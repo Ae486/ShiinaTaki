@@ -8,6 +8,8 @@ apps/desktop/src/
 │   ├── pet/               # pet overlay window entry (transparent, click-through)
 │   │   ├── main.tsx
 │   │   └── pet-stage.tsx  # PixiJS mount point — the ONLY React↔Pixi bridge component
+│   ├── chat/              # full chat window: continuous timeline (ADR 0005), markdown, history
+│   │   └── main.tsx
 │   └── settings/          # settings window entry
 │       └── main.tsx
 ├── features/              # feature folders: components + hooks + helpers colocated
