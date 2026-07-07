@@ -1,6 +1,6 @@
 # TTS Interface (reserved in v1, implemented later)
 
-The Companion's voice is synthesized by a TTS service deployed on the user's VPS — never locally (local inference would violate the low-footprint goal). v1 ships the client interface, settings fields, and audio playback path; no synthesis implementation.
+The Companion's voice is synthesized by a TTS service reached over HTTP — deployed on the user's VPS in production, but **validated locally first**: the same backend runs on `127.0.0.1` during development, and moving to the VPS is a base-URL settings change with zero code impact (BandoriPet's local Qwen3TTS at `127.0.0.1:9880` validates this usage). Synthesis never runs inside TakiAgent's processes (low-footprint goal). v1 ships the client interface, settings fields, and audio playback path; no synthesis implementation.
 
 ## Wire contract
 
