@@ -1,0 +1,13 @@
+# Copyrighted / third-party assets — never commit
+models/
+references/
+audio_reference/
+
+# Secrets
+.env
+.env.*
+
+# Build artifacts
+node_modules/
+dist/
+target/

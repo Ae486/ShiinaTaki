@@ -1,0 +1,10 @@
+# Vercel AI SDK 6 as the agent engine
+
+The Agent Core is built on Vercel AI SDK 6 (`ai` + `@ai-sdk/*` providers + `@ai-sdk/mcp`) rather than a hand-rolled loop or another framework. AI SDK 6 (May 2026, stable) ships exactly our required primitives as first-class features: unified multi-provider API (25+ providers), ToolLoopAgent for the tool-execution loop, **built-in human-in-the-loop tool approval** (which we wire directly to the Permission Gate), and stable MCP support including OAuth, resources, and prompts. With ~20M monthly downloads it is the dominant TS agent toolkit — maximum ecosystem, minimum custom code ("glue, don't build").
+
+Considered and rejected:
+- Hand-rolled loop on raw provider SDKs: full control, but we would rebuild streaming normalization, provider quirks, tool approval, and MCP plumbing that AI SDK 6 already ships and battle-tests.
+- pi-mono agent core (OpenClaw's engine): proven, but smaller community and couples us to its opinionated runtime.
+- LangChain/LlamaIndex JS: heavier abstractions aimed at RAG pipelines, weaker fit for a long-lived local agent.
+
+Consequence: provider coverage and loop semantics track AI SDK's release cadence; major-version migrations (they ship codemods) become part of our maintenance. Acceptable — this dependency is the product's center of gravity and is the healthiest project in its category.
