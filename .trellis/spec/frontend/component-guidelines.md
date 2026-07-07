@@ -1,59 +1,9 @@
 # Component Guidelines
 
-> How components are built in this project.
-
----
-
-## Overview
-
-<!--
-Document your project's component conventions here.
-
-Questions to answer:
-- What component patterns do you use?
-- How are props defined?
-- How do you handle composition?
-- What accessibility standards apply?
--->
-
-(To be filled by the team)
-
----
-
-## Component Structure
-
-<!-- Standard structure of a component file -->
-
-(To be filled by the team)
-
----
-
-## Props Conventions
-
-<!-- How props should be defined and typed -->
-
-(To be filled by the team)
-
----
-
-## Styling Patterns
-
-<!-- How styles are applied (CSS modules, styled-components, Tailwind, etc.) -->
-
-(To be filled by the team)
-
----
-
-## Accessibility
-
-<!-- A11y requirements and patterns -->
-
-(To be filled by the team)
-
----
-
-## Common Mistakes
-
-<!-- Component-related mistakes your team has made -->
-
-(To be filled by the team)
+- Function components only; identifier PascalCase, file kebab-case (`chat-bubble.tsx` exports `ChatBubble`). One primary component per file; subcomponents get sibling files once they exceed ~30 lines or gain their own state.
+- Props: explicit `type XProps = {...}` above the component (no `React.FC`). Max ~7 props — more is a signal to group into an object or split the component.
+- No business logic in components: data flow is `ws-client`/`tauri` → store → hook → component. Components render and dispatch; that's all.
+- Event handlers defined inside components stay under a few lines — anything more moves to the feature's hook.
+- Tailwind 4 for styling; class lists longer than one line get extracted to a `cva`/helper or a subcomponent. No inline `style=` except for truly dynamic values (positions from the renderer).
+- The pet overlay window must remain transparent: no opaque root backgrounds outside explicitly-rendered UI (bubbles, menus). Test any new overlay element against click-through hit-testing.
+- Accessibility floor for the settings window: labelled inputs, keyboard navigation, focus states. (The pet overlay is exempt — it's a canvas.)

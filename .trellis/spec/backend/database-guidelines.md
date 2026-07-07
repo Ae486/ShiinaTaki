@@ -1,51 +1,19 @@
 # Database Guidelines
 
-> Database patterns and conventions for this project.
+## Engine and access
 
----
+- SQLite via **`node:sqlite`** (Node 24 built-in), wrapped in `packages/core/src/db/`. The wrapper is the only module importing `node:sqlite` — keeps a `better-sqlite3` swap trivial if stability disappoints.
+- **Single writer**: only the Agent Core opens the database. Shell, Pet UI, and future mobile nodes query/subscribe over the WS API (ADR 0004). Never open the DB file from Rust or the UI.
+- DB file lives in the app data root (`%USERPROFILE%\.takiagent\`, beside the Workspace, not inside it), never in the repo or install dir.
 
-## Overview
+## Schema conventions
 
-<!--
-Document your project's database conventions here.
+- Tables and columns: `snake_case`. Timestamps: `*_at`, ISO-8601 UTC strings.
+- Migrations: numbered SQL files `db/migrations/NNN-description.sql`, applied at startup, tracked in a `migrations` table. No ORM — hand-written SQL in repository modules (`db/sessions-repo.ts`, `db/memory-repo.ts`), one repo per aggregate.
+- Memory search: SQLite **FTS5** virtual table indexing Workspace markdown files; markdown is the source of truth, the index is rebuildable.
 
-Questions to answer:
-- What ORM/query library do you use?
-- How are migrations managed?
-- What are the naming conventions for tables/columns?
-- How do you handle transactions?
--->
+## Patterns
 
-(To be filled by the team)
-
----
-
-## Query Patterns
-
-<!-- How should queries be written? Batch operations? -->
-
-(To be filled by the team)
-
----
-
-## Migrations
-
-<!-- How to create and run migrations -->
-
-(To be filled by the team)
-
----
-
-## Naming Conventions
-
-<!-- Table names, column names, index names -->
-
-(To be filled by the team)
-
----
-
-## Common Mistakes
-
-<!-- Database-related mistakes your team has made -->
-
-(To be filled by the team)
+- Repos expose typed functions; zod-parse rows at boundaries where shape matters.
+- Every externally-relevant write emits a WS event after commit (this is how desktop→phone real-time works). Write + event emission live together in the repo/service layer.
+- No transactions across async gaps; keep them synchronous and short.

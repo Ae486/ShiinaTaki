@@ -1,51 +1,21 @@
 # Logging Guidelines
 
-> How logging is done in this project.
+## TS (Agent Core)
 
----
+- **pino** for structured JSON logging (stdout in dev; file under the app data root `%USERPROFILE%\.takiagent\logs\` in packaged mode — outside the Workspace).
+- One logger per module via child loggers: `logger.child({ mod: "server" })`.
+- Levels: `error` (broken invariant / lost data), `warn` (degraded but recovered), `info` (lifecycle: start/stop, client pair/connect, task fire), `debug` (per-message detail — default off).
+- Never log: API keys, full LLM prompts/responses (log token counts + ids instead), screenshot bytes, clipboard contents.
 
-## Overview
+## Rust (Shell)
 
-<!--
-Document your project's logging conventions here.
+- **`tracing`** crate + `tracing-subscriber` (JSON output matching pino field style: `level`, `msg`, `mod`, `ts`).
+- Spans around Capability executions (`gate.request` span with capability + decision).
 
-Questions to answer:
-- What logging library do you use?
-- What are the log levels and when to use each?
-- What should be logged?
-- What should NOT be logged (PII, secrets)?
--->
+## Audit log (separate from app logs)
 
-(To be filled by the team)
-
----
-
-## Log Levels
-
-<!-- When to use each level: debug, info, warn, error -->
-
-(To be filled by the team)
-
----
-
-## Structured Logging
-
-<!-- Log format, required fields -->
-
-(To be filled by the team)
-
----
-
-## What to Log
-
-<!-- Important events to log -->
-
-(To be filled by the team)
-
----
-
-## What NOT to Log
-
-<!-- Sensitive data, PII, secrets -->
-
-(To be filled by the team)
+- Every Permission Gate decision writes one JSONL line to `%USERPROFILE%\.takiagent\audit\audit-YYYY-MM.jsonl`. **The audit log lives OUTSIDE the Workspace and is written by the Shell only** — the agent's workspace file-RW Capability must never be able to reach or tamper with its own audit trail:
+  ```json
+  {"ts": "...", "capability": "exec", "detail": "...", "decision": "allowed|approved|denied|blocked", "source": "policy|user|blocklist"}
+  ```
+- Audit entries are append-only, never rotated away by log level config, and never contain secret values (command lines are recorded; env is not).

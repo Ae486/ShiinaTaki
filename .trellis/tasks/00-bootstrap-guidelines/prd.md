@@ -21,9 +21,14 @@ the rest conversationally.
 
 ## Status (update the checkboxes as you complete each item)
 
-- [ ] Fill backend guidelines
-- [ ] Fill frontend guidelines
-- [ ] Add code examples
+- [x] Fill backend guidelines (Agent Core TS + Rust Shell — all 5 files, real conventions from design docs + research)
+- [x] Fill frontend guidelines (Pet UI — all 6 files incl. renderer isolation, Zustand, perf rules)
+- [x] Add code examples (structure trees, error shapes, store/selector patterns; codebase is greenfield — file-path references will land with the scaffold)
+
+Additional bootstrap work done in the same pass:
+- Root `CLAUDE.md` rewritten as project rules (~140 lines): pinned versions (surveyed 2026-07-07), naming, anti-sprawl caps, architecture invariants, gotchas
+- Research persisted to `research/` (5 files: claude-md practices, anti-monolith numbers, naming, tauri2 structure, ai-sdk organization)
+- `docs/index.md` documentation index created; git initialized with remote
 
 ---
 

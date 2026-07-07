@@ -8,3 +8,7 @@ Considered and rejected:
 - LangChain/LlamaIndex JS: heavier abstractions aimed at RAG pipelines, weaker fit for a long-lived local agent.
 
 Consequence: provider coverage and loop semantics track AI SDK's release cadence; major-version migrations (they ship codemods) become part of our maintenance. Acceptable — this dependency is the product's center of gravity and is the healthiest project in its category.
+
+---
+
+**Amendment 2026-07-07**: at scaffolding time the current stable is AI SDK **7** (`ai@7.0.x` — tool approvals, durable workflows, provider-level skills). Being greenfield, we start directly on `^7`. The decision and rationale above are unchanged; API names referenced in docs (ToolLoopAgent etc.) must be verified against installed v7 types before coding.

@@ -1,0 +1,31 @@
+{
+  "id": "requirements-and-tech-selection",
+  "name": "requirements-and-tech-selection",
+  "title": "Requirements discussion and tech selection",
+  "description": "Grill-with-docs sessions producing domain glossary, ADRs 0001-0004, tech stack and TTS contract",
+  "status": "completed",
+  "dev_type": "docs",
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-07-07",
+  "completedAt": "2026-07-07",
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [
+    "CONTEXT.md",
+    "docs/TECH-STACK.md",
+    "docs/TTS-INTERFACE.md",
+    "docs/adr/"
+  ],
+  "notes": "Work completed conversationally before task creation; prd.md is the record and links to canonical docs.",
+  "meta": {}
+}

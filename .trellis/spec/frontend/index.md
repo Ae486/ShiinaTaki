@@ -1,39 +1,28 @@
 # Frontend Development Guidelines
 
-> Best practices for frontend development in this project.
+> Frontend = the Pet UI (`apps/desktop/src`): React 19 + Vite 8 + Tailwind CSS 4 + PixiJS 8 + Live2D, running in WebView2.
 
----
+## Pre-Development Checklist
 
-## Overview
-
-This directory contains guidelines for frontend development. Fill in each file with your project's specific conventions.
-
----
+1. Read `CLAUDE.md` (root) — naming (kebab-case files), size caps, anti-sprawl rules.
+2. Read `CONTEXT.md` — Pet UI is a disposable WS client; it owns rendering, not state of record.
+3. Talking to the Agent Core? Types come from `@taki/shared`; talking to the Shell? `@tauri-apps/api` `invoke`/events only.
+4. Two windows exist (pet overlay, settings) with separate Tauri capability files — know which one you are in.
 
 ## Guidelines Index
 
-| Guide | Description | Status |
-|-------|-------------|--------|
-| [Directory Structure](./directory-structure.md) | Module organization and file layout | To fill |
-| [Component Guidelines](./component-guidelines.md) | Component patterns, props, composition | To fill |
-| [Hook Guidelines](./hook-guidelines.md) | Custom hooks, data fetching patterns | To fill |
-| [State Management](./state-management.md) | Local state, global state, server state | To fill |
-| [Quality Guidelines](./quality-guidelines.md) | Code standards, forbidden patterns | To fill |
-| [Type Safety](./type-safety.md) | Type patterns, validation | To fill |
+| Guide | Description |
+|-------|-------------|
+| [Directory Structure](./directory-structure.md) | Feature folders, window entries, renderer isolation |
+| [Component Guidelines](./component-guidelines.md) | Component patterns, props, composition |
+| [Hook Guidelines](./hook-guidelines.md) | Custom hooks, WS subscription patterns |
+| [State Management](./state-management.md) | Zustand stores, what state lives where |
+| [Type Safety](./type-safety.md) | zod boundaries, no-any policy |
+| [Quality Guidelines](./quality-guidelines.md) | Size caps, perf rules (this window is always-on), tests |
 
----
+## Quality Check (run before handing off)
 
-## How to Fill These Guidelines
+- `pnpm --filter desktop typecheck && pnpm --filter desktop lint && pnpm --filter desktop test` green
+- Pet overlay idle CPU ~0% (render loop pauses when idle — perf is a feature, see quality guidelines)
 
-For each guideline file:
-
-1. Document your project's **actual conventions** (not ideals)
-2. Include **code examples** from your codebase
-3. List **forbidden patterns** and why
-4. Add **common mistakes** your team has made
-
-The goal is to help AI assistants and new team members understand how YOUR project works.
-
----
-
-**Language**: All documentation should be written in **English**.
+**Language**: All documentation in **English**.

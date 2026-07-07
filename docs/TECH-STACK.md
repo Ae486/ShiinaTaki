@@ -7,8 +7,9 @@ Selection principle: glue mature components, build only the domain-specific part
 | Concern | Choice | Notes |
 | --- | --- | --- |
 | Runtime | Node 24 LTS | No Bun-specific APIs; Bun single-file compile re-evaluated at distribution time |
-| Agent engine | Vercel AI SDK 6 (`ai`, `@ai-sdk/*`, `@ai-sdk/mcp`) | ADR 0003. ToolLoopAgent + built-in tool approval wired to Permission Gate |
-| LLM providers | OpenAI-compatible as the default and primary path (`@ai-sdk/openai-compatible`, user-supplied base URL + key) | User's real-world setup. Other `@ai-sdk/*` providers are config away, no code |
+| Agent engine | Vercel AI SDK (`ai@^7`, `@ai-sdk/mcp@^2`) | ADR 0003 (decided on SDK 6; v7 is current stable — see ADR amendment). ToolLoopAgent + built-in tool approval wired to Permission Gate |
+| LLM providers | OpenAI-compatible as the default and primary path (`@ai-sdk/openai-compatible@^3`, user-supplied base URL + key) | User's real-world setup. Other `@ai-sdk/*` providers are config away, no code |
+| Logging | `pino@^10` (structured JSON) | Audit log is separate (JSONL, Shell-side) |
 | MCP client | `@ai-sdk/mcp` (stable since SDK 6) | stdio + HTTP transports; OAuth supported |
 | Skills | SKILL.md folders (OpenClaw/Claude Code convention) | Loader lists descriptions in prompt, loads full content on demand |
 | WS API | `ws` + JSON-RPC 2.0 + zod schemas in shared package | ADR 0004. Device identity + pairing from day one |
@@ -46,6 +47,7 @@ Dev assets: 47-character set already at `./models` (git-ignored — copyrighted,
 | Concern | Choice | Notes |
 | --- | --- | --- |
 | UI framework | React 19 + Vite | Settings panel, bubbles, overlays |
+| State | Zustand ^5 | One store per domain; state of record stays in Agent Core |
 | Renderer | PixiJS v8 | |
 | Live2D | 1-day spike between `untitled-pixi-live2d-engine` and `@naari3/pixi-live2d-display` | **Hard requirement from reference assets: must render Cubism 2 (`.model.json`/moc) AND Cubism 3+ (`.model3.json`/moc3)** — the BanG Dream model set (ModelScope `HELPMEEADICE/BanG-Dream-Live2D`) mixes both. `untitled-pixi-live2d-engine` documents Cubism 2.1-5 on PixiJS 8; the naari3 fork confirms Cubism 5 but its Cubism 2 path is unverified. Spike acceptance: one moc + one moc3 model from that set rendering with motions/expressions. Reversible choice, no ADR |
 | Cubism Core | User-supplied download (license) | Never bundled |

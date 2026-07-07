@@ -1,54 +1,34 @@
-# Directory Structure
+# Frontend Directory Structure
 
-> How frontend code is organized in this project.
-
----
-
-## Overview
-
-<!--
-Document your project's frontend directory structure here.
-
-Questions to answer:
-- Where do components live?
-- How are features/modules organized?
-- Where are shared utilities?
-- How are assets organized?
--->
-
-(To be filled by the team)
-
----
-
-## Directory Layout
+## `apps/desktop/src` (Pet UI)
 
 ```
-<!-- Replace with your actual structure -->
-src/
-├── ...
-└── ...
+apps/desktop/src/
+├── windows/
+│   ├── pet/               # pet overlay window entry (transparent, click-through)
+│   │   ├── main.tsx
+│   │   └── pet-stage.tsx  # PixiJS mount point — the ONLY React↔Pixi bridge component
+│   └── settings/          # settings window entry
+│       └── main.tsx
+├── features/              # feature folders: components + hooks + helpers colocated
+│   ├── chat-bubble/
+│   ├── approval-dialog/   # Permission Gate approval UI
+│   ├── character-import/
+│   └── settings-panel/
+├── renderer/              # PixiJS + Live2D — NO React imports allowed here
+│   ├── stage.ts           # Pixi Application lifecycle, frame-rate governor
+│   ├── live2d/            # model loading, motions, expressions, hit areas
+│   └── state-machine.ts   # idle/thinking/working/sleeping animation states
+├── stores/                # Zustand stores (see state-management.md)
+├── lib/
+│   ├── ws-client.ts       # Agent Core WS client (uses @taki/shared types)
+│   └── tauri.ts           # typed invoke() wrappers for Shell commands
+└── components/            # small shared presentational components only
 ```
 
----
+## Rules
 
-## Module Organization
-
-<!-- How should new features be organized? -->
-
-(To be filled by the team)
-
----
-
-## Naming Conventions
-
-<!-- File and folder naming rules -->
-
-(To be filled by the team)
-
----
-
-## Examples
-
-<!-- Link to well-organized modules as examples -->
-
-(To be filled by the team)
+- **`renderer/` is framework-free TypeScript.** React never reaches into Pixi objects directly; the bridge is `pet-stage.tsx` + store subscriptions. This keeps the render loop testable and the React tree cheap.
+- Feature folders own their internals; cross-feature imports go through the feature's entry file. No barrels inside features — direct imports.
+- Vite multi-entry: one HTML entry per window (`pet.html`, `settings.html`), configured in `vite.config.ts` + `tauri.conf.json`.
+- Static assets for the UI live in `apps/desktop/public/`; user Live2D models do NOT — they load from the Workspace at runtime via Tauri asset protocol.

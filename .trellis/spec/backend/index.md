@@ -1,38 +1,31 @@
 # Backend Development Guidelines
 
-> Best practices for backend development in this project.
+> Backend = the TS Agent Core (`packages/core`, Node 24) and the Rust Shell (`apps/desktop/src-tauri`, Tauri 2).
 
----
+## Pre-Development Checklist
 
-## Overview
+Before writing backend code:
 
-This directory contains guidelines for backend development. Fill in each file with your project's specific conventions.
-
----
+1. Read `CLAUDE.md` (root) — architecture invariants, naming, size caps.
+2. Read `CONTEXT.md` — use domain terms exactly (Capability, Permission Gate, Node, Workspace...).
+3. Protocol change? Start in `packages/shared` (zod schema) — never declare message shapes locally.
+4. New system action? It is a Capability: Rust implementation + permission entry + audit; TS side only gets a client stub.
+5. Verify external library APIs against current docs (AI SDK 7 moves fast) — never from memory.
 
 ## Guidelines Index
 
-| Guide | Description | Status |
-|-------|-------------|--------|
-| [Directory Structure](./directory-structure.md) | Module organization and file layout | To fill |
-| [Database Guidelines](./database-guidelines.md) | ORM patterns, queries, migrations | To fill |
-| [Error Handling](./error-handling.md) | Error types, handling strategies | To fill |
-| [Quality Guidelines](./quality-guidelines.md) | Code standards, forbidden patterns | To fill |
-| [Logging Guidelines](./logging-guidelines.md) | Structured logging, log levels | To fill |
+| Guide | Description |
+|-------|-------------|
+| [Directory Structure](./directory-structure.md) | Where files go in `packages/core` and `src-tauri` |
+| [Database Guidelines](./database-guidelines.md) | SQLite single-writer, wrapper, migrations |
+| [Error Handling](./error-handling.md) | Structured tool errors, Rust error types, IPC error shape |
+| [Quality Guidelines](./quality-guidelines.md) | Size caps, lint, tests, forbidden patterns |
+| [Logging Guidelines](./logging-guidelines.md) | pino / tracing, audit log |
 
----
+## Quality Check (run before handing off)
 
-## How to Fill These Guidelines
+- `pnpm -r typecheck && pnpm -r lint && pnpm -r test` green
+- `cargo clippy --manifest-path apps/desktop/src-tauri/Cargo.toml -- -D warnings` green
+- No architecture invariant violated (esp. invariant 1: no OS access from TS)
 
-For each guideline file:
-
-1. Document your project's **actual conventions** (not ideals)
-2. Include **code examples** from your codebase
-3. List **forbidden patterns** and why
-4. Add **common mistakes** your team has made
-
-The goal is to help AI assistants and new team members understand how YOUR project works.
-
----
-
-**Language**: All documentation should be written in **English**.
+**Language**: All documentation in **English**.
