@@ -56,6 +56,7 @@ references/          Third-party study material — git-ignored; licenses vary (
 5. **Secrets live in Windows Credential Manager** (keyring), never in config files or env-committed files.
 6. `main.rs` stays a thin shim; app logic goes in `lib.rs` and modules (Tauri mobile-entry requirement).
 7. **Features are pluggable modules** (user requirement): every feature lives in its own module wired through a registry (tools registry, Capability registry, skills loader, WS method table) — adding a feature = new module + one registry entry; removing = delete the module; no feature reaches into another's internals.
+8. **`packages/core` and `packages/shared` are OS-neutral** (must run on Windows AND Ubuntu — the production VPS is Ubuntu). No Windows-only APIs/deps there; paths via `os.homedir()` + `path.join` (never hardcoded separators or `%USERPROFILE%`); secrets behind a per-OS backend interface. Windows-specific code lives only in `apps/desktop`.
 
 ## Naming
 
