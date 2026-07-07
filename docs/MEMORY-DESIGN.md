@@ -2,31 +2,50 @@
 
 Native TS module in `packages/core/src/memory/`. No external service, no network dependency — memory is the Companion's most intimate data and must survive offline, forever, in a form the user can read. Sources of ideas: OpenClaw (production-proven markdown memory), nocturne (disclosure/priority fields), ATRI (intentions, reason-gated proactivity — vibe-coded reference, ideas only, zero authority), SillyTavern (keyword-triggered injection), generative-agents (deferred scoring). All mechanisms independently authored.
 
+v1 ships a single Character: Shiina Taki (椎名立希). Multi-character-on-screen is out of scope for v1; the layer model below keeps it open.
+
+## Mechanism/policy separation: the layer registry (user requirement: layers must be add/remove/editable)
+
+The engine (store, indexer, retriever, assembler) is **generic over layers** — it only knows "a layer with a policy". The taxonomy itself is data: one registry file of declarative `MemoryLayerDefinition` entries (zod-validated):
+
+```ts
+{ id, ownership: "global" | "per-character",
+  writePolicy: "explicit-tool" | "machine" | "agent" | "consolidation",
+  recallPolicy: "pinned" | "retrieved" | "mood-gated", truncatable: boolean,
+  retention: "permanent" | { rollingDays } | "expiring" }
+```
+
+Adding/removing/reshaping a layer = editing one registry entry + a directory; the engine never changes (open-closed principle). Because files are the truth and SQLite is a rebuildable index, layer changes require **no DB migration** — just re-index. Guardrail: the registry is a config file edited in code, NOT a runtime plugin system or layer-management UI (over-engineering until proven needed). Critical guarantees are layer policy fields, not hard-coded special cases (e.g. promises = `recallPolicy: pinned, truncatable: false`).
+
+## v1 layer registry
+
+| Layer | Ownership | Writer | Recall | Retention |
+| --- | --- | --- | --- | --- |
+| `profile` (user facts: identity, preferences, taboos) | global | explicit tools + consolidation | importance >= 9 pinned, rest retrieved | permanent |
+| `activity` (objective records from Sampling: apps opened, pages read, screenshot content summaries) | global | machine (sensing pipeline) | retrieved only, never pinned | rolling window, user-configurable (default ~30 days) |
+| `relationship` (promises, rules, milestones) | per-character | explicit tools | **pinned, never truncated** | permanent |
+| `episodes` (conversation logs, diary) | per-character | auto + nightly consolidation | retrieved | permanent (archived by consolidation) |
+| `intentions` (unsaid thoughts) | per-character | agent | mood-gated, max one per turn | expiring |
+
+Persona is NOT memory: the Character card (persona prompt, Character-Card-v2 vocabulary) is static config; memory supplies the evolving shared history. Soul = card + pinned layers + retrieved history, assembled fresh every turn.
+
 ## Substrate: files are the truth, SQLite is a derived index
 
-- Every memory is a markdown entry with YAML frontmatter in the Workspace (`memory/` subtree): human-readable, user-editable, git-able, survives DB corruption.
+- Every memory is a markdown entry with YAML frontmatter in the Workspace: human-readable, user-editable, git-able, survives DB corruption.
 - `node:sqlite` holds the derived index: one metadata table + FTS5 content index + an events log. **Rebuildable from files at any time** (startup reconciliation by content hash). DB corruption or schema migration can never lose a memory.
 
 ```
 workspace/memory/
-├── soul/relationship.md      # pinned block: promises, rules, milestones (one entry per item)
-├── facts/NNNN-slug.md        # stable facts (preferences, taboos, identity)
-├── episodes/2026-07-07.md    # daily episodic log (append-only entries)
-└── intentions/NNNN-slug.md   # unsaid thoughts (mood-gated, expiring)
+├── global/
+│   ├── profile/NNNN-slug.md
+│   └── activity/2026-07-07.md          # append-only daily records
+└── characters/taki/
+    ├── relationship.md                  # one entry per promise/rule/milestone
+    ├── episodes/2026-07-07.md
+    └── intentions/NNNN-slug.md
 ```
 
-Frontmatter (all types): `id`, `type: fact|promise|rule|episode|intention`, `importance: 1-10`, `disclosure` (free-text "when to recall" hint, keyword-matched), `created`, `status: active|archived`, optional `emotional_weight`, optional `expires` (intentions).
-
-## Memory taxonomy
-
-| Type | What | Recall path |
-| --- | --- | --- |
-| `promise` / `rule` | Agreements with the user; behavioral rules | **Pinned — always in context, never retrieval-gated.** "You promised" must not depend on search luck |
-| `fact` | Stable user/world facts | importance >= 9 pinned; rest retrieved |
-| `episode` | What happened, per day | Retrieved (FTS5 + disclosure match) |
-| `intention` | Things the Companion "wants to say someday" | Mood/context-gated surfacing; expire if never said; feed Proactive Utterance reasons |
-
-Persona is NOT memory: the Character card (persona prompt, Character-Card-v2 vocabulary) is static config; memory supplies the evolving shared history. Soul = card + pinned block + retrieved history, assembled fresh every turn.
+Frontmatter (all layers): `id`, `layer`, `importance: 1-10`, `disclosure` (free-text "when to recall" hint, keyword-matched), `created`, `status: active|archived`, optional `emotional_weight`, optional `expires`.
 
 ## Context assembly (deterministic order, per-section token budgets)
 

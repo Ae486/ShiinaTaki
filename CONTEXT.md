@@ -66,8 +66,12 @@ _Avoid_: device, client (ambiguous — operators are also clients)
 
 ### Character & Voice
 
+**Memory Layer**:
+A declaratively-registered scope of memory carrying its own policy: ownership (global vs per-character), write path, recall behavior, retention. The engine is generic over layers; the taxonomy is data, not code.
+_Avoid_: memory type (layers carry policy, not just a type tag), category
+
 **Character**:
-A user-selectable identity for the Companion: a Live2D model + a persona prompt + a voice profile, three decoupled parts. Any generic Cubism model can be bound to any persona.
+A user-selectable identity for the Companion: a Live2D model + a persona prompt + a voice profile, three decoupled parts. Any generic Cubism model can be bound to any persona. v1 ships exactly one: Shiina Taki (椎名立希).
 _Avoid_: model (that's just the visual part), pet, avatar
 
 **Voice Profile**:
