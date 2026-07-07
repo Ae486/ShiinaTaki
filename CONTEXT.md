@@ -7,7 +7,7 @@ A Windows-native, companion-oriented desktop pet whose core is a local LLM agent
 ### Product
 
 **Companion**:
-The product persona — a desktop pet that passively senses the user's activity and proactively engages within configured limits. Companion-oriented means sensing is mostly read-only; write/operate capabilities are minimal and gated.
+The product persona — a desktop pet that passively senses the user's activity and proactively engages within configured limits. Companion-oriented means sensing is mostly read-only; write/operate capabilities are minimal and gated. Referred to as **taki** (lowercase) in discussion; v1 Character is Shiina Taki.
 _Avoid_: assistant, chatbot
 
 **Sampling**:

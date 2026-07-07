@@ -22,7 +22,17 @@ Adding/removing/reshaping a layer = editing one registry entry + a directory; th
 | Layer | Ownership | Writer | Recall | Retention |
 | --- | --- | --- | --- | --- |
 | `profile` (user facts: identity, preferences, taboos) | global | explicit tools + consolidation | importance >= 9 pinned, rest retrieved | permanent |
-| `activity` (objective records from Sampling: apps opened, pages read, screenshot content summaries) | global | machine (sensing pipeline) | retrieved only, never pinned | rolling window, user-configurable (default ~30 days) |
+| `activity` (objective records from Sampling: apps opened, pages read, screenshot content summaries) | global | machine (sensing pipeline) | retrieved only, never pinned | entries: rolling window (default ~30 days); referenced screenshots: separate shorter window (default ~7 days) + disk-size cap — entry survives its image |
+
+### Activity capture pipeline (decided 2026-07-07)
+
+Sampling is a single opportunistic pass at trigger time — everything lands immediately, no deferred batch jobs: capture screenshot (Shell/xcap) + process snapshot → VLM interpretation (screenshot + process info are dual signals; process alone says "Edge is open", vision says *what* is being watched) → write in one go: compressed image (WebP, ~1600px wide) to app-data `captures/YYYY-MM-DD/`, activity markdown entry with frontmatter `image` (path ref) + `processes` (structured snapshot) + interpretation text, FTS index upsert.
+
+- **Raw screenshots ARE retained by default** (user decision, reversing the discard-by-default proposal): configurable time window, master switch (off = interpretation only, image never touches disk).
+- Retention is dual-threshold: max age AND max total disk size, whichever hits first; expiry deletes the image, never the entry.
+- Sensitive-process skip list (password managers, banking, private-browsing windows in foreground → skip that sampling round), user-editable; Privacy Pause remains the manual master switch.
+- VLM failure degrades gracefully: image + process snapshot still land, interpretation left empty — no re-analysis queue.
+- UI: activity log cards (thumbnail click-to-open, capture time, process info, taki's interpretation); phone Node receives cards with summaries, thumbnails fetched on demand.
 | `relationship` (promises, rules, milestones) | per-character | explicit tools | **pinned, never truncated** | permanent |
 | `episodes` (conversation logs, diary) | per-character | auto + nightly consolidation | retrieved | permanent (archived by consolidation) |
 | `intentions` (unsaid thoughts) | per-character | agent | mood-gated, max one per turn | expiring |
