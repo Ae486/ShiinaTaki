@@ -12,7 +12,7 @@ Selection principle: glue mature components, build only the domain-specific part
 | Logging | `pino@^10` (structured JSON) | Audit log is separate (JSONL, Shell-side) |
 | MCP client | `@ai-sdk/mcp` (stable since SDK 6) | stdio + HTTP transports; OAuth supported |
 | Skills | SKILL.md folders (OpenClaw/Claude Code convention) | Loader lists descriptions in prompt, loads full content on demand |
-| WS API | `ws` + JSON-RPC 2.0 + zod schemas in shared package | ADR 0004. Device identity + pairing from day one |
+| WS API | `ws` + JSON-RPC 2.0 + zod schemas in shared package; `json-rpc-2.0` (npm) as envelope library | ADR 0004. Device identity + pairing from day one. Envelope lib is transport-agnostic, composes with `ws` + zod (per ecosystem scan 07-07) |
 | Storage | `node:sqlite` behind a thin wrapper | Zero native deps; wrapper keeps better-sqlite3 swap trivial if stability disappoints |
 | Memory | Markdown files in Workspace + SQLite FTS5 index | OpenClaw-proven pattern; vector search deferred |
 | Scheduler | `croner` (cron) + heartbeat interval reading HEARTBEAT.md | |
@@ -33,6 +33,7 @@ Dev assets: 47-character set already at `./models` (git-ignored — copyrighted,
 | Concern | Choice | Notes |
 | --- | --- | --- |
 | Framework | Tauri 2 | |
+| Official plugins | `single-instance` + `autostart` (must-have), `positioner` (should-have); `updater`/`notification` planned | Ecosystem scan 07-07 |
 | WS client | `tokio-tungstenite` + `serde` | Connects to core as role `node` with declared capabilities |
 | Screenshot | `xcap` | |
 | Process info | `sysinfo` | Read-only in v1 (no kill) |
@@ -49,7 +50,7 @@ Dev assets: 47-character set already at `./models` (git-ignored — copyrighted,
 | UI framework | React 19 + Vite | Settings panel, bubbles, overlays |
 | State | Zustand ^5 | One store per domain; state of record stays in Agent Core |
 | Renderer | PixiJS v8 | |
-| Live2D | 1-day spike between `untitled-pixi-live2d-engine` and `@naari3/pixi-live2d-display` | **Hard requirement from reference assets: must render Cubism 2 (`.model.json`/moc) AND Cubism 3+ (`.model3.json`/moc3)** — the BanG Dream model set (ModelScope `HELPMEEADICE/BanG-Dream-Live2D`) mixes both. `untitled-pixi-live2d-engine` documents Cubism 2.1-5 on PixiJS 8; the naari3 fork confirms Cubism 5 but its Cubism 2 path is unverified. Spike acceptance: one moc + one moc3 model from that set rendering with motions/expressions. Reversible choice, no ADR |
+| Live2D | **Primary: `untitled-pixi-live2d-engine`** — the only candidate with documented Cubism 2/3/4/5 coverage (+ bundled lip-sync, parallel motion, texture LOD). Research (07-07-reference-research) found `@naari3/pixi-live2d-display` is **Cubism 5 only**, failing the mixed-format requirement | **Hard requirement from reference assets: must render Cubism 2 (`.model.json`/moc) AND Cubism 3+ (`.model3.json`/moc3)** — the BanG Dream model set mixes both. Spike still validates before lock-in: one moc + one moc3 model rendering with motions/expressions |
 | Cubism Core | User-supplied download (license) | Never bundled |
 | Avatar control | Typed tools in Agent Core (`avatar.set_expression`, `avatar.play_motion`, ...) forwarded as WS events to Pet UI | LLM drives expressions via ordinary tool calls; idle/thinking/working states are UI-local, no LLM involved |
 

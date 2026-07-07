@@ -44,7 +44,7 @@ apps/desktop         Tauri app: src/ (Pet UI React) + src-tauri/ (Rust Shell)
 docs/                Design docs + ADRs (see docs/index.md)
 .trellis/            Workflow: tasks, per-layer specs, scripts
 models/              Live2D dev assets — git-ignored, copyrighted; NEVER commit or bundle
-references/          Third-party study material — git-ignored, GPLv3; NEVER copy code from it
+references/          Third-party study material — git-ignored; licenses vary (BANDORI-PET-REV is GPLv3, nocturne_memory is MIT). Default stance: learn patterns, never copy code; porting MIT code still goes through clean-room rewrite to our conventions
 ```
 
 ## Architecture invariants (violating any of these is a design regression, not a style issue)
