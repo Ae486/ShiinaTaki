@@ -55,6 +55,7 @@ references/          Third-party study material — git-ignored; licenses vary (
 4. **Pet UI is a disposable client.** Closing it must not affect agent sessions, cron, or memory.
 5. **Secrets live in Windows Credential Manager** (keyring), never in config files or env-committed files.
 6. `main.rs` stays a thin shim; app logic goes in `lib.rs` and modules (Tauri mobile-entry requirement).
+7. **Features are pluggable modules** (user requirement): every feature lives in its own module wired through a registry (tools registry, Capability registry, skills loader, WS method table) — adding a feature = new module + one registry entry; removing = delete the module; no feature reaches into another's internals.
 
 ## Naming
 
