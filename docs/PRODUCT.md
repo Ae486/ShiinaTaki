@@ -43,6 +43,6 @@ Preview note: the settings window reuses the web renderer component for an embed
 
 | Version | Ships |
 | --- | --- |
-| v1 | Full desktop companion: avatar + interaction, chat (bubble + window), layered memory, capabilities + Permission Gate, reason-gated proactivity, settings panel above |
-| v1.5 | Nightly diary (readable panel), intention surfacing polish, memory consolidation, memory/activity album |
+| v1 | Full desktop companion (all-local): avatar + interaction, chat (bubble + window), layered memory, capabilities + Permission Gate, reason-gated proactivity, settings panel above |
+| v1.5 | Nightly diary (readable panel), intention surfacing polish, memory consolidation, memory/activity album; **VPS-hosted core deployment mode** (taki persistently online; desktop and phone become frontends) |
 | v2 | Paraphrase-association memory (hybrid vector RAG), TTS + lip-sync live, Android node |
