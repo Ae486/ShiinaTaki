@@ -35,6 +35,16 @@ Memory is existential for a companion/roleplay agent: longevity ("remembers what
 - How do memory + system prompt compose into a stable persona ("soul") — SOUL.md patterns, character cards, retrieval-augmented persona. What should our Character profile contain beyond the persona prompt?
 - Deliver a comparison table + a recommendation compatible with our architecture (ADR 0001/0004).
 
+### 5. ATRI deep-dive (`references/ATRI-main`, added 2026-07-07)
+
+Android Kotlin client + Cloudflare Worker (TypeScript) AI companion — functionally the closest reference yet (three-layer memory, emotional inertia, nightly diary consolidation, proactive messaging). License is **PolyForm NC**: patterns only, never code. Answer:
+
+- How its memory actually works at the implementation level (worker/db schemas + migrations, consolidation pipeline, vector recall, prompt injection rules) — and does it change/refine the memory recommendation from question 4?
+- Emotion system mechanics: status capsule, intimacy decay.
+- Soul/prompt engineering (shared/prompts): anti-customer-service rules, anti-hallucination ("associate first, verify with tools").
+- Proactive behavior design + the user-facing diary UI.
+- Borrowable-feature inventory for TakiAgent with 连/造 verdicts and cost estimates.
+
 ## Constraints
 
 - References are GPLv3 / study-only: patterns and architecture may be learned; code may never be copied.
