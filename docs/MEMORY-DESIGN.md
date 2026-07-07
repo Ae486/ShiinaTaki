@@ -51,7 +51,13 @@ FTS5's default unicode61 tokenizer does not segment Chinese. v1 uses the FTS5 **
 
 ## Upgrade path (interfaces over engines)
 
-`Retriever` is an interface. v1 = FTS5. v2 candidates behind the same interface: embedding recall via the user's OpenAI-compatible `/v1/embeddings` (paraphrase association — the only thing FTS5 genuinely cannot do), `sqlite-vec` as store. Deferred, not designed-in: recency×importance×relevance scoring, forgetting curves, graph edges. Optional later: external MCP memory service (e.g. nocturne on VPS) as a cross-device *archive* behind the local store — never the primary.
+`Retriever` is an interface. v1 = FTS5 (plus agentic compensation: `memory_search` is LLM-invoked, so the model reformulates queries itself — partial coverage of the paraphrase gap). v2 adds embedding recall behind the same interface — the one thing lexical search cannot do is paraphrase association ("那家我们去过的拉面店" → stored "吃了豚骨拉面"), which is the "she suddenly remembers" magic; therefore v2 is committed, not optional. v2 shape, following the industry-wide pattern (every serious implementation is hybrid, none is vector-only, all degrade gracefully):
+
+- Hybrid **weighted union** (not intersection), OpenClaw-style ~0.7 vector / 0.3 bm25
+- Embeddings via the user's OpenAI-compatible `/v1/embeddings` (no new privacy surface — memories already flow to the same provider as chat context); vectors stored in `sqlite-vec`
+- Degradation chain baked in: embedding call fails → FTS5 still works → pinned block and files always present
+
+Deferred beyond v2, not designed-in: recency×importance×relevance scoring (generative-agents), forgetting curves (MemoryBank), graph edges (Zep). Optional later: external MCP memory service (e.g. nocturne on VPS) as a cross-device *archive* behind the local store — never the primary.
 
 ## Module layout
 
