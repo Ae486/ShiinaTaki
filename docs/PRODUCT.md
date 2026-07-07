@@ -34,6 +34,7 @@ Engineering counterparts: `TECH-STACK.md` (stack), `MEMORY-DESIGN.md` (memory), 
 | Permissions | exec policy mode, allowlist editor, per-capability switches, grant management (revoke "always allow"), read-only audit log viewer | — |
 | Character | model import (dir/zip/.zst), character & costume picker **with embedded live preview canvas**, persona preset editor (default read-only preview), TTS fields (endpoint/key/voice) | multi-character management |
 | Presentation | scale, opacity, position reset, render quality profile, idle-motion switch, random-motion switch, head/gaze tracking switch, click-feedback mapping (motion/expression with preview buttons), default motion/expression | mutual gaze, group movement (multi-char) |
+| Extensions | MCP servers: list CRUD (stdio command/args/env or HTTP URL/headers, enable toggle), connection status + test, discovered-tools count, secret fields stored in Credential Manager (ADR 0006); Skills: installed list from workspace/skills (name/description from SKILL.md), per-skill enable toggle, open-folder button | MCP OAuth flows, skill editor, marketplace/discovery |
 | General | autostart, Privacy Pause (also in tray) | WS port, token budgets, memory layer registry |
 
 Preview note: the settings window reuses the web renderer component for an embedded preview canvas — pick a costume or a click-motion and see it play immediately (cheaper for us than BandoriPet's preview-on-pet approach, which we can add later).

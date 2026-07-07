@@ -49,7 +49,7 @@ references/          Third-party study material — git-ignored; licenses vary (
 
 ## Architecture invariants (violating any of these is a design regression, not a style issue)
 
-1. **The Agent Core never touches the OS.** No `child_process`, no `fs` outside the Workspace, no screenshots. Every system action crosses the WS boundary to the Rust Permission Gate (ADR 0002).
+1. **The Agent Core never touches the OS on the agent's initiative.** No `child_process`, no `fs` outside the Workspace, no screenshots. Every agent-initiated system action crosses the WS boundary to the Rust Permission Gate (ADR 0002). Single sanctioned exception: the MCP stdio transport in `packages/core/src/mcp/` spawns operator-configured MCP servers (ADR 0006).
 2. **The database has one writer**: Agent Core. All other processes query/subscribe over WS (ADR 0004).
 3. **Protocol types are defined once** in `@taki/shared` (zod) and mirrored in Rust via serde. Never hand-declare a message shape elsewhere.
 4. **Pet UI is a disposable client.** Closing it must not affect agent sessions, cron, or memory.
