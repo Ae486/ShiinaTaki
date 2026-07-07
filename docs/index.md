@@ -6,8 +6,9 @@ Start here. Every design decision has exactly one canonical home; nothing is dup
 
 1. **`../CONTEXT.md`** — domain glossary. The project's canonical vocabulary (Companion, Sampling, Capability, Permission Gate, Node, Character...). Read first; all other docs assume these terms.
 2. **`TECH-STACK.md`** — the complete v1 technology selection table (Agent Core / Shell / Pet UI / mobile), character & model import design, cross-device data pattern.
-3. **`adr/`** — why the four foundational decisions were made (see below).
-4. **`TTS-INTERFACE.md`** — reserved TTS wire contract (v1: interface only).
+3. **`MEMORY-DESIGN.md`** — the memory module design: file-based truth + SQLite index, taxonomy (promise/fact/episode/intention), context assembly, write paths, ship schedule.
+4. **`adr/`** — why the four foundational decisions were made (see below).
+5. **`TTS-INTERFACE.md`** — reserved TTS wire contract (v1: interface only).
 
 ## Architecture Decision Records (`adr/`)
 
