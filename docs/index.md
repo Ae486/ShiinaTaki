@@ -2,6 +2,8 @@
 
 Start here. Every design decision has exactly one canonical home; nothing is duplicated.
 
+> **New session picking up implementation?** Read **`HANDOFF.md`** first — it is the Leader bootstrap (what's done, what to read, how to drive the trellis master/worker flow).
+
 ## Reading order for a new agent/developer
 
 1. **`../CONTEXT.md`** — domain glossary. The project's canonical vocabulary (Companion, Sampling, Capability, Permission Gate, Node, Character...). Read first; all other docs assume these terms.
