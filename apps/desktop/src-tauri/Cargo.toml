@@ -1,0 +1,22 @@
+[package]
+name = "taki-desktop"
+version = "0.0.0"
+description = "TakiAgent desktop shell"
+edition = "2021"
+rust-version = "1.88"
+
+[lib]
+# The library entry the Tauri mobile-entry macro loads; keep main.rs a thin shim.
+name = "taki_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.6", features = [] }
+
+[dependencies]
+tauri = { version = "2.11", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[lints.clippy]
+too_many_lines = "warn"

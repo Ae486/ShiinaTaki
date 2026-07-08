@@ -11,3 +11,10 @@ audio_reference/
 node_modules/
 dist/
 target/
+
+# Tauri generated + local icon source
+apps/desktop/src-tauri/gen/
+apps/desktop/app-icon.png
+
+# One-off local scripts (machine-specific)
+scripts/migrate-node-to-g.ps1

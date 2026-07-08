@@ -1,0 +1,15 @@
+{
+  "name": "@taki/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@taki/shared": "workspace:*",
+    "zod": "^4.4.0"
+  }
+}
