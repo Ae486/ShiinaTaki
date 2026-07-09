@@ -9,7 +9,7 @@
 ## Schema conventions
 
 - Tables and columns: `snake_case`. Timestamps: `*_at`, ISO-8601 UTC strings.
-- Migrations: numbered SQL files `db/migrations/NNN-description.sql`, applied at startup, tracked in a `migrations` table. No ORM — hand-written SQL in repository modules (`db/sessions-repo.ts`, `db/memory-repo.ts`), one repo per aggregate.
+- Migrations: numbered TS modules `db/migrations/NNN-description.ts`, each exporting `{ version, sql }` (plain SQL string constants — keeps the db layer fs-free and bundle-safe), aggregated in one explicit ordered list (no fs/glob discovery), applied at startup each inside a transaction, tracked in a `migrations` table. No ORM — hand-written SQL in repository modules (`db/timeline-repo.ts`, `db/memory-repo.ts`), one repo per aggregate.
 - Memory search: SQLite **FTS5** virtual table indexing Workspace markdown files; markdown is the source of truth, the index is rebuildable.
 
 ## Patterns

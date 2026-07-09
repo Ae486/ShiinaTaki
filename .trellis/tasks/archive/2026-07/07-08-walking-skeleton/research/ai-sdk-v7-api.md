@@ -138,3 +138,16 @@ Alternative in-stream failure: include `{ type: "error", error: new Error("boom"
 
 - `agent.stream()` returning a Promise (vs v6's sync return) means `const result = await agent.stream(...)` — one v7 doc snippet omits the await; trust the `.d.ts`.
 - Did not verify OpenTelemetry/telemetry options — out of scope.
+
+## Addendum (2026-07-10, task 07-10, appended by check agent — CORRECTS §2 error semantics)
+
+§2 claimed "`textStream` … when an error occurs the stream throws it (doc comment at 2842-2845) → the PRD's errors-propagate contract." **That is WRONG for provider/mid-stream errors** and was taken from the type-doc comment without empirical verification. Verified empirically against installed `ai@7.0.17` (probe: MockLanguageModelV4 emitting a `{type:"error"}` chunk, and a `doStream` that rejects; each consumed via `textStream` ONLY vs `fullStream` ONLY, `maxRetries:0`):
+
+| Failure mode | `textStream` only | `fullStream`/`stream` only |
+|---|---|---|
+| mid-stream `{type:"error"}` part | yields prior deltas, then **completes silently — does NOT throw** | emits an `error` part (`error` = the error), no throw |
+| `doStream` call rejects (pre-stream) | yields `""`, **completes silently — does NOT throw** | emits `start` then `error` part, no throw |
+
+Root cause in compiled source: `textStream = toTextStream({stream})` whose transform enqueues **only** `text-delta` parts and drops everything else, including `error` parts (`dist/index.js:6122-6130`) — there is no rethrow. The doc-comment "will throw the error" only holds for errors that reject the underlying `ReadableStream` itself, NOT for `{type:"error"}` parts (which is how provider failures arrive). `fullStream` is an exact alias: `get fullStream(){ return this.stream }` (`dist/index.js:9758`); prefer `.stream` (non-deprecated).
+
+**Consequence for the agent loop**: to surface provider failures you MUST iterate `result.stream`/`fullStream` and `throw` on the `{type:"error"}` part (what `chat-agent.ts` now does). Iterating `textStream` would swallow every provider error and silently persist an empty/partial assistant turn. Pinned by `chat-agent.test.ts` (call-reject + mid-stream error cases), both of which fail if switched back to `textStream`.
