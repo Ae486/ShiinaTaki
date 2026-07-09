@@ -1,0 +1,6 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend entry: pre-dev checklist + quality gates"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "File placement in packages/core; devices/ is a new domain dir per prd"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Closed error-code union, JSON-RPC error mapping, streamed-method + registry-catch conventions"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Size caps, forbidden patterns, file headers + index.md rules"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "pino usage; tokens/hashes never logged (pairing-code sink is the documented exception)"}
+{"file": ".trellis/tasks/archive/2026-07/07-08-walking-skeleton/research/json-rpc-2-0-lib.md", "reason": "Verified lib API for error responses (JSONRPCErrorException, custom data) reused by app-error frames"}

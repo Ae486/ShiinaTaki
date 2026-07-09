@@ -1,0 +1,7 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend quality-check entry point"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Enforce size caps, forbidden patterns, headers/index.md coverage"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Verify closed union usage, handle-once, registry FORBIDDEN/INTERNAL_ERROR paths"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "Verify placement; devices/ module ownership; only sanctioned fs sites"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Verify no token/hash leaks in logs; pairing-code sink is the only exception"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "shared/core/cli handshake consistency review"}
+{"file": ".trellis/tasks/archive/2026-07/07-08-walking-skeleton/research/json-rpc-2-0-lib.md", "reason": "Check app-error frames match verified lib API"}
