@@ -1,19 +1,30 @@
 /**
  * INPUT:  inbound WS text frames (JSON-RPC 2.0) from local clients
- * OUTPUT: startWsServer({ host, port, registry, logger }) -> { port, close }
- * POS:    core/server — the only module owning sockets; binds loopback, zod-validates frames, dispatches via method-registry
+ * OUTPUT: startWsServer({ host, port, registry, connectionRegistry, logger }) -> { port, close }
+ * POS:    core/server — the only socket-owning module; per-socket auth state + pre-auth gate, then method dispatch
  */
 import { once } from "node:events";
 import { WebSocket, WebSocketServer, type RawData } from "ws";
 import { createJSONRPCErrorResponse, createJSONRPCNotification } from "json-rpc-2.0";
-import { JSON_RPC_ERROR_CODES, JsonRpcInboundFrameSchema, type JsonRpcId } from "@taki/shared";
+import {
+  CONNECT_METHOD,
+  ErrorCodeSchema,
+  JSON_RPC_ERROR_CODES,
+  JsonRpcInboundFrameSchema,
+  type JsonRpcId,
+  type JsonRpcInboundFrame,
+  type JsonRpcRequest,
+} from "@taki/shared";
 import type { Logger } from "../logging/logger.ts";
+import { appErrorResponse } from "./app-error.ts";
+import type { Connection, ConnectionRegistry } from "./connection-registry.ts";
 import type { MethodContext, MethodRegistry } from "./method-registry.ts";
 
 export interface WsServerOptions {
   host: string;
   port: number;
   registry: MethodRegistry;
+  connectionRegistry: ConnectionRegistry;
   logger: Logger;
 }
 
@@ -23,17 +34,20 @@ export interface WsServer {
   close(): Promise<void>;
 }
 
-// Loopback only; pairing/auth is a later slice (never binds 0.0.0.0).
 export async function startWsServer(options: WsServerOptions): Promise<WsServer> {
-  const { host, port, registry, logger } = options;
+  const { host, port, registry, connectionRegistry, logger } = options;
   const log = logger.child({ mod: "server" });
   const wss = new WebSocketServer({ host, port });
 
   wss.on("connection", (socket) => {
+    const connection = connectionRegistry.create();
     log.info("client connected");
     socket.on("error", (err) => log.warn({ err: err.message }, "socket error"));
-    socket.on("message", (data) => void handleMessage({ socket, data, registry, log }));
-    socket.on("close", () => log.info("client disconnected"));
+    socket.on("message", (data) => void handleMessage({ socket, connection, data, registry, log }));
+    socket.on("close", () => {
+      connectionRegistry.remove(connection);
+      log.info("client disconnected");
+    });
   });
 
   await once(wss, "listening"); // rejects if binding emits 'error' first
@@ -46,35 +60,69 @@ export async function startWsServer(options: WsServerOptions): Promise<WsServer>
 
 interface HandleArgs {
   socket: WebSocket;
+  connection: Connection;
   data: RawData;
   registry: MethodRegistry;
   log: Logger;
 }
 
-async function handleMessage({ socket, data, registry, log }: HandleArgs): Promise<void> {
+async function handleMessage(args: HandleArgs): Promise<void> {
+  const frame = parseAndValidate(args);
+  if (!frame) {
+    // Fail-closed pre-auth: an unauthenticated peer gets exactly one envelope error, then the
+    // socket dies — it has no legitimate reason to send malformed frames, and a lenient path
+    // would let it hold sockets open indefinitely (v1.5 VPS exposure). Authenticated peers keep
+    // the tolerant #3 behavior: one bad frame must not kill a live session.
+    if (args.connection.state.status !== "authenticated") args.socket.close();
+    return;
+  }
+  if (!enforcePreAuthGate(args, frame)) return;
+  if (!("id" in frame)) {
+    args.log.debug({ method: frame.method }, "ignoring notification");
+    return;
+  }
+  await dispatchFrame(args, frame);
+}
+
+function parseAndValidate({ socket, data }: HandleArgs): JsonRpcInboundFrame | null {
   let parsed: unknown;
   try {
     parsed = JSON.parse(data.toString());
   } catch {
     reply(socket, createJSONRPCErrorResponse(null, JSON_RPC_ERROR_CODES.PARSE_ERROR, "Parse error"));
-    return;
+    return null;
   }
-
   const frame = JsonRpcInboundFrameSchema.safeParse(parsed);
   if (!frame.success) {
     const id = recoverableId(parsed);
     reply(socket, createJSONRPCErrorResponse(id, JSON_RPC_ERROR_CODES.INVALID_REQUEST, "Invalid Request"));
-    return;
+    return null;
   }
-  if (!("id" in frame.data)) {
-    log.debug({ method: frame.data.method }, "ignoring notification");
-    return;
-  }
+  return frame.data;
+}
 
+// Fail-closed: an unauthenticated socket may send only a `connect` request; anything else gets a
+// NOT_AUTHENTICATED app error and the socket is closed (prd §3 handshake step 2).
+function enforcePreAuthGate({ socket, connection }: HandleArgs, frame: JsonRpcInboundFrame): boolean {
+  if (connection.state.status === "authenticated") return true;
+  if ("id" in frame && frame.method === CONNECT_METHOD) return true;
+  const id = "id" in frame ? frame.id : null;
+  reply(socket, appErrorResponse(id, ErrorCodeSchema.enum.NOT_AUTHENTICATED, "not authenticated"));
+  socket.close();
+  return false;
+}
+
+async function dispatchFrame({ socket, connection, registry }: HandleArgs, frame: JsonRpcRequest): Promise<void> {
+  let closeRequested = false;
   const ctx: MethodContext = {
     notify: (method, params) => reply(socket, createJSONRPCNotification(method, params)),
+    connection,
+    close: () => {
+      closeRequested = true;
+    },
   };
-  reply(socket, await registry.dispatch(frame.data, ctx));
+  reply(socket, await registry.dispatch(frame, ctx));
+  if (closeRequested) socket.close(); // after the reply is queued, so the error frame flushes first
 }
 
 function reply(socket: WebSocket, payload: unknown): void {

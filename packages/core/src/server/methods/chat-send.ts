@@ -1,6 +1,6 @@
 /**
  * INPUT:  ChatSendParams from a dispatched chat.send request + a ChatAgent
- * OUTPUT: MethodDefinition; acks { messageId }, then streams chat.delta/.complete/.error notifications via ctx
+ * OUTPUT: MethodDefinition (operator-only); acks { messageId }, then streams chat.delta/.complete/.error via ctx
  * POS:    core/server/methods — one file per WS method; the boundary that turns provider failures into structured errors
  */
 import { randomUUID } from "node:crypto";
@@ -23,6 +23,7 @@ export function chatSendMethod(chatAgent: ChatAgent, logger: Logger): MethodDefi
   const log = logger.child({ mod: "chat-send" });
   return {
     method: CHAT_METHODS.send,
+    roles: ["operator"], // conversing is an operator concern; nodes are capability providers (prd §3)
     paramsSchema: ChatSendParamsSchema,
     handler: (params, ctx): ChatSendResult => {
       const messageId = randomUUID();

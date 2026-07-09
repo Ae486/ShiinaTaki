@@ -1,0 +1,87 @@
+/**
+ * INPUT:  pairing/verification calls + an injected PairedDeviceStore and clock (now())
+ * OUTPUT: createDeviceRegistry({store, now}) -> { beginPairing, completePairing, verifyToken }; PairingError
+ * POS:    core/devices — pairing-code lifecycle + token issue/verify (sha256 at rest, timingSafeEqual compare; prd §4)
+ */
+import { createHash, randomBytes, randomInt, timingSafeEqual } from "node:crypto";
+import type { Role } from "@taki/shared";
+import type { PairedDeviceStore } from "./paired-device-store.ts";
+
+const PAIRING_TTL_MS = 5 * 60 * 1000;
+const MAX_ATTEMPTS = 3;
+
+/** Locked into the paired record at pairing; a later role change fails verification (privilege-swap guard). */
+export interface DeviceIdentity {
+  deviceName: string;
+  role: Role;
+}
+
+export interface DeviceRegistry {
+  /** Starts (or restarts) pairing for a device; returns the 6-digit code to show the operator. */
+  beginPairing(deviceId: string): string;
+  /** On the right code within TTL/attempts: persists the device, returns the plaintext token ONCE. */
+  completePairing(deviceId: string, code: string, identity: DeviceIdentity): string;
+  verifyToken(deviceId: string, token: string, role: Role): boolean;
+}
+
+export class PairingError extends Error {}
+
+export interface DeviceRegistryDeps {
+  store: PairedDeviceStore;
+  now?: () => number;
+}
+
+interface PendingPairing {
+  code: string;
+  expiresAt: number;
+  attempts: number;
+}
+
+export function createDeviceRegistry(deps: DeviceRegistryDeps): DeviceRegistry {
+  const { store } = deps;
+  const now = deps.now ?? Date.now;
+  const pending = new Map<string, PendingPairing>();
+
+  return {
+    beginPairing(deviceId) {
+      const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
+      pending.set(deviceId, { code, expiresAt: now() + PAIRING_TTL_MS, attempts: 0 });
+      return code;
+    },
+
+    completePairing(deviceId, code, identity) {
+      const entry = pending.get(deviceId);
+      if (!entry || now() >= entry.expiresAt) {
+        pending.delete(deviceId);
+        throw new PairingError("no active pairing for this device");
+      }
+      if (entry.code !== code) {
+        entry.attempts += 1;
+        if (entry.attempts >= MAX_ATTEMPTS) pending.delete(deviceId);
+        throw new PairingError("invalid pairing code");
+      }
+      pending.delete(deviceId);
+      const token = randomBytes(32).toString("base64url");
+      store.save({
+        deviceId,
+        deviceName: identity.deviceName,
+        role: identity.role,
+        tokenHash: hashToken(token).toString("base64"),
+        pairedAt: new Date(now()).toISOString(),
+      });
+      return token;
+    },
+
+    verifyToken(deviceId, token, role) {
+      const device = store.find(deviceId);
+      if (!device || device.role !== role) return false;
+      const presented = hashToken(token);
+      const stored = Buffer.from(device.tokenHash, "base64");
+      return presented.length === stored.length && timingSafeEqual(presented, stored);
+    },
+  };
+}
+
+function hashToken(token: string): Buffer {
+  return createHash("sha256").update(token).digest();
+}
