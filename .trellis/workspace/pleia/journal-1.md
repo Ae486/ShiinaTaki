@@ -104,3 +104,36 @@ Full trellis cycle for issue #4: leader-authored prd (no research agent needed, 
 ### Next Steps
 
 - None - task complete
+
+
+## Session 4: Issue #5 timeline persistence; M1 milestone complete
+
+**Date**: 2026-07-10
+**Task**: Issue #5 timeline persistence; M1 milestone complete
+**Branch**: `main`
+
+### Summary
+
+Full cycle for #5: opus research verified node:sqlite RC status + Windows restart survival; opus implement built db layer/migrations/repo/store-v2/subscriptions in TDD (178 tests); opus check resolved the textStream-swallows-errors contradiction with source+probe evidence, corrected archived research, added boundary tests (182). Leader verified live cross-restart replay against DeepSeek (pairing survived, last-4 printed, model recalled planted facts). Ops lesson: pnpm-wrapped background cores orphan node children on Windows - launch node directly. M1 complete.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `c8bd681` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

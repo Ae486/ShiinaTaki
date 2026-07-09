@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 3
-- **Last Active**: 2026-07-09
+- **Total Sessions**: 4
+- **Last Active**: 2026-07-10
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~106 | Active |
+| `journal-1.md` | ~139 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 4 | 2026-07-10 | Issue #5 timeline persistence; M1 milestone complete | `c8bd681` | `main` |
 | 3 | 2026-07-09 | Issue #4 device pairing implemented and verified | `8911398` | `main` |
 | 2 | 2026-07-09 | Issue #3 walking skeleton implemented and verified | `c17aae4` | `main` |
 | 1 | 2026-07-07 | Requirements, tech selection, reference research — full design phase closeout | `d17e9a7` | `main` |
