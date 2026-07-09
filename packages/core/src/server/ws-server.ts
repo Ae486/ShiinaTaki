@@ -41,10 +41,13 @@ export async function startWsServer(options: WsServerOptions): Promise<WsServer>
 
   wss.on("connection", (socket) => {
     const connection = connectionRegistry.create();
+    // Cleanups registered by handlers (via ctx.onClose) for THIS socket — run once on close.
+    const closeListeners: Array<() => void> = [];
     log.info("client connected");
     socket.on("error", (err) => log.warn({ err: err.message }, "socket error"));
-    socket.on("message", (data) => void handleMessage({ socket, connection, data, registry, log }));
+    socket.on("message", (data) => void handleMessage({ socket, connection, closeListeners, data, registry, log }));
     socket.on("close", () => {
+      for (const listener of closeListeners) listener();
       connectionRegistry.remove(connection);
       log.info("client disconnected");
     });
@@ -61,6 +64,7 @@ export async function startWsServer(options: WsServerOptions): Promise<WsServer>
 interface HandleArgs {
   socket: WebSocket;
   connection: Connection;
+  closeListeners: Array<() => void>;
   data: RawData;
   registry: MethodRegistry;
   log: Logger;
@@ -112,7 +116,7 @@ function enforcePreAuthGate({ socket, connection }: HandleArgs, frame: JsonRpcIn
   return false;
 }
 
-async function dispatchFrame({ socket, connection, registry }: HandleArgs, frame: JsonRpcRequest): Promise<void> {
+async function dispatchFrame({ socket, connection, closeListeners, registry }: HandleArgs, frame: JsonRpcRequest): Promise<void> {
   let closeRequested = false;
   const ctx: MethodContext = {
     notify: (method, params) => reply(socket, createJSONRPCNotification(method, params)),
@@ -120,6 +124,7 @@ async function dispatchFrame({ socket, connection, registry }: HandleArgs, frame
     close: () => {
       closeRequested = true;
     },
+    onClose: (cb) => closeListeners.push(cb),
   };
   reply(socket, await registry.dispatch(frame, ctx));
   if (closeRequested) socket.close(); // after the reply is queued, so the error frame flushes first

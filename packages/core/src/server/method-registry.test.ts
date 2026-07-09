@@ -5,7 +5,7 @@ import type { Connection } from "./connection-registry.ts";
 import { createMethodRegistry, type MethodContext } from "./method-registry.ts";
 
 function ctxFor(connection: Connection, notify: (m: string, p: unknown) => void = () => {}): MethodContext {
-  return { notify, connection, close: () => {} };
+  return { notify, connection, close: () => {}, onClose: () => {} };
 }
 function authed(role: Role = "operator"): Connection {
   return { state: { status: "authenticated", deviceId: "d", role, capabilities: [] } };

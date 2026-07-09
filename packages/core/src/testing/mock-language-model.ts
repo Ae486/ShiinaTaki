@@ -35,3 +35,22 @@ export function failingMockModel(error: unknown): MockLanguageModelV4 {
     },
   });
 }
+
+/**
+ * A mock model that streams some deltas and then emits a mid-stream `error` part (no finish).
+ * In ai@7 this error is swallowed by `textStream` but delivered as an `{type:"error"}` part on
+ * `fullStream`/`stream` — the reason the chat loop must iterate the full stream (see research addendum).
+ */
+export function midStreamErrorModel(deltas: string[], error: unknown): MockLanguageModelV4 {
+  return new MockLanguageModelV4({
+    doStream: async () => ({
+      stream: simulateReadableStream({
+        chunks: [
+          { type: "text-start" as const, id: "t1" },
+          ...deltas.map((delta) => ({ type: "text-delta" as const, id: "t1", delta })),
+          { type: "error" as const, error },
+        ],
+      }),
+    }),
+  });
+}

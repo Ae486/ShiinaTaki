@@ -18,12 +18,14 @@ import type { Connection } from "./connection-registry.ts";
 /**
  * Per-connection handler context: `notify` pushes a JSON-RPC notification back to the one
  * socket this request arrived on; `connection` is that socket's auth state; `close` asks the
- * server to close the socket after this response is flushed (fail-closed auth refusals).
+ * server to close the socket after this response is flushed (fail-closed auth refusals);
+ * `onClose` registers a cleanup to run when that socket closes (subscription teardown).
  */
 export interface MethodContext {
   notify: (method: string, params: unknown) => void;
   connection: Connection;
   close: () => void;
+  onClose: (cb: () => void) => void;
 }
 
 export interface MethodDefinition<P> {
