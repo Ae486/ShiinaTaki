@@ -1,0 +1,8 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend entry: pre-dev checklist + quality gates"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "Where files go in packages/core; server/ owns sockets, config/ owns config"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Structured error rules: closed error-code union in @taki/shared, handle-once boundary, fatal-fast config"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Size caps, forbidden patterns (any / non-null ! / hand-declared shapes), test priorities"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "pino child loggers; never log keys or prompt contents"}
+{"file": ".trellis/tasks/07-08-walking-skeleton/research/ai-sdk-v7-api.md", "reason": "Verified AI SDK v7 API names + snippets — code strictly from this, never from memory"}
+{"file": ".trellis/tasks/07-08-walking-skeleton/research/json-rpc-2-0-lib.md", "reason": "Envelope lib verdict + exact API for wiring JSON-RPC over ws"}
+{"file": ".trellis/tasks/07-08-walking-skeleton/research/runtime-and-provider.md", "reason": "Dev-run scripts (Node TS stripping / env-file flag) + DeepSeek baseURL contract"}

@@ -1,0 +1,9 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend quality-check entry point"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Enforce size caps + forbidden patterns"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Verify error paths: closed union in shared, no empty catch, handle-once boundary"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "Verify file placement + module ownership (only server/ owns sockets)"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Verify no secrets or message contents in logs"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "shared/core/cli cross-layer consistency review"}
+{"file": ".trellis/tasks/07-08-walking-skeleton/research/ai-sdk-v7-api.md", "reason": "Check implementation matches verified AI SDK v7 APIs"}
+{"file": ".trellis/tasks/07-08-walking-skeleton/research/json-rpc-2-0-lib.md", "reason": "Check envelope usage matches verified lib API"}
+{"file": ".trellis/tasks/07-08-walking-skeleton/research/runtime-and-provider.md", "reason": "Check run scripts + provider config match verified runtime facts"}
