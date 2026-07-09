@@ -68,3 +68,7 @@ export const JSON_RPC_ERROR_CODES = {
   INVALID_PARAMS: -32602,
   INTERNAL_ERROR: -32603,
 } as const;
+
+// Server-defined app error (JSON-RPC "server error" range). Domain/auth failures ride
+// this code with the machine-readable ErrorCode in error.data.code (prd §3, error-handling spec).
+export const JSON_RPC_APP_ERROR = -32000;

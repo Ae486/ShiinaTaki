@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  JSON_RPC_APP_ERROR,
   JSON_RPC_ERROR_CODES,
   JsonRpcClientFrameSchema,
   JsonRpcErrorObjectSchema,
@@ -84,5 +85,11 @@ describe("JSON_RPC_ERROR_CODES", () => {
       INVALID_PARAMS: -32602,
       INTERNAL_ERROR: -32603,
     });
+  });
+});
+
+describe("JSON_RPC_APP_ERROR", () => {
+  it("is the server-defined app error code (-32000)", () => {
+    expect(JSON_RPC_APP_ERROR).toBe(-32000);
   });
 });

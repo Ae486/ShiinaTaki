@@ -7,6 +7,7 @@ export { PingSchema, PongSchema } from "./ping-schema.ts";
 export type { Ping, Pong } from "./ping-schema.ts";
 
 export {
+  JSON_RPC_APP_ERROR,
   JSON_RPC_ERROR_CODES,
   JsonRpcClientFrameSchema,
   JsonRpcErrorObjectSchema,
@@ -30,6 +31,14 @@ export type {
 
 export { ErrorCodeSchema } from "./error-code-schema.ts";
 export type { ErrorCode } from "./error-code-schema.ts";
+
+export {
+  CONNECT_METHOD,
+  ConnectParamsSchema,
+  ConnectResultSchema,
+  RoleSchema,
+} from "./connect-schema.ts";
+export type { ConnectParams, ConnectResult, Role } from "./connect-schema.ts";
 
 export {
   CHAT_METHODS,
