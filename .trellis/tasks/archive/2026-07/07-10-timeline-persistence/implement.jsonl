@@ -1,0 +1,8 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend entry: pre-dev checklist + quality gates"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "BINDING for this slice: node:sqlite wrapper rules, migrations, snake_case schema, write->event colocation"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "db/ module ownership: only db/ talks to SQLite, only server/ owns sockets"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Fatal-fast startup (migrations), closed error union, app-error conventions"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Size caps, forbidden patterns, headers + index.md rules"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Never log message content; log seq/characterId/lengths"}
+{"file": ".trellis/tasks/07-10-timeline-persistence/research/node-sqlite-api.md", "reason": "Verified node:sqlite API (DatabaseSync/StatementSync, bigint, pragmas) — code strictly from this"}
+{"file": ".trellis/tasks/07-10-timeline-persistence/research/sqlite-migrations-and-testing.md", "reason": "Migration-runner pattern + vitest :memory:/temp-file restart patterns (Windows-verified)"}
