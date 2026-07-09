@@ -81,6 +81,12 @@ references/          Third-party study material — git-ignored; licenses vary (
 - No god-buckets: no catch-all `types.ts` / `utils.ts` growing without bound — split by responsibility.
 - Commands/tools are thin: Tauri commands delegate to `services/`; AI SDK tool `execute` delegates to a capability client — business logic is never inline in the handler.
 
+## File headers & folder indexes (navigation aids — for humans and agents)
+
+- Every production source file (`.ts`/`.tsx`/`.rs`; tests and generated code exempt) opens with a 3-6 line **module-contract header** — TS `/** ... */`, Rust `//! ...` — with three tags: `INPUT:` what it consumes (upstream data/events/env), `OUTPUT:` what it exposes/produces (public API, side effects), `POS:` its architectural position (layer, ownership rule, wiring point; mark "experimental / not in production path" when true). It is a placement card, not prose — never restate the code; update it when the contract changes (stale header = review finding).
+- Every directory under `packages/*/src` and `apps/*/src` carries an `index.md`: one line per source file (`name — role`; colocated tests implied, not listed). Touching a folder means updating its `index.md` in the same change. Retrofit is on-touch, not big-bang.
+- Body comments remain why-only (see Working rules) — headers do not license what/how narration inside code.
+
 ## Working rules
 
 - **Think before coding**: state assumptions; if multiple interpretations exist, present them — don't pick silently; push back on wrong approaches.

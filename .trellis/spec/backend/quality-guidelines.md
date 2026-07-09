@@ -31,6 +31,34 @@ Exemptions: generated code, migrations, test files.
 - **cargo test** for Rust: gate policy table-driven tests are mandatory for every new Capability; blocklist patterns get regression tests.
 - The exec allowlist parser and the Permission Gate are security boundaries: no change ships without tests covering the new branch.
 
+## File headers & folder index.md (mandatory)
+
+Every production source file opens with a 3-6 line module-contract header; tests and generated code are exempt. Every directory under `src/` carries an `index.md` (one line per source file; colocated tests implied). Touch a folder → update its `index.md` in the same change. Headers are placement cards — never what/how narration; body comments stay why-only.
+
+TS:
+```ts
+/**
+ * INPUT:  inbound WS text frames (JSON-RPC 2.0) from local clients
+ * OUTPUT: startWsServer({host, port, registry, logger}) -> { port, close }
+ * POS:    core/server — the only module owning sockets; zod-validates frames, dispatches via method-registry
+ */
+```
+
+Rust:
+```rust
+//! INPUT:  capability requests dispatched by gate/
+//! OUTPUT: PNG screenshot bytes via xcap
+//! POS:    capabilities_impl — called ONLY from gate/, never directly from commands/
+```
+
+`index.md` per directory:
+```md
+# server/
+- ws-server.ts — WS listener; frame validation; reply/notify plumbing
+- method-registry.ts — WS method table (invariant-7 wiring point)
+- methods/ — one handler file per WS method
+```
+
 ## Checks before handoff
 
 ```

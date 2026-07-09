@@ -11,6 +11,25 @@ File <= 300 lines; function/hook/component <= 50 lines; max 3 params; test files
 - Re-render hygiene: narrow store selectors, `memo` only where a profile shows need, stable callback identities for renderer-bridge props.
 - Assets: Live2D textures load through the Tauri asset protocol lazily per character; never import model assets into the JS bundle.
 
+## File headers & folder index.md (mandatory)
+
+Every production source file (`.ts`/`.tsx`) opens with a 3-6 line module-contract header; tests and generated code are exempt. Every directory under `src/` carries an `index.md` (one line per source file; colocated tests implied). Touch a folder → update its `index.md` in the same change. Headers are placement cards — never what/how narration; body comments stay why-only.
+
+```tsx
+/**
+ * INPUT:  avatar state events from the ws store (thinking/working/sleeping)
+ * OUTPUT: <PetStage> — PixiJS canvas host mounting the Live2D renderer
+ * POS:    ui/renderer bridge — the ONLY component allowed to touch renderer/ APIs
+ */
+```
+
+`index.md` per directory:
+```md
+# hooks/
+- use-ws-client.ts — WS connection lifecycle + typed method calls
+- use-avatar-state.ts — avatar state machine subscription
+```
+
 ## Forbidden patterns
 
 - React imports inside `renderer/` (framework-free zone).
