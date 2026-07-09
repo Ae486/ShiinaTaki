@@ -71,3 +71,36 @@ Full trellis cycle for issue #3: fable research verified AI SDK v7/json-rpc-2.0/
 ### Next Steps
 
 - None - task complete
+
+
+## Session 3: Issue #4 device pairing implemented and verified
+
+**Date**: 2026-07-09
+**Task**: Issue #4 device pairing implemented and verified
+**Branch**: `main`
+
+### Summary
+
+Full trellis cycle for issue #4: leader-authored prd (no research agent needed, Node builtins only); opus implement built connect handshake + file-backed device registry + role gates in TDD; fable check ruled ALREADY_CONNECTED into the closed union, closed a pre-auth spam hole, added 7 auth-branch tests; leader verification caught a CLI stdin-EOF REPL hang via raw WS probe isolation, fixed by a focused agent (LineQueue). 123 tests green; live pairing/reconnect/tamper smokes passed against DeepSeek.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8911398` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

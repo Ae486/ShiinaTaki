@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 2
+- **Total Sessions**: 3
 - **Last Active**: 2026-07-09
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~73 | Active |
+| `journal-1.md` | ~106 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 3 | 2026-07-09 | Issue #4 device pairing implemented and verified | `8911398` | `main` |
 | 2 | 2026-07-09 | Issue #3 walking skeleton implemented and verified | `c17aae4` | `main` |
 | 1 | 2026-07-07 | Requirements, tech selection, reference research — full design phase closeout | `d17e9a7` | `main` |
 <!-- @@@/auto:session-history -->
