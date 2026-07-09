@@ -17,6 +17,8 @@ A failing Capability or tool call must degrade into a **structured error the LLM
 - Config/startup validation errors are fatal-fast with a precise message (zod `.parse`, let it throw at boot).
 - Streamed WS methods (ack response + event notifications): the ack MUST be sent before the first event — defer the stream pump to a **macrotask** (`setImmediate`); microtask deferral is insufficient because the response path itself crosses several `await`s. Pin the ordering with a test (see `server/methods/chat-send.ts`).
 - The method registry converts uncaught handler throws into JSON-RPC `INTERNAL_ERROR` responses — a throwing handler must never become an unhandled rejection that kills the core process (regression-tested in `method-registry.test.ts`).
+- App-level refusals NEVER reuse JSON-RPC envelope codes: `-32600`/`-32601`/`-32602`/`-32700` are reserved for structurally invalid traffic; every semantic refusal (auth, pairing, roles, state) rides `-32000` (`JSON_RPC_APP_ERROR`) with `data.code` from the closed `ErrorCode` union — one path for the Rust Shell to mirror, no special cases.
+- Pre-auth connections are fail-closed: before a successful `connect`, ANY invalid or non-connect frame (well-formed or garbage) gets one error reply, then the socket closes. Authenticated connections are fail-tolerant: a bad frame must not kill a live session. Both behaviors are pinned by tests (`ws-server.test.ts`).
 
 ## Rust (Shell)
 
