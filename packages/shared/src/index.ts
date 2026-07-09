@@ -56,4 +56,26 @@ export type {
   ChatSendResult,
 } from "./chat-schema.ts";
 
+export {
+  TIMELINE_HISTORY_LIMIT_DEFAULT,
+  TIMELINE_HISTORY_LIMIT_MAX,
+  TIMELINE_METHODS,
+  TimelineAppendedSchema,
+  TimelineEntrySchema,
+  TimelineHistoryParamsSchema,
+  TimelineHistoryResultSchema,
+  TimelineRoleSchema,
+  TimelineSubscribeParamsSchema,
+  TimelineSubscribeResultSchema,
+} from "./timeline-schema.ts";
+export type {
+  TimelineAppended,
+  TimelineEntry,
+  TimelineHistoryParams,
+  TimelineHistoryResult,
+  TimelineRole,
+  TimelineSubscribeParams,
+  TimelineSubscribeResult,
+} from "./timeline-schema.ts";
+
 export { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "./ws-defaults.ts";
