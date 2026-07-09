@@ -1,6 +1,6 @@
 /**
  * INPUT:  a WS URL; inbound JSON-RPC frames (ack + chat.* notifications)
- * OUTPUT: connectChatClient(url) -> ChatClient.chat(params, handlers) resolving on complete/error
+ * OUTPUT: connectChatClient(url) -> ChatClient: connect()/chat()/history()/close over one WS
  * POS:    cli — the transport client; @taki/shared-typed, zod-validates inbound frames; never imports @taki/core
  */
 import { once } from "node:events";
@@ -15,10 +15,14 @@ import {
   ConnectResultSchema,
   ErrorCodeSchema,
   JsonRpcClientFrameSchema,
+  TIMELINE_METHODS,
+  TimelineHistoryResultSchema,
   type ChatSendParams,
   type ConnectParams,
   type ErrorCode,
   type JsonRpcClientFrame,
+  type TimelineHistoryParams,
+  type TimelineHistoryResult,
 } from "@taki/shared";
 
 export interface ChatHandlers {
@@ -37,6 +41,8 @@ export interface ChatClient {
   connect(params: ConnectParams): Promise<ConnectOutcome>;
   /** Sends one message and resolves when the turn ends (complete or error). */
   chat(params: ChatSendParams, handlers: ChatHandlers): Promise<void>;
+  /** Fetches one newest-first page of the conversation timeline. */
+  history(params: TimelineHistoryParams): Promise<TimelineHistoryResult>;
   close(): void;
 }
 
@@ -143,6 +149,7 @@ export async function connectChatClient(url: string): Promise<ChatClient> {
       }
       await done;
     },
+    history: async (params) => TimelineHistoryResultSchema.parse(await rpc.request(TIMELINE_METHODS.history, params)),
     close: () => ws.close(),
   };
 }

@@ -9,6 +9,7 @@ import { parseArgs } from "node:util";
 import { DEFAULT_WS_HOST, DEFAULT_WS_PORT, ErrorCodeSchema } from "@taki/shared";
 import { connectChatClient, type ChatClient } from "./chat-client.ts";
 import { loadOrCreateIdentity, saveToken } from "./device-identity.ts";
+import { showRecentHistory } from "./recent-history.ts";
 import { runRepl } from "./repl.ts";
 
 const DEFAULT_URL = `ws://${DEFAULT_WS_HOST}:${DEFAULT_WS_PORT}`;
@@ -52,6 +53,14 @@ async function authenticate(chatClient: ChatClient, ask: (query: string) => Prom
     process.stderr.write(`\n[connect failed] ${outcome.code ?? "ERROR"}: ${outcome.message}\n`);
     chatClient.close();
     process.exit(1);
+  }
+  // AC-2 demo: replay the tail of the persisted timeline so a reconnect shows prior turns.
+  // A history-fetch failure must not block chatting, so degrade to a warning.
+  try {
+    await showRecentHistory({ reader: chatClient, characterId, output: process.stdout });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    process.stderr.write(`\n[history unavailable] ${reason}\n`);
   }
 }
 

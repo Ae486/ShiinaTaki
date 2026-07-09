@@ -160,6 +160,29 @@ async function bootConnect(onConnect: (api: ConnectApi) => void): Promise<ChatCl
   return client;
 }
 
+const HISTORY_ENTRY = {
+  seq: 1,
+  id: DEVICE_ID,
+  characterId: "taki",
+  role: "user" as const,
+  content: "earlier",
+  createdAt: "2026-07-10T00:00:00.000Z",
+};
+
+describe("ChatClient.history (timeline paging)", () => {
+  it("T8 sends timeline.history and returns the parsed result", async () => {
+    // scriptConnect is a generic request→reply scripted server; here it answers timeline.history.
+    const client = await bootConnect(({ send, requestId }) => {
+      send({ jsonrpc: "2.0", id: requestId, result: { entries: [HISTORY_ENTRY], nextBefore: null } });
+    });
+
+    const result = await client.history({ characterId: "taki", limit: 5 });
+
+    expect(result.entries).toEqual([HISTORY_ENTRY]);
+    expect(result.nextBefore).toBeNull();
+  });
+});
+
 describe("ChatClient.connect (pairing handshake)", () => {
   it("T11 surfaces PAIRING_REQUIRED, then succeeds with a code and exposes the token", async () => {
     const client = await bootConnect(({ send, requestId, params }) => {
