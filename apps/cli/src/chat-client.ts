@@ -4,15 +4,19 @@
  * POS:    cli — the transport client; @taki/shared-typed, zod-validates inbound frames; never imports @taki/core
  */
 import { once } from "node:events";
-import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
+import { JSONRPCClient, JSONRPCErrorException, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
 import { WebSocket } from "ws";
 import {
   CHAT_METHODS,
+  CONNECT_METHOD,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
+  ConnectResultSchema,
+  ErrorCodeSchema,
   JsonRpcClientFrameSchema,
   type ChatSendParams,
+  type ConnectParams,
   type ErrorCode,
   type JsonRpcClientFrame,
 } from "@taki/shared";
@@ -23,7 +27,14 @@ export interface ChatHandlers {
   onError?: (code: ErrorCode, message: string) => void;
 }
 
+/** The connect handshake outcome: authenticated (ok, token present only right after pairing) or refused. */
+export type ConnectOutcome =
+  | { ok: true; token?: string }
+  | { ok: false; code: ErrorCode | null; message: string };
+
 export interface ChatClient {
+  /** Runs the pre-auth handshake; must resolve `ok` before chat() is usable. */
+  connect(params: ConnectParams): Promise<ConnectOutcome>;
   /** Sends one message and resolves when the turn ends (complete or error). */
   chat(params: ChatSendParams, handlers: ChatHandlers): Promise<void>;
   close(): void;
@@ -76,6 +87,26 @@ function parseClientFrame(text: string): JsonRpcClientFrame | null {
   return frame.success ? frame.data : null;
 }
 
+// The json-rpc-2.0 client rejects with a JSONRPCErrorException carrying error.code + error.data,
+// so the app-level ErrorCode (PAIRING_REQUIRED / AUTH_FAILED / ...) survives to the caller.
+async function handshake(rpc: JSONRPCServerAndClient, params: ConnectParams): Promise<ConnectOutcome> {
+  try {
+    const result = ConnectResultSchema.parse(await rpc.request(CONNECT_METHOD, params));
+    return { ok: true, token: result.token };
+  } catch (error) {
+    if (error instanceof JSONRPCErrorException) {
+      return { ok: false, code: appErrorCode(error.data), message: error.message };
+    }
+    throw error;
+  }
+}
+
+function appErrorCode(data: unknown): ErrorCode | null {
+  if (typeof data !== "object" || data === null || !("code" in data)) return null;
+  const parsed = ErrorCodeSchema.safeParse((data as { code: unknown }).code);
+  return parsed.success ? parsed.data : null;
+}
+
 export async function connectChatClient(url: string): Promise<ChatClient> {
   const ws = new WebSocket(url);
   const rpc = new JSONRPCServerAndClient(
@@ -99,6 +130,7 @@ export async function connectChatClient(url: string): Promise<ChatClient> {
   await once(ws, "open");
 
   return {
+    connect: (params) => handshake(rpc, params),
     async chat(params, handlers) {
       const done = new Promise<void>((resolve) => {
         state.current = { handlers, finish: resolve };
