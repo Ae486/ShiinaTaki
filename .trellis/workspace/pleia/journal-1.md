@@ -38,3 +38,36 @@ Grill sessions Q1-Q11 complete: product definition, layered memory registry, act
 ### Next Steps
 
 - None - task complete
+
+
+## Session 2: Issue #3 walking skeleton implemented and verified
+
+**Date**: 2026-07-09
+**Task**: Issue #3 walking skeleton implemented and verified
+**Branch**: `main`
+
+### Summary
+
+Full trellis cycle for issue #3: fable research verified AI SDK v7/json-rpc-2.0/Node24 APIs (caught deepseek-chat deprecation); opus implement built shared protocol + core WS server + CLI in strict TDD; fable check fixed 8 findings incl. a process-crash vector and wildcard-bind hole; leader verified 57 tests green + real DeepSeek streaming round-trip, multi-turn memory, and structured-error negative smoke. Codified header/index.md conventions.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `c17aae4` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
