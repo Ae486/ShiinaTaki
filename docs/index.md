@@ -26,6 +26,10 @@ Start here. Every design decision has exactly one canonical home; nothing is dup
 
 ADR conventions: sequential numbering `NNNN-slug.md`, 1-3 paragraph body, only for hard-to-reverse + surprising + real-trade-off decisions.
 
+## Development reports (`devlog/`)
+
+Per-milestone progress reports, the queued manual-verification checklist, and the stop-on-blocked problem file — maintained by the dev leader during autonomous runs, written in Simplified Chinese (it is the owner-review channel, not a design doc). Start at [`devlog/index.md`](devlog/index.md).
+
 ## Related locations outside `docs/`
 
 | Location | Content |
