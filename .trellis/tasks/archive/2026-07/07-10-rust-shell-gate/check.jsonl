@@ -1,0 +1,8 @@
+{"file": ".trellis/tasks/07-10-rust-shell-gate/prd.md", "reason": "The contract to check against: 16 rulings, TDD table, AC mapping"}
+{"file": ".trellis/tasks/07-10-rust-shell-gate/research/tauri2-shell.md", "reason": "Ground truth for Tauri patterns — verify setup spawn, dialog threading (blocking_show never on main thread / async reactor), capability permission tokens"}
+{"file": ".trellis/tasks/07-10-rust-shell-gate/research/rust-ws-protocol.md", "reason": "Ground truth for serde mirrors and frame shapes — verify deny_unknown_fields parity with zod strictObject, fixture dual-assert completeness"}
+{"file": ".trellis/tasks/07-10-rust-shell-gate/research/gate-audit-keyring.md", "reason": "Ground truth for gate policy order, scope semantics, audit line shape, keyring error mapping"}
+{"file": ".trellis/tasks/07-10-rust-shell-gate/research/rust-testing.md", "reason": "Test conventions the implementation must meet: table-driven gate cases, tempdir fixtures, no real Credential Manager/dialog/socket in units"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Headers, index.md, size caps, anti-sprawl compliance"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Security-boundary review: fail-closed gate completeness, closed unions, corruption asymmetry, Rust no-unwrap"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Verify zero content leakage: no base64/paths/payloads in logs or audit lines"}
