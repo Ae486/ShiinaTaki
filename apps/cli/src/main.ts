@@ -7,6 +7,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { DEFAULT_WS_HOST, DEFAULT_WS_PORT, ErrorCodeSchema } from "@taki/shared";
+import { parseApprovalAnswer, renderApprovalAsk } from "./approval-prompt.ts";
 import { connectChatClient, type ChatClient } from "./chat-client.ts";
 import { loadOrCreateIdentity, saveToken } from "./device-identity.ts";
 import { showRecentHistory } from "./recent-history.ts";
@@ -33,9 +34,21 @@ const baseParams = { deviceId: identity.deviceId, deviceName: DEVICE_NAME, role:
 
 const client = await connectChatClient(url);
 
+// The approval prompt reads the same stdin queue as the REPL (bound below); an ask arrives only mid-turn,
+// while the main loop is parked awaiting client.chat, so pulling a line here doesn't race the prompt loop.
+let askLine: ((query: string) => Promise<string>) | null = null;
+client.onApprovalRequest(async (request) => {
+  if (!askLine) return { approved: false, scope: "once" }; // no console bound yet -> fail-closed
+  for (;;) {
+    const parsed = parseApprovalAnswer(await askLine(renderApprovalAsk(request)));
+    if (parsed) return parsed;
+    process.stdout.write("Please answer y / s / a / d / n.\n");
+  }
+});
+
 await runRepl(
   { input: process.stdin, output: process.stdout },
-  { authenticate: (ask) => authenticate(client, ask), onLine: chatTurn },
+  { authenticate: (ask) => authenticate(client, ask), onLine: chatTurn, bindAsk: (ask) => (askLine = ask) },
 );
 
 client.close();

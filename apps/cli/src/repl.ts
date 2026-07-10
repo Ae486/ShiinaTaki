@@ -15,6 +15,8 @@ export interface ReplDeps {
   authenticate: (ask: (query: string) => Promise<string>) => Promise<void>;
   /** Handles one chat line; runRepl re-prompts after it resolves. */
   onLine: (line: string) => Promise<void>;
+  /** Receives the shared line-reader once, so mid-turn prompts (e.g. tool approval) read the same stdin queue. */
+  bindAsk?: (ask: (query: string) => Promise<string>) => void;
 }
 
 // A pull-based line queue. readline pushes into it from the moment the interface is created, so lines
@@ -67,6 +69,7 @@ export async function runRepl(io: ReplIo, deps: ReplDeps): Promise<void> {
     io.output.write(query);
     return (await queue.next()) ?? "";
   };
+  deps.bindAsk?.(ask);
 
   try {
     await deps.authenticate(ask);

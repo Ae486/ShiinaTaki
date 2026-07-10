@@ -7,8 +7,10 @@ import { once } from "node:events";
 import { JSONRPCClient, JSONRPCErrorException, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
 import { WebSocket } from "ws";
 import {
+  APPROVAL_METHODS,
   CHAT_METHODS,
   CONNECT_METHOD,
+  ApprovalRequestSchema,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
@@ -17,6 +19,8 @@ import {
   JsonRpcClientFrameSchema,
   TIMELINE_METHODS,
   TimelineHistoryResultSchema,
+  type ApprovalRequest,
+  type ApprovalScope,
   type ChatSendParams,
   type ConnectParams,
   type ErrorCode,
@@ -31,6 +35,10 @@ export interface ChatHandlers {
   onError?: (code: ErrorCode, message: string) => void;
 }
 
+/** The operator's answer to an MCP tool-approval ask (mirrors approval-prompt's ApprovalAnswer). */
+export type ApprovalDecision = { approved: boolean; scope: ApprovalScope };
+export type ApprovalRequestHandler = (request: ApprovalRequest) => Promise<ApprovalDecision>;
+
 /** The connect handshake outcome: authenticated (ok, token present only right after pairing) or refused. */
 export type ConnectOutcome =
   | { ok: true; token?: string }
@@ -43,6 +51,8 @@ export interface ChatClient {
   chat(params: ChatSendParams, handlers: ChatHandlers): Promise<void>;
   /** Fetches one newest-first page of the conversation timeline. */
   history(params: TimelineHistoryParams): Promise<TimelineHistoryResult>;
+  /** Registers the handler asked to approve/deny each MCP tool call the agent proposes mid-turn. */
+  onApprovalRequest(handler: ApprovalRequestHandler): void;
   close(): void;
 }
 
@@ -77,6 +87,27 @@ function installChatRoutes(rpc: JSONRPCServerAndClient, state: TurnState): void 
     endTurn((turn) => {
       turn.handlers.onError?.(code, message);
       turn.finish();
+    });
+  });
+}
+
+/** A mutable slot for the approval handler so the route can be registered once at construction, set later. */
+interface ApprovalSlot {
+  handler: ApprovalRequestHandler | null;
+}
+
+// approval.request arrives as a server notification mid-turn; answer with a normal approval.respond request
+// (operator role). No handler registered -> fail-closed deny-once, so the agent's turn never hangs.
+function installApprovalRoute(rpc: JSONRPCServerAndClient, slot: ApprovalSlot): void {
+  rpc.addMethod(APPROVAL_METHODS.request, async (params: unknown) => {
+    const request = ApprovalRequestSchema.parse(params);
+    const decision: ApprovalDecision = slot.handler
+      ? await slot.handler(request)
+      : { approved: false, scope: "once" };
+    await rpc.request(APPROVAL_METHODS.respond, {
+      approvalId: request.approvalId,
+      approved: decision.approved,
+      scope: decision.scope,
     });
   });
 }
@@ -122,6 +153,8 @@ export async function connectChatClient(url: string): Promise<ChatClient> {
 
   const state: TurnState = { current: null };
   installChatRoutes(rpc, state);
+  const approvalSlot: ApprovalSlot = { handler: null };
+  installApprovalRoute(rpc, approvalSlot);
 
   ws.on("message", (data) => {
     const frame = parseClientFrame(data.toString());
@@ -150,6 +183,9 @@ export async function connectChatClient(url: string): Promise<ChatClient> {
       await done;
     },
     history: async (params) => TimelineHistoryResultSchema.parse(await rpc.request(TIMELINE_METHODS.history, params)),
+    onApprovalRequest: (handler) => {
+      approvalSlot.handler = handler;
+    },
     close: () => ws.close(),
   };
 }
