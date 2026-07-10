@@ -1,0 +1,9 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend entry: pre-dev checklist + quality gates"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Migration 003 pattern; sole node:sqlite importer; repo conventions"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Auto-writes degrade to warn + retry, never crash the user turn"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Size caps, headers/index.md, forbidden patterns"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Event log lines carry ids/lengths, never memory content"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "memory/ module placement"}
+{"file": ".trellis/tasks/archive/2026-07/07-10-memory-engine/research/ai-sdk-v7-tools.md", "reason": "Verified ToolLoopAgent tools wiring + mock recipes for the silent flush turn"}
+{"file": ".trellis/tasks/archive/2026-07/07-10-memory-engine/research/frontmatter-and-budget.md", "reason": "Store entry conventions the auto-writers must follow"}
+{"file": ".trellis/tasks/archive/2026-07/07-08-walking-skeleton/research/ai-sdk-v7-api.md", "reason": "Base v7 model/mock facts incl. textStream correction addendum"}

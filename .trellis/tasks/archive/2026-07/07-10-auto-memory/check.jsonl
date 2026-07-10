@@ -1,0 +1,8 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend quality-check entry point"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Enforce size caps, headers/index.md coverage"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Verify failure policy: warn + watermark-unchanged retry, user turn never blocked"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Verify migration 003 + repo pattern"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Verify no memory content in logs"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "chat-agent/auto-memory/store consistency"}
+{"file": ".trellis/tasks/archive/2026-07/07-10-memory-engine/research/ai-sdk-v7-tools.md", "reason": "Check silent tool-turn wiring matches verified v7 behavior"}
+{"file": ".trellis/tasks/archive/2026-07/07-10-memory-engine/research/frontmatter-and-budget.md", "reason": "Check auto-written entries match store conventions"}
