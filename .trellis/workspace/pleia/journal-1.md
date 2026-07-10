@@ -137,3 +137,36 @@ Full cycle for #5: opus research verified node:sqlite RC status + Windows restar
 ### Next Steps
 
 - None - task complete
+
+
+## Session 5: Issue #6 memory engine shipped
+
+**Date**: 2026-07-10
+**Task**: Issue #6 memory engine shipped
+**Branch**: `main`
+
+### Summary
+
+Largest v1 slice: fable research (FTS5 trigram CJK proofs, v7 tools stream-parts, zero-dep frontmatter), opus implement (19-file memory module, migration 002, per-turn agent+tools), fable check (blessed 3 deviations with evidence, fixed boot-crash-on-invalid-file HIGH and intention-gate-window MEDIUM, pinned bm25 offset). 260 tests green. Live smoke: CJK promise -> tool write importance 10 -> restart recall -> decisive files-only rebuild proof (DB deleted, answer survived). Ops: second orphaned-core port collision; pre-smoke port check now standing order.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `e6ad21a` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
