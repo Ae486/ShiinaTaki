@@ -11,6 +11,9 @@ import { createConversationStore } from "./agents/conversation-store.ts";
 import { createApprovalBroker } from "./approval/approval-broker.ts";
 import { createApprovalGate } from "./approval/approval-gate.ts";
 import { createDecisionStore } from "./approval/decision-store.ts";
+import { createCapabilityBroker } from "./capabilities/capability-broker.ts";
+import { createScreenshotStore } from "./capabilities/screenshot-store.ts";
+import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
 import { loadProviderConfig } from "./config/provider-config.ts";
 import { loadServerConfig } from "./config/server-config.ts";
 import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
@@ -30,6 +33,7 @@ import { createConnectionRegistry } from "./server/connection-registry.ts";
 import { createMethodRegistry } from "./server/method-registry.ts";
 import { approvalRespondMethod } from "./server/methods/approval-respond.ts";
 import { chatSendMethod } from "./server/methods/chat-send.ts";
+import { capabilityRespondMethod } from "./server/methods/capability-respond.ts";
 import { connectMethod } from "./server/methods/connect.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
@@ -124,6 +128,23 @@ const approvalGate = createApprovalGate({
   decisions: createDecisionStore({ filePath: join(serverConfig.dataDir, "mcp-approvals.json"), logger }),
 });
 
+// Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
+// capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
+// requests immediately (fail-closed); the 90s backstop covers a node that never answers. The Shell gate authorizes.
+const capabilityBroker = createCapabilityBroker({ logger });
+connectionRegistry.onRemove((connection) => {
+  if (connection.state.status === "authenticated" && connection.state.role === "node") {
+    capabilityBroker.denyAll("node disconnected");
+  }
+});
+const screenshotTool = createScreenshotTool({
+  registry: connectionRegistry,
+  broker: capabilityBroker,
+  // The core is the single sanctioned Workspace writer (invariant 2); the Shell only returns base64 over the wire.
+  store: createScreenshotStore({ screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots") }),
+  logger,
+});
+
 const registry = createMethodRegistry();
 // The pairing code is the one sanctioned secret-ish value in a log: short-lived, single-purpose,
 // and the operator console is the trust anchor for first pairing (prd §4). Tokens are never logged.
@@ -143,8 +164,8 @@ registry.register(
       store: conversationStore,
       memory,
       autoMemory,
-      // Extra tools = the skills meta-tool + every namespaced MCP tool (memory tools are added inside the agent).
-      extraTools: { ...createLoadSkillTool(skillsLoader), ...mcpManager.tools() },
+      // Extra tools = the skills meta-tool + the screenshot capability tool + every namespaced MCP tool.
+      extraTools: { ...createLoadSkillTool(skillsLoader), ...screenshotTool, ...mcpManager.tools() },
       instructionsExtra: () => skillsLoader.renderList(),
       approval: approvalGate,
     }),
@@ -152,6 +173,7 @@ registry.register(
   ),
 );
 registry.register(approvalRespondMethod(approvalBroker));
+registry.register(capabilityRespondMethod(capabilityBroker));
 registry.register(timelineHistoryMethod(timelineRepo));
 registry.register(timelineSubscribeMethod(timelineSubscriptions));
 

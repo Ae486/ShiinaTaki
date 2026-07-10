@@ -40,7 +40,11 @@ export async function startWsServer(options: WsServerOptions): Promise<WsServer>
   const wss = new WebSocketServer({ host, port });
 
   wss.on("connection", (socket) => {
-    const connection = connectionRegistry.create();
+    // Socket-level notify: server-initiated pushes (chat/timeline events, the capability channel) reach
+    // exactly this socket. Stored on the connection so the capability broker can notify a node directly.
+    const notify: MethodContext["notify"] = (method, params) =>
+      reply(socket, createJSONRPCNotification(method, params));
+    const connection = connectionRegistry.create(notify);
     // Cleanups registered by handlers (via ctx.onClose) for THIS socket — run once on close.
     const closeListeners: Array<() => void> = [];
     log.info("client connected");
@@ -119,7 +123,8 @@ function enforcePreAuthGate({ socket, connection }: HandleArgs, frame: JsonRpcIn
 async function dispatchFrame({ socket, connection, closeListeners, registry }: HandleArgs, frame: JsonRpcRequest): Promise<void> {
   let closeRequested = false;
   const ctx: MethodContext = {
-    notify: (method, params) => reply(socket, createJSONRPCNotification(method, params)),
+    // Reuse the socket-level notify stored on the connection (same target socket).
+    notify: connection.notify ?? ((method, params) => reply(socket, createJSONRPCNotification(method, params))),
     connection,
     close: () => {
       closeRequested = true;

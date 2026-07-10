@@ -4,3 +4,4 @@
 - timeline-history.ts — timeline.history (operator-only): newest-first cursor page of the conversation timeline
 - timeline-subscribe.ts — timeline.subscribe (operator-only): register a timeline.appended sink; auto-unsubscribe on disconnect
 - approval-respond.ts — approval.respond (operator-only): resolve a pending MCP tool-approval ask; unknown id -> {accepted:false}
+- capability-respond.ts — capability.respond (node-only): settle a pending capability request; unknown id -> {accepted:false}

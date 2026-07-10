@@ -1,6 +1,6 @@
 # core/src/
 - index.ts — package public entry; empty until an external consumer exists (core runs as a process)
-- main.ts — process entry: wires config → logger → model → db/store/subscriptions → memory engine → skills + MCP + approval gate → registries → ws-server; closes MCP clients + db on SIGINT/SIGTERM
+- main.ts — process entry: wires config → logger → model → db/store/subscriptions → memory engine → skills + MCP + approval gate + capability channel → registries → ws-server; closes MCP clients + db on SIGINT/SIGTERM
 - config/ — env → validated boot config
 - logging/ — pino root logger factory
 - server/ — WS JSON-RPC server + method table + connection auth state
@@ -10,5 +10,6 @@
 - memory/ — layer-generic memory engine: files-as-truth store + FTS5 index + retriever + assembler + tools
 - mcp/ — MCP client: connect operator servers at boot, namespace + error-wrap their tools (ADR 0006 spawn carve-out)
 - approval/ — MCP tool-approval gate: ask/await broker + decision memory + the v7 toolApproval decision fn
+- capabilities/ — core→node capability channel: ask/await broker + screenshot tool + sanctioned Workspace PNG write site
 - skills/ — SKILL.md discovery + enable/disable state + lazy load_skill tool
 - testing/ — test-only mock-model factories + memory/companion fixtures + capture logger + MCP stdio fixture

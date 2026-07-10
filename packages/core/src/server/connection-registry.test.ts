@@ -30,4 +30,33 @@ describe("createConnectionRegistry", () => {
     registry.remove(connection);
     expect(registry.list()).not.toContain(connection);
   });
+
+  it("findNodeForCapability returns the first authenticated node declaring the capability", () => {
+    const registry = createConnectionRegistry();
+    const operator = registry.create();
+    registry.authenticate(operator, { deviceId: "op", role: "operator", capabilities: [] });
+    const other = registry.create();
+    registry.authenticate(other, { deviceId: "n0", role: "node", capabilities: ["clipboard"] });
+    const node = registry.create();
+    registry.authenticate(node, { deviceId: "n1", role: "node", capabilities: ["screenshot"] });
+
+    expect(registry.findNodeForCapability("screenshot")).toBe(node);
+    expect(registry.findNodeForCapability("exec")).toBeUndefined();
+  });
+
+  it("ignores an awaiting (unauthenticated) connection when routing a capability", () => {
+    const registry = createConnectionRegistry();
+    const awaiting = registry.create();
+    void awaiting;
+    expect(registry.findNodeForCapability("screenshot")).toBeUndefined();
+  });
+
+  it("notifies onRemove listeners with the removed connection", () => {
+    const registry = createConnectionRegistry();
+    const removed: unknown[] = [];
+    registry.onRemove((connection) => removed.push(connection));
+    const connection = registry.create();
+    registry.remove(connection);
+    expect(removed).toEqual([connection]);
+  });
 });
