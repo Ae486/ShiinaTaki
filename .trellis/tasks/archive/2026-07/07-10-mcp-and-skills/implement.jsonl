@@ -1,0 +1,7 @@
+{"file": ".trellis/tasks/07-10-mcp-and-skills/prd.md", "reason": "The contract: leader rulings (approval mechanism, WS leg, namespacing, skills lazy-load), file map, TDD table, AC mapping"}
+{"file": ".trellis/tasks/07-10-mcp-and-skills/research/ai-sdk-mcp-client.md", "reason": "Empirically probed @ai-sdk/mcp@2.0.10 API: createMCPClient, stdio/http transports, error surfaces, fixture recipes (stdio .mjs + node:http + in-memory transport), execute wrap shape, namespacing safety"}
+{"file": ".trellis/tasks/07-10-mcp-and-skills/research/v7-tool-approval.md", "reason": "Probed ai@7.0.17 native toolApproval async-fn flow (single stream call, execution-denied on deny), WS Option B wiring, timeout/decision-memory rulings"}
+{"file": ".trellis/tasks/07-10-mcp-and-skills/research/skills-loader.md", "reason": "SKILL.md convention, frontmatter parser reuse + KEY_RE hyphen relaxation, load_skill tool shape, skills-state.json pattern"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Module-contract headers, index.md, size caps, naming, anti-sprawl, test conventions"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Closed error unions, {ok:false} tool envelopes, fail-closed pre-auth vs fail-tolerant post-auth, app-error conventions"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "pino logs carry ids/counts never content — skill bodies and tool inputs are content"}

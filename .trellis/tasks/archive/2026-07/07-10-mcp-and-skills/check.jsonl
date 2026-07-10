@@ -1,0 +1,7 @@
+{"file": ".trellis/tasks/07-10-mcp-and-skills/prd.md", "reason": "The contract to check against: leader rulings, file map, TDD table, AC mapping"}
+{"file": ".trellis/tasks/07-10-mcp-and-skills/research/ai-sdk-mcp-client.md", "reason": "Ground truth for MCP client API claims — verify implementation matches probed behavior (error surfaces, namespacing, env allowlist, shell:false)"}
+{"file": ".trellis/tasks/07-10-mcp-and-skills/research/v7-tool-approval.md", "reason": "Ground truth for approval flow — verify native toolApproval used (not wrapper), deny path, timeout fail-closed, decision persistence"}
+{"file": ".trellis/tasks/07-10-mcp-and-skills/research/skills-loader.md", "reason": "Ground truth for skills conventions — verify KEY_RE relaxation is minimal and memory frontmatter unaffected"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Headers, index.md, size caps, anti-sprawl compliance"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Security-boundary review: fail-closed approval, closed error codes, no envelope-code reuse"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Verify zero content leakage in logs (tool inputs, skill bodies)"}
