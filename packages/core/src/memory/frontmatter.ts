@@ -9,7 +9,9 @@ export type FrontmatterValue = string | number | boolean;
 export type FrontmatterData = Record<string, FrontmatterValue>;
 
 const FENCE = "---";
-const KEY_RE = /^[a-z][a-z0-9_]*$/;
+// Hyphens are allowed so hyphenated keys (SKILL.md's `allowed-tools`) don't invalidate a whole file.
+// Memory keys are all hyphen-free lowercase, so this relaxation is a no-op for them (skills-loader research).
+const KEY_RE = /^[a-z][a-z0-9_-]*$/;
 
 export interface ParsedFrontmatter {
   data: FrontmatterData;

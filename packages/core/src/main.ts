@@ -8,6 +8,9 @@ import { join } from "node:path";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { createChatAgent } from "./agents/chat-agent.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
+import { createApprovalBroker } from "./approval/approval-broker.ts";
+import { createApprovalGate } from "./approval/approval-gate.ts";
+import { createDecisionStore } from "./approval/decision-store.ts";
 import { loadProviderConfig } from "./config/provider-config.ts";
 import { loadServerConfig } from "./config/server-config.ts";
 import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
@@ -17,16 +20,23 @@ import { createTimelineRepo } from "./db/timeline-repo.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
 import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
 import { createLogger } from "./logging/logger.ts";
+import { loadMcpConfig } from "./mcp/mcp-config.ts";
+import { createMcpManager } from "./mcp/mcp-manager.ts";
 import { createAutoMemory } from "./memory/auto-memory.ts";
 import { createEpisodicWriter } from "./memory/episodic-writer.ts";
 import { createFlushWriter } from "./memory/flush-writer.ts";
 import { createMemoryEngine } from "./memory/memory-engine.ts";
 import { createConnectionRegistry } from "./server/connection-registry.ts";
 import { createMethodRegistry } from "./server/method-registry.ts";
+import { approvalRespondMethod } from "./server/methods/approval-respond.ts";
 import { chatSendMethod } from "./server/methods/chat-send.ts";
 import { connectMethod } from "./server/methods/connect.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
+import { createLoadSkillTool } from "./skills/load-skill-tool.ts";
+import { createSkillsLoader } from "./skills/skills-loader.ts";
+import { createSkillsState } from "./skills/skills-state.ts";
+import { scanSkills } from "./skills/skill-scanner.ts";
 import { createTimelineSubscriptions } from "./server/timeline-subscriptions.ts";
 import { startWsServer } from "./server/ws-server.ts";
 
@@ -88,6 +98,32 @@ const deviceRegistry = createDeviceRegistry({
 });
 const connectionRegistry = createConnectionRegistry();
 
+// Skills (#9): discover SKILL.md folders, honor persisted enable/disable, expose the list + the load_skill tool.
+const skillsLog = logger.child({ mod: "skills" });
+const skillsScan = scanSkills(join(serverConfig.dataDir, "skills"));
+skillsLog.info({ count: skillsScan.skills.length }, "skills discovered");
+if (skillsScan.invalid.length > 0) skillsLog.warn({ invalid: skillsScan.invalid }, "invalid skills skipped");
+const skillsLoader = createSkillsLoader({
+  skills: skillsScan.skills,
+  state: createSkillsState({ filePath: join(serverConfig.dataDir, "skills-state.json"), logger }),
+});
+
+// MCP (#8): connect operator-configured servers at boot; a missing/malformed config or a failing server degrades
+// gracefully (never fatal — MCP is an extension). Their tools join the per-turn ToolSet behind the approval gate.
+const mcpLog = logger.child({ mod: "mcp" });
+const mcpManager = await createMcpManager({
+  entries: loadMcpConfig(join(serverConfig.dataDir, "mcp-servers.json"), mcpLog),
+  logger,
+});
+
+// Approval gate: MCP tool calls await the operator's decision over WS; always/never persist, session/once do not.
+const approvalBroker = createApprovalBroker({ logger });
+const approvalGate = createApprovalGate({
+  mcp: mcpManager,
+  broker: approvalBroker,
+  decisions: createDecisionStore({ filePath: join(serverConfig.dataDir, "mcp-approvals.json"), logger }),
+});
+
 const registry = createMethodRegistry();
 // The pairing code is the one sanctioned secret-ish value in a log: short-lived, single-purpose,
 // and the operator console is the trust anchor for first pairing (prd §4). Tokens are never logged.
@@ -100,7 +136,22 @@ registry.register(
       pairingLog.info({ deviceId, deviceName, code }, "pairing code issued"),
   }),
 );
-registry.register(chatSendMethod(createChatAgent({ model, store: conversationStore, memory, autoMemory }), logger));
+registry.register(
+  chatSendMethod(
+    createChatAgent({
+      model,
+      store: conversationStore,
+      memory,
+      autoMemory,
+      // Extra tools = the skills meta-tool + every namespaced MCP tool (memory tools are added inside the agent).
+      extraTools: { ...createLoadSkillTool(skillsLoader), ...mcpManager.tools() },
+      instructionsExtra: () => skillsLoader.renderList(),
+      approval: approvalGate,
+    }),
+    logger,
+  ),
+);
+registry.register(approvalRespondMethod(approvalBroker));
 registry.register(timelineHistoryMethod(timelineRepo));
 registry.register(timelineSubscribeMethod(timelineSubscriptions));
 
@@ -114,7 +165,8 @@ const server = await startWsServer({
 
 function shutdown(signal: string): void {
   logger.info({ signal }, "shutting down");
-  void server.close().then(() => {
+  void server.close().then(async () => {
+    await mcpManager.close(); // close every MCP client (kills stdio children / aborts http) before exit
     db.close(); // release the sqlite file handle (and checkpoint the WAL) before exit
     process.exit(0);
   });

@@ -75,4 +75,10 @@ describe("frontmatter subset (T2)", () => {
   it("rejects an invalid key", () => {
     expect(() => parseFrontmatter('---\nBad-Key: "a"\n---\n')).toThrow(/invalid key/);
   });
+
+  it("accepts a hyphenated key (SKILL.md allowed-tools relaxation, T18)", () => {
+    const { data } = parseFrontmatter('---\nname: my-skill\nallowed-tools: "Read, Grep"\n---\nbody');
+    expect(data.name).toBe("my-skill");
+    expect(data["allowed-tools"]).toBe("Read, Grep");
+  });
 });

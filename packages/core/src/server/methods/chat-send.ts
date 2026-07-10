@@ -47,7 +47,8 @@ interface PumpArgs {
 async function pump({ chatAgent, log, params, ctx, messageId }: PumpArgs): Promise<void> {
   const { characterId } = params;
   try {
-    for await (const delta of chatAgent.stream(params)) {
+    // The turn handle lets MCP tool approvals ride ctx.notify (approval.request) and deny-on-disconnect via ctx.onClose.
+    for await (const delta of chatAgent.stream(params, { notify: ctx.notify, onClose: ctx.onClose })) {
       ctx.notify(CHAT_METHODS.delta, { messageId, characterId, delta } satisfies ChatDelta);
     }
     ctx.notify(CHAT_METHODS.complete, { messageId, characterId } satisfies ChatComplete);

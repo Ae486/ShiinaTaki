@@ -1,0 +1,74 @@
+/**
+ * INPUT:  the mcp-servers.json path under the app data root (TAKI_DATA_DIR) + a logger
+ * OUTPUT: McpServerEntry types + loadMcpConfig(filePath, log) -> McpServerEntry[]
+ * POS:    core/mcp — operator-owned MCP server config; NEVER agent-reachable (AC #8-2). Missing/malformed degrades to []
+ */
+import { readFileSync } from "node:fs";
+import { z } from "zod";
+import type { Logger } from "../logging/logger.ts";
+
+// stdio: an operator-configured child process (ADR 0006 spawn happens inside @ai-sdk/mcp, never our code).
+// Windows note: `command` must be a real exe (`node`) or `cmd /c npx ...` — the transport spawns with shell:false.
+const StdioServerConfigSchema = z.object({
+  command: z.string().min(1),
+  args: z.array(z.string()).optional(),
+  env: z.record(z.string(), z.string()).optional(),
+  cwd: z.string().optional(),
+});
+export type StdioServerConfig = z.infer<typeof StdioServerConfigSchema>;
+
+// http: a Streamable HTTP MCP endpoint.
+const HttpServerConfigSchema = z.object({
+  url: z.url(),
+  headers: z.record(z.string(), z.string()).optional(),
+});
+export type HttpServerConfig = z.infer<typeof HttpServerConfigSchema>;
+
+export const McpServerConfigSchema = z.union([StdioServerConfigSchema, HttpServerConfigSchema]);
+export type McpServerConfig = z.infer<typeof McpServerConfigSchema>;
+
+const McpServersFileSchema = z.record(z.string().min(1), McpServerConfigSchema);
+
+export interface McpServerEntry {
+  key: string;
+  config: McpServerConfig;
+}
+
+export function isStdioConfig(config: McpServerConfig): config is StdioServerConfig {
+  return "command" in config;
+}
+
+/**
+ * MCP is an extension surface, not auth state: a missing file is zero servers (normal boot), and a malformed
+ * file is a boot WARNING + zero servers — never a crash (contrast devices.json, which stays fatal). This keeps
+ * the companion alive when an operator hand-edits the config wrong.
+ */
+export function loadMcpConfig(filePath: string, log: Logger): McpServerEntry[] {
+  let raw: string;
+  try {
+    raw = readFileSync(filePath, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+    log.warn({ filePath, err: readable(error) }, "mcp config unreadable; starting with no MCP servers");
+    return [];
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    log.warn({ filePath }, "mcp config is not valid JSON; starting with no MCP servers");
+    return [];
+  }
+
+  const result = McpServersFileSchema.safeParse(parsed);
+  if (!result.success) {
+    log.warn({ filePath, issues: result.error.issues.length }, "mcp config is malformed; starting with no MCP servers");
+    return [];
+  }
+  return Object.entries(result.data).map(([key, config]) => ({ key, config }));
+}
+
+function readable(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
