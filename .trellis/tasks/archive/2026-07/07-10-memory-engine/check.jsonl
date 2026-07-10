@@ -1,0 +1,10 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend quality-check entry point"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Enforce size caps, headers/index.md coverage, forbidden patterns"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Verify tool error shape {ok:false,...}, no throws killing the loop, no empty catch"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Verify sole node:sqlite importer, migration 002 pattern, rebuildable index"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "Verify memory/ placement and thin-tool rule"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Verify no memory content in logs"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "chat-agent/tools/store/indexer consistency"}
+{"file": ".trellis/tasks/07-10-memory-engine/research/fts5-trigram-cjk.md", "reason": "Check FTS5 usage matches verified trigram/CJK/rebuild facts"}
+{"file": ".trellis/tasks/07-10-memory-engine/research/ai-sdk-v7-tools.md", "reason": "Check tool wiring + stream-part handling matches verified v7 behavior"}
+{"file": ".trellis/tasks/07-10-memory-engine/research/frontmatter-and-budget.md", "reason": "Check frontmatter subset, path containment, estimator match research"}

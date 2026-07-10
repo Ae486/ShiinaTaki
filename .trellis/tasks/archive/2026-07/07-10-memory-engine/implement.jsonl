@@ -1,0 +1,11 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend entry: pre-dev checklist + quality gates"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Binding: sole node:sqlite importer, TS-constant migrations, FTS5 index is rebuildable from files"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "memory/ module layout; db/ owns SQLite; tools are thin delegates"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Tool execute returns {ok:false, code, message} readable results — never throws; fatal-fast boot"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Size caps (split assembler/indexer early), headers/index.md, forbidden patterns"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Never log memory content — ids/layers/lengths only"}
+{"file": ".trellis/tasks/07-10-memory-engine/research/fts5-trigram-cjk.md", "reason": "Verified FTS5 trigram availability, CJK behavior, rebuild pattern, migration transactionality"}
+{"file": ".trellis/tasks/07-10-memory-engine/research/ai-sdk-v7-tools.md", "reason": "Verified v7 tool() + ToolLoopAgent tools wiring, stream parts during tool calls, per-turn instructions, mock recipe"}
+{"file": ".trellis/tasks/07-10-memory-engine/research/frontmatter-and-budget.md", "reason": "Zero-dep frontmatter subset, slug/path-containment rules, token estimator"}
+{"file": ".trellis/tasks/archive/2026-07/07-08-walking-skeleton/research/ai-sdk-v7-api.md", "reason": "Base v7 API facts incl. textStream-swallows-errors correction addendum"}
+{"file": ".trellis/tasks/archive/2026-07/07-10-timeline-persistence/research/node-sqlite-api.md", "reason": "node:sqlite verified API basics (DatabaseSync, params, transactions)"}
