@@ -102,6 +102,30 @@ describe("createTimelineRepo.latestAscending", () => {
   });
 });
 
+describe("createTimelineRepo.latestSeq + rangeAscending (auto-memory watermark math)", () => {
+  it("latestSeq returns the highest seq, and 0 for an empty character", () => {
+    expect(repo.latestSeq("ghost")).toBe(0);
+    for (let i = 1; i <= 3; i += 1) repo.append({ characterId: "taki", role: "user", content: `m${i}` });
+    expect(repo.latestSeq("taki")).toBe(3);
+    expect(repo.latestSeq("ghost")).toBe(0);
+  });
+
+  it("rangeAscending returns the half-open (after, through] window ascending", () => {
+    for (let i = 1; i <= 6; i += 1) repo.append({ characterId: "taki", role: "user", content: `m${i}` });
+
+    const seg = repo.rangeAscending("taki", 2, 5);
+    expect(seg.map((e) => e.content)).toEqual(["m3", "m4", "m5"]); // excludes seq 2, includes seq 5
+  });
+
+  it("rangeAscending excludes other characters and yields empty for an out-of-band window", () => {
+    for (let i = 1; i <= 3; i += 1) repo.append({ characterId: "taki", role: "user", content: `t${i}` });
+    repo.append({ characterId: "yui", role: "user", content: "y1" });
+
+    expect(repo.rangeAscending("taki", 0, 3).map((e) => e.content)).toEqual(["t1", "t2", "t3"]);
+    expect(repo.rangeAscending("taki", 3, 3)).toEqual([]); // empty half-open range
+  });
+});
+
 describe("createTimelineRepo per-character isolation", () => {
   it("keeps each character's timeline separate", () => {
     repo.append({ characterId: "taki", role: "user", content: "for taki" });

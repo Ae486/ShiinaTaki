@@ -13,4 +13,8 @@
 - pinned-block.ts — pinned-block policy: non-truncatable layers survive budget; oldest truncatable drop first
 - assembler.ts — deterministic per-turn context assembly with per-section budgets
 - memory-tools.ts — the first agent tools (memory_write/search/archive); thin, characterId-bound, never throw
-- memory-engine.ts — the memory subsystem composition root (store+repo+indexer+retriever+assembler+tools)
+- memory-engine.ts — the memory subsystem composition root (store+repo+indexer+retriever+assembler+tools; exposes writeEntry)
+- render-transcript.ts — shared helper: a timeline segment -> "role: text" transcript for the auto-write prompts
+- episodic-writer.ts — auto-write path 2: segment -> 1-3 episode entries via a non-streaming generate + the store API
+- flush-writer.ts — auto-write path 3: pre-compaction flush as one SILENT tool-enabled turn (output discarded)
+- auto-memory.ts — auto-write orchestrator: watermarks + per-character mutex + failure policy; onTurnCompleted trigger

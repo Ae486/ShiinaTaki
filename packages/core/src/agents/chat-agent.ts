@@ -1,10 +1,11 @@
 /**
- * INPUT:  ChatSendParams + an injected LanguageModel (AI SDK v7), ConversationStore, and MemoryEngine
- * OUTPUT: createChatAgent({model, store, memory}) -> ChatAgent whose stream() yields text deltas; errors propagate
- * POS:    core/agents — the streaming chat loop; per turn: assemble memory context + bind tools, persist each turn
+ * INPUT:  ChatSendParams + an injected LanguageModel (AI SDK v7), ConversationStore, MemoryEngine, optional AutoMemory
+ * OUTPUT: createChatAgent({model, store, memory, autoMemory?}) -> ChatAgent whose stream() yields text deltas; errors propagate
+ * POS:    core/agents — the streaming chat loop; per turn: assemble memory context + bind tools, persist, fire auto-writes detached
  */
 import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage } from "ai";
 import type { ChatSendParams } from "@taki/shared";
+import type { AutoMemory } from "../memory/auto-memory.ts";
 import type { MemoryEngine } from "../memory/memory-engine.ts";
 import type { ConversationStore } from "./conversation-store.ts";
 
@@ -17,6 +18,8 @@ export interface ChatAgentDeps {
   model: LanguageModel;
   store: ConversationStore;
   memory: MemoryEngine;
+  /** Optional auto-write orchestrator; when present, fired detached after each turn (existing tests omit it). */
+  autoMemory?: AutoMemory;
 }
 
 // Memory tools take a few steps at most; cap the loop low (a runaway tool loop just ends the turn cleanly).
@@ -53,6 +56,8 @@ export function createChatAgent(deps: ChatAgentDeps): ChatAgent {
         }
       }
       store.appendAssistant(characterId, assistantText);
+      // Detached, never awaited: the auto-write pass must not add latency to the user-facing turn (prd §3 failure policy).
+      void deps.autoMemory?.onTurnCompleted(characterId);
     },
   };
 }

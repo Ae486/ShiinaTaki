@@ -1,6 +1,7 @@
 /**
  * INPUT:  scripted text deltas, or an error to raise on the model call
- * OUTPUT: streamingMockModel(deltas) / failingMockModel(error) -> MockLanguageModelV4
+ * OUTPUT: streamingMockModel / failingMockModel / midStreamErrorModel / scriptedModel (stream) +
+ *         generatingModel / failingGenerateModel / scriptedGenerateModel (non-streaming generate) -> MockLanguageModelV4
  * POS:    core/testing — test-only factories (research/ai-sdk-v7-api.md §3); never imported by production code
  */
 import { simulateReadableStream } from "ai";
@@ -92,4 +93,50 @@ function stepToResult(step: ScriptStep) {
       ],
     }),
   };
+}
+
+// --- Non-streaming generate path (ai@7 agent.generate -> doGenerate). GenerateTextResult.text = final-step text. ---
+
+/** A mock whose single generate() returns the given text (episodic summarizer: text is a JSON summaries payload). */
+export function generatingModel(text: string): MockLanguageModelV4 {
+  return new MockLanguageModelV4({
+    doGenerate: async () => generateResult([{ type: "text", text }], "stop"),
+  });
+}
+
+/** A mock whose generate() call rejects — simulates a provider failure on the non-streaming path. */
+export function failingGenerateModel(error: unknown): MockLanguageModelV4 {
+  return new MockLanguageModelV4({
+    doGenerate: async () => {
+      throw error;
+    },
+  });
+}
+
+/**
+ * A scripted multi-step model for tool-loop generate() tests (flush): `doGenerate` is an ARRAY, one result per LLM
+ * call. A tool step ends with finishReason `tool-calls` (continues the loop); its `input` is a JSON STRING.
+ * Total generate calls across the run must not exceed steps.length.
+ */
+export function scriptedGenerateModel(steps: ScriptStep[]): MockLanguageModelV4 {
+  return new MockLanguageModelV4({ doGenerate: steps.map(stepToGenerateResult) });
+}
+
+function stepToGenerateResult(step: ScriptStep) {
+  if (step.kind === "tool") {
+    return generateResult(
+      [{ type: "tool-call", toolCallId: step.toolCallId, toolName: step.toolName, input: JSON.stringify(step.input) }],
+      "tool-calls",
+    );
+  }
+  return generateResult([{ type: "text", text: step.deltas.join("") }], "stop");
+}
+
+function generateResult(content: unknown, unified: "stop" | "tool-calls") {
+  return {
+    content,
+    finishReason: { unified, raw: undefined },
+    usage: USAGE,
+    warnings: [],
+  } as Awaited<ReturnType<MockLanguageModelV4["doGenerate"]>>;
 }

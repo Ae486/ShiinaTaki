@@ -101,4 +101,29 @@ describe("createChatAgent", () => {
     // The user turn is recorded; the failed assistant turn must NOT be persisted (no partial row).
     expect(f.conversation.history("taki").map((m) => m.role)).toEqual(["user"]);
   });
+
+  it("fires the auto-memory trigger after the turn, without blocking the turn's resolution (T9)", async () => {
+    const f = fresh();
+    let released!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      released = resolve;
+    });
+    const order: string[] = [];
+    // The trigger's work only completes when we release the gate — proving the turn resolves independently.
+    const autoMemory = {
+      onTurnCompleted(characterId: string): Promise<void> {
+        order.push(`trigger:${characterId}`);
+        return gate.then(() => void order.push("auto-write-done"));
+      },
+    };
+    const agent = createChatAgent({ model: streamingMockModel(["hi"]), store: f.conversation, memory: f.memory, autoMemory });
+
+    await drain(agent.stream({ characterId: "taki", message: "hello" }));
+
+    // Turn is done and the trigger was invoked, but the (gated) auto-write has NOT finished yet.
+    expect(order).toEqual(["trigger:taki"]);
+    released();
+    await gate;
+    expect(order).toEqual(["trigger:taki", "auto-write-done"]);
+  });
 });

@@ -1,6 +1,6 @@
 /**
  * INPUT:  the Database wrapper + a memory root dir (under the Workspace)
- * OUTPUT: createMemoryEngine({db, memoryRoot}) -> { reconcile, assemble, createTools }
+ * OUTPUT: createMemoryEngine({db, memoryRoot}) -> { reconcile, assemble, createTools, writeEntry }
  * POS:    core/memory — the memory subsystem's composition root: wires store+repo+indexer+retriever+assembler+tools
  */
 import type { Database } from "../db/sqlite.ts";
@@ -22,6 +22,14 @@ export interface MemoryEngine {
   assemble(params: AssembleParams): string;
   /** characterId-bound memory tools for one chat stream. */
   createTools(characterId: string): ToolSet;
+  /** Direct file-first-then-index write (auto-memory episodic path; tools cover the LLM-invoked path). */
+  writeEntry(input: {
+    characterId: string;
+    type: string;
+    content: string;
+    importance: number;
+    disclosure?: string;
+  }): { id: string; layer: string };
 }
 
 export function createMemoryEngine(deps: { db: Database; memoryRoot: string }): MemoryEngine {
@@ -52,5 +60,6 @@ export function createMemoryEngine(deps: { db: Database; memoryRoot: string }): 
     reconcile: () => reconcile({ repo, store }),
     assemble: (params) => assembler.assemble(params),
     createTools: (characterId) => createMemoryTools(ops, characterId),
+    writeEntry: (input) => ops.writeEntry(input),
   };
 }

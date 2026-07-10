@@ -8,7 +8,8 @@ import type { TimelineEntry, TimelineRole } from "@taki/shared";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 
 // The model receives the latest REPLAY_WINDOW messages; compaction/token-budgeting is a later concern (ADR 0005).
-const REPLAY_WINDOW = 200;
+// Exported as the single source: the pre-compaction flush (#7) treats this boundary AS the context edge.
+export const REPLAY_WINDOW = 200;
 
 export interface ConversationStore {
   appendUser(characterId: string, text: string): void;

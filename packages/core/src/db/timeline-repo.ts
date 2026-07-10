@@ -1,6 +1,6 @@
 /**
  * INPUT:  the Database wrapper + append/paging calls (characterId-scoped)
- * OUTPUT: createTimelineRepo(db) -> { append, pageBefore, latestAscending } over timeline_messages
+ * OUTPUT: createTimelineRepo(db) -> { append, pageBefore, latestAscending, latestSeq, rangeAscending } over timeline_messages
  * POS:    core/db — the timeline aggregate's typed SQL; zod-parses rows at the boundary; no node:sqlite import
  */
 import { randomUUID } from "node:crypto";
@@ -26,6 +26,10 @@ export interface TimelineRepo {
   pageBefore(query: TimelineHistoryParams): TimelineHistoryResult;
   /** The latest `limit` entries in ascending order (the model replay window). */
   latestAscending(characterId: string, limit: number): TimelineEntry[];
+  /** The highest seq for the character, or 0 when it has no messages (auto-memory watermark math). */
+  latestSeq(characterId: string): number;
+  /** Entries in the half-open seq range (after, through], ascending (auto-memory segment fetch). */
+  rangeAscending(characterId: string, after: number, through: number): TimelineEntry[];
 }
 
 const INSERT_SQL =
@@ -41,10 +45,20 @@ const LATEST_SQL =
   "SELECT seq, id, character_id, role, content, created_at FROM timeline_messages " +
   "WHERE character_id = :characterId ORDER BY seq DESC LIMIT :limit";
 
+const MAX_SEQ_SQL =
+  "SELECT COALESCE(MAX(seq), 0) AS seq FROM timeline_messages WHERE character_id = :characterId";
+
+// (after, through]: the segment about to leave the window (flush) or since the last summary (episodic).
+const RANGE_SQL =
+  "SELECT seq, id, character_id, role, content, created_at FROM timeline_messages " +
+  "WHERE character_id = :characterId AND seq > :after AND seq <= :through ORDER BY seq ASC";
+
 export function createTimelineRepo(db: Database): TimelineRepo {
   const insert = db.prepare(INSERT_SQL);
   const page = db.prepare(PAGE_SQL);
   const latest = db.prepare(LATEST_SQL);
+  const maxSeq = db.prepare(MAX_SEQ_SQL);
+  const range = db.prepare(RANGE_SQL);
 
   return {
     append(input) {
@@ -74,6 +88,14 @@ export function createTimelineRepo(db: Database): TimelineRepo {
 
     latestAscending(characterId, limit) {
       return latest.all({ characterId, limit }).map(toEntry).reverse();
+    },
+
+    latestSeq(characterId) {
+      return Number(maxSeq.get({ characterId })?.seq ?? 0);
+    },
+
+    rangeAscending(characterId, after, through) {
+      return range.all({ characterId, after, through }).map(toEntry);
     },
   };
 }

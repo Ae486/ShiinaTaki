@@ -10,12 +10,16 @@ import { createChatAgent } from "./agents/chat-agent.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
 import { loadProviderConfig } from "./config/provider-config.ts";
 import { loadServerConfig } from "./config/server-config.ts";
+import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
 import { MIGRATIONS } from "./db/migrations/index-list.ts";
 import { openDatabase } from "./db/sqlite.ts";
 import { createTimelineRepo } from "./db/timeline-repo.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
 import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
 import { createLogger } from "./logging/logger.ts";
+import { createAutoMemory } from "./memory/auto-memory.ts";
+import { createEpisodicWriter } from "./memory/episodic-writer.ts";
+import { createFlushWriter } from "./memory/flush-writer.ts";
 import { createMemoryEngine } from "./memory/memory-engine.ts";
 import { createConnectionRegistry } from "./server/connection-registry.ts";
 import { createMethodRegistry } from "./server/method-registry.ts";
@@ -66,6 +70,19 @@ memoryLog.info(reconciled, "memory index reconciled from workspace");
 if (reconciled.invalid.length > 0)
   memoryLog.warn({ invalid: reconciled.invalid }, "invalid memory files skipped (fix or remove them)");
 
+// Automatic memory writes (#7): episodic summaries + pre-compaction flush, fired detached after each chat turn.
+// Both writers share the chat model; all writes ride the memory engine's store API (never raw fs).
+const autoMemory = createAutoMemory({
+  timeline: timelineRepo,
+  autoState: createMemoryAutoRepo(db),
+  episodic: createEpisodicWriter({
+    model,
+    writeEpisode: (input) => memory.writeEntry({ ...input, type: "episodes" }),
+  }),
+  flush: createFlushWriter({ model, createTools: (id) => memory.createTools(id) }),
+  logger: logger.child({ mod: "memory-auto" }),
+});
+
 const deviceRegistry = createDeviceRegistry({
   store: createPairedDeviceStore(join(serverConfig.dataDir, "devices.json")),
 });
@@ -83,7 +100,7 @@ registry.register(
       pairingLog.info({ deviceId, deviceName, code }, "pairing code issued"),
   }),
 );
-registry.register(chatSendMethod(createChatAgent({ model, store: conversationStore, memory }), logger));
+registry.register(chatSendMethod(createChatAgent({ model, store: conversationStore, memory, autoMemory }), logger));
 registry.register(timelineHistoryMethod(timelineRepo));
 registry.register(timelineSubscribeMethod(timelineSubscriptions));
 
