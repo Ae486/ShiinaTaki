@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 6
+- **Total Sessions**: 7
 - **Last Active**: 2026-07-10
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~205 | Active |
+| `journal-1.md` | ~236 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 7 | 2026-07-10 | M2 finale: MCP client + approval gate + skills loader (#8+#9) | - | `main` |
 | 6 | 2026-07-10 | Issue #7 auto memory writes shipped | `3438f74` | `main` |
 | 5 | 2026-07-10 | Issue #6 memory engine shipped | `e6ad21a` | `main` |
 | 4 | 2026-07-10 | Issue #5 timeline persistence; M1 milestone complete | `c8bd681` | `main` |

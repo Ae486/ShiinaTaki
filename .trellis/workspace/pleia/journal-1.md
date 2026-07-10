@@ -203,3 +203,34 @@ No-research slice on #6 engine: opus implement (migration 003 watermarks, episod
 ### Next Steps
 
 - None - task complete
+
+
+## Session 7: M2 finale: MCP client + approval gate + skills loader (#8+#9)
+
+**Date**: 2026-07-10
+**Task**: M2 finale: MCP client + approval gate + skills loader (#8+#9)
+**Branch**: `main`
+
+### Summary
+
+Merged issues #8+#9 shipped and closed; M2 COMPLETE pending push. Fable research probed @ai-sdk/mcp@2.0.10 and v7 native toolApproval (async fn, one stream call). Opus implement: 340 tests green, 4 blessed deviations (approval-gate module = M3 Permission Gate seam; mcp-connect = single-file ADR 0006 carve-out). Fable check fixed HIGH latent fail-open (no-TurnContext approval bypass -> deny-by-default, pinned) + MEDIUM NUL-byte decision key -> JSON tuple. Leader live smoke: 4-server config (stdio x2 + HTTP + dead-degraded), approval prompt with input display, always persisted across restart, once not persisted, per-server isolation held, deny-once -> graceful recovery -> re-ask, skill lazy-load followed exactly. Lesson: smoke false alarm — model picked the already-approved same-named tool; multi-server smokes need distinguishable replies. Specs: state-file corruption asymmetry + fail-closed approval-gate conventions. 344 tests total. Next: milestone push + CI + m2.md deep report.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+(No commits - planning session)
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
