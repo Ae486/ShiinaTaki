@@ -92,4 +92,22 @@ export type {
   ApprovalScope,
 } from "./approval-schema.ts";
 
+export {
+  CAPABILITY_METHODS,
+  CapabilityErrorCodeSchema,
+  CapabilityErrorSchema,
+  CapabilityOutputSchema,
+  CapabilityRequestSchema,
+  CapabilityRespondParamsSchema,
+  CapabilityRespondResultSchema,
+} from "./capability-schema.ts";
+export type {
+  CapabilityError,
+  CapabilityErrorCode,
+  CapabilityOutput,
+  CapabilityRequest,
+  CapabilityRespondParams,
+  CapabilityRespondResult,
+} from "./capability-schema.ts";
+
 export { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "./ws-defaults.ts";

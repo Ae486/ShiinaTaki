@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "error": {
+    "code": -32000,
+    "message": "unknown domain code",
+    "data": { "code": "NOT_A_REAL_CODE" }
+  }
+}

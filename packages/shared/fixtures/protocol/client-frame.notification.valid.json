@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "2.0",
+  "method": "capability.request",
+  "params": {
+    "requestId": "22222222-2222-4222-8222-222222222222",
+    "capability": "screenshot",
+    "input": {}
+  }
+}

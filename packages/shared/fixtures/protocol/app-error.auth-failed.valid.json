@@ -1,0 +1,9 @@
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "error": {
+    "code": -32000,
+    "message": "authentication failed",
+    "data": { "code": "AUTH_FAILED" }
+  }
+}
