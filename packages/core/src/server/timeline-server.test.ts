@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -21,7 +21,9 @@ import { createTimelineRepo, type TimelineRepo } from "../db/timeline-repo.ts";
 import { createDeviceRegistry } from "../devices/device-registry.ts";
 import { createPairedDeviceStore } from "../devices/paired-device-store.ts";
 import { createLogger } from "../logging/logger.ts";
+import { createMemoryEngine } from "../memory/memory-engine.ts";
 import { streamingMockModel } from "../testing/mock-language-model.ts";
+import { rmTempDir } from "../testing/rm-temp.ts";
 import { appCode, notification, openClient, sendConnect, type TestClient } from "../testing/ws-test-client.ts";
 import { createConnectionRegistry } from "./connection-registry.ts";
 import { createMethodRegistry } from "./method-registry.ts";
@@ -55,7 +57,7 @@ afterEach(async () => {
   clients.length = 0;
   await Promise.all(harnesses.map((harness) => harness.close()));
   harnesses.length = 0;
-  for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
+  for (const dir of dirs) rmTempDir(dir);
   dirs.length = 0;
 });
 
@@ -81,7 +83,9 @@ async function bootServer(options: BootOptions): Promise<ServerHarness> {
   const codes: PairingCodeInfo[] = [];
   const registry = createMethodRegistry();
   registry.register(connectMethod({ deviceRegistry, connectionRegistry, onPairingCode: (info) => codes.push(info) }));
-  registry.register(chatSendMethod(createChatAgent({ model: options.model, store }), logger));
+  const memory = createMemoryEngine({ db, memoryRoot: join(options.dataDir, "workspace", "memory") });
+  memory.reconcile();
+  registry.register(chatSendMethod(createChatAgent({ model: options.model, store, memory }), logger));
   registry.register(timelineHistoryMethod(repo));
   registry.register(timelineSubscribeMethod(subscriptions));
   const server = await startWsServer({ host: "127.0.0.1", port: 0, registry, connectionRegistry, logger });
@@ -233,10 +237,16 @@ describe("timeline restart integration (AC-2)", () => {
       { role: "user", content: "remember apples" },
     ]);
 
-    // A fresh turn's model call must include the replayed prior history (ascending), then the new message.
+    // A fresh turn's model call must include the replayed prior history (ascending), then the new message,
+    // behind the assembled system prompt (memory context).
     await runChatTurn(c2, "what did I say?");
     const prompt = model2.doStreamCalls[0]?.prompt ?? [];
-    expect(prompt.map((message) => message.role)).toEqual(["user", "assistant", "user"]);
+    expect(prompt[0]?.role).toBe("system");
+    expect(prompt.filter((message) => message.role !== "system").map((message) => message.role)).toEqual([
+      "user",
+      "assistant",
+      "user",
+    ]);
     const serialized = JSON.stringify(prompt);
     expect(serialized).toContain("remember apples");
     expect(serialized).toContain("Nice to meet you");

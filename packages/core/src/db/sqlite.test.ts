@@ -1,9 +1,10 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { MIGRATIONS } from "./migrations/index-list.ts";
 import { openDatabase, toSafeInteger, type Database } from "./sqlite.ts";
+import { rmTempDir } from "../testing/rm-temp.ts";
 
 const dbs: Database[] = [];
 const dirs: string[] = [];
@@ -11,7 +12,7 @@ const dirs: string[] = [];
 afterEach(() => {
   for (const db of dbs) db.close(); // idempotent close, safe even if the test closed it already
   dbs.length = 0;
-  for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
+  for (const dir of dirs) rmTempDir(dir);
   dirs.length = 0;
 });
 
@@ -30,7 +31,7 @@ describe("openDatabase", () => {
     const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
     dbs.push(db);
     db.exec(INSERT_ONE); // table exists only if migration 001 ran
-    expect(db.prepare("SELECT count(*) AS n FROM migrations").get()?.n).toBe(1);
+    expect(db.prepare("SELECT count(*) AS n FROM migrations").get()?.n).toBe(MIGRATIONS.length);
   });
 
   it("opens a file db in WAL mode with foreign keys on", () => {
@@ -45,14 +46,14 @@ describe("openDatabase", () => {
 
     const first = openDatabase({ path: file, migrations: MIGRATIONS });
     first.exec(INSERT_ONE);
-    expect(first.prepare("SELECT count(*) AS n FROM migrations").get()?.n).toBe(1);
+    expect(first.prepare("SELECT count(*) AS n FROM migrations").get()?.n).toBe(MIGRATIONS.length);
     first.close(); // releases the OS file handle
 
     const second = openDatabase({ path: file, migrations: MIGRATIONS });
     dbs.push(second);
     expect(second.prepare("SELECT content FROM timeline_messages").get()?.content).toBe("hi");
-    // still exactly one migration row: version 1 was tracked, not re-applied on reopen
-    expect(second.prepare("SELECT count(*) AS n FROM migrations").get()?.n).toBe(1);
+    // still exactly the same migration rows: every version was tracked, not re-applied on reopen
+    expect(second.prepare("SELECT count(*) AS n FROM migrations").get()?.n).toBe(MIGRATIONS.length);
   });
 
   it("throws a readable fatal error when a migration is bad SQL", () => {

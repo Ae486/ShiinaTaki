@@ -1,0 +1,16 @@
+# core/memory/
+- layer-registry.ts — the layer taxonomy as DATA (MemoryLayerDefinitionSchema + V1_MEMORY_LAYERS + writable-layer selectors)
+- frontmatter.ts — zero-dep YAML-frontmatter SUBSET parse/serialize (flat scalars only)
+- entry.ts — memory-entry domain codec: MemoryEntrySchema + frontmatter <-> entry (file text codec)
+- naming.ts — slugify + IdSchema + assertSafeSegment + resolveWithin (path containment); no fs
+- store.ts — THE sanctioned node:fs site (Workspace-scoped): entry files, atomic write, id allocation, archive, list (invalid files reported, not thrown)
+- indexer.ts — index sync: indexEntry (write path) + reconcile (rebuild the derived index from files; reports invalid files)
+- fts5-query.ts — FTS5 query hygiene: trigram-decompose + quote (MATCH) or escaped LIKE fallback
+- disclosure-gate.ts — the shared "when to recall" keyword gate (retriever + intention gate use one definition)
+- retriever.ts — the Retriever seam (interface + RankedEntry; v2 hybrid-vector plan documented)
+- fts5-retriever.ts — v1 Retriever impl: bm25/LIKE recall + layer + disclosure post-filters
+- token-estimator.ts — soft token budgeting: estimateTokens (CJK-aware) + fitToBudget
+- pinned-block.ts — pinned-block policy: non-truncatable layers survive budget; oldest truncatable drop first
+- assembler.ts — deterministic per-turn context assembly with per-section budgets
+- memory-tools.ts — the first agent tools (memory_write/search/archive); thin, characterId-bound, never throw
+- memory-engine.ts — the memory subsystem composition root (store+repo+indexer+retriever+assembler+tools)

@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -20,7 +20,9 @@ import { createChatAgent } from "../agents/chat-agent.ts";
 import { createDeviceRegistry } from "../devices/device-registry.ts";
 import { createPairedDeviceStore } from "../devices/paired-device-store.ts";
 import { createLogger } from "../logging/logger.ts";
+import { createMemoryEngine } from "../memory/memory-engine.ts";
 import { createMemoryStore } from "../testing/memory-store.ts";
+import { rmTempDir } from "../testing/rm-temp.ts";
 import { failingMockModel, streamingMockModel } from "../testing/mock-language-model.ts";
 import { appCode, notification, openClient, sendConnect, type TestClient } from "../testing/ws-test-client.ts";
 import { createConnectionRegistry, type ConnectionRegistry } from "./connection-registry.ts";
@@ -48,7 +50,7 @@ afterEach(async () => {
   clients.length = 0;
   await Promise.all(servers.map((server) => server.close()));
   servers.length = 0;
-  for (const dir of dirs) rmSync(dir, { recursive: true, force: true });
+  for (const dir of dirs) rmTempDir(dir);
   dirs.length = 0;
 });
 
@@ -60,7 +62,9 @@ async function boot(model: LanguageModel): Promise<Harness> {
   const codes: PairingCodeInfo[] = [];
   const registry = createMethodRegistry();
   registry.register(connectMethod({ deviceRegistry, connectionRegistry, onPairingCode: (info) => codes.push(info) }));
-  registry.register(chatSendMethod(createChatAgent({ model, store: createMemoryStore().store }), logger));
+  const memoryStore = createMemoryStore();
+  const memory = createMemoryEngine({ db: memoryStore.db, memoryRoot: join(dir, "memory") });
+  registry.register(chatSendMethod(createChatAgent({ model, store: memoryStore.store, memory }), logger));
   const server = await startWsServer({ host: "127.0.0.1", port: 0, registry, connectionRegistry, logger });
   servers.push(server);
   return { url: `ws://127.0.0.1:${server.port}`, codes, connections: connectionRegistry };

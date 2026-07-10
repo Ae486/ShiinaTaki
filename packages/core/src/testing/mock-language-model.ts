@@ -54,3 +54,42 @@ export function midStreamErrorModel(deltas: string[], error: unknown): MockLangu
     }),
   });
 }
+
+/**
+ * A scripted multi-step model for tool-loop tests (research/ai-sdk-v7-tools.md §5): `doStream` is an ARRAY, one
+ * fresh stream per LLM call. A tool step ends with finishReason `tool-calls` (which continues the loop); its
+ * `input` is a JSON STRING (the provider-level shape). Never reuse a consumed simulateReadableStream — each step
+ * builds its own. Total LLM calls across the run must not exceed steps.length.
+ */
+export type ScriptStep =
+  | { kind: "text"; deltas: string[] }
+  | { kind: "tool"; toolCallId: string; toolName: string; input: unknown };
+
+export function scriptedModel(steps: ScriptStep[]): MockLanguageModelV4 {
+  return new MockLanguageModelV4({ doStream: steps.map(stepToResult) });
+}
+
+function stepToResult(step: ScriptStep) {
+  if (step.kind === "tool") {
+    return {
+      stream: simulateReadableStream({
+        chunks: [
+          { type: "stream-start" as const, warnings: [] },
+          { type: "tool-call" as const, toolCallId: step.toolCallId, toolName: step.toolName, input: JSON.stringify(step.input) },
+          { type: "finish" as const, finishReason: { unified: "tool-calls" as const, raw: undefined }, usage: USAGE },
+        ],
+      }),
+    };
+  }
+  return {
+    stream: simulateReadableStream({
+      chunks: [
+        { type: "stream-start" as const, warnings: [] },
+        { type: "text-start" as const, id: "t1" },
+        ...step.deltas.map((delta) => ({ type: "text-delta" as const, id: "t1", delta })),
+        { type: "text-end" as const, id: "t1" },
+        { type: "finish" as const, finishReason: { unified: "stop" as const, raw: undefined }, usage: USAGE },
+      ],
+    }),
+  };
+}

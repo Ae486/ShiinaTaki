@@ -5,5 +5,6 @@
  */
 import type { Migration } from "../migration-runner.ts";
 import { timelineMigration001 } from "./001-timeline.ts";
+import { memoryMigration002 } from "./002-memory.ts";
 
-export const MIGRATIONS: Migration[] = [timelineMigration001];
+export const MIGRATIONS: Migration[] = [timelineMigration001, memoryMigration002];

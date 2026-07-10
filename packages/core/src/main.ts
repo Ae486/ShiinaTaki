@@ -16,6 +16,7 @@ import { createTimelineRepo } from "./db/timeline-repo.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
 import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
 import { createLogger } from "./logging/logger.ts";
+import { createMemoryEngine } from "./memory/memory-engine.ts";
 import { createConnectionRegistry } from "./server/connection-registry.ts";
 import { createMethodRegistry } from "./server/method-registry.ts";
 import { chatSendMethod } from "./server/methods/chat-send.ts";
@@ -56,6 +57,15 @@ const conversationStore = createConversationStore({
   onAppend: (entry) => timelineSubscriptions.publish(entry),
 });
 
+// The memory engine's Workspace: markdown files under the app data root (beside the db, NOT in it — invariant 1).
+// Startup reconciliation rebuilds the derived index from those files (files are truth).
+const memoryLog = logger.child({ mod: "memory" });
+const memory = createMemoryEngine({ db, memoryRoot: join(serverConfig.dataDir, "workspace", "memory") });
+const reconciled = memory.reconcile();
+memoryLog.info(reconciled, "memory index reconciled from workspace");
+if (reconciled.invalid.length > 0)
+  memoryLog.warn({ invalid: reconciled.invalid }, "invalid memory files skipped (fix or remove them)");
+
 const deviceRegistry = createDeviceRegistry({
   store: createPairedDeviceStore(join(serverConfig.dataDir, "devices.json")),
 });
@@ -73,7 +83,7 @@ registry.register(
       pairingLog.info({ deviceId, deviceName, code }, "pairing code issued"),
   }),
 );
-registry.register(chatSendMethod(createChatAgent({ model, store: conversationStore }), logger));
+registry.register(chatSendMethod(createChatAgent({ model, store: conversationStore, memory }), logger));
 registry.register(timelineHistoryMethod(timelineRepo));
 registry.register(timelineSubscribeMethod(timelineSubscriptions));
 

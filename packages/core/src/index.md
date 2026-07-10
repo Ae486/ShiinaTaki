@@ -1,10 +1,11 @@
 # core/src/
 - index.ts — package public entry; empty until an external consumer exists (core runs as a process)
-- main.ts — process entry: wires config → logger → model → db/store/subscriptions → registries → ws-server; closes db on SIGINT/SIGTERM
+- main.ts — process entry: wires config → logger → model → db/store/subscriptions → memory engine → registries → ws-server; closes db on SIGINT/SIGTERM
 - config/ — env → validated boot config
 - logging/ — pino root logger factory
 - server/ — WS JSON-RPC server + method table + connection auth state
 - devices/ — paired-device store + pairing/token registry (device identity security state)
 - db/ — SQLite wrapper + migrations + repos (the only node:sqlite importer; single-writer durable store)
 - agents/ — streaming chat agent + SQLite-backed conversation store
-- testing/ — test-only mock-model factories
+- memory/ — layer-generic memory engine: files-as-truth store + FTS5 index + retriever + assembler + tools
+- testing/ — test-only mock-model factories + memory/companion fixtures
