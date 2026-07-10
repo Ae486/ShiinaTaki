@@ -19,6 +19,8 @@ A failing Capability or tool call must degrade into a **structured error the LLM
 - The method registry converts uncaught handler throws into JSON-RPC `INTERNAL_ERROR` responses — a throwing handler must never become an unhandled rejection that kills the core process (regression-tested in `method-registry.test.ts`).
 - App-level refusals NEVER reuse JSON-RPC envelope codes: `-32600`/`-32601`/`-32602`/`-32700` are reserved for structurally invalid traffic; every semantic refusal (auth, pairing, roles, state) rides `-32000` (`JSON_RPC_APP_ERROR`) with `data.code` from the closed `ErrorCode` union — one path for the Rust Shell to mirror, no special cases.
 - Pre-auth connections are fail-closed: before a successful `connect`, ANY invalid or non-connect frame (well-formed or garbage) gets one error reply, then the socket closes. Authenticated connections are fail-tolerant: a bad frame must not kill a live session. Both behaviors are pinned by tests (`ws-server.test.ts`).
+- Core-owned state files follow the same asymmetry: **auth state is fatal on corruption** (`devices.json` — a tampered trust root must stop the core), while **extension/re-derivable state degrades to warn + empty** (`mcp-servers.json`, `mcp-approvals.json`, `skills-state.json` — worst case the operator reconfigures or is asked again). Pick the policy by asking "is a corrupt file a security event or an inconvenience?" and say which in the loader's header.
+- Approval-style gates (operator/permission asks) are fail-closed on EVERY non-affirmative path: timeout, disconnect, absent ask channel, thrown decision fn — all must resolve to deny, and the deny default must be pinned by a test that fails if flipped (`approval-gate.test.ts`, `approval-broker.test.ts`).
 
 ## Rust (Shell)
 
