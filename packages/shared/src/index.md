@@ -6,4 +6,5 @@
 - connect-schema.ts — CONNECT_METHOD + RoleSchema + connect handshake param/result schemas (ADR 0004)
 - chat-schema.ts — CHAT_METHODS + chat.send/delta/complete/error param & event schemas
 - timeline-schema.ts — TIMELINE_METHODS + timeline entry/history/subscribe/appended schemas (ADR 0005)
+- approval-schema.ts — APPROVAL_METHODS + tool-approval request/respond schemas (MCP gate; M3 Permission Gate reuse)
 - ws-defaults.ts — default loopback WS host/port constants

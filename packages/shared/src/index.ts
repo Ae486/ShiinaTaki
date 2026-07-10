@@ -78,4 +78,18 @@ export type {
   TimelineSubscribeResult,
 } from "./timeline-schema.ts";
 
+export {
+  APPROVAL_METHODS,
+  ApprovalRequestSchema,
+  ApprovalRespondParamsSchema,
+  ApprovalRespondResultSchema,
+  ApprovalScopeSchema,
+} from "./approval-schema.ts";
+export type {
+  ApprovalRequest,
+  ApprovalRespondParams,
+  ApprovalRespondResult,
+  ApprovalScope,
+} from "./approval-schema.ts";
+
 export { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "./ws-defaults.ts";
