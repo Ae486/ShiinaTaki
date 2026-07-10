@@ -170,3 +170,36 @@ Largest v1 slice: fable research (FTS5 trigram CJK proofs, v7 tools stream-parts
 ### Next Steps
 
 - None - task complete
+
+
+## Session 6: Issue #7 auto memory writes shipped
+
+**Date**: 2026-07-10
+**Task**: Issue #7 auto memory writes shipped
+**Branch**: `main`
+
+### Summary
+
+No-research slice on #6 engine: opus implement (migration 003 watermarks, episodic writer via non-streaming generate, silent tool-turn flush, per-character mutex), opus check (fixed HIGH log content-leak per leader ruling, three-trigger mutex test). 282 tests green. Live smoke: 11 real turns -> exactly one episodic firing, 3 CJK summaries with clean count-only logging. Root-caused recurring port-8974 orphans to agents' pnpm-wrapped boot smokes; standing orders updated.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `3438f74` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
