@@ -234,3 +234,34 @@ Merged issues #8+#9 shipped and closed; M2 COMPLETE pending push. Fable research
 ### Next Steps
 
 - None - task complete
+
+
+## Session 8: M3 #10: Rust Shell + Permission Gate + screenshot (code complete)
+
+**Date**: 2026-07-11
+**Task**: M3 #10: Rust Shell + Permission Gate + screenshot (code complete)
+**Branch**: `main`
+
+### Summary
+
+First Rust work + end-to-end security-architecture tracer bullet. Fable research (reused OOM-crashed run's resolved Cargo.lock) delivered 4 files; leader adjudicated 11 design decisions (9 from precedent/invariants, user ratified 1A two-step native dialog + 8A core-persists-PNG-returns-path). Opus implement: 389 TS + 17 Rust green, 4 gates. Fable security check: 0 defects/0 fixes — base64 fuzz-verified 5000 vectors vs Node Buffer, RandomState device-id adjudicated security-irrelevant (real auth = core randomBytes(32)+sha256+timingSafeEqual). Net-new: core->node capability broker + capability.request/respond channel (mirror of #8 approval broker) — the reusable path all M3 capabilities plug into. Golden-fixture dual-assert (vitest zod + cargo serde round-trip, 19 frames) = the cross-language anti-drift contract. Leader ran all 4 gates green, committed 4 layers, closed #10. Live-dialog/xcap/keyring smoke queued to user (manual-checks 9 items). Deviations blessed: @types/node test-only, tracing per spec, hand-rolled base64/uuid to keep pinned-stack-only. User asleep, goal active. Next: #11 typed capabilities.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+(No commits - planning session)
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
