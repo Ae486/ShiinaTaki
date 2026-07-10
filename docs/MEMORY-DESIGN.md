@@ -48,12 +48,15 @@ Persona is NOT memory: the Character card (persona prompt, Character-Card-v2 voc
 workspace/memory/
 ├── global/
 │   ├── profile/NNNN-slug.md
-│   └── activity/2026-07-07.md          # append-only daily records
+│   └── activity/NNNN-slug.md
 └── characters/taki/
-    ├── relationship.md                  # one entry per promise/rule/milestone
-    ├── episodes/2026-07-07.md
+    ├── relationship/NNNN-slug.md
+    ├── episodes/NNNN-slug.md
     └── intentions/NNNN-slug.md
 ```
+
+One entry per file across every layer (`NNNN-slug.md`), decided in #6: a single storage mechanism (policy in
+data, no per-layer special cases) makes entry-level atomicity, `status`, retention-expiry, and reindex uniform.
 
 Frontmatter (all layers): `id`, `layer`, `importance: 1-10`, `disclosure` (free-text "when to recall" hint, keyword-matched), `created`, `status: active|archived`, optional `emotional_weight`, optional `expires`.
 
