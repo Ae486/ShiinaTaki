@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 9
+- **Total Sessions**: 10
 - **Last Active**: 2026-07-11
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~298 | Active |
+| `journal-1.md` | ~329 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 10 | 2026-07-11 | M3 #12: exec capability + full governance pipeline (M3 FINAL) | - | `main` |
 | 9 | 2026-07-11 | M3 #11: typed capabilities (process-list/clipboard/shell-open/workspace-files) | - | `main` |
 | 8 | 2026-07-11 | M3 #10: Rust Shell + Permission Gate + screenshot (code complete) | - | `main` |
 | 7 | 2026-07-10 | M2 finale: MCP client + approval gate + skills loader (#8+#9) | - | `main` |

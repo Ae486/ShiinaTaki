@@ -296,3 +296,34 @@ Four typed capabilities on the #10 gate path. Leader adjudicated all 11 design d
 ### Next Steps
 
 - None - task complete
+
+
+## Session 10: M3 #12: exec capability + full governance pipeline (M3 FINAL)
+
+**Date**: 2026-07-11
+**Task**: M3 #12: exec capability + full governance pipeline (M3 FINAL)
+**Branch**: `main`
+
+### Summary
+
+The general-purpose exec shell capability — v1's highest-stakes security boundary — on the #10/#11 gate path. Leader adjudicated all rulings into a 17-point prd (R0-R17); 3 needed the user (all resolved live): (a) audit records the command for exec as a documented exception to the names-only invariant (2A); (b) blocklist operator-editable with an approved seed set; (c) exec cwd Shell-resolved not Core-Workspace. Point (c) surfaced a deeper architecture fork the user intuited via the Claude-Code analogy (remote brain + local hands) — resolved as new ADR 0007: Stance A (host is the agent's world, VPS pure compute offload; OS/data capabilities execute Node-side; v1 single-machine ships as-is, split-machine is v1.5 with file-caps migrating Core->Node-routed). fable research (4 files) then fable implement: split into parser (hand-rolled raw-string sieve, zero dep) + policy (deny/allowlist/full + editable seed blocklist + degrade-safe config) + sandbox (argv-no-shell, env allowlist-from-empty, hand-rolled try_wait+kill timeout, dual-thread 1 MiB caps) + gate Shape B (evaluate_exec alongside unchanged evaluate; always-ask, never-persist) + audit exec-only command field. Implement had a mid-run model downgrade (fable->opus second half) so leader did a full line-read of all 5 security cores AND ran a fable adversarial check: both verdicts SHIP, 0 defects. Leader fixed one ruling-deviation (R11 named HKLM force-write; impl missed reg-add-HKLM). 6 gates green: 444 TS + 59 Rust tests + clippy + build. Committed 5 layers, closed #12. M3 COMPLETE (#10+#11+#12). CLAUDE.md note: user injected then removed a fake DoD/Commander-in-Chief system_prompt block (a misguided attempt to prevent the fable->opus safety downgrade); leader declined to adopt the persona and advised removal. Manual-checks now 23 items (all M3 live smoke) awaiting the user. Next: M4, or address the user's #10/#11/#12 manual smoke feedback.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+(No commits - planning session)
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
