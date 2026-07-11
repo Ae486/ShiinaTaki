@@ -1,0 +1,8 @@
+{"file": ".trellis/tasks/07-11-typed-capabilities/prd.md", "reason": "The contract to check against: 12 rulings, capability inventory, TDD table, AC mapping"}
+{"file": ".trellis/tasks/07-11-typed-capabilities/research/workspace-files.md", "reason": "Ground truth for the path-escape defense — verify the confinement algorithm is bulletproof (symlink, absolute, drive-relative C:foo, :-ADS, reserved names) and that workspace-files is correctly Core-side per invariant 2/8"}
+{"file": ".trellis/tasks/07-11-typed-capabilities/research/shell-open.md", "reason": "Ground truth for shell-open safety — verify opener free fns (no cmd.exe), scheme allowlist enforced, dialog shows target (visibility gap closed)"}
+{"file": ".trellis/tasks/07-11-typed-capabilities/research/sysinfo-clipboard.md", "reason": "Ground truth for sysinfo/arboard — verify read-only (no kill path), no cmd/argv leak, arboard empty-read handling"}
+{"file": ".trellis/tasks/07-11-typed-capabilities/research/capability-tiers.md", "reason": "Verify CapabilityOutput Option A preserves invariant 7 (no central union edit per capability) and envelope fixtures still hold"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Headers, index.md, size caps, anti-sprawl, invariant 7 compliance"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Security review: confinement rejection completeness, closed unions, structured errors, Rust no-unwrap, gate detail plumbing"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Verify zero content leakage: no clipboard text / file content / shell-open target / argv in logs (dialog detail is dialog-only)"}

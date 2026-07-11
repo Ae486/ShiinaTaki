@@ -1,0 +1,8 @@
+{"file": ".trellis/tasks/07-11-typed-capabilities/prd.md", "reason": "The contract: 12 leader rulings (workspace-files Core-side, CapabilityOutput Option A, shell-open dialog visibility, confinement algorithm), capability inventory, file map, TDD table, AC mapping"}
+{"file": ".trellis/tasks/07-11-typed-capabilities/research/sysinfo-clipboard.md", "reason": "sysinfo 0.39 read-only snapshot API (refresh_processes_specifics, name()->OsStr, memory bytes, no kill) + arboard 3.6 create-use-drop + output shapes"}
+{"file": ".trellis/tasks/07-11-typed-capabilities/research/shell-open.md", "reason": "tauri-plugin-opener free fns (ShellExecuteW = injection-safe), {kind,target} schema, scheme allowlist, dialog target-visibility gap"}
+{"file": ".trellis/tasks/07-11-typed-capabilities/research/workspace-files.md", "reason": "the path-escape defense (canonicalize both sides + component-wise starts_with, symlink/absolute/drive-relative/ADS/reserved-name) + Core-side execution rationale"}
+{"file": ".trellis/tasks/07-11-typed-capabilities/research/capability-tiers.md", "reason": "CapabilityOutput Option A generalization, tier table (descriptive only in v1), the 6 core tools inventory"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Module-contract headers, index.md, size caps, naming, anti-sprawl, invariant 7 pluggable modules"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Closed error unions, {ok:false} tool envelopes, fail-closed gate, structured errors the LLM reads, Rust no-unwrap"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Logs carry names/ids/counts never content — clipboard text, file content, shell-open target, process argv are all content"}
