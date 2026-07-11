@@ -170,6 +170,22 @@ pub struct ShellOpenOutput {
     pub opened: String,
 }
 
+/// The exec output (mirror of ExecOutputSchema; Option A opaque payload). A nonzero exit / timeout / truncation is a
+/// SUCCESSFUL execution carried here, NOT a wire error (ruling 17). exitCode is null when the child was killed
+/// (timeout / output-cap). stdout/stderr are content — never logged.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ExecOutput {
+    #[serde(rename = "exitCode")]
+    pub exit_code: Option<i32>,
+    pub stdout: String,
+    pub stderr: String,
+    pub truncated: bool,
+    #[serde(rename = "timedOut")]
+    pub timed_out: bool,
+    #[serde(rename = "durationMs")]
+    pub duration_ms: u64,
+}
+
 /// The closed wire error union shared with the core (`capability-schema.ts`).
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -243,6 +259,7 @@ mod tests {
             "clipboard-read-output" => serde_json::from_str::<ClipboardReadOutput>(text).ok().map(to_value),
             "clipboard-write-output" => serde_json::from_str::<ClipboardWriteOutput>(text).ok().map(to_value),
             "shell-open-output" => serde_json::from_str::<ShellOpenOutput>(text).ok().map(to_value),
+            "exec-output" => serde_json::from_str::<ExecOutput>(text).ok().map(to_value),
             other => panic!("no serde type mapped for fixture prefix {other:?}"),
         }
     }

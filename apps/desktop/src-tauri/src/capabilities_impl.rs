@@ -3,6 +3,7 @@
 //! POS:    shell/capabilities — the pluggable handler table (invariant 7); executors reachable ONLY after the gate
 
 pub mod clipboard;
+pub mod exec;
 pub mod process_list;
 pub mod screenshot;
 pub mod shell_open;

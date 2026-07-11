@@ -1,6 +1,6 @@
-//! INPUT:  a gate decision (requestId, capability, closed decision vocabulary)
+//! INPUT:  a gate decision (requestId, capability, closed decision vocabulary, optional exec command)
 //! OUTPUT: AuditSink trait + FileAuditor (append one JSONL line) + Decision enum; a test MemoryAuditor
-//! POS:    shell/audit — the Shell-owned, agent-unreachable decision trail (D10); NO payload/paths, NO tauri:: types
+//! POS:    shell/audit — the Shell-owned, agent-unreachable decision trail (D10); names-only EXCEPT exec's command (ruling 9)
 
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -22,9 +22,11 @@ pub enum Decision {
     DeniedTimeout,
 }
 
-/// One append per gate decision. Records only names — never the input, the image, or a path (logging spec).
+/// One append per gate decision. Records only names — never the input, the image, or a path (logging spec) — with ONE
+/// documented exception: exec passes its normalized command, because the command IS the blast-radius record ADR 0002
+/// relies on in lieu of a Windows sandbox (ruling 9). Every other capability passes `command: None` and stays names-only.
 pub trait AuditSink: Send + Sync {
-    fn record(&self, request_id: &str, capability: &str, decision: Decision);
+    fn record(&self, request_id: &str, capability: &str, decision: Decision, command: Option<&str>);
 }
 
 #[derive(Serialize)]
@@ -34,6 +36,9 @@ struct AuditLine<'a> {
     request_id: &'a str,
     capability: &'a str,
     decision: Decision,
+    // Present ONLY for exec (ruling 9); absent for every other capability, preserving the names-only invariant.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    command: Option<&'a str>,
 }
 
 /// Appends JSONL to a Shell-owned file (app_data_dir); reopen-per-append, single writer, no locking (D10).
@@ -55,8 +60,8 @@ impl FileAuditor {
 }
 
 impl AuditSink for FileAuditor {
-    fn record(&self, request_id: &str, capability: &str, decision: Decision) {
-        let line = AuditLine { ts: iso8601_utc(SystemTime::now()), request_id, capability, decision };
+    fn record(&self, request_id: &str, capability: &str, decision: Decision, command: Option<&str>) {
+        let line = AuditLine { ts: iso8601_utc(SystemTime::now()), request_id, capability, decision, command };
         // A failed append must not crash a gated action; it is a diagnostic event, not a control-flow one.
         if let Err(error) = self.try_append(&line) {
             tracing::error!(error = %error, "failed to append audit line");
@@ -109,8 +114,8 @@ mod tests {
         let path = dir.path().join("audit.jsonl");
         let auditor = FileAuditor::new(path.clone());
 
-        auditor.record("req-1", "screenshot", Decision::AllowedOnce);
-        auditor.record("req-2", "screenshot", Decision::DeniedTimeout);
+        auditor.record("req-1", "screenshot", Decision::AllowedOnce, None);
+        auditor.record("req-2", "screenshot", Decision::DeniedTimeout, None);
 
         let contents = std::fs::read_to_string(&path).unwrap();
         let lines: Vec<&str> = contents.lines().collect();
@@ -121,11 +126,33 @@ mod tests {
         assert_eq!(first["capability"], "screenshot");
         assert_eq!(first["decision"], "allowed-once");
         assert!(first["ts"].as_str().unwrap().ends_with('Z'));
-        // No payload/content ever leaks into the audit trail.
+        // No payload/content ever leaks into a non-exec audit line — names only (ruling 9).
         assert!(first.get("input").is_none());
         assert!(first.get("output").is_none());
+        assert!(first.get("command").is_none());
 
         let second: serde_json::Value = serde_json::from_str(lines[1]).unwrap();
         assert_eq!(second["decision"], "denied-timeout");
+    }
+
+    #[test]
+    fn only_exec_records_the_command_field() {
+        // Ruling 9: exec's line carries the command (the blast-radius record); every other capability stays names-only.
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("audit.jsonl");
+        let auditor = FileAuditor::new(path.clone());
+
+        auditor.record("req-x", "exec", Decision::AllowedOnce, Some("git status"));
+        auditor.record("req-y", "clipboard-read", Decision::AllowedOnce, None);
+
+        let contents = std::fs::read_to_string(&path).unwrap();
+        let lines: Vec<&str> = contents.lines().collect();
+        let exec_line: serde_json::Value = serde_json::from_str(lines[0]).unwrap();
+        assert_eq!(exec_line["capability"], "exec");
+        assert_eq!(exec_line["command"], "git status");
+
+        let other_line: serde_json::Value = serde_json::from_str(lines[1]).unwrap();
+        assert_eq!(other_line["capability"], "clipboard-read");
+        assert!(other_line.get("command").is_none(), "only exec logs its command");
     }
 }

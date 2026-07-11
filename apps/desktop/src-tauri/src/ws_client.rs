@@ -15,6 +15,7 @@ use tokio::sync::Mutex;
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 
+use crate::capabilities_impl::exec::{classify as classify_exec, command_of, ExecPolicy};
 use crate::capabilities_impl::CapabilityRegistry;
 use crate::gate::Gate;
 use crate::protocol::{
@@ -37,6 +38,9 @@ pub struct WsClient {
     pub secrets: Arc<dyn SecretStore>,
     pub gate: Arc<Gate>,
     pub handlers: Arc<CapabilityRegistry>,
+    // The exec policy is shared with the ExecExec handler; the WS task uses it to pre-classify a command for the gate
+    // (Shape B, ruling 6) — exec's decision depends on the parsed command, not just the capability name.
+    pub exec_policy: Arc<ExecPolicy>,
 }
 
 #[derive(Serialize, Clone)]
@@ -156,12 +160,22 @@ impl WsClient {
     async fn authorize_and_run(&self, request: CapabilityRequest) -> CapabilityRespond {
         let gate = self.gate.clone();
         let handlers = self.handlers.clone();
+        let exec_policy = self.exec_policy.clone();
         let CapabilityRequest { request_id, capability, input } = request;
         let joined = tauri::async_runtime::spawn_blocking(move || {
-            // The dialog detail (e.g. the shell-open target) is derived from the input by the capability itself; it is
-            // shown to the user for approval but never audited or logged (ruling 4).
-            let detail = handlers.detail(&capability, &input);
-            if gate.evaluate(&request_id, &capability, detail.as_deref()) {
+            // exec is authorized via Shape B (ruling 6): its decision depends on the parsed command, so it computes an
+            // ExecClass and takes the command-keyed gate path (evaluate_exec) — never the name-keyed `evaluate`, which
+            // could remember "always allow exec" and bypass the gate forever (ruling 8).
+            let authorized = if capability == "exec" {
+                let class = classify_exec(&exec_policy, &input);
+                gate.evaluate_exec(&request_id, command_of(&input), class)
+            } else {
+                // The dialog detail (e.g. the shell-open target) is derived from the input by the capability itself; it
+                // is shown to the user for approval but never audited or logged (ruling 4).
+                let detail = handlers.detail(&capability, &input);
+                gate.evaluate(&request_id, &capability, detail.as_deref())
+            };
+            if authorized {
                 handlers.respond(request_id, &capability, &input)
             } else {
                 CapabilityRespond::err(request_id, crate::protocol::CapabilityErrorCode::Denied, "denied".into())

@@ -18,6 +18,7 @@ use tauri::{Manager, State};
 use tokio::sync::mpsc;
 
 use capabilities_impl::clipboard::{ClipboardReadExec, ClipboardWriteExec};
+use capabilities_impl::exec::{ExecExec, ExecPolicy};
 use capabilities_impl::process_list::ProcessListExec;
 use capabilities_impl::screenshot::ScreenshotExec;
 use capabilities_impl::shell_open::ShellOpenExec;
@@ -89,12 +90,19 @@ fn build_client(handle: tauri::AppHandle) -> Result<WsClient, Box<dyn std::error
     let approver = Arc::new(TwoStepDialogApprover::new(handle.clone()));
     let gate = Arc::new(Gate::new(GatePolicy::new(), decisions, approver, auditor));
 
+    // exec (#12): Shell-resolved cwd (ruling 0) — the Core Workspace if it exists on THIS host (single-machine v1),
+    // else a Shell-owned dir under app_data_dir (invariant-8-safe: exec never assumes Core's filesystem). The policy
+    // is load-or-degrade-safe and shared between the ExecExec handler (sandbox config) and the WS task (classify).
+    let exec_cwd = resolve_exec_cwd(&handle, &data_dir);
+    let exec_policy = Arc::new(ExecPolicy::load(&data_dir.join("exec-policy.json"), exec_cwd));
+
     let mut handlers = CapabilityRegistry::new();
     handlers.register(Arc::new(ScreenshotExec));
     handlers.register(Arc::new(ProcessListExec));
     handlers.register(Arc::new(ClipboardReadExec));
     handlers.register(Arc::new(ClipboardWriteExec));
     handlers.register(Arc::new(ShellOpenExec));
+    handlers.register(Arc::new(ExecExec::new(exec_policy.clone())));
 
     Ok(WsClient {
         app: handle,
@@ -109,11 +117,27 @@ fn build_client(handle: tauri::AppHandle) -> Result<WsClient, Box<dyn std::error
             "clipboard-read".to_string(),
             "clipboard-write".to_string(),
             "shell-open".to_string(),
+            "exec".to_string(),
         ],
         secrets,
         gate,
         handlers: Arc::new(handlers),
+        exec_policy,
     })
+}
+
+// The default exec cwd (ruling 0): the Core Workspace dir when it exists on this Shell host, else a Shell-owned dir
+// under app_data_dir. A config `cwd` overrides this inside ExecPolicy::load. Single-machine v1: the Workspace exists.
+fn resolve_exec_cwd(handle: &tauri::AppHandle, data_dir: &std::path::Path) -> std::path::PathBuf {
+    if let Ok(home) = handle.path().home_dir() {
+        let workspace = home.join(".takiagent").join("workspace");
+        if workspace.is_dir() {
+            return workspace;
+        }
+    }
+    let fallback = data_dir.join("exec-cwd");
+    let _ = std::fs::create_dir_all(&fallback); // best-effort: a missing cwd would fail every spawn
+    fallback
 }
 
 // A stable per-install device id (a v4-format UUID), generated once and persisted in the keyring.
