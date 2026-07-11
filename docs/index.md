@@ -10,7 +10,7 @@ Start here. Every design decision has exactly one canonical home; nothing is dup
 2. **`PRODUCT.md`** — what the product is, v1 scope decisions, settings panel scope, roadmap.
 3. **`TECH-STACK.md`** — the complete v1 technology selection table (Agent Core / Shell / Pet UI / mobile), character & model import design, cross-device data pattern.
 4. **`MEMORY-DESIGN.md`** — the memory module design: layer registry, file-based truth + SQLite index, context assembly, write paths, activity capture pipeline, ship schedule.
-5. **`adr/`** — why the five foundational decisions were made (see below).
+5. **`adr/`** — why the foundational decisions were made (see below).
 6. **`TTS-INTERFACE.md`** — reserved TTS wire contract (v1: interface only).
 
 ## Architecture Decision Records (`adr/`)
@@ -23,6 +23,7 @@ Start here. Every design decision has exactly one canonical home; nothing is dup
 | [0004](adr/0004-jsonrpc-ws-protocol-with-pairing.md) | Client protocol | JSON-RPC 2.0 over localhost WS, zod-schema'd, device identity + pairing from day one (mobile-ready) |
 | [0005](adr/0005-continuous-timeline-no-sessions.md) | Conversation model | One continuous timeline per character; no session list; bubble + chat window share the stream |
 | [0006](adr/0006-mcp-processes-vs-no-os-invariant.md) | MCP boundary | MCP servers are operator-configured processes (single sanctioned spawn site); agent-initiated exec still crosses the Permission Gate |
+| [0007](adr/0007-capability-data-locality-split-machine.md) | Deployment locality | One codebase, two topologies (single-machine / VPS split); Stance A — host is the agent's world, VPS is pure compute offload; OS/data capabilities execute Node-side |
 
 ADR conventions: sequential numbering `NNNN-slug.md`, 1-3 paragraph body, only for hard-to-reverse + surprising + real-trade-off decisions.
 

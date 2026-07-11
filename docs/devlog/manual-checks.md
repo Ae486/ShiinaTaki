@@ -45,3 +45,18 @@ node --env-file-if-exists=../../.env.local src/main.ts
 - [ ] **15. 路径逃逸被拒（安全核心）**：让模型"读取 ../../../Windows/System32/drivers/etc/hosts"（或任意工作区外路径) → 应被拒(`OUTSIDE_WORKSPACE`/`INVALID_PATH`),模型收到结构化错误,**不泄露绝对路径**,不读到任何工作区外文件。
 
 发现任何问题在对应条目下写一行，我开返工轮。
+
+## 来自 M3 #12（exec 能力 + 完整治理管线）
+
+> 机器可验部分主脑 + fable check 双验全绿：444 TS + 59 Rust 测试、clippy 零警告，含 3 个真实 Windows spawn 测试(exit0/超时杀/截断杀)。以下需真机看**弹窗是否逐字显示命令原文**(安全关键)+ 实际执行效果。沿用三终端启动。默认策略 = allowlist 模式、**allowlist 为空**(未配置 `exec-policy.json` 前一切命令都会弹窗),要测"自动跑"需先在 `%APPDATA%\cc.shiinataki.app\exec-policy.json` 写 `{"mode":"allowlist","allowlist":["git","hostname"]}` 之类。
+
+- [ ] **16. 简单允许命令自动跑**：配好 allowlist 含 `hostname` → 让模型"运行 hostname" → **不弹窗**直接执行 → 模型回报机器名 + exitCode 0。(验 allowlist 自动放行)
+- [ ] **17. 非白名单命令弹窗显示原文**：让模型"运行 whoami"(不在 allowlist)→ Shell 弹窗应**逐字显示 `whoami`**(不只是"exec")→ Allow → 执行并回报。这是安全关键:用户必须看清跑的是什么命令再批。
+- [ ] **18. 链式/重定向命令升级审批**：让模型"运行 `git status && del x`" 或含 `>` 重定向 → 应弹窗(不自动跑,即便 git 在 allowlist)→ 弹窗显示完整命令串。
+- [ ] **19. 灾难命令直拒不弹窗**：让模型"运行 `rm -rf /` 或 `format c:`" → **不弹窗直接拒**,模型收到结构化 DENIED,不执行任何东西。
+- [ ] **20. 超时**：让模型运行一个长任务(如 `ping -n 60 127.0.0.1`,需先 allowlist 或走 Allow)→ 约 30s 后应被杀,模型收到 `timedOut:true`、exitCode null,不永久挂起。
+- [ ] **21. 工作区 cwd**：让模型运行能打印当前目录的白名单命令 → 确认执行目录是 `~/.takiagent/workspace`(单机默认),非随机目录。
+- [ ] **22. 审计记命令**：跑几条 exec 后看 `%APPDATA%\cc.shiinataki.app\audit.jsonl` → exec 的行应含 `command` 字段(命令原文),其余能力(截图/剪贴板)的行**无** command 字段。
+- [ ] **23. 拒绝路径优雅**：某次 exec 弹窗点 Deny → 模型优雅报告被拒,不崩。
+
+发现任何问题在对应条目下写一行，我开返工轮。
