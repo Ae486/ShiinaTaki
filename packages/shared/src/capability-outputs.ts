@@ -1,6 +1,6 @@
 /**
  * INPUT:  a capability.respond Ok payload (opaque Value on the wire) parsed by the core tool that owns it
- * OUTPUT: one output schema per capability (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen) + types
+ * OUTPUT: one output schema per capability (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec) + types
  * POS:    shared/protocol — the per-capability output contracts (Option A); each mirrored by that capability's Rust serde struct (invariant 3)
  */
 import { z } from "zod";
@@ -51,3 +51,16 @@ export const ShellOpenOutputSchema = z.strictObject({
   opened: z.string().min(1),
 });
 export type ShellOpenOutput = z.infer<typeof ShellOpenOutputSchema>;
+
+// exec (#12) returns the full run outcome (Option A opaque payload). A nonzero exit / timeout / truncation is a
+// SUCCESSFUL capability execution, not a wire error — the model reads exitCode/stderr/timedOut to reason and retry.
+// exitCode is null when the child was killed before exit (timeout or output-cap). stdout/stderr are content — never logged.
+export const ExecOutputSchema = z.strictObject({
+  exitCode: z.number().int().nullable(),
+  stdout: z.string(),
+  stderr: z.string(),
+  truncated: z.boolean(),
+  timedOut: z.boolean(),
+  durationMs: z.number().int().nonnegative(),
+});
+export type ExecOutput = z.infer<typeof ExecOutputSchema>;

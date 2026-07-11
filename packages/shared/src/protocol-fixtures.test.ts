@@ -15,6 +15,7 @@ import { CapabilityRequestSchema, CapabilityRespondParamsSchema } from "./capabi
 import {
   ClipboardReadOutputSchema,
   ClipboardWriteOutputSchema,
+  ExecOutputSchema,
   ProcessListOutputSchema,
   ScreenshotOutputSchema,
   ShellOpenOutputSchema,
@@ -49,6 +50,7 @@ const SCHEMA_BY_PREFIX: Record<string, ZodType> = {
   "clipboard-read-output": ClipboardReadOutputSchema,
   "clipboard-write-output": ClipboardWriteOutputSchema,
   "shell-open-output": ShellOpenOutputSchema,
+  "exec-output": ExecOutputSchema,
 };
 
 const FIXTURE_DIR = fileURLToPath(new URL("../fixtures/protocol", import.meta.url));

@@ -111,6 +111,7 @@ export type {
 export {
   ClipboardReadOutputSchema,
   ClipboardWriteOutputSchema,
+  ExecOutputSchema,
   ProcessInfoSchema,
   ProcessListOutputSchema,
   ScreenshotOutputSchema,
@@ -119,6 +120,7 @@ export {
 export type {
   ClipboardReadOutput,
   ClipboardWriteOutput,
+  ExecOutput,
   ProcessInfo,
   ProcessListOutput,
   ScreenshotOutput,
