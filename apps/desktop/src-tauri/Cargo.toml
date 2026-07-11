@@ -5,11 +5,18 @@ description = "TakiAgent desktop shell"
 edition = "2021"
 # Effective floor raised to 1.95 by sysinfo 0.39.6 (patch-level MSRV bump); toolchain is `rustup update stable`.
 rust-version = "1.95"
+# Two bins live here (the Tauri app + the headless test node); `cargo run` means the app.
+default-run = "taki-desktop"
 
 [lib]
 # The library entry the Tauri mobile-entry macro loads; keep main.rs a thin shim.
 name = "taki_desktop_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
+
+# The headless e2e/CI node (no window, ScriptedApprover-driven); debug-only at runtime — see its module header.
+[[bin]]
+name = "taki-node"
+path = "src/bin/taki-node.rs"
 
 [build-dependencies]
 tauri-build = { version = "2.6", features = [] }
@@ -20,7 +27,8 @@ tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tokio = { version = "1", features = ["rt", "sync", "time", "macros"] }
+# rt-multi-thread: the headless taki-node bin runs its own #[tokio::main] runtime (the app uses Tauri's).
+tokio = { version = "1", features = ["rt", "rt-multi-thread", "sync", "time", "macros"] }
 tokio-tungstenite = "0.29"
 futures-util = "0.3"
 keyring = "4.1"

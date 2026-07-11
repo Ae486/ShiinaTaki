@@ -1,15 +1,13 @@
 //! INPUT:  the core WS endpoint; pairing codes via an mpsc channel; core→node capability.request notifications
 //! OUTPUT: a long-lived reconnecting node client: pairs, persists its token, runs gate-authorized capabilities
-//! POS:    shell/ws_client — the socket-owning task (spawned from lib.rs setup); the only Tauri emit/state site here
+//! POS:    shell/ws_client — the socket-owning task (spawned by a composition root); tauri-free (status via StatusEmitter)
 
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
 use futures_util::{SinkExt, StreamExt};
-use serde::Serialize;
 use serde_json::{json, Value};
-use tauri::{AppHandle, Emitter};
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::Mutex;
 use tokio_tungstenite::connect_async;
@@ -22,33 +20,26 @@ use crate::protocol::{
     CapabilityRequest, CapabilityRespond, ClientFrame, ConnectParams, ConnectResult, ErrorCode, Role,
 };
 use crate::secrets::SecretStore;
+use crate::status::StatusEmitter;
 
 const TOKEN_KEY: &str = "node-token";
-const STATUS_EVENT: &str = "taki://status";
 const RECONNECT_MIN: Duration = Duration::from_millis(500);
 const RECONNECT_MAX: Duration = Duration::from_secs(30);
 
-/// Everything the WS task needs; assembled in lib.rs setup (the composition root).
+/// Everything the WS task needs; assembled by node::build_node (fields are crate-internal wiring).
 pub struct WsClient {
-    pub app: AppHandle,
-    pub url: String,
-    pub device_id: String,
-    pub device_name: String,
-    pub capabilities: Vec<String>,
-    pub secrets: Arc<dyn SecretStore>,
-    pub gate: Arc<Gate>,
-    pub handlers: Arc<CapabilityRegistry>,
-    // The current connection status, mirrored for the Pet UI's get_status command (a late-attaching WebView misses
-    // one-shot emits). std Mutex (not tokio's): it is read from the sync command handler and held only momentarily.
-    pub status: Arc<std::sync::Mutex<String>>,
+    pub(crate) url: String,
+    pub(crate) device_id: String,
+    pub(crate) device_name: String,
+    pub(crate) capabilities: Vec<String>,
+    pub(crate) secrets: Arc<dyn SecretStore>,
+    pub(crate) gate: Arc<Gate>,
+    pub(crate) handlers: Arc<CapabilityRegistry>,
+    // Where connection-state transitions go: the Tauri app forwards them to the Pet UI, the headless bin logs them.
+    pub(crate) status: Arc<dyn StatusEmitter>,
     // The exec policy is shared with the ExecExec handler; the WS task uses it to pre-classify a command for the gate
     // (Shape B, ruling 6) — exec's decision depends on the parsed command, not just the capability name.
-    pub exec_policy: Arc<ExecPolicy>,
-}
-
-#[derive(Serialize, Clone)]
-struct StatusPayload {
-    state: &'static str,
+    pub(crate) exec_policy: Arc<ExecPolicy>,
 }
 
 impl WsClient {
@@ -180,7 +171,8 @@ impl WsClient {
         let handlers = self.handlers.clone();
         let exec_policy = self.exec_policy.clone();
         let CapabilityRequest { request_id, capability, input } = request;
-        let joined = tauri::async_runtime::spawn_blocking(move || {
+        // tokio (not tauri) spawn_blocking: works under any tokio runtime — the Tauri app's and the headless bin's.
+        let joined = tokio::task::spawn_blocking(move || {
             // exec is authorized via Shape B (ruling 6): its decision depends on the parsed command, so it computes an
             // ExecClass and takes the command-keyed gate path (evaluate_exec) — never the name-keyed `evaluate`, which
             // could remember "always allow exec" and bypass the gate forever (ruling 8).
@@ -216,13 +208,8 @@ impl WsClient {
         }
     }
 
-    fn emit_status(&self, state: &'static str) {
-        // Mirror into shared state first so get_status returns the latest even if this emit is missed by a late listener.
-        if let Ok(mut current) = self.status.lock() {
-            *current = state.to_string();
-        }
-        // The Pet UI is a disposable client (invariant 4); a failed emit (window closed) is not an error.
-        let _ = self.app.emit(STATUS_EVENT, StatusPayload { state });
+    fn emit_status(&self, state: &str) {
+        self.status.emit(state);
     }
 }
 

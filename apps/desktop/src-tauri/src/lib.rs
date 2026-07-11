@@ -1,38 +1,32 @@
 //! INPUT:  Tauri app lifecycle (setup hook) + the submit_pairing_code / get_status commands from the Pet UI
-//! OUTPUT: run() — inits tracing, boots the app, wires the gate/secrets/audit/capabilities, spawns the WS node task
-//! POS:    shell — the app composition root (the ONLY place besides the dialog impl that touches Tauri); main.rs is a shim
+//! OUTPUT: run() — inits tracing, boots the app, selects the approver, calls node::build_node, spawns the WS task
+//! POS:    shell — the Tauri composition root (the ONLY place besides the dialog impl that touches Tauri); main.rs
+//!         is a shim; the tauri-free assembly lives in node.rs (shared with bin/taki-node)
 
-mod audit;
+// audit/gate/node/secrets/status/ws_client are pub: the headless taki-node bin (a separate crate root) composes
+// the same node from them; capability handlers and the wire protocol stay crate-internal.
+pub mod audit;
 mod capabilities_impl;
-mod gate;
+pub mod gate;
+pub mod node;
 mod protocol;
-mod secrets;
-mod ws_client;
+pub mod secrets;
+pub mod status;
+pub mod ws_client;
 
-use std::hash::{BuildHasher, Hasher, RandomState};
 use std::sync::{Arc, Mutex};
-use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde::Serialize;
-use tauri::{Manager, State};
+use tauri::{Emitter, Manager, State};
 use tokio::sync::mpsc;
 
-use capabilities_impl::clipboard::{ClipboardReadExec, ClipboardWriteExec};
-use capabilities_impl::exec::{ExecExec, ExecPolicy};
-use capabilities_impl::process_list::ProcessListExec;
-use capabilities_impl::screenshot::ScreenshotExec;
-use capabilities_impl::shell_open::ShellOpenExec;
-use capabilities_impl::CapabilityRegistry;
-use gate::approver::TwoStepDialogApprover;
-use gate::decisions::DecisionStore;
-use gate::{Gate, GatePolicy};
+use gate::approver::{Approver, TwoStepDialogApprover};
 use secrets::{KeyringStore, SecretStore};
+use status::StatusEmitter;
 use ws_client::WsClient;
-use audit::FileAuditor;
 
-const WS_URL: &str = "ws://127.0.0.1:8974"; // DEFAULT_WS_HOST:DEFAULT_WS_PORT (@taki/shared)
 const DEVICE_NAME: &str = "TakiAgent Shell";
-const DEVICE_ID_KEY: &str = "device-id";
+const STATUS_EVENT: &str = "taki://status";
 
 #[derive(Serialize)]
 struct Pong {
@@ -72,7 +66,7 @@ fn submit_pairing_code(code: String, state: State<'_, PairingState>) -> Result<(
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    init_tracing();
+    node::init_tracing();
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
@@ -93,68 +87,59 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
-// The Shell's only subscriber init: without it every tracing line (gate decisions, audit failures, ws_client) is
-// dropped silently (R1/D1). Default level `info`, overridable via RUST_LOG; compact fmt to stderr; try_init keeps a
-// double call (tests / re-entry) harmless.
-fn init_tracing() {
-    let filter = tracing_subscriber::EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
-    let _ = tracing_subscriber::fmt()
-        .compact()
-        .with_env_filter(filter)
-        .with_writer(std::io::stderr)
-        .try_init();
+#[derive(Serialize, Clone)]
+struct StatusPayload<'a> {
+    state: &'a str,
 }
 
-// Assembles the gate (policy + decisions + native approver + audit), the capability handlers, and the WS client.
+/// Forwards node status to the Pet UI. Mirrors into the shared get_status state FIRST (a late-attaching WebView
+/// misses one-shot emits), then emits the event; a failed emit (window closed) is not an error (invariant 4).
+struct TauriStatusEmitter {
+    app: tauri::AppHandle,
+    status: Arc<Mutex<String>>,
+}
+
+impl StatusEmitter for TauriStatusEmitter {
+    fn emit(&self, state: &str) {
+        if let Ok(mut current) = self.status.lock() {
+            *current = state.to_string();
+        }
+        let _ = self.app.emit(STATUS_EVENT, StatusPayload { state });
+    }
+}
+
+// Resolves the Tauri-app-specific pieces (dirs, status sink, approver, keyring) and hands assembly to node::build_node.
 fn build_client(handle: tauri::AppHandle, status: StatusHandle) -> Result<WsClient, Box<dyn std::error::Error>> {
     let data_dir = handle.path().app_data_dir()?; // Shell-owned, outside the Workspace by construction (D7)
-    std::fs::create_dir_all(&data_dir)?;
-
-    let secrets: Arc<dyn SecretStore> = Arc::new(KeyringStore::new());
-    let device_id = ensure_device_id(secrets.as_ref());
-
-    let decisions = Arc::new(DecisionStore::load(data_dir.join("gate-decisions.json")));
-    let auditor = Arc::new(FileAuditor::new(data_dir.join("audit.jsonl")));
-    let approver = Arc::new(TwoStepDialogApprover::new(handle.clone()));
-    let gate = Arc::new(Gate::new(GatePolicy::new(), decisions, approver, auditor));
-
-    // exec (#12): Shell-resolved cwd (ruling 0) — the Core Workspace if it exists on THIS host (single-machine v1),
-    // else a Shell-owned dir under app_data_dir (invariant-8-safe: exec never assumes Core's filesystem). The policy
-    // is load-or-degrade-safe and shared between the ExecExec handler (sandbox config) and the WS task (classify).
     let exec_cwd = resolve_exec_cwd(&handle, &data_dir);
-    let exec_policy = Arc::new(ExecPolicy::load(&data_dir.join("exec-policy.json"), exec_cwd));
-
-    let mut handlers = CapabilityRegistry::new();
-    handlers.register(Arc::new(ScreenshotExec));
-    handlers.register(Arc::new(ProcessListExec));
-    handlers.register(Arc::new(ClipboardReadExec));
-    handlers.register(Arc::new(ClipboardWriteExec));
-    handlers.register(Arc::new(ShellOpenExec));
-    handlers.register(Arc::new(ExecExec::new(exec_policy.clone())));
-
-    Ok(WsClient {
-        app: handle,
-        url: WS_URL.to_string(),
-        device_id,
+    let emitter: Arc<dyn StatusEmitter> = Arc::new(TauriStatusEmitter { app: handle.clone(), status: status.0 });
+    node::build_node(node::NodeConfig {
+        data_dir,
+        exec_cwd,
+        url: node::DEFAULT_WS_URL.to_string(),
         device_name: DEVICE_NAME.to_string(),
-        // Shared with the Pet UI's get_status command so a late-attaching WebView can read the current status.
-        status: status.0,
-        // Each declared capability is one entry here + one register call above (invariant 7). clipboard is two
-        // independently-gated names. workspace-files is NOT here — it executes Core-side (ruling 1).
-        capabilities: vec![
-            "screenshot".to_string(),
-            "process-list".to_string(),
-            "clipboard-read".to_string(),
-            "clipboard-write".to_string(),
-            "shell-open".to_string(),
-            "exec".to_string(),
-        ],
-        secrets,
-        gate,
-        handlers: Arc::new(handlers),
-        exec_policy,
+        capabilities: node::default_capabilities(),
+        approver: select_approver(handle),
+        secrets: Arc::new(KeyringStore::new()) as Arc<dyn SecretStore>,
+        status: emitter,
     })
+}
+
+// The approver seam (R1): the scripted approver is a permission-gate BYPASS, so it exists only in debug builds
+// (cfg — the type is absent in release) AND requires the TAKI_GATE_AUTOAPPROVE env opt-in; anything else — including
+// a malformed spec — falls back to the real dialog (fail-closed). Normal runs are unchanged (R2).
+fn select_approver(handle: tauri::AppHandle) -> Arc<dyn Approver> {
+    #[cfg(debug_assertions)]
+    if let Ok(spec) = std::env::var("TAKI_GATE_AUTOAPPROVE") {
+        match gate::approver::ScriptedApprover::parse(&spec) {
+            Ok(scripted) => return Arc::new(scripted),
+            Err(error) => {
+                tracing::error!(error = %error, "TAKI_GATE_AUTOAPPROVE ignored; falling back to the dialog approver");
+            }
+        }
+    }
+    tracing::info!("approver: two-step native dialog");
+    Arc::new(TwoStepDialogApprover::new(handle))
 }
 
 // The default exec cwd (ruling 0): the Core Workspace dir when it exists on this Shell host, else a Shell-owned dir
@@ -169,36 +154,4 @@ fn resolve_exec_cwd(handle: &tauri::AppHandle, data_dir: &std::path::Path) -> st
     let fallback = data_dir.join("exec-cwd");
     let _ = std::fs::create_dir_all(&fallback); // best-effort: a missing cwd would fail every spawn
     fallback
-}
-
-// A stable per-install device id (a v4-format UUID), generated once and persisted in the keyring.
-fn ensure_device_id(secrets: &dyn SecretStore) -> String {
-    if let Ok(Some(existing)) = secrets.get(DEVICE_ID_KEY) {
-        return existing;
-    }
-    let id = generate_uuid_v4();
-    let _ = secrets.set(DEVICE_ID_KEY, &id);
-    id
-}
-
-// A v4-format UUID from OS-seeded RandomState entropy — no uuid crate (outside the pinned set); persisted, so one
-// generation per install makes collisions irrelevant.
-fn generate_uuid_v4() -> String {
-    let nanos = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos() as u64;
-    let mut bytes = [0u8; 16];
-    fill_random(&mut bytes[..8], nanos);
-    fill_random(&mut bytes[8..], nanos ^ u64::from(std::process::id()));
-    bytes[6] = (bytes[6] & 0x0f) | 0x40; // version 4
-    bytes[8] = (bytes[8] & 0x3f) | 0x80; // RFC 4122 variant
-    let hex: String = bytes.iter().map(|byte| format!("{byte:02x}")).collect();
-    format!("{}-{}-{}-{}-{}", &hex[0..8], &hex[8..12], &hex[12..16], &hex[16..20], &hex[20..32])
-}
-
-fn fill_random(slice: &mut [u8], seed: u64) {
-    let mut hasher = RandomState::new().build_hasher(); // OS-seeded per process
-    hasher.write_u64(seed);
-    let value = hasher.finish();
-    for (index, byte) in slice.iter_mut().enumerate() {
-        *byte = (value >> (index * 8)) as u8;
-    }
 }
