@@ -6,12 +6,11 @@
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
 import { ClipboardReadOutputSchema } from "@taki/shared";
-import type { Logger } from "../logging/logger.ts";
 import { routeCapability, type CapabilityRouteDeps } from "./route-capability.ts";
 
 const CAPABILITY = "clipboard-read";
 
-export type ClipboardReadToolDeps = CapabilityRouteDeps & { logger: Logger };
+export type ClipboardReadToolDeps = CapabilityRouteDeps;
 
 export function createClipboardReadTool(deps: ClipboardReadToolDeps): ToolSet {
   const log = deps.logger.child({ mod: "capability" });

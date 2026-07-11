@@ -21,6 +21,7 @@
     "zod": "^4.4.0"
   },
   "devDependencies": {
-    "@types/ws": "^8.18.1"
+    "@types/ws": "^8.18.1",
+    "pino-pretty": "^13.1.3"
   }
 }

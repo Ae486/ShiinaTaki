@@ -1,6 +1,6 @@
 # core/capabilities/
-- capability-broker.ts — core→node ask/await broker; correlate by requestId; 90s backstop + denyAll on disconnect
-- route-capability.ts — shared route→broker step (findNode → request → normalize); reused by every Shell-backed tool
+- capability-broker.ts — core→node ask/await broker; correlate by requestId; 90s backstop + denyAll on disconnect; logs requested/responded
+- route-capability.ts — shared route→broker step (findNode → request → normalize); reused by every Shell-backed tool; logs invoked/routing-failed
 - screenshot-store.ts — the sanctioned Workspace write site: base64 PNG → screenshots/<ts>.png (invariant 2)
 - screenshot-tool.ts — the agent tool: route → broker.request → persist → { ok, path, width, height, bytes }
 - process-list-tool.ts — the agent tool: route → broker → { ok, processes, count } (read-only, no kill)

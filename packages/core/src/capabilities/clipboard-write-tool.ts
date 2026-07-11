@@ -6,12 +6,11 @@
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
 import { ClipboardWriteOutputSchema } from "@taki/shared";
-import type { Logger } from "../logging/logger.ts";
 import { routeCapability, type CapabilityRouteDeps } from "./route-capability.ts";
 
 const CAPABILITY = "clipboard-write";
 
-export type ClipboardWriteToolDeps = CapabilityRouteDeps & { logger: Logger };
+export type ClipboardWriteToolDeps = CapabilityRouteDeps;
 
 export function createClipboardWriteTool(deps: ClipboardWriteToolDeps): ToolSet {
   const log = deps.logger.child({ mod: "capability" });

@@ -6,12 +6,11 @@
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
 import { ProcessListOutputSchema } from "@taki/shared";
-import type { Logger } from "../logging/logger.ts";
 import { routeCapability, type CapabilityRouteDeps } from "./route-capability.ts";
 
 const CAPABILITY = "process-list";
 
-export type ProcessListToolDeps = CapabilityRouteDeps & { logger: Logger };
+export type ProcessListToolDeps = CapabilityRouteDeps;
 
 export function createProcessListTool(deps: ProcessListToolDeps): ToolSet {
   const log = deps.logger.child({ mod: "capability" });

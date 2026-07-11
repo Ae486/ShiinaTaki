@@ -6,12 +6,11 @@
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
 import { ExecOutputSchema } from "@taki/shared";
-import type { Logger } from "../logging/logger.ts";
 import { routeCapability, type CapabilityRouteDeps } from "./route-capability.ts";
 
 const CAPABILITY = "exec";
 
-export type ExecToolDeps = CapabilityRouteDeps & { logger: Logger };
+export type ExecToolDeps = CapabilityRouteDeps;
 
 export function createExecTool(deps: ExecToolDeps): ToolSet {
   const log = deps.logger.child({ mod: "capability" });

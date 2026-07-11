@@ -6,12 +6,11 @@
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
 import { ShellOpenOutputSchema } from "@taki/shared";
-import type { Logger } from "../logging/logger.ts";
 import { routeCapability, type CapabilityRouteDeps } from "./route-capability.ts";
 
 const CAPABILITY = "shell-open";
 
-export type ShellOpenToolDeps = CapabilityRouteDeps & { logger: Logger };
+export type ShellOpenToolDeps = CapabilityRouteDeps;
 
 export function createShellOpenTool(deps: ShellOpenToolDeps): ToolSet {
   const log = deps.logger.child({ mod: "capability" });

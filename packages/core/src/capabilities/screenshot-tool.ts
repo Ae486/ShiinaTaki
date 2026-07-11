@@ -6,19 +6,13 @@
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
 import { ScreenshotOutputSchema } from "@taki/shared";
-import type { Logger } from "../logging/logger.ts";
-import type { ConnectionRegistry } from "../server/connection-registry.ts";
-import type { CapabilityBroker } from "./capability-broker.ts";
-import { routeCapability } from "./route-capability.ts";
+import { routeCapability, type CapabilityRouteDeps } from "./route-capability.ts";
 import type { ScreenshotStore } from "./screenshot-store.ts";
 
 const CAPABILITY = "screenshot";
 
-export interface ScreenshotToolDeps {
-  registry: ConnectionRegistry;
-  broker: CapabilityBroker;
+export interface ScreenshotToolDeps extends CapabilityRouteDeps {
   store: ScreenshotStore;
-  logger: Logger;
 }
 
 export function createScreenshotTool(deps: ScreenshotToolDeps): ToolSet {

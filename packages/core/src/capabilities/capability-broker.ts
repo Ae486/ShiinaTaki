@@ -38,6 +38,7 @@ const DEFAULT_TIMEOUT_MS = 90_000;
 export const TIMEOUT_MESSAGE = "capability request timed out";
 
 interface Pending {
+  capability: string;
   finish: (outcome: CapabilityOutcome) => void;
 }
 
@@ -50,6 +51,8 @@ export function createCapabilityBroker(deps: { logger: Logger; timeoutMs?: numbe
     const entry = pending.get(requestId);
     if (!entry) return false;
     pending.delete(requestId);
+    // The terminal seam log (R3): every request ends in exactly one of these — metadata only, never the output.
+    log.info({ requestId, capability: entry.capability, ok: outcome.ok }, "capability responded");
     entry.finish(outcome);
     return true;
   }
@@ -63,6 +66,7 @@ export function createCapabilityBroker(deps: { logger: Logger; timeoutMs?: numbe
           timeoutMs,
         );
         pending.set(requestId, {
+          capability,
           finish: (outcome) => {
             clearTimeout(timer);
             resolve(outcome);
