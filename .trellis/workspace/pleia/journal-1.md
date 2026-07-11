@@ -265,3 +265,34 @@ First Rust work + end-to-end security-architecture tracer bullet. Fable research
 ### Next Steps
 
 - None - task complete
+
+
+## Session 9: M3 #11: typed capabilities (process-list/clipboard/shell-open/workspace-files)
+
+**Date**: 2026-07-11
+**Task**: M3 #11: typed capabilities (process-list/clipboard/shell-open/workspace-files)
+**Branch**: `main`
+
+### Summary
+
+Four typed capabilities on the #10 gate path. Leader adjudicated all 11 design decisions from invariants (no user calls needed): workspace-files is Core-side TS not a Shell capability (invariant 2/8); CapabilityOutput -> opaque payload (Option A, invariant 7); shell-open {kind,target}+scheme allowlist; leader-added the gate approval detail so the dialog shows shell-open's target (ruling 4). Opus implement: TS green but hit an ENV BLOCK — crates.io TLS-blocked locally, then rustc 1.88 too old for sysinfo 0.39.6 (MSRV 1.95). Leader ruled upgrade rustc over downgrade crate (CLAUDE.md prescribes rustup update stable; CI uses @stable); rustup->1.97, fixed one compile-only error (OpenPlan Debug). Fable check fixed 2 content-leak defects (fs-error errno-only; wrapped resolve() throw in the path-escape core), restored the screenshot golden fixture lost in the generalization, blessed route-capability. Leader ran all 4 gates green: 438 TS + 26 Rust + clippy + build. Committed 4 layers, closed #11. #10 + #11 GUI smokes queued to manual-checks (user testing #10 now). Accepted residual documented: shell-open kind:path can launch protocol handlers, bound only by the dialog. rust-version bumped 1.88->1.95; CLAUDE.md toolchain table flagged for user to sync. Next: #12 exec (last M3 slice).
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+(No commits - planning session)
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
