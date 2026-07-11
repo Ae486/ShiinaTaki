@@ -32,3 +32,16 @@ node --env-file-if-exists=../../.env.local src/main.ts
 - [ ] **9. 审计文件**：查看 `%APPDATA%\cc.shiinataki.app\audit.jsonl` → 每次决定一行，字段仅 `ts / requestId / capability / decision`（如 `allowed-once` / `allowed-session` / `denied`），**无图像内容、无路径**。
 
 发现任何问题在对应条目下写一行，我开返工轮。截图落盘的实际路径若与上面不符，以 core 控制台日志为准。
+
+## 来自 M3 #11（类型化能力：进程列表 / 剪贴板 / shell-open / 工作区文件）
+
+> 机器可验部分主脑已全绿：438 TS + 26 Rust 测试、clippy 零警告，check（fable）修复 2 项内容泄漏/契约缺陷后通过。工作区文件的逃逸拒绝、进程列表、剪贴板往返可在 CLI 里直接验；shell-open 的**弹窗目标可见性 + 真实启动**需真机看。沿用 #10 的三终端启动方式（core 裸 node + Shell tauri dev + CLI）。
+
+- [ ] **10. shell-open + 弹窗显目标**：CLI 让模型"打开 https://example.com" → Shell 弹窗应**逐字显示 `open https://example.com`**（不只是能力名）→ Allow → 浏览器打开该页。这是安全关键:用户必须看清开的是什么再批。
+- [ ] **11. shell-open 拒绝危险 scheme**：让模型"打开 javascript:alert(1)" 或 "打开 file:///C:/Windows" → 应被拒（`unsupported url scheme`），**不启动任何东西**,模型收到结构化错误。
+- [ ] **12. 剪贴板往返**：让模型"把 hello-taki 写入剪贴板" → 弹窗 Allow → 手动 Ctrl+V 到记事本应出现 `hello-taki`；再让模型"读剪贴板" → Allow → 模型回报该内容。
+- [ ] **13. 进程列表**：让模型"列出正在运行的进程" → 弹窗 Allow → 模型返回进程快照（pid/名称/内存),**不含命令行 argv**（隐私:v1 故意排除)。
+- [ ] **14. 工作区文件读写**：让模型"在工作区写一个 notes.txt,内容 hello" → **不弹窗**（工作区是 agent 自己的空间,自动允许)→ `~/.takiagent/workspace/` 下出现 notes.txt；再让模型"读 notes.txt" → 回报 hello。
+- [ ] **15. 路径逃逸被拒（安全核心）**：让模型"读取 ../../../Windows/System32/drivers/etc/hosts"（或任意工作区外路径) → 应被拒(`OUTSIDE_WORKSPACE`/`INVALID_PATH`),模型收到结构化错误,**不泄露绝对路径**,不读到任何工作区外文件。
+
+发现任何问题在对应条目下写一行，我开返工轮。
