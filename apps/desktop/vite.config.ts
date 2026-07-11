@@ -15,5 +15,10 @@ export default defineConfig({
   server: {
     port: 1420,
     strictPort: true,
+    // Rust build output churns and Windows exclusively locks the .dll while cargo writes it; watching
+    // src-tauri makes Vite's file watcher crash with EBUSY. The Rust side has its own watcher (tauri dev).
+    watch: {
+      ignored: ["**/src-tauri/**"],
+    },
   },
 });
