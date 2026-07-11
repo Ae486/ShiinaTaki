@@ -7,4 +7,5 @@
 - clipboard-read-tool.ts — the agent tool: route → broker → { ok, text } (empty clipboard → "")
 - clipboard-write-tool.ts — the agent tool: route → broker → { ok:true } (text is content, never logged)
 - shell-open-tool.ts — the agent tool: route → broker → { ok:true, opened } (url/path launch; dialog shows target)
+- exec-tool.ts — the agent tool: route → broker → ExecOutput (opaque `{command}` pass-through; parsed/governed Shell-side)
 - (the node-role capability.respond method lives in server/methods/capability-respond.ts)

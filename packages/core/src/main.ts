@@ -14,6 +14,7 @@ import { createDecisionStore } from "./approval/decision-store.ts";
 import { createCapabilityBroker } from "./capabilities/capability-broker.ts";
 import { createClipboardReadTool } from "./capabilities/clipboard-read-tool.ts";
 import { createClipboardWriteTool } from "./capabilities/clipboard-write-tool.ts";
+import { createExecTool } from "./capabilities/exec-tool.ts";
 import { createProcessListTool } from "./capabilities/process-list-tool.ts";
 import { createScreenshotStore } from "./capabilities/screenshot-store.ts";
 import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
@@ -157,6 +158,8 @@ const processListTool = createProcessListTool(shellCapabilityDeps);
 const clipboardReadTool = createClipboardReadTool(shellCapabilityDeps);
 const clipboardWriteTool = createClipboardWriteTool(shellCapabilityDeps);
 const shellOpenTool = createShellOpenTool(shellCapabilityDeps);
+// exec (#12): the general-purpose shell tool on the same route→broker path; the Shell parses, governs, spawns, audits.
+const execTool = createExecTool(shellCapabilityDeps);
 
 // Workspace file RW (#11): CORE-side tools (no broker/gate) confined to the Workspace root — the agent's own scratch
 // space, the same subtree memory/ and screenshots/ live under. read+write are auto-allowed within it (ruling 1/8).
@@ -191,6 +194,7 @@ registry.register(
         ...clipboardReadTool,
         ...clipboardWriteTool,
         ...shellOpenTool,
+        ...execTool,
         ...readFileTool,
         ...writeFileTool,
         ...mcpManager.tools(),
