@@ -1,5 +1,5 @@
-//! INPUT:  Tauri app lifecycle (setup hook) + the submit_pairing_code command from the Pet UI
-//! OUTPUT: run() — boots the app, wires the gate/secrets/audit/capabilities, spawns the long-lived WS node task
+//! INPUT:  Tauri app lifecycle (setup hook) + the submit_pairing_code / get_status commands from the Pet UI
+//! OUTPUT: run() — inits tracing, boots the app, wires the gate/secrets/audit/capabilities, spawns the WS node task
 //! POS:    shell — the app composition root (the ONLY place besides the dialog impl that touches Tauri); main.rs is a shim
 
 mod audit;
@@ -10,7 +10,7 @@ mod secrets;
 mod ws_client;
 
 use std::hash::{BuildHasher, Hasher, RandomState};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde::Serialize;
@@ -52,6 +52,18 @@ struct PairingState {
     tx: mpsc::Sender<String>,
 }
 
+/// The latest node connection status, shared with the Pet UI. The WS task writes it on every transition; the UI seeds
+/// from it on mount via `get_status`, because Tauri does not buffer an event emitted before a listener attaches — a
+/// fresh WebView would otherwise miss the one-shot `pairing-required` and hang on the default "connecting".
+#[derive(Clone)]
+pub struct StatusHandle(pub Arc<Mutex<String>>);
+
+// The Pet UI reads the current status on mount to close the emit-before-listener race.
+#[tauri::command]
+fn get_status(state: State<'_, StatusHandle>) -> String {
+    state.0.lock().map(|status| status.clone()).unwrap_or_else(|_| "connecting".into())
+}
+
 // The Pet UI calls this after the user reads the pairing code from the core console (prd ruling 13).
 #[tauri::command]
 fn submit_pairing_code(code: String, state: State<'_, PairingState>) -> Result<(), String> {
@@ -60,6 +72,7 @@ fn submit_pairing_code(code: String, state: State<'_, PairingState>) -> Result<(
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    init_tracing();
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
@@ -67,18 +80,34 @@ pub fn run() {
             let (tx, rx) = mpsc::channel::<String>(8);
             app.manage(PairingState { tx });
 
-            let client = build_client(handle.clone())?;
+            let status = StatusHandle(Arc::new(Mutex::new("connecting".to_string())));
+            app.manage(status.clone());
+
+            let client = build_client(handle.clone(), status)?;
             // The long-lived node client runs on Tauri's tokio runtime; closing the Pet UI never stops it (invariant 4).
             tauri::async_runtime::spawn(async move { client.run(rx).await });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![ping, submit_pairing_code])
+        .invoke_handler(tauri::generate_handler![ping, submit_pairing_code, get_status])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
+// The Shell's only subscriber init: without it every tracing line (gate decisions, audit failures, ws_client) is
+// dropped silently (R1/D1). Default level `info`, overridable via RUST_LOG; compact fmt to stderr; try_init keeps a
+// double call (tests / re-entry) harmless.
+fn init_tracing() {
+    let filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
+    let _ = tracing_subscriber::fmt()
+        .compact()
+        .with_env_filter(filter)
+        .with_writer(std::io::stderr)
+        .try_init();
+}
+
 // Assembles the gate (policy + decisions + native approver + audit), the capability handlers, and the WS client.
-fn build_client(handle: tauri::AppHandle) -> Result<WsClient, Box<dyn std::error::Error>> {
+fn build_client(handle: tauri::AppHandle, status: StatusHandle) -> Result<WsClient, Box<dyn std::error::Error>> {
     let data_dir = handle.path().app_data_dir()?; // Shell-owned, outside the Workspace by construction (D7)
     std::fs::create_dir_all(&data_dir)?;
 
@@ -109,6 +138,8 @@ fn build_client(handle: tauri::AppHandle) -> Result<WsClient, Box<dyn std::error
         url: WS_URL.to_string(),
         device_id,
         device_name: DEVICE_NAME.to_string(),
+        // Shared with the Pet UI's get_status command so a late-attaching WebView can read the current status.
+        status: status.0,
         // Each declared capability is one entry here + one register call above (invariant 7). clipboard is two
         // independently-gated names. workspace-files is NOT here — it executes Core-side (ruling 1).
         capabilities: vec![

@@ -125,6 +125,7 @@ impl Gate {
     // Audits the decision and returns whether it authorizes the capability (the single source of the allow bit).
     fn audited(&self, request_id: &str, capability: &str, decision: Decision) -> bool {
         self.audit.record(request_id, capability, decision, None);
+        tracing::info!(capability = %capability, decision = ?decision, "gate decision");
         matches!(
             decision,
             Decision::AllowedOnce | Decision::AllowedSession | Decision::AllowedAlways | Decision::AutoAllowed
@@ -134,6 +135,8 @@ impl Gate {
     // The exec variant: identical allow logic, but the command rides the audit line (ruling 9).
     fn audited_exec(&self, request_id: &str, decision: Decision, command: &str) -> bool {
         self.audit.record(request_id, "exec", decision, Some(command));
+        // The command is audit-only (ruling 9/R4) — the tracing line carries the decision alone.
+        tracing::info!(capability = "exec", decision = ?decision, "gate decision");
         matches!(
             decision,
             Decision::AllowedOnce | Decision::AllowedSession | Decision::AllowedAlways | Decision::AutoAllowed

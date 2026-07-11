@@ -38,6 +38,9 @@ pub struct WsClient {
     pub secrets: Arc<dyn SecretStore>,
     pub gate: Arc<Gate>,
     pub handlers: Arc<CapabilityRegistry>,
+    // The current connection status, mirrored for the Pet UI's get_status command (a late-attaching WebView misses
+    // one-shot emits). std Mutex (not tokio's): it is read from the sync command handler and held only momentarily.
+    pub status: Arc<std::sync::Mutex<String>>,
     // The exec policy is shared with the ExecExec handler; the WS task uses it to pre-classify a command for the gate
     // (Shape B, ruling 6) — exec's decision depends on the parsed command, not just the capability name.
     pub exec_policy: Arc<ExecPolicy>,
@@ -148,10 +151,25 @@ impl WsClient {
             return;
         }
         let Ok(request) = serde_json::from_value::<CapabilityRequest>(params) else {
+            // A request the serde mirror rejects would otherwise vanish (the core waits out its 90s backstop) —
+            // surface the drop, but never the params (they are content, R4).
+            tracing::warn!("capability.request params failed to parse; request dropped");
             return;
         };
+        tracing::info!(
+            capability = %request.capability,
+            request_id = %request.request_id,
+            "capability.request received"
+        );
+        let capability = request.capability.clone();
 
         let respond = self.authorize_and_run(request).await;
+        match &respond {
+            CapabilityRespond::Ok { .. } => tracing::info!(capability = %capability, ok = true, "capability handled"),
+            CapabilityRespond::Err { error, .. } => {
+                tracing::warn!(capability = %capability, ok = false, code = ?error.code, "capability failed");
+            }
+        }
         let frame = json!({ "jsonrpc": "2.0", "id": next_id(), "method": "capability.respond", "params": respond });
         let _ = write.lock().await.send(Message::text(frame.to_string())).await;
     }
@@ -199,6 +217,10 @@ impl WsClient {
     }
 
     fn emit_status(&self, state: &'static str) {
+        // Mirror into shared state first so get_status returns the latest even if this emit is missed by a late listener.
+        if let Ok(mut current) = self.status.lock() {
+            *current = state.to_string();
+        }
         // The Pet UI is a disposable client (invariant 4); a failed emit (window closed) is not an error.
         let _ = self.app.emit(STATUS_EVENT, StatusPayload { state });
     }

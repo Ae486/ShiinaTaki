@@ -37,6 +37,8 @@ impl CapabilityExec for ExecExec {
     fn run(&self, input: &Value) -> Result<Value, ExecError> {
         let command = read_command(input)?;
         let output = sandbox::run(command, self.policy.sandbox())?;
+        // Exit metadata only — the command lives in the audit line, stdout/stderr are content (ruling 9/R4).
+        tracing::info!(exit_code = ?output.exit_code, timed_out = output.timed_out, "exec completed");
         serde_json::to_value(output).map_err(|error| ExecError::failed(error.to_string()))
     }
 }

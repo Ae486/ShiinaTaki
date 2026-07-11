@@ -28,6 +28,8 @@ xcap = "0.9"
 sysinfo = "0.39"
 arboard = "3.6"
 tracing = "0.1"
+# fmt is a default feature; env-filter (RUST_LOG) is opt-in — without a subscriber every tracing line is dropped (R1).
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dev-dependencies]
 tempfile = "3"

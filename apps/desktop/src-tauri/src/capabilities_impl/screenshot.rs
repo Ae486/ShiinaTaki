@@ -24,6 +24,8 @@ impl CapabilityExec for ScreenshotExec {
         let monitor = primary_monitor()?;
         let image = monitor.capture_image().map_err(|error| ExecError::failed(error.to_string()))?;
         let (width, height) = (image.width(), image.height());
+        // Dimensions only — the pixels/base64 are content and never enter a log (R4).
+        tracing::info!(width, height, "screenshot captured");
 
         let mut png = Cursor::new(Vec::new());
         image

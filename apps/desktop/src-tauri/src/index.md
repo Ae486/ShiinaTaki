@@ -1,8 +1,8 @@
 # desktop/src-tauri/src/
 - main.rs — thin shim (windows_subsystem + mobile entry) calling taki_desktop_lib::run(); untouched
-- lib.rs — app composition root: plugin init, gate/secrets/audit/capabilities wiring, spawn the WS node task, commands
+- lib.rs — app composition root: tracing init, plugin init, gate/secrets/audit/capabilities wiring, spawn the WS node task, commands
 - protocol.rs — serde mirrors of @taki/shared (connect, app-error, client frames, capability channel) + golden-fixture sweep
-- ws_client.rs — the reconnecting node client: handshake, token persist, capability.request → gate → respond
+- ws_client.rs — the reconnecting node client: handshake, token persist, capability.request → gate → respond (seam-logged)
 - gate.rs — the Permission Gate policy core (name-keyed evaluate + command-keyed evaluate_exec/ExecClass, fail-closed) + gate/ submodules
 - gate/ — decisions store + approver trait/dialog impl
 - audit.rs — Shell-owned JSONL audit trail (append-only, names-only EXCEPT exec's command, ruling 9) + ISO-8601 timestamp

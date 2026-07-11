@@ -22,8 +22,14 @@ export function App() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const unlisten = listen<{ state: Status }>("taki://status", (event) => setStatus(event.payload.state));
-    return () => void unlisten.then((dispose) => dispose());
+    let unlisten: (() => void) | undefined;
+    void listen<{ state: Status }>("taki://status", (event) => setStatus(event.payload.state)).then((dispose) => {
+      unlisten = dispose;
+      // Seed once the listener is live: the Rust node may have emitted `pairing-required` before we attached, and
+      // Tauri does not buffer those events — without this the panel hangs on the default "connecting".
+      void invoke<Status>("get_status").then(setStatus).catch(() => undefined);
+    });
+    return () => unlisten?.();
   }, []);
 
   async function submit() {
