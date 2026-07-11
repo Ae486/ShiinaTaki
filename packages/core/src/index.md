@@ -10,6 +10,7 @@
 - memory/ — layer-generic memory engine: files-as-truth store + FTS5 index + retriever + assembler + tools
 - mcp/ — MCP client: connect operator servers at boot, namespace + error-wrap their tools (ADR 0006 spawn carve-out)
 - approval/ — MCP tool-approval gate: ask/await broker + decision memory + the v7 toolApproval decision fn
-- capabilities/ — core→node capability channel: ask/await broker + screenshot tool + sanctioned Workspace PNG write site
+- capabilities/ — core→node capability channel: ask/await broker + route helper + screenshot/process-list/clipboard/shell-open tools + sanctioned Workspace PNG write site
+- workspace/ — core-side Workspace-confined file RW tools + the path-escape confinement security core
 - skills/ — SKILL.md discovery + enable/disable state + lazy load_skill tool
 - testing/ — test-only mock-model factories + memory/companion fixtures + capture logger + MCP stdio fixture

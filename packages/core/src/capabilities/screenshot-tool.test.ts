@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { CapabilityOutput } from "@taki/shared";
+import type { ScreenshotOutput } from "@taki/shared";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import type { CapabilityBroker, CapabilityOutcome } from "./capability-broker.ts";
 import type { ConnectionRegistry } from "../server/connection-registry.ts";
 import type { SavedScreenshot, ScreenshotStore } from "./screenshot-store.ts";
 import { createScreenshotTool } from "./screenshot-tool.ts";
 
-const OUTPUT: CapabilityOutput = { mediaType: "image/png", dataBase64: "AAAA", width: 1920, height: 1080 };
+const OUTPUT: ScreenshotOutput = { mediaType: "image/png", dataBase64: "AAAA", width: 1920, height: 1080 };
 const EXEC_OPTS = { toolCallId: "c1", messages: [] } as never;
 
 function nodeConnection() {

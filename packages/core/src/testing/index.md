@@ -8,3 +8,4 @@
 - capture-logger.ts — pino-shaped logger stub that records (level, obj, msg) for assertions; test-only
 - mcp-fixture.mjs — 3-method stdio MCP server (initialize/tools/list/tools/call) spawned by the manager integration test; test-only
 - ws-test-client.ts — WS integration-test client harness (makeClient/openClient + frame helpers); test-only
+- capability-tool-harness.ts — ConnectionRegistry + CapabilityBroker doubles for the Shell-backed capability tools; test-only

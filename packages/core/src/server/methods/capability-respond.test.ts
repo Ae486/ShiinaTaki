@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { JSON_RPC_APP_ERROR, type CapabilityOutput, type JsonRpcRequest, type Role } from "@taki/shared";
+import { JSON_RPC_APP_ERROR, type ScreenshotOutput, type JsonRpcRequest, type Role } from "@taki/shared";
 import { createCaptureLogger } from "../../testing/capture-logger.ts";
 import { createCapabilityBroker, type CapabilityBroker, type CapabilityNotify } from "../../capabilities/capability-broker.ts";
 import type { Connection } from "../connection-registry.ts";
 import { createMethodRegistry, type MethodContext } from "../method-registry.ts";
 import { capabilityRespondMethod } from "./capability-respond.ts";
 
-const OUTPUT: CapabilityOutput = { mediaType: "image/png", dataBase64: "AAAA", width: 1, height: 1 };
+const OUTPUT: ScreenshotOutput = { mediaType: "image/png", dataBase64: "AAAA", width: 1, height: 1 };
 
 function ctxFor(role: Role): MethodContext {
   const connection: Connection = { state: { status: "authenticated", deviceId: "d", role, capabilities: [] } };

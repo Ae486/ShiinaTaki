@@ -1,5 +1,10 @@
 # core/capabilities/
 - capability-broker.ts — core→node ask/await broker; correlate by requestId; 90s backstop + denyAll on disconnect
+- route-capability.ts — shared route→broker step (findNode → request → normalize); reused by every Shell-backed tool
 - screenshot-store.ts — the sanctioned Workspace write site: base64 PNG → screenshots/<ts>.png (invariant 2)
 - screenshot-tool.ts — the agent tool: route → broker.request → persist → { ok, path, width, height, bytes }
+- process-list-tool.ts — the agent tool: route → broker → { ok, processes, count } (read-only, no kill)
+- clipboard-read-tool.ts — the agent tool: route → broker → { ok, text } (empty clipboard → "")
+- clipboard-write-tool.ts — the agent tool: route → broker → { ok:true } (text is content, never logged)
+- shell-open-tool.ts — the agent tool: route → broker → { ok:true, opened } (url/path launch; dialog shows target)
 - (the node-role capability.respond method lives in server/methods/capability-respond.ts)

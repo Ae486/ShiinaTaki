@@ -7,7 +7,6 @@ import { randomUUID } from "node:crypto";
 import {
   CAPABILITY_METHODS,
   type CapabilityErrorCode,
-  type CapabilityOutput,
   type CapabilityRequest,
   type CapabilityRespondParams,
   type CapabilityRespondResult,
@@ -17,9 +16,9 @@ import type { Logger } from "../logging/logger.ts";
 /** Core-internal failure codes added to the closed wire union (surfaced to the tool, never onto the wire). */
 export type CapabilityFailureCode = CapabilityErrorCode | "CAPABILITY_TIMEOUT" | "NODE_DISCONNECTED";
 
-/** A node's answer: its output, or a structured failure the tool degrades into a model-readable result. */
+/** A node's answer: its opaque output payload (Option A — the calling tool owns its schema), or a structured failure. */
 export type CapabilityOutcome =
-  | { ok: true; output: CapabilityOutput }
+  | { ok: true; output: unknown }
   | { ok: false; code: CapabilityFailureCode; message: string };
 
 /** Pushes a capability.request notification to ONE node socket (from connection-registry.findNodeForCapability). */

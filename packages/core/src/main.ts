@@ -12,8 +12,12 @@ import { createApprovalBroker } from "./approval/approval-broker.ts";
 import { createApprovalGate } from "./approval/approval-gate.ts";
 import { createDecisionStore } from "./approval/decision-store.ts";
 import { createCapabilityBroker } from "./capabilities/capability-broker.ts";
+import { createClipboardReadTool } from "./capabilities/clipboard-read-tool.ts";
+import { createClipboardWriteTool } from "./capabilities/clipboard-write-tool.ts";
+import { createProcessListTool } from "./capabilities/process-list-tool.ts";
 import { createScreenshotStore } from "./capabilities/screenshot-store.ts";
 import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
+import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
 import { loadProviderConfig } from "./config/provider-config.ts";
 import { loadServerConfig } from "./config/server-config.ts";
 import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
@@ -43,6 +47,9 @@ import { createSkillsState } from "./skills/skills-state.ts";
 import { scanSkills } from "./skills/skill-scanner.ts";
 import { createTimelineSubscriptions } from "./server/timeline-subscriptions.ts";
 import { startWsServer } from "./server/ws-server.ts";
+import { createReadFileTool } from "./workspace/read-file-tool.ts";
+import { createWorkspacePaths } from "./workspace/workspace-paths.ts";
+import { createWriteFileTool } from "./workspace/write-file-tool.ts";
 
 // Config parse is fatal-fast at boot; env is supplied by the run script's
 // --env-file flag, never read from disk by code (invariant 1).
@@ -144,6 +151,18 @@ const screenshotTool = createScreenshotTool({
   store: createScreenshotStore({ screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots") }),
   logger,
 });
+// The other three Shell-backed capabilities (#11) share the route→broker path; each is gate-authorized on the Shell.
+const shellCapabilityDeps = { registry: connectionRegistry, broker: capabilityBroker, logger };
+const processListTool = createProcessListTool(shellCapabilityDeps);
+const clipboardReadTool = createClipboardReadTool(shellCapabilityDeps);
+const clipboardWriteTool = createClipboardWriteTool(shellCapabilityDeps);
+const shellOpenTool = createShellOpenTool(shellCapabilityDeps);
+
+// Workspace file RW (#11): CORE-side tools (no broker/gate) confined to the Workspace root — the agent's own scratch
+// space, the same subtree memory/ and screenshots/ live under. read+write are auto-allowed within it (ruling 1/8).
+const workspacePaths = createWorkspacePaths({ root: join(serverConfig.dataDir, "workspace") });
+const readFileTool = createReadFileTool({ paths: workspacePaths, logger });
+const writeFileTool = createWriteFileTool({ paths: workspacePaths, logger });
 
 const registry = createMethodRegistry();
 // The pairing code is the one sanctioned secret-ish value in a log: short-lived, single-purpose,
@@ -164,8 +183,18 @@ registry.register(
       store: conversationStore,
       memory,
       autoMemory,
-      // Extra tools = the skills meta-tool + the screenshot capability tool + every namespaced MCP tool.
-      extraTools: { ...createLoadSkillTool(skillsLoader), ...screenshotTool, ...mcpManager.tools() },
+      // Extra tools = the skills meta-tool + every capability tool (Shell-gated + core-side Workspace files) + MCP tools.
+      extraTools: {
+        ...createLoadSkillTool(skillsLoader),
+        ...screenshotTool,
+        ...processListTool,
+        ...clipboardReadTool,
+        ...clipboardWriteTool,
+        ...shellOpenTool,
+        ...readFileTool,
+        ...writeFileTool,
+        ...mcpManager.tools(),
+      },
       instructionsExtra: () => skillsLoader.renderList(),
       approval: approvalGate,
     }),

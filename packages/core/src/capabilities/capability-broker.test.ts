@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { CapabilityOutput, CapabilityRequest } from "@taki/shared";
+import type { ScreenshotOutput, CapabilityRequest } from "@taki/shared";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { TIMEOUT_MESSAGE, createCapabilityBroker, type CapabilityNotify } from "./capability-broker.ts";
 
@@ -8,7 +8,8 @@ function broker(timeoutMs?: number) {
   return createCapabilityBroker({ logger, timeoutMs });
 }
 
-const OUTPUT: CapabilityOutput = { mediaType: "image/png", dataBase64: "AAAA", width: 1920, height: 1080 };
+// An arbitrary opaque payload (Option A); the broker no longer knows or checks the shape — the tool does.
+const OUTPUT: ScreenshotOutput = { mediaType: "image/png", dataBase64: "AAAA", width: 1920, height: 1080 };
 
 describe("createCapabilityBroker", () => {
   it("notifies the node with a requestId payload and resolves with the output on respond (T3)", async () => {
