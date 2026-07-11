@@ -1,5 +1,5 @@
 //! INPUT:  a gate-authorized screenshot request (input ignored; primary monitor, v1)
-//! OUTPUT: ScreenshotExec: xcap capture -> PNG -> base64 CapabilityOutput
+//! OUTPUT: ScreenshotExec: xcap capture -> PNG -> base64 ScreenshotOutput Value
 //! POS:    shell/capabilities — the screenshot capability; reachable ONLY via the gate; blocking (run off-reactor)
 
 use std::io::Cursor;
@@ -8,7 +8,7 @@ use serde_json::Value;
 use xcap::Monitor;
 
 use crate::capabilities_impl::{CapabilityExec, ExecError};
-use crate::protocol::CapabilityOutput;
+use crate::protocol::ScreenshotOutput;
 
 const CAPABILITY: &str = "screenshot";
 
@@ -20,7 +20,7 @@ impl CapabilityExec for ScreenshotExec {
         CAPABILITY
     }
 
-    fn run(&self, _input: &Value) -> Result<CapabilityOutput, ExecError> {
+    fn run(&self, _input: &Value) -> Result<Value, ExecError> {
         let monitor = primary_monitor()?;
         let image = monitor.capture_image().map_err(|error| ExecError::failed(error.to_string()))?;
         let (width, height) = (image.width(), image.height());
@@ -30,12 +30,13 @@ impl CapabilityExec for ScreenshotExec {
             .write_to(&mut png, xcap::image::ImageFormat::Png)
             .map_err(|error| ExecError::failed(error.to_string()))?;
 
-        Ok(CapabilityOutput {
+        let output = ScreenshotOutput {
             media_type: "image/png".to_string(),
             data_base64: base64_encode(png.get_ref()),
             width,
             height,
-        })
+        };
+        serde_json::to_value(output).map_err(|error| ExecError::failed(error.to_string()))
     }
 }
 

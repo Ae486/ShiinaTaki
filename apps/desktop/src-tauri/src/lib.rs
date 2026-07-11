@@ -17,7 +17,11 @@ use serde::Serialize;
 use tauri::{Manager, State};
 use tokio::sync::mpsc;
 
-use capabilities_impl::{screenshot::ScreenshotExec, CapabilityRegistry};
+use capabilities_impl::clipboard::{ClipboardReadExec, ClipboardWriteExec};
+use capabilities_impl::process_list::ProcessListExec;
+use capabilities_impl::screenshot::ScreenshotExec;
+use capabilities_impl::shell_open::ShellOpenExec;
+use capabilities_impl::CapabilityRegistry;
 use gate::approver::TwoStepDialogApprover;
 use gate::decisions::DecisionStore;
 use gate::{Gate, GatePolicy};
@@ -87,13 +91,25 @@ fn build_client(handle: tauri::AppHandle) -> Result<WsClient, Box<dyn std::error
 
     let mut handlers = CapabilityRegistry::new();
     handlers.register(Arc::new(ScreenshotExec));
+    handlers.register(Arc::new(ProcessListExec));
+    handlers.register(Arc::new(ClipboardReadExec));
+    handlers.register(Arc::new(ClipboardWriteExec));
+    handlers.register(Arc::new(ShellOpenExec));
 
     Ok(WsClient {
         app: handle,
         url: WS_URL.to_string(),
         device_id,
         device_name: DEVICE_NAME.to_string(),
-        capabilities: vec!["screenshot".to_string()],
+        // Each declared capability is one entry here + one register call above (invariant 7). clipboard is two
+        // independently-gated names. workspace-files is NOT here — it executes Core-side (ruling 1).
+        capabilities: vec![
+            "screenshot".to_string(),
+            "process-list".to_string(),
+            "clipboard-read".to_string(),
+            "clipboard-write".to_string(),
+            "shell-open".to_string(),
+        ],
         secrets,
         gate,
         handlers: Arc::new(handlers),

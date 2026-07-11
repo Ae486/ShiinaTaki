@@ -7,5 +7,5 @@
 - gate/ — decisions store + approver trait/dialog impl
 - audit.rs — Shell-owned JSONL audit trail (append-only, names-not-content) + ISO-8601 timestamp
 - secrets.rs — SecretStore trait + Windows Credential Manager (keyring) + in-memory fake
-- capabilities_impl.rs — capability handler registry (invariant 7) + capabilities_impl/ executors
-- capabilities_impl/ — one executor per capability (screenshot)
+- capabilities_impl.rs — capability handler registry (invariant 7; opaque Value output + optional dialog detail) + capabilities_impl/ executors
+- capabilities_impl/ — one executor per capability (screenshot, process-list, clipboard read/write, shell-open)

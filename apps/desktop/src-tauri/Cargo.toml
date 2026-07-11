@@ -3,7 +3,8 @@ name = "taki-desktop"
 version = "0.0.0"
 description = "TakiAgent desktop shell"
 edition = "2021"
-rust-version = "1.88"
+# Effective floor raised to 1.95 by sysinfo 0.39.6 (patch-level MSRV bump); toolchain is `rustup update stable`.
+rust-version = "1.95"
 
 [lib]
 # The library entry the Tauri mobile-entry macro loads; keep main.rs a thin shim.
@@ -16,6 +17,7 @@ tauri-build = { version = "2.6", features = [] }
 [dependencies]
 tauri = { version = "2.11", features = [] }
 tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["rt", "sync", "time", "macros"] }
@@ -23,6 +25,8 @@ tokio-tungstenite = "0.29"
 futures-util = "0.3"
 keyring = "4.1"
 xcap = "0.9"
+sysinfo = "0.39"
+arboard = "3.6"
 tracing = "0.1"
 
 [dev-dependencies]

@@ -59,9 +59,10 @@ impl Gate {
         Self { policy, decisions, approver, audit }
     }
 
-    /// Returns true iff the capability is authorized. Blocking (the approver may show a native dialog) — the caller
-    /// runs this off the async reactor (spawn_blocking).
-    pub fn evaluate(&self, request_id: &str, capability: &str) -> bool {
+    /// Returns true iff the capability is authorized. `detail` is an optional human-readable string (e.g. the
+    /// shell-open target) shown in the approval dialog only (ruling 4) — it is never audited or logged. Blocking (the
+    /// approver may show a native dialog) — the caller runs this off the async reactor (spawn_blocking).
+    pub fn evaluate(&self, request_id: &str, capability: &str, detail: Option<&str>) -> bool {
         // 1. Disabled capability -> auto-deny (mirror of approval-gate.ts order).
         if !self.policy.is_enabled(capability) {
             return self.audited(request_id, capability, Decision::AutoDenied);
@@ -73,7 +74,7 @@ impl Gate {
             None => {}
         }
         // 4. Ask. Allow remembers per scope; every other arm denies without persisting (deny-once, ruling 1).
-        match self.approver.ask(capability) {
+        match self.approver.ask(capability, detail) {
             ApproverOutcome::Allow(scope) => {
                 self.decisions.remember(capability, scope, true);
                 self.audited(request_id, capability, allow_decision(scope))
@@ -110,8 +111,19 @@ mod tests {
 
     struct FakeApprover(ApproverOutcome);
     impl Approver for FakeApprover {
-        fn ask(&self, _capability: &str) -> ApproverOutcome {
+        fn ask(&self, _capability: &str, _detail: Option<&str>) -> ApproverOutcome {
             self.0
+        }
+    }
+
+    // Records the detail it was asked with, to prove the gate threads it through to the approver (T16).
+    struct RecordingApprover {
+        detail: Mutex<Option<String>>,
+    }
+    impl Approver for RecordingApprover {
+        fn ask(&self, _capability: &str, detail: Option<&str>) -> ApproverOutcome {
+            *self.detail.lock().unwrap() = detail.map(str::to_string);
+            ApproverOutcome::Allow(Scope::Once)
         }
     }
 
@@ -169,7 +181,7 @@ mod tests {
         ];
         for (policy, answer, expect_allowed, expect_audit) in cases {
             let h = harness(policy, answer);
-            let allowed = h.gate.evaluate("req", "screenshot");
+            let allowed = h.gate.evaluate("req", "screenshot", None);
             assert_eq!(allowed, expect_allowed, "allow bit for {answer:?}");
             assert_eq!(last_decision(&h.audit), expect_audit, "audited-as for {answer:?}");
             // Exactly one audit line per evaluation.
@@ -181,7 +193,7 @@ mod tests {
     fn remembered_always_auto_allows_without_asking() {
         let h = harness(GatePolicy::new(), ApproverOutcome::Deny); // approver would deny — but it must not be consulted
         h.decisions.remember("screenshot", Scope::Always, true);
-        assert!(h.gate.evaluate("req", "screenshot"));
+        assert!(h.gate.evaluate("req", "screenshot", None));
         assert_eq!(last_decision(&h.audit), Decision::AutoAllowed);
     }
 
@@ -189,21 +201,42 @@ mod tests {
     fn remembered_never_auto_denies_without_asking() {
         let h = harness(GatePolicy::new(), ApproverOutcome::Allow(Scope::Once));
         h.decisions.remember("screenshot", Scope::Always, false); // deny+always == never
-        assert!(!h.gate.evaluate("req", "screenshot"));
+        assert!(!h.gate.evaluate("req", "screenshot", None));
         assert_eq!(last_decision(&h.audit), Decision::AutoDenied);
     }
 
     #[test]
     fn allow_always_persists_for_the_next_evaluation() {
         let h = harness(GatePolicy::new(), ApproverOutcome::Allow(Scope::Always));
-        assert!(h.gate.evaluate("req", "screenshot"));
+        assert!(h.gate.evaluate("req", "screenshot", None));
         assert_eq!(h.decisions.get("screenshot"), Some(Remembered::Always));
     }
 
     #[test]
     fn allow_once_persists_nothing() {
         let h = harness(GatePolicy::new(), ApproverOutcome::Allow(Scope::Once));
-        assert!(h.gate.evaluate("req", "screenshot"));
+        assert!(h.gate.evaluate("req", "screenshot", None));
         assert_eq!(h.decisions.get("screenshot"), None);
+    }
+
+    #[test]
+    fn threads_the_detail_string_to_the_approver_on_ask() {
+        // T16: shell-open passes its target as detail; screenshot passes None (name-only). The detail must reach the
+        // approver verbatim — it is what the user sees in the dialog before authorizing a launch (ruling 4).
+        let dir = tempfile::tempdir().unwrap();
+        let decisions = Arc::new(DecisionStore::load(dir.path().join("gate-decisions.json")));
+        let approver = Arc::new(RecordingApprover { detail: Mutex::new(None) });
+        let gate = Gate::new(
+            GatePolicy::new(),
+            decisions,
+            approver.clone(),
+            Arc::new(MemoryAuditor::default()) as Arc<dyn AuditSink>,
+        );
+
+        assert!(gate.evaluate("req", "shell-open", Some("open https://x")));
+        assert_eq!(*approver.detail.lock().unwrap(), Some("open https://x".to_string()));
+
+        assert!(gate.evaluate("req", "screenshot", None));
+        assert_eq!(*approver.detail.lock().unwrap(), None);
     }
 }

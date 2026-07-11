@@ -2,14 +2,17 @@
 //! OUTPUT: CapabilityRegistry::respond -> CapabilityRespond; CapabilityExec trait + ExecError
 //! POS:    shell/capabilities — the pluggable handler table (invariant 7); executors reachable ONLY after the gate
 
+pub mod clipboard;
+pub mod process_list;
 pub mod screenshot;
+pub mod shell_open;
 
 use std::collections::HashMap;
 use std::sync::Arc;
 
 use serde_json::Value;
 
-use crate::protocol::{CapabilityErrorCode, CapabilityOutput, CapabilityRespond};
+use crate::protocol::{CapabilityErrorCode, CapabilityRespond};
 
 /// A capability execution failure, carrying a closed wire code the core surfaces to the model.
 #[derive(Debug, Clone)]
@@ -24,10 +27,16 @@ impl ExecError {
     }
 }
 
-/// One capability implementation. `run` is blocking (screen capture) — the caller runs it off the async reactor.
+/// One capability implementation. `run` is blocking (screen capture / clipboard / launch) — the caller runs it off the
+/// async reactor. Output is an opaque Value (Option A): each exec serializes its own output struct.
 pub trait CapabilityExec: Send + Sync {
     fn capability(&self) -> &str;
-    fn run(&self, input: &Value) -> Result<CapabilityOutput, ExecError>;
+    fn run(&self, input: &Value) -> Result<Value, ExecError>;
+    /// An optional human-readable detail derived from the input, shown in the approval dialog (ruling 4). Default: none.
+    /// It is dialog-only — NEVER logged (the target may be content, e.g. a URL the user is browsing).
+    fn detail(&self, _input: &Value) -> Option<String> {
+        None
+    }
 }
 
 /// The handler table: capability name -> executor. Adding a capability is one `register` call (invariant 7).
@@ -43,6 +52,11 @@ impl CapabilityRegistry {
 
     pub fn register(&mut self, exec: Arc<dyn CapabilityExec>) {
         self.handlers.insert(exec.capability().to_string(), exec);
+    }
+
+    /// The dialog detail for a capability+input, or None (unknown capability / no detail) — name-only dialog.
+    pub fn detail(&self, capability: &str, input: &Value) -> Option<String> {
+        self.handlers.get(capability).and_then(|exec| exec.detail(input))
     }
 
     /// Runs the capability and shapes the node's respond frame; an unknown capability is UNSUPPORTED_CAPABILITY.
@@ -64,19 +78,15 @@ impl CapabilityRegistry {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
 
     struct FakeExec;
     impl CapabilityExec for FakeExec {
         fn capability(&self) -> &str {
             "screenshot"
         }
-        fn run(&self, _input: &Value) -> Result<CapabilityOutput, ExecError> {
-            Ok(CapabilityOutput {
-                media_type: "image/png".into(),
-                data_base64: "AAAA".into(),
-                width: 1920,
-                height: 1080,
-            })
+        fn run(&self, _input: &Value) -> Result<Value, ExecError> {
+            Ok(json!({ "mediaType": "image/png", "dataBase64": "AAAA", "width": 1920, "height": 1080 }))
         }
     }
 
@@ -93,8 +103,8 @@ mod tests {
             CapabilityRespond::Ok { request_id, ok, output } => {
                 assert_eq!(request_id, "req-1");
                 assert!(ok);
-                assert_eq!(output.media_type, "image/png");
-                assert_eq!((output.width, output.height), (1920, 1080));
+                assert_eq!(output["mediaType"], "image/png");
+                assert_eq!((output["width"].as_u64(), output["height"].as_u64()), (Some(1920), Some(1080)));
             }
             other => panic!("expected an Ok respond arm, got {other:?}"),
         }
@@ -109,5 +119,11 @@ mod tests {
             }
             other => panic!("expected an Err respond arm, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn detail_is_none_for_a_capability_without_one() {
+        assert_eq!(registry().detail("screenshot", &Value::Null), None);
+        assert_eq!(registry().detail("unknown", &Value::Null), None);
     }
 }

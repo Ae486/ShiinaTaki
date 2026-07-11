@@ -119,15 +119,55 @@ pub struct CapabilityRequest {
     pub input: Value,
 }
 
-/// The screenshot capability output carried by a successful capability.respond.
+/// The screenshot capability output (mirror of ScreenshotOutputSchema; Option A: serialized to an opaque Value).
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct CapabilityOutput {
+pub struct ScreenshotOutput {
     #[serde(rename = "mediaType")]
     pub media_type: String,
     #[serde(rename = "dataBase64")]
     pub data_base64: String,
     pub width: u32,
     pub height: u32,
+}
+
+/// One process in a process-list snapshot (mirror of ProcessInfoSchema). cmd/argv is excluded in v1 (ruling 5).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProcessInfo {
+    pub pid: u32,
+    pub name: String,
+    #[serde(rename = "parentPid")]
+    pub parent_pid: Option<u32>,
+    #[serde(rename = "memoryBytes")]
+    pub memory_bytes: u64,
+    #[serde(rename = "startTime")]
+    pub start_time: u64,
+}
+
+/// The process-list capability output (mirror of ProcessListOutputSchema).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProcessListOutput {
+    pub processes: Vec<ProcessInfo>,
+    pub count: usize,
+}
+
+/// The clipboard-read output (mirror of ClipboardReadOutputSchema); text is content — never logged.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ClipboardReadOutput {
+    pub text: String,
+}
+
+/// An ack for clipboard-write (mirror of ClipboardWriteOutputSchema); ok is always true on the success arm.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ClipboardWriteOutput {
+    pub ok: bool,
+}
+
+/// The shell-open output (mirror of ShellOpenOutputSchema); echoes the launched target back to the model
+/// (dialog + model only — the target never enters the audit line or a log).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ShellOpenOutput {
+    pub ok: bool,
+    pub opened: String,
 }
 
 /// The closed wire error union shared with the core (`capability-schema.ts`).
@@ -146,6 +186,7 @@ pub struct CapabilityError {
 }
 
 /// The capability.respond params (node→core). Untagged; discriminated by the presence of output vs error.
+/// `output` is an opaque Value (Option A) — each capability serializes its own output struct into it (invariant 7).
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(untagged)]
 pub enum CapabilityRespond {
@@ -153,7 +194,7 @@ pub enum CapabilityRespond {
         #[serde(rename = "requestId")]
         request_id: String,
         ok: bool,
-        output: CapabilityOutput,
+        output: Value,
     },
     Err {
         #[serde(rename = "requestId")]
@@ -164,8 +205,8 @@ pub enum CapabilityRespond {
 }
 
 impl CapabilityRespond {
-    /// A success respond frame for a captured screenshot.
-    pub fn ok(request_id: String, output: CapabilityOutput) -> Self {
+    /// A success respond frame carrying a capability's opaque output payload.
+    pub fn ok(request_id: String, output: Value) -> Self {
         Self::Ok { request_id, ok: true, output }
     }
 
@@ -196,6 +237,12 @@ mod tests {
             "client-frame" => serde_json::from_str::<ClientFrame>(text).ok().map(to_value),
             "capability-request" => serde_json::from_str::<CapabilityRequest>(text).ok().map(to_value),
             "capability-respond" => serde_json::from_str::<CapabilityRespond>(text).ok().map(to_value),
+            // Per-capability output payloads (Option A) — the SAME golden files the vitest per-capability schemas assert.
+            "screenshot-output" => serde_json::from_str::<ScreenshotOutput>(text).ok().map(to_value),
+            "process-list-output" => serde_json::from_str::<ProcessListOutput>(text).ok().map(to_value),
+            "clipboard-read-output" => serde_json::from_str::<ClipboardReadOutput>(text).ok().map(to_value),
+            "clipboard-write-output" => serde_json::from_str::<ClipboardWriteOutput>(text).ok().map(to_value),
+            "shell-open-output" => serde_json::from_str::<ShellOpenOutput>(text).ok().map(to_value),
             other => panic!("no serde type mapped for fixture prefix {other:?}"),
         }
     }

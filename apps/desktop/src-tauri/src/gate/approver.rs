@@ -23,9 +23,10 @@ pub enum ApproverOutcome {
     Unavailable,
 }
 
-/// Asks the user to authorize a capability. Object-safe + tauri-free so the gate stays unit-testable.
+/// Asks the user to authorize a capability. `detail` is an optional human-readable string (e.g. the shell-open
+/// target) rendered in the dialog only. Object-safe + tauri-free so the gate stays unit-testable.
 pub trait Approver: Send + Sync {
-    fn ask(&self, capability: &str) -> ApproverOutcome;
+    fn ask(&self, capability: &str, detail: Option<&str>) -> ApproverOutcome;
 }
 
 // Fail-closed: a user who never answers within a minute is a deny, not a hung capability (ruling 2/11).
@@ -51,14 +52,15 @@ impl TwoStepDialogApprover {
 
 #[cfg(desktop)]
 impl Approver for TwoStepDialogApprover {
-    fn ask(&self, capability: &str) -> ApproverOutcome {
+    fn ask(&self, capability: &str, detail: Option<&str>) -> ApproverOutcome {
         let (tx, rx) = mpsc::channel();
         let app = self.app.clone();
         let capability = capability.to_string();
+        let detail = detail.map(str::to_string);
         // The native dialog is blocking and must never run on the main/UI thread; a worker thread keeps both the
         // UI and the async WS reactor free while the recv_timeout enforces the fail-closed 60s deadline.
         std::thread::spawn(move || {
-            let _ = tx.send(run_two_step_dialog(&app, &capability));
+            let _ = tx.send(run_two_step_dialog(&app, &capability, detail.as_deref()));
         });
         match rx.recv_timeout(DIALOG_TIMEOUT) {
             Ok(outcome) => outcome,
@@ -70,12 +72,17 @@ impl Approver for TwoStepDialogApprover {
 }
 
 #[cfg(desktop)]
-fn run_two_step_dialog(app: &tauri::AppHandle, capability: &str) -> ApproverOutcome {
+fn run_two_step_dialog(app: &tauri::AppHandle, capability: &str, detail: Option<&str>) -> ApproverOutcome {
     use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind, MessageDialogResult};
 
+    // The detail (e.g. the shell-open target) closes the visibility gap: the user sees WHAT is being launched (ruling 4).
+    let prompt = match detail {
+        Some(detail) => format!("The agent wants to use: {capability} — {detail}"),
+        None => format!("The agent wants to use: {capability}"),
+    };
     let allowed = app
         .dialog()
-        .message(format!("The agent wants to use: {capability}"))
+        .message(prompt)
         .title("TakiAgent — Permission")
         .kind(MessageDialogKind::Warning)
         .buttons(MessageDialogButtons::OkCancelCustom(ALLOW.into(), "Deny".into()))

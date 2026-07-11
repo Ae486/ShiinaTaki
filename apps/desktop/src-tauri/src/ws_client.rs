@@ -158,7 +158,10 @@ impl WsClient {
         let handlers = self.handlers.clone();
         let CapabilityRequest { request_id, capability, input } = request;
         let joined = tauri::async_runtime::spawn_blocking(move || {
-            if gate.evaluate(&request_id, &capability) {
+            // The dialog detail (e.g. the shell-open target) is derived from the input by the capability itself; it is
+            // shown to the user for approval but never audited or logged (ruling 4).
+            let detail = handlers.detail(&capability, &input);
+            if gate.evaluate(&request_id, &capability, detail.as_deref()) {
                 handlers.respond(request_id, &capability, &input)
             } else {
                 CapabilityRespond::err(request_id, crate::protocol::CapabilityErrorCode::Denied, "denied".into())
