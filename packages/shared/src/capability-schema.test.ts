@@ -31,20 +31,17 @@ describe("capability schema (T1)", () => {
     ).toBe(false);
   });
 
-  it("parses the success arm and rejects a malformed output", () => {
-    const ok = CapabilityRespondParamsSchema.safeParse({
-      requestId: UUID,
-      ok: true,
-      output: { mediaType: "image/png", dataBase64: "AAAA", width: 1920, height: 1080 },
-    });
-    expect(ok.success).toBe(true);
+  it("parses the success arm with an OPAQUE output payload (Option A) and requires the output key", () => {
+    // The channel no longer validates the output shape (each capability owns its schema in capability-outputs.ts);
+    // it accepts any payload but still requires the key present so an arm-less respond is rejected.
     expect(
       CapabilityRespondParamsSchema.safeParse({
         requestId: UUID,
         ok: true,
-        output: { mediaType: "image/jpeg", dataBase64: "AAAA", width: 1, height: 1 },
+        output: { anything: "goes", n: 1 },
       }).success,
-    ).toBe(false);
+    ).toBe(true);
+    expect(CapabilityRespondParamsSchema.safeParse({ requestId: UUID, ok: true }).success).toBe(false);
   });
 
   it("parses the failure arm over the closed error union and rejects an unknown code", () => {

@@ -96,7 +96,6 @@ export {
   CAPABILITY_METHODS,
   CapabilityErrorCodeSchema,
   CapabilityErrorSchema,
-  CapabilityOutputSchema,
   CapabilityRequestSchema,
   CapabilityRespondParamsSchema,
   CapabilityRespondResultSchema,
@@ -104,10 +103,26 @@ export {
 export type {
   CapabilityError,
   CapabilityErrorCode,
-  CapabilityOutput,
   CapabilityRequest,
   CapabilityRespondParams,
   CapabilityRespondResult,
 } from "./capability-schema.ts";
+
+export {
+  ClipboardReadOutputSchema,
+  ClipboardWriteOutputSchema,
+  ProcessInfoSchema,
+  ProcessListOutputSchema,
+  ScreenshotOutputSchema,
+  ShellOpenOutputSchema,
+} from "./capability-outputs.ts";
+export type {
+  ClipboardReadOutput,
+  ClipboardWriteOutput,
+  ProcessInfo,
+  ProcessListOutput,
+  ScreenshotOutput,
+  ShellOpenOutput,
+} from "./capability-outputs.ts";
 
 export { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "./ws-defaults.ts";

@@ -12,6 +12,13 @@ import { ErrorCodeSchema } from "./error-code-schema.ts";
 import { JsonRpcClientFrameSchema, JsonRpcIdSchema } from "./json-rpc-schema.ts";
 import { ConnectParamsSchema, ConnectResultSchema } from "./connect-schema.ts";
 import { CapabilityRequestSchema, CapabilityRespondParamsSchema } from "./capability-schema.ts";
+import {
+  ClipboardReadOutputSchema,
+  ClipboardWriteOutputSchema,
+  ProcessListOutputSchema,
+  ScreenshotOutputSchema,
+  ShellOpenOutputSchema,
+} from "./capability-outputs.ts";
 
 // The app-error frame is a JSON-RPC error response whose data carries a closed-union domain code — the
 // stricter shape the node branches on (PAIRING_REQUIRED vs AUTH_FAILED). The generic envelope leaves data
@@ -35,6 +42,13 @@ const SCHEMA_BY_PREFIX: Record<string, ZodType> = {
   "client-frame": JsonRpcClientFrameSchema,
   "capability-request": CapabilityRequestSchema,
   "capability-respond": CapabilityRespondParamsSchema,
+  // Per-capability output payloads (Option A): the channel treats `output` as opaque, so each capability's own
+  // output schema owns its fixtures — the SAME files the cargo serde structs re-parse (anti-drift, invariant 3).
+  "screenshot-output": ScreenshotOutputSchema,
+  "process-list-output": ProcessListOutputSchema,
+  "clipboard-read-output": ClipboardReadOutputSchema,
+  "clipboard-write-output": ClipboardWriteOutputSchema,
+  "shell-open-output": ShellOpenOutputSchema,
 };
 
 const FIXTURE_DIR = fileURLToPath(new URL("../fixtures/protocol", import.meta.url));

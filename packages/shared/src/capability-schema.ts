@@ -21,15 +21,6 @@ export const CapabilityRequestSchema = z.strictObject({
 });
 export type CapabilityRequest = z.infer<typeof CapabilityRequestSchema>;
 
-// The screenshot capability's output (v1's only capability). dataBase64 is content — it never enters a log.
-export const CapabilityOutputSchema = z.strictObject({
-  mediaType: z.literal("image/png"),
-  dataBase64: z.string().min(1),
-  width: z.number().int().positive(),
-  height: z.number().int().positive(),
-});
-export type CapabilityOutput = z.infer<typeof CapabilityOutputSchema>;
-
 // Closed wire error union shared with the Rust node: a denial, a failed execution, or an unknown capability.
 export const CapabilityErrorCodeSchema = z.enum(["DENIED", "EXEC_FAILED", "UNSUPPORTED_CAPABILITY"]);
 export type CapabilityErrorCode = z.infer<typeof CapabilityErrorCodeSchema>;
@@ -40,9 +31,11 @@ export const CapabilityErrorSchema = z.strictObject({
 });
 export type CapabilityError = z.infer<typeof CapabilityErrorSchema>;
 
-// Two arms discriminated by ok: success carries output, failure carries a closed-union error (mirror: serde untagged enum).
+// Two arms discriminated by ok: success carries an OPAQUE output payload (Option A — each capability owns its own
+// output schema in capability-outputs.ts and .parse()s it), failure carries a closed-union error. `output` is
+// z.unknown() symmetric with `input` above, so adding a capability never touches this channel schema (invariant 7).
 export const CapabilityRespondParamsSchema = z.discriminatedUnion("ok", [
-  z.strictObject({ requestId: z.uuid(), ok: z.literal(true), output: CapabilityOutputSchema }),
+  z.strictObject({ requestId: z.uuid(), ok: z.literal(true), output: z.unknown() }),
   z.strictObject({ requestId: z.uuid(), ok: z.literal(false), error: CapabilityErrorSchema }),
 ]);
 export type CapabilityRespondParams = z.infer<typeof CapabilityRespondParamsSchema>;

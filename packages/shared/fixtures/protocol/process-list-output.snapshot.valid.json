@@ -1,0 +1,7 @@
+{
+  "processes": [
+    { "pid": 1, "name": "systemd", "parentPid": null, "memoryBytes": 5000000000, "startTime": 1720000000 },
+    { "pid": 88, "name": "chrome.exe", "parentPid": 1, "memoryBytes": 154820608, "startTime": 1720000001 }
+  ],
+  "count": 2
+}
