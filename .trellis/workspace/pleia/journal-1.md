@@ -327,3 +327,34 @@ The general-purpose exec shell capability — v1's highest-stakes security bound
 ### Next Steps
 
 - None - task complete
+
+
+## Session 11: Observability: Shell tracing + readable core logs + capability-flow trace
+
+**Date**: 2026-07-11
+**Task**: Observability: Shell tracing + readable core logs + capability-flow trace
+**Branch**: `main`
+
+### Summary
+
+Manual smoke of #10 screenshot item 3/4 (session grant + restart) surfaced: no console/dialog/audit/file, agent claims success. Diagnosed: the break is UPSTREAM of the Shell gate (no audit line means the request never reached evaluate); Shell-side session memory is correct (verified). Two candidates, observationally identical without logs: H1 routeCapability NO_NODE (silent) vs H2 agent never invoked the tool (hallucination). Root-cause blocked by an observability hole. Confirmed defects fixed: D1 the Shell had NO tracing-subscriber (every gate/audit/ws log dropped — Shell console dark); D2 core logs were raw JSON (no pino-pretty); D3 routeCapability returned NO_NODE without logging. obs-impl (fable) fixed all: Shell tracing-subscriber 0.3 + init_tracing(); core pino-pretty dev-TTY-only guard (VPS stays JSON); seam trace lines core (tool invoked / routing failed / responded) + shell (request received / gate decision / handled|failed / screenshot|exec metadata) — all metadata-only, R4 grep clean. R5 (approver YesNoCancelCustom mapping) adjudicated CORRECT against rfd 0.16 + plugin source (returns Custom(label)); NOT a bug. Leader re-ran all 6 gates green (TS 444 / Rust 59 / clippy / build) + independent content-leak grep + read route-capability/logger. Also committed the two earlier validated fixes: vite EBUSY (src-tauri watch ignore) + Pet UI status race (get_status seed). 3 commits. NEW security finding (tracked, not yet fixed): dismissing the scope dialog (ESC/X) maps to the Cancel slot = 'Always' -> a dismissal silently grants Always (most-permissive), a permission fail-OPEN; fix = put the safest option (Only once) in the cancel slot. The actual screenshot H1/H2 root cause is now diagnosable: the new 'tool invoked' / 'capability routing failed {NO_NODE}' logs will show it on the next run. Next: build the e2e-test-harness (dev scripted approver + headless node + fixture) to self-repro, OR user re-runs item 3/4 and pastes the console. Also fix the dismiss fail-open.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+(No commits - planning session)
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
