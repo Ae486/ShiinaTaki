@@ -95,6 +95,7 @@ references/          Third-party study material — git-ignored; licenses vary (
 - **Simplicity first**: minimum code that solves the problem; no speculative abstraction/configurability; would a senior engineer call it overcomplicated?
 - **Surgical changes**: touch only what the task requires; match existing style; remove only orphans your own change created.
 - **Verify, don't declare**: define the check before coding (test, lint, `pnpm tauri dev` smoke); loop until it passes. Trellis flow: implement → check → update-spec; do not skip `trellis-check`.
+- **Defer explicitly, never silently**: any "ship this later" decision (a feature, a fidelity gap, a hardening step) gets logged in `docs/deferred-decisions.md` at planning time, with a trigger-to-complete. A `TODO: later` in code must cite that file's entry — a bare deferral note is how a planned delay silently becomes a permanent defect (see the timeline-tool-fidelity case there).
 - Comments explain **why** (constraints, invariants), never what/how — and only when the code cannot say it.
 - Error handling on every capability path: a failing tool call must degrade into a structured error the LLM can read, never a crash or a silent swallow.
 

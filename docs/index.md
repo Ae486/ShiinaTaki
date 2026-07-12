@@ -12,6 +12,7 @@ Start here. Every design decision has exactly one canonical home; nothing is dup
 4. **`MEMORY-DESIGN.md`** — the memory module design: layer registry, file-based truth + SQLite index, context assembly, write paths, activity capture pipeline, ship schedule.
 5. **`adr/`** — why the foundational decisions were made (see below).
 6. **`TTS-INTERFACE.md`** — reserved TTS wire contract (v1: interface only).
+7. **`deferred-decisions.md`** — the register of every "ship later" decision, with its trigger-to-complete. Consult when planning a task (are you about to defer something? log it) and when picking up a milestone (what debt comes due here?).
 
 ## Architecture Decision Records (`adr/`)
 
@@ -47,3 +48,4 @@ Per-milestone progress reports, the queued manual-verification checklist, and th
 - New foundational decision → new ADR + row in the table above.
 - New domain term → `CONTEXT.md` (glossary only — no implementation details there).
 - Stack change → edit `TECH-STACK.md` in place; if the change reverses an ADR, write a superseding ADR rather than editing the old one.
+- **Deferring anything at planning time → log it in `deferred-decisions.md` with a trigger-to-complete.** A "TODO: later" in code must cite that file's entry id, never stand alone (a bare deferral note is how a planned delay becomes a permanent defect).

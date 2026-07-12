@@ -10,7 +10,7 @@ import { selectPinned } from "./pinned-block.ts";
 import type { Retriever } from "./retriever.ts";
 import { fitToBudget } from "./token-estimator.ts";
 
-// Placeholders (replaced later): persona card = #16, emotion capsule = D2. Static so v1 output is deterministic.
+// Placeholders (replaced later): persona card = #16, emotion capsule = D9 (docs/deferred-decisions.md). Static so v1 output is deterministic.
 const PERSONA_PLACEHOLDER = "You are the user's companion. (Persona card pending — #16.)";
 const EMOTION_CAPSULE = "Current mood: neutral.";
 const PINNED_HEADER = "Promises and facts you always keep in mind:";
