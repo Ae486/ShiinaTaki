@@ -5,6 +5,7 @@
  */
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+import type { ToolSet } from "ai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { createChatAgent } from "./agents/chat-agent.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
@@ -39,6 +40,7 @@ import { createMethodRegistry } from "./server/method-registry.ts";
 import { approvalRespondMethod } from "./server/methods/approval-respond.ts";
 import { chatSendMethod } from "./server/methods/chat-send.ts";
 import { capabilityRespondMethod } from "./server/methods/capability-respond.ts";
+import { capabilityTriggerMethod, devTriggerEnabled } from "./server/methods/capability-trigger.ts";
 import { connectMethod } from "./server/methods/connect.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
@@ -161,6 +163,17 @@ const shellOpenTool = createShellOpenTool(shellCapabilityDeps);
 // exec (#12): the general-purpose shell tool on the same route→broker path; the Shell parses, governs, spawns, audits.
 const execTool = createExecTool(shellCapabilityDeps);
 
+// The six Shell-routed capability tools as one bag (invariant 7): the chat agent's extraTools spreads it AND the
+// dev capability.trigger reuses these exact objects — never a second execute path to the same capabilities.
+const capabilityTools: ToolSet = {
+  ...screenshotTool,
+  ...processListTool,
+  ...clipboardReadTool,
+  ...clipboardWriteTool,
+  ...shellOpenTool,
+  ...execTool,
+};
+
 // Workspace file RW (#11): CORE-side tools (no broker/gate) confined to the Workspace root — the agent's own scratch
 // space, the same subtree memory/ and screenshots/ live under. read+write are auto-allowed within it (ruling 1/8).
 const workspacePaths = createWorkspacePaths({ root: join(serverConfig.dataDir, "workspace") });
@@ -189,12 +202,7 @@ registry.register(
       // Extra tools = the skills meta-tool + every capability tool (Shell-gated + core-side Workspace files) + MCP tools.
       extraTools: {
         ...createLoadSkillTool(skillsLoader),
-        ...screenshotTool,
-        ...processListTool,
-        ...clipboardReadTool,
-        ...clipboardWriteTool,
-        ...shellOpenTool,
-        ...execTool,
+        ...capabilityTools,
         ...readFileTool,
         ...writeFileTool,
         ...mcpManager.tools(),
@@ -209,6 +217,16 @@ registry.register(approvalRespondMethod(approvalBroker));
 registry.register(capabilityRespondMethod(capabilityBroker));
 registry.register(timelineHistoryMethod(timelineRepo));
 registry.register(timelineSubscribeMethod(timelineSubscriptions));
+
+// Dev-only L1 drive (env double-gate, mirror of the Shell's ScriptedApprover): registered ONLY with TAKI_DEV_TRIGGER=1
+// so it has zero production surface. It drives the same capability tools the agent does — the node-side gate still
+// authorizes every call (NOT a bypass); it only removes the LLM so headless e2e can drive governance deterministically.
+if (devTriggerEnabled(process.env)) {
+  logger.warn("TAKI_DEV_TRIGGER=1 — registering the DEV capability.trigger method (L1 drive; node-side gate still authorizes)");
+  registry.register(
+    capabilityTriggerMethod({ tools: { ...capabilityTools, ...readFileTool, ...writeFileTool }, logger }),
+  );
+}
 
 const server = await startWsServer({
   host: serverConfig.host,

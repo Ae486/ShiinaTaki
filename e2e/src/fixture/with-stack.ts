@@ -5,11 +5,11 @@
  * POS:    e2e/fixture — the reusable harness entry (PRD layer B); test scope only, never imported by production code
  */
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { jsonLine } from "./line-buffer.ts";
-import { sayToAgent, pairOperator, type AgentTurn } from "./operator-drivers.ts";
+import { sayToAgent, pairOperator, triggerCapability, type AgentTurn } from "./operator-drivers.ts";
 import { childEnv, getFreePort, killTree, spawnProc, type Proc } from "./procs.ts";
 import { CORE_DIR, dummyProviderEnv, realProviderEnv, TAKI_NODE_BIN } from "./paths.ts";
 import { openRpcSocket, type RpcSocket } from "./rpc-socket.ts";
@@ -25,6 +25,10 @@ export interface StackOptions {
   provider?: "dummy" | "real";
   /** Spawn the node at boot (default true). */
   startNode?: boolean;
+  /** Register the dev capability.trigger (adds TAKI_DEV_TRIGGER=1 to the core env) — enables stack.l1(). */
+  devTrigger?: boolean;
+  /** Seed <nodeDataDir>/exec-policy.json before the node boots (exec allowlist/mode/cwd scenarios read it at startup). */
+  execPolicy?: unknown;
 }
 
 /** One node-side gate decision from <node dataDir>/audit.jsonl (names-only except exec's command). */
@@ -55,6 +59,8 @@ export interface Stack {
   killNode(): Promise<void>;
   /** The memoized paired operator socket (pairs on first use). */
   operator(): Promise<RpcSocket>;
+  /** L1 drive (dev capability.trigger): run a capability tool's execute with no LLM; returns its structured result. */
+  l1(capability: string, input?: unknown, timeoutMs?: number): Promise<unknown>;
   /** L2 drive: one real chat turn through the agent. */
   agentSay(text: string, timeoutMs?: number): Promise<AgentTurn>;
   screenshots(): string[];
@@ -90,30 +96,38 @@ async function bootParts(options: StackOptions): Promise<Parts> {
   const port = await getFreePort();
   const coreDataDir = mkdtempSync(join(tmpdir(), "taki-e2e-core-"));
   const nodeDataDir = mkdtempSync(join(tmpdir(), "taki-e2e-node-"));
-  const core = spawnProc({
-    command: process.execPath,
-    args: ["src/main.ts"],
-    cwd: CORE_DIR,
-    env: childEnv({
-      TAKI_WS_HOST: "127.0.0.1",
-      TAKI_WS_PORT: String(port),
-      TAKI_LOG_LEVEL: "info",
-      TAKI_DATA_DIR: coreDataDir,
-      ...provider,
-    }),
-  });
+  const coreEnv: Record<string, string> = {
+    TAKI_WS_HOST: "127.0.0.1",
+    TAKI_WS_PORT: String(port),
+    TAKI_LOG_LEVEL: "info",
+    TAKI_DATA_DIR: coreDataDir,
+    ...provider,
+  };
+  // The dev L1 drive is env double-gated: the core only registers capability.trigger when this is exactly "1".
+  if (options.devTrigger) coreEnv.TAKI_DEV_TRIGGER = "1";
   const parts: Parts = {
     autoApprove: options.autoApprove ?? "allow-once",
     wsUrl: `ws://127.0.0.1:${port}`,
     coreDataDir,
     nodeDataDir,
-    core,
+    core: spawnProc({ command: process.execPath, args: ["src/main.ts"], cwd: CORE_DIR, env: childEnv(coreEnv) }),
     node: null,
     operatorSocket: null,
   };
-  await waitCoreListening(parts);
-  if (options.startNode !== false) await startNodeProc(parts, true);
-  return parts;
+  // B3: once the core process (or a temp dir) exists, ANY boot failure must tear the whole stack down — a leaked
+  // core/node process or temp dir would poison later runs. Everything after the spawn lives inside this guard.
+  try {
+    await waitCoreListening(parts);
+    // Seed node-side config BEFORE the node boots (ExecPolicy::load reads it once at startup).
+    if (options.execPolicy !== undefined) {
+      writeFileSync(join(nodeDataDir, "exec-policy.json"), JSON.stringify(options.execPolicy));
+    }
+    if (options.startNode !== false) await startNodeProc(parts, true);
+    return parts;
+  } catch (error) {
+    await teardown(parts);
+    throw error;
+  }
 }
 
 async function waitCoreListening(parts: Parts): Promise<void> {
@@ -189,6 +203,8 @@ function makeStack(parts: Parts): Stack {
       await parts.node.exited;
     },
     operator: () => getOperator(parts),
+    l1: async (capability, input, timeoutMs) =>
+      triggerCapability(await getOperator(parts), { capability, input, timeoutMs }),
     agentSay: async (text, timeoutMs) => sayToAgent(await getOperator(parts), text, timeoutMs),
     screenshots: () => (existsSync(screenshotsDir) ? readdirSync(screenshotsDir) : []),
     audit: () => readAudit(auditPath),

@@ -1,6 +1,7 @@
 /**
  * INPUT:  an open RpcSocket + the core's WS protocol (shared zod schemas)
  * OUTPUT: pairOperator() (pairing handshake -> authenticated socket) + sayToAgent() (chat.send -> AgentTurn)
+ *         + triggerCapability() (dev capability.trigger -> a real tool's structured result, L1/no-LLM)
  * POS:    e2e/fixture — the operator-side drivers; with-stack composes them into the Stack helpers
  */
 import {
@@ -70,4 +71,21 @@ export async function sayToAgent(socket: RpcSocket, message: string, timeoutMs =
   }
   ChatCompleteSchema.parse(end.params);
   return { status: "complete", text };
+}
+
+/**
+ * Drives one capability tool's execute via the dev `capability.trigger` method (L1 — no LLM, node-side gate still
+ * authorizes). Returns the tool's raw structured result (`{ ok:true, ... }` or `{ ok:false, code, message }`); a failed
+ * capability is a normal result, never a thrown error. Requires the stack booted with `devTrigger: true`.
+ */
+export async function triggerCapability(
+  socket: RpcSocket,
+  spec: { capability: string; input?: unknown; timeoutMs?: number },
+): Promise<unknown> {
+  const frame = await socket.request(
+    "capability.trigger",
+    { capability: spec.capability, input: spec.input },
+    spec.timeoutMs,
+  );
+  return JsonRpcSuccessResponseSchema.parse(frame).result;
 }

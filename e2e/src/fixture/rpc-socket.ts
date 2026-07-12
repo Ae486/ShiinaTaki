@@ -14,7 +14,7 @@ export interface RpcNotification {
 
 export interface RpcSocket {
   /** Sends a request and resolves the raw response frame (success or error — callers parse with shared schemas). */
-  request(method: string, params: unknown): Promise<unknown>;
+  request(method: string, params: unknown, timeoutMs?: number): Promise<unknown>;
   notifications(): readonly RpcNotification[];
   waitForNotification(pred: (note: RpcNotification) => boolean, timeoutMs?: number): Promise<RpcNotification>;
   close(): void;
@@ -37,7 +37,7 @@ export async function openRpcSocket(url: string): Promise<RpcSocket> {
   const inbox: Inbox = { pending: new Map(), notes: [], waiters: new Set() };
   ws.on("message", (data) => routeFrame(inbox, JSON.parse(String(data))));
   return {
-    request: (method, params) => sendRequest(ws, inbox, { method, params }),
+    request: (method, params, timeoutMs) => sendRequest(ws, inbox, { method, params, timeoutMs }),
     notifications: () => inbox.notes,
     waitForNotification: (pred, timeoutMs = 20_000) => waitForNote(inbox, pred, timeoutMs),
     close: () => ws.close(),
@@ -65,13 +65,19 @@ function routeFrame(inbox: Inbox, frame: unknown): void {
   }
 }
 
-function sendRequest(ws: WebSocket, inbox: Inbox, call: { method: string; params: unknown }): Promise<unknown> {
+// Default 30s covers the fast capabilities; a slow drive (e.g. an exec that runs to its 30s node-side timeout) passes a
+// larger budget so the request outlives the capability rather than racing it.
+function sendRequest(
+  ws: WebSocket,
+  inbox: Inbox,
+  call: { method: string; params: unknown; timeoutMs?: number },
+): Promise<unknown> {
   const id = randomUUID();
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       inbox.pending.delete(id);
       reject(new Error(`request ${call.method} timed out`));
-    }, 30_000);
+    }, call.timeoutMs ?? 30_000);
     inbox.pending.set(id, (frame) => {
       clearTimeout(timer);
       resolve(frame);

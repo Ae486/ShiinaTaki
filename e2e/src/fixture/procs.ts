@@ -27,6 +27,9 @@ export function spawnProc(spec: SpawnSpec): Proc {
     env: spec.env,
     stdio: ["pipe", "pipe", "pipe"],
     windowsHide: true,
+    // POSIX only: make the child its own process-group leader so killTree can signal the whole group (grandchildren
+    // included). Windows stays in our group and uses taskkill /T for the tree — detaching there spawns a new console.
+    detached: process.platform !== "win32",
   });
   if (!child.stdout || !child.stderr) throw new Error("child spawned without piped stdio");
   return {
@@ -44,7 +47,13 @@ export function killTree(proc: Proc): void {
   if (process.platform === "win32") {
     spawnSync("taskkill", ["/T", "/F", "/PID", String(pid)], { windowsHide: true });
   } else {
-    proc.child.kill("SIGKILL");
+    // A negative pid targets the whole process group (the child is a group leader — see spawnProc), so exec/MCP
+    // grandchildren die with it, not just the direct child. Fall back to a plain kill if the group is already gone.
+    try {
+      process.kill(-pid, "SIGKILL");
+    } catch {
+      proc.child.kill("SIGKILL");
+    }
   }
 }
 
