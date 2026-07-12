@@ -21,6 +21,7 @@ Before writing backend code:
 | [Error Handling](./error-handling.md) | Structured tool errors, Rust error types, IPC error shape |
 | [Quality Guidelines](./quality-guidelines.md) | Size caps, lint, tests, forbidden patterns |
 | [Logging Guidelines](./logging-guidelines.md) | pino / tracing, audit log |
+| [E2E Harness](./e2e-harness.md) | Headless `withStack` fixture; L1 (deterministic) + L2 (real-agent) dual-track per capability |
 
 ## Quality Check (run before handing off)
 
