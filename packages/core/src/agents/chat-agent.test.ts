@@ -87,7 +87,7 @@ describe("createChatAgent", () => {
     expect(APICallError.isInstance(caught)).toBe(true);
   });
 
-  it("propagates a mid-stream error part and persists no assistant turn", async () => {
+  it("propagates a mid-stream error part and persists the already-streamed partial text (D1 #5)", async () => {
     const f = fresh();
     const agent = createChatAgent({ model: midStreamErrorModel(["par"], new Error("mid-stream boom")), store: f.conversation, memory: f.memory });
 
@@ -98,8 +98,11 @@ describe("createChatAgent", () => {
 
     expect(caught).toBeInstanceOf(Error);
     expect((caught as Error).message).toBe("mid-stream boom");
-    // The user turn is recorded; the failed assistant turn must NOT be persisted (no partial row).
-    expect(f.conversation.history("taki").map((m) => m.role)).toEqual(["user"]);
+    // The user already saw "par" stream by — the transcript must not lose it (gap #5); the error still propagates.
+    expect(f.conversation.history("taki")).toEqual([
+      { role: "user", content: "hi" },
+      { role: "assistant", content: "par" },
+    ]);
   });
 
   it("fires the auto-memory trigger after the turn, without blocking the turn's resolution (T9)", async () => {

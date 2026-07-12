@@ -2,11 +2,14 @@
  * INPUT:  an open RpcSocket + the core's WS protocol (shared zod schemas)
  * OUTPUT: pairOperator() (pairing handshake -> authenticated socket) + sayToAgent() (chat.send -> AgentTurn)
  *         + triggerCapability() (dev capability.trigger -> a real tool's structured result, L1/no-LLM)
+ *         + fetchTimelineEntries() (timeline.history -> persisted entries, fidelity assertions)
  * POS:    e2e/fixture — the operator-side drivers; with-stack composes them into the Stack helpers
  */
 import {
   CHAT_METHODS,
   CONNECT_METHOD,
+  TIMELINE_HISTORY_LIMIT_MAX,
+  TIMELINE_METHODS,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
@@ -14,6 +17,8 @@ import {
   ConnectResultSchema,
   JsonRpcErrorResponseSchema,
   JsonRpcSuccessResponseSchema,
+  TimelineHistoryResultSchema,
+  type TimelineEntry,
 } from "@taki/shared";
 import type { RpcNotification, RpcSocket } from "./rpc-socket.ts";
 
@@ -88,4 +93,19 @@ export async function triggerCapability(
     spec.timeoutMs,
   );
   return JsonRpcSuccessResponseSchema.parse(frame).result;
+}
+
+/**
+ * Reads the persisted timeline oldest-first (up to the protocol max page). The hallucination L2 asserts on the
+ * roles that survived a turn — a "tool" role appearing proves the turn's tool-call/result were persisted (the fix),
+ * its absence is the pre-fix signature. Reads only role/content metadata, never logs the content (R5).
+ */
+export async function fetchTimelineEntries(socket: RpcSocket, characterId: string): Promise<TimelineEntry[]> {
+  const frame = await socket.request(TIMELINE_METHODS.history, {
+    characterId,
+    limit: TIMELINE_HISTORY_LIMIT_MAX,
+  });
+  const { entries } = TimelineHistoryResultSchema.parse(JsonRpcSuccessResponseSchema.parse(frame).result);
+  // history() is newest-first; return oldest-first so callers read chronologically.
+  return [...entries].reverse();
 }

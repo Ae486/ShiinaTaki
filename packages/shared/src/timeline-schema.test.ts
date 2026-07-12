@@ -4,6 +4,7 @@ import {
   TimelineEntrySchema,
   TimelineHistoryParamsSchema,
   TimelineHistoryResultSchema,
+  TimelinePartSchema,
   TimelineRoleSchema,
   TimelineSubscribeParamsSchema,
 } from "./timeline-schema.ts";
@@ -29,7 +30,7 @@ describe("TIMELINE_METHODS", () => {
 });
 
 describe("TimelineRoleSchema", () => {
-  it.each(["user", "assistant"])("accepts the %s role", (role) => {
+  it.each(["user", "assistant", "tool"])("accepts the %s role", (role) => {
     expect(TimelineRoleSchema.safeParse(role).success).toBe(true);
   });
 
@@ -39,9 +40,48 @@ describe("TimelineRoleSchema", () => {
   });
 });
 
+describe("TimelinePartSchema", () => {
+  it("round-trips the three part kinds (v7 field names: input / output)", () => {
+    const text = { type: "text", text: "hi" };
+    const call = { type: "tool-call", toolCallId: "c1", toolName: "screenshot", input: { display: 1 } };
+    const result = {
+      type: "tool-result",
+      toolCallId: "c1",
+      toolName: "screenshot",
+      output: { type: "json", value: { ok: true, path: "shot.png" } },
+    };
+    expect(TimelinePartSchema.parse(text)).toEqual(text);
+    expect(TimelinePartSchema.parse(call)).toEqual(call);
+    expect(TimelinePartSchema.parse(result)).toEqual(result);
+  });
+
+  it("rejects an unknown part type and a result without a tagged output", () => {
+    expect(TimelinePartSchema.safeParse({ type: "reasoning", text: "hmm" }).success).toBe(false);
+    expect(
+      TimelinePartSchema.safeParse({ type: "tool-result", toolCallId: "c1", toolName: "t", output: "raw" }).success,
+    ).toBe(false);
+  });
+});
+
 describe("TimelineEntrySchema", () => {
   it("round-trips a valid entry", () => {
     expect(TimelineEntrySchema.parse(entry)).toEqual(entry);
+  });
+
+  it("round-trips a tool entry carrying structured parts", () => {
+    const toolEntry = {
+      ...entry,
+      role: "tool" as const,
+      content: "[tool-result: screenshot]",
+      parts: [
+        { type: "tool-result" as const, toolCallId: "c1", toolName: "screenshot", output: { type: "json", value: 1 } },
+      ],
+    };
+    expect(TimelineEntrySchema.parse(toolEntry)).toEqual(toolEntry);
+  });
+
+  it("accepts a legacy entry without parts (text-only rows stay valid)", () => {
+    expect(TimelineEntrySchema.parse(entry).parts).toBeUndefined();
   });
 
   it("rejects a non-uuid id", () => {

@@ -28,6 +28,23 @@ export function streamingMockModel(deltas: string[]): MockLanguageModelV4 {
   });
 }
 
+/** Like streamingMockModel but with a per-chunk delay — gives an abort signal room to land mid-stream. */
+export function slowStreamingModel(deltas: string[], chunkDelayInMs: number): MockLanguageModelV4 {
+  return new MockLanguageModelV4({
+    doStream: async () => ({
+      stream: simulateReadableStream({
+        chunkDelayInMs,
+        chunks: [
+          { type: "text-start" as const, id: "t1" },
+          ...deltas.map((delta) => ({ type: "text-delta" as const, id: "t1", delta })),
+          { type: "text-end" as const, id: "t1" },
+          { type: "finish" as const, finishReason: { unified: "stop" as const, raw: undefined }, usage: USAGE },
+        ],
+      }),
+    }),
+  });
+}
+
 /** A mock model whose call rejects — simulates a provider failure. */
 export function failingMockModel(error: unknown): MockLanguageModelV4 {
   return new MockLanguageModelV4({

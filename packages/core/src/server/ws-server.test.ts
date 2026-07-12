@@ -17,6 +17,8 @@ import {
   type Role,
 } from "@taki/shared";
 import { createChatAgent } from "../agents/chat-agent.ts";
+import { createTurnQueue } from "../agents/turn-queue.ts";
+import { createTurnRegistry } from "../agents/turn-registry.ts";
 import { createDeviceRegistry } from "../devices/device-registry.ts";
 import { createPairedDeviceStore } from "../devices/paired-device-store.ts";
 import { createLogger } from "../logging/logger.ts";
@@ -64,7 +66,12 @@ async function boot(model: LanguageModel): Promise<Harness> {
   registry.register(connectMethod({ deviceRegistry, connectionRegistry, onPairingCode: (info) => codes.push(info) }));
   const memoryStore = createMemoryStore();
   const memory = createMemoryEngine({ db: memoryStore.db, memoryRoot: join(dir, "memory") });
-  registry.register(chatSendMethod(createChatAgent({ model, store: memoryStore.store, memory }), logger));
+  registry.register(
+    chatSendMethod(createChatAgent({ model, store: memoryStore.store, memory }), logger, {
+      queue: createTurnQueue(),
+      turns: createTurnRegistry(),
+    }),
+  );
   const server = await startWsServer({ host: "127.0.0.1", port: 0, registry, connectionRegistry, logger });
   servers.push(server);
   return { url: `ws://127.0.0.1:${server.port}`, codes, connections: connectionRegistry };

@@ -15,6 +15,8 @@ import {
 } from "@taki/shared";
 import { createChatAgent } from "../agents/chat-agent.ts";
 import { createConversationStore } from "../agents/conversation-store.ts";
+import { createTurnQueue } from "../agents/turn-queue.ts";
+import { createTurnRegistry } from "../agents/turn-registry.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createTimelineRepo, type TimelineRepo } from "../db/timeline-repo.ts";
@@ -85,7 +87,12 @@ async function bootServer(options: BootOptions): Promise<ServerHarness> {
   registry.register(connectMethod({ deviceRegistry, connectionRegistry, onPairingCode: (info) => codes.push(info) }));
   const memory = createMemoryEngine({ db, memoryRoot: join(options.dataDir, "workspace", "memory") });
   memory.reconcile();
-  registry.register(chatSendMethod(createChatAgent({ model: options.model, store, memory }), logger));
+  registry.register(
+    chatSendMethod(createChatAgent({ model: options.model, store, memory }), logger, {
+      queue: createTurnQueue(),
+      turns: createTurnRegistry(),
+    }),
+  );
   registry.register(timelineHistoryMethod(repo));
   registry.register(timelineSubscribeMethod(subscriptions));
   const server = await startWsServer({ host: "127.0.0.1", port: 0, registry, connectionRegistry, logger });

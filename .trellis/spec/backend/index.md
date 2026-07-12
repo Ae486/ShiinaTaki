@@ -23,6 +23,7 @@ Before writing backend code:
 | [Logging Guidelines](./logging-guidelines.md) | pino / tracing, audit log |
 | [E2E Harness](./e2e-harness.md) | Headless `withStack` fixture; L1 (deterministic) + L2 (real-agent) dual-track per capability |
 | [Permission Authorization](./permission-authorization.md) | Authorize on `(capability, argClass)` for arg-risk capabilities, name for fixed-risk; no cross-class leakage |
+| [Agent Runtime](./agent-runtime.md) | Persist full turn (tool-call/result) or hallucinate; base-prompt truthfulness floor; test the deterministic root cause |
 
 ## Quality Check (run before handing off)
 

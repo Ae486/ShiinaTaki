@@ -9,6 +9,7 @@ import {
   type TimelineEntry,
   type TimelineHistoryParams,
   type TimelineHistoryResult,
+  type TimelinePart,
   type TimelineRole,
 } from "@taki/shared";
 import type { Database, SqlRow } from "./sqlite.ts";
@@ -17,6 +18,8 @@ export interface AppendInput {
   characterId: string;
   role: TimelineRole;
   content: string;
+  /** Structured model-replay fidelity (tool calls/results); omitted = plain text row (stored as NULL). */
+  parts?: TimelinePart[];
 }
 
 export interface TimelineRepo {
@@ -33,16 +36,16 @@ export interface TimelineRepo {
 }
 
 const INSERT_SQL =
-  "INSERT INTO timeline_messages (id, character_id, role, content, created_at) " +
-  "VALUES (:id, :characterId, :role, :content, :createdAt)";
+  "INSERT INTO timeline_messages (id, character_id, role, content, parts, created_at) " +
+  "VALUES (:id, :characterId, :role, :content, :parts, :createdAt)";
 
 // (:before IS NULL OR seq < :before): one prepared statement serves both the newest and cursor pages.
 const PAGE_SQL =
-  "SELECT seq, id, character_id, role, content, created_at FROM timeline_messages " +
+  "SELECT seq, id, character_id, role, content, parts, created_at FROM timeline_messages " +
   "WHERE character_id = :characterId AND (:before IS NULL OR seq < :before) ORDER BY seq DESC LIMIT :limit";
 
 const LATEST_SQL =
-  "SELECT seq, id, character_id, role, content, created_at FROM timeline_messages " +
+  "SELECT seq, id, character_id, role, content, parts, created_at FROM timeline_messages " +
   "WHERE character_id = :characterId ORDER BY seq DESC LIMIT :limit";
 
 const MAX_SEQ_SQL =
@@ -50,7 +53,7 @@ const MAX_SEQ_SQL =
 
 // (after, through]: the segment about to leave the window (flush) or since the last summary (episodic).
 const RANGE_SQL =
-  "SELECT seq, id, character_id, role, content, created_at FROM timeline_messages " +
+  "SELECT seq, id, character_id, role, content, parts, created_at FROM timeline_messages " +
   "WHERE character_id = :characterId AND seq > :after AND seq <= :through ORDER BY seq ASC";
 
 export function createTimelineRepo(db: Database): TimelineRepo {
@@ -69,8 +72,11 @@ export function createTimelineRepo(db: Database): TimelineRepo {
         content: input.content,
         createdAt: new Date().toISOString(),
       };
-      const { lastInsertRowid } = insert.run(row);
-      return TimelineEntrySchema.parse({ seq: lastInsertRowid, ...row });
+      const { lastInsertRowid } = insert.run({
+        ...row,
+        parts: input.parts === undefined ? null : JSON.stringify(input.parts),
+      });
+      return TimelineEntrySchema.parse({ seq: lastInsertRowid, ...row, parts: input.parts });
     },
 
     pageBefore(query) {
@@ -107,6 +113,17 @@ function toEntry(row: SqlRow): TimelineEntry {
     characterId: row.character_id,
     role: row.role,
     content: row.content,
+    parts: parseParts(row),
     createdAt: row.created_at,
   });
+}
+
+// NULL = legacy text-only row. A corrupt JSON cell must fail loudly with the row's seq, not as a bare SyntaxError.
+function parseParts(row: SqlRow): unknown {
+  if (row.parts === null || row.parts === undefined) return undefined;
+  try {
+    return JSON.parse(String(row.parts));
+  } catch (error) {
+    throw new Error(`timeline row seq=${String(row.seq)} has corrupt parts JSON`, { cause: error });
+  }
 }

@@ -42,6 +42,8 @@ export type { ConnectParams, ConnectResult, Role } from "./connect-schema.ts";
 
 export {
   CHAT_METHODS,
+  ChatCancelParamsSchema,
+  ChatCancelResultSchema,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
@@ -49,6 +51,8 @@ export {
   ChatSendResultSchema,
 } from "./chat-schema.ts";
 export type {
+  ChatCancelParams,
+  ChatCancelResult,
   ChatComplete,
   ChatDelta,
   ChatError,
@@ -64,18 +68,22 @@ export {
   TimelineEntrySchema,
   TimelineHistoryParamsSchema,
   TimelineHistoryResultSchema,
+  TimelinePartSchema,
   TimelineRoleSchema,
   TimelineSubscribeParamsSchema,
   TimelineSubscribeResultSchema,
+  TimelineToolOutputSchema,
 } from "./timeline-schema.ts";
 export type {
   TimelineAppended,
   TimelineEntry,
   TimelineHistoryParams,
   TimelineHistoryResult,
+  TimelinePart,
   TimelineRole,
   TimelineSubscribeParams,
   TimelineSubscribeResult,
+  TimelineToolOutput,
 } from "./timeline-schema.ts";
 
 export {

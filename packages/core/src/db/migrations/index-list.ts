@@ -7,5 +7,11 @@ import type { Migration } from "../migration-runner.ts";
 import { timelineMigration001 } from "./001-timeline.ts";
 import { memoryMigration002 } from "./002-memory.ts";
 import { memoryAutoStateMigration003 } from "./003-memory-auto-state.ts";
+import { timelinePartsMigration004 } from "./004-timeline-parts.ts";
 
-export const MIGRATIONS: Migration[] = [timelineMigration001, memoryMigration002, memoryAutoStateMigration003];
+export const MIGRATIONS: Migration[] = [
+  timelineMigration001,
+  memoryMigration002,
+  memoryAutoStateMigration003,
+  timelinePartsMigration004,
+];

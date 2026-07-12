@@ -8,11 +8,13 @@ import { randomUUID } from "node:crypto";
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import type { TimelineEntry } from "@taki/shared";
 import { jsonLine } from "./line-buffer.ts";
-import { sayToAgent, pairOperator, triggerCapability, type AgentTurn } from "./operator-drivers.ts";
+import { fetchTimelineEntries, sayToAgent, pairOperator, triggerCapability, type AgentTurn } from "./operator-drivers.ts";
 import { childEnv, getFreePort, killTree, spawnProc, type Proc } from "./procs.ts";
 import { CORE_DIR, dummyProviderEnv, realProviderEnv, TAKI_NODE_BIN } from "./paths.ts";
 import { openRpcSocket, type RpcSocket } from "./rpc-socket.ts";
+import { seedTimeline, type SeedRow } from "./seed-timeline.ts";
 
 /** taki-node.rs hardcodes this device name; pairing lines for the node are matched by it. */
 export const NODE_DEVICE_NAME = "TakiAgent Headless Node";
@@ -31,6 +33,8 @@ export interface StackOptions {
   execPolicy?: unknown;
   /** Seed <nodeDataDir>/gate-decisions.json before the node boots (persisted always/never memory scenarios). */
   gateDecisions?: { capability: string; decision: "always" | "never" }[];
+  /** Seed the core timeline (character "taki") BEFORE the core boots — polluted-history scenarios (D1 L2). */
+  seedTimeline?: SeedRow[];
 }
 
 /** One node-side gate decision from <node dataDir>/audit.jsonl (names-only except exec's command). */
@@ -65,6 +69,8 @@ export interface Stack {
   l1(capability: string, input?: unknown, timeoutMs?: number): Promise<unknown>;
   /** L2 drive: one real chat turn through the agent. */
   agentSay(text: string, timeoutMs?: number): Promise<AgentTurn>;
+  /** The persisted timeline oldest-first (turn-fidelity assertions: tool rows prove tool records survived). */
+  timeline(): Promise<TimelineEntry[]>;
   screenshots(): string[];
   audit(): AuditRecord[];
 }
@@ -107,6 +113,16 @@ async function bootParts(options: StackOptions): Promise<Parts> {
   };
   // The dev L1 drive is env double-gated: the core only registers capability.trigger when this is exactly "1".
   if (options.devTrigger) coreEnv.TAKI_DEV_TRIGGER = "1";
+  // Timeline pollution must land BEFORE the core opens the db (sequential single-writer). The teardown guard
+  // below starts at the core spawn, so a failed seed cleans its own temp dirs here.
+  if (options.seedTimeline !== undefined && options.seedTimeline.length > 0) {
+    try {
+      seedTimeline(coreDataDir, options.seedTimeline);
+    } catch (error) {
+      for (const dir of [coreDataDir, nodeDataDir]) rmSync(dir, { recursive: true, force: true });
+      throw error;
+    }
+  }
   const parts: Parts = {
     autoApprove: options.autoApprove ?? "allow-once",
     wsUrl: `ws://127.0.0.1:${port}`,
@@ -212,6 +228,7 @@ function makeStack(parts: Parts): Stack {
     l1: async (capability, input, timeoutMs) =>
       triggerCapability(await getOperator(parts), { capability, input, timeoutMs }),
     agentSay: async (text, timeoutMs) => sayToAgent(await getOperator(parts), text, timeoutMs),
+    timeline: async () => fetchTimelineEntries(await getOperator(parts), "taki"),
     screenshots: () => (existsSync(screenshotsDir) ? readdirSync(screenshotsDir) : []),
     audit: () => readAudit(auditPath),
   };

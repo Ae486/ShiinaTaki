@@ -59,4 +59,51 @@ describe("createConversationStore", () => {
     expect(() => store.appendUser("taki", "hi")).not.toThrow();
     expect(store.history("taki")).toHaveLength(1);
   });
+
+  it("appendTurn persists tool-calls + tool-results and history replays the full multi-part shape (D1 #1)", () => {
+    const emitted: TimelineEntry[] = [];
+    const store = makeStore((entry) => emitted.push(entry));
+    store.appendUser("taki", "screenshot please");
+
+    store.appendTurn("taki", [
+      { role: "assistant", content: [{ type: "tool-call", toolCallId: "c1", toolName: "screenshot", input: {} }] },
+      {
+        role: "tool",
+        content: [
+          { type: "tool-result", toolCallId: "c1", toolName: "screenshot", output: { type: "json", value: { ok: true } } },
+        ],
+      },
+      { role: "assistant", content: "Saved it." },
+    ]);
+
+    // Every row fired timeline.appended (UI parity), and the tool row carries its structured parts.
+    expect(emitted.map((entry) => entry.role)).toEqual(["user", "assistant", "tool", "assistant"]);
+    expect(emitted[2]?.parts?.[0]).toMatchObject({ type: "tool-result", toolCallId: "c1" });
+
+    expect(store.history("taki")).toEqual([
+      { role: "user", content: "screenshot please" },
+      { role: "assistant", content: [{ type: "tool-call", toolCallId: "c1", toolName: "screenshot", input: {} }] },
+      {
+        role: "tool",
+        content: [
+          { type: "tool-result", toolCallId: "c1", toolName: "screenshot", output: { type: "json", value: { ok: true } } },
+        ],
+      },
+      { role: "assistant", content: "Saved it." },
+    ]);
+  });
+
+  it("drops leading orphan tool rows from history (window cut must not start replay with a tool message)", () => {
+    const store = makeStore();
+    // Simulates the replay window slicing mid-turn: the tool row's assistant tool-call fell outside the window.
+    store.appendTurn("taki", [
+      {
+        role: "tool",
+        content: [{ type: "tool-result", toolCallId: "c0", toolName: "exec", output: { type: "text", value: "x" } }],
+      },
+    ]);
+    store.appendUser("taki", "next");
+
+    expect(store.history("taki")).toEqual([{ role: "user", content: "next" }]);
+  });
 });

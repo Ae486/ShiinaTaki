@@ -1,11 +1,13 @@
 /**
- * INPUT:  appendUser/appendAssistant(characterId, text) + an injected TimelineRepo and onAppend sink
- * OUTPUT: createConversationStore({repo, onAppend}) -> { appendUser, appendAssistant, history }
- * POS:    core/agents — SQLite-backed conversation store; persists each turn, emits committed entries, replays history
+ * INPUT:  appendUser/appendAssistant(characterId, text) + appendTurn(characterId, ModelMessage[]) + an injected
+ *         TimelineRepo and onAppend sink
+ * OUTPUT: createConversationStore({repo, onAppend}) -> { appendUser, appendAssistant, appendTurn, history }
+ * POS:    core/agents — SQLite-backed conversation store; persists each turn (full multi-part fidelity), replays history
  */
 import type { ModelMessage } from "ai";
-import type { TimelineEntry, TimelineRole } from "@taki/shared";
+import type { TimelineEntry } from "@taki/shared";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
+import { toEntryInput, toModelMessage, type TurnEntryInput, type TurnMessage } from "./turn-mapping.ts";
 
 // The model receives the latest REPLAY_WINDOW messages; compaction/token-budgeting is a later concern (ADR 0005).
 // Exported as the single source: the pre-compaction flush (#7) treats this boundary AS the context edge.
@@ -14,7 +16,12 @@ export const REPLAY_WINDOW = 200;
 export interface ConversationStore {
   appendUser(characterId: string, text: string): void;
   appendAssistant(characterId: string, text: string): void;
-  /** The replay window as AI SDK messages, oldest-first. */
+  /**
+   * Persists a whole turn's response tail (assistant tool-call parts + tool-result messages + final text),
+   * oldest-first, as returned by `result.responseMessages` — the fix for cross-turn tool-record loss (D1 #1).
+   */
+  appendTurn(characterId: string, messages: TurnMessage[]): void;
+  /** The replay window as AI SDK messages, oldest-first (full multi-part fidelity when parts are present). */
   history(characterId: string): ModelMessage[];
 }
 
@@ -26,20 +33,28 @@ export interface ConversationStoreDeps {
 
 export function createConversationStore(deps: ConversationStoreDeps): ConversationStore {
   const { repo, onAppend } = deps;
-  const commit = (characterId: string, role: TimelineRole, text: string): void => {
-    const entry = repo.append({ characterId, role, content: text });
+  const commit = (characterId: string, input: TurnEntryInput): void => {
+    const entry = repo.append({ characterId, ...input });
     onAppend?.(entry);
   };
   return {
-    appendUser: (characterId, text) => commit(characterId, "user", text),
-    appendAssistant: (characterId, text) => commit(characterId, "assistant", text),
-    history: (characterId) => repo.latestAscending(characterId, REPLAY_WINDOW).map(toModelMessage),
+    appendUser: (characterId, text) => commit(characterId, { role: "user", content: text }),
+    appendAssistant: (characterId, text) => commit(characterId, { role: "assistant", content: text }),
+    appendTurn: (characterId, messages) => {
+      for (const message of messages) {
+        const input = toEntryInput(message);
+        if (input) commit(characterId, input);
+      }
+    },
+    // Legacy text-only rows reconstruct via content; parts-carrying rows replay their full multi-part shape.
+    history: (characterId) => {
+      const entries = repo.latestAscending(characterId, REPLAY_WINDOW);
+      // The hard window cut can strand tool rows whose assistant tool-call fell outside the window; a leading
+      // tool message is invalid replay input for providers, so drop rows until the first non-tool one.
+      const first = entries.findIndex((entry) => entry.role !== "tool");
+      return (first === -1 ? [] : entries.slice(first))
+        .map(toModelMessage)
+        .filter((message): message is ModelMessage => message !== null);
+    },
   };
-}
-
-// Text-only reconstruction (design decision 1): lossless for chat; multi-part fidelity returns when tools land.
-function toModelMessage(entry: TimelineEntry): ModelMessage {
-  return entry.role === "user"
-    ? { role: "user", content: entry.content }
-    : { role: "assistant", content: entry.content };
 }

@@ -26,7 +26,7 @@ M1 设计对话存储时还没有工具,`conversation-store.ts` 做成 text-only
 
 | # | 延期项 | 为什么延 | 触发补齐 | 锚点 | 状态 |
 |---|---|---|---|---|---|
-| D1 | **回合生命周期缺陷集**：timeline 丢失 tool-call/result、无基础 system prompt、回合无并发串行化、无取消/中断、中断回合丢失已流文本 | M1 时无工具(text-only 合理起点);其余是 agent runtime 基本功在渐进交付中的欠账 | **立即** —— 幻觉已在生产暴露,阻塞 M4 的 #16/#17(聊天窗要渲染工具记录) | 任务 `agent-harness-improve`(原 `agent-tool-timeline` 升级) | SCHEDULED |
+| D1 | **回合生命周期缺陷集**：timeline 丢失 tool-call/result、无基础 system prompt、回合无并发串行化、无取消/中断、中断回合丢失已流文本 | M1 时无工具(text-only 合理起点);其余是 agent runtime 基本功在渐进交付中的欠账 | **立即** —— 幻觉已在生产暴露,阻塞 M4 的 #16/#17(聊天窗要渲染工具记录) | 任务 `agent-harness-improve`(原 `agent-tool-timeline` 升级) | DONE(2026-07-13 补齐:parts 列 + appendTurn 全回合持久化、BASE_SYSTEM_PROMPT、turn-queue 串行化、chat.cancel + abort、部分文本落盘;幻觉复现 L2 红→绿) |
 | D2 | **shell-open 的 Always 持久化 → 静默任意执行**(A1) | name-keyed 持久化对"启动"类能力是错的(target 才界定动作) | **M4 前** | 任务 `shell-open-persist-fix`(DONE);原则沉淀于 `.trellis/spec/backend/permission-authorization.md` | DONE |
 | D3 | **exec argv[0] 未按排除 cwd 的 PATH 解析为绝对路径**(B2) | 当前被"write_file 只写文本 + allowlist 默认空"缓解 | **exec auto-run 配置上线前必修** | GitHub #23 | OPEN |
 | D4 | **上下文压缩 / token 预算** | ADR 0005 明列为 "later concern";`REPLAY_WINDOW=200` 硬截断 | 长对话撞上下文窗口 / M5 | ADR 0005 | OPEN |
@@ -39,6 +39,9 @@ M1 设计对话存储时还没有工具,`conversation-store.ts` 做成 text-only
 | D11 | **硬编码默认值待 config 化** | exec 输出上限/超时(`policy.rs:14`)、episodic 汇总节奏 `EPISODIC_EVERY_N=20`(`auto-memory.ts:12`)等;v1 硬编码求确定性,HANDOFF:118 认可的占位默认值 | M5 settings 面板统一暴露 | HANDOFF:118 | OPEN(良性可调) |
 | D12 | **shell-open 域名级 url 白名单** | 三类隔离(url-safe/local-file/local-exec)已堵 A1;域名粒度(`domain:*.github.com`,à la Claude Code)是更细的可配控制 | 需要比"所有 url-safe scheme 静默"更细时 | 任务 `shell-open-persist-fix` PRD | OPEN |
 | D13 | **shell-open 危险目标的 smart-LLM 审阅层** | 未命中的 local-exec 先让辅助 LLM 分类再决定升级(Codex Smart Approvals / Hermes smart);A1 靠类隔离已治本,这是 make-it-fast 增强 | make-it-fast 阶段 / 主动性里程碑 | 任务 `shell-open-persist-fix` PRD | OPEN |
+| D14 | **timeline parts 丢弃 reasoning / file / approval part** | `turn-mapping.ts` 持久化回合时只保留 text / tool-call / tool-result;reasoning、file、approval-request/response part 被丢弃(当前无重放价值,provider 也不要求)| M4 聊天窗需要渲染思维链/文件卡,或 provider 要求重放 reasoning 时 | `turn-mapping.ts:assistantEntry`、任务 `agent-harness-improve` | OPEN |
+| D15 | **排队中断连的回合仍完整执行** | `chat.send` 排在 turn-queue 里等锁的回合,若期间连接关闭,拿到锁后仍对已关闭 socket 完整跑一轮(真实 provider 浪费 token);进行中回合的取消已覆盖,仅"排队中"这一窄口未覆盖,数据无损坏 | 多回合高并发/主动性上线,或 token 浪费显著时 | `turn-queue.ts`、`chat-send.ts`、任务 `agent-harness-improve` | OPEN(窄边缘) |
+| D16 | **抛错多步回合丢失已完成步的工具记录** | error 路径(`streamEnded=false`)不 await `responseMessages`(ai@7.0.17 流被弃置后 promise 可能永不 settle,await 会挂起),故多 step 回合若后续 step 抛错,仅 partial 文本落盘、已完成 step 的 tool 记录丢失 | 若发现 error 后跨回合幻觉复发,或有低成本的带超时 race-await 方案时 | `chat-agent.ts:persistTurn`、任务 `agent-harness-improve` | OPEN(极窄边缘) |
 | — | **Deferred issues #27–#34** | v1.5/v2 追踪器,故意不实现 | 永不作为 `ready-for-agent` | GitHub #27–#34 / HANDOFF | OPEN(设计延期) |
 
 > 补齐一项后:状态改 `DONE`、注明补齐的 commit/任务、保留行(留档,不删)。

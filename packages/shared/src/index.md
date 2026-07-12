@@ -4,8 +4,8 @@
 - json-rpc-schema.ts — JSON-RPC 2.0 envelope schemas + JSON_RPC_ERROR_CODES + JSON_RPC_APP_ERROR + client-frame union
 - error-code-schema.ts — closed cross-process ErrorCode union
 - connect-schema.ts — CONNECT_METHOD + RoleSchema + connect handshake param/result schemas (ADR 0004)
-- chat-schema.ts — CHAT_METHODS + chat.send/delta/complete/error param & event schemas
-- timeline-schema.ts — TIMELINE_METHODS + timeline entry/history/subscribe/appended schemas (ADR 0005)
+- chat-schema.ts — CHAT_METHODS + chat.send/cancel/delta/complete/error param & event schemas
+- timeline-schema.ts — TIMELINE_METHODS + timeline entry/part/history/subscribe/appended schemas (ADR 0005); parts = structured tool-call/result fidelity
 - approval-schema.ts — APPROVAL_METHODS + tool-approval request/respond schemas (MCP gate; M3 Permission Gate reuse)
 - capability-schema.ts — CAPABILITY_METHODS + core↔node capability request/respond/error schemas; respond output is opaque (Option A)
 - capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen); mirrored in Rust serde

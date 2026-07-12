@@ -2,6 +2,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { TimelinePart } from "@taki/shared";
 import { MIGRATIONS } from "./migrations/index-list.ts";
 import { openDatabase, type Database } from "./sqlite.ts";
 import { createTimelineRepo, type TimelineRepo } from "./timeline-repo.ts";
@@ -31,6 +32,28 @@ describe("createTimelineRepo.append", () => {
     expect(first.id).not.toBe(second.id);
     expect(new Date(first.createdAt).toISOString()).toBe(first.createdAt);
     expect(first).toMatchObject({ characterId: "taki", role: "user", content: "hi" });
+  });
+
+  it("round-trips structured parts through the JSON column and keeps legacy rows parts-less", () => {
+    const parts: TimelinePart[] = [
+      { type: "tool-call", toolCallId: "c1", toolName: "screenshot", input: { display: 1 } },
+    ];
+    repo.append({ characterId: "taki", role: "assistant", content: "[tool-call: screenshot]", parts });
+    repo.append({ characterId: "taki", role: "user", content: "legacy" });
+
+    const [withParts, legacy] = repo.latestAscending("taki", 10);
+    expect(withParts?.parts).toEqual(parts);
+    expect(legacy?.parts).toBeUndefined();
+  });
+
+  it("accepts and reads back a tool role row", () => {
+    const parts: TimelinePart[] = [
+      { type: "tool-result", toolCallId: "c1", toolName: "screenshot", output: { type: "json", value: { ok: true } } },
+    ];
+    repo.append({ characterId: "taki", role: "tool", content: "[tool-result: screenshot -> json]", parts });
+
+    const page = repo.pageBefore({ characterId: "taki", limit: 10 });
+    expect(page.entries[0]).toMatchObject({ role: "tool", parts });
   });
 });
 
