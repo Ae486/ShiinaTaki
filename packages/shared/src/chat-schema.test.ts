@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   CHAT_METHODS,
+  ChatCancelParamsSchema,
+  ChatCancelResultSchema,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
@@ -9,13 +11,26 @@ import {
 } from "./chat-schema.ts";
 
 describe("CHAT_METHODS", () => {
-  it("exposes the four chat method names", () => {
+  it("exposes the five chat method names", () => {
     expect(CHAT_METHODS).toEqual({
       send: "chat.send",
+      cancel: "chat.cancel",
       delta: "chat.delta",
       complete: "chat.complete",
       error: "chat.error",
     });
+  });
+});
+
+describe("ChatCancelParamsSchema", () => {
+  it("accepts a valid cancel and rejects an empty characterId", () => {
+    expect(ChatCancelParamsSchema.safeParse({ characterId: "taki" }).success).toBe(true);
+    expect(ChatCancelParamsSchema.safeParse({ characterId: "" }).success).toBe(false);
+  });
+
+  it("round-trips a cancel result", () => {
+    expect(ChatCancelResultSchema.parse({ cancelled: true })).toEqual({ cancelled: true });
+    expect(ChatCancelResultSchema.safeParse({}).success).toBe(false);
   });
 });
 

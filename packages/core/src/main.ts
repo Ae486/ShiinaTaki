@@ -9,6 +9,8 @@ import type { ToolSet } from "ai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { createChatAgent } from "./agents/chat-agent.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
+import { createTurnQueue } from "./agents/turn-queue.ts";
+import { createTurnRegistry } from "./agents/turn-registry.ts";
 import { createApprovalBroker } from "./approval/approval-broker.ts";
 import { createApprovalGate } from "./approval/approval-gate.ts";
 import { createDecisionStore } from "./approval/decision-store.ts";
@@ -38,6 +40,7 @@ import { createMemoryEngine } from "./memory/memory-engine.ts";
 import { createConnectionRegistry } from "./server/connection-registry.ts";
 import { createMethodRegistry } from "./server/method-registry.ts";
 import { approvalRespondMethod } from "./server/methods/approval-respond.ts";
+import { chatCancelMethod } from "./server/methods/chat-cancel.ts";
 import { chatSendMethod } from "./server/methods/chat-send.ts";
 import { capabilityRespondMethod } from "./server/methods/capability-respond.ts";
 import { capabilityTriggerMethod, devTriggerEnabled } from "./server/methods/capability-trigger.ts";
@@ -181,6 +184,8 @@ const readFileTool = createReadFileTool({ paths: workspacePaths, logger });
 const writeFileTool = createWriteFileTool({ paths: workspacePaths, logger });
 
 const registry = createMethodRegistry();
+// Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
+const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry() };
 // The pairing code is the one sanctioned secret-ish value in a log: short-lived, single-purpose,
 // and the operator console is the trust anchor for first pairing (prd §4). Tokens are never logged.
 const pairingLog = logger.child({ mod: "pairing" });
@@ -211,8 +216,10 @@ registry.register(
       approval: approvalGate,
     }),
     logger,
+    turnControls,
   ),
 );
+registry.register(chatCancelMethod(turnControls.turns));
 registry.register(approvalRespondMethod(approvalBroker));
 registry.register(capabilityRespondMethod(capabilityBroker));
 registry.register(timelineHistoryMethod(timelineRepo));

@@ -1,6 +1,7 @@
 /**
- * INPUT:  ChatSendParams from a dispatched chat.send request + a ChatAgent
- * OUTPUT: MethodDefinition (operator-only); acks { messageId }, then streams chat.delta/.complete/.error via ctx
+ * INPUT:  ChatSendParams from a dispatched chat.send request + a ChatAgent + TurnControls (queue + registry)
+ * OUTPUT: MethodDefinition (operator-only); acks { messageId }, then streams chat.delta/.complete/.error via ctx;
+ *         turns are serialized per characterId and cancellable (chat.cancel / connection close)
  * POS:    core/server/methods — one file per WS method; the boundary that turns provider failures into structured errors
  */
 import { randomUUID } from "node:crypto";
@@ -16,10 +17,22 @@ import {
   type ChatSendResult,
 } from "@taki/shared";
 import type { ChatAgent } from "../../agents/chat-agent.ts";
+import type { TurnQueue } from "../../agents/turn-queue.ts";
+import type { TurnRegistry } from "../../agents/turn-registry.ts";
 import type { Logger } from "../../logging/logger.ts";
 import type { MethodContext, MethodDefinition } from "../method-registry.ts";
 
-export function chatSendMethod(chatAgent: ChatAgent, logger: Logger): MethodDefinition<ChatSendParams> {
+/** The turn-lifecycle pair every send runs under: per-character serialization + cancellation (D1 #3/#4). */
+export interface TurnControls {
+  queue: TurnQueue;
+  turns: TurnRegistry;
+}
+
+export function chatSendMethod(
+  chatAgent: ChatAgent,
+  logger: Logger,
+  controls: TurnControls,
+): MethodDefinition<ChatSendParams> {
   const log = logger.child({ mod: "chat-send" });
   return {
     method: CHAT_METHODS.send,
@@ -30,7 +43,7 @@ export function chatSendMethod(chatAgent: ChatAgent, logger: Logger): MethodDefi
       // Defer streaming to the next macrotask so the ack — sent by the server as
       // this dispatch's result, a couple of microtask hops later — is flushed to
       // the socket before the first delta notification.
-      setImmediate(() => void pump({ chatAgent, log, params, ctx, messageId }));
+      setImmediate(() => void runQueued({ chatAgent, log, params, ctx, messageId, controls }));
       return { messageId };
     },
   };
@@ -42,15 +55,36 @@ interface PumpArgs {
   params: ChatSendParams;
   ctx: MethodContext;
   messageId: string;
+  controls: TurnControls;
 }
 
-async function pump({ chatAgent, log, params, ctx, messageId }: PumpArgs): Promise<void> {
+// A turn fully commits (append user -> stream -> append turn) before the character's next send starts; concurrent
+// sends for one character would otherwise interleave appends and read each other's half-written history (D1 #3).
+async function runQueued(args: PumpArgs): Promise<void> {
+  const { controls, params } = args;
+  const release = await controls.queue.acquire(params.characterId);
+  const controller = controls.turns.begin(params.characterId);
+  try {
+    await pump(args, controller);
+  } finally {
+    controls.turns.end(params.characterId, controller);
+    release();
+  }
+}
+
+async function pump(args: PumpArgs, controller: AbortController): Promise<void> {
+  const { chatAgent, log, params, ctx, messageId } = args;
   const { characterId } = params;
+  // A closing operator socket aborts its own in-flight turn — nobody is listening to the deltas anymore.
+  // The controller is per-turn, so a late close event can never abort a later turn.
+  ctx.onClose(() => controller.abort("connection closed"));
   try {
     // The turn handle lets MCP tool approvals ride ctx.notify (approval.request) and deny-on-disconnect via ctx.onClose.
-    for await (const delta of chatAgent.stream(params, { notify: ctx.notify, onClose: ctx.onClose })) {
+    const turn = { notify: ctx.notify, onClose: ctx.onClose, signal: controller.signal };
+    for await (const delta of chatAgent.stream(params, turn)) {
       ctx.notify(CHAT_METHODS.delta, { messageId, characterId, delta } satisfies ChatDelta);
     }
+    // A cancelled turn also ends here: the stream closes gracefully after the abort, partial text already streamed.
     ctx.notify(CHAT_METHODS.complete, { messageId, characterId } satisfies ChatComplete);
   } catch (error) {
     const message = readableError(error);
