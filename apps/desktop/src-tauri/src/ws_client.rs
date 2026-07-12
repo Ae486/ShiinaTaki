@@ -14,6 +14,7 @@ use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 
 use crate::capabilities_impl::exec::{classify as classify_exec, command_of, ExecPolicy};
+use crate::capabilities_impl::shell_open::classify as classify_shell_open;
 use crate::capabilities_impl::CapabilityRegistry;
 use crate::gate::Gate;
 use crate::protocol::{
@@ -179,6 +180,12 @@ impl WsClient {
             let authorized = if capability == "exec" {
                 let class = classify_exec(&exec_policy, &input);
                 gate.evaluate_exec(&request_id, command_of(&input), class)
+            } else if capability == "shell-open" {
+                // shell-open's risk is set by the TARGET, not the name (A1): classify, then authorize per
+                // (capability, targetClass) so a remembered Always never crosses classes.
+                let class = classify_shell_open(&input);
+                let detail = handlers.detail(&capability, &input);
+                gate.evaluate_shell_open(&request_id, class, detail.as_deref())
             } else {
                 // The dialog detail (e.g. the shell-open target) is derived from the input by the capability itself; it
                 // is shown to the user for approval but never audited or logged (ruling 4).

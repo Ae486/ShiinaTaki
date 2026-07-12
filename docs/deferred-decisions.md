@@ -27,7 +27,7 @@ M1 设计对话存储时还没有工具,`conversation-store.ts` 做成 text-only
 | # | 延期项 | 为什么延 | 触发补齐 | 锚点 | 状态 |
 |---|---|---|---|---|---|
 | D1 | **回合生命周期缺陷集**：timeline 丢失 tool-call/result、无基础 system prompt、回合无并发串行化、无取消/中断、中断回合丢失已流文本 | M1 时无工具(text-only 合理起点);其余是 agent runtime 基本功在渐进交付中的欠账 | **立即** —— 幻觉已在生产暴露,阻塞 M4 的 #16/#17(聊天窗要渲染工具记录) | 任务 `agent-harness-improve`(原 `agent-tool-timeline` 升级) | SCHEDULED |
-| D2 | **shell-open 的 Always 持久化 → 静默任意执行**(A1) | name-keyed 持久化对"启动"类能力是错的(target 才界定动作) | **M4 前** | 任务 `shell-open-persist-fix` | SCHEDULED |
+| D2 | **shell-open 的 Always 持久化 → 静默任意执行**(A1) | name-keyed 持久化对"启动"类能力是错的(target 才界定动作) | **M4 前** | 任务 `shell-open-persist-fix`(DONE);原则沉淀于 `.trellis/spec/backend/permission-authorization.md` | DONE |
 | D3 | **exec argv[0] 未按排除 cwd 的 PATH 解析为绝对路径**(B2) | 当前被"write_file 只写文本 + allowlist 默认空"缓解 | **exec auto-run 配置上线前必修** | GitHub #23 | OPEN |
 | D4 | **上下文压缩 / token 预算** | ADR 0005 明列为 "later concern";`REPLAY_WINDOW=200` 硬截断 | 长对话撞上下文窗口 / M5 | ADR 0005 | OPEN |
 | D5 | **调度器(croner)/ 主动性** | 无 `scheduler/` 目录;主动性属 M5 | M5 立项 | GitHub M5 (#19–#26) | OPEN |
@@ -37,6 +37,8 @@ M1 设计对话存储时还没有工具,`conversation-store.ts` 做成 text-only
 | D9 | **emotion capsule / companion state 模块**(黄金样本级) | 喂 persona 的情绪胶囊现为静态 `"Current mood: neutral."` 占位(`assembler.ts:15`);mood-gated 记忆层已落地,但情绪信号恒定中性 → PRODUCT.md:10 承诺的"看情绪出话"半接线、真实场景空心。v1 先出确定性输出;companion state 模块未建(仅 MEMORY-DESIGN.md:66 提及一次) | **"角色真实感"优化任务(待立项)**;M4 #16(情绪驱动表情)会先碰到 | `assembler.ts:13`、已归档 `07-10-memory-engine/prd.md` | OPEN |
 | D10 | **core 关停链缺 `.catch`** | `server.close()` 拒绝时 SQLite 句柄不释放(自述极低概率);M1 记为"待后续顺手修",只写在 devlog | 下次触碰 server 关停链 | `docs/devlog/m1.md:13` | OPEN(低危加固) |
 | D11 | **硬编码默认值待 config 化** | exec 输出上限/超时(`policy.rs:14`)、episodic 汇总节奏 `EPISODIC_EVERY_N=20`(`auto-memory.ts:12`)等;v1 硬编码求确定性,HANDOFF:118 认可的占位默认值 | M5 settings 面板统一暴露 | HANDOFF:118 | OPEN(良性可调) |
+| D12 | **shell-open 域名级 url 白名单** | 三类隔离(url-safe/local-file/local-exec)已堵 A1;域名粒度(`domain:*.github.com`,à la Claude Code)是更细的可配控制 | 需要比"所有 url-safe scheme 静默"更细时 | 任务 `shell-open-persist-fix` PRD | OPEN |
+| D13 | **shell-open 危险目标的 smart-LLM 审阅层** | 未命中的 local-exec 先让辅助 LLM 分类再决定升级(Codex Smart Approvals / Hermes smart);A1 靠类隔离已治本,这是 make-it-fast 增强 | make-it-fast 阶段 / 主动性里程碑 | 任务 `shell-open-persist-fix` PRD | OPEN |
 | — | **Deferred issues #27–#34** | v1.5/v2 追踪器,故意不实现 | 永不作为 `ready-for-agent` | GitHub #27–#34 / HANDOFF | OPEN(设计延期) |
 
 > 补齐一项后:状态改 `DONE`、注明补齐的 commit/任务、保留行(留档,不删)。

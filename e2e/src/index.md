@@ -9,7 +9,8 @@ Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pn
 - trigger-gating.e2e.test.ts — the dev capability.trigger is absent without TAKI_DEV_TRIGGER=1 (METHOD_NOT_FOUND), present with it
 - screenshot-always-restart.e2e.test.ts — #5 allow-always persists across a node restart (second shot auto-allowed, no ask)
 - deny-degrades.e2e.test.ts — #6/#23 scripted deny on screenshot/exec → structured DENIED, no crash/file
-- shell-open-schemes.e2e.test.ts — #11 shell-open refuses javascript:/file: → EXEC_FAILED unsupported url scheme
+- shell-open-schemes.e2e.test.ts — #11 dangerous url schemes classify as shell-open:blocked → DENIED at the gate, no dialog
+- shell-open-target-class.e2e.test.ts — 07-12 A1 fix: per (capability,targetClass); persisted url-safe memory answers via gate decision (deny polarity, never launches a real browser); url-safe Always never authorizes local-exec/local-file; local classes ask every time
 - clipboard-roundtrip.e2e.test.ts — #12 clipboard write→read returns the exact value (real arboard)
 - process-list.e2e.test.ts — #13 process-list has pid/name/memory and no argv/cmd leak
 - workspace-files.e2e.test.ts — #14/#15 Workspace write+read round-trip; ../../.. escape rejected with no path leak

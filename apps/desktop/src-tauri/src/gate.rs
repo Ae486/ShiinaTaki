@@ -1,5 +1,5 @@
-//! INPUT:  a capability request (requestId, capability) + a Remembered verdict / an Approver answer; or a pre-classified exec command
-//! OUTPUT: Gate::evaluate -> bool (name-keyed); Gate::evaluate_exec -> bool (command-keyed, no persistence); ExecClass; GatePolicy
+//! INPUT:  a capability request (requestId, capability) + a Remembered verdict / an Approver answer; or a pre-classified exec command / shell-open target
+//! OUTPUT: Gate::evaluate (name-keyed); evaluate_exec (command-keyed) + evaluate_shell_open (class-keyed, A1 fix); ExecClass; ShellOpenClass; GatePolicy
 //! POS:    shell/gate — the Permission Gate policy core (ruling 10); fail-closed everywhere; NO tauri:: types
 
 pub mod approver;
@@ -25,6 +25,32 @@ pub enum ExecClass {
     Auto,
     /// Everything else — ask the user; ALWAYS-ask, never persisted (ruling 8).
     Escalate,
+}
+
+/// The derived risk class of a shell-open target (A1 fix): shell-open's risk is set by the TARGET, not the name, so
+/// authorization keys on (capability, targetClass) — an Always earned on one class never reaches another (R1).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ShellOpenClass {
+    /// An allowlisted-scheme url (http/https/mailto) — rememberable once/session/always under its OWN class key.
+    UrlSafe,
+    /// A local non-executable file — always-ask, never persisted (the target varies per request, so does its risk).
+    LocalFile,
+    /// An executable/script/UNC target — the bypass-immune floor (R2): always >= ask, never persisted.
+    LocalExec,
+    /// A non-allowlisted url scheme or malformed request — refused without a dialog.
+    Blocked,
+}
+
+impl ShellOpenClass {
+    /// The (capability, targetClass) authorization key — what decision memory, the approver, and audit see.
+    pub fn key(self) -> &'static str {
+        match self {
+            Self::UrlSafe => "shell-open:url-safe",
+            Self::LocalFile => "shell-open:local-file",
+            Self::LocalExec => "shell-open:local-exec",
+            Self::Blocked => "shell-open:blocked",
+        }
+    }
 }
 
 /// Per-capability enable switch. v1: every capability is enabled (operator config lands with #23), but the
@@ -118,6 +144,29 @@ impl Gate {
                     self.audited_exec(request_id, Decision::Denied, command)
                 }
                 ApproverOutcome::Timeout => self.audited_exec(request_id, Decision::DeniedTimeout, command),
+            },
+        }
+    }
+
+    /// Authorizes a shell-open from its pre-derived target class (A1 fix). url-safe delegates to the name-keyed
+    /// `evaluate` under its class-qualified key, so a remembered Always silences ONLY url-safe. The local classes are
+    /// the bypass-immune floor (R2): decision memory is neither consulted nor written — no Always (legacy name-keyed,
+    /// url-safe, or a future trust mode) can ever silence a local open, and any allow is once-only.
+    pub fn evaluate_shell_open(&self, request_id: &str, class: ShellOpenClass, detail: Option<&str>) -> bool {
+        // The enable switch stays on the bare capability name — operator config disables shell-open as a whole.
+        if !self.policy.is_enabled("shell-open") {
+            return self.audited(request_id, class.key(), Decision::AutoDenied);
+        }
+        match class {
+            ShellOpenClass::Blocked => self.audited(request_id, class.key(), Decision::AutoDenied),
+            ShellOpenClass::UrlSafe => self.evaluate(request_id, class.key(), detail),
+            ShellOpenClass::LocalFile | ShellOpenClass::LocalExec => match self.approver.ask(class.key(), detail) {
+                // The remember-step answer is deliberately dropped (never persisted, R2) — any allow is once-only.
+                ApproverOutcome::Allow(_) => self.audited(request_id, class.key(), Decision::AllowedOnce),
+                ApproverOutcome::Deny | ApproverOutcome::Unavailable => {
+                    self.audited(request_id, class.key(), Decision::Denied)
+                }
+                ApproverOutcome::Timeout => self.audited(request_id, class.key(), Decision::DeniedTimeout),
             },
         }
     }
@@ -361,5 +410,72 @@ mod tests {
         let (gate, _audit, decisions) = exec_harness(ApproverOutcome::Allow(Scope::Always));
         assert!(gate.evaluate_exec("req", "some-tool", ExecClass::Escalate));
         assert_eq!(decisions.get("exec"), None, "exec approvals are never remembered");
+    }
+
+    #[test]
+    fn shell_open_url_safe_always_is_remembered_under_its_class_key_only() {
+        let h = harness(GatePolicy::new(), ApproverOutcome::Allow(Scope::Always));
+        assert!(h.gate.evaluate_shell_open("req", ShellOpenClass::UrlSafe, Some("open https://x")));
+        assert_eq!(last_decision(&h.audit), Decision::AllowedAlways);
+        assert_eq!(h.decisions.get("shell-open:url-safe"), Some(Remembered::Always));
+        assert_eq!(h.decisions.get("shell-open"), None, "the bare capability name is never written");
+    }
+
+    #[test]
+    fn shell_open_url_safe_always_never_authorizes_a_local_class() {
+        // THE A1 regression: an Always earned on a safe url (plus a stale pre-fix name-keyed grant) must not
+        // silence a local open — the approver MUST still be consulted, and here the user says no.
+        let h = harness(GatePolicy::new(), ApproverOutcome::Deny);
+        h.decisions.remember("shell-open:url-safe", Scope::Always, true);
+        h.decisions.remember("shell-open", Scope::Always, true); // the pre-fix leaked grant must be inert
+
+        assert!(h.gate.evaluate_shell_open("r1", ShellOpenClass::UrlSafe, None), "url-safe is silent");
+        assert_eq!(last_decision(&h.audit), Decision::AutoAllowed);
+
+        assert!(!h.gate.evaluate_shell_open("r2", ShellOpenClass::LocalExec, Some("open C:\\x\\cmd.exe")));
+        assert_eq!(last_decision(&h.audit), Decision::Denied, "asked (not auto-denied) — the ask still happened");
+
+        assert!(!h.gate.evaluate_shell_open("r3", ShellOpenClass::LocalFile, Some("open C:\\x\\a.pdf")));
+        assert_eq!(last_decision(&h.audit), Decision::Denied);
+    }
+
+    #[test]
+    fn shell_open_local_classes_never_persist_even_on_allow_always() {
+        for class in [ShellOpenClass::LocalFile, ShellOpenClass::LocalExec] {
+            let h = harness(GatePolicy::new(), ApproverOutcome::Allow(Scope::Always));
+            assert!(h.gate.evaluate_shell_open("req", class, None));
+            assert_eq!(last_decision(&h.audit), Decision::AllowedOnce, "{class:?} allows are once-only");
+            assert_eq!(h.decisions.get(class.key()), None, "{class:?} is never remembered");
+        }
+    }
+
+    #[test]
+    fn shell_open_local_classes_ignore_a_seeded_remembered_always() {
+        // Bypass-immunity (R2): even a decision-store entry under the local class key (tampering / a future bug)
+        // must not silence the ask — the local arms never read memory at all.
+        for class in [ShellOpenClass::LocalFile, ShellOpenClass::LocalExec] {
+            let h = harness(GatePolicy::new(), ApproverOutcome::Deny);
+            h.decisions.remember(class.key(), Scope::Always, true);
+            assert!(!h.gate.evaluate_shell_open("req", class, None), "{class:?} must still ask");
+            assert_eq!(last_decision(&h.audit), Decision::Denied);
+        }
+    }
+
+    #[test]
+    fn shell_open_blocked_auto_denies_without_asking() {
+        let h = harness(GatePolicy::new(), ApproverOutcome::Allow(Scope::Always)); // would allow — must not be consulted
+        assert!(!h.gate.evaluate_shell_open("req", ShellOpenClass::Blocked, None));
+        assert_eq!(last_decision(&h.audit), Decision::AutoDenied);
+    }
+
+    #[test]
+    fn shell_open_disabled_capability_auto_denies_every_class() {
+        for class in [ShellOpenClass::UrlSafe, ShellOpenClass::LocalFile, ShellOpenClass::LocalExec] {
+            let mut policy = GatePolicy::new();
+            policy.disable("shell-open");
+            let h = harness(policy, ApproverOutcome::Allow(Scope::Once));
+            assert!(!h.gate.evaluate_shell_open("req", class, None), "{class:?} is off with the capability");
+            assert_eq!(last_decision(&h.audit), Decision::AutoDenied);
+        }
     }
 }

@@ -5,7 +5,7 @@
 - status.rs — StatusEmitter trait (status sink seam) + TracingStatusEmitter (headless log-only impl)
 - protocol.rs — serde mirrors of @taki/shared (connect, app-error, client frames, capability channel) + golden-fixture sweep
 - ws_client.rs — the reconnecting node client: handshake, token persist, capability.request → gate → respond; tauri-free
-- gate.rs — the Permission Gate policy core (name-keyed evaluate + command-keyed evaluate_exec/ExecClass, fail-closed) + gate/ submodules
+- gate.rs — the Permission Gate policy core (name-keyed evaluate + command-keyed evaluate_exec + class-keyed evaluate_shell_open, fail-closed) + gate/ submodules
 - gate/ — decisions store + approver trait/dialog impl/scripted (debug-only) impl
 - audit.rs — Shell-owned JSONL audit trail (append-only, names-only EXCEPT exec's command, ruling 9) + ISO-8601 timestamp
 - secrets.rs — SecretStore trait + Windows Credential Manager (keyring) + in-memory fake

@@ -29,6 +29,8 @@ export interface StackOptions {
   devTrigger?: boolean;
   /** Seed <nodeDataDir>/exec-policy.json before the node boots (exec allowlist/mode/cwd scenarios read it at startup). */
   execPolicy?: unknown;
+  /** Seed <nodeDataDir>/gate-decisions.json before the node boots (persisted always/never memory scenarios). */
+  gateDecisions?: { capability: string; decision: "always" | "never" }[];
 }
 
 /** One node-side gate decision from <node dataDir>/audit.jsonl (names-only except exec's command). */
@@ -121,6 +123,10 @@ async function bootParts(options: StackOptions): Promise<Parts> {
     // Seed node-side config BEFORE the node boots (ExecPolicy::load reads it once at startup).
     if (options.execPolicy !== undefined) {
       writeFileSync(join(nodeDataDir, "exec-policy.json"), JSON.stringify(options.execPolicy));
+    }
+    if (options.gateDecisions !== undefined) {
+      const decisions = options.gateDecisions.map((entry) => ({ ...entry, decidedAt: new Date().toISOString() }));
+      writeFileSync(join(nodeDataDir, "gate-decisions.json"), JSON.stringify({ decisions }));
     }
     if (options.startNode !== false) await startNodeProc(parts, true);
     return parts;

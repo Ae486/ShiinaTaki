@@ -1,16 +1,20 @@
 //! INPUT:  a gate-authorized shell-open request ({ kind: "url"|"path", target })
-//! OUTPUT: ShellOpenExec: launches the target via tauri-plugin-opener free fns -> ShellOpenOutput ack Value
-//! POS:    shell/capabilities — the shell-open capability; reachable ONLY via the gate; the dialog shows the target (ruling 3/4)
+//! OUTPUT: ShellOpenExec (launch via opener free fns) + target::classify re-export (feeds the class-keyed gate path)
+//! POS:    shell/capabilities — the shell-open capability; reachable ONLY via Gate::evaluate_shell_open (A1 fix); the dialog shows the target (ruling 3/4)
+
+mod target;
 
 use serde_json::Value;
 use tauri_plugin_opener::{open_path, open_url};
 
 use crate::capabilities_impl::{CapabilityExec, ExecError};
+use crate::gate::ShellOpenClass;
 use crate::protocol::ShellOpenOutput;
 
+pub use target::classify;
+use target::parse_target;
+
 const CAPABILITY: &str = "shell-open";
-// URL schemes allowed to launch in v1; everything else (file:, javascript:, custom app schemes) is refused (ruling 3).
-const ALLOWED_SCHEMES: [&str; 3] = ["http", "https", "mailto"];
 
 /// What the exec decided to launch, after validating the input. `open_url`/`open_path` never go through a shell, so
 /// there is no argument-injection surface — the residual risk is semantic and rests on the gate + dialog (ruling 3).
@@ -46,25 +50,19 @@ impl CapabilityExec for ShellOpenExec {
     }
 }
 
-// Extracts (kind, target) from the input, or None if the shape is wrong (the gate/detail then falls back to name-only).
-fn parse_target(input: &Value) -> Option<(String, String)> {
-    let kind = input.get("kind").and_then(Value::as_str)?;
-    let target = input.get("target").and_then(Value::as_str)?;
-    Some((kind.to_string(), target.to_string()))
-}
-
-// Validates the input and, for URLs, enforces the scheme allowlist. Pure (no launch) so it is unit-testable.
+// Validates the input via the same classifier the gate authorized on. The gate refuses Blocked before the handler
+// runs; re-deriving here is defense-in-depth so the handler stays safe even through a future non-gate path.
 fn plan_open(input: &Value) -> Result<OpenPlan, ExecError> {
-    let (kind, target) = parse_target(input).ok_or_else(|| ExecError::failed("shell-open requires `kind` and `target`"))?;
+    let (kind, target) =
+        parse_target(input).ok_or_else(|| ExecError::failed("shell-open requires `kind` and `target`"))?;
     match kind.as_str() {
-        "url" => {
-            let scheme = target.split_once(':').map(|(scheme, _)| scheme.to_ascii_lowercase());
-            match scheme {
-                Some(scheme) if ALLOWED_SCHEMES.contains(&scheme.as_str()) => Ok(OpenPlan { is_url: true, target }),
-                _ => Err(ExecError::failed("unsupported url scheme")),
+        "url" | "path" => {
+            if classify(input) == ShellOpenClass::Blocked {
+                let reason = if kind == "url" { "unsupported url scheme" } else { "malformed path target" };
+                return Err(ExecError::failed(reason));
             }
+            Ok(OpenPlan { is_url: kind == "url", target })
         }
-        "path" => Ok(OpenPlan { is_url: false, target }),
         other => Err(ExecError::failed(format!("unknown shell-open kind: {other}"))),
     }
 }
@@ -92,9 +90,18 @@ mod tests {
     }
 
     #[test]
-    fn a_path_plan_does_not_scheme_check() {
-        let plan = plan_open(&json!({ "kind": "path", "target": "C:\\Users\\me\\notes.txt" })).expect("path plan");
-        assert!(!plan.is_url);
+    fn a_path_plan_accepts_files_and_executables_alike() {
+        // The gate decides WHETHER a path opens (per class); the handler only refuses Blocked shapes.
+        for target in ["C:\\Users\\me\\notes.txt", "C:\\Windows\\System32\\cmd.exe"] {
+            let plan = plan_open(&json!({ "kind": "path", "target": target })).expect("path plan");
+            assert!(!plan.is_url);
+        }
+    }
+
+    #[test]
+    fn an_empty_path_target_is_refused() {
+        let error = plan_open(&json!({ "kind": "path", "target": "  " })).expect_err("blocked path");
+        assert_eq!(error.message, "malformed path target");
     }
 
     #[test]

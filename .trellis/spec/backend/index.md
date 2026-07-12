@@ -22,6 +22,7 @@ Before writing backend code:
 | [Quality Guidelines](./quality-guidelines.md) | Size caps, lint, tests, forbidden patterns |
 | [Logging Guidelines](./logging-guidelines.md) | pino / tracing, audit log |
 | [E2E Harness](./e2e-harness.md) | Headless `withStack` fixture; L1 (deterministic) + L2 (real-agent) dual-track per capability |
+| [Permission Authorization](./permission-authorization.md) | Authorize on `(capability, argClass)` for arg-risk capabilities, name for fixed-risk; no cross-class leakage |
 
 ## Quality Check (run before handing off)
 
