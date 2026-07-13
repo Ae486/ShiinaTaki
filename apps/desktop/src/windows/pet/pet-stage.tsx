@@ -1,7 +1,8 @@
 /**
  * INPUT:  avatar state from the Zustand store; the pet canvas host DOM node.
  * OUTPUT: <PetStage> — the PixiJS canvas host that mounts the Live2D renderer scene, drives its render tier from
- *         avatar state, wires the render governor + window drag, and reveals the window after first paint.
+ *         avatar state, wires the render governor + window drag + per-pixel click-through, and reveals the window
+ *         after first paint.
  * POS:    ui/renderer bridge — the ONLY component allowed to touch renderer/ APIs. Root remains transparent
  *         (no opaque background) so the overlay stays a per-pixel cut-out.
  */
@@ -12,6 +13,7 @@ import { createPetScene, type PetScene } from "@/renderer/pet-scene.js";
 import { useAvatarStore } from "@/stores/avatar-store.js";
 import { usePetDrag } from "./use-pet-drag.ts";
 import { useRenderGovernor } from "./use-render-governor.ts";
+import { useClickThrough } from "./use-click-through.ts";
 
 export function PetStage() {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -19,6 +21,7 @@ export function PetStage() {
   const avatarState = useAvatarStore((s) => s.state);
   const drag = usePetDrag();
   useRenderGovernor(scene?.governor ?? null);
+  useClickThrough(scene);
 
   useEffect(() => {
     const host = hostRef.current;
