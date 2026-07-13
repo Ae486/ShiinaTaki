@@ -11,6 +11,12 @@ File <= 300 lines; function/hook/component <= 50 lines; max 3 params; test files
 - Re-render hygiene: narrow store selectors, `memo` only where a profile shows need, stable callback identities for renderer-bridge props.
 - Assets: Live2D textures load through the Tauri asset protocol lazily per character; never import model assets into the JS bundle.
 
+## Proprietary & copyrighted assets (Live2D runtimes, models)
+
+- Acquisition is ALWAYS script-driven into git-ignored dirs (`scripts/vendor-live2d-runtimes.mjs` → `apps/desktop/public/vendor/live2d/`; models extract under `models/`). Never commit, never hotlink a CDN at runtime; verify with `git check-ignore` + `git status --porcelain` in the same change.
+- Model assets are served in dev via a dev-only Vite middleware (`apply: "serve"`) from OUTSIDE `public/` — they must never be reachable by a production build. Runtime globals (`live2dcubismcore.min.js`, `live2d.min.js`) load as plain `<script>` tags before the module entry.
+- Production packaging of the vendored runtimes is a Tauri-side concern (deferred-decisions **D18**, due at #14): anything proprietary sitting under `publicDir` gets copied into `dist/` by `vite build` — do not add more proprietary files there.
+
 ## File headers & folder index.md (mandatory)
 
 Every production source file (`.ts`/`.tsx`) opens with a 3-6 line module-contract header; tests and generated code are exempt. Every directory under `src/` carries an `index.md` (one line per source file; colocated tests implied). Touch a folder → update its `index.md` in the same change. Headers are placement cards — never what/how narration; body comments stay why-only.

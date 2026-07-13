@@ -7,3 +7,4 @@
 - Tailwind 4 for styling; class lists longer than one line get extracted to a `cva`/helper or a subcomponent. No inline `style=` except for truly dynamic values (positions from the renderer).
 - The pet overlay window must remain transparent: no opaque root backgrounds outside explicitly-rendered UI (bubbles, menus). Test any new overlay element against click-through hit-testing.
 - Accessibility floor for the settings window: labelled inputs, keyboard navigation, focus states. (The pet overlay is exempt — it's a canvas.)
+- Visual styling of panels/windows may temporarily reference BANDORI-PET-REV (`references/` — GPLv3: look & patterns only, NEVER copy code; clean-room per CLAUDE.md). The user restyles later — do not invest in bespoke visual design ahead of that.

@@ -19,6 +19,7 @@
 | [State Management](./state-management.md) | Zustand stores, what state lives where |
 | [Type Safety](./type-safety.md) | zod boundaries, no-any policy |
 | [Quality Guidelines](./quality-guidelines.md) | Size caps, perf rules (this window is always-on), tests |
+| [Live2D Renderer Contract](./live2d-renderer.md) | Locked renderer stack, load order, generation-split param API, BanG Dream model facts |
 
 ## Quality Check (run before handing off)
 

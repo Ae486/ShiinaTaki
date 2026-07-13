@@ -1,0 +1,8 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/frontend/index.md", "reason": "frontend layer entry: pre-dev checklist + quality gates"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "renderer/ isolation rules + where spike code lives"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "size caps, headers/index.md, perf rules, forbidden patterns"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "zod boundary + no-any policy"}
+{"file": ".trellis/tasks/archive/2026-07/07-07-live2d-renderer-selection/research/renderer-comparison.md", "reason": "candidate matrix + risks + API notes for both renderers"}
+{"file": ".trellis/tasks/archive/2026-07/07-07-reference-research/research/live2d-presentation-analysis.md", "reason": "BANDORI pattern reference for increments observations"}
+{"file": "docs/TECH-STACK.md", "reason": "renderer decision section this spike writes back into"}
