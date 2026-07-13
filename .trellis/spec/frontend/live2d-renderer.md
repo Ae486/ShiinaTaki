@@ -32,3 +32,13 @@ Reference implementation: `apps/desktop/src/renderer/spike/param-probe.ts`.
 - Auto-behaviors are NOT free: a loaded model shows only built-in idle param drift (a slight breath sway). Eye-blink does NOT run automatically — it needs the EyeBlink motion group driven explicitly or an idle loop (that is #14's state machine, not the renderer default). `autoInteract` defaults are off in our harness.
 - Idle cost is high WITHOUT a frame governor: PixiJS defaults to full-rate redraw, so two idle models pegged ~1 CPU core in the spike. The frame governor (full-rate while animating, throttle when idle, pause off-screen/asleep) is a #14 acceptance criterion, not an optimization — treat any always-on render loop without it as a defect.
 - Cubism 2 costumes may reference an external `../_mtn_emp/` shared motion pool absent from the `.zst` (e.g. taki `casual/`); prefer self-contained costumes (e.g. `arbeit/`) or handle missing motion refs gracefully at import (#18).
+
+## Render governor (established #14) — mandatory for any always-on canvas
+
+- The governor OWNS the ticker: create the PixiJS app with `autoStart:false` and let the governor call `ticker.start()/stop()` + set `maxFPS`. Never let a Live2D model update on an unstarted `Ticker.shared` while the app runs a different ticker — that was the spike's "blink doesn't run" bug. Bind the model explicitly to the governed ticker.
+- Tiers: full fps while active/interacting; throttle on window blur (`getCurrentWindow().onFocusChanged`); STOP on `visibilitychange` hidden (minimize) — provable via a frame-count assertion (0 frames while hidden, resumes on unhide). "Paused when covered by another window" is NOT achievable (no verified Tauri/DOM occlusion API) — scope it out, don't fake it.
+- Gate the whole thing on a `renderThrottling` flag (default true); off ⇒ always full-rate, never paused. The flag's real config wiring is deferred (D19 → M5 #24); #14-era code reads a local default.
+
+## Window geometry persistence (decided #14)
+
+Pet window position is LOCAL window-manager state, NOT agent-domain state of record — it is per-machine, meaningless to the OS-neutral Core (invariant 8), and must NOT cross the WS protocol. Use `tauri-plugin-window-state` (Rust-side, POSITION-only, pet-scoped via `with_denylist(["main"])`); geometry never touches `packages/core`/`packages/shared`. This is the ruling on "durable state belongs to Agent Core": that rule covers agent-domain durable state (sessions/memory/config), not display-manager chrome.
