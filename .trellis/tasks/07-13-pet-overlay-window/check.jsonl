@@ -1,0 +1,6 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/frontend/index.md", "reason": "quality check entry"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "size caps, forbidden patterns, perf"}
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "verify renderer usage matches locked contract"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "verify store/state boundaries"}
+{"file": ".trellis/tasks/07-13-pet-overlay-window/research/04-position-persistence.md", "reason": "verify persistence choice matches decision (a)"}

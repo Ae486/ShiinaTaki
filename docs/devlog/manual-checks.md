@@ -75,3 +75,19 @@ node --env-file-if-exists=../../.env.local src/main.ts
 > 真实 Tauri WebView2 窗口内的最终确认不在此处单验——#14 落地悬浮窗时渲染器直接跑在 WebView2 里，自然覆盖。
 
 发现任何问题在对应条目下写一行，我开返工轮。
+
+## 来自 #14（宠物悬浮窗：透明 / 待机 / 状态机 / 拖拽）
+
+> 机器可验部分主脑 + check 双验全绿：desktop typecheck / -w lint / 11 前端测试（FSM 转换 + governor 暂停断言）/ -r typecheck / cargo build 全过；renderer/ 零 React 导入、位置持久化纯 Rust 侧不过 WS、能力文件权限齐备均已核。以下是**必须真机看**的活线层——透明合成、Win11 边框、真实动画、拖拽手感只能人眼验。约 3-5 分钟。
+
+**跑法**：仓库根 `pnpm --filter @taki/desktop tauri dev`（起 Tauri，pet 窗口应自动出现；main 配对窗也会开——D20 已登记，属预期）。
+
+- [ ] **33. 透明合成**：pet 窗口应是**逐像素透明**——只有 taki 小人可见，周围无白底/灰底/方框，能看到桌面。若小人周围有不透明背景块 → 透明失败。
+- [ ] **34. 无 Win11 边框（决定 DWM 是否要补）**：`shadow:false` 下窗口应**无圆角、无 1px 白边**。若仍有残留圆角/白边 → 在此写一行，我补 DWM 抑制（D18/研究 05 已备方案：`windows="0.61"` + DONOTROUND + BORDER_COLOR NONE）。
+- [ ] **35. 待机动画可见**：taki 应**看得见地眨眼 + 呼吸起伏**（spike 时眨眼没跑，本次已显式绑定 governed ticker + eyeBlink:true + 循环 idle 动作——需真机确认真的动起来）。
+- [ ] **36. 拖拽手感 + 死区**：拖 taki 应带动整个窗口移动；轻点（<4px 移动）应算点击不触发拖拽（为 #16 点击留通路）；OS 拖拽后 pointerup 行为正常，不卡住。
+- [ ] **37. 位置持久化**：拖到某处 → 关掉 app 重开 → pet 窗口应**回到上次位置**（tauri-plugin-window-state，POSITION-only，仅 pet 窗）。
+- [ ] **38. 不抢焦点 + 无白闪**：启动时 pet 窗口不应抢走当前程序的焦点（`focus:false`）；`visible:false`→首帧后 show 应**无白屏一闪**。
+- [ ] **39. 待机 CPU（governor 真值）**：pet 窗口静置后看任务管理器，记录待机 CPU%——应**明显低于 #13 spike 的约 1 核（≈89%）基线**（governor 生效的证明）。
+
+发现任何问题在对应条目下写一行，我会开返工轮。

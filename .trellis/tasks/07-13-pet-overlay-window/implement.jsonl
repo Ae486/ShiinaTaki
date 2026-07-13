@@ -1,0 +1,14 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/tasks/07-13-pet-overlay-window/research/01-transparent-overlay-window.md", "reason": "verified Tauri API for #14: 01-transparent-overlay-window"}
+{"file": ".trellis/tasks/07-13-pet-overlay-window/research/02-multi-window-capabilities.md", "reason": "verified Tauri API for #14: 02-multi-window-capabilities"}
+{"file": ".trellis/tasks/07-13-pet-overlay-window/research/03-window-dragging.md", "reason": "verified Tauri API for #14: 03-window-dragging"}
+{"file": ".trellis/tasks/07-13-pet-overlay-window/research/04-position-persistence.md", "reason": "verified Tauri API for #14: 04-position-persistence"}
+{"file": ".trellis/tasks/07-13-pet-overlay-window/research/05-win11-dwm-polish.md", "reason": "verified Tauri API for #14: 05-win11-dwm-polish"}
+{"file": ".trellis/tasks/07-13-pet-overlay-window/research/06-framerate-governor.md", "reason": "verified Tauri API for #14: 06-framerate-governor"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "frontend layer entry"}
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "locked renderer contract: load order, param API, idle caveat"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "renderer/ isolation, window entries, feature folders"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Zustand store rules; where FSM state lives"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "pet-stage bridge, transparency, panel styling stance"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "size caps, perf rules, headers/index.md, proprietary asset handling"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "zod boundary, discriminated unions for UI state, no-any"}
