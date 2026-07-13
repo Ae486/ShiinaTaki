@@ -57,6 +57,21 @@ node --env-file-if-exists=../../.env.local src/main.ts
 - [ ] **20. 超时**：让模型运行一个长任务(如 `ping -n 60 127.0.0.1`,需先 allowlist 或走 Allow)→ 约 30s 后应被杀,模型收到 `timedOut:true`、exitCode null,不永久挂起。
 - [ ] **21. 工作区 cwd**：让模型运行能打印当前目录的白名单命令 → 确认执行目录是 `~/.takiagent/workspace`(单机默认),非随机目录。
 - [ ] **22. 审计记命令**：跑几条 exec 后看 `%APPDATA%\cc.shiinataki.app\audit.jsonl` → exec 的行应含 `command` 字段(命令原文),其余能力(截图/剪贴板)的行**无** command 字段。
-- [ ] **23. 拒绝路径优雅**：某次 exec 弹窗点 Deny → 模型优雅报告被拒,不崩。
+发现任何问题在对应条目下写一行，我开返工轮。
+
+## 来自 #13（Live2D 渲染器选型 spike）
+
+> **状态更新（2026-07-13）**：原 24-30 与"决定"项已由主脑的无头浏览器采证覆盖（headless Edge/CDP，与 WebView2 同内核；全部探针 PASS，决策 LOCK 已写回 `docs/TECH-STACK.md`，证据在任务 `research/` 目录，截图经主脑目视核验）。但无头跑在 **SwiftShader 软件渲染**上——真实 GPU 下的视觉正确性与空闲开销仍需你手测，即下方 31/32 两项。约 3 分钟。
+
+**跑法**：仓库根目录 `pnpm --filter @taki/desktop dev`（只起 Vite，不需要 Tauri）→ 用 Edge/Chrome 打开 **http://localhost:1420/spike.html**（桌面浏览器默认硬件 GPU 加速，内核与 WebView2 一致）。验完 Ctrl+C 关掉 dev server。左侧画布应并排出现两个 taki 模型（左 Cubism 2 arbeit，右 Cubism 3+ live_01）。
+
+- [x] ~~24. moc + moc3 双双加载~~ —— 无头采证覆盖（`loaded.ok` 双 true）
+- [x] ~~25. 动作播放~~ / ~~26. 表情切换~~ / ~~27. 命中测试~~ / ~~28. 参数往返~~ / ~~29. 口型 API~~ —— 无头采证全部 PASS；hitTest 双双返回 `[]` 坐实 #16 需自建命中区（`runtime-evidence.md`）
+- [x] ~~30. 取景/缩放读数~~ —— 无头采证：两代 layout-scale 均 1.0，暂不需要 BANDORI 式 1.35x 补偿（#14 复核）
+- [x] **31. 空闲开销（GPU 真值）**：用户实测 2026-07-13 —— 静置 CPU ≈ **89%**（Chromium 单标签按单核计，≈吃满一核），内存 ≈ 207MB。偏高但**符合预期、非缺陷**：spike 无帧率调控器（PixiJS 默认满帧无脑重绘两模型，其一为 4.5MB moc3）。此为 #14 帧率调控器（动画全帧/待机降帧/离屏停渲）的**基线参考值**，做完后应大幅下降。GPU 列用户浏览器未显示，略。
+- [x] **32. GPU 渲染目视**：用户确认 2026-07-13 —— 两模型完整渲染、有轻微呼吸晃动、无花屏破面、面板全 PASS、DECISION=LOCK。**眨眼未见（正确）**：spike harness 只做一次性探针 + `autoInteract:false`，未启用 EyeBlink/待机循环；眨眼自动化属 #14 待机状态机，spike 不含。呼吸是模型内建 idle 参数，渲染即有。
+- [x] ~~决定~~ —— 已执行：`decision` = LOCK，`untitled-pixi-live2d-engine@1.3.1` + `pixi.js@8.19.0` 已写回 `docs/TECH-STACK.md` 渲染器决策段
+
+> 真实 Tauri WebView2 窗口内的最终确认不在此处单验——#14 落地悬浮窗时渲染器直接跑在 WebView2 里，自然覆盖。
 
 发现任何问题在对应条目下写一行，我开返工轮。

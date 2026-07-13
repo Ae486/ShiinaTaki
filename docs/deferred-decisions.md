@@ -42,6 +42,8 @@ M1 设计对话存储时还没有工具,`conversation-store.ts` 做成 text-only
 | D14 | **timeline parts 丢弃 reasoning / file / approval part** | `turn-mapping.ts` 持久化回合时只保留 text / tool-call / tool-result;reasoning、file、approval-request/response part 被丢弃(当前无重放价值,provider 也不要求)| M4 聊天窗需要渲染思维链/文件卡,或 provider 要求重放 reasoning 时 | `turn-mapping.ts:assistantEntry`、任务 `agent-harness-improve` | OPEN |
 | D15 | **排队中断连的回合仍完整执行** | `chat.send` 排在 turn-queue 里等锁的回合,若期间连接关闭,拿到锁后仍对已关闭 socket 完整跑一轮(真实 provider 浪费 token);进行中回合的取消已覆盖,仅"排队中"这一窄口未覆盖,数据无损坏 | 多回合高并发/主动性上线,或 token 浪费显著时 | `turn-queue.ts`、`chat-send.ts`、任务 `agent-harness-improve` | OPEN(窄边缘) |
 | D16 | **抛错多步回合丢失已完成步的工具记录** | error 路径(`streamEnded=false`)不 await `responseMessages`(ai@7.0.17 流被弃置后 promise 可能永不 settle,await 会挂起),故多 step 回合若后续 step 抛错,仅 partial 文本落盘、已完成 step 的 tool 记录丢失 | 若发现 error 后跨回合幻觉复发,或有低成本的带超时 race-await 方案时 | `chat-agent.ts:persistTurn`、任务 `agent-harness-improve` | OPEN(极窄边缘) |
+| D17 | **BANDORI 增量采纳的后置部分**(2026-07-13 功能对比评审,用户全采纳):鼠标靠近反应 + 桌面情境待机(M5)、点击性格预设的设置面板入口(M5)、口型完整落地(振幅走渲染器内建轮子 + viseme 规则表移植)+ 情绪→TTS 语速联动(v2,随 TTS) | 宿主里程碑未到;M4 内可落的增量已直接写入 #13/#14/#16 正文 | 各宿主 issue 开发时(增量段已写入 issue 正文,带 [v1/M5]/[v2] 标注) | issues #21/#24/#31 增量段;模式出处 `live2d-presentation-analysis.md` | SCHEDULED |
+| D18 | **spike 产物的发布隔离**:vendored 专有运行时位于 Vite `publicDir`,会被复制进生产 build;`spike.html` 成为常驻 Rollup 构建入口 | spike 只求决策证据;发布打包明确属 #14 的渲染器落地层;git 全程干净(运行时/模型均 ignored,CI checkout 无任何专有文件) | **#14 落地渲染器时**:dev-gate `spike.html`(移出生产构建入口)、把 vendored 运行时迁出 `publicDir` | issue #14 增量段;`spike-check` 审计报告;vendor 脚本 POS 头 | SCHEDULED |
 | — | **Deferred issues #27–#34** | v1.5/v2 追踪器,故意不实现 | 永不作为 `ready-for-agent` | GitHub #27–#34 / HANDOFF | OPEN(设计延期) |
 
 > 补齐一项后:状态改 `DONE`、注明补齐的 commit/任务、保留行(留档,不删)。
