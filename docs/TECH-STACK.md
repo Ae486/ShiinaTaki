@@ -40,7 +40,7 @@ Dev assets: 47-character set already at `./models` (git-ignored — copyrighted,
 | Clipboard | `arboard` | |
 | Shell-open | Tauri opener plugin | |
 | Secrets | `keyring` crate → Windows Credential Manager | API keys never in files |
-| Click-through | `windows` crate, cursor hit-test vs canvas alpha mask | Hardest module; budget spike time |
+| Click-through | Tauri `setIgnoreCursorEvents` (sets `WS_EX_TRANSPARENT｜WS_EX_LAYERED` under the hood) + global-cursor poll via `cursorPosition()` vs a per-frame cached canvas alpha mask | Solved in #15 — NO `windows` crate needed (Tauri's API already does the WS_EX toggle); crate is only an optional latency fallback |
 | Audit log | JSONL via `tracing` | Every Permission Gate decision |
 
 ## Pet UI (WebView2)

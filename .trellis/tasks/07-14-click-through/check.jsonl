@@ -1,0 +1,5 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/frontend/index.md", "reason": "quality check entry"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "size caps, forbidden patterns, perf"}
+{"file": ".trellis/spec/frontend/hook-guidelines.md", "reason": "verify Tauri touch only in hooks, error state exposure"}
+{"file": ".trellis/tasks/07-14-click-through/research/00-summary-and-recommendation.md", "reason": "verify impl followed the ruled decisions (mask+approach B, no windows crate)"}

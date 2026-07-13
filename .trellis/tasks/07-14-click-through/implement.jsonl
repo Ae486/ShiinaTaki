@@ -1,0 +1,13 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/tasks/07-14-click-through/research/00-summary-and-recommendation.md", "reason": "verified click-through research: 00-summary-and-recommendation"}
+{"file": ".trellis/tasks/07-14-click-through/research/01-tauri-set-ignore-cursor-events.md", "reason": "verified click-through research: 01-tauri-set-ignore-cursor-events"}
+{"file": ".trellis/tasks/07-14-click-through/research/02-alpha-hit-test-options.md", "reason": "verified click-through research: 02-alpha-hit-test-options"}
+{"file": ".trellis/tasks/07-14-click-through/research/03-event-flow-architecture.md", "reason": "verified click-through research: 03-event-flow-architecture"}
+{"file": ".trellis/tasks/07-14-click-through/research/04-drag-suspend-and-animation-tracking.md", "reason": "verified click-through research: 04-drag-suspend-and-animation-tracking"}
+{"file": ".trellis/tasks/07-14-click-through/research/05-windows-crate-necessity.md", "reason": "verified click-through research: 05-windows-crate-necessity"}
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "governor + renderer conventions from #14"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "renderer/ isolation, hooks placement"}
+{"file": ".trellis/spec/frontend/hook-guidelines.md", "reason": "hooks are the only Tauri-touch point; subscription patterns"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "shared drag flag store rules"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "size caps, perf, headers/index.md, forbidden patterns"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "no-any, discriminated unions, zod boundary"}
