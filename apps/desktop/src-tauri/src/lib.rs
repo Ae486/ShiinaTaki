@@ -69,6 +69,15 @@ pub fn run() {
     node::init_tracing();
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        // Persist ONLY the pet overlay's position across restarts (leader decision (a), issue #14). The `main`
+        // pairing/status window is denied so its geometry is not tracked; SIZE is omitted because the pet is
+        // non-resizable. Save/restore is entirely OS-side here — geometry never crosses the WS boundary.
+        .plugin(
+            tauri_plugin_window_state::Builder::default()
+                .with_state_flags(tauri_plugin_window_state::StateFlags::POSITION)
+                .with_denylist(&["main"])
+                .build(),
+        )
         .setup(|app| {
             let handle = app.handle().clone();
             let (tx, rx) = mpsc::channel::<String>(8);

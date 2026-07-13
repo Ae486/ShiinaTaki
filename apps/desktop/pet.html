@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TakiAgent Pet</title>
+    <!--
+      Cubism runtime globals must load before the module entry: Live2DCubismCore (moc3, Cubism 3-5) and
+      Live2DModelWebGL (moc, Cubism 2.1). Served from public/vendor/live2d (git-ignored, fetched by
+      scripts/vendor-live2d-runtimes.mjs). Missing the legacy runtime fails with "Could not find Cubism 2 runtime".
+    -->
+    <script src="/vendor/live2d/live2dcubismcore.min.js"></script>
+    <script src="/vendor/live2d/live2d.min.js"></script>
+    <!-- Transparent all the way down: any opaque background here defeats the window's transparent:true. -->
+    <style>
+      html,
+      body,
+      #root {
+        margin: 0;
+        height: 100%;
+        background: transparent;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/windows/pet/main.tsx"></script>
+  </body>
+</html>

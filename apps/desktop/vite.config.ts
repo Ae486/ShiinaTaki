@@ -43,6 +43,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: fileURLToPath(new URL("./index.html", import.meta.url)),
+        pet: fileURLToPath(new URL("./pet.html", import.meta.url)),
         spike: fileURLToPath(new URL("./spike.html", import.meta.url)),
       },
     },

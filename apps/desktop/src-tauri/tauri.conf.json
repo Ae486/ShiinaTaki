@@ -12,10 +12,26 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "TakiAgent",
         "width": 480,
         "height": 640,
         "resizable": true
+      },
+      {
+        "label": "pet",
+        "url": "pet.html",
+        "title": "TakiAgent Pet",
+        "width": 480,
+        "height": 640,
+        "transparent": true,
+        "decorations": false,
+        "shadow": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "resizable": false,
+        "focus": false,
+        "visible": false
       }
     ],
     "security": {
