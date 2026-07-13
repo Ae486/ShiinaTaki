@@ -38,10 +38,13 @@ export interface ChatAgentDeps {
   instructionsExtra?: () => string;
   /** MCP tool-approval gate; only consulted when a TurnContext is present (its notify carries the ask). */
   approval?: ApprovalGate;
+  /** Tool-loop step cap per turn (round-trips: call -> observe -> decide). Injected from AgentConfig; falls back to DEFAULT_MAX_STEPS. */
+  maxSteps?: number;
 }
 
-// Memory tools take a few steps at most; cap the loop low (a runaway tool loop just ends the turn cleanly).
-const MAX_STEPS = 5;
+// Fallback step cap when no caller injects one (tests). Production injects AgentConfig.maxSteps (env TAKI_MAX_STEPS, D11);
+// a turn hitting the cap ends cleanly instead of looping forever.
+const DEFAULT_MAX_STEPS = 10;
 // Retrieval + intention gate look at the current message plus the last few turns.
 const RECALL_WINDOW = 5;
 
@@ -59,7 +62,7 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
     model: deps.model,
     instructions: composeInstructions(deps, { characterId, history, message }),
     tools: { ...memory.createTools(characterId), ...(deps.extraTools ?? {}) },
-    stopWhen: isStepCount(MAX_STEPS),
+    stopWhen: isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS),
     // MCP tool calls await the operator's decision inside the loop; internal tools return not-applicable (ruling 5).
     // The gate is installed whenever it is configured — without a turn (no notify sink) it denies unremembered
     // MCP tools instead of coming off (fail-closed: a turn without an operator must not bypass approval).

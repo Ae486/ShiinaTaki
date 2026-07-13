@@ -22,6 +22,7 @@ import { createProcessListTool } from "./capabilities/process-list-tool.ts";
 import { createScreenshotStore } from "./capabilities/screenshot-store.ts";
 import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
 import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
+import { loadAgentConfig } from "./config/agent-config.ts";
 import { loadProviderConfig } from "./config/provider-config.ts";
 import { loadServerConfig } from "./config/server-config.ts";
 import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
@@ -61,6 +62,7 @@ import { createWriteFileTool } from "./workspace/write-file-tool.ts";
 // --env-file flag, never read from disk by code (invariant 1).
 const serverConfig = loadServerConfig(process.env);
 const providerConfig = loadProviderConfig(process.env);
+const agentConfig = loadAgentConfig(process.env);
 
 const logger = createLogger(serverConfig.logLevel);
 
@@ -204,6 +206,7 @@ registry.register(
       store: conversationStore,
       memory,
       autoMemory,
+      maxSteps: agentConfig.maxSteps,
       // Extra tools = the skills meta-tool + every capability tool (Shell-gated + core-side Workspace files) + MCP tools.
       extraTools: {
         ...createLoadSkillTool(skillsLoader),
