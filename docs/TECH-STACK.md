@@ -50,7 +50,7 @@ Dev assets: 47-character set already at `./models` (git-ignored — copyrighted,
 | UI framework | React 19 + Vite | Settings panel, bubbles, overlays |
 | State | Zustand ^5 | One store per domain; state of record stays in Agent Core |
 | Renderer | PixiJS v8 | |
-| Live2D | **Primary: `untitled-pixi-live2d-engine`; fallback: `pixi-live2d-display-lipsyncpatch`** — see decision tree below | Hard requirement: must render Cubism 2 (`.model.json`/moc) AND Cubism 3+ (`.model3.json`/moc3) — the BanG Dream model set mixes both |
+| Live2D | **LOCKED (spike #13, 2026-07-13): `untitled-pixi-live2d-engine@1.3.1` + `pixi.js@8.19.0`, Cubism Core 5.1.0** — see decision record below | Hard requirement met: renders Cubism 2 (`.model.json`/moc) AND Cubism 3+ (`.model3.json`/moc3) — the BanG Dream model set mixes both |
 
 ### Live2D renderer decision (research 07-07, task `live2d-renderer-selection`)
 
@@ -58,7 +58,7 @@ Five candidates evaluated across adoption / performance / stack fit / extensibil
 
 - **Primary (A)**: `untitled-pixi-live2d-engine` — full Cubism 2-5, native PixiJS 8 render pipe, bundled lip-sync (serves TTS v2) + texture LOD (serves big BanG Dream atlases and mobile memory). Lineage de-risked: same family tree as guansss/RaSan147 forks, so downgrade migration is cheap.
 - **Fallback (C)**: `pixi-live2d-display-lipsyncpatch` (RaSan147) — the AI-vtuber ecosystem's battle-tested choice (`model.speak` lip-sync), but pins PixiJS 7 and has no Cubism 5.
-- **Spike decision tree (executed as an AFK issue, M4)**: load one moc + one moc3 from `./models` with motions/expressions/hit-test on A → pass = lock A. A fails Cubism 2 → check whether the model set's moc3 assets actually need a Cubism 5 runtime: no → adopt C (accepting the PixiJS 7 pin); yes → A is mandatory, patch/escalate its Cubism 2 path. Outcome and pinned versions get written back here.
+- **Spike outcome (issue #13, executed 2026-07-13): A LOCKED — `untitled-pixi-live2d-engine@1.3.1`, `pixi.js@8.19.0`, Cubism Core 5.1.0.** Both a moc (`taki/arbeit`, 43 motions/30 expressions) and a moc3 (`taki/live_01`, 63 motion groups/33 expressions) loaded and rendered under PixiJS 8 with motion + expression playback, raw-parameter round-trip on both generations, and the `model.speak` lip-sync API present; Cubism Core 5.1.0 drives the moc3 with no version block, so the fallback branch was never needed. `hitTest` returns `[]` on both — BanG Dream manifests define no SDK hit areas (only BandoriPet-custom fields), confirming #16's custom hit-area increment. Layout scale 1.0 on both (no moc3 framing compensation needed so far). Evidence: `.trellis/tasks/07-13-live2d-renderer-spike/research/` (spike-report.md, runtime-evidence.md, spike-screenshot.png). Caveat: runtime proof captured on headless Edge/SwiftShader (same Chromium engine as WebView2, software GL); in-WebView2 GPU visual + idle-cost checks remain queued in `docs/devlog/manual-checks.md`.
 - **Runtime vendoring**: Cubism Core (`live2dcubismcore.min.js`) and the Cubism 2.1 runtime (`live2d.min.js` — survives only on unofficial mirrors) are proprietary: vendored locally via a download script, git-ignored, NEVER committed or hotlinked.
 - **Mobile note**: no candidate has published Capacitor/Android evidence; WebGL2 (not WebGPU) is the mobile plan, and the Android node work (v2) starts with a real-device render spike. A's texture LOD is the best hedge against WebView large-atlas OOM.
 | Cubism Core | User-supplied download (license) | Never bundled |

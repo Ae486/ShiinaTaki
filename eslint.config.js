@@ -13,6 +13,8 @@ export default tseslint.config(
       // Non-source / third-party / git-ignored trees.
       "references/**",
       "models/**",
+      // Vendored proprietary Live2D runtimes (minified third-party; git-ignored, fetched by a script).
+      "apps/desktop/public/vendor/**",
       ".trellis/**",
       "scripts/**",
       "docs/**",

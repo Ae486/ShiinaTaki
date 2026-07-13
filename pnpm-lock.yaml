@@ -54,12 +54,18 @@ importers:
       '@tauri-apps/api':
         specifier: ^2.11.0
         version: 2.11.1
+      pixi.js:
+        specifier: ^8.19.0
+        version: 8.19.0
       react:
         specifier: ^19.2.0
         version: 19.2.7
       react-dom:
         specifier: ^19.2.0
         version: 19.2.7(react@19.2.7)
+      untitled-pixi-live2d-engine:
+        specifier: ^1.3.1
+        version: 1.3.1(@pixi/sound@6.0.1(pixi.js@8.19.0))(pixi.js@8.19.0)
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.3.0
@@ -283,6 +289,14 @@ packages:
 
   '@pinojs/redact@0.4.0':
     resolution: {integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==}
+
+  '@pixi/colord@2.9.6':
+    resolution: {integrity: sha512-nezytU2pw587fQstUu1AsJZDVEynjskwOL+kibwcdxsMBFqPsFFNA7xl0ii/gXuDi6M0xj3mfRJj8pBSc2jCfA==}
+
+  '@pixi/sound@6.0.1':
+    resolution: {integrity: sha512-hpFlQSScAR2L/CsEoIvDi7s1oGsu8y9Zd742Vd3982N+q3IF2vFuIfV9HN4ryjlGnhCT8yBlEgs1gp4G9Rt9TA==}
+    peerDependencies:
+      pixi.js: ^8.0.0
 
   '@rolldown/binding-android-arm64@1.1.4':
     resolution: {integrity: sha512-EZLpf/8y7GXkkra90ML47kzik/GMP3EMcE9bPyHmRfxLC6z9+aW5A8poCsoxjrT5GfEcNAAvWwUHjvP1pUQkfw==}
@@ -552,6 +566,9 @@ packages:
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
 
+  '@types/earcut@3.0.0':
+    resolution: {integrity: sha512-k/9fOUGO39yd2sCjrbAJvGDEQvRwRnQIZlBz43roGwUZo5SHAmyVvSFyaVVZkicRVCaDXPKlbxrUcBuJoSWunQ==}
+
   '@types/esrecurse@4.3.1':
     resolution: {integrity: sha512-xJBAbDifo5hpffDBuHl0Y8ywswbiAp/Wi7Y/GtAgSlZyIABppyurxVueOPE8LUQOxdlgi6Zqce7uoEpqNTeiUw==}
 
@@ -680,8 +697,15 @@ packages:
   '@vitest/utils@4.1.10':
     resolution: {integrity: sha512-fy9am/HWxbaGt/Sawrp90vt6Y6jQwf1RX77cz3uwoJwJVMli/e1IEwRPnMNJ7vKfPTwo0diXifkpPvwH9v7nGA==}
 
+  '@webgpu/types@0.1.71':
+    resolution: {integrity: sha512-mMy8/ODcKhab808co15eW+yN+HgXoQxRQHTiBV9Mrvl1r0ufnid7YOcI+gi4eUWSWl9ezD6TW2KXccrL8HCh2A==}
+
   '@workflow/serde@4.1.0':
     resolution: {integrity: sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ==}
+
+  '@xmldom/xmldom@0.8.13':
+    resolution: {integrity: sha512-KRYzxepc14G/CEpEGc3Yn+JKaAeT63smlDr+vjB8jRfgTBBI9wRj/nkQEO+ucV8p8I9bfKLWp37uHgFrbntPvw==}
+    engines: {node: '>=10.0.0'}
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -789,6 +813,9 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
+  earcut@3.2.3:
+    resolution: {integrity: sha512-vnS4AVwp1KHAF13i1vp1/2D5evWy3k5u/iW/B81QVsUZtV8cv2tU0b2VNFlqvh4kYwrFMDdjPCfAmfyJW9y14Q==}
+
   electron-to-chromium@1.5.389:
     resolution: {integrity: sha512-cEto7aeOqBfU1D+c5py5pE+ooscKE75JifxLBdFUZsqAxRS6y7kebtxAZvICszSl05gPjYHDTjY+lXpyGvpJbg==}
 
@@ -861,6 +888,9 @@ packages:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
 
+  eventemitter3@5.0.4:
+    resolution: {integrity: sha512-mlsTRyGaPBjPedk6Bvw+aqbsXDtoAyAzm5MO7JgU+yVRyMQ5O8bD4Kcci7BS85f93veegeCPkL8R4GLClnjLFw==}
+
   eventsource-parser@3.1.0:
     resolution: {integrity: sha512-kJezFj9YFAMLeORyi7aCLxLbD5/qWMQnoMVlVPyHIll7lgRJCc3JVln9Vgl9nwQi0YkMnhdGTMNn7CkRRAptMg==}
     engines: {node: '>=18.0.0'}
@@ -921,6 +951,9 @@ packages:
     resolution: {integrity: sha512-939eZS4gJ3htTHAldmyyuzlrD58P03fHG49v2JfFXbV6OhvZKRC9j2yAtdHw/zrp2zXHuv05zMIy40F0ge7spA==}
     engines: {node: '>=18'}
 
+  gifuct-js@2.1.2:
+    resolution: {integrity: sha512-rI2asw77u0mGgwhV3qA+OEgYqaDn5UNqgs+Bx0FGwSpuqfYn+Ir6RQY5ENNQ8SbIiG/m5gVa7CD5RriO4f4Lsg==}
+
   glob-parent@6.0.2:
     resolution: {integrity: sha512-XxwI8EOhVQgWp6iDL+3b0r86f4d6AX6zSU55HfB4ydCEuXLXc5FcYeOu+nnGftS4TEju/11rt4KJPTMgbfmv4A==}
     engines: {node: '>=10.13.0'}
@@ -974,6 +1007,9 @@ packages:
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
 
+  ismobilejs@1.1.1:
+    resolution: {integrity: sha512-VaFW53yt8QO61k2WJui0dHf4SlL8lxBofUuUmwBo0ljPk0Drz2TiuDW4jo3wDcv41qy/SxrJ+VAzJ/qYqsmzRw==}
+
   jiti@2.7.0:
     resolution: {integrity: sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ==}
     hasBin: true
@@ -981,6 +1017,9 @@ packages:
   joycon@3.1.1:
     resolution: {integrity: sha512-34wB/Y7MW7bzjKRjUKTa46I2Z7eV62Rkhva+KkopW7Qvv/OSWBqvkSY7vusOPrNuZcUG3tApvdVgNB8POj3SPw==}
     engines: {node: '>=10'}
+
+  js-binary-schema-parser@2.0.3:
+    resolution: {integrity: sha512-xezGJmOb4lk/M1ZZLTR/jaBHQ4gG/lqQnJqdIv4721DMggsa1bDVlHXNeHYogaIEHD9vCRv0fcL4hMA+Coarkg==}
 
   jsesc@3.1.0:
     resolution: {integrity: sha512-/sM3dO2FOzXjKQhJuo0Q173wf2KOo8t4I8vHy6lF9poUp7bKT0/NHE8fPX23PwfhnykfqnC2xRxOnVw5XuGIaA==}
@@ -1143,6 +1182,9 @@ packages:
     resolution: {integrity: sha512-MyIV3ZA/PmyBN/ud8vV9XzwTrNtR4jFrObymZYnZqMmW0zA8Z17vnT0rBgFE/TlohB+YCHqXMgZzb3Csp49vqg==}
     engines: {node: '>=14.16'}
 
+  parse-svg-path@0.2.0:
+    resolution: {integrity: sha512-Tf7FFIrguPKQwzD4pWnYkR2VOv3raoHeKED80Bm+BYHI3KxC8KsgsGC5+fSMzAGDA6UEk4bHvmi+RsjmL3khpg==}
+
   path-exists@4.0.0:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
     engines: {node: '>=8'}
@@ -1174,6 +1216,9 @@ packages:
   pino@10.3.1:
     resolution: {integrity: sha512-r34yH/GlQpKZbU1BvFFqOjhISRo1MNx1tWYsYvmj6KIRHSPMT2+yHOEb1SG6NMvRoHRF0a07kCOox/9yakl1vg==}
     hasBin: true
+
+  pixi.js@8.19.0:
+    resolution: {integrity: sha512-pq1O6emA/GFjjeF+8d3Pb5t7knD8FsnfWGqQcRjYjsqFZ7QdzG1XgjLDUu0DFJRbafjV5+g8iNLFBx0b9649lg==}
 
   pkce-challenge@5.0.1:
     resolution: {integrity: sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ==}
@@ -1307,6 +1352,10 @@ packages:
     resolution: {integrity: sha512-75voc/9G4rDIJleOo4jPvN4/YC4GRZrY8yy1uU4lwrB3XEQbWve8zXoO5No4eFrGcTAMYyoY67p8jRQdtA1HbA==}
     engines: {node: '>=12'}
 
+  tiny-lru@11.4.7:
+    resolution: {integrity: sha512-w/Te7uMUVeH0CR8vZIjr+XiN41V+30lkDdK+NRIDCUYKKuL9VcmaUEmaPISuwGhLlrTGh5yu18lENtR9axSxYw==}
+    engines: {node: '>=12'}
+
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
 
@@ -1353,6 +1402,12 @@ packages:
 
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
+
+  untitled-pixi-live2d-engine@1.3.1:
+    resolution: {integrity: sha512-bFFiEEJlZtydmSHNCaqWR9HBq6gmn7thA3zWdSMaJPs1MdhFjHPITFXUrXa8pC6UJ4bdRIbna9vE9gq89+U/2Q==}
+    peerDependencies:
+      '@pixi/sound': ^6.0.1
+      pixi.js: ^8.13.1
 
   update-browserslist-db@1.2.3:
     resolution: {integrity: sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w==}
@@ -1628,6 +1683,12 @@ snapshots:
 
   '@pinojs/redact@0.4.0': {}
 
+  '@pixi/colord@2.9.6': {}
+
+  '@pixi/sound@6.0.1(pixi.js@8.19.0)':
+    dependencies:
+      pixi.js: 8.19.0
+
   '@rolldown/binding-android-arm64@1.1.4':
     optional: true
 
@@ -1810,6 +1871,8 @@ snapshots:
 
   '@types/deep-eql@4.0.2': {}
 
+  '@types/earcut@3.0.0': {}
+
   '@types/esrecurse@4.3.1': {}
 
   '@types/estree@1.0.9': {}
@@ -1971,7 +2034,11 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
+  '@webgpu/types@0.1.71': {}
+
   '@workflow/serde@4.1.0': {}
+
+  '@xmldom/xmldom@0.8.13': {}
 
   acorn-jsx@5.3.2(acorn@8.17.0):
     dependencies:
@@ -2052,6 +2119,8 @@ snapshots:
   detect-indent@7.0.2: {}
 
   detect-libc@2.1.2: {}
+
+  earcut@3.2.3: {}
 
   electron-to-chromium@1.5.389: {}
 
@@ -2161,6 +2230,8 @@ snapshots:
 
   esutils@2.0.3: {}
 
+  eventemitter3@5.0.4: {}
+
   eventsource-parser@3.1.0: {}
 
   expect-type@1.4.0: {}
@@ -2202,6 +2273,10 @@ snapshots:
 
   function-timeout@1.0.2: {}
 
+  gifuct-js@2.1.2:
+    dependencies:
+      js-binary-schema-parser: 2.0.3
+
   glob-parent@6.0.2:
     dependencies:
       is-glob: 4.0.3
@@ -2241,9 +2316,13 @@ snapshots:
 
   isexe@2.0.0: {}
 
+  ismobilejs@1.1.1: {}
+
   jiti@2.7.0: {}
 
   joycon@3.1.1: {}
+
+  js-binary-schema-parser@2.0.3: {}
 
   jsesc@3.1.0: {}
 
@@ -2374,6 +2453,8 @@ snapshots:
 
   p-timeout@6.1.4: {}
 
+  parse-svg-path@0.2.0: {}
+
   path-exists@4.0.0: {}
 
   path-key@3.1.1: {}
@@ -2419,6 +2500,19 @@ snapshots:
       safe-stable-stringify: 2.5.0
       sonic-boom: 4.2.1
       thread-stream: 4.2.0
+
+  pixi.js@8.19.0:
+    dependencies:
+      '@pixi/colord': 2.9.6
+      '@types/earcut': 3.0.0
+      '@webgpu/types': 0.1.71
+      '@xmldom/xmldom': 0.8.13
+      earcut: 3.2.3
+      eventemitter3: 5.0.4
+      gifuct-js: 2.1.2
+      ismobilejs: 1.1.1
+      parse-svg-path: 0.2.0
+      tiny-lru: 11.4.7
 
   pkce-challenge@5.0.1: {}
 
@@ -2533,6 +2627,8 @@ snapshots:
     dependencies:
       convert-hrtime: 5.0.0
 
+  tiny-lru@11.4.7: {}
+
   tinybench@2.9.0: {}
 
   tinyexec@1.2.4: {}
@@ -2571,6 +2667,11 @@ snapshots:
   typescript@6.0.3: {}
 
   undici-types@7.18.2: {}
+
+  untitled-pixi-live2d-engine@1.3.1(@pixi/sound@6.0.1(pixi.js@8.19.0))(pixi.js@8.19.0):
+    dependencies:
+      '@pixi/sound': 6.0.1(pixi.js@8.19.0)
+      pixi.js: 8.19.0
 
   update-browserslist-db@1.2.3(browserslist@4.28.5):
     dependencies:

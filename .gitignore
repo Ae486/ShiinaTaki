@@ -16,5 +16,8 @@ target/
 apps/desktop/src-tauri/gen/
 apps/desktop/app-icon.png
 
+# Vendored proprietary Live2D runtimes (license-restricted; fetched by scripts/vendor-live2d-runtimes.mjs)
+apps/desktop/public/vendor/
+
 # One-off local scripts (machine-specific)
 scripts/migrate-node-to-g.ps1

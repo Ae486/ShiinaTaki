@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TakiAgent — Live2D Renderer Spike</title>
+    <!--
+      Cubism runtime globals must load before the module (Live2DCubismCore for moc3, Live2DModelWebGL for moc).
+      Served from public/vendor/live2d (git-ignored, fetched by scripts/vendor-live2d-runtimes.mjs). Spike-only.
+    -->
+    <script src="/vendor/live2d/live2dcubismcore.min.js"></script>
+    <script src="/vendor/live2d/live2d.min.js"></script>
+  </head>
+  <body style="margin: 0">
+    <div id="root"></div>
+    <script type="module" src="/src/windows/spike/main.ts"></script>
+  </body>
+</html>
