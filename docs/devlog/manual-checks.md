@@ -103,6 +103,11 @@ node --env-file-if-exists=../../.env.local src/main.ts
 - [ ] **42. 坐标对齐（关键失败模式）**：穿透/交互的分界应**贴合可见轮廓**——不应出现"小人左边一片明明是透明却点不透"或"小人身上某块却能穿透"的错位。若错位 → 坐标变换或 mask 缩放有问题，写一行我修。
 - [ ] **43. 随动画追踪**：小人眨眼/呼吸/动作时轮廓在动，穿透分界应**跟着轮廓走**（每帧刷 mask），不滞后。
 - [ ] **44. 拖拽中不漏穿**：拖动小人移动窗口的**全过程**中，不应中途"漏穿"把点击落到后面的程序（拖拽期 toggle 挂起）。
-- [ ] **45. HiDPI（若你是高分屏/缩放≠100%）**：在系统缩放 125%/150% 下重验 40-42，确认穿透判定仍贴合轮廓（坐标除以了 scaleFactor，但值得在真实缩放下看一眼）。
-
 发现任何问题在对应条目下写一行，我会开返工轮。
+
+## 来自 #16 后端（气泡对话 + LLM 驱动表情/动作——后端半）
+
+> 后端半（avatar 工具 + 频道 + 人格注入）机器可验部分已全绿：`@taki/shared` 142 测 + `@taki/core` 369 测（含 avatar-schema 往返、persona-provider 读取/顺序/note-strip/降级、assembler 注入顺序、avatar 订阅扇出 + onClose 清理、vocabulary set/render、avatar 工具 publish、avatar-subscribe/report 方法）、`-r typecheck`（5 项目）、`-w lint` 全过；D1 硬化回合运行时（chat-agent 流循环/持久化/中止）**未触碰**，仅新增模块 + assembler 注入 + main 装配。以下一项是**真实模型行为**，单测注入 fake 无法验，需真机看（前端渲染项随前端半另附）。
+
+- [ ] **46. LLM 主动表达（活模型行为）**：core 接真实 provider，在 CLI（或前端气泡就绪后）对 taki 聊几轮带情绪的话（如夸她、逗她、让她认真做事）→ 观察 core 日志应出现 `avatar expression published` / `avatar motion published`（模型**主动**调用了 `avatar_set_expression`/`avatar_play_motion`），且用的名字落在该模型 manifest 报上来的词表内。这验证的是 assistant-layer 卡片的表达引导 + Option A 词表注入是否真的让模型去 emote——纯 prompt 行为，只能真机看。
+

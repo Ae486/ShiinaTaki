@@ -9,6 +9,9 @@ describe("loadServerConfig", () => {
     const config = loadServerConfig({});
     expect(config).toMatchObject({ host: DEFAULT_WS_HOST, port: DEFAULT_WS_PORT, logLevel: "info" });
     expect(config.dataDir).toBe(join(homedir(), ".takiagent"));
+    // The prompt-dir default resolves to the repo prompt/ library (OS-neutral, from import.meta.url).
+    expect(config.promptDir.length).toBeGreaterThan(0);
+    expect(config.promptDir.replace(/[/\\]$/, "").endsWith("prompt")).toBe(true);
   });
 
   it("reads provided values and coerces the port", () => {
@@ -18,8 +21,9 @@ describe("loadServerConfig", () => {
         TAKI_WS_PORT: "9000",
         TAKI_LOG_LEVEL: "debug",
         TAKI_DATA_DIR: "/tmp/taki",
+        TAKI_PROMPT_DIR: "/tmp/prompt",
       }),
-    ).toEqual({ host: "127.0.0.1", port: 9000, logLevel: "debug", dataDir: "/tmp/taki" });
+    ).toEqual({ host: "127.0.0.1", port: 9000, logLevel: "debug", dataDir: "/tmp/taki", promptDir: "/tmp/prompt" });
   });
 
   it("reads TAKI_DATA_DIR when provided", () => {

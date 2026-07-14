@@ -34,8 +34,10 @@ export interface ChatAgentDeps {
   autoMemory?: AutoMemory;
   /** Extra tools merged after memory tools each turn (skills load_skill + MCP tools); stable across turns. */
   extraTools?: ToolSet;
-  /** Extra instructions appended after the assembled memory context (e.g. the skills list); "" contributes nothing. */
-  instructionsExtra?: () => string;
+  /** Per-character tools built fresh each turn with the turn's characterId (avatar tools bind their publish target here). */
+  characterTools?: (characterId: string) => ToolSet;
+  /** Extra instructions appended after the assembled memory context (skills list + avatar vocabulary); "" contributes nothing. */
+  instructionsExtra?: (characterId: string) => string;
   /** MCP tool-approval gate; only consulted when a TurnContext is present (its notify carries the ask). */
   approval?: ApprovalGate;
   /** Tool-loop step cap per turn (round-trips: call -> observe -> decide). Injected from AgentConfig; falls back to DEFAULT_MAX_STEPS. */
@@ -61,7 +63,7 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   const agent = new ToolLoopAgent({
     model: deps.model,
     instructions: composeInstructions(deps, { characterId, history, message }),
-    tools: { ...memory.createTools(characterId), ...(deps.extraTools ?? {}) },
+    tools: { ...memory.createTools(characterId), ...(deps.extraTools ?? {}), ...(deps.characterTools?.(characterId) ?? {}) },
     stopWhen: isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS),
     // MCP tool calls await the operator's decision inside the loop; internal tools return not-applicable (ruling 5).
     // The gate is installed whenever it is configured — without a turn (no notify sink) it denies unremembered
@@ -138,7 +140,7 @@ function composeInstructions(
     queryText: recentText(turn.history),
     currentMessage: turn.message,
   });
-  return [BASE_SYSTEM_PROMPT, assembled, deps.instructionsExtra?.() ?? ""]
+  return [BASE_SYSTEM_PROMPT, assembled, deps.instructionsExtra?.(turn.characterId) ?? ""]
     .filter((section) => section.length > 0)
     .join("\n\n");
 }

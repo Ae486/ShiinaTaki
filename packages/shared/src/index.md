@@ -6,6 +6,7 @@
 - connect-schema.ts — CONNECT_METHOD + RoleSchema + connect handshake param/result schemas (ADR 0004)
 - chat-schema.ts — CHAT_METHODS + chat.send/cancel/delta/complete/error param & event schemas
 - timeline-schema.ts — TIMELINE_METHODS + timeline entry/part/history/subscribe/appended schemas (ADR 0005); parts = structured tool-call/result fidelity
+- avatar-schema.ts — AVATAR_METHODS + avatar.subscribe/report/command schemas (LLM-driven expression/motion push); operator-only, NO Rust mirror
 - approval-schema.ts — APPROVAL_METHODS + tool-approval request/respond schemas (MCP gate; M3 Permission Gate reuse)
 - capability-schema.ts — CAPABILITY_METHODS + core↔node capability request/respond/error schemas; respond output is opaque (Option A)
 - capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen); mirrored in Rust serde

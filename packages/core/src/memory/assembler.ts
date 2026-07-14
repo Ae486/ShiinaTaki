@@ -1,17 +1,17 @@
 /**
- * INPUT:  AssembleParams (characterId + queryText) + an injected MemoryRepo and Retriever
- * OUTPUT: createAssembler({repo, retriever}) -> { assemble(params) -> instructions string }
+ * INPUT:  AssembleParams (characterId + queryText) + an injected MemoryRepo, Retriever, and PersonaProvider
+ * OUTPUT: createAssembler({repo, retriever, persona}) -> { assemble(params) -> instructions string }
  * POS:    core/memory — deterministic per-turn context assembly with per-section budgets (MEMORY-DESIGN §Context assembly)
  */
 import type { MemoryEntryRow, MemoryRepo } from "../db/memory-repo.ts";
 import { disclosureMatches } from "./disclosure-gate.ts";
 import { V1_MEMORY_LAYERS } from "./layer-registry.ts";
+import type { PersonaProvider } from "./persona-provider.ts";
 import { selectPinned } from "./pinned-block.ts";
 import type { Retriever } from "./retriever.ts";
 import { fitToBudget } from "./token-estimator.ts";
 
-// Placeholders (replaced later): persona card = #16, emotion capsule = D9 (docs/deferred-decisions.md). Static so v1 output is deterministic.
-const PERSONA_PLACEHOLDER = "You are the user's companion. (Persona card pending — #16.)";
+// Emotion capsule is a static placeholder (D9, docs/deferred-decisions.md); the persona card now loads from disk (#16).
 const EMOTION_CAPSULE = "Current mood: neutral.";
 const PINNED_HEADER = "Promises and facts you always keep in mind:";
 const RETRIEVED_HEADER = "Things that come to mind right now:";
@@ -38,13 +38,14 @@ export interface Assembler {
   assemble(params: AssembleParams): string;
 }
 
-export function createAssembler(deps: { repo: MemoryRepo; retriever: Retriever }): Assembler {
-  const { repo, retriever } = deps;
+export function createAssembler(deps: { repo: MemoryRepo; retriever: Retriever; persona: PersonaProvider }): Assembler {
+  const { repo, retriever, persona } = deps;
 
   return {
     assemble({ characterId, queryText, currentMessage }) {
       const now = new Date().toISOString();
-      const sections = [PERSONA_PLACEHOLDER, EMOTION_CAPSULE];
+      // Injection order (prompt/README.md): global assistant layer FIRST, then the per-character persona, then emotion.
+      const sections = [persona.assistantLayer(), persona.persona(characterId), EMOTION_CAPSULE];
 
       const pinned = selectPinned(repo.listActiveByLayers({ characterId, layers: PINNED_LAYER_IDS, now }), PINNED_BUDGET);
       if (pinned.length > 0) sections.push(renderBlock(PINNED_HEADER, pinned));

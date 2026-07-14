@@ -14,6 +14,9 @@ import { createTurnRegistry } from "./agents/turn-registry.ts";
 import { createApprovalBroker } from "./approval/approval-broker.ts";
 import { createApprovalGate } from "./approval/approval-gate.ts";
 import { createDecisionStore } from "./approval/decision-store.ts";
+import { createAvatarSubscriptions } from "./avatar/avatar-subscriptions.ts";
+import { createAvatarTools } from "./avatar/avatar-tools.ts";
+import { createAvatarVocabulary } from "./avatar/avatar-vocabulary.ts";
 import { createCapabilityBroker } from "./capabilities/capability-broker.ts";
 import { createClipboardReadTool } from "./capabilities/clipboard-read-tool.ts";
 import { createClipboardWriteTool } from "./capabilities/clipboard-write-tool.ts";
@@ -38,9 +41,12 @@ import { createAutoMemory } from "./memory/auto-memory.ts";
 import { createEpisodicWriter } from "./memory/episodic-writer.ts";
 import { createFlushWriter } from "./memory/flush-writer.ts";
 import { createMemoryEngine } from "./memory/memory-engine.ts";
+import { createPersonaProvider } from "./memory/persona-provider.ts";
 import { createConnectionRegistry } from "./server/connection-registry.ts";
 import { createMethodRegistry } from "./server/method-registry.ts";
 import { approvalRespondMethod } from "./server/methods/approval-respond.ts";
+import { avatarReportMethod } from "./server/methods/avatar-report.ts";
+import { avatarSubscribeMethod } from "./server/methods/avatar-subscribe.ts";
 import { chatCancelMethod } from "./server/methods/chat-cancel.ts";
 import { chatSendMethod } from "./server/methods/chat-send.ts";
 import { capabilityRespondMethod } from "./server/methods/capability-respond.ts";
@@ -90,10 +96,22 @@ const conversationStore = createConversationStore({
   onAppend: (entry) => timelineSubscriptions.publish(entry),
 });
 
+// Avatar channel (#16): LLM-driven expression/motion commands fan out to subscribed Pet UI operators (mirrors the
+// timeline fan-out); the vocabulary store holds each character's reported manifest names, injected into turn prompts.
+const avatarSubscriptions = createAvatarSubscriptions();
+const avatarVocabulary = createAvatarVocabulary();
+
 // The memory engine's Workspace: markdown files under the app data root (beside the db, NOT in it — invariant 1).
 // Startup reconciliation rebuilds the derived index from those files (files are truth).
 const memoryLog = logger.child({ mod: "memory" });
-const memory = createMemoryEngine({ db, memoryRoot: join(serverConfig.dataDir, "workspace", "memory") });
+// Persona cards (#16): the global assistant layer + per-character persona, read from prompt/ at boot and injected
+// FIRST in the assembled turn context (prompt/README.md order). A missing card degrades to a built-in fallback.
+const personaProvider = createPersonaProvider({ promptDir: serverConfig.promptDir, logger });
+const memory = createMemoryEngine({
+  db,
+  memoryRoot: join(serverConfig.dataDir, "workspace", "memory"),
+  persona: personaProvider,
+});
 const reconciled = memory.reconcile();
 memoryLog.info(reconciled, "memory index reconciled from workspace");
 if (reconciled.invalid.length > 0)
@@ -215,7 +233,11 @@ registry.register(
         ...writeFileTool,
         ...mcpManager.tools(),
       },
-      instructionsExtra: () => skillsLoader.renderList(),
+      // Per-character avatar tools bind their publish target (the turn's characterId) here — same lifetime as memory tools.
+      characterTools: (characterId) => createAvatarTools({ subscriptions: avatarSubscriptions, characterId, logger }),
+      // Skills list + the active character's reported avatar vocabulary (Option A names); blank sections contribute nothing.
+      instructionsExtra: (characterId) =>
+        [skillsLoader.renderList(), avatarVocabulary.render(characterId)].filter((section) => section.length > 0).join("\n\n"),
       approval: approvalGate,
     }),
     logger,
@@ -227,6 +249,8 @@ registry.register(approvalRespondMethod(approvalBroker));
 registry.register(capabilityRespondMethod(capabilityBroker));
 registry.register(timelineHistoryMethod(timelineRepo));
 registry.register(timelineSubscribeMethod(timelineSubscriptions));
+registry.register(avatarSubscribeMethod(avatarSubscriptions));
+registry.register(avatarReportMethod(avatarVocabulary));
 
 // Dev-only L1 drive (env double-gate, mirror of the Shell's ScriptedApprover): registered ONLY with TAKI_DEV_TRIGGER=1
 // so it has zero production surface. It drives the same capability tools the agent does — the node-side gate still

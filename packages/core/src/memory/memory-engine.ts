@@ -1,6 +1,6 @@
 /**
- * INPUT:  the Database wrapper + a memory root dir (under the Workspace)
- * OUTPUT: createMemoryEngine({db, memoryRoot}) -> { reconcile, assemble, createTools, writeEntry }
+ * INPUT:  the Database wrapper + a memory root dir (under the Workspace) + an optional PersonaProvider (prompt cards)
+ * OUTPUT: createMemoryEngine({db, memoryRoot, persona?}) -> { reconcile, assemble, createTools, writeEntry }
  * POS:    core/memory — the memory subsystem's composition root: wires store+repo+indexer+retriever+assembler+tools
  */
 import type { Database } from "../db/sqlite.ts";
@@ -9,6 +9,7 @@ import { createAssembler, type AssembleParams } from "./assembler.ts";
 import { createFts5Retriever } from "./fts5-retriever.ts";
 import { indexEntry, reconcile, type ReconcileStats } from "./indexer.ts";
 import { createMemoryTools, type MemoryToolOps } from "./memory-tools.ts";
+import { createFallbackPersonaProvider, type PersonaProvider } from "./persona-provider.ts";
 import { createMemoryStore } from "./store.ts";
 import type { ToolSet } from "ai";
 
@@ -32,11 +33,12 @@ export interface MemoryEngine {
   }): { id: string; layer: string };
 }
 
-export function createMemoryEngine(deps: { db: Database; memoryRoot: string }): MemoryEngine {
+export function createMemoryEngine(deps: { db: Database; memoryRoot: string; persona?: PersonaProvider }): MemoryEngine {
   const store = createMemoryStore({ root: deps.memoryRoot });
   const repo = createMemoryRepo(deps.db);
   const retriever = createFts5Retriever(repo);
-  const assembler = createAssembler({ repo, retriever });
+  // The persona provider is injected in production (main.ts, reading prompt/); tests without one degrade to fallbacks.
+  const assembler = createAssembler({ repo, retriever, persona: deps.persona ?? createFallbackPersonaProvider() });
 
   // The write path is file-first, then index (a crash between the two heals at the next startup reconcile).
   const ops: MemoryToolOps = {

@@ -2,12 +2,22 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createMemoryFixture, type MemoryFixture } from "../testing/memory-fixture.ts";
 import { createAssembler, type Assembler } from "./assembler.ts";
 import { createFts5Retriever } from "./fts5-retriever.ts";
+import type { PersonaProvider } from "./persona-provider.ts";
+
+// Recognizable stub cards so the fixed-order assertions can pin exactly where persona content lands.
+const STUB_PERSONA: PersonaProvider = {
+  assistantLayer: () => "ASSISTANT_LAYER",
+  persona: (characterId) => `PERSONA(${characterId})`,
+};
 
 const fixtures: MemoryFixture[] = [];
 function fresh(): { f: MemoryFixture; assembler: Assembler } {
   const f = createMemoryFixture();
   fixtures.push(f);
-  return { f, assembler: createAssembler({ repo: f.repo, retriever: createFts5Retriever(f.repo) }) };
+  return {
+    f,
+    assembler: createAssembler({ repo: f.repo, retriever: createFts5Retriever(f.repo), persona: STUB_PERSONA }),
+  };
 }
 afterEach(() => {
   for (const f of fixtures.splice(0)) f.cleanup();
@@ -22,12 +32,13 @@ describe("assembler (T9 deterministic order + budgets)", () => {
 
     const out = assembler.assemble({ characterId: "taki", queryText: "豚骨拉面好吃吗" });
     const sections = out.split("\n\n");
-    expect(sections[0]).toContain("Persona card pending");
-    expect(sections[1]).toBe("Current mood: neutral.");
-    expect(sections[2]).toContain("Promises and facts you always keep in mind:");
-    expect(sections[2]).toContain("每周五一起看电影");
-    expect(sections[3]).toContain("Things that come to mind right now:");
-    expect(sections[3]).toContain("今天聊到了豚骨拉面");
+    expect(sections[0]).toBe("ASSISTANT_LAYER"); // global assistant layer injected FIRST
+    expect(sections[1]).toBe("PERSONA(taki)"); // per-character persona AFTER the assistant layer
+    expect(sections[2]).toBe("Current mood: neutral.");
+    expect(sections[3]).toContain("Promises and facts you always keep in mind:");
+    expect(sections[3]).toContain("每周五一起看电影");
+    expect(sections[4]).toContain("Things that come to mind right now:");
+    expect(sections[4]).toContain("今天聊到了豚骨拉面");
 
     // Deterministic: same inputs -> byte-identical output.
     expect(assembler.assemble({ characterId: "taki", queryText: "豚骨拉面好吃吗" })).toBe(out);
@@ -50,7 +61,7 @@ describe("assembler (T9 deterministic order + budgets)", () => {
   it("omits memory sections entirely when there is nothing to recall", () => {
     const { assembler } = fresh();
     const out = assembler.assemble({ characterId: "taki", queryText: "hello" });
-    expect(out.split("\n\n")).toHaveLength(2); // persona + emotion only
+    expect(out.split("\n\n")).toHaveLength(3); // assistant layer + persona + emotion only
   });
 });
 

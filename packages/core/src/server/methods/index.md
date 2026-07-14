@@ -4,6 +4,8 @@
 - chat-cancel.ts — chat.cancel (operator-only): abort the character's in-flight turn via the TurnRegistry; idempotent ({cancelled:false} when idle)
 - timeline-history.ts — timeline.history (operator-only): newest-first cursor page of the conversation timeline
 - timeline-subscribe.ts — timeline.subscribe (operator-only): register a timeline.appended sink; auto-unsubscribe on disconnect
+- avatar-subscribe.ts — avatar.subscribe (operator-only): register an avatar.command sink; auto-unsubscribe on disconnect
+- avatar-report.ts — avatar.report (operator-only): record the Pet UI's loaded-model motion/expression names into the vocabulary store
 - approval-respond.ts — approval.respond (operator-only): resolve a pending MCP tool-approval ask; unknown id -> {accepted:false}
 - capability-respond.ts — capability.respond (node-only): settle a pending capability request; unknown id -> {accepted:false}
 - capability-trigger.ts — capability.trigger (operator-only, DEV-ONLY via TAKI_DEV_TRIGGER=1): drive a real capability tool's execute without the LLM (node-side gate still authorizes); + devTriggerEnabled(env)

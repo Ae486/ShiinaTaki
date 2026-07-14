@@ -87,6 +87,22 @@ export type {
 } from "./timeline-schema.ts";
 
 export {
+  AVATAR_METHODS,
+  AvatarCommandSchema,
+  AvatarReportParamsSchema,
+  AvatarReportResultSchema,
+  AvatarSubscribeParamsSchema,
+  AvatarSubscribeResultSchema,
+} from "./avatar-schema.ts";
+export type {
+  AvatarCommand,
+  AvatarReportParams,
+  AvatarReportResult,
+  AvatarSubscribeParams,
+  AvatarSubscribeResult,
+} from "./avatar-schema.ts";
+
+export {
   APPROVAL_METHODS,
   ApprovalRequestSchema,
   ApprovalRespondParamsSchema,
