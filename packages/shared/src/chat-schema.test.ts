@@ -8,7 +8,11 @@ import {
   ChatErrorSchema,
   ChatSendParamsSchema,
   ChatSendResultSchema,
+  ImageAttachmentSchema,
+  MAX_ATTACHMENTS_PER_MESSAGE,
 } from "./chat-schema.ts";
+
+const IMAGE = { mediaType: "image/png" as const, dataBase64: "aGk=" };
 
 describe("CHAT_METHODS", () => {
   it("exposes the five chat method names", () => {
@@ -49,6 +53,41 @@ describe("ChatSendParamsSchema", () => {
 
   it("rejects a missing characterId", () => {
     expect(ChatSendParamsSchema.safeParse({ message: "hi" }).success).toBe(false);
+  });
+});
+
+describe("ChatSendParamsSchema attachments (T1)", () => {
+  it("accepts a send carrying image attachments", () => {
+    const parsed = ChatSendParamsSchema.safeParse({ characterId: "taki", message: "look", attachments: [IMAGE] });
+    expect(parsed.success).toBe(true);
+  });
+
+  it("accepts an empty caption when an attachment is present (empty text + image is valid)", () => {
+    expect(ChatSendParamsSchema.safeParse({ characterId: "taki", message: "", attachments: [IMAGE] }).success).toBe(true);
+  });
+
+  it("rejects a wholly empty send (empty message AND no attachments)", () => {
+    expect(ChatSendParamsSchema.safeParse({ characterId: "taki", message: "" }).success).toBe(false);
+    expect(ChatSendParamsSchema.safeParse({ characterId: "taki", message: "", attachments: [] }).success).toBe(false);
+  });
+
+  it("rejects more than MAX_ATTACHMENTS_PER_MESSAGE attachments", () => {
+    const many = Array.from({ length: MAX_ATTACHMENTS_PER_MESSAGE + 1 }, () => IMAGE);
+    expect(ChatSendParamsSchema.safeParse({ characterId: "taki", message: "x", attachments: many }).success).toBe(false);
+  });
+
+  it("rejects an unsupported media type", () => {
+    const bad = { mediaType: "image/svg+xml", dataBase64: "aGk=" };
+    expect(ChatSendParamsSchema.safeParse({ characterId: "taki", message: "x", attachments: [bad] }).success).toBe(false);
+    expect(ImageAttachmentSchema.safeParse(bad).success).toBe(false);
+  });
+
+  it("rejects an attachment with empty base64", () => {
+    expect(ImageAttachmentSchema.safeParse({ mediaType: "image/jpeg", dataBase64: "" }).success).toBe(false);
+  });
+
+  it("keeps text-only sends byte-identical (no attachments field present)", () => {
+    expect(ChatSendParamsSchema.parse({ characterId: "taki", message: "hi" })).toEqual({ characterId: "taki", message: "hi" });
   });
 });
 

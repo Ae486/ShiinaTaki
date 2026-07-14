@@ -4,6 +4,7 @@
  * POS:    shared/protocol — the timeline persistence contract (ADR 0005, invariants 3, 7); core repo + server + CLI
  */
 import { z } from "zod";
+import { IMAGE_MEDIA_TYPES } from "./chat-schema.ts";
 
 export const TIMELINE_METHODS = {
   history: "timeline.history",
@@ -40,6 +41,13 @@ export const TimelinePartSchema = z.discriminatedUnion("type", [
     toolCallId: z.string().min(1),
     toolName: z.string().min(1),
     output: TimelineToolOutputSchema,
+  }),
+  // The image/file part (#17, advances D14): `ref` is a workspace-relative attachment path (attachments/<sha256>.<ext>),
+  // never bytes — the model replays the row's TEXT projection; the chat window fetches bytes lazily via media.get.
+  z.object({
+    type: z.literal("image"),
+    mediaType: z.enum(IMAGE_MEDIA_TYPES),
+    ref: z.string().min(1),
   }),
 ]);
 export type TimelinePart = z.infer<typeof TimelinePartSchema>;

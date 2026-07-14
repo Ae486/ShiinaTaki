@@ -49,6 +49,9 @@ export {
   ChatErrorSchema,
   ChatSendParamsSchema,
   ChatSendResultSchema,
+  IMAGE_MEDIA_TYPES,
+  ImageAttachmentSchema,
+  MAX_ATTACHMENTS_PER_MESSAGE,
 } from "./chat-schema.ts";
 export type {
   ChatCancelParams,
@@ -58,6 +61,7 @@ export type {
   ChatError,
   ChatSendParams,
   ChatSendResult,
+  ImageAttachment,
 } from "./chat-schema.ts";
 
 export {
@@ -85,6 +89,24 @@ export type {
   TimelineSubscribeResult,
   TimelineToolOutput,
 } from "./timeline-schema.ts";
+
+export {
+  MEDIA_METHODS,
+  MediaClearParamsSchema,
+  MediaClearResultSchema,
+  MediaGetParamsSchema,
+  MediaGetResultSchema,
+  MediaUsageParamsSchema,
+  MediaUsageResultSchema,
+} from "./media-schema.ts";
+export type {
+  MediaClearParams,
+  MediaClearResult,
+  MediaGetParams,
+  MediaGetResult,
+  MediaUsageParams,
+  MediaUsageResult,
+} from "./media-schema.ts";
 
 export {
   AVATAR_METHODS,

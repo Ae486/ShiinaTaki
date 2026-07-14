@@ -61,6 +61,13 @@ describe("TimelinePartSchema", () => {
       TimelinePartSchema.safeParse({ type: "tool-result", toolCallId: "c1", toolName: "t", output: "raw" }).success,
     ).toBe(false);
   });
+
+  it("round-trips an image part (#17) and rejects an unsupported media type / empty ref", () => {
+    const image = { type: "image", mediaType: "image/png", ref: "attachments/abc.png" };
+    expect(TimelinePartSchema.parse(image)).toEqual(image);
+    expect(TimelinePartSchema.safeParse({ type: "image", mediaType: "image/svg+xml", ref: "attachments/x.svg" }).success).toBe(false);
+    expect(TimelinePartSchema.safeParse({ type: "image", mediaType: "image/webp", ref: "" }).success).toBe(false);
+  });
 });
 
 describe("TimelineEntrySchema", () => {
@@ -78,6 +85,16 @@ describe("TimelineEntrySchema", () => {
       ],
     };
     expect(TimelineEntrySchema.parse(toolEntry)).toEqual(toolEntry);
+  });
+
+  it("round-trips a user entry carrying an image part (#17)", () => {
+    const imageEntry = {
+      ...entry,
+      role: "user" as const,
+      content: "[image]",
+      parts: [{ type: "image" as const, mediaType: "image/jpeg", ref: "attachments/deadbeef.jpg" }],
+    };
+    expect(TimelineEntrySchema.parse(imageEntry)).toEqual(imageEntry);
   });
 
   it("accepts a legacy entry without parts (text-only rows stay valid)", () => {
