@@ -84,7 +84,15 @@ async function bootServer(options: BootOptions): Promise<ServerHarness> {
   const connectionRegistry = createConnectionRegistry();
   const codes: PairingCodeInfo[] = [];
   const registry = createMethodRegistry();
-  registry.register(connectMethod({ deviceRegistry, connectionRegistry, onPairingCode: (info) => codes.push(info) }));
+  registry.register(
+    connectMethod({
+      deviceRegistry,
+      connectionRegistry,
+      trustLoopbackOperator: false,
+      onPairingCode: (info) => codes.push(info),
+      onAutoTrust: () => {},
+    }),
+  );
   const memory = createMemoryEngine({ db, memoryRoot: join(options.dataDir, "workspace", "memory") });
   memory.reconcile();
   registry.register(

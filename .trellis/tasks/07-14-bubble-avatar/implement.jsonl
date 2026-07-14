@@ -1,0 +1,21 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/tasks/07-14-bubble-avatar/research/00-overview-and-decisions.md", "reason": "verified #16 research: 00-overview-and-decisions"}
+{"file": ".trellis/tasks/07-14-bubble-avatar/research/01-backend-tool-registration.md", "reason": "verified #16 research: 01-backend-tool-registration"}
+{"file": ".trellis/tasks/07-14-bubble-avatar/research/02-avatar-event-channel-protocol.md", "reason": "verified #16 research: 02-avatar-event-channel-protocol"}
+{"file": ".trellis/tasks/07-14-bubble-avatar/research/03-manifest-enum-architecture.md", "reason": "verified #16 research: 03-manifest-enum-architecture"}
+{"file": ".trellis/tasks/07-14-bubble-avatar/research/04-persona-injection-refactor.md", "reason": "verified #16 research: 04-persona-injection-refactor"}
+{"file": ".trellis/tasks/07-14-bubble-avatar/research/05-bubble-conversation-ui.md", "reason": "verified #16 research: 05-bubble-conversation-ui"}
+{"file": ".trellis/tasks/07-14-bubble-avatar/research/06-gaze-and-click-reactions.md", "reason": "verified #16 research: 06-gaze-and-click-reactions"}
+{"file": ".trellis/tasks/07-14-bubble-avatar/research/07-thinking-working-states.md", "reason": "verified #16 research: 07-thinking-working-states"}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "D1-hardened turn runtime — the DO-NOT-TOUCH zone + tool-loop context"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "core module layout — where avatar/ tools/ methods go"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "structured error on every capability/tool path"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "backend size caps, headers, index.md, tests"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "frontend layer entry"}
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "locked renderer conventions (governor, framework-free, param API)"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "ws-client, features/, renderer isolation"}
+{"file": ".trellis/spec/frontend/hook-guidelines.md", "reason": "ws-client only via hooks; subscription patterns"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Zustand stores, one domain each"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "zod boundary at ws-client, no-any, discriminated unions"}
+{"file": "prompt/README.md", "reason": "injection order + soul-swap convention"}
+{"file": "docs/TTS-INTERFACE.md", "reason": "presentation-gate + TTS-ready slot seam (reserve, no TTS code)"}

@@ -1,0 +1,7 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "verify NO D1 turn-runtime touch"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "backend size caps, error handling, tests"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "frontend size caps, perf, forbidden patterns"}
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "renderer framework-free + conventions"}
+{"file": ".trellis/tasks/07-14-bubble-avatar/research/00-overview-and-decisions.md", "reason": "verify locked decisions A/B/C/P3 followed"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "verify core module placement + invariant 3/7"}

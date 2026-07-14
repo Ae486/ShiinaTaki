@@ -94,6 +94,19 @@ export async function withStack(options: StackOptions, fn: (stack: Stack) => Pro
   }
 }
 
+// Base core env for an e2e stack. TAKI_TRUST_LOOPBACK_OPERATOR is forced off because these scenarios drive
+// the real pairing handshake (operator-drivers expects PAIRING_REQUIRED); P3 auto-trust is covered by unit tests.
+function baseCoreEnv(port: number, coreDataDir: string, provider: Record<string, string>): Record<string, string> {
+  return {
+    TAKI_WS_HOST: "127.0.0.1",
+    TAKI_WS_PORT: String(port),
+    TAKI_LOG_LEVEL: "info",
+    TAKI_DATA_DIR: coreDataDir,
+    TAKI_TRUST_LOOPBACK_OPERATOR: "false",
+    ...provider,
+  };
+}
+
 async function bootParts(options: StackOptions): Promise<Parts> {
   if (!existsSync(TAKI_NODE_BIN)) {
     throw new Error(`taki-node binary missing at ${TAKI_NODE_BIN} — build it: cargo build --bin taki-node`);
@@ -104,13 +117,7 @@ async function bootParts(options: StackOptions): Promise<Parts> {
   const port = await getFreePort();
   const coreDataDir = mkdtempSync(join(tmpdir(), "taki-e2e-core-"));
   const nodeDataDir = mkdtempSync(join(tmpdir(), "taki-e2e-node-"));
-  const coreEnv: Record<string, string> = {
-    TAKI_WS_HOST: "127.0.0.1",
-    TAKI_WS_PORT: String(port),
-    TAKI_LOG_LEVEL: "info",
-    TAKI_DATA_DIR: coreDataDir,
-    ...provider,
-  };
+  const coreEnv = baseCoreEnv(port, coreDataDir, provider);
   // The dev L1 drive is env double-gated: the core only registers capability.trigger when this is exactly "1".
   if (options.devTrigger) coreEnv.TAKI_DEV_TRIGGER = "1";
   // Timeline pollution must land BEFORE the core opens the db (sequential single-writer). The teardown guard
