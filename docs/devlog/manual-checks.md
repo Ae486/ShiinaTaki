@@ -111,3 +111,22 @@ node --env-file-if-exists=../../.env.local src/main.ts
 
 - [ ] **46. LLM 主动表达（活模型行为）**：core 接真实 provider，在 CLI（或前端气泡就绪后）对 taki 聊几轮带情绪的话（如夸她、逗她、让她认真做事）→ 观察 core 日志应出现 `avatar expression published` / `avatar motion published`（模型**主动**调用了 `avatar_set_expression`/`avatar_play_motion`），且用的名字落在该模型 manifest 报上来的词表内。这验证的是 assistant-layer 卡片的表达引导 + Option A 词表注入是否真的让模型去 emote——纯 prompt 行为，只能真机看。
 
+## 来自 #16 前端（气泡对话 + 表情/动作消费 + 注视 + 点击反应——前端半）
+
+> 机器可验部分已全绿：desktop typecheck / desktop lint / 61 前端测试（emotion-resolver 模糊匹配、click-regions 7 区分桶、avatar-commands 未知名 no-op 优雅降级、click-reactions 归一化+分区+反应、presentation-gate 就绪门控、ws-client 入站路由 zod 校验、device-identity、model-vocabulary 读词表、gaze 夹取/去抖、chat-bubble store reducer、click-through 真值表含 bubbleOpen）/ `-r typecheck`（5 项目）全过；renderer/ 保持零 React/Tauri/ws 导入，气泡/连接只经 hook 触达 ws-client。（注：`-w lint` 因并发后端任务在 `e2e/src/fixture/with-stack.ts` 的一处 `max-lines-per-function` 而红，与前端无关、属后端 P3 任务范围。）以下全是**必须真机看**的活线层（透明合成 + 真实模型 + 真实 WS 流），无头测不了。沿用 `pnpm --filter @taki/desktop tauri dev` + 裸 node 起 core。
+
+> **⚠️ 前置阻塞（先读）：operator 连接需要信任。** core 的 `connect.ts` 目前对未知设备一律回 `PAIRING_REQUIRED`——**P3「localhost 免配对」尚未在后端落地**（connect.ts 没有 loopback 自动信任）。Pet UI 作为 operator 直连 core，会撞到同一堵墙，而 #16 按 D23 **不做 operator 配对 UI**。所以下面 47-52（凡需真实 WS 的项）在后端补上 loopback 自动信任前**无法端到端验**。两条出路：**(a) 后端在 connect.ts 给回环连接加自动信任（约 5 行，才是 P3 的正解）**；(b) 临时手动信任一次。前端已写成：一旦拿到 token 就复用、后端一旦自动信任 no-token 连接即自动 `connected`（前向兼容，无需改前端）。纯前端项（53 注视、54 点击反应、55 气泡可点）不依赖 WS，可独立验。
+
+- [ ] **47. 点击身体开气泡 + 流式回复**（依赖前置信任）：点 taki **身体**（非头部）→ 顶部应弹出输入框 → 打字发送 → 回复应**逐字流入**上方气泡；`chat.complete` 后气泡停在完整文本。这是 #16 的核心 AC。
+- [ ] **48. 气泡↔时间线共享**（依赖前置信任）：气泡发一句 → 另一终端 CLI 对同一 character 拉 history（或直接看 core 时间线）应含这条 user 消息 + assistant 回复（服务端 `timeline.appended` 扇出，气泡不自持久化）。
+- [ ] **49. LLM 表情/动作真机可见**（依赖前置信任，配合后端 46）：聊带情绪的话 → 模型应**真的切表情/播动作**（core 日志 published 的名字应在模型上生效）；报错的名字（词表外）应**静默 no-op 不崩**（Option A 第三层）。
+- [ ] **50. 表情+气泡同框（presentation gate）**（依赖前置信任）：一次带表情的回复里，表情切换与气泡文字应**一起出现**（v1 就绪=立即）。这验证的是 D21 预留槽的接线；#31 接 TTS 后会变成「音频就绪才一起出」。
+- [ ] **51. 断连表现**：Ctrl+C 杀 core → Pet UI 连接状态应转 `disconnected`（v1 **不自动重连** operator，重开 pet 窗口即可；已知限制，非缺陷）。
+- [ ] **52. 首次 PAIRING_REQUIRED 不崩**：全新（清 localStorage）启动、core 未信任本设备 → Pet UI 应停在 `pairing-required` 状态而**不崩、不卡死**（气泡发送会优雅报「未连接」）。这验证前置阻塞下的降级。
+- [ ] **53. 注视跟随（纯前端，无需 WS）**：鼠标在屏幕上移动 → taki 头/眼应**平滑转向光标**；光标移到很远处头部**不应被拉到边缘**（600px 夹取）；静止时不抖（去抖门）。注视复用 #15 的同一次光标轮询，**零额外 IPC**——顺带看待机 CPU 是否仍明显低于 #13 的约 1 核基线。
+- [ ] **54. 点击分区反应（纯前端，无需 WS）**：戳 taki **头部**应出 tsundere 反应（哈？/angry/别过头），**不开气泡**；戳身体各区应各有反应（pui/shame/serious/sigh）。反应名字对不上时静默（arbeit 词表里有 angry/pui/shame/serious/sigh/smile）。
+- [ ] **55. 气泡在透明区可点（点击穿透协同）**：气泡开着时，即便输入框压在**透明像素**上也应能点/能打字（bubbleOpen 期间整窗保持可交互）；关掉气泡后透明区应恢复穿透。点输入框不应触发身后的点击反应/再开气泡（事件已 stopPropagation）。
+
+发现任何问题在对应条目下写一行，我会开返工轮。
+
+
