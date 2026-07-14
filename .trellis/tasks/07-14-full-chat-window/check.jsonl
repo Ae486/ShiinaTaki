@@ -1,0 +1,8 @@
+{"file": ".trellis/tasks/07-14-full-chat-window/prd.md", "reason": "the #17 plan — verify the implementation against every locked decision, TDD row, and hard constraint (esp. §7)"}
+{"file": ".trellis/tasks/07-14-full-chat-window/research/r1-ai-sdk-multimodal.md", "reason": "verified AI SDK 7 facts — FilePart (not deprecated ImagePart), raw base64 (no data: prefix), routing rationale"}
+{"file": ".trellis/spec/backend/index.md", "reason": "backend checklist + guideline index"}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "D1-hardened turn runtime — verify the frozen regions are byte-unchanged and L2 repro still green"}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "operator-only channels: no Rust mirror, standalone schema test, not in protocol-fixtures"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "structured error conventions for the rejects (no-vision-slot, invalid ref)"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "size caps, forbidden patterns, header/index.md rules"}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "media.* are operator-only methods — confirm no capability-gate confusion"}

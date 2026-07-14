@@ -1,0 +1,11 @@
+{"file": ".trellis/tasks/07-14-full-chat-window/prd.md", "reason": "the #17 plan — Phase B scope: §2 decisions, §4.3 display flow, §5 Phase B file map, §6 TDD T10-T12, §7 constraints"}
+{"file": ".trellis/tasks/07-14-full-chat-window/research/r2-markdown.md", "reason": "verified react-markdown@^10.1.0 + remark-gfm@^4.0.1 — default XSS-safe, streaming re-parse guidance, React.memo settled rows"}
+{"file": ".trellis/tasks/07-14-full-chat-window/research/r3-image-attach.md", "reason": "verified file-pick → base64+mediaType in WebView2 (no dialog plugin), size caps + canvas downscale recipe"}
+{"file": ".trellis/tasks/07-14-full-chat-window/research/r4-chat-window.md", "reason": "verified runtime-created chat window steps: capability files, vite input, WebviewWindow getByLabel-or-create (async in v2)"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "frontend pre-dev checklist + guidelines index"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "component conventions (ALWAYS inject — missed once in #16, don't repeat)"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "where windows/features/lib files go in apps/desktop"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "store/hook conventions for the timeline store + composer state"}
+{"file": ".trellis/spec/frontend/hook-guidelines.md", "reason": "use-x hook conventions (use-chat-timeline, use-image-attach)"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "zod-at-boundary + no-any rules for ws payload handling"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "size caps, lint, test expectations"}
