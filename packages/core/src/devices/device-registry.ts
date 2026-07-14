@@ -1,6 +1,6 @@
 /**
  * INPUT:  pairing/verification calls + an injected PairedDeviceStore and clock (now())
- * OUTPUT: createDeviceRegistry({store, now}) -> { beginPairing, completePairing, verifyToken }; PairingError
+ * OUTPUT: createDeviceRegistry({store, now}) -> { beginPairing, completePairing, trustDevice, verifyToken }; PairingError
  * POS:    core/devices — pairing-code lifecycle + token issue/verify (sha256 at rest, timingSafeEqual compare; prd §4)
  */
 import { createHash, randomBytes, randomInt, timingSafeEqual } from "node:crypto";
@@ -21,6 +21,11 @@ export interface DeviceRegistry {
   beginPairing(deviceId: string): string;
   /** On the right code within TTL/attempts: persists the device, returns the plaintext token ONCE. */
   completePairing(deviceId: string, code: string, identity: DeviceIdentity): string;
+  /**
+   * Direct-trust a device WITHOUT a pairing code (loopback auto-trust, P3): persists it and returns the
+   * plaintext token ONCE, via the SAME issuance path as pairing — no parallel token scheme.
+   */
+  trustDevice(deviceId: string, identity: DeviceIdentity): string;
   verifyToken(deviceId: string, token: string, role: Role): boolean;
 }
 
@@ -42,6 +47,20 @@ export function createDeviceRegistry(deps: DeviceRegistryDeps): DeviceRegistry {
   const now = deps.now ?? Date.now;
   const pending = new Map<string, PendingPairing>();
 
+  // Single token-issuance path shared by pairing and loopback auto-trust: mint a 256-bit token, persist
+  // only its sha256, hand back the plaintext ONCE. Never duplicate this — one secret mechanism, one place.
+  function issueToken(deviceId: string, identity: DeviceIdentity): string {
+    const token = randomBytes(32).toString("base64url");
+    store.save({
+      deviceId,
+      deviceName: identity.deviceName,
+      role: identity.role,
+      tokenHash: hashToken(token).toString("base64"),
+      pairedAt: new Date(now()).toISOString(),
+    });
+    return token;
+  }
+
   return {
     beginPairing(deviceId) {
       const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
@@ -61,15 +80,11 @@ export function createDeviceRegistry(deps: DeviceRegistryDeps): DeviceRegistry {
         throw new PairingError("invalid pairing code");
       }
       pending.delete(deviceId);
-      const token = randomBytes(32).toString("base64url");
-      store.save({
-        deviceId,
-        deviceName: identity.deviceName,
-        role: identity.role,
-        tokenHash: hashToken(token).toString("base64"),
-        pairedAt: new Date(now()).toISOString(),
-      });
-      return token;
+      return issueToken(deviceId, identity);
+    },
+
+    trustDevice(deviceId, identity) {
+      return issueToken(deviceId, identity);
     },
 
     verifyToken(deviceId, token, role) {

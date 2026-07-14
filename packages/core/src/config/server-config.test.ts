@@ -12,6 +12,8 @@ describe("loadServerConfig", () => {
     // The prompt-dir default resolves to the repo prompt/ library (OS-neutral, from import.meta.url).
     expect(config.promptDir.length).toBeGreaterThan(0);
     expect(config.promptDir.replace(/[/\\]$/, "").endsWith("prompt")).toBe(true);
+    // Loopback auto-trust defaults ON (P3): a local Pet UI connects without pairing.
+    expect(config.trustLoopbackOperator).toBe(true);
   });
 
   it("reads provided values and coerces the port", () => {
@@ -23,7 +25,14 @@ describe("loadServerConfig", () => {
         TAKI_DATA_DIR: "/tmp/taki",
         TAKI_PROMPT_DIR: "/tmp/prompt",
       }),
-    ).toEqual({ host: "127.0.0.1", port: 9000, logLevel: "debug", dataDir: "/tmp/taki", promptDir: "/tmp/prompt" });
+    ).toEqual({
+      host: "127.0.0.1",
+      port: 9000,
+      logLevel: "debug",
+      dataDir: "/tmp/taki",
+      promptDir: "/tmp/prompt",
+      trustLoopbackOperator: true,
+    });
   });
 
   it("reads TAKI_DATA_DIR when provided", () => {
@@ -45,5 +54,20 @@ describe("loadServerConfig", () => {
   it("rejects wildcard hosts (no auth exists yet)", () => {
     expect(() => loadServerConfig({ TAKI_WS_HOST: "0.0.0.0" })).toThrow(/wildcard/);
     expect(() => loadServerConfig({ TAKI_WS_HOST: "::" })).toThrow(/wildcard/);
+  });
+
+  it('parses the loopback auto-trust kill switch strictly (case-insensitive "true"/"1"/"false"/"0")', () => {
+    expect(loadServerConfig({ TAKI_TRUST_LOOPBACK_OPERATOR: "false" }).trustLoopbackOperator).toBe(false);
+    expect(loadServerConfig({ TAKI_TRUST_LOOPBACK_OPERATOR: "0" }).trustLoopbackOperator).toBe(false);
+    expect(loadServerConfig({ TAKI_TRUST_LOOPBACK_OPERATOR: "False" }).trustLoopbackOperator).toBe(false);
+    expect(loadServerConfig({ TAKI_TRUST_LOOPBACK_OPERATOR: "true" }).trustLoopbackOperator).toBe(true);
+    expect(loadServerConfig({ TAKI_TRUST_LOOPBACK_OPERATOR: "1" }).trustLoopbackOperator).toBe(true);
+    // Set-but-empty behaves as unset (default on) — a stray `VAR=` must not brick the boot.
+    expect(loadServerConfig({ TAKI_TRUST_LOOPBACK_OPERATOR: "" }).trustLoopbackOperator).toBe(true);
+  });
+
+  it("rejects an unrecognized auto-trust value — a typo'd disable must fail the boot, never silently mean ON", () => {
+    expect(() => loadServerConfig({ TAKI_TRUST_LOOPBACK_OPERATOR: "off" })).toThrow();
+    expect(() => loadServerConfig({ TAKI_TRUST_LOOPBACK_OPERATOR: "no" })).toThrow();
   });
 });

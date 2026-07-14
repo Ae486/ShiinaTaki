@@ -96,6 +96,35 @@ describe("createDeviceRegistry pairing", () => {
   });
 });
 
+describe("createDeviceRegistry trustDevice", () => {
+  it("T-P3 issues a token that verifyToken accepts for the trusted operator role", () => {
+    const reg = makeRegistry(storePath(), { value: 0 });
+    const token = reg.trustDevice(DEVICE_ID, identity);
+    expect(token.length).toBeGreaterThan(0);
+    expect(reg.verifyToken(DEVICE_ID, token, "operator")).toBe(true);
+  });
+
+  it("T-P3 locks the role into the record (a stolen token can't privilege-swap to node)", () => {
+    const reg = makeRegistry(storePath(), { value: 0 });
+    const token = reg.trustDevice(DEVICE_ID, identity);
+    expect(reg.verifyToken(DEVICE_ID, token, "node")).toBe(false);
+  });
+
+  it("T-P3 stores only the token hash (plaintext never touches disk), like pairing", () => {
+    const path = storePath();
+    const token = makeRegistry(path, { value: 0 }).trustDevice(DEVICE_ID, identity);
+    const raw = readFileSync(path, "utf8");
+    expect(raw).not.toContain(token);
+    expect(JSON.parse(raw).devices[0].tokenHash).toBe(createHash("sha256").update(token).digest("base64"));
+  });
+
+  it("T-P3 token survives a registry restart over the same store", () => {
+    const path = storePath();
+    const token = makeRegistry(path, { value: 0 }).trustDevice(DEVICE_ID, identity);
+    expect(makeRegistry(path, { value: 0 }).verifyToken(DEVICE_ID, token, "operator")).toBe(true);
+  });
+});
+
 describe("createDeviceRegistry verifyToken", () => {
   it("T3 verifies a freshly issued token for the paired role", () => {
     const reg = makeRegistry(storePath(), { value: 0 });

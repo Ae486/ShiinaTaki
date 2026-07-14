@@ -28,7 +28,7 @@ export type ConnectParams = z.infer<typeof ConnectParamsSchema>;
 
 export const ConnectResultSchema = z.object({
   status: z.literal("ok"),
-  // Present exactly once: in the result of the connect that just completed pairing.
+  // Present once: in the result of a connect that just minted a token — via completed pairing OR loopback auto-trust (#16 P3).
   token: z.string().optional(),
 });
 export type ConnectResult = z.infer<typeof ConnectResultSchema>;

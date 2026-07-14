@@ -213,8 +213,13 @@ registry.register(
   connectMethod({
     deviceRegistry,
     connectionRegistry,
+    // Localhost auto-trust (P3): default-on config so the local Pet UI connects without pairing; off for a public Core.
+    trustLoopbackOperator: serverConfig.trustLoopbackOperator,
     onPairingCode: ({ deviceId, deviceName, code }) =>
       pairingLog.info({ deviceId, deviceName, code }, "pairing code issued"),
+    // A credential minted with no human in the loop must leave an audit trail (the token itself is never logged).
+    onAutoTrust: ({ deviceId, deviceName, remoteAddress }) =>
+      pairingLog.info({ deviceId, deviceName, remoteAddress }, "loopback operator auto-trusted"),
   }),
 );
 registry.register(

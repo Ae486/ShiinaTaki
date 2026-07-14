@@ -1,6 +1,6 @@
 /**
- * INPUT:  ConnectParams from a dispatched pre-auth connect request + injected registries and a code sink
- * OUTPUT: connectMethod(deps) -> MethodDefinition; authenticates the socket or drives pairing (prd §3/§6)
+ * INPUT:  ConnectParams from a dispatched pre-auth connect request + injected registries, code/audit sinks, the loopback-trust flag
+ * OUTPUT: connectMethod(deps) -> MethodDefinition; authenticates the socket (token / pairing / loopback auto-trust) or drives pairing (prd §3/§6, P3)
  * POS:    core/server/methods — the ONLY pre-auth method; thin delegation to device-registry + connection-registry
  */
 import {
@@ -24,10 +24,32 @@ export interface PairingCodeInfo {
   code: string;
 }
 
+/** Audit record for loopback auto-trust (P3) — a credential is minted with no human in the loop, so it must leave a trace. */
+export interface AutoTrustInfo {
+  deviceId: string;
+  deviceName: string;
+  remoteAddress: string;
+}
+
 export interface ConnectMethodDeps {
   deviceRegistry: DeviceRegistry;
   connectionRegistry: ConnectionRegistry;
   onPairingCode: (info: PairingCodeInfo) => void;
+  /** Audit sink: fired on every auto-trust issuance (never receives the token itself). */
+  onAutoTrust: (info: AutoTrustInfo) => void;
+  /**
+   * When true, a loopback OPERATOR presenting no credential is auto-trusted without pairing (P3): on a local
+   * Core the machine boundary IS the trust boundary. A public/VPS Core sets this false to force pairing.
+   */
+  trustLoopbackOperator: boolean;
+}
+
+// Peer addresses that count as loopback. `::ffff:127.0.0.1` is the IPv4-mapped form seen when the server
+// binds IPv6 but the client connects over IPv4; an unknown/absent address is never loopback (fail-closed).
+const LOOPBACK_ADDRESSES = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
+
+function isLoopback(address: string | undefined): address is string {
+  return address !== undefined && LOOPBACK_ADDRESSES.has(address);
 }
 
 export function connectMethod(deps: ConnectMethodDeps): MethodDefinition<ConnectParams> {
@@ -41,7 +63,7 @@ export function connectMethod(deps: ConnectMethodDeps): MethodDefinition<Connect
 }
 
 function handleConnect(deps: ConnectMethodDeps, params: ConnectParams, ctx: MethodContext): ConnectResult {
-  const { deviceRegistry, connectionRegistry, onPairingCode } = deps;
+  const { deviceRegistry, connectionRegistry, onPairingCode, onAutoTrust, trustLoopbackOperator } = deps;
   const { deviceId, deviceName, role, capabilities, token, pairingCode } = params;
 
   if (ctx.connection.state.status === "authenticated") {
@@ -62,6 +84,17 @@ function handleConnect(deps: ConnectMethodDeps, params: ConnectParams, ctx: Meth
   if (pairingCode !== undefined) {
     const issued = completePairing(deviceRegistry, deviceId, { pairingCode, deviceName, role });
     connectionRegistry.authenticate(ctx.connection, { deviceId, role, capabilities });
+    return { status: "ok", token: issued };
+  }
+
+  // Loopback auto-trust (P3): no token, no pairing code, but a local operator on the trusted machine boundary.
+  // Operator-only (nodes carry capabilities → Permission Gate → must still pair) and fail-closed on a
+  // non-loopback/unknown peer. A token is still issued so reconnects work even if the flag is later turned off.
+  const { remoteAddress } = ctx.connection;
+  if (trustLoopbackOperator && role === RoleSchema.enum.operator && isLoopback(remoteAddress)) {
+    const issued = deviceRegistry.trustDevice(deviceId, { deviceName, role });
+    connectionRegistry.authenticate(ctx.connection, { deviceId, role, capabilities });
+    onAutoTrust({ deviceId, deviceName, remoteAddress });
     return { status: "ok", token: issued };
   }
 

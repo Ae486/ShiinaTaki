@@ -1,5 +1,5 @@
 /**
- * INPUT:  socket lifecycle calls from the WS server (create / authenticate / remove) + a per-socket notify sink
+ * INPUT:  socket lifecycle calls from the WS server (create / authenticate / remove) + a per-socket notify sink + peer remote address
  * OUTPUT: createConnectionRegistry() -> { create, authenticate, remove, list, findNodeForCapability, onRemove }
  * POS:    core/server — per-connection auth state + the tracked set the M3 capability router consumes (prd §3, ruling 12)
  */
@@ -21,6 +21,8 @@ export interface Connection {
   state: ConnectionState;
   /** Set by ws-server at socket creation; undefined only in unit tests that never push server-initiated frames. */
   notify?: ConnectionNotify;
+  /** Peer address captured at socket creation (ws `request.socket.remoteAddress`); undefined for unknown peers / unit tests. Drives loopback auto-trust in connect (P3). */
+  readonly remoteAddress?: string;
 }
 
 export interface AuthenticatedIdentity {
@@ -31,7 +33,7 @@ export interface AuthenticatedIdentity {
 
 export interface ConnectionRegistry {
   /** A freshly opened socket: starts awaiting-connect and is tracked until removed; notify reaches only this socket. */
-  create(notify?: ConnectionNotify): Connection;
+  create(notify?: ConnectionNotify, remoteAddress?: string): Connection;
   authenticate(connection: Connection, identity: AuthenticatedIdentity): void;
   remove(connection: Connection): void;
   list(): readonly Connection[];
@@ -46,8 +48,8 @@ export function createConnectionRegistry(): ConnectionRegistry {
   const removeListeners: Array<(connection: Connection) => void> = [];
 
   return {
-    create(notify) {
-      const connection: Connection = { state: { status: "awaiting" }, notify };
+    create(notify, remoteAddress) {
+      const connection: Connection = { state: { status: "awaiting" }, notify, remoteAddress };
       connections.add(connection);
       return connection;
     },

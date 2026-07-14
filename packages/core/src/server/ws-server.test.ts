@@ -56,14 +56,24 @@ afterEach(async () => {
   dirs.length = 0;
 });
 
-async function boot(model: LanguageModel): Promise<Harness> {
+async function boot(model: LanguageModel, options?: { trustLoopbackOperator: boolean }): Promise<Harness> {
   const dir = mkdtempSync(join(tmpdir(), "taki-wss-"));
   dirs.push(dir);
   const deviceRegistry = createDeviceRegistry({ store: createPairedDeviceStore(join(dir, "devices.json")) });
   const connectionRegistry = createConnectionRegistry();
   const codes: PairingCodeInfo[] = [];
   const registry = createMethodRegistry();
-  registry.register(connectMethod({ deviceRegistry, connectionRegistry, onPairingCode: (info) => codes.push(info) }));
+  // Default flag-off so the pairing-handshake tests keep exercising the real handshake over loopback sockets;
+  // the flag-on socket path (remoteAddress captured from the upgrade request) has its own dedicated test.
+  registry.register(
+    connectMethod({
+      deviceRegistry,
+      connectionRegistry,
+      trustLoopbackOperator: options?.trustLoopbackOperator ?? false,
+      onPairingCode: (info) => codes.push(info),
+      onAutoTrust: () => {},
+    }),
+  );
   const memoryStore = createMemoryStore();
   const memory = createMemoryEngine({ db: memoryStore.db, memoryRoot: join(dir, "memory") });
   registry.register(
@@ -260,6 +270,20 @@ describe("startWsServer pre-auth gate + pairing handshake", () => {
     const states = harness.connections.list().map((connection) => connection.state);
     expect(states).toHaveLength(2);
     expect(states.every((state) => state.status === "authenticated" && state.deviceId === OPERATOR_ID)).toBe(true);
+  });
+
+  // Covers the ws-server line that feeds `request.socket.remoteAddress` into the connection: if that capture
+  // ever breaks (wrong property, undefined), this degrades to PAIRING_REQUIRED and the test goes red.
+  it("P3 auto-trusts a loopback operator over a REAL socket when the flag is on", async () => {
+    const harness = await boot(streamingMockModel([]), { trustLoopbackOperator: true });
+    const client = await open(harness.url);
+
+    sendConnect(client, { deviceId: OPERATOR_ID, deviceName: "pet-ui", role: "operator" }, "c-auto");
+    const result = ConnectResultSchema.parse(JsonRpcSuccessResponseSchema.parse((await client.take(1))[0]).result);
+
+    expect(result.status).toBe("ok");
+    expect(result.token?.length ?? 0).toBeGreaterThan(0);
+    expect(harness.codes).toHaveLength(0); // authenticated directly — never fell through to pairing
   });
 });
 

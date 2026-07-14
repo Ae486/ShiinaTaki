@@ -39,12 +39,14 @@ export async function startWsServer(options: WsServerOptions): Promise<WsServer>
   const log = logger.child({ mod: "server" });
   const wss = new WebSocketServer({ host, port });
 
-  wss.on("connection", (socket) => {
+  wss.on("connection", (socket, request) => {
     // Socket-level notify: server-initiated pushes (chat/timeline events, the capability channel) reach
     // exactly this socket. Stored on the connection so the capability broker can notify a node directly.
     const notify: MethodContext["notify"] = (method, params) =>
       reply(socket, createJSONRPCNotification(method, params));
-    const connection = connectionRegistry.create(notify);
+    // Peer address (ws passes the upgrade request as the 2nd arg) — the connect handler uses it for
+    // loopback auto-trust (P3). Undefined for an unknown peer ⇒ never auto-trusted (fail-closed).
+    const connection = connectionRegistry.create(notify, request.socket.remoteAddress);
     // Cleanups registered by handlers (via ctx.onClose) for THIS socket — run once on close.
     const closeListeners: Array<() => void> = [];
     log.info("client connected");

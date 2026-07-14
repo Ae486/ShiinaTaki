@@ -1,7 +1,7 @@
 /**
- * INPUT:  process env (TAKI_WS_HOST / _PORT / TAKI_LOG_LEVEL / TAKI_DATA_DIR / TAKI_PROMPT_DIR)
- * OUTPUT: loadServerConfig(env) -> { host, port, logLevel, dataDir, promptDir } with defaults from ws-defaults + homedir
- * POS:    core/config — boot-time WS + logging + data-root + prompt-dir config (OS-neutral paths, invariant 8)
+ * INPUT:  process env (TAKI_WS_HOST / _PORT / TAKI_LOG_LEVEL / TAKI_DATA_DIR / TAKI_PROMPT_DIR / TAKI_TRUST_LOOPBACK_OPERATOR)
+ * OUTPUT: loadServerConfig(env) -> { host, port, logLevel, dataDir, promptDir, trustLoopbackOperator } with defaults from ws-defaults + homedir
+ * POS:    core/config — boot-time WS + logging + data-root + prompt-dir + loopback-trust config (OS-neutral paths, invariant 8)
  */
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -30,6 +30,9 @@ export const ServerConfigSchema = z.object({
   dataDir: z.string().min(1).default(join(homedir(), ".takiagent")),
   // Prompt-card library root: <promptDir>/system/assistant-layer.md + <promptDir>/characters/<id>/persona.md (#16).
   promptDir: z.string().min(1).default(DEFAULT_PROMPT_DIR),
+  // Loopback auto-trust for operators (P3): default ON so a local Pet UI connects without pairing; a public/VPS
+  // Core sets TAKI_TRUST_LOOPBACK_OPERATOR=false to force pairing.
+  trustLoopbackOperator: z.preprocess(parseTrustFlag, z.boolean().default(true)),
 });
 
 export type ServerConfig = z.infer<typeof ServerConfigSchema>;
@@ -42,5 +45,17 @@ export function loadServerConfig(env: Record<string, string | undefined>): Serve
     logLevel: env.TAKI_LOG_LEVEL,
     dataDir: env.TAKI_DATA_DIR,
     promptDir: env.TAKI_PROMPT_DIR,
+    trustLoopbackOperator: env.TAKI_TRUST_LOOPBACK_OPERATOR,
   });
+}
+
+// The auto-trust flag is a security kill switch: recognize only true/1/false/0 (case-insensitive; empty = unset)
+// and fail the boot on anything else — a typo'd disable (e.g. "off") silently meaning ON would be fail-open.
+function parseTrustFlag(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "") return undefined;
+  if (normalized === "true" || normalized === "1") return true;
+  if (normalized === "false" || normalized === "0") return false;
+  return value; // z.boolean() rejects it -> loadServerConfig throws at boot
 }
