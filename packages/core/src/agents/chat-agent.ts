@@ -1,11 +1,12 @@
 /**
- * INPUT:  ChatSendParams + an injected LanguageModel (AI SDK v7), ConversationStore, MemoryEngine, optional AutoMemory
+ * INPUT:  ChatSendParams (+optional attachments) + an injected LanguageModel (AI SDK v7), ConversationStore,
+ *         MemoryEngine, optional AutoMemory/visionModel/attachment store/imageMemory hook
  * OUTPUT: createChatAgent({model, store, memory, ...}) -> ChatAgent whose stream() yields text deltas; persists the
  *         FULL turn (tool-calls + tool-results + text) after the loop; abort-aware, partial text never lost
  * POS:    core/agents — the streaming chat loop; base prompt + memory context + tools per turn; auto-writes detached
  */
 import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type ToolSet } from "ai";
-import type { ChatSendParams } from "@taki/shared";
+import type { ChatSendParams, ImageAttachment } from "@taki/shared";
 import type { ApprovalGate } from "../approval/approval-gate.ts";
 import type { AutoMemory } from "../memory/auto-memory.ts";
 import type { MemoryEngine } from "../memory/memory-engine.ts";
@@ -32,6 +33,12 @@ export interface ChatAgentDeps {
   memory: MemoryEngine;
   /** Optional auto-write orchestrator; when present, fired detached after each turn (existing tests omit it). */
   autoMemory?: AutoMemory;
+  /** Vision model slot (TAKI_VLM_*, #17 decision 5); image-bearing turns route here. Absent = image turns rejected. */
+  visionModel?: LanguageModel;
+  /** Content-addressed attachment writer — a NARROW structural type (zero coupling to the media module). */
+  attachments?: { save(dataBase64: string, mediaType: ImageAttachment["mediaType"]): { ref: string; bytes: number } };
+  /** Detached post-turn image-description hook (mirrors autoMemory); fired void, only when the turn carried images (D28). */
+  imageMemory?: { onImageTurn(input: { characterId: string; refs: string[]; caption: string }): void };
   /** Extra tools merged after memory tools each turn (skills load_skill + MCP tools); stable across turns. */
   extraTools?: ToolSet;
   /** Per-character tools built fresh each turn with the turn's characterId (avatar tools bind their publish target here). */
@@ -57,11 +64,20 @@ export function createChatAgent(deps: ChatAgentDeps): ChatAgent {
 async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: TurnContext): AsyncIterable<string> {
   const { store, memory, approval } = deps;
   const { characterId, message } = params;
-  store.appendUser(characterId, message);
+  const attachments = params.attachments ?? [];
+  // Image turns route to the vision slot (decision 5). A turn carrying images with no slot/store configured is rejected
+  // BEFORE any persistence — the text model must never be handed an image (chat-send maps this throw to a structured
+  // chat.error; the UI also disables attach). `vision` is null for a text turn, else the narrowed {model, store}.
+  const vision = attachments.length > 0 ? requireVisionDeps(deps) : null;
+  // Save the in-flight bytes to the content-addressed store; only the refs (mediaType + ref) persist on the timeline row.
+  const images = vision
+    ? attachments.map((a) => ({ mediaType: a.mediaType, ref: vision.store.save(a.dataBase64, a.mediaType).ref }))
+    : [];
+  store.appendUser(characterId, message, images);
   const history = store.history(characterId);
   // Per-turn construction: assembled instructions + characterId-bound tools (construction cost is trivial).
   const agent = new ToolLoopAgent({
-    model: deps.model,
+    model: vision ? vision.model : deps.model,
     instructions: composeInstructions(deps, { characterId, history, message }),
     tools: { ...memory.createTools(characterId), ...(deps.extraTools ?? {}), ...(deps.characterTools?.(characterId) ?? {}) },
     stopWhen: isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS),
@@ -76,8 +92,11 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
     turn.onClose(() => approval.denyPending("connection closed"));
     turn.signal?.addEventListener("abort", () => approval.denyPending("turn cancelled"), { once: true });
   }
+  // The in-flight image bytes ride ONLY this turn's messages (a FilePart tail swap replacing the just-appended user
+  // row's text projection); persistence + replay stay text (decision 6). A text turn sends `history` unchanged.
+  const outgoing = vision ? [...history.slice(0, -1), buildMultimodalUser(message, attachments)] : history;
   // abortSignal is per-call by SDK design (not a constructor setting); abort ends the stream gracefully.
-  const result = await agent.stream({ messages: history, abortSignal: turn?.signal });
+  const result = await agent.stream({ messages: outgoing, abortSignal: turn?.signal });
 
   // pendingStepText holds ONLY the in-flight step's text: finish-step clears it because that step's text is then
   // inside its recorded response messages (persisting both would duplicate it).
@@ -103,6 +122,27 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   }
   // Detached, never awaited: the auto-write pass must not add latency to the user-facing turn (prd §3 failure policy).
   void deps.autoMemory?.onTurnCompleted(characterId);
+  // Also detached (mirrors autoMemory): an image turn's authoritative cross-turn record is the vision model's TEXT
+  // description (decision 6), written via the injected hook. Fires only when the turn actually carried images.
+  if (images.length > 0) {
+    void deps.imageMemory?.onImageTurn({ characterId, refs: images.map((img) => img.ref), caption: message });
+  }
+}
+
+// Image turns need BOTH the vision slot and the attachment store; a turn with images but either missing is rejected
+// (the guard). Returns the narrowed non-optional pair so the save + model-pick sites carry no `undefined` (decision 5).
+function requireVisionDeps(deps: ChatAgentDeps): { model: LanguageModel; store: NonNullable<ChatAgentDeps["attachments"]> } {
+  if (!deps.visionModel || !deps.attachments) {
+    throw new Error("Image attachments require a configured vision model (TAKI_VLM_*)");
+  }
+  return { model: deps.visionModel, store: deps.attachments };
+}
+
+// The canonical v7 multimodal user message: a FilePart per attachment (ImagePart is @deprecated in v7), `data` = RAW
+// base64 (a tagged data-URL throws InvalidDataContentError — research r1). This message rides one turn and is never persisted.
+function buildMultimodalUser(text: string, attachments: ImageAttachment[]): ModelMessage {
+  const fileParts = attachments.map((a) => ({ type: "file" as const, mediaType: a.mediaType, data: a.dataBase64 }));
+  return { role: "user", content: text.length > 0 ? [{ type: "text" as const, text }, ...fileParts] : fileParts };
 }
 
 interface TurnOutcome {

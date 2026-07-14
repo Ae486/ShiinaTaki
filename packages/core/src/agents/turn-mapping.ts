@@ -1,6 +1,6 @@
 /**
  * INPUT:  AI SDK v7 response messages (assistant/tool) and persisted TimelineEntry rows
- * OUTPUT: toEntryInput(message) -> {role, content, parts?} | null  +  toModelMessage(entry) -> ModelMessage | null
+ * OUTPUT: toEntryInput(message) | toUserEntryInput(text, images) -> {role, content, parts?}  +  toModelMessage(entry) -> ModelMessage | null
  * POS:    core/agents — the persistence mapping for turn fidelity (D1 #1); conversation-store is its only consumer
  */
 import type { AssistantModelMessage, ModelMessage, ToolModelMessage, ToolResultPart } from "ai";
@@ -8,6 +8,9 @@ import type { TimelineEntry, TimelinePart, TimelineRole, TimelineToolOutput } fr
 
 /** What `result.responseMessages` yields (the SDK's ResponseMessage union, which it does not export). */
 export type TurnMessage = AssistantModelMessage | ToolModelMessage;
+
+/** The image inputs appendUser persists as image parts (mediaType + workspace-relative ref; bytes live in the media store). */
+export type UserImageInput = Omit<Extract<TimelinePart, { type: "image" }>, "type">;
 
 export interface TurnEntryInput {
   role: TimelineRole;
@@ -18,6 +21,18 @@ export interface TurnEntryInput {
 /** Null = nothing persistable (e.g. an empty or reasoning-only message). */
 export function toEntryInput(message: TurnMessage): TurnEntryInput | null {
   return message.role === "tool" ? toolEntry(message) : assistantEntry(message);
+}
+
+// A user turn's persisted shape (#17): no images = legacy `{role:"user", content}` row (byte-identical to today); with
+// images the row carries a text part (only when the caption is non-empty) + one image part per attachment, and the
+// content projection is the caption or "[image]". Replay (toModelMessage) drops the image parts — bytes never re-enter
+// the model (decision 6); the vision model saw them in-flight, later recall rides the description-memory.
+export function toUserEntryInput(text: string, images: UserImageInput[]): TurnEntryInput {
+  if (images.length === 0) return { role: "user", content: text };
+  const parts: TimelinePart[] = [];
+  if (text.length > 0) parts.push({ type: "text", text });
+  for (const image of images) parts.push({ type: "image", mediaType: image.mediaType, ref: image.ref });
+  return { role: "user", content: text.length > 0 ? text : "[image]", parts };
 }
 
 function assistantEntry(message: AssistantModelMessage): TurnEntryInput | null {
@@ -61,6 +76,8 @@ function summarize(parts: TimelinePart[]): string {
     .map((part) => {
       if (part.type === "text") return part.text;
       if (part.type === "tool-call") return `[tool-call: ${part.toolName}]`;
+      // Image parts never reach summarize (user rows project their content directly), but keep the map exhaustive.
+      if (part.type === "image") return "[image]";
       return `[tool-result: ${part.toolName} -> ${part.output.type}]`;
     })
     .filter((line) => line.length > 0)
@@ -78,7 +95,9 @@ export function toModelMessage(entry: TimelineEntry): ModelMessage | null {
   return {
     role: "assistant",
     content: entry.parts
-      .filter((part) => part.type !== "tool-result")
+      // text|tool-call only: assistant rows never carry image parts (those live on user rows) — the explicit predicate
+      // keeps the inferred type guard tight now that TimelinePart includes the image variant.
+      .filter((part) => part.type === "text" || part.type === "tool-call")
       .map((part) =>
         part.type === "text"
           ? { type: "text" as const, text: part.text }

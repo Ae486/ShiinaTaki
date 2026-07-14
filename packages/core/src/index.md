@@ -1,6 +1,6 @@
 # core/src/
 - index.ts — package public entry; empty until an external consumer exists (core runs as a process)
-- main.ts — process entry: wires config → logger → model → db/store/subscriptions → memory engine → skills + MCP + approval gate + capability channel → registries → ws-server; closes MCP clients + db on SIGINT/SIGTERM
+- main.ts — process entry: wires config → logger → model(s) → db/store/subscriptions → memory engine → media store + attachment GC → skills + MCP + approval gate + capability channel → registries → ws-server; closes MCP clients + db on SIGINT/SIGTERM
 - config/ — env → validated boot config
 - logging/ — pino root logger factory
 - server/ — WS JSON-RPC server + method table + connection auth state
@@ -8,6 +8,7 @@
 - db/ — SQLite wrapper + migrations + repos (the only node:sqlite importer; single-writer durable store)
 - agents/ — streaming chat agent + SQLite-backed conversation store
 - memory/ — layer-generic memory engine: files-as-truth store + FTS5 index + retriever + assembler + tools
+- media/ — content-addressed attachment store (chat image bytes) under the Workspace; the DB never holds bytes (#17)
 - mcp/ — MCP client: connect operator servers at boot, namespace + error-wrap their tools (ADR 0006 spawn carve-out)
 - approval/ — MCP tool-approval gate: ask/await broker + decision memory + the v7 toolApproval decision fn
 - capabilities/ — core→node capability channel: ask/await broker + route helper + screenshot/process-list/clipboard/shell-open tools + sanctioned Workspace PNG write site

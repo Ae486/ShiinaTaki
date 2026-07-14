@@ -1,20 +1,21 @@
 /**
- * INPUT:  appendUser/appendAssistant(characterId, text) + appendTurn(characterId, ModelMessage[]) + an injected
- *         TimelineRepo and onAppend sink
+ * INPUT:  appendUser(characterId, text, images?)/appendAssistant(characterId, text) + appendTurn(characterId, ModelMessage[]) +
+ *         an injected TimelineRepo and onAppend sink
  * OUTPUT: createConversationStore({repo, onAppend}) -> { appendUser, appendAssistant, appendTurn, history }
  * POS:    core/agents — SQLite-backed conversation store; persists each turn (full multi-part fidelity), replays history
  */
 import type { ModelMessage } from "ai";
 import type { TimelineEntry } from "@taki/shared";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
-import { toEntryInput, toModelMessage, type TurnEntryInput, type TurnMessage } from "./turn-mapping.ts";
+import { toEntryInput, toModelMessage, toUserEntryInput, type TurnEntryInput, type TurnMessage, type UserImageInput } from "./turn-mapping.ts";
 
 // The model receives the latest REPLAY_WINDOW messages; compaction/token-budgeting is a later concern (ADR 0005).
 // Exported as the single source: the pre-compaction flush (#7) treats this boundary AS the context edge.
 export const REPLAY_WINDOW = 200;
 
 export interface ConversationStore {
-  appendUser(characterId: string, text: string): void;
+  /** Persists the user turn; images (#17) add image parts (mediaType + ref) — no images = a legacy text-only row. */
+  appendUser(characterId: string, text: string, images?: UserImageInput[]): void;
   appendAssistant(characterId: string, text: string): void;
   /**
    * Persists a whole turn's response tail (assistant tool-call parts + tool-result messages + final text),
@@ -38,7 +39,8 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
     onAppend?.(entry);
   };
   return {
-    appendUser: (characterId, text) => commit(characterId, { role: "user", content: text }),
+    // No images = toUserEntryInput returns the legacy `{role:"user", content}` row (byte-identical to before #17).
+    appendUser: (characterId, text, images = []) => commit(characterId, toUserEntryInput(text, images)),
     appendAssistant: (characterId, text) => commit(characterId, { role: "assistant", content: text }),
     appendTurn: (characterId, messages) => {
       for (const message of messages) {

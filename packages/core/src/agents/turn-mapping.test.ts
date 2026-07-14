@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TimelineEntry } from "@taki/shared";
-import { toEntryInput, toModelMessage } from "./turn-mapping.ts";
+import { toEntryInput, toModelMessage, toUserEntryInput } from "./turn-mapping.ts";
 
 function entryOf(partial: Partial<TimelineEntry>): TimelineEntry {
   return {
@@ -63,6 +63,33 @@ describe("toEntryInput", () => {
   });
 });
 
+describe("toUserEntryInput (#17, T6)", () => {
+  const image = { mediaType: "image/png" as const, ref: "attachments/abc.png" };
+
+  it("returns a legacy text-only row (no parts) when there are no images (byte-identical to today)", () => {
+    expect(toUserEntryInput("hello", [])).toEqual({ role: "user", content: "hello" });
+  });
+
+  it("carries a text part + image parts, content = the caption", () => {
+    expect(toUserEntryInput("look at this", [image])).toEqual({
+      role: "user",
+      content: "look at this",
+      parts: [
+        { type: "text", text: "look at this" },
+        { type: "image", mediaType: "image/png", ref: "attachments/abc.png" },
+      ],
+    });
+  });
+
+  it("projects content to [image] and omits the text part when the caption is empty", () => {
+    expect(toUserEntryInput("", [image])).toEqual({
+      role: "user",
+      content: "[image]",
+      parts: [{ type: "image", mediaType: "image/png", ref: "attachments/abc.png" }],
+    });
+  });
+});
+
 describe("toModelMessage", () => {
   it("reconstructs legacy text-only rows (backward compatibility)", () => {
     expect(toModelMessage(entryOf({ role: "user", content: "hi" }))).toEqual({ role: "user", content: "hi" });
@@ -70,6 +97,21 @@ describe("toModelMessage", () => {
       role: "assistant",
       content: "hello",
     });
+  });
+
+  it("replays a user image row as the TEXT projection only — image bytes never re-enter the model (#17 decision 6)", () => {
+    const replayed = toModelMessage(
+      entryOf({
+        role: "user",
+        content: "look at this",
+        parts: [
+          { type: "text", text: "look at this" },
+          { type: "image", mediaType: "image/png", ref: "attachments/abc.png" },
+        ],
+      }),
+    );
+    expect(replayed).toEqual({ role: "user", content: "look at this" });
+    expect(JSON.stringify(replayed)).not.toContain("attachments/abc.png");
   });
 
   it("reconstructs a multi-part assistant message from parts", () => {

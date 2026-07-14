@@ -6,6 +6,9 @@
 - timeline-subscribe.ts — timeline.subscribe (operator-only): register a timeline.appended sink; auto-unsubscribe on disconnect
 - avatar-subscribe.ts — avatar.subscribe (operator-only): register an avatar.command sink; auto-unsubscribe on disconnect
 - avatar-report.ts — avatar.report (operator-only): record the Pet UI's loaded-model motion/expression names into the vocabulary store
+- media-get.ts — media.get (operator-only): serve one attachment's bytes for scroll-back; thin delegation to attachment-store.read (ref confinement single-sourced there)
+- media-clear.ts — media.clear (operator-only): purge retained attachment bytes on demand (the description-memory is untouched)
+- media-usage.ts — media.usage (operator-only): attachment + memory-text byte footprint; RESERVED for the M5 settings UI (D27)
 - approval-respond.ts — approval.respond (operator-only): resolve a pending MCP tool-approval ask; unknown id -> {accepted:false}
 - capability-respond.ts — capability.respond (node-only): settle a pending capability request; unknown id -> {accepted:false}
 - capability-trigger.ts — capability.trigger (operator-only, DEV-ONLY via TAKI_DEV_TRIGGER=1): drive a real capability tool's execute without the LLM (node-side gate still authorizes); + devTriggerEnabled(env)

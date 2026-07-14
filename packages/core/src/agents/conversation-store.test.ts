@@ -106,4 +106,27 @@ describe("createConversationStore", () => {
 
     expect(store.history("taki")).toEqual([{ role: "user", content: "next" }]);
   });
+
+  it("appendUser without images stays a legacy row (byte-identical to today)", () => {
+    const emitted: TimelineEntry[] = [];
+    const store = makeStore((entry) => emitted.push(entry));
+    store.appendUser("taki", "hi");
+    expect(emitted[0]?.parts).toBeUndefined();
+    expect(store.history("taki")).toEqual([{ role: "user", content: "hi" }]);
+  });
+
+  it("appendUser with images persists image parts, but history replays only the TEXT projection (#17)", () => {
+    const emitted: TimelineEntry[] = [];
+    const store = makeStore((entry) => emitted.push(entry));
+    store.appendUser("taki", "look", [{ mediaType: "image/png", ref: "attachments/deadbeef.png" }]);
+
+    // The persisted row carries the image part (for the chat window to render) ...
+    expect(emitted[0]?.parts).toEqual([
+      { type: "text", text: "look" },
+      { type: "image", mediaType: "image/png", ref: "attachments/deadbeef.png" },
+    ]);
+    // ... but the model replay is text only — no ref, no bytes (decision 6).
+    expect(store.history("taki")).toEqual([{ role: "user", content: "look" }]);
+    expect(JSON.stringify(store.history("taki"))).not.toContain("attachments/deadbeef.png");
+  });
 });

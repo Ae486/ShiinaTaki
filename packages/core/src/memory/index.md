@@ -19,3 +19,4 @@
 - episodic-writer.ts — auto-write path 2: segment -> 1-3 episode entries via a non-streaming generate + the store API
 - flush-writer.ts — auto-write path 3: pre-compaction flush as one SILENT tool-enabled turn (output discarded)
 - auto-memory.ts — auto-write orchestrator: watermarks + per-character mutex + failure policy; onTurnCompleted trigger
+- image-description-writer.ts — thin, DELETABLE image→text bridge (#17 decision 6, D28): VLM describes a turn's images, writes ONE episode via the existing store path; detached, warn+drop

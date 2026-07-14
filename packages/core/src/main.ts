@@ -1,9 +1,9 @@
 /**
- * INPUT:  process env (server + provider config) and OS signals
+ * INPUT:  process env (server + provider + optional vision/attachment config) and OS signals
  * OUTPUT: a running headless Agent Core — WS server bound to loopback; exits 0 on SIGINT/SIGTERM
- * POS:    core — the process entry/composition root; wires config → logger → model → db/store/subscriptions → ws-server
+ * POS:    core — the process entry/composition root; wires config → logger → model(s) → db/store/media/subscriptions → ws-server
  */
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { ToolSet } from "ai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
@@ -26,8 +26,10 @@ import { createScreenshotStore } from "./capabilities/screenshot-store.ts";
 import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
 import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
 import { loadAgentConfig } from "./config/agent-config.ts";
+import { loadAttachmentConfig } from "./config/attachment-config.ts";
 import { loadProviderConfig } from "./config/provider-config.ts";
 import { loadServerConfig } from "./config/server-config.ts";
+import { loadVisionConfig } from "./config/vision-config.ts";
 import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
 import { MIGRATIONS } from "./db/migrations/index-list.ts";
 import { openDatabase } from "./db/sqlite.ts";
@@ -37,9 +39,11 @@ import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
 import { createLogger } from "./logging/logger.ts";
 import { loadMcpConfig } from "./mcp/mcp-config.ts";
 import { createMcpManager } from "./mcp/mcp-manager.ts";
+import { createAttachmentStore } from "./media/attachment-store.ts";
 import { createAutoMemory } from "./memory/auto-memory.ts";
 import { createEpisodicWriter } from "./memory/episodic-writer.ts";
 import { createFlushWriter } from "./memory/flush-writer.ts";
+import { createImageDescriptionWriter } from "./memory/image-description-writer.ts";
 import { createMemoryEngine } from "./memory/memory-engine.ts";
 import { createPersonaProvider } from "./memory/persona-provider.ts";
 import { createConnectionRegistry } from "./server/connection-registry.ts";
@@ -52,6 +56,9 @@ import { chatSendMethod } from "./server/methods/chat-send.ts";
 import { capabilityRespondMethod } from "./server/methods/capability-respond.ts";
 import { capabilityTriggerMethod, devTriggerEnabled } from "./server/methods/capability-trigger.ts";
 import { connectMethod } from "./server/methods/connect.ts";
+import { mediaClearMethod } from "./server/methods/media-clear.ts";
+import { mediaGetMethod } from "./server/methods/media-get.ts";
+import { mediaUsageMethod } from "./server/methods/media-usage.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
 import { createLoadSkillTool } from "./skills/load-skill-tool.ts";
@@ -69,6 +76,10 @@ import { createWriteFileTool } from "./workspace/write-file-tool.ts";
 const serverConfig = loadServerConfig(process.env);
 const providerConfig = loadProviderConfig(process.env);
 const agentConfig = loadAgentConfig(process.env);
+// Two user-adjustable model slots (#17 decision 5): the required text slot (above) + an OPTIONAL vision slot. Both are
+// fatal-fast — a partial TAKI_VLM_* set or a garbage TTL fails the boot, never silently degrades.
+const visionConfig = loadVisionConfig(process.env);
+const attachmentConfig = loadAttachmentConfig(process.env);
 
 const logger = createLogger(serverConfig.logLevel);
 
@@ -78,6 +89,12 @@ const provider = createOpenAICompatible({
   apiKey: providerConfig.apiKey,
 });
 const model = provider.languageModel(providerConfig.model);
+// The vision slot mirrors the text-slot block; absent config = no vision model (image turns are then rejected upstream).
+const visionModel = visionConfig
+  ? createOpenAICompatible({ name: "taki-vision", baseURL: visionConfig.baseUrl, apiKey: visionConfig.apiKey }).languageModel(
+      visionConfig.model,
+    )
+  : undefined;
 
 // The composition root ensures the app data root exists before opening the db (first-boot);
 // the db layer itself stays fs-free (invariant). Mirrors the paired-device-store sanctioned site.
@@ -107,9 +124,10 @@ const memoryLog = logger.child({ mod: "memory" });
 // Persona cards (#16): the global assistant layer + per-character persona, read from prompt/ at boot and injected
 // FIRST in the assembled turn context (prompt/README.md order). A missing card degrades to a built-in fallback.
 const personaProvider = createPersonaProvider({ promptDir: serverConfig.promptDir, logger });
+const memoryRoot = join(serverConfig.dataDir, "workspace", "memory");
 const memory = createMemoryEngine({
   db,
-  memoryRoot: join(serverConfig.dataDir, "workspace", "memory"),
+  memoryRoot,
   persona: personaProvider,
 });
 const reconciled = memory.reconcile();
@@ -129,6 +147,21 @@ const autoMemory = createAutoMemory({
   flush: createFlushWriter({ model, createTools: (id) => memory.createTools(id) }),
   logger: logger.child({ mod: "memory-auto" }),
 });
+
+// Attachment store (#17): the sanctioned content-addressed Workspace R/W site for chat image attachments — the DB never
+// holds bytes (invariant 2). Retained under a user-editable TTL and GC-swept below; the description-memory is permanent.
+const attachmentStore = createAttachmentStore({ attachmentsDir: join(serverConfig.dataDir, "workspace", "attachments") });
+// Image→text bridge (#17 decision 6, D28): ONLY when a vision slot exists — an image turn's authoritative cross-turn
+// record is the VLM's text description, written via the EXISTING episodic path (same bound op the episodic writer uses).
+// A thin, deletable writer riding its own detached hook; the memory engine itself is untouched.
+const imageDescriptionWriter = visionModel
+  ? createImageDescriptionWriter({
+      model: visionModel,
+      attachments: attachmentStore,
+      writeEpisode: (input) => memory.writeEntry({ ...input, type: "episodes" }),
+      logger: logger.child({ mod: "image-memory" }),
+    })
+  : undefined;
 
 const deviceRegistry = createDeviceRegistry({
   store: createPairedDeviceStore(join(serverConfig.dataDir, "devices.json")),
@@ -230,6 +263,14 @@ registry.register(
       memory,
       autoMemory,
       maxSteps: agentConfig.maxSteps,
+      // Vision slot + attachment store (#17): an image turn routes to visionModel and its bytes ride in-flight only; with
+      // no vision slot an image turn is rejected upstream (the text model never receives an image).
+      visionModel,
+      attachments: attachmentStore,
+      // Detached, fire-and-forget (mirrors autoMemory) — present only when a vision slot is configured.
+      imageMemory: imageDescriptionWriter
+        ? { onImageTurn: (input) => void imageDescriptionWriter.onImageTurn(input) }
+        : undefined,
       // Extra tools = the skills meta-tool + every capability tool (Shell-gated + core-side Workspace files) + MCP tools.
       extraTools: {
         ...createLoadSkillTool(skillsLoader),
@@ -256,6 +297,21 @@ registry.register(timelineHistoryMethod(timelineRepo));
 registry.register(timelineSubscribeMethod(timelineSubscriptions));
 registry.register(avatarSubscribeMethod(avatarSubscriptions));
 registry.register(avatarReportMethod(avatarVocabulary));
+// Media methods (#17): serve attachment bytes for scroll-back, purge on demand, and report cache usage (usage RESERVED
+// for the M5 settings UI, D27). Operator-only, NO Rust mirror — the ref confinement is single-sourced in attachment-store.
+registry.register(mediaGetMethod(attachmentStore));
+registry.register(mediaClearMethod(attachmentStore));
+registry.register(mediaUsageMethod(attachmentStore, () => directoryByteSize(memoryRoot)));
+
+// Attachment GC (#17): a lightweight boot sweep + a 6h interval (NOT the croner scheduler — D5 is M5). Only raw bytes
+// expire; the description-memory is permanent. unref() keeps the timer from holding the process open on shutdown.
+const attachmentLog = logger.child({ mod: "attachments" });
+function sweepAttachments(): void {
+  const swept = attachmentStore.sweepExpired(attachmentConfig.ttlMs);
+  if (swept.removedCount > 0) attachmentLog.info(swept, "expired attachments swept");
+}
+sweepAttachments();
+setInterval(sweepAttachments, 6 * 60 * 60 * 1000).unref();
 
 // Dev-only L1 drive (env double-gate, mirror of the Shell's ScriptedApprover): registered ONLY with TAKI_DEV_TRIGGER=1
 // so it has zero production surface. It drives the same capability tools the agent does — the node-side gate still
@@ -274,6 +330,23 @@ const server = await startWsServer({
   connectionRegistry,
   logger,
 });
+
+// Recursive byte total of a directory's files (the memory-text footprint for media.usage); a missing dir = 0. Best-effort
+// (single-writer core), reserved for the M5 settings surface (D27).
+function directoryByteSize(root: string): number {
+  let names: string[];
+  try {
+    names = readdirSync(root, { recursive: true }).filter((name): name is string => typeof name === "string");
+  } catch {
+    return 0; // dir not created yet
+  }
+  let total = 0;
+  for (const name of names) {
+    const stat = statSync(join(root, name));
+    if (stat.isFile()) total += stat.size;
+  }
+  return total;
+}
 
 function shutdown(signal: string): void {
   logger.info({ signal }, "shutting down");
