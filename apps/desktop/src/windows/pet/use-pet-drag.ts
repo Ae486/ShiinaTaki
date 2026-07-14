@@ -1,8 +1,8 @@
 /**
- * INPUT:  pointer events on the pet canvas host (bridged from React) + the shared interaction store.
+ * INPUT:  pointer events on the pet canvas host (bridged from React) + the shared interaction store + an onClick sink.
  * OUTPUT: pointer handlers implementing a 4px click-vs-drag dead-zone; past the threshold it hands the move to the
- *         OS via getCurrentWindow().startDragging() and raises the shared `dragging` flag so click-through stays
- *         suspended for the whole drag. Under the threshold it is a click (hit-test reaction is #16).
+ *         OS via getCurrentWindow().startDragging() and raises the shared `dragging` flag. Under the threshold it is a
+ *         click: onClick(x, y) fires with canvas-local px (the F2/F4 seam — open the bubble / react to a hit region).
  * POS:    ui/windows/pet — hook owns the Tauri window access (components never call it directly). The `dragging`
  *         flag is lifted to the store so the click-through poll (#15) can gate on it — no drop-through mid-drag.
  */
@@ -20,7 +20,7 @@ type DragHandlers = {
   onPointerUp: (event: ReactPointerEvent<HTMLDivElement>) => void;
 };
 
-export function usePetDrag(): DragHandlers {
+export function usePetDrag(onClick?: (x: number, y: number) => void): DragHandlers {
   const start = useRef<{ x: number; y: number } | null>(null);
   const dragging = useRef(false);
   const setDragging = useInteractionStore((s) => s.setDragging);
@@ -66,8 +66,19 @@ export function usePetDrag(): DragHandlers {
     [setDragging],
   );
 
-  // start.current && !dragging.current ⇒ it was a click: model.hitTest reaction lands in #16 (seam).
-  const onPointerUp = useCallback(() => endDrag(), [endDrag]);
+  // start.current && !dragging.current ⇒ it was a click: fire onClick with canvas-local px (the div fills the window,
+  // so client-minus-rect is logical canvas px — what isOpaqueAt / handleClick / focusAt expect).
+  const onPointerUp = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const wasClick = start.current !== null && !dragging.current;
+      if (wasClick && onClick) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        onClick(event.clientX - rect.left, event.clientY - rect.top);
+      }
+      endDrag();
+    },
+    [endDrag, onClick],
+  );
 
   return { onPointerDown, onPointerMove, onPointerUp };
 }

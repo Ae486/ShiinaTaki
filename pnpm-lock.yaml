@@ -54,6 +54,9 @@ importers:
       '@tauri-apps/api':
         specifier: ^2.11.0
         version: 2.11.1
+      json-rpc-2.0:
+        specifier: ^1.7.1
+        version: 1.7.1
       pixi.js:
         specifier: ^8.19.0
         version: 8.19.0

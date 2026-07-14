@@ -5,6 +5,6 @@ Framework-free PixiJS + Live2D. NO React imports allowed here.
 - state-machine.ts — pure idle/thinking/working/sleeping FSM + render-activity tiers
 - alpha-mask.ts — pure click-through mask sampler (logical point → mask cell alpha; opacity threshold)
 - alpha-mask-source.ts — persistent low-res RenderTexture owner; per-frame readback feeding the sampler
-- pet-scene.ts — assembles stage + model + governor + FSM tiers + alpha mask; the controller the React bridge mounts
-- live2d/ — Live2D model load + idle blink/breathing using the locked engine
+- pet-scene.ts — assembles stage + model + governor + FSM tiers + alpha mask + the avatar controller; exposes isOpaqueAt + the avatar surface (report/apply/click/gaze) the React bridge mounts
+- live2d/ — Live2D model load, idle blink/breathing, and the avatar behavior surface (vocabulary, commands, click reactions, gaze)
 - spike/ — experimental renderer-selection harness (#13); seeds the real renderer module (#14).

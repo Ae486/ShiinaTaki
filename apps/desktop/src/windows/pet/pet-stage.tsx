@@ -11,7 +11,10 @@ import { useEffect, useRef, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { createPetScene, type PetScene } from "@/renderer/pet-scene.js";
 import { useAvatarStore } from "@/stores/avatar-store.js";
+import { ChatBubble } from "@/features/chat-bubble/chat-bubble.js";
 import { usePetDrag } from "./use-pet-drag.ts";
+import { usePetClick } from "./use-pet-click.ts";
+import { useCoreConnection } from "./use-core-connection.ts";
 import { useRenderGovernor } from "./use-render-governor.ts";
 import { useClickThrough } from "./use-click-through.ts";
 
@@ -19,9 +22,11 @@ export function PetStage() {
   const hostRef = useRef<HTMLDivElement>(null);
   const [scene, setScene] = useState<PetScene | null>(null);
   const avatarState = useAvatarStore((s) => s.state);
-  const drag = usePetDrag();
+  const onPetClick = usePetClick(scene);
+  const drag = usePetDrag(onPetClick);
   useRenderGovernor(scene?.governor ?? null);
   useClickThrough(scene);
+  useCoreConnection(scene);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -52,5 +57,9 @@ export function PetStage() {
     scene?.setAvatarState(avatarState);
   }, [scene, avatarState]);
 
-  return <div ref={hostRef} className="h-full w-full" {...drag} />;
+  return (
+    <div ref={hostRef} className="h-full w-full" {...drag}>
+      <ChatBubble />
+    </div>
+  );
 }

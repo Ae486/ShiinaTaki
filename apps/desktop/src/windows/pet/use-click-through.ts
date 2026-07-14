@@ -1,10 +1,10 @@
 /**
- * INPUT:  the loaded PetScene (its isOpaqueAt alpha test) + the shared dragging flag; Tauri's global cursorPosition,
- *         the pet window geometry (innerPosition/scaleFactor), and setIgnoreCursorEvents.
- * OUTPUT: drives per-pixel click-through — polls the global cursor, maps it to canvas-local px, toggles the window's
- *         ignore-cursor-events (only on change) so opaque pixels stay interactive and transparent pixels pass through.
- * POS:    ui/windows/pet — hook owns the Tauri window access (approach B, no Rust). Reads the shared dragging flag so
- *         a drag never drops through; exposes error state (async Tauri calls) per hook guidelines.
+ * INPUT:  the loaded PetScene (isOpaqueAt alpha test + focusAt gaze) + the shared dragging/bubbleOpen flags; Tauri's
+ *         global cursorPosition, the pet window geometry (innerPosition/scaleFactor), and setIgnoreCursorEvents.
+ * OUTPUT: drives per-pixel click-through AND gaze follow from ONE global-cursor poll — maps the cursor to canvas-local
+ *         px, toggles ignore-cursor-events (only on change), and points the model's gaze at the cursor each tick.
+ * POS:    ui/windows/pet — hook owns the Tauri window access (approach B, no Rust). Reads the shared flags so a drag
+ *         or an open bubble never drops through; exposes error state (async Tauri calls) per hook guidelines.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -20,6 +20,7 @@ type PollContext = {
   win: TauriWindow;
   scene: PetScene;
   isDragging: () => boolean;
+  isBubbleOpen: () => boolean;
   scaleFactor: number;
   buttonDown: boolean;
   lastIgnore: boolean | null;
@@ -34,8 +35,15 @@ async function pollOnce(ctx: PollContext): Promise<void> {
     const [cursor, origin] = await Promise.all([cursorPosition(), ctx.win.innerPosition()]);
     const x = (cursor.x - origin.x) / ctx.scaleFactor;
     const y = (cursor.y - origin.y) / ctx.scaleFactor;
+    // Gaze follow (F4) rides this same cursor read — no second poll, so it adds zero IPC to the always-on overlay.
+    ctx.scene.focusAt(x, y);
     const opaque = ctx.scene.isOpaqueAt(x, y);
-    const ignore = shouldIgnoreCursor({ dragging: ctx.isDragging(), buttonDown: ctx.buttonDown, opaque });
+    const ignore = shouldIgnoreCursor({
+      dragging: ctx.isDragging(),
+      buttonDown: ctx.buttonDown,
+      bubbleOpen: ctx.isBubbleOpen(),
+      opaque,
+    });
     if (ignore !== ctx.lastIgnore) {
       await ctx.win.setIgnoreCursorEvents(ignore);
       ctx.lastIgnore = ignore;
@@ -53,6 +61,9 @@ export function useClickThrough(scene: PetScene | null): { error: string | null 
   const dragging = useInteractionStore((s) => s.dragging);
   const draggingRef = useRef(dragging);
   draggingRef.current = dragging;
+  const bubbleOpen = useInteractionStore((s) => s.bubbleOpen);
+  const bubbleOpenRef = useRef(bubbleOpen);
+  bubbleOpenRef.current = bubbleOpen;
 
   useEffect(() => {
     if (!scene) return;
@@ -60,6 +71,7 @@ export function useClickThrough(scene: PetScene | null): { error: string | null 
       win: getCurrentWindow(),
       scene,
       isDragging: () => draggingRef.current,
+      isBubbleOpen: () => bubbleOpenRef.current,
       scaleFactor: 1,
       buttonDown: false,
       lastIgnore: null,
