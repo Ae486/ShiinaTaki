@@ -1,9 +1,11 @@
-{"file": ".trellis/tasks/07-15-character-import/prd.md", "reason": "the #18 plan — verify against the 9 locked decisions, protocol, TDD T1-T8, hard constraints (traversal security + clean-room + no-partial-write)"}
-{"file": ".trellis/tasks/07-15-character-import/research/rb-zst-and-cubism.md", "reason": "the clean-room format spec to check correctness against — .zst framing, C2/C3 detection, manifest JSON paths, validation asymmetry, error codes; also the clean-room provenance baseline"}
-{"file": ".trellis/tasks/07-15-character-import/research/ra-asset-architecture.md", "reason": "Workspace layout + extraction-locus + invariant analysis (import is operator-driven Core-fs, not an agent OS action)"}
-{"file": ".trellis/spec/backend/index.md", "reason": "backend checklist + guideline index"}
-{"file": ".trellis/spec/backend/error-handling.md", "reason": "structured app-error envelope conventions — the import codes ride error.data.reason with FORBIDDEN, no ErrorCodeSchema extension"}
-{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "operator-only methods get NO Rust mirror → character.* out of protocol-fixtures, standalone schema test"}
-{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "character.* operator-only (roles gate), not a capability-gated agent action"}
-{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "size caps, forbidden patterns, header/index.md rules, test meaningfulness"}
-{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "C2/C3 facts + the ../_mtn_emp/ external-motion tolerance the validation must honor (decision 6)"}
+{"file": ".trellis/tasks/07-15-character-import/prd.md", "reason": "the #18 plan — verify Phase B against decisions 1/8/9, §4.2 serving, §4.3 costume-switch flow, §5 frontend+shell map, §6 T8, §7 constraints"}
+{"file": ".trellis/tasks/07-15-character-import/research/ra-asset-architecture.md", "reason": "THE Phase B correctness bible: the Live2DModel.from URL gating fact, Tauri asset: protocol scope/CSP evidence, the costume-switch flow reusing avatar.report (no new WS method), what #16/#17 give for free"}
+{"file": ".trellis/tasks/07-15-character-import/research/rb-zst-and-cubism.md", "reason": "C2/C3 is PER-COSTUME — one load path must handle either (arbeit C2 ↔ live_01 C3); settingsFile per costume"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "frontend checklist + guideline index"}
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "locked renderer stack, framework-free rule (zero React/Tauri/ws imports in renderer/), generation-split, the ../_mtn_emp/ tolerate-at-load note"}
+{"file": ".trellis/spec/frontend/chat-window.md", "reason": "the runtime-window + per-window-capability + ws-client-through-hook template #17 set; Phase B's asset: config + import affordance follow it; cross-window control forbidden (costume switch drives local scene)"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "components never call ws-client/tauri directly — data flow ws-client→hook→component; a component importing ws-client is a review-blocker"}
+{"file": ".trellis/spec/frontend/hook-guidelines.md", "reason": "use-x hook conventions for the import/costume affordances calling ws-client"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "zustand store conventions (interaction-store panelOpen flag) + cross-window sync goes through Core, never shared memory"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "zod-at-boundary for the new character.* ws-client methods"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "size caps, lint, renderer perf (always-on window), test expectations"}
