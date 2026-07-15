@@ -1,7 +1,8 @@
 /**
  * INPUT:  a WsTransport (browser WebSocket by default) + inbound JSON-RPC frames from the Core; every frame is zod-parsed here.
  * OUTPUT: createWsClient({transport}) -> WsClient: connect()/chat()/subscribeAvatar()/reportAvatar() +
- *         timelineHistory()/subscribeTimeline()/mediaGet() (chat window) + avatar/timeline push handlers.
+ *         timelineHistory()/subscribeTimeline()/mediaGet() (chat window) + importCharacter()/listCharacters()/
+ *         characterCostumes() (#18) + avatar/timeline push handlers.
  * POS:    ui/lib — the Pet UI's operator transport to the Agent Core (mirrors apps/cli chat-client, browser WS). THE
  *         zod boundary: past this file inbound data is trusted typed data (type-safety spec). No React/Tauri imports.
  */
@@ -10,11 +11,15 @@ import { JSONRPCClient, JSONRPCErrorException, JSONRPCServer, JSONRPCServerAndCl
 import {
   AVATAR_METHODS,
   AvatarCommandSchema,
+  CHARACTER_METHODS,
   CHAT_METHODS,
   CONNECT_METHOD,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
+  CharacterCostumesResultSchema,
+  CharacterImportResultSchema,
+  CharacterListResultSchema,
   ConnectResultSchema,
   ErrorCodeSchema,
   JsonRpcClientFrameSchema,
@@ -25,6 +30,10 @@ import {
   TimelineHistoryResultSchema,
   type AvatarCommand,
   type AvatarReportParams,
+  type CharacterCostumesResult,
+  type CharacterImportParams,
+  type CharacterImportResult,
+  type CharacterListResult,
   type ChatSendParams,
   type ConnectParams,
   type ErrorCode,
@@ -60,6 +69,12 @@ export interface WsClient {
   subscribeTimeline(characterId: string): Promise<void>;
   /** Fetches one attachment's bytes for scroll-back rendering; rejects (FORBIDDEN/missing) surface to the caller. */
   mediaGet(ref: string): Promise<MediaGetResult>;
+  /** Imports an operator-picked model archive (base64) into the Workspace; returns costumes + import warnings (#18). */
+  importCharacter(params: CharacterImportParams): Promise<CharacterImportResult>;
+  /** Lists the imported characters (feeds the costume switcher + the reserved M5 roster). */
+  listCharacters(): Promise<CharacterListResult>;
+  /** Reads one character's costumes + per-costume settings filenames (the renderer composes the asset URL from these). */
+  characterCostumes(characterId: string): Promise<CharacterCostumesResult>;
   /** Registers the fire-and-forget avatar command sink (core -> operator push). Replaces any prior handler. */
   onAvatarCommand(handler: (command: AvatarCommand) => void): void;
   /** Registers the optional live-timeline sink (shared with the chat window server-side). */
@@ -147,6 +162,24 @@ function appErrorCode(data: unknown): ErrorCode | null {
   return parsed.success ? parsed.data : null;
 }
 
+// The plain request/response methods (no turn/handshake state) — split out to keep createWsClient within the size cap.
+// Each parses its result through a @taki/shared schema: the zod boundary holds for every inbound frame.
+function requestMethods(rpc: JSONRPCServerAndClient) {
+  return {
+    subscribeAvatar: async (characterId: string) => void (await rpc.request(AVATAR_METHODS.subscribe, { characterId })),
+    reportAvatar: async (params: AvatarReportParams) => void (await rpc.request(AVATAR_METHODS.report, params)),
+    timelineHistory: async (params: TimelineHistoryParams) =>
+      TimelineHistoryResultSchema.parse(await rpc.request(TIMELINE_METHODS.history, params)),
+    subscribeTimeline: async (characterId: string) => void (await rpc.request(TIMELINE_METHODS.subscribe, { characterId })),
+    mediaGet: async (ref: string) => MediaGetResultSchema.parse(await rpc.request(MEDIA_METHODS.get, { ref })),
+    importCharacter: async (params: CharacterImportParams) =>
+      CharacterImportResultSchema.parse(await rpc.request(CHARACTER_METHODS.import, params)),
+    listCharacters: async () => CharacterListResultSchema.parse(await rpc.request(CHARACTER_METHODS.list, {})),
+    characterCostumes: async (characterId: string) =>
+      CharacterCostumesResultSchema.parse(await rpc.request(CHARACTER_METHODS.costumes, { characterId })),
+  };
+}
+
 export function createWsClient(deps: { transport: WsTransport }): WsClient {
   const { transport } = deps;
   const rpc = new JSONRPCServerAndClient(
@@ -187,12 +220,7 @@ export function createWsClient(deps: { transport: WsTransport }): WsClient {
       }
       await done;
     },
-    subscribeAvatar: async (characterId) => void (await rpc.request(AVATAR_METHODS.subscribe, { characterId })),
-    reportAvatar: async (params) => void (await rpc.request(AVATAR_METHODS.report, params)),
-    timelineHistory: async (params) =>
-      TimelineHistoryResultSchema.parse(await rpc.request(TIMELINE_METHODS.history, params)),
-    subscribeTimeline: async (characterId) => void (await rpc.request(TIMELINE_METHODS.subscribe, { characterId })),
-    mediaGet: async (ref) => MediaGetResultSchema.parse(await rpc.request(MEDIA_METHODS.get, { ref })),
+    ...requestMethods(rpc),
     onAvatarCommand: (handler) => (state.push.avatar = handler),
     onTimelineAppended: (handler) => (state.push.timeline = handler),
     onClose: (handler) => transport.onClose(handler),

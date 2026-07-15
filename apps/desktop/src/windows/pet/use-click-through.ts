@@ -61,9 +61,12 @@ export function useClickThrough(scene: PetScene | null): { error: string | null 
   const dragging = useInteractionStore((s) => s.dragging);
   const draggingRef = useRef(dragging);
   draggingRef.current = dragging;
+  // The bubble AND the operator panel both need the window interactive while open (their inputs may sit over
+  // transparent pixels). OR them into the one "keep interactive" signal so the pure toggle formula stays unchanged.
   const bubbleOpen = useInteractionStore((s) => s.bubbleOpen);
-  const bubbleOpenRef = useRef(bubbleOpen);
-  bubbleOpenRef.current = bubbleOpen;
+  const panelOpen = useInteractionStore((s) => s.panelOpen);
+  const keepInteractiveRef = useRef(bubbleOpen || panelOpen);
+  keepInteractiveRef.current = bubbleOpen || panelOpen;
 
   useEffect(() => {
     if (!scene) return;
@@ -71,7 +74,7 @@ export function useClickThrough(scene: PetScene | null): { error: string | null 
       win: getCurrentWindow(),
       scene,
       isDragging: () => draggingRef.current,
-      isBubbleOpen: () => bubbleOpenRef.current,
+      isBubbleOpen: () => keepInteractiveRef.current,
       scaleFactor: 1,
       buttonDown: false,
       lastIgnore: null,

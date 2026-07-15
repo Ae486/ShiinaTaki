@@ -1,6 +1,7 @@
 # renderer/live2d/
 Live2D model loading, idle behavior, and the avatar behavior surface using untitled-pixi-live2d-engine (locked #13). Framework-free.
-- load-taki-model.ts — loads + centers the taki model bound to the governed ticker (eyeBlink + breath on)
+- load-character-model.ts — loads + centers a model from a settings URL (imported asset: URL, or the dev route default) on the governed ticker (#18)
+- costume-switch.ts — teardown+reload the model for a new costume URL; returns the re-read vocabulary the caller re-reports (#18)
 - idle-behavior.ts — starts the looping idle motion group; degrades gracefully when none is defined
 - model-vocabulary.ts — reads the model's motion/expression names (Cubism 2 `name` / Cubism 3 `Name`) for avatar.report (#16)
 - avatar-commands.ts — applies an LLM avatar command (validate vs vocabulary; unknown → log + no-op) (#16)

@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { AVATAR_METHODS, CHAT_METHODS, CONNECT_METHOD, JSON_RPC_APP_ERROR, MEDIA_METHODS, TIMELINE_METHODS } from "@taki/shared";
+import { AVATAR_METHODS, CHARACTER_METHODS, CHAT_METHODS, CONNECT_METHOD, JSON_RPC_APP_ERROR, MEDIA_METHODS, TIMELINE_METHODS } from "@taki/shared";
 import { createWsClient } from "./ws-client.ts";
 import type { WsTransport } from "./ws-transport.ts";
 
@@ -94,6 +94,50 @@ describe("createWsClient inbound routing", () => {
     expect(sent.params).toEqual({ ref: "attachments/abc.png" });
     h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { mediaType: "image/png", dataBase64: "AAAA" } });
     expect(await got).toEqual({ mediaType: "image/png", dataBase64: "AAAA" });
+  });
+
+  it("importCharacter uploads the archive and parses the costumes + warnings result (#18)", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const done = client.importCharacter({ sourceKind: "zst", archiveBase64: "AAAA", fileName: "taki.zst" });
+    await flush();
+    const sent = JSON.parse(h.sent[h.sent.length - 1] ?? "{}");
+    expect(sent.method).toBe(CHARACTER_METHODS.import);
+    expect(sent.params).toEqual({ sourceKind: "zst", archiveBase64: "AAAA", fileName: "taki.zst" });
+    h.deliver({
+      jsonrpc: "2.0",
+      id: lastRequestId(h.sent),
+      result: {
+        characterId: "taki",
+        costumes: ["arbeit"],
+        defaultCostume: "arbeit",
+        settingsFilesByCostume: { arbeit: "model.json" },
+        warnings: [],
+      },
+    });
+    expect((await done).characterId).toBe("taki");
+  });
+
+  it("characterCostumes requests one character's costumes + settings filenames (#18)", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const got = client.characterCostumes("taki");
+    await flush();
+    const sent = JSON.parse(h.sent[h.sent.length - 1] ?? "{}");
+    expect(sent.method).toBe(CHARACTER_METHODS.costumes);
+    expect(sent.params).toEqual({ characterId: "taki" });
+    h.deliver({
+      jsonrpc: "2.0",
+      id: lastRequestId(h.sent),
+      result: { costumes: ["arbeit", "live_01"], defaultCostume: "arbeit", settingsFilesByCostume: { arbeit: "model.json", live_01: "x.model3.json" } },
+    });
+    expect(await got).toEqual({
+      costumes: ["arbeit", "live_01"],
+      defaultCostume: "arbeit",
+      settingsFilesByCostume: { arbeit: "model.json", live_01: "x.model3.json" },
+    });
   });
 
   it("routes an avatar.command push to the registered handler (zod-validated)", () => {

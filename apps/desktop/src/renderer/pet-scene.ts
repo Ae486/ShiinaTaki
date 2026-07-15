@@ -1,18 +1,21 @@
 /**
- * INPUT:  a DOM host element + a local renderThrottling flag; assembles stage + Live2D model + governor + FSM tiers.
- * OUTPUT: a PetScene controller — governor (for window-signal hooks), setAvatarState (store → render tier),
- *         idleResult (what idle animation actually started), and dispose.
- * POS:    ui/renderer — framework-free (ZERO React imports). The single assembly point the React bridge
+ * INPUT:  a DOM host + a local renderThrottling flag + an initial model source (asset: URL, or the dev route default).
+ * OUTPUT: a PetScene controller — governor, setAvatarState, idleResult, isOpaqueAt, the avatar surface, switchCostume
+ *         (teardown+reload a new costume, returns its re-read vocabulary), and dispose.
+ * POS:    ui/renderer — framework-free (ZERO React/Tauri imports). The single assembly point the React bridge
  *         (windows/pet/pet-stage.tsx) mounts; keeps all Pixi/Live2D ownership out of the React tree.
  */
 
+import type { Application } from "pixi.js";
+import type { Live2DModel } from "untitled-pixi-live2d-engine";
 import { createStage } from "./stage.ts";
 import { RenderGovernor } from "./render-governor.ts";
 import { renderActivityFor, type AvatarState } from "./state-machine.ts";
-import { loadTakiModel } from "./live2d/load-taki-model.ts";
+import { loadCharacterModel, DEV_MODEL_SOURCE } from "./live2d/load-character-model.ts";
 import { startIdleAnimation, type IdleResult } from "./live2d/idle-behavior.ts";
-import { createAvatarController } from "./live2d/avatar-controller.ts";
-import type { AvatarVocabulary } from "./live2d/model-vocabulary.ts";
+import { createAvatarController, type AvatarController } from "./live2d/avatar-controller.ts";
+import { reloadModel } from "./live2d/costume-switch.ts";
+import { readVocabulary, type AvatarVocabulary } from "./live2d/model-vocabulary.ts";
 import type { ClickRegion } from "./live2d/click-regions.ts";
 import { createAlphaMaskSource } from "./alpha-mask-source.ts";
 import type { AvatarCommand } from "@taki/shared";
@@ -22,6 +25,8 @@ export type PetSceneOptions = {
   renderThrottling?: boolean;
   // The active character whose click-reaction preset applies (data, invariant 7); defaults to taki for #16.
   characterId?: string;
+  // The initial model settings source: an imported costume's asset: URL, or the dev /spike-assets route (default).
+  modelSource?: string;
 };
 
 export type PetScene = {
@@ -39,27 +44,40 @@ export type PetScene = {
   handleClick: (x: number, y: number) => ClickRegion | null;
   // Gaze follow: point the model at a canvas-local cursor position (clamped + delta-gated). F4.
   focusAt: (x: number, y: number) => void;
+  // Swaps to another costume's model (asset: URL) and returns its re-read vocabulary for the caller to avatar.report (#18).
+  switchCostume: (settingsUrl: string) => Promise<AvatarVocabulary>;
   dispose: () => void;
 };
 
+interface SceneModel {
+  model: Live2DModel;
+  avatar: AvatarController;
+}
+
+interface SwitchContext {
+  app: Application;
+  center: { x: number; y: number };
+  characterId: string;
+  current: SceneModel; // mutated in place so the scene's delegating methods see the new costume's controller
+}
+
 export async function createPetScene(host: HTMLElement, options: PetSceneOptions = {}): Promise<PetScene> {
+  const characterId = options.characterId ?? "taki";
   const app = await createStage(host);
-  const model = await loadTakiModel(app);
+  const model = await loadCharacterModel(app, options.modelSource ?? DEV_MODEL_SOURCE);
   const idleResult = await startIdleAnimation(model);
 
   const governor = new RenderGovernor(app.ticker);
   governor.setThrottling(options.renderThrottling ?? true);
 
-  // The model is placed at the screen center (load-taki-model); the avatar controller needs it for gaze + click math.
+  // Stable across costume swaps (the pet window is fixed-size); the avatar controller needs it for gaze + click math.
   const center = { x: app.screen.width / 2, y: app.screen.height / 2 };
-  const avatar = createAvatarController({ model, center, characterId: options.characterId ?? "taki" });
+  const current: SceneModel = { model, avatar: createAvatarController({ model, center, characterId }) };
 
   // Snapshot the stage (the on-screen composition) into a low-res alpha mask once per painted frame. Hooking it to
   // the governed ticker means it throttles/pauses with rendering; a paused model is static, so the mask stays valid.
-  const mask = createAlphaMaskSource(app.renderer, app.stage, {
-    width: app.screen.width,
-    height: app.screen.height,
-  });
+  // It reads app.stage each frame, so a costume swap (removeChild+addChild) is tracked with no mask rewiring.
+  const mask = createAlphaMaskSource(app.renderer, app.stage, { width: app.screen.width, height: app.screen.height });
   app.ticker.add(mask.refresh);
 
   return {
@@ -67,14 +85,29 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
     idleResult,
     setAvatarState: (state) => governor.setActivity(renderActivityFor(state)),
     isOpaqueAt: (x, y) => mask.isOpaque(x, y),
-    reportVocabulary: () => avatar.vocabulary,
-    applyAvatarCommand: avatar.applyCommand,
-    handleClick: avatar.reactToClick,
-    focusAt: avatar.focusAt,
+    reportVocabulary: () => current.avatar.vocabulary,
+    applyAvatarCommand: (command) => current.avatar.applyCommand(command),
+    handleClick: (x, y) => current.avatar.reactToClick(x, y),
+    focusAt: (x, y) => current.avatar.focusAt(x, y),
+    switchCostume: (settingsUrl) => switchCostume({ app, center, characterId, current }, settingsUrl),
     dispose: () => {
       app.ticker.remove(mask.refresh);
       mask.dispose();
       app.destroy(true, { children: true });
     },
   };
+}
+
+// Teardown+reload the new costume, rebuild its avatar controller + idle loop, and return the re-read vocabulary the
+// caller re-reports through the EXISTING avatar.report (arch §6b — no new vocab plumbing, no costume.switch WS method).
+async function switchCostume(ctx: SwitchContext, settingsUrl: string): Promise<AvatarVocabulary> {
+  const { model, vocabulary } = await reloadModel(
+    { app: ctx.app, load: loadCharacterModel, readVocab: readVocabulary },
+    ctx.current.model,
+    settingsUrl,
+  );
+  ctx.current.model = model;
+  ctx.current.avatar = createAvatarController({ model, center: ctx.center, characterId: ctx.characterId });
+  void startIdleAnimation(model);
+  return vocabulary;
 }
