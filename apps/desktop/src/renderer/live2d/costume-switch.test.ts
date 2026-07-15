@@ -45,4 +45,18 @@ describe("reloadModel", () => {
     expect(readVocab).toHaveBeenCalledWith(next);
     expect(result.vocabulary.motions).toEqual(["idle01"]);
   });
+
+  it("leaves the previous model intact when the new costume fails to load (load-before-teardown)", async () => {
+    const { app, removed } = fakeApp();
+    const previous = fakeModel("previous");
+    const readVocab = vi.fn();
+    const load = vi.fn(async () => {
+      throw new Error("bad costume");
+    });
+    await expect(reloadModel({ app, load, readVocab }, previous, "url")).rejects.toThrow("bad costume");
+    // A failed load must not destroy or remove the still-rendering previous model, and must not re-read vocab.
+    expect(removed).toEqual([]);
+    expect((previous as unknown as { destroy: ReturnType<typeof vi.fn> }).destroy).not.toHaveBeenCalled();
+    expect(readVocab).not.toHaveBeenCalled();
+  });
 });

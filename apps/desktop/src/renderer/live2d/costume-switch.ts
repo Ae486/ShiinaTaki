@@ -1,7 +1,7 @@
 /**
  * INPUT:  a live app/stage + the current model + a new costume's settings URL + injected load/readVocab fns.
- * OUTPUT: reloadModel(deps, previous, url) -> { model, vocabulary } — tears down the previous model, loads the new
- *         costume, re-reads its vocabulary. The caller re-reports that vocab through the EXISTING avatar.report.
+ * OUTPUT: reloadModel(deps, previous, url) -> { model, vocabulary } — loads the new costume, then tears down the
+ *         previous model, re-reads its vocabulary. The caller re-reports that vocab through the EXISTING avatar.report.
  * POS:    ui/renderer/live2d — framework-free AND engine-free (loader/reader are injected by pet-scene, so this stays
  *         node-testable — importing the engine value evaluates window). Costume switch = Live2DModel.from teardown+reload.
  */
@@ -24,13 +24,16 @@ export interface ReloadedModel {
 }
 
 /**
- * Tear down the previous model (remove from stage + destroy), load the new costume, and read its vocabulary. The
- * load/read fns are injected so this compose-and-re-read core is testable with a mocked engine (the engine's value
- * import evaluates `window`, absent in node).
+ * Load the new costume FIRST, then tear down the previous model (remove from stage + destroy) and read the new
+ * model's vocabulary. Load-before-teardown is the safe order: if the load throws (bad costume), the previous model
+ * is left rendering untouched and the caller keeps it; and the previous model stays valid for the whole load await,
+ * so the click-through poll's per-tick focusAt never touches a destroyed model mid-switch. The load/read fns are
+ * injected so this compose-and-re-read core is testable with a mocked engine (the engine's value import evaluates
+ * `window`, absent in node).
  */
 export async function reloadModel(deps: CostumeSwitchDeps, previous: Live2DModel, url: string): Promise<ReloadedModel> {
+  const model = await deps.load(deps.app, url);
   deps.app.stage.removeChild(previous);
   previous.destroy({ children: true });
-  const model = await deps.load(deps.app, url);
   return { model, vocabulary: deps.readVocab(model) };
 }
