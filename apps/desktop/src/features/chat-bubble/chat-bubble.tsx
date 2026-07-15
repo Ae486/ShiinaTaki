@@ -8,6 +8,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { openChatWindow } from "@/lib/open-chat-window.js";
 import { useChatBubble } from "./use-chat-bubble.ts";
 import type { BubbleReply } from "./chat-bubble-store.ts";
 
@@ -35,16 +36,11 @@ function BubbleReplyView({ reply }: { reply: BubbleReply }) {
   );
 }
 
-export function ChatBubble() {
-  const { isOpen, reply, isPending, send, close } = useChatBubble();
+// The input + action row (its own draft state); split out so ChatBubble stays a thin open-gate + layout shell.
+function BubbleForm({ isPending, send, close }: { isPending: boolean; send: (message: string) => Promise<void>; close: () => void }) {
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isOpen) inputRef.current?.focus();
-  }, [isOpen]);
-
-  if (!isOpen) return null;
+  useEffect(() => inputRef.current?.focus(), []);
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -55,6 +51,46 @@ export function ChatBubble() {
   };
 
   return (
+    <form
+      onSubmit={onSubmit}
+      className="flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 shadow-lg ring-1 ring-black/5"
+    >
+      <input
+        ref={inputRef}
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        onKeyDown={(event) => event.key === "Escape" && close()}
+        placeholder="跟 taki 说点什么…"
+        className="min-w-0 flex-1 bg-transparent px-2 py-1 text-sm text-slate-800 outline-none"
+      />
+      <button
+        type="submit"
+        disabled={draft.trim().length === 0 || isPending}
+        className="rounded-full bg-rose-400 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-rose-500 disabled:opacity-40"
+      >
+        {isPending ? "…" : "发送"}
+      </button>
+      <button
+        type="button"
+        onClick={() => void openChatWindow()}
+        className="px-1 text-slate-400 hover:text-slate-600"
+        aria-label="Open chat window"
+        title="打开聊天窗口"
+      >
+        ⤢
+      </button>
+      <button type="button" onClick={close} className="px-2 text-slate-400 hover:text-slate-600" aria-label="Close">
+        ×
+      </button>
+    </form>
+  );
+}
+
+export function ChatBubble() {
+  const { isOpen, reply, isPending, send, close } = useChatBubble();
+  if (!isOpen) return null;
+
+  return (
     <div
       className="pointer-events-auto absolute left-1/2 top-6 flex w-72 -translate-x-1/2 flex-col gap-2"
       // Keep bubble pointer events out of the pet drag/click seam (the host div behind it owns those handlers).
@@ -63,29 +99,7 @@ export function ChatBubble() {
       onPointerMove={(event) => event.stopPropagation()}
     >
       <BubbleReplyView reply={reply} />
-      <form
-        onSubmit={onSubmit}
-        className="flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 shadow-lg ring-1 ring-black/5"
-      >
-        <input
-          ref={inputRef}
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={(event) => event.key === "Escape" && close()}
-          placeholder="跟 taki 说点什么…"
-          className="min-w-0 flex-1 bg-transparent px-2 py-1 text-sm text-slate-800 outline-none"
-        />
-        <button
-          type="submit"
-          disabled={draft.trim().length === 0 || isPending}
-          className="rounded-full bg-rose-400 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-rose-500 disabled:opacity-40"
-        >
-          {isPending ? "…" : "发送"}
-        </button>
-        <button type="button" onClick={close} className="px-2 text-slate-400 hover:text-slate-600" aria-label="Close">
-          ×
-        </button>
-      </form>
+      <BubbleForm isPending={isPending} send={send} close={close} />
     </div>
   );
 }

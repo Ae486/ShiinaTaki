@@ -5,3 +5,4 @@ Cross-cutting Pet UI clients + seams (talk to the Agent Core / hold window-share
 - device-identity.ts — the operator device identity (deviceId + reconnect token) persisted in localStorage
 - presentation-gate.ts — the ONE presentation gate (D21/TTS seam): reply text + avatar command surface together
 - active-character.ts — the pet window's active character id (data; M5 #24 makes it selectable)
+- open-chat-window.ts — pet→chat window opener (#17): show/focus an existing chat window or runtime-create chat.html

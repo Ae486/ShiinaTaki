@@ -1,6 +1,7 @@
 /**
  * INPUT:  a WsTransport (browser WebSocket by default) + inbound JSON-RPC frames from the Core; every frame is zod-parsed here.
- * OUTPUT: createWsClient({transport}) -> WsClient: connect()/chat()/subscribeAvatar()/reportAvatar() + avatar/timeline push handlers.
+ * OUTPUT: createWsClient({transport}) -> WsClient: connect()/chat()/subscribeAvatar()/reportAvatar() +
+ *         timelineHistory()/subscribeTimeline()/mediaGet() (chat window) + avatar/timeline push handlers.
  * POS:    ui/lib — the Pet UI's operator transport to the Agent Core (mirrors apps/cli chat-client, browser WS). THE
  *         zod boundary: past this file inbound data is trusted typed data (type-safety spec). No React/Tauri imports.
  */
@@ -17,21 +18,28 @@ import {
   ConnectResultSchema,
   ErrorCodeSchema,
   JsonRpcClientFrameSchema,
+  MEDIA_METHODS,
+  MediaGetResultSchema,
   TIMELINE_METHODS,
   TimelineAppendedSchema,
+  TimelineHistoryResultSchema,
   type AvatarCommand,
   type AvatarReportParams,
   type ChatSendParams,
   type ConnectParams,
   type ErrorCode,
   type JsonRpcClientFrame,
+  type MediaGetResult,
   type TimelineEntry,
+  type TimelineHistoryParams,
+  type TimelineHistoryResult,
 } from "@taki/shared";
 import type { WsTransport } from "./ws-transport.ts";
 
 /** Streamed-turn callbacks: deltas append into the bubble, complete/error settle it (mirrors the CLI's ChatHandlers). */
 export interface ChatHandlers {
-  onDelta: (delta: string) => void;
+  // messageId keys the in-flight assistant row (the chat window drops it when its persisted entry arrives, #17).
+  onDelta: (delta: string, messageId: string) => void;
   onComplete?: () => void;
   onError?: (code: ErrorCode, message: string) => void;
 }
@@ -46,6 +54,12 @@ export interface WsClient {
   chat(params: ChatSendParams, handlers: ChatHandlers): Promise<void>;
   subscribeAvatar(characterId: string): Promise<void>;
   reportAvatar(params: AvatarReportParams): Promise<void>;
+  /** Fetches one newest-first page of a character's timeline (the chat window's history paging). */
+  timelineHistory(params: TimelineHistoryParams): Promise<TimelineHistoryResult>;
+  /** Subscribes this socket to a character's live timeline.appended pushes (chat window backlog + live). */
+  subscribeTimeline(characterId: string): Promise<void>;
+  /** Fetches one attachment's bytes for scroll-back rendering; rejects (FORBIDDEN/missing) surface to the caller. */
+  mediaGet(ref: string): Promise<MediaGetResult>;
   /** Registers the fire-and-forget avatar command sink (core -> operator push). Replaces any prior handler. */
   onAvatarCommand(handler: (command: AvatarCommand) => void): void;
   /** Registers the optional live-timeline sink (shared with the chat window server-side). */
@@ -77,7 +91,8 @@ function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
     if (turn) act(turn);
   };
   rpc.addMethod(CHAT_METHODS.delta, (params: unknown) => {
-    state.current?.handlers.onDelta(ChatDeltaSchema.parse(params).delta);
+    const { delta, messageId } = ChatDeltaSchema.parse(params);
+    state.current?.handlers.onDelta(delta, messageId);
   });
   rpc.addMethod(CHAT_METHODS.complete, (params: unknown) => {
     ChatCompleteSchema.parse(params);
@@ -172,12 +187,12 @@ export function createWsClient(deps: { transport: WsTransport }): WsClient {
       }
       await done;
     },
-    async subscribeAvatar(characterId) {
-      await rpc.request(AVATAR_METHODS.subscribe, { characterId });
-    },
-    async reportAvatar(params) {
-      await rpc.request(AVATAR_METHODS.report, params);
-    },
+    subscribeAvatar: async (characterId) => void (await rpc.request(AVATAR_METHODS.subscribe, { characterId })),
+    reportAvatar: async (params) => void (await rpc.request(AVATAR_METHODS.report, params)),
+    timelineHistory: async (params) =>
+      TimelineHistoryResultSchema.parse(await rpc.request(TIMELINE_METHODS.history, params)),
+    subscribeTimeline: async (characterId) => void (await rpc.request(TIMELINE_METHODS.subscribe, { characterId })),
+    mediaGet: async (ref) => MediaGetResultSchema.parse(await rpc.request(MEDIA_METHODS.get, { ref })),
     onAvatarCommand: (handler) => (state.push.avatar = handler),
     onTimelineAppended: (handler) => (state.push.timeline = handler),
     onClose: (handler) => transport.onClose(handler),

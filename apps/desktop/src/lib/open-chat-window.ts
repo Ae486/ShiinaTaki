@@ -1,0 +1,30 @@
+/**
+ * INPUT:  a click on the bubble's "expand" affordance (pet window).
+ * OUTPUT: openChatWindow() — shows+focuses the existing chat window, or creates it at runtime (chat.html).
+ * POS:    ui/lib — the pet→chat window opener (research r4). Runtime-created (no tauri.conf.json entry); the chat
+ *         window is a disposable client whose own WS dies with it (invariant 4). Needs the pet capability's
+ *         core:webview:allow-create-webview-window + core:window:allow-set-focus.
+ */
+
+import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+
+const CHAT_LABEL = "chat";
+
+/** Opens (or re-focuses) the chat window; safe to call repeatedly — closing it destroys it, the next call recreates it. */
+export async function openChatWindow(): Promise<void> {
+  const existing = await WebviewWindow.getByLabel(CHAT_LABEL);
+  if (existing) {
+    await existing.show();
+    await existing.setFocus();
+    return;
+  }
+  const chat = new WebviewWindow(CHAT_LABEL, {
+    url: "chat.html",
+    title: "TakiAgent Chat",
+    width: 720,
+    height: 800,
+    resizable: true,
+  });
+  // A creation failure names the missing permission verbatim (Tauri 2); surface it instead of a silent no-op.
+  chat.once("tauri://error", (event) => console.error("chat window creation failed", event));
+}

@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { AVATAR_METHODS, CHAT_METHODS, CONNECT_METHOD, JSON_RPC_APP_ERROR } from "@taki/shared";
+import { AVATAR_METHODS, CHAT_METHODS, CONNECT_METHOD, JSON_RPC_APP_ERROR, MEDIA_METHODS, TIMELINE_METHODS } from "@taki/shared";
 import { createWsClient } from "./ws-client.ts";
 import type { WsTransport } from "./ws-transport.ts";
 
@@ -42,15 +42,22 @@ function lastRequestId(sent: string[]): number | string {
 }
 
 describe("createWsClient inbound routing", () => {
-  it("streams chat deltas to the active turn and settles on complete", async () => {
+  it("streams chat deltas (with the turn's messageId) to the active turn and settles on complete", async () => {
     const h = harness();
     const client = createWsClient({ transport: h.transport });
     h.open();
     const deltas: string[] = [];
+    const messageIds: string[] = [];
     let completed = false;
     const turn = client.chat(
       { characterId: "taki", message: "hi" },
-      { onDelta: (delta) => deltas.push(delta), onComplete: () => (completed = true) },
+      {
+        onDelta: (delta, messageId) => {
+          deltas.push(delta);
+          messageIds.push(messageId);
+        },
+        onComplete: () => (completed = true),
+      },
     );
     await flush();
     const id = lastRequestId(h.sent);
@@ -61,7 +68,32 @@ describe("createWsClient inbound routing", () => {
     h.deliver({ jsonrpc: "2.0", method: CHAT_METHODS.complete, params: { messageId: "m1", characterId: "taki" } });
     await turn;
     expect(deltas).toEqual(["Hel", "lo"]);
+    expect(messageIds).toEqual(["m1", "m1"]);
     expect(completed).toBe(true);
+  });
+
+  it("timelineHistory requests a page and parses the newest-first result", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const page = client.timelineHistory({ characterId: "taki", limit: 50 });
+    await flush();
+    expect(JSON.parse(h.sent[h.sent.length - 1] ?? "{}").method).toBe(TIMELINE_METHODS.history);
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { entries: [], nextBefore: null } });
+    expect(await page).toEqual({ entries: [], nextBefore: null });
+  });
+
+  it("mediaGet fetches attachment bytes for the given ref and parses the result", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const got = client.mediaGet("attachments/abc.png");
+    await flush();
+    const sent = JSON.parse(h.sent[h.sent.length - 1] ?? "{}");
+    expect(sent.method).toBe(MEDIA_METHODS.get);
+    expect(sent.params).toEqual({ ref: "attachments/abc.png" });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { mediaType: "image/png", dataBase64: "AAAA" } });
+    expect(await got).toEqual({ mediaType: "image/png", dataBase64: "AAAA" });
   });
 
   it("routes an avatar.command push to the registered handler (zod-validated)", () => {
