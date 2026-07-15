@@ -39,6 +39,8 @@ import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
 import { createLogger } from "./logging/logger.ts";
 import { loadMcpConfig } from "./mcp/mcp-config.ts";
 import { createMcpManager } from "./mcp/mcp-manager.ts";
+import { createCharacterImporter } from "./characters/character-import.ts";
+import { createCharacterStore } from "./characters/character-store.ts";
 import { createAttachmentStore } from "./media/attachment-store.ts";
 import { createAutoMemory } from "./memory/auto-memory.ts";
 import { createEpisodicWriter } from "./memory/episodic-writer.ts";
@@ -55,6 +57,9 @@ import { chatCancelMethod } from "./server/methods/chat-cancel.ts";
 import { chatSendMethod } from "./server/methods/chat-send.ts";
 import { capabilityRespondMethod } from "./server/methods/capability-respond.ts";
 import { capabilityTriggerMethod, devTriggerEnabled } from "./server/methods/capability-trigger.ts";
+import { characterCostumesMethod } from "./server/methods/character-costumes.ts";
+import { characterImportMethod } from "./server/methods/character-import.ts";
+import { characterListMethod } from "./server/methods/character-list.ts";
 import { connectMethod } from "./server/methods/connect.ts";
 import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
@@ -151,6 +156,11 @@ const autoMemory = createAutoMemory({
 // Attachment store (#17): the sanctioned content-addressed Workspace R/W site for chat image attachments — the DB never
 // holds bytes (invariant 2). Retained under a user-editable TTL and GC-swept below; the description-memory is permanent.
 const attachmentStore = createAttachmentStore({ attachmentsDir: join(serverConfig.dataDir, "workspace", "attachments") });
+// Character store + importer (#18): the characterId-addressable model layer. Extraction is operator-driven Core-fs into
+// the Workspace `characters/` subtree (ADR 0007 v1, invariant 2 single writer) — same family as the attachment store,
+// not an agent OS action. Serving the extracted files to the renderer is the host-side Tauri asset: protocol (Phase B).
+const characterStore = createCharacterStore({ charactersDir: join(serverConfig.dataDir, "workspace", "characters") });
+const characterImporter = createCharacterImporter({ store: characterStore });
 // Image→text bridge (#17 decision 6, D28): ONLY when a vision slot exists — an image turn's authoritative cross-turn
 // record is the VLM's text description, written via the EXISTING episodic path (same bound op the episodic writer uses).
 // A thin, deletable writer riding its own detached hook; the memory engine itself is untouched.
@@ -302,6 +312,12 @@ registry.register(avatarReportMethod(avatarVocabulary));
 registry.register(mediaGetMethod(attachmentStore));
 registry.register(mediaClearMethod(attachmentStore));
 registry.register(mediaUsageMethod(attachmentStore, () => directoryByteSize(memoryRoot)));
+// Character methods (#18): import a generic-Cubism / BanG-Dream `.zst` model into the Workspace, list imported
+// characters, and read a character's costumes. Operator-only (like media.*), NO Rust mirror — traversal confinement is
+// single-sourced in characters/member-path. Costume switching is client-side (renderer reloads + re-reports vocabulary).
+registry.register(characterImportMethod(characterImporter));
+registry.register(characterListMethod(characterStore));
+registry.register(characterCostumesMethod(characterStore));
 
 // Attachment GC (#17): a lightweight boot sweep + a 6h interval (NOT the croner scheduler — D5 is M5). Only raw bytes
 // expire; the description-memory is permanent. unref() keeps the timer from holding the process open on shutdown.

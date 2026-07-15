@@ -15,12 +15,15 @@
     "@ai-sdk/openai-compatible": "^3.0.5",
     "@taki/shared": "workspace:*",
     "ai": "^7.0.17",
+    "fflate": "^0.8.3",
     "json-rpc-2.0": "^1.7.1",
     "pino": "^10.3.1",
+    "tar-stream": "^3.2.0",
     "ws": "^8.21.0",
     "zod": "^4.4.0"
   },
   "devDependencies": {
+    "@types/tar-stream": "^3.1.4",
     "@types/ws": "^8.18.1",
     "pino-pretty": "^13.1.3"
   }
