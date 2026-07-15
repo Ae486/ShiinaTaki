@@ -109,6 +109,32 @@ export type {
 } from "./media-schema.ts";
 
 export {
+  CHARACTER_METHODS,
+  CharacterCostumesParamsSchema,
+  CharacterCostumesResultSchema,
+  CharacterIdSchema,
+  CharacterImportErrorSchema,
+  CharacterImportParamsSchema,
+  CharacterImportResultSchema,
+  CharacterListParamsSchema,
+  CharacterListResultSchema,
+  CharacterSourceSchema,
+  CharacterSummarySchema,
+} from "./character-schema.ts";
+export type {
+  CharacterCostumesParams,
+  CharacterCostumesResult,
+  CharacterId,
+  CharacterImportError,
+  CharacterImportParams,
+  CharacterImportResult,
+  CharacterListParams,
+  CharacterListResult,
+  CharacterSource,
+  CharacterSummary,
+} from "./character-schema.ts";
+
+export {
   AVATAR_METHODS,
   AvatarCommandSchema,
   AvatarReportParamsSchema,
