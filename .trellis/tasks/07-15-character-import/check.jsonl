@@ -1,1 +1,9 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/tasks/07-15-character-import/prd.md", "reason": "the #18 plan — verify against the 9 locked decisions, protocol, TDD T1-T8, hard constraints (traversal security + clean-room + no-partial-write)"}
+{"file": ".trellis/tasks/07-15-character-import/research/rb-zst-and-cubism.md", "reason": "the clean-room format spec to check correctness against — .zst framing, C2/C3 detection, manifest JSON paths, validation asymmetry, error codes; also the clean-room provenance baseline"}
+{"file": ".trellis/tasks/07-15-character-import/research/ra-asset-architecture.md", "reason": "Workspace layout + extraction-locus + invariant analysis (import is operator-driven Core-fs, not an agent OS action)"}
+{"file": ".trellis/spec/backend/index.md", "reason": "backend checklist + guideline index"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "structured app-error envelope conventions — the import codes ride error.data.reason with FORBIDDEN, no ErrorCodeSchema extension"}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "operator-only methods get NO Rust mirror → character.* out of protocol-fixtures, standalone schema test"}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "character.* operator-only (roles gate), not a capability-gated agent action"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "size caps, forbidden patterns, header/index.md rules, test meaningfulness"}
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "C2/C3 facts + the ../_mtn_emp/ external-motion tolerance the validation must honor (decision 6)"}
