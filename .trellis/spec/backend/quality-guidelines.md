@@ -66,3 +66,7 @@ pnpm -r typecheck && pnpm -r lint && pnpm -r test
 cargo clippy --manifest-path apps/desktop/src-tauri/Cargo.toml -- -D warnings
 cargo test  --manifest-path apps/desktop/src-tauri/Cargo.toml
 ```
+
+## The Core runs under Node strip-only type erasure — `tsc`/`vitest` green is NOT enough
+
+`pnpm core:dev`/`start` runs `src/main.ts` directly through Node's strip-only TS mode (it deletes type annotations, it does NOT transpile). `tsc` and `vitest` (esbuild) accept syntax Node strip-only rejects — so a bug there passes every gate and only fails at real Core boot with `ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX`. The whole class (TS **parameter properties** `constructor(private readonly x: T)`, `enum`, `namespace`, non-`declare` `const enum`) is now blocked at typecheck by **`erasableSyntaxOnly`** in `tsconfig.base.json` — do not remove it. Declare + assign fields explicitly instead of using parameter properties. When a change touches Core startup wiring (`main.ts`, a module it imports at boot, config loaders), a check MUST include a real boot smoke: `TAKI_WS_PORT=<nonstd> TAKI_DATA_DIR=<temp> node --env-file-if-exists=.env.local packages/core/src/main.ts` → confirm `ws server listening`, then kill the tree. A passing test suite does not prove the Core starts.
