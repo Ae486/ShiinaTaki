@@ -127,6 +127,19 @@ node --env-file-if-exists=../../.env.local src/main.ts
 - [ ] **54. 点击分区反应（纯前端，无需 WS）**：戳 taki **头部**应出 tsundere 反应（哈？/angry/别过头），**不开气泡**；戳身体各区应各有反应（pui/shame/serious/sigh）。反应名字对不上时静默（arbeit 词表里有 angry/pui/shame/serious/sigh/smile）。
 - [ ] **55. 气泡在透明区可点（点击穿透协同）**：气泡开着时，即便输入框压在**透明像素**上也应能点/能打字（bubbleOpen 期间整窗保持可交互）；关掉气泡后透明区应恢复穿透。点输入框不应触发身后的点击反应/再开气泡（事件已 stopPropagation）。
 
+## 来自 #17（完整聊天窗口 + 图片附件）
+
+> 机器可验部分已全绿：shared 158 + cli 18 + desktop 88 + core 440 = **704** 测试、`-r typecheck`（5 项目）、root lint、`desktop build`（chat.html 进 rollup、chat 独立 chunk 打包 markdown 管线）、`cargo check`（capability id 校验）全过。**后端数据路径已由主脑真实 VLM 端到端 smoke 覆盖**（非默认端口真 core + 真 gemini：红色 PNG → deepseek 答"哈？红色。" → timeline image part 落库 → media.get 精确字节往返 → 穿越 ref 拒 FORBIDDEN → 识图描述记忆 `[image] ...red` 真落库 → P3 auto-trust 日志）。下面全是**必须真机看**的前端渲染/滚动/DOM 层（真实 WebView2），无头测不了。注：本轮自动化无头浏览器 smoke 代理早退无产物，故前端真机项转本人工批次（沿用项目"手测后置"惯例）。启动：`pnpm --filter @taki/desktop tauri dev` + 裸 node 起 core（本机 loopback 免配对，P3 已落地，无 #16 的前置信任阻塞）。
+
+- [ ] **56. 开窗 + 连接**：气泡上的 **⤢（展开）**按钮 → 应打开独立聊天窗口（720×800、可缩放、不透明）；再点一次应**聚焦已有窗**而非重复开；窗口应自动连上本机 core（core 日志出现 deviceName `taki-chat` 的 `loopback operator auto-trusted`），无配对弹窗。
+- [ ] **57. 历史分页 + 时序**：窗口打开应拉最新一页历史，**按时间正序**（旧→新）渲染，附日期分隔；滚到顶部应**加载更早页并保持滚动位置**（不跳、不重复行）。
+- [ ] **58. 文本流式 + 无缝落定**：发一句 → assistant 回复应**逐字流入** in-flight 气泡 → `chat.complete`/`appended` 后**无缝**变成持久化行（**不闪、不重复**两条）。这是 in-flight（按 messageId）→ persisted（按 seq）原子换行的核心。
+- [ ] **59. Markdown 渲染 + XSS 惰化**：让 taki 回一段含**表格 / 粗体 / 行内 code / 链接**的 markdown → 应渲染成真 `<table>`/`<strong>`/`<code>`/`<a>`；构造含 `<script>`、`<img onerror>`、`[x](javascript:...)` 的消息 → 应**转义为纯文本、无脚本执行、无 javascript: href**（react-markdown 默认安全，机测已有回归网，此处肉眼复核真机一致）。
+- [ ] **60. 图片附件全链路**：composer 选一张图 → 发送前应见**缩略图预览**（可移除）；≤1MB 原样、>1MB 应降到 2048px JPEG、>20MB 应**内联拒绝**；发送 → 识图槽（gemini）应回答与图相关内容 → 落定后 user 行显示图片缩略图（`<img src>` 应是 `data:image/...`，走 media.get）；滚走再滚回应命中缓存不重复请求。
+- [ ] **61. 图片过期降级**：（需等 TTL 或手动清 `attachments/`）过期 ref 的行应显示**"图片已过期"**占位而非崩溃；对应的**识图文本描述**应仍在记忆里（文本权威，D26/决策6）。
+- [ ] **62. 无识图槽降级**：`TAKI_VLM_*` 未配置时发图 → 应落库前被拒、聊天窗**内联提示**"需要识图模型"、附件按钮**仍可用**（v1 无配置发现，决策5）、**不落库**。
+- [ ] **63. 双客户端实时同步**：同时开气泡（pet 窗）与聊天窗（或两个聊天窗）→ 一端发一句 → 另一端应**实时**出现该消息 + 回复（无需刷新，服务端 `timeline.appended` 扇出到同 characterId 的两个 socket）。
+
 发现任何问题在对应条目下写一行，我会开返工轮。
 
 
