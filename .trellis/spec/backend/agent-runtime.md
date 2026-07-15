@@ -30,3 +30,29 @@ reproduction test (a real-agent L2 seeded with a transcript polluted by verbal "
 hinge its red→green on the **persisted tool record**, not on the model's behaviour that run. A single-turn empty-DB
 test cannot catch this — see [E2E Harness](./e2e-harness.md). The test must be RED against pre-fix code (prove it by
 reverting the fix) or it proves nothing.
+
+## Multimodal turns: two model slots, in-flight bytes, text-authoritative memory (#17)
+
+Image attachments landed in #17 as **additive seams** on the D1-frozen turn — the stream loop, `persistTurn`, abort
+wiring, and `toolApproval` stay byte-identical; only the pre-loop guard/save, the `appendUser` call-site, the `model:`
+pick, the in-flight `messages` tail swap, and the detached memory fire are new. When you extend the turn, preserve that
+discipline: the frozen regions are off-limits.
+
+- **Two parallel user-adjustable model slots**: the required text slot (`TAKI_PROVIDER_*`) and an OPTIONAL vision slot
+  (`TAKI_VLM_*`), which may hold identical values. A turn routes to the vision slot **iff the current message carries
+  attachments**, else the text slot. Attachments with no vision slot configured are **rejected before any persistence**
+  (structured error) — the text model never receives an image. Config load is all-or-nothing fail-closed (partial names
+  the missing var), matching the P3-flag parse discipline.
+- **Image bytes are in-flight only; TEXT is authoritative across turns.** The image reaches the model only on the turn
+  it is sent (AI SDK v7 `FilePart` = `{type:"file", mediaType, data:<RAW base64>}` — NOT the deprecated `ImagePart`, and
+  never a `data:` URL, which throws at the provider boundary). The persisted user row keeps the image for DISPLAY (an
+  `image` part with a content-addressed ref) but its model projection is text (`[image]`+caption). History replay never
+  re-sends bytes → no byte reader in the conversation store, no forcing later text turns onto the vision model, no
+  choking a text-only model on an image part. Cross-turn recall comes from a **detached post-turn writer** that has the
+  vision slot describe the image and stores that description as an ordinary episodic memory (thin, deletable module on
+  the EXISTING memory write path — the memory engine is untouched, its redesign deferred to D28).
+- **Binary refs are a closed content-addressed namespace**: `attachments/<sha256hex>.<ext>`, filename derived ONLY from
+  the content hash, never from caller input. Read-side confinement is a strict whole-ref regex checked BEFORE any fs call
+  (traversal is not even expressible), single-sourced in the store; the `media.*` WS methods are thin delegations and
+  operator-only (no Rust mirror — see [Server-Push & Connection Auth](./server-push-and-connection-auth.md)). Retained
+  bytes are swept on a configurable TTL; the description memory is never swept.

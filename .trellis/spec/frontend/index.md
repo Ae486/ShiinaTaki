@@ -20,6 +20,7 @@
 | [Type Safety](./type-safety.md) | zod boundaries, no-any policy |
 | [Quality Guidelines](./quality-guidelines.md) | Size caps, perf rules (this window is always-on), tests |
 | [Live2D Renderer Contract](./live2d-renderer.md) | Locked renderer stack, load order, generation-split param API, BanG Dream model facts |
+| [Chat Window & Streaming Timeline](./chat-window.md) | Runtime-created windows + per-window capability, in-flight row lifecycle, media.get render path, markdown default-safe (the M5-settings-window template) |
 
 ## Quality Check (run before handing off)
 
