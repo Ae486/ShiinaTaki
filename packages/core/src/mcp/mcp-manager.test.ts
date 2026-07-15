@@ -30,10 +30,12 @@ class InMemoryTransport {
   onclose?: () => void;
   onerror?: (error: Error) => void;
   closedCount = 0;
-  constructor(
-    private readonly tools: Array<Record<string, unknown>>,
-    private readonly call: CallHandler,
-  ) {}
+  private readonly tools: Array<Record<string, unknown>>;
+  private readonly call: CallHandler;
+  constructor(tools: Array<Record<string, unknown>>, call: CallHandler) {
+    this.tools = tools;
+    this.call = call;
+  }
   async start(): Promise<void> {}
   async send(message: { id?: number | string; method?: string }): Promise<void> {
     if (message.id === undefined) return; // notification
