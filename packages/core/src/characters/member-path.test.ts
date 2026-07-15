@@ -20,7 +20,9 @@ describe("safeMemberPath (the single-sourced traversal guard)", () => {
       "\\\\server\\share\\x", // UNC
       "C:/Windows/system32",
       "C:\\Windows",
+      "C:foo", // drive-relative
       "data:text/plain", // colon (drive / ADS)
+      "x:zone", // NTFS alternate data stream
       "with\0null",
       "..",
       "./",
@@ -28,6 +30,28 @@ describe("safeMemberPath (the single-sourced traversal guard)", () => {
       "CON",
       "nul.png",
       "dir/COM1",
+      "CLOCK$", // console/clock devices have no extension form
+      "CONIN$",
+    ]) {
+      expect(safeMemberPath(bad)).toBeNull();
+    }
+  });
+
+  it("rejects trailing-dot/space segments that Windows would rewrite on write (fail-closed superset)", () => {
+    // Win32 strips trailing dots/spaces per component, so each of these diverges from what actually lands on disk:
+    // `.. ` → `..` (a parent hop the confine() path.relative check would NOT catch), `NUL ` → the NUL device,
+    // `foo.png ` → a colliding name. No legitimate Cubism member carries a trailing dot/space.
+    for (const bad of [
+      ".. /.. /evil.txt", // dot-dot-space traversal that path.resolve treats as literal
+      "casual/.. /x.png",
+      "foo.png ",
+      "foo.png.",
+      "NUL ",
+      "NUL.",
+      "COM1 ",
+      "a/NUL /b",
+      ". ",
+      "...",
     ]) {
       expect(safeMemberPath(bad)).toBeNull();
     }
