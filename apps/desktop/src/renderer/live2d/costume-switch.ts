@@ -18,6 +18,10 @@ export interface CostumeSwitchDeps {
   load: (app: Application, source: string | CostumeSource) => Promise<Live2DModel>;
   // Read the loaded model's motion/expression vocabulary (the real reader is passed by pet-scene; a fake in tests).
   readVocab: (model: Live2DModel) => AvatarVocabulary;
+  // Optional staleness probe, checked AFTER the load resolves: when a newer switch superseded this one mid-load
+  // (e.g. the UI timed out and the operator picked another costume), the late arrival is discarded — it must not
+  // tear down or replace the newer switch's model.
+  isStale?: () => boolean;
 }
 
 export interface ReloadedModel {
@@ -40,6 +44,12 @@ export async function reloadModel(
   source: string | CostumeSource,
 ): Promise<ReloadedModel> {
   const model = await deps.load(deps.app, source);
+  if (deps.isStale?.() === true) {
+    // A newer switch won the race while this one loaded: discard the late model, leave the current one untouched.
+    deps.app.stage.removeChild(model);
+    model.destroy({ children: true });
+    throw new Error("costume switch superseded by a newer one");
+  }
   if (previous !== null) {
     deps.app.stage.removeChild(previous);
     previous.destroy({ children: true });

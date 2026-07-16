@@ -34,7 +34,8 @@ describe("reactToClick", () => {
     // y=40 ⇒ ny=0.1 (< 0.38) ⇒ head; tag "angry" resolves to angry01 in both expr + motion.
     expect(reactToClick({ model, center: CENTER, vocabulary: VOCAB, preset: PRESET, point: { x: 100, y: 40 } })).toBe("head");
     expect(expression).toHaveBeenCalledWith("angry01");
-    expect(motion).toHaveBeenCalledWith("angry01", undefined, 2);
+    // loop:false pins the one-shot override — newer-game C3 motions ship Meta.Loop=true (B-test round 3).
+    expect(motion).toHaveBeenCalledWith("angry01", undefined, 2, { loop: false });
   });
 
   it("plays only what resolves (shy→shame01 expression; no matching motion)", () => {

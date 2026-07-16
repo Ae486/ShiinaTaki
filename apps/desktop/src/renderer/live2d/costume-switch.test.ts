@@ -71,4 +71,20 @@ describe("reloadModel", () => {
     expect(result.model).toBe(next);
     expect(result.vocabulary.motions).toEqual(["smile01"]);
   });
+
+  it("discards a late-resolving load when a newer switch superseded it (isStale)", async () => {
+    const { app, removed } = fakeApp();
+    const previous = fakeModel("previous");
+    const late = fakeModel("late");
+    const readVocab = vi.fn();
+
+    await expect(
+      reloadModel({ app, load: async () => late, readVocab, isStale: () => true }, previous, "url"),
+    ).rejects.toThrow("superseded");
+    // The LATE model is discarded; the previous (now the newer switch's world) is never touched.
+    expect(removed).toEqual([late]);
+    expect((late as unknown as { destroy: ReturnType<typeof vi.fn> }).destroy).toHaveBeenCalledWith({ children: true });
+    expect((previous as unknown as { destroy: ReturnType<typeof vi.fn> }).destroy).not.toHaveBeenCalled();
+    expect(readVocab).not.toHaveBeenCalled();
+  });
 });

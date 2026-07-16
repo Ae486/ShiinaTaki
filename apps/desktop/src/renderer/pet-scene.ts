@@ -63,6 +63,7 @@ interface SwitchContext {
   center: { x: number; y: number };
   characterId: string;
   slot: { current: SceneModel | null }; // mutated in place so the scene's delegating methods see the new costume
+  seq: { current: number }; // monotonically increasing switch ticket — a late-resolving load must not clobber a newer one
 }
 
 export async function createPetScene(host: HTMLElement, options: PetSceneOptions = {}): Promise<PetScene> {
@@ -75,7 +76,7 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
   // Stable across costume swaps (the pet window is fixed-size); the avatar controller needs it for gaze + click math.
   const center = { x: app.screen.width / 2, y: app.screen.height / 2 };
   const slot: { current: SceneModel | null } = { current: null };
-  const ctx: SwitchContext = { app, center, characterId, slot };
+  const ctx: SwitchContext = { app, center, characterId, slot, seq: { current: 0 } };
 
   // The initial model is best-effort: the dev route exists only under `pnpm tauri dev`, and even there a transient
   // fetch failure must not kill the stage. A model-less scene stays alive; the initial-costume promotion (or a
@@ -112,8 +113,9 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
 // Teardown+reload the new costume, rebuild its avatar controller + idle loop, and return the re-read vocabulary the
 // caller re-reports through the EXISTING avatar.report (arch §6b — no new vocab plumbing, no costume.switch WS method).
 async function switchCostume(ctx: SwitchContext, source: CostumeSource): Promise<AvatarVocabulary> {
+  const ticket = ++ctx.seq.current;
   const { model, vocabulary } = await reloadModel(
-    { app: ctx.app, load: loadCharacterModel, readVocab: readVocabulary },
+    { app: ctx.app, load: loadCharacterModel, readVocab: readVocabulary, isStale: () => ticket !== ctx.seq.current },
     ctx.slot.current?.model ?? null,
     source,
   );

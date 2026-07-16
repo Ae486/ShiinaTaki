@@ -33,6 +33,8 @@ export function reactToClick(input: ClickReactionInput): ClickRegion | null {
   const expression = resolveByTag(tag, vocabulary.expressions);
   if (expression !== null) void model.expression(expression);
   const motion = resolveByTag(tag, vocabulary.motions);
-  if (motion !== null) void model.motion(motion, undefined, MotionPriority.NORMAL);
+  // loop:false overrides the motion file's own Loop metadata — the newer-game C3 motions ship Meta.Loop=true, which
+  // made a click reaction loop forever (B-test round 3); a reaction is a one-shot beat by definition.
+  if (motion !== null) void model.motion(motion, undefined, MotionPriority.NORMAL, { loop: false });
   return region;
 }

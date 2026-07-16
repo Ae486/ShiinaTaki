@@ -25,6 +25,10 @@ export async function openChatWindow(): Promise<void> {
     height: 800,
     resizable: true,
   });
-  // A creation failure names the missing permission verbatim (Tauri 2); surface it instead of a silent no-op.
-  chat.once("tauri://error", (event) => console.error("chat window creation failed", event));
+  // Await the created/error race so a failure REJECTS to the caller — packaged builds have no devtools, so a
+  // console-only error is invisible (B-test: the open click silently did nothing).
+  await new Promise<void>((resolve, reject) => {
+    void chat.once("tauri://created", () => resolve());
+    void chat.once("tauri://error", (event) => reject(new Error(JSON.stringify(event.payload ?? "unknown error"))));
+  });
 }

@@ -39,10 +39,17 @@ function BubbleReplyView({ reply }: { reply: BubbleReply }) {
 // Owns the expand-to-chat-window action. Inline SVG, not a glyph: WebView2 rendered the previous ⤢ invisibly,
 // hiding the ONLY entry to the full chat window (B8).
 function OpenChatButton() {
+  const open = () =>
+    openChatWindow().catch((cause: unknown) => {
+      // Packaged builds have no devtools/console — a window-creation failure must be visible to be reportable.
+      const message = cause instanceof Error ? cause.message : String(cause);
+      console.error("chat window failed to open", cause);
+      window.alert(`无法打开聊天窗口: ${message}`);
+    });
   return (
     <button
       type="button"
-      onClick={() => void openChatWindow()}
+      onClick={() => void open()}
       className="px-1 text-slate-400 hover:text-slate-600"
       aria-label="Open chat window"
       title="打开聊天窗口"
