@@ -34,11 +34,16 @@ function AttachButton({ onPick }: { onPick: (files: FileList | null) => void }) 
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        className="rounded-full px-2 py-1.5 text-lg text-slate-500 hover:bg-slate-100"
+        className="rounded-full p-2 text-slate-500 hover:bg-slate-100"
         aria-label="Attach image"
         title="添加图片"
       >
-        🖼
+        {/* Inline SVG, not an emoji glyph: WebView2's fallback fonts can render pictographs invisibly. */}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <path d="m21 15-5-5L5 21" />
+        </svg>
       </button>
     </>
   );
