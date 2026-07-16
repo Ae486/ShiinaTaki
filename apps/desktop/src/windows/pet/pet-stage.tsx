@@ -8,7 +8,6 @@
  */
 
 import { useEffect, useRef } from "react";
-import type { PetScene } from "@/renderer/pet-scene.js";
 import { useAvatarStore } from "@/stores/avatar-store.js";
 import { useInteractionStore } from "@/stores/interaction-store.js";
 import { ChatBubble } from "@/features/chat-bubble/chat-bubble.js";
@@ -23,7 +22,7 @@ import { useInitialCostume } from "./use-initial-costume.ts";
 
 export function PetStage() {
   const hostRef = useRef<HTMLDivElement>(null);
-  const scene: PetScene | null = usePetScene(hostRef);
+  const { scene, error: sceneError } = usePetScene(hostRef);
   const avatarState = useAvatarStore((s) => s.state);
   const panelOpen = useInteractionStore((s) => s.panelOpen);
   const setPanelOpen = useInteractionStore((s) => s.setPanelOpen);
@@ -41,7 +40,7 @@ export function PetStage() {
   return (
     <div
       ref={hostRef}
-      className="h-full w-full"
+      className="relative h-full w-full"
       // Right-click opens the operator character/costume panel (left-click is the chat bubble, #16).
       onContextMenu={(event) => {
         event.preventDefault();
@@ -49,6 +48,12 @@ export function PetStage() {
       }}
       {...drag}
     >
+      {/* Stage failures were previously console-only — an invisible pet with no visible reason (defect 0). */}
+      {sceneError && (
+        <div className="absolute left-2 top-2 z-10 max-w-[90%] rounded bg-red-900/80 px-2 py-1 text-xs text-red-100">
+          渲染初始化失败: {sceneError}
+        </div>
+      )}
       <ChatBubble />
       {panelOpen && <CharacterPanel scene={scene} onClose={() => setPanelOpen(false)} />}
     </div>

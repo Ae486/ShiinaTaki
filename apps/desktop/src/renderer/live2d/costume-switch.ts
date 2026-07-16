@@ -1,7 +1,8 @@
 /**
- * INPUT:  a live app/stage + the current model + a new costume source + injected load/readVocab fns.
+ * INPUT:  a live app/stage + the current model (null on a model-less boot) + a new costume source + injected
+ *         load/readVocab fns.
  * OUTPUT: reloadModel(deps, previous, source) -> { model, vocabulary } — loads the new costume, then tears down the
- *         previous model, re-reads its vocabulary. The caller re-reports that vocab through the EXISTING avatar.report.
+ *         previous model (when one exists), re-reads its vocabulary. The caller re-reports via avatar.report.
  * POS:    ui/renderer/live2d — framework-free AND engine-free (loader/reader are injected by pet-scene, so this stays
  *         node-testable — importing the engine value evaluates window). Costume switch = Live2DModel.from teardown+reload.
  */
@@ -28,17 +29,20 @@ export interface ReloadedModel {
  * Load the new costume FIRST, then tear down the previous model (remove from stage + destroy) and read the new
  * model's vocabulary. Load-before-teardown is the safe order: if the load throws (bad costume), the previous model
  * is left rendering untouched and the caller keeps it; and the previous model stays valid for the whole load await,
- * so the click-through poll's per-tick focusAt never touches a destroyed model mid-switch. The load/read fns are
- * injected so this compose-and-re-read core is testable with a mocked engine (the engine's value import evaluates
- * `window`, absent in node).
+ * so the click-through poll's per-tick focusAt never touches a destroyed model mid-switch. `previous` is null on a
+ * model-less boot (a packaged build has no dev route — the first promotion attaches with nothing to tear down). The
+ * load/read fns are injected so this compose-and-re-read core is testable with a mocked engine (the engine's value
+ * import evaluates `window`, absent in node).
  */
 export async function reloadModel(
   deps: CostumeSwitchDeps,
-  previous: Live2DModel,
+  previous: Live2DModel | null,
   source: string | CostumeSource,
 ): Promise<ReloadedModel> {
   const model = await deps.load(deps.app, source);
-  deps.app.stage.removeChild(previous);
-  previous.destroy({ children: true });
+  if (previous !== null) {
+    deps.app.stage.removeChild(previous);
+    previous.destroy({ children: true });
+  }
   return { model, vocabulary: deps.readVocab(model) };
 }

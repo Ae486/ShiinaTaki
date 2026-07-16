@@ -59,4 +59,16 @@ describe("reloadModel", () => {
     expect((previous as unknown as { destroy: ReturnType<typeof vi.fn> }).destroy).not.toHaveBeenCalled();
     expect(readVocab).not.toHaveBeenCalled();
   });
+
+  it("attaches with nothing to tear down when previous is null (model-less boot's first promotion)", async () => {
+    const { app, removed } = fakeApp();
+    const next = fakeModel("next");
+    const readVocab = vi.fn(() => ({ motions: ["smile01"], expressions: [] }));
+
+    const result = await reloadModel({ app, load: async () => next, readVocab }, null, "url");
+
+    expect(removed).toEqual([]); // no previous model — removeChild/destroy must not run
+    expect(result.model).toBe(next);
+    expect(result.vocabulary.motions).toEqual(["smile01"]);
+  });
 });
