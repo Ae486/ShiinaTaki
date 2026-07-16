@@ -29,7 +29,7 @@ export function PetStage() {
   const onPetClick = usePetClick(scene);
   const drag = usePetDrag(onPetClick);
   useRenderGovernor(scene?.governor ?? null);
-  useClickThrough(scene);
+  const clickThrough = useClickThrough(scene);
   useCoreConnection(scene);
   useInitialCostume(scene);
 
@@ -48,10 +48,13 @@ export function PetStage() {
       }}
       {...drag}
     >
-      {/* Stage failures were previously console-only — an invisible pet with no visible reason (defect 0). */}
-      {sceneError && (
-        <div className="absolute left-2 top-2 z-10 max-w-[90%] rounded bg-red-900/80 px-2 py-1 text-xs text-red-100">
-          渲染初始化失败: {sceneError}
+      {/* Stage/poll failures were previously console-only — an invisible pet with no visible reason (defect 0/B6). */}
+      {(sceneError ?? clickThrough.error) && (
+        <div className="absolute left-2 top-2 z-10 flex max-w-[90%] flex-col gap-1">
+          {sceneError && <div className="rounded bg-red-900/80 px-2 py-1 text-xs text-red-100">渲染初始化失败: {sceneError}</div>}
+          {clickThrough.error && (
+            <div className="rounded bg-amber-900/80 px-2 py-1 text-xs text-amber-100">穿透轮询错误: {clickThrough.error}</div>
+          )}
         </div>
       )}
       <ChatBubble />

@@ -39,6 +39,9 @@ export interface ResolvedResource {
  * the FAIL-SAFE: null means the caller strips the entry, so a traversal ref never reaches convertFileSrc (#18).
  */
 export function resolveResourcePath(ref: string, resolution: Record<string, string | null>): ResolvedResource | null {
+  // Cubism 3 manifests carry optional file slots (physics/pose); the engine's replaceFiles passes their null/undefined
+  // straight through its `string` type — treat any non-string/empty ref as unresolvable rather than crash (B13).
+  if (typeof (ref as unknown) !== "string" || ref.length === 0) return null;
   const mapped = resolution[ref];
   if (mapped === null) return null; // the Core searched every imported character and found nothing
   if (mapped !== undefined) return mapped.includes("..") ? null : { kind: "characters", segments: resourceSegments(mapped) };

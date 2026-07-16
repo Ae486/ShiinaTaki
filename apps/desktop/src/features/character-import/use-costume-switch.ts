@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { CharacterCostumesResult, CostumeAvailability } from "@taki/shared";
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
 import { costumeAssetResolver } from "@/lib/character-asset-url.js";
+import { loadLastCostume, saveLastCostume } from "@/lib/last-costume.js";
 import type { WsClient } from "@/lib/ws-client.js";
 import { useConnectionStore } from "@/stores/connection-store.js";
 import type { PetScene } from "@/renderer/pet-scene.js";
@@ -38,11 +39,15 @@ const EMPTY: CostumesState = { costumes: [], files: {}, availability: {}, curren
 function toState(result: CharacterCostumesResult, current: string | null): CostumesState {
   const availability = result.availability ?? {};
   const rank = (id: string): number => (availability[id]?.renderable === false ? 1 : 0);
+  // The panel's initial highlight mirrors what the pet actually wears: the remembered last-worn costume (the initial
+  // promotion loads it) rather than the marker default (B7/B19).
+  const remembered = loadLastCostume(ACTIVE_CHARACTER_ID, localStorage);
+  const fallback = remembered !== null && result.costumes.includes(remembered) ? remembered : result.defaultCostume;
   return {
     costumes: [...result.costumes].sort((a, b) => rank(a) - rank(b)),
     files: result.settingsFilesByCostume,
     availability,
-    current: current ?? result.defaultCostume,
+    current: current ?? fallback,
   };
 }
 
@@ -95,6 +100,7 @@ export function useCostumeSwitch(scene: PetScene | null): CostumeSwitch {
       setError(null);
       try {
         await applySwitch({ client, scene, costume, settingsFile });
+        saveLastCostume(ACTIVE_CHARACTER_ID, costume, localStorage); // restarts re-wear this costume (B7/B19)
         setState((prev) => ({ ...prev, current: costume }));
       } catch (cause) {
         setError(`${costume}: ${cause instanceof Error ? cause.message : String(cause)}`);

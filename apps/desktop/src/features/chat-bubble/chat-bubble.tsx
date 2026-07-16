@@ -36,6 +36,26 @@ function BubbleReplyView({ reply }: { reply: BubbleReply }) {
   );
 }
 
+// Owns the expand-to-chat-window action. Inline SVG, not a glyph: WebView2 rendered the previous ⤢ invisibly,
+// hiding the ONLY entry to the full chat window (B8).
+function OpenChatButton() {
+  return (
+    <button
+      type="button"
+      onClick={() => void openChatWindow()}
+      className="px-1 text-slate-400 hover:text-slate-600"
+      aria-label="Open chat window"
+      title="打开聊天窗口"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+        <path d="M15 3h6v6" />
+        <path d="m10 14 11-11" />
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      </svg>
+    </button>
+  );
+}
+
 // The input + action row (its own draft state); split out so ChatBubble stays a thin open-gate + layout shell.
 function BubbleForm({ isPending, send, close }: { isPending: boolean; send: (message: string) => Promise<void>; close: () => void }) {
   const [draft, setDraft] = useState("");
@@ -70,15 +90,7 @@ function BubbleForm({ isPending, send, close }: { isPending: boolean; send: (mes
       >
         {isPending ? "…" : "发送"}
       </button>
-      <button
-        type="button"
-        onClick={() => void openChatWindow()}
-        className="px-1 text-slate-400 hover:text-slate-600"
-        aria-label="Open chat window"
-        title="打开聊天窗口"
-      >
-        ⤢
-      </button>
+      <OpenChatButton />
       <button type="button" onClick={close} className="px-2 text-slate-400 hover:text-slate-600" aria-label="Close">
         ×
       </button>

@@ -46,6 +46,9 @@ async function pollOnce(ctx: PollContext): Promise<void> {
     });
     if (ignore !== ctx.lastIgnore) {
       await ctx.win.setIgnoreCursorEvents(ignore);
+      // Toggle-transition trace (B6 diagnostics): if click-through misbehaves, this shows whether the poll ever
+      // computes ignore=true (opaque sampling) vs the call itself failing (which would surface via onError instead).
+      console.info(`[click-through] ignore=${String(ignore)} opaque=${String(opaque)} at ${Math.round(x)},${Math.round(y)}`);
       ctx.lastIgnore = ignore;
     }
     ctx.onError(null);

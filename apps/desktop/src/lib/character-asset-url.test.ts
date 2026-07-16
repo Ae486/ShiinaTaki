@@ -89,4 +89,12 @@ describe("resolveResourcePath (the fail-safe: `..` never reaches convertFileSrc)
   it("rejects a resolution value that itself carries `..` (defense against a corrupted map)", () => {
     expect(resolveResourcePath("ref.mtn", { "ref.mtn": "../outside.mtn" })).toBeNull();
   });
+
+  // Cubism 3 manifests have optional file slots (physics/pose); the engine's replaceFiles hands their null through
+  // its `string`-typed callback — six C3 costumes crashed on `null.includes` before this guard (B13).
+  it("returns null for a non-string or empty ref instead of crashing", () => {
+    expect(resolveResourcePath(null as unknown as string, {})).toBeNull();
+    expect(resolveResourcePath(undefined as unknown as string, {})).toBeNull();
+    expect(resolveResourcePath("", {})).toBeNull();
+  });
 });
