@@ -2,7 +2,7 @@
  * INPUT:  a WsTransport (browser WebSocket by default) + inbound JSON-RPC frames from the Core; every frame is zod-parsed here.
  * OUTPUT: createWsClient({transport}) -> WsClient: connect()/chat()/subscribeAvatar()/reportAvatar() +
  *         timelineHistory()/subscribeTimeline()/mediaGet() (chat window) + importCharacter()/listCharacters()/
- *         characterCostumes() (#18) + avatar/timeline push handlers.
+ *         characterCostumes()/costumeResolution() (#18) + avatar/timeline push handlers.
  * POS:    ui/lib — the Pet UI's operator transport to the Agent Core (mirrors apps/cli chat-client, browser WS). THE
  *         zod boundary: past this file inbound data is trusted typed data (type-safety spec). No React/Tauri imports.
  */
@@ -17,6 +17,7 @@ import {
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
+  CharacterCostumeResolutionResultSchema,
   CharacterCostumesResultSchema,
   CharacterImportResultSchema,
   CharacterListResultSchema,
@@ -30,6 +31,7 @@ import {
   TimelineHistoryResultSchema,
   type AvatarCommand,
   type AvatarReportParams,
+  type CharacterCostumeResolutionResult,
   type CharacterCostumesResult,
   type CharacterImportParams,
   type CharacterImportResult,
@@ -75,6 +77,8 @@ export interface WsClient {
   listCharacters(): Promise<CharacterListResult>;
   /** Reads one character's costumes + per-costume settings filenames (the renderer composes the asset URL from these). */
   characterCostumes(characterId: string): Promise<CharacterCostumesResult>;
+  /** Reads one costume's external-ref resolution map (feeds settings pruning + resolve before a switch, #18). */
+  costumeResolution(characterId: string, costume: string): Promise<CharacterCostumeResolutionResult>;
   /** Registers the fire-and-forget avatar command sink (core -> operator push). Replaces any prior handler. */
   onAvatarCommand(handler: (command: AvatarCommand) => void): void;
   /** Registers the optional live-timeline sink (shared with the chat window server-side). */
@@ -177,6 +181,10 @@ function requestMethods(rpc: JSONRPCServerAndClient) {
     listCharacters: async () => CharacterListResultSchema.parse(await rpc.request(CHARACTER_METHODS.list, {})),
     characterCostumes: async (characterId: string) =>
       CharacterCostumesResultSchema.parse(await rpc.request(CHARACTER_METHODS.costumes, { characterId })),
+    costumeResolution: async (characterId: string, costume: string) =>
+      CharacterCostumeResolutionResultSchema.parse(
+        await rpc.request(CHARACTER_METHODS.costumeResolution, { characterId, costume }),
+      ),
   };
 }
 

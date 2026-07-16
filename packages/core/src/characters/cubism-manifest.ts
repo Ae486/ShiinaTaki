@@ -1,8 +1,9 @@
 /**
  * INPUT:  a parsed Cubism settings manifest (unknown JSON) + a has(relPath) existence probe over the costume's files
- * OUTPUT: detectGeneration / validateManifest (throws on missing moc|textures, warns on optional misses) / extractManifestNames
+ * OUTPUT: detectGeneration / validateManifest (throws on missing moc|textures, warns on optional misses) /
+ *         validateEssentials (moc+textures only) / extractManifestNames / motionExpressionRefs (file+sound refs)
  * POS:    core/characters — clean-room Cubism 2.1 vs 3-5 handling (#18). Detection + validation feed the importer; name
- *         extraction feeds a costume's motion/expression vocabulary. Pure, OS-neutral; no fs, no engine dependency.
+ *         extraction feeds a costume's vocabulary; ref listing feeds costume availability. Pure, OS-neutral; no fs.
  */
 import { CharacterImportError } from "./import-error.ts";
 import { safeMemberPath } from "./member-path.ts";
@@ -24,14 +25,21 @@ export function detectGeneration(json: unknown): Generation {
  * failure (decision 6: e.g. a Cubism-2 costume's external `../_mtn_emp/` shared-motion pool is tolerated at load).
  */
 export function validateManifest(json: unknown, has: (relPath: string) => boolean): string[] {
+  validateEssentials(json, has);
   const obj = asRecord(json) ?? {};
   const gen = detectGeneration(json);
   const source = gen === "cubism3" ? asRecord(obj.FileReferences) ?? {} : obj;
-  const mocKey = gen === "cubism3" ? "Moc" : "model";
-  const texKey = gen === "cubism3" ? "Textures" : "textures";
-  requireMoc(asString(source[mocKey]), has);
-  requireTextures(asStringArray(source[texKey]), has);
   return warnMissing(gen === "cubism3" ? optionalRefs3(source) : optionalRefs2(obj), has);
+}
+
+/** Essentials only (moc/moc3 + every texture) — throws missing_moc/missing_textures, probes NO optional refs. The
+ *  availability layer (#18 degrade-and-badge) calls this per costume; probing hundreds of optional refs there is waste. */
+export function validateEssentials(json: unknown, has: (relPath: string) => boolean): void {
+  const obj = asRecord(json) ?? {};
+  const gen = detectGeneration(json);
+  const source = gen === "cubism3" ? asRecord(obj.FileReferences) ?? {} : obj;
+  requireMoc(asString(source[gen === "cubism3" ? "Moc" : "model"]), has);
+  requireTextures(asStringArray(source[gen === "cubism3" ? "Textures" : "textures"]), has);
 }
 
 /** Motion GROUP names + expression names for BOTH generations (feeds a costume's avatar vocabulary). */
@@ -44,6 +52,31 @@ export function extractManifestNames(json: unknown): { motions: string[]; expres
     .map((entry) => asString(asRecord(entry)?.name) ?? asString(asRecord(entry)?.Name))
     .filter((name): name is string => name !== undefined);
   return { motions: dedupeSort(motionsObj ? Object.keys(motionsObj) : []), expressions: dedupeSort(expressions) };
+}
+
+/** Every motion file/sound + expression file ref, BOTH generations, deduped in manifest order — the external-ref
+ *  surface costume availability filters for `..` (physics/pose stay out: they are neither pruned nor pool-shared). */
+export function motionExpressionRefs(json: unknown): string[] {
+  const obj = asRecord(json) ?? {};
+  const fr = asRecord(obj.FileReferences);
+  const refs: string[] = [];
+  for (const group of Object.values(asRecord(obj.motions) ?? asRecord(fr?.Motions) ?? {})) {
+    for (const entry of asArray(group) ?? []) {
+      const record = asRecord(entry);
+      pushRef(refs, record?.file ?? record?.File);
+      pushRef(refs, record?.sound ?? record?.Sound);
+    }
+  }
+  for (const entry of asArray(obj.expressions) ?? asArray(fr?.Expressions) ?? []) {
+    const record = asRecord(entry);
+    pushRef(refs, record?.file ?? record?.File);
+  }
+  return [...new Set(refs)];
+}
+
+function pushRef(refs: string[], value: unknown): void {
+  const ref = asString(value);
+  if (ref !== undefined) refs.push(ref);
 }
 
 interface ResourceRef {

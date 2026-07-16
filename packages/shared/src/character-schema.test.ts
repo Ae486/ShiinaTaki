@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   CHARACTER_METHODS,
+  CharacterCostumeResolutionParamsSchema,
+  CharacterCostumeResolutionResultSchema,
   CharacterCostumesParamsSchema,
   CharacterCostumesResultSchema,
   CharacterIdSchema,
@@ -9,14 +11,16 @@ import {
   CharacterImportResultSchema,
   CharacterListParamsSchema,
   CharacterListResultSchema,
+  CostumeAvailabilitySchema,
 } from "./character-schema.ts";
 
 describe("CHARACTER_METHODS", () => {
-  it("names the three character methods", () => {
+  it("names the four character methods", () => {
     expect(CHARACTER_METHODS).toEqual({
       import: "character.import",
       list: "character.list",
       costumes: "character.costumes",
+      costumeResolution: "character.costumeResolution",
     });
   });
 });
@@ -83,6 +87,33 @@ describe("character.list + character.costumes schemas (T6)", () => {
     const result = { costumes: ["casual", "live_01"], defaultCostume: "casual", settingsFilesByCostume: { casual: "model.json", live_01: "x.model3.json" } };
     expect(CharacterCostumesResultSchema.parse(result)).toEqual(result);
     expect(CharacterCostumesResultSchema.parse({ ...result, current: "live_01" }).current).toBe("live_01");
+  });
+
+  it("keeps availability optional on the costumes result and round-trips it when present", () => {
+    const base = { costumes: ["casual"], defaultCostume: "casual", settingsFilesByCostume: { casual: "model.json" } };
+    expect(CharacterCostumesResultSchema.parse(base).availability).toBeUndefined();
+    const availability = { casual: { renderable: true, missingMotions: 75, missingPacks: ["anon", "sakiko"] } };
+    expect(CharacterCostumesResultSchema.parse({ ...base, availability }).availability).toEqual(availability);
+    expect(CostumeAvailabilitySchema.safeParse({ renderable: true, missingMotions: "75", missingPacks: [] }).success).toBe(false);
+  });
+});
+
+describe("character.costumeResolution schemas", () => {
+  it("round-trips params and rejects an empty costume", () => {
+    const params = { characterId: "taki", costume: "casual" };
+    expect(CharacterCostumeResolutionParamsSchema.parse(params)).toEqual(params);
+    expect(CharacterCostumeResolutionParamsSchema.safeParse({ characterId: "taki", costume: "" }).success).toBe(false);
+  });
+
+  it("round-trips a resolution map with resolved and null entries", () => {
+    const result = {
+      resolution: {
+        "../_mtn_emp/taki/angry01.mtn": "taki/arbeit/motions/angry01.mtn",
+        "../_mtn_emp/sakiko/rare01.mtn": null,
+      },
+    };
+    expect(CharacterCostumeResolutionResultSchema.parse(result)).toEqual(result);
+    expect(CharacterCostumeResolutionResultSchema.safeParse({ resolution: { a: 1 } }).success).toBe(false);
   });
 });
 

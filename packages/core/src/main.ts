@@ -22,6 +22,7 @@ import { createClipboardReadTool } from "./capabilities/clipboard-read-tool.ts";
 import { createClipboardWriteTool } from "./capabilities/clipboard-write-tool.ts";
 import { createExecTool } from "./capabilities/exec-tool.ts";
 import { createProcessListTool } from "./capabilities/process-list-tool.ts";
+import { createScreenshotDescriber } from "./capabilities/screenshot-describe.ts";
 import { createScreenshotStore } from "./capabilities/screenshot-store.ts";
 import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
 import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
@@ -57,6 +58,7 @@ import { chatCancelMethod } from "./server/methods/chat-cancel.ts";
 import { chatSendMethod } from "./server/methods/chat-send.ts";
 import { capabilityRespondMethod } from "./server/methods/capability-respond.ts";
 import { capabilityTriggerMethod, devTriggerEnabled } from "./server/methods/capability-trigger.ts";
+import { characterCostumeResolutionMethod } from "./server/methods/character-costume-resolution.ts";
 import { characterCostumesMethod } from "./server/methods/character-costumes.ts";
 import { characterImportMethod } from "./server/methods/character-import.ts";
 import { characterListMethod } from "./server/methods/character-list.ts";
@@ -159,7 +161,8 @@ const attachmentStore = createAttachmentStore({ attachmentsDir: join(serverConfi
 // Character store + importer (#18): the characterId-addressable model layer. Extraction is operator-driven Core-fs into
 // the Workspace `characters/` subtree (ADR 0007 v1, invariant 2 single writer) — same family as the attachment store,
 // not an agent OS action. Serving the extracted files to the renderer is the host-side Tauri asset: protocol (Phase B).
-const characterStore = createCharacterStore({ charactersDir: join(serverConfig.dataDir, "workspace", "characters") });
+const charactersDir = join(serverConfig.dataDir, "workspace", "characters");
+const characterStore = createCharacterStore({ charactersDir });
 const characterImporter = createCharacterImporter({ store: characterStore });
 // Image→text bridge (#17 decision 6, D28): ONLY when a vision slot exists — an image turn's authoritative cross-turn
 // record is the VLM's text description, written via the EXISTING episodic path (same bound op the episodic writer uses).
@@ -218,6 +221,8 @@ const screenshotTool = createScreenshotTool({
   broker: capabilityBroker,
   // The core is the single sanctioned Workspace writer (invariant 2); the Shell only returns base64 over the wire.
   store: createScreenshotStore({ screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots") }),
+  // Screenshot→VLM bridge: reuses the OPTIONAL vision slot; without it the result stays path+dims (no pixels to the text model).
+  describe: visionModel ? createScreenshotDescriber({ model: visionModel, logger }).describe : undefined,
   logger,
 });
 // The other three Shell-backed capabilities (#11) share the route→broker path; each is gate-authorized on the Shell.
@@ -317,7 +322,8 @@ registry.register(mediaUsageMethod(attachmentStore, () => directoryByteSize(memo
 // single-sourced in characters/member-path. Costume switching is client-side (renderer reloads + re-reports vocabulary).
 registry.register(characterImportMethod(characterImporter));
 registry.register(characterListMethod(characterStore));
-registry.register(characterCostumesMethod(characterStore));
+registry.register(characterCostumesMethod({ store: characterStore, charactersDir }));
+registry.register(characterCostumeResolutionMethod({ store: characterStore, charactersDir }));
 
 // Attachment GC (#17): a lightweight boot sweep + a 6h interval (NOT the croner scheduler — D5 is M5). Only raw bytes
 // expire; the description-memory is permanent. unref() keeps the timer from holding the process open on shutdown.

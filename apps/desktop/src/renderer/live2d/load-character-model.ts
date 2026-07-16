@@ -1,25 +1,26 @@
 /**
  * INPUT:  an initialized PixiJS Application + a costume source: either the dev settings URL (DEV_MODEL_SOURCE) or a
- *         CostumeSource {settingsUrl, file} for an imported costume; the vendored Cubism runtimes (globals from pet.html).
+ *         CostumeSource {settingsUrl, resolve} for an imported costume; the vendored Cubism runtimes (pet.html globals).
  * OUTPUT: loadCharacterModel(app, source) -> a loaded, centered Live2DModel on the governed ticker (eye-blink+breath).
  * POS:    ui/renderer/live2d — framework-free (ZERO React/Tauri imports). For an imported costume the caller passes a
- *         `file` resolver (built in lib/character-asset-url) so each sub-resource becomes its OWN absolute asset: URL —
- *         the engine's relative resolveURL would otherwise drop the prefix (research/rc-asset-suburl-defect.md). C2/C3
- *         is auto-detected via the engine's own isValidJSON. Cubism runtimes load as pet.html <script> globals (#18).
+ *         `resolve` fn (built in lib/character-asset-url): unresolvable refs are PRUNED from the settings before the
+ *         engine sees them (`..` never reaches the asset protocol), every kept sub-resource becomes its OWN absolute
+ *         asset: URL (research/rc-asset-suburl-defect.md). C2/C3 auto-detected via the engine's own isValidJSON (#18).
  */
 
 import type { Application } from "pixi.js";
 import { CubismLegacyModelSettings, CubismModelSettings, Live2DModel, ModelSettings } from "untitled-pixi-live2d-engine";
+import { pruneSettings } from "./settings-prune.ts";
 
 // Dev fallback: the git-ignored self-contained Cubism 2 costume served by the vite middleware (apply:"serve"). Used
 // when no character is imported so `pnpm tauri dev` still renders; absent from a packaged build (an imported model
 // replaces it live via the costume-switch path). An imported costume passes a CostumeSource instead of this string.
 export const DEV_MODEL_SOURCE = "/spike-assets/arbeit/model.json";
 
-/** An imported costume's load inputs: the settings-file asset URL + a per-sub-resource absolute-asset-URL resolver. */
+/** An imported costume's load inputs: the settings asset URL + a per-sub-resource resolver (null = unresolvable ref). */
 export interface CostumeSource {
   settingsUrl: string;
-  file: (relPath: string) => string;
+  resolve: (relPath: string) => string | null;
 }
 
 export async function loadCharacterModel(app: Application, source: string | CostumeSource): Promise<Live2DModel> {
@@ -40,16 +41,21 @@ export async function loadCharacterModel(app: Application, source: string | Cost
   return model;
 }
 
-// Fetch the costume settings JSON and rewrite every sub-resource ref to its own absolute asset: URL via replaceFiles,
-// then hand the engine a fully-resolved ModelSettings. This bypasses the engine's relative resolveURL (which drops the
-// convertFileSrc-encoded prefix — see the module header + research/rc-asset-suburl-defect.md). Generation is detected
-// by the engine's own isValidJSON so a C2 costume and a C3 costume take the same path with no manual branch.
+// Fetch the costume settings JSON, PRUNE entries whose refs are unresolvable (external `../_mtn_emp/` pool files no
+// imported character supplies — degrade-and-badge, #18), then rewrite every kept ref to its own absolute asset: URL
+// via replaceFiles. Pruning first keeps the vocabulary honest (readVocabulary/avatar.report never mention stripped
+// motions) and guarantees no `..` ref reaches the asset protocol. Generation is detected by the engine's isValidJSON.
 async function toAbsoluteSettings(source: CostumeSource): Promise<ModelSettings> {
   const response = await fetch(source.settingsUrl);
   if (!response.ok) throw new Error(`costume settings not reachable: ${response.status} ${source.settingsUrl}`);
-  const json = (await response.json()) as Record<string, unknown>;
-  const settings = createSettings({ ...json, url: source.settingsUrl });
-  settings.replaceFiles((file) => source.file(file));
+  const raw = (await response.json()) as Record<string, unknown>;
+  const { settings: pruned, prunedMotions, prunedExpressions } = pruneSettings(raw, source.resolve);
+  if (prunedMotions + prunedExpressions > 0) {
+    console.info(`[live2d] pruned ${prunedMotions} motions + ${prunedExpressions} expressions with unresolvable refs`);
+  }
+  const settings = createSettings({ ...pruned, url: source.settingsUrl });
+  // After pruning every remaining ref resolves; `?? file` is unreachable defense (a raw ref would just 404 gracefully).
+  settings.replaceFiles((file) => source.resolve(file) ?? file);
   return settings;
 }
 

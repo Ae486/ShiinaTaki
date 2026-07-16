@@ -110,6 +110,8 @@ export type {
 
 export {
   CHARACTER_METHODS,
+  CharacterCostumeResolutionParamsSchema,
+  CharacterCostumeResolutionResultSchema,
   CharacterCostumesParamsSchema,
   CharacterCostumesResultSchema,
   CharacterIdSchema,
@@ -120,8 +122,11 @@ export {
   CharacterListResultSchema,
   CharacterSourceSchema,
   CharacterSummarySchema,
+  CostumeAvailabilitySchema,
 } from "./character-schema.ts";
 export type {
+  CharacterCostumeResolutionParams,
+  CharacterCostumeResolutionResult,
   CharacterCostumesParams,
   CharacterCostumesResult,
   CharacterId,
@@ -132,6 +137,7 @@ export type {
   CharacterListResult,
   CharacterSource,
   CharacterSummary,
+  CostumeAvailability,
 } from "./character-schema.ts";
 
 export {

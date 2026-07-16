@@ -25,7 +25,15 @@ export function useInitialCostume(scene: PetScene | null): void {
         const costumes = await client.characterCostumes(ACTIVE_CHARACTER_ID);
         const settingsFile = resolveSettingsFile(costumes, costumes.defaultCostume);
         if (!settingsFile) return; // imported but malformed marker — keep the dev model rather than crash
-        const source = await costumeAssetResolver(ACTIVE_CHARACTER_ID, costumes.defaultCostume, settingsFile);
+        // The default costume is self-contained today, but a future default with external refs must not regress:
+        // the resolution feeds pruning so an unresolvable `..` ref never reaches the asset protocol (#18).
+        const { resolution } = await client.costumeResolution(ACTIVE_CHARACTER_ID, costumes.defaultCostume);
+        const source = await costumeAssetResolver({
+          characterId: ACTIVE_CHARACTER_ID,
+          costume: costumes.defaultCostume,
+          settingsFile,
+          resolution,
+        });
         const vocabulary = await scene.switchCostume(source);
         await client.reportAvatar({ characterId: ACTIVE_CHARACTER_ID, ...vocabulary });
       } catch {

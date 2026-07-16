@@ -1,6 +1,7 @@
 /**
  * INPUT:  candidate character.* params/result payloads (parsed WS frames from a Pet UI operator)
- * OUTPUT: CHARACTER_METHODS + import/list/costumes param & result schemas + CharacterImportErrorSchema + CharacterIdSchema
+ * OUTPUT: CHARACTER_METHODS + import/list/costumes/costumeResolution param & result schemas + CostumeAvailabilitySchema +
+ *         CharacterImportErrorSchema + CharacterIdSchema
  * POS:    shared/protocol — the character-import + costume contract (#18, invariants 3, 7); operator-only, NO Rust mirror
  */
 import { z } from "zod";
@@ -9,6 +10,7 @@ export const CHARACTER_METHODS = {
   import: "character.import", // operator → core: extract an uploaded archive into the Workspace characters/ subtree
   list: "character.list", // operator → core: enumerate imported characters (feeds the switch affordance + M5 roster)
   costumes: "character.costumes", // operator → core: the costumes of one character (+ settings filenames for the renderer)
+  costumeResolution: "character.costumeResolution", // operator → core: one costume's external-ref → rel-path map (on demand)
 } as const;
 
 // characterId is the addressable key + a path segment under characters/; a strict slug keeps it a single safe segment.
@@ -61,13 +63,36 @@ export const CharacterCostumesParamsSchema = z.object({
 });
 export type CharacterCostumesParams = z.infer<typeof CharacterCostumesParamsSchema>;
 
+// Per-costume availability, computed on demand by the Core (never stored): renderable = essentials (moc/textures) exist
+// locally; missingMotions/missingPacks describe external `../_mtn_emp/` refs no imported character supplies (degrade-and-badge).
+export const CostumeAvailabilitySchema = z.object({
+  renderable: z.boolean(),
+  missingMotions: z.number(),
+  missingPacks: z.array(z.string()),
+});
+export type CostumeAvailability = z.infer<typeof CostumeAvailabilitySchema>;
+
 export const CharacterCostumesResultSchema = z.object({
   costumes: z.array(z.string().min(1)),
   defaultCostume: z.string().min(1),
   settingsFilesByCostume: SettingsFilesByCostumeSchema,
   current: z.string().optional(), // the live-loaded costume is client-side state; the Core leaves this unset in v1
+  availability: z.record(z.string(), CostumeAvailabilitySchema).optional(), // optional: older results stay parseable
 });
 export type CharacterCostumesResult = z.infer<typeof CharacterCostumesResultSchema>;
+
+export const CharacterCostumeResolutionParamsSchema = z.object({
+  characterId: CharacterIdSchema,
+  costume: z.string().min(1),
+});
+export type CharacterCostumeResolutionParams = z.infer<typeof CharacterCostumeResolutionParamsSchema>;
+
+// external ref → POSIX rel path from the characters/ root (basename search over every imported character), or null when
+// no imported character supplies it. Per-costume + on demand: a 600-entry map is too heavy to inline in every costumes call.
+export const CharacterCostumeResolutionResultSchema = z.object({
+  resolution: z.record(z.string(), z.string().nullable()),
+});
+export type CharacterCostumeResolutionResult = z.infer<typeof CharacterCostumeResolutionResultSchema>;
 
 // Clean-room import-failure vocabulary (from the BanG Dream reference's error codes). These are import-domain codes that
 // ride error.data on the WS envelope — they do NOT extend the Rust-mirrored ErrorCode enum (operator-only, no node parse).

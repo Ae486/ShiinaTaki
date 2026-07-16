@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CharacterImportError } from "./import-error.ts";
-import { detectGeneration, extractManifestNames, validateManifest } from "./cubism-manifest.ts";
+import { detectGeneration, extractManifestNames, motionExpressionRefs, validateEssentials, validateManifest } from "./cubism-manifest.ts";
 
 const hasIn = (present: string[]) => (relPath: string) => present.includes(relPath);
 
@@ -96,5 +96,36 @@ describe("extractManifestNames (T3)", () => {
 
   it("extracts motion group + expression names from a C3 manifest (FileReferences paths)", () => {
     expect(extractManifestNames(C3)).toEqual({ motions: ["mtn_idle01_C", "mtn_smile01_C"], expressions: ["exp_smile05"] });
+  });
+});
+
+describe("validateEssentials (availability's renderable probe)", () => {
+  it("passes on moc+textures alone and never probes optional refs", () => {
+    expect(() => validateEssentials(C2, hasIn(["data/model.moc", "data/t1.png", "data/t2.png"]))).not.toThrow();
+    expect(() => validateEssentials(C2, hasIn(["data/t1.png", "data/t2.png"]))).toThrow(CharacterImportError);
+  });
+});
+
+describe("motionExpressionRefs (availability's external-ref surface)", () => {
+  it("lists motion file+sound and expression file refs from a C2 manifest, deduped", () => {
+    const manifest = {
+      model: "m.moc",
+      textures: ["t.png"],
+      motions: { idle: [{ file: "i.mtn", sound: "i.wav" }], again: [{ file: "i.mtn" }] },
+      expressions: [{ name: "smile", file: "e.exp.json" }],
+    };
+    expect(motionExpressionRefs(manifest)).toEqual(["i.mtn", "i.wav", "e.exp.json"]);
+  });
+
+  it("lists File+Sound refs from a C3 manifest at the FileReferences paths", () => {
+    const manifest = {
+      FileReferences: {
+        Moc: "x.moc3",
+        Textures: ["t.png"],
+        Motions: { idle: [{ File: "motions/i.motion3.json", Sound: "voice/i.wav" }] },
+        Expressions: [{ Name: "smile", File: "exp/s.exp3.json" }],
+      },
+    };
+    expect(motionExpressionRefs(manifest)).toEqual(["motions/i.motion3.json", "voice/i.wav", "exp/s.exp3.json"]);
   });
 });

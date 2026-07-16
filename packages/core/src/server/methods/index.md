@@ -9,6 +9,10 @@
 - media-get.ts — media.get (operator-only): serve one attachment's bytes for scroll-back; thin delegation to attachment-store.read (ref confinement single-sourced there)
 - media-clear.ts — media.clear (operator-only): purge retained attachment bytes on demand (the description-memory is untouched)
 - media-usage.ts — media.usage (operator-only): attachment + memory-text byte footprint; RESERVED for the M5 settings UI (D27)
+- character-import.ts — character.import (operator-only): extract an uploaded model archive into the Workspace characters/ subtree; thin delegation to the characters importer
+- character-list.ts — character.list (operator-only): enumerate imported characters from their character.json markers
+- character-costumes.ts — character.costumes (operator-only): one character's costumes + settings filenames + on-demand availability (renderable / missing motions+packs)
+- character-costume-resolution.ts — character.costumeResolution (operator-only): one costume's external-ref → characters-root rel-path map, on demand (#18)
 - approval-respond.ts — approval.respond (operator-only): resolve a pending MCP tool-approval ask; unknown id -> {accepted:false}
 - capability-respond.ts — capability.respond (node-only): settle a pending capability request; unknown id -> {accepted:false}
 - capability-trigger.ts — capability.trigger (operator-only, DEV-ONLY via TAKI_DEV_TRIGGER=1): drive a real capability tool's execute without the LLM (node-side gate still authorizes); + devTriggerEnabled(env)

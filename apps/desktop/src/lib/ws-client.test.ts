@@ -140,6 +140,20 @@ describe("createWsClient inbound routing", () => {
     });
   });
 
+  it("costumeResolution requests one costume's external-ref map (resolved + null entries, #18)", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const got = client.costumeResolution("taki", "casual");
+    await flush();
+    const sent = JSON.parse(h.sent[h.sent.length - 1] ?? "{}");
+    expect(sent.method).toBe(CHARACTER_METHODS.costumeResolution);
+    expect(sent.params).toEqual({ characterId: "taki", costume: "casual" });
+    const resolution = { "../_mtn_emp/taki/hit.mtn": "taki/arbeit/hit.mtn", "../_mtn_emp/sakiko/gone.mtn": null };
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { resolution } });
+    expect(await got).toEqual({ resolution });
+  });
+
   it("routes an avatar.command push to the registered handler (zod-validated)", () => {
     const h = harness();
     const client = createWsClient({ transport: h.transport });

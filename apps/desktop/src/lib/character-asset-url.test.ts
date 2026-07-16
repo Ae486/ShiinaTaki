@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from "vitest";
 import type { CharacterCostumesResult } from "@taki/shared";
-import { costumeSettingsSegments, resolveSettingsFile, resourceSegments } from "./character-asset-url.ts";
+import { costumeSettingsSegments, resolveResourcePath, resolveSettingsFile, resourceSegments } from "./character-asset-url.ts";
 
 const COSTUMES: CharacterCostumesResult = {
   costumes: ["arbeit", "live_01"],
@@ -57,5 +57,36 @@ describe("resourceSegments", () => {
   it("drops leading ./ and empty segments so the joined path stays clean", () => {
     expect(resourceSegments("./data/model.moc")).toEqual(["data", "model.moc"]);
     expect(resourceSegments("data//model.moc")).toEqual(["data", "model.moc"]);
+  });
+});
+
+describe("resolveResourcePath (the fail-safe: `..` never reaches convertFileSrc)", () => {
+  const RESOLUTION = {
+    "../_mtn_emp/taki/hit.mtn": "taki/arbeit/motions/hit.mtn",
+    "../_mtn_emp/sakiko/gone.mtn": null,
+  };
+
+  it("keeps a plain ref costume-relative", () => {
+    expect(resolveResourcePath("motions/idle.mtn", RESOLUTION)).toEqual({
+      kind: "costume",
+      segments: ["motions", "idle.mtn"],
+    });
+  });
+
+  it("maps a Core-resolved external ref to characters-root segments", () => {
+    expect(resolveResourcePath("../_mtn_emp/taki/hit.mtn", RESOLUTION)).toEqual({
+      kind: "characters",
+      segments: ["taki", "arbeit", "motions", "hit.mtn"],
+    });
+  });
+
+  it("returns null for a null-resolved ref and for any `..` ref without a resolution entry", () => {
+    expect(resolveResourcePath("../_mtn_emp/sakiko/gone.mtn", RESOLUTION)).toBeNull();
+    expect(resolveResourcePath("../_mtn_emp/unknown/x.mtn", {})).toBeNull();
+    expect(resolveResourcePath("a/../../escape.png", {})).toBeNull();
+  });
+
+  it("rejects a resolution value that itself carries `..` (defense against a corrupted map)", () => {
+    expect(resolveResourcePath("ref.mtn", { "ref.mtn": "../outside.mtn" })).toBeNull();
   });
 });
