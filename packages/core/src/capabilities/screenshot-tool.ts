@@ -1,7 +1,9 @@
 /**
- * INPUT:  an LLM screenshot call (no args) + a ConnectionRegistry, CapabilityBroker, ScreenshotStore
- * OUTPUT: createScreenshotTool(deps) -> ToolSet { screenshot }; returns { ok, path, width, height, bytes } or { ok:false, code }
- * POS:    core/capabilities — the agent tool; thin over route→broker→persist; execute NEVER throws (ruling 7/8A)
+ * INPUT:  an LLM screenshot call (no args) + a ConnectionRegistry, CapabilityBroker, ScreenshotStore, and an optional
+ *         VLM describe bridge (screenshot-describe, wired only when the vision slot is configured)
+ * OUTPUT: createScreenshotTool(deps) -> ToolSet { screenshot }; returns { ok, path, width, height, bytes,
+ *         description? } or { ok:false, code } — description present only when the VLM bridge produced one
+ * POS:    core/capabilities — the agent tool; thin over route→broker→persist(→describe); execute NEVER throws (ruling 7/8A)
  */
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
@@ -13,6 +15,8 @@ const CAPABILITY = "screenshot";
 
 export interface ScreenshotToolDeps extends CapabilityRouteDeps {
   store: ScreenshotStore;
+  /** Optional screenshot→VLM bridge; a null description (failure/empty) degrades to the plain result. */
+  describe?: (input: { dataBase64: string; mediaType: string }) => Promise<string | null>;
 }
 
 export function createScreenshotTool(deps: ScreenshotToolDeps): ToolSet {
@@ -21,7 +25,9 @@ export function createScreenshotTool(deps: ScreenshotToolDeps): ToolSet {
     screenshot: tool({
       description:
         "Capture a screenshot of the user's primary monitor. The user is asked to approve on their device; " +
-        "on success you receive the saved file path and its pixel dimensions (the image itself is stored, not shown to you).",
+        (deps.describe
+          ? "on success you receive the saved file path, its pixel dimensions, and a textual description of the screen."
+          : "on success you receive the saved file path and its pixel dimensions (the image itself is stored, not shown to you)."),
       inputSchema: z.object({}),
       // Every failure degrades into a structured result the model can read; this execute never throws (error-handling spec).
       execute: async () => {
@@ -32,8 +38,13 @@ export function createScreenshotTool(deps: ScreenshotToolDeps): ToolSet {
           // The channel output is opaque (Option A); the screenshot tool owns and parses its own payload shape.
           const output = ScreenshotOutputSchema.parse(routed.output);
           const { path, bytes } = deps.store.save(output.dataBase64);
-          log.info({ width: output.width, height: output.height, bytes }, "screenshot persisted");
-          return { ok: true as const, path, width: output.width, height: output.height, bytes };
+          // The describe bridge reads the in-flight bytes (no fs round-trip); its failures degrade to null inside it.
+          const description = deps.describe
+            ? await deps.describe({ dataBase64: output.dataBase64, mediaType: output.mediaType })
+            : null;
+          log.info({ width: output.width, height: output.height, bytes, described: description !== null }, "screenshot persisted");
+          const result = { ok: true as const, path, width: output.width, height: output.height, bytes };
+          return description === null ? result : { ...result, description };
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
           log.warn({ err: message }, "screenshot tool failed");

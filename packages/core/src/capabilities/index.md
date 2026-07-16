@@ -2,7 +2,8 @@
 - capability-broker.ts — core→node ask/await broker; correlate by requestId; 90s backstop + denyAll on disconnect; logs requested/responded
 - route-capability.ts — shared route→broker step (findNode → request → normalize); reused by every Shell-backed tool; logs invoked/routing-failed
 - screenshot-store.ts — the sanctioned Workspace write site: base64 PNG → screenshots/<ts>.png (invariant 2)
-- screenshot-tool.ts — the agent tool: route → broker.request → persist → { ok, path, width, height, bytes }
+- screenshot-describe.ts — the OPTIONAL screenshot→VLM bridge (vision slot): bytes → textual description; null on failure
+- screenshot-tool.ts — the agent tool: route → broker.request → persist(→describe) → { ok, path, width, height, bytes, description? }
 - process-list-tool.ts — the agent tool: route → broker → { ok, processes, count } (read-only, no kill)
 - clipboard-read-tool.ts — the agent tool: route → broker → { ok, text } (empty clipboard → "")
 - clipboard-write-tool.ts — the agent tool: route → broker → { ok:true } (text is content, never logged)

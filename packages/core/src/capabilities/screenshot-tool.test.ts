@@ -36,7 +36,12 @@ function store(onSave: () => SavedScreenshot): ScreenshotStore {
   return { save: onSave };
 }
 
-function toolWith(deps: { registry: ConnectionRegistry; broker: CapabilityBroker; store: ScreenshotStore }) {
+function toolWith(deps: {
+  registry: ConnectionRegistry;
+  broker: CapabilityBroker;
+  store: ScreenshotStore;
+  describe?: (input: { dataBase64: string; mediaType: string }) => Promise<string | null>;
+}) {
   const { logger } = createCaptureLogger();
   return createScreenshotTool({ ...deps, logger });
 }
@@ -80,5 +85,34 @@ describe("createScreenshotTool", () => {
     });
     const result = await tools.screenshot?.execute?.({}, EXEC_OPTS);
     expect(result).toMatchObject({ ok: false, code: "INTERNAL_ERROR", message: "disk full" });
+  });
+
+  it("includes the VLM description in the result when a describe bridge is wired", async () => {
+    const tools = toolWith({
+      registry: registryReturning(nodeConnection()),
+      broker: brokerReturning({ ok: true, output: OUTPUT }),
+      store: store(() => ({ path: "x.png", bytes: 42 })),
+      describe: (input) => Promise.resolve(`screen shows ${input.mediaType} of ${input.dataBase64.length} chars`),
+    });
+    const result = await tools.screenshot?.execute?.({}, EXEC_OPTS);
+    expect(result).toEqual({
+      ok: true,
+      path: "x.png",
+      width: 1920,
+      height: 1080,
+      bytes: 42,
+      description: "screen shows image/png of 4 chars",
+    });
+  });
+
+  it("omits description (plain result) when the bridge degrades to null", async () => {
+    const tools = toolWith({
+      registry: registryReturning(nodeConnection()),
+      broker: brokerReturning({ ok: true, output: OUTPUT }),
+      store: store(() => ({ path: "x.png", bytes: 42 })),
+      describe: () => Promise.resolve(null),
+    });
+    const result = await tools.screenshot?.execute?.({}, EXEC_OPTS);
+    expect(result).toEqual({ ok: true, path: "x.png", width: 1920, height: 1080, bytes: 42 });
   });
 });
