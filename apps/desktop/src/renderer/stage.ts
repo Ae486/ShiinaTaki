@@ -5,6 +5,10 @@
  *         its ticker. Its canvas is bridged into React only by windows/pet/pet-stage.tsx.
  */
 
+// CSP-safe shader/UBO sync (self-installing): Pixi's default codepaths `new Function` at runtime, which the packaged
+// build's strict CSP (script-src 'self' 'wasm-unsafe-eval') forbids — without this the stage cannot init AT ALL in a
+// packaged app (B-test finding, 2026-07-16). Dev never catches it: tauri dev does not enforce the CSP.
+import "pixi.js/unsafe-eval";
 import { Application, extensions } from "pixi.js";
 import { Live2DPlugin } from "untitled-pixi-live2d-engine";
 
