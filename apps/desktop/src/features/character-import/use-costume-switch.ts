@@ -8,7 +8,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
-import { characterCostumeUrl } from "@/lib/character-asset-url.js";
+import { costumeAssetResolver } from "@/lib/character-asset-url.js";
 import type { WsClient } from "@/lib/ws-client.js";
 import { useConnectionStore } from "@/stores/connection-store.js";
 import type { PetScene } from "@/renderer/pet-scene.js";
@@ -25,8 +25,8 @@ export interface CostumeSwitch {
 // Reload the costume in the renderer, then re-report the re-read vocabulary through the existing avatar.report so the
 // Core's per-character vocab (and next turn's prompt) tracks the new costume (arch §6b). Returns nothing; throws up.
 async function applySwitch(deps: { client: WsClient; scene: PetScene; costume: string; settingsFile: string }): Promise<void> {
-  const url = await characterCostumeUrl(ACTIVE_CHARACTER_ID, deps.costume, deps.settingsFile);
-  const vocabulary = await deps.scene.switchCostume(url);
+  const source = await costumeAssetResolver(ACTIVE_CHARACTER_ID, deps.costume, deps.settingsFile);
+  const vocabulary = await deps.scene.switchCostume(source);
   await deps.client.reportAvatar({ characterId: ACTIVE_CHARACTER_ID, ...vocabulary });
 }
 

@@ -11,7 +11,7 @@ import type { Live2DModel } from "untitled-pixi-live2d-engine";
 import { createStage } from "./stage.ts";
 import { RenderGovernor } from "./render-governor.ts";
 import { renderActivityFor, type AvatarState } from "./state-machine.ts";
-import { loadCharacterModel, DEV_MODEL_SOURCE } from "./live2d/load-character-model.ts";
+import { loadCharacterModel, DEV_MODEL_SOURCE, type CostumeSource } from "./live2d/load-character-model.ts";
 import { startIdleAnimation, type IdleResult } from "./live2d/idle-behavior.ts";
 import { createAvatarController, type AvatarController } from "./live2d/avatar-controller.ts";
 import { reloadModel } from "./live2d/costume-switch.ts";
@@ -44,8 +44,9 @@ export type PetScene = {
   handleClick: (x: number, y: number) => ClickRegion | null;
   // Gaze follow: point the model at a canvas-local cursor position (clamped + delta-gated). F4.
   focusAt: (x: number, y: number) => void;
-  // Swaps to another costume's model (asset: URL) and returns its re-read vocabulary for the caller to avatar.report (#18).
-  switchCostume: (settingsUrl: string) => Promise<AvatarVocabulary>;
+  // Swaps to another costume's model and returns its re-read vocabulary for the caller to avatar.report (#18). The
+  // source carries the settings URL + a per-sub-resource absolute-asset-URL fn (see load-character-model / lib).
+  switchCostume: (source: CostumeSource) => Promise<AvatarVocabulary>;
   dispose: () => void;
 };
 
@@ -89,7 +90,7 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
     applyAvatarCommand: (command) => current.avatar.applyCommand(command),
     handleClick: (x, y) => current.avatar.reactToClick(x, y),
     focusAt: (x, y) => current.avatar.focusAt(x, y),
-    switchCostume: (settingsUrl) => switchCostume({ app, center, characterId, current }, settingsUrl),
+    switchCostume: (source) => switchCostume({ app, center, characterId, current }, source),
     dispose: () => {
       app.ticker.remove(mask.refresh);
       mask.dispose();
@@ -100,11 +101,11 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
 
 // Teardown+reload the new costume, rebuild its avatar controller + idle loop, and return the re-read vocabulary the
 // caller re-reports through the EXISTING avatar.report (arch §6b — no new vocab plumbing, no costume.switch WS method).
-async function switchCostume(ctx: SwitchContext, settingsUrl: string): Promise<AvatarVocabulary> {
+async function switchCostume(ctx: SwitchContext, source: CostumeSource): Promise<AvatarVocabulary> {
   const { model, vocabulary } = await reloadModel(
     { app: ctx.app, load: loadCharacterModel, readVocab: readVocabulary },
     ctx.current.model,
-    settingsUrl,
+    source,
   );
   ctx.current.model = model;
   ctx.current.avatar = createAvatarController({ model, center: ctx.center, characterId: ctx.characterId });

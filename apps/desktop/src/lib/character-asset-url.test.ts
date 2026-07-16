@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from "vitest";
 import type { CharacterCostumesResult } from "@taki/shared";
-import { costumeSettingsSegments, resolveSettingsFile } from "./character-asset-url.ts";
+import { costumeSettingsSegments, resolveSettingsFile, resourceSegments } from "./character-asset-url.ts";
 
 const COSTUMES: CharacterCostumesResult = {
   costumes: ["arbeit", "live_01"],
@@ -43,5 +43,19 @@ describe("resolveSettingsFile", () => {
 
   it("returns null for a costume the character does not have", () => {
     expect(resolveSettingsFile(COSTUMES, "nope")).toBeNull();
+  });
+});
+
+describe("resourceSegments", () => {
+  // These feed the per-sub-resource asset URL that fixes the dropped-prefix defect (rc-asset-suburl-defect.md):
+  // each settings-relative ref becomes its own absolute path, so the engine never relative-joins it.
+  it("splits a nested POSIX ref into clean segments", () => {
+    expect(resourceSegments("data/textures/texture_00.png")).toEqual(["data", "textures", "texture_00.png"]);
+    expect(resourceSegments("model.moc")).toEqual(["model.moc"]);
+  });
+
+  it("drops leading ./ and empty segments so the joined path stays clean", () => {
+    expect(resourceSegments("./data/model.moc")).toEqual(["data", "model.moc"]);
+    expect(resourceSegments("data//model.moc")).toEqual(["data", "model.moc"]);
   });
 });

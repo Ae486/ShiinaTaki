@@ -8,7 +8,7 @@
 
 import { useEffect, useRef } from "react";
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
-import { characterCostumeUrl, resolveSettingsFile } from "@/lib/character-asset-url.js";
+import { costumeAssetResolver, resolveSettingsFile } from "@/lib/character-asset-url.js";
 import { useConnectionStore } from "@/stores/connection-store.js";
 import type { PetScene } from "@/renderer/pet-scene.js";
 
@@ -25,8 +25,8 @@ export function useInitialCostume(scene: PetScene | null): void {
         const costumes = await client.characterCostumes(ACTIVE_CHARACTER_ID);
         const settingsFile = resolveSettingsFile(costumes, costumes.defaultCostume);
         if (!settingsFile) return; // imported but malformed marker — keep the dev model rather than crash
-        const url = await characterCostumeUrl(ACTIVE_CHARACTER_ID, costumes.defaultCostume, settingsFile);
-        const vocabulary = await scene.switchCostume(url);
+        const source = await costumeAssetResolver(ACTIVE_CHARACTER_ID, costumes.defaultCostume, settingsFile);
+        const vocabulary = await scene.switchCostume(source);
         await client.reportAvatar({ characterId: ACTIVE_CHARACTER_ID, ...vocabulary });
       } catch {
         // Not imported (character.costumes rejects) → stay on the dev fallback model. Not an error the operator sees.
