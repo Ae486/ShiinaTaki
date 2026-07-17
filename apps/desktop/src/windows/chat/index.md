@@ -15,6 +15,6 @@ text, tool cards, image thumbnails; streaming replies; image attachments. One co
 - tool-card.tsx — a compact tool-call/tool-result card (name + status label)
 - image-attachment.tsx — image part renderer (presentational): shimmer / "图片已过期" / resolved thumbnail
 - use-attachment-image.ts — lazy media.get + module ref→dataURL cache (the ws touchpoint for image parts)
-- composer.tsx — textarea (Enter=send) + attach button + thumbnail previews + send
+- composer.tsx — textarea + attach button + thumbnails + dual-state action (发送 while idle / 中断 aborting the in-flight turn via chat.cancel)
 - use-image-attach.ts — file-pick → normalize (downscale/JPEG) → { mediaType, raw base64, preview }, capped at 4
 - image-attach-decode.ts — pure size-gate verdict + data-URL split (the node-testable core of use-image-attach)

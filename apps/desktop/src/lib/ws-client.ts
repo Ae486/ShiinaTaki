@@ -14,6 +14,7 @@ import {
   CHARACTER_METHODS,
   CHAT_METHODS,
   CONNECT_METHOD,
+  ChatCancelResultSchema,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
@@ -63,6 +64,8 @@ export type ConnectOutcome =
 export interface WsClient {
   connect(params: ConnectParams): Promise<ConnectOutcome>;
   chat(params: ChatSendParams, handlers: ChatHandlers): Promise<void>;
+  /** Cancels the character's in-flight turn (idempotent; false = nothing was running). The composer's abort entry. */
+  chatCancel(characterId: string): Promise<boolean>;
   subscribeAvatar(characterId: string): Promise<void>;
   reportAvatar(params: AvatarReportParams): Promise<void>;
   /** Fetches one newest-first page of a character's timeline (the chat window's history paging). */
@@ -172,6 +175,8 @@ function requestMethods(rpc: JSONRPCServerAndClient) {
   return {
     subscribeAvatar: async (characterId: string) => void (await rpc.request(AVATAR_METHODS.subscribe, { characterId })),
     reportAvatar: async (params: AvatarReportParams) => void (await rpc.request(AVATAR_METHODS.report, params)),
+    chatCancel: async (characterId: string) =>
+      ChatCancelResultSchema.parse(await rpc.request(CHAT_METHODS.cancel, { characterId })).cancelled,
     timelineHistory: async (params: TimelineHistoryParams) =>
       TimelineHistoryResultSchema.parse(await rpc.request(TIMELINE_METHODS.history, params)),
     subscribeTimeline: async (characterId: string) => void (await rpc.request(TIMELINE_METHODS.subscribe, { characterId })),

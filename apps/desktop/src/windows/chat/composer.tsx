@@ -1,7 +1,7 @@
 /**
- * INPUT:  the user's typed draft + picked image attachments (useImageAttach); an isSending flag from the hook.
- * OUTPUT: <Composer> — textarea (Enter=send, Shift+Enter=newline), attach button, thumbnail previews, send button.
- *         Calls onSend(message, attachments) then clears; send is disabled while a turn is in-flight or the row is empty.
+ * INPUT:  the user's typed draft + picked image attachments (useImageAttach); an isSending flag + onCancel from the hook.
+ * OUTPUT: <Composer> — textarea (Enter=send, Shift+Enter=newline), attach button, thumbnail previews, and a dual-state
+ *         action button: 发送 while idle, 中断 (abort the in-flight turn) while sending. Calls onSend then clears.
  * POS:    ui/windows/chat — presentational; owns the image-attach hook. The attach button stays enabled even without a
  *         vision slot (decision 5, v1) — a no-vision send returns chat.error rendered as an inline timeline notice.
  */
@@ -12,6 +12,7 @@ import { useImageAttach, type PickedAttachment } from "./use-image-attach.ts";
 
 interface ComposerProps {
   onSend: (message: string, attachments: ImageAttachment[]) => void;
+  onCancel: () => void;
   isSending: boolean;
 }
 
@@ -80,7 +81,32 @@ function Thumbnails({ attachments, onRemove }: { attachments: PickedAttachment[]
   );
 }
 
-export function Composer({ onSend, isSending }: ComposerProps) {
+// The action slot: 发送 while idle, 中断 (abort via chat.cancel) while a turn streams — same position, two states.
+function ActionButton({ isSending, canSend, onSubmit, onCancel }: { isSending: boolean; canSend: boolean; onSubmit: () => void; onCancel: () => void }) {
+  if (isSending) {
+    return (
+      <button
+        type="button"
+        onClick={onCancel}
+        className="rounded-full border border-rose-300 px-4 py-2 text-sm font-medium text-rose-500 transition-colors hover:bg-rose-50"
+      >
+        中断
+      </button>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={onSubmit}
+      disabled={!canSend}
+      className="rounded-full bg-rose-400 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-rose-500 disabled:opacity-40"
+    >
+      发送
+    </button>
+  );
+}
+
+export function Composer({ onSend, onCancel, isSending }: ComposerProps) {
   const [draft, setDraft] = useState("");
   const { attachments, pick, remove, clear, notice, dismissNotice } = useImageAttach();
   const canSend = !isSending && (draft.trim().length > 0 || attachments.length > 0);
@@ -112,14 +138,7 @@ export function Composer({ onSend, isSending }: ComposerProps) {
           placeholder="跟 taki 说点什么…"
           className="max-h-40 min-h-[2.5rem] flex-1 resize-none rounded-2xl bg-slate-100 px-3.5 py-2 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-rose-300"
         />
-        <button
-          type="button"
-          onClick={submit}
-          disabled={!canSend}
-          className="rounded-full bg-rose-400 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-rose-500 disabled:opacity-40"
-        >
-          发送
-        </button>
+        <ActionButton isSending={isSending} canSend={canSend} onSubmit={submit} onCancel={onCancel} />
       </div>
     </div>
   );

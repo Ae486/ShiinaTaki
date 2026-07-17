@@ -44,6 +44,8 @@ export interface ChatTimeline {
   isSending: boolean;
   loadOlder: () => void;
   send: (message: string, attachments: ImageAttachment[]) => void;
+  /** Aborts the in-flight turn (the composer's 中断 button); isSending releases when the cancelled turn settles. */
+  cancel: () => void;
 }
 
 export function useChatTimeline(client: WsClient | null, ready: boolean): ChatTimeline {
@@ -79,6 +81,12 @@ export function useChatTimeline(client: WsClient | null, ready: boolean): ChatTi
     [client],
   );
 
+  // Fire-and-forget: the server aborts the turn and the pending chat() settles via chat.complete/error, which is
+  // what releases isSending — no local state to unwind here. cancelled:false (nothing running) is a harmless no-op.
+  const cancel = useCallback(() => {
+    if (client) void client.chatCancel(ACTIVE_CHARACTER_ID).catch(() => undefined);
+  }, [client]);
+
   const loadOlder = useCallback(() => {
     const before = useChatTimelineStore.getState().nextBefore;
     if (!client || before === null || loadingOlder.current) return;
@@ -91,5 +99,5 @@ export function useChatTimeline(client: WsClient | null, ready: boolean): ChatTi
   }, [client]);
 
   const groups = useMemo(() => groupByLocalDate(entries), [entries]);
-  return { groups, inflight, notices, loaded, hasMore: nextBefore !== null, isSending, loadOlder, send };
+  return { groups, inflight, notices, loaded, hasMore: nextBefore !== null, isSending, loadOlder, send, cancel };
 }

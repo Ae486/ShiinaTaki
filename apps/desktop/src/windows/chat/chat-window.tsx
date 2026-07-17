@@ -47,7 +47,7 @@ export function ChatWindow() {
         </header>
         <StatusBanner status={status} />
         <TimelineView timeline={timeline} />
-        <Composer onSend={timeline.send} isSending={timeline.isSending} />
+        <Composer onSend={timeline.send} onCancel={timeline.cancel} isSending={timeline.isSending} />
       </div>
     </ChatClientContext.Provider>
   );
