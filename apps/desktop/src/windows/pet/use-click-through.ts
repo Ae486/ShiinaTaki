@@ -1,10 +1,11 @@
 /**
- * INPUT:  the loaded PetScene (isOpaqueAt alpha test + focusAt gaze) + the shared dragging/bubbleOpen flags; Tauri's
- *         global cursorPosition, the pet window geometry (innerPosition/scaleFactor), and setIgnoreCursorEvents.
+ * INPUT:  the loaded PetScene (isOpaqueAt alpha test + focusAt gaze) + the shared dragging flag; Tauri's global
+ *         cursorPosition, the pet window geometry (innerPosition/scaleFactor), and setIgnoreCursorEvents; the DOM
+ *         (elementFromPoint) for element-level UI hit-testing ([data-keep-interactive] bubble/panel).
  * OUTPUT: drives per-pixel click-through AND gaze follow from ONE global-cursor poll — maps the cursor to canvas-local
  *         px, toggles ignore-cursor-events (only on change), and points the model's gaze at the cursor each tick.
- * POS:    ui/windows/pet — hook owns the Tauri window access (approach B, no Rust). Reads the shared flags so a drag
- *         or an open bubble never drops through; exposes error state (async Tauri calls) per hook guidelines.
+ * POS:    ui/windows/pet — hook owns the Tauri window access (approach B, no Rust). An open bubble/panel keeps only
+ *         its OWN rect interactive (element-level, B-test 4); exposes error state (async Tauri calls) per hook guidelines.
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -16,11 +17,17 @@ import { shouldIgnoreCursor } from "./click-through-toggle.ts";
 // ~40Hz: responsive enough that the toggle feels instant, far below the rate that would peg a core (IPC per tick).
 const POLL_INTERVAL_MS = 24;
 
+// Element-level UI hit test: the bubble/panel mark themselves [data-keep-interactive]; hovering them keeps the
+// window interactive while everything around them passes through. Works regardless of the current ignore state —
+// elementFromPoint is a render-tree query, not an OS event.
+function isOverUi(x: number, y: number): boolean {
+  return document.elementFromPoint(x, y)?.closest("[data-keep-interactive]") != null;
+}
+
 type PollContext = {
   win: TauriWindow;
   scene: PetScene;
   isDragging: () => boolean;
-  isBubbleOpen: () => boolean;
   scaleFactor: number;
   buttonDown: boolean;
   lastIgnore: boolean | null;
@@ -41,7 +48,7 @@ async function pollOnce(ctx: PollContext): Promise<void> {
     const ignore = shouldIgnoreCursor({
       dragging: ctx.isDragging(),
       buttonDown: ctx.buttonDown,
-      bubbleOpen: ctx.isBubbleOpen(),
+      overUi: isOverUi(x, y),
       opaque,
     });
     if (ignore !== ctx.lastIgnore) {
@@ -64,12 +71,6 @@ export function useClickThrough(scene: PetScene | null): { error: string | null 
   const dragging = useInteractionStore((s) => s.dragging);
   const draggingRef = useRef(dragging);
   draggingRef.current = dragging;
-  // The bubble AND the operator panel both need the window interactive while open (their inputs may sit over
-  // transparent pixels). OR them into the one "keep interactive" signal so the pure toggle formula stays unchanged.
-  const bubbleOpen = useInteractionStore((s) => s.bubbleOpen);
-  const panelOpen = useInteractionStore((s) => s.panelOpen);
-  const keepInteractiveRef = useRef(bubbleOpen || panelOpen);
-  keepInteractiveRef.current = bubbleOpen || panelOpen;
 
   useEffect(() => {
     if (!scene) return;
@@ -77,7 +78,6 @@ export function useClickThrough(scene: PetScene | null): { error: string | null 
       win: getCurrentWindow(),
       scene,
       isDragging: () => draggingRef.current,
-      isBubbleOpen: () => keepInteractiveRef.current,
       scaleFactor: 1,
       buttonDown: false,
       lastIgnore: null,

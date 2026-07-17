@@ -39,27 +39,36 @@ function BubbleReplyView({ reply }: { reply: BubbleReply }) {
 // Owns the expand-to-chat-window action. Inline SVG, not a glyph: WebView2 rendered the previous ⤢ invisibly,
 // hiding the ONLY entry to the full chat window (B8).
 function OpenChatButton() {
+  // Inline error, NOT window.alert — WebView2 does not implement native JS dialogs, so alert is a silent no-op.
+  const [error, setError] = useState<string | null>(null);
   const open = () =>
-    openChatWindow().catch((cause: unknown) => {
-      // Packaged builds have no devtools/console — a window-creation failure must be visible to be reportable.
-      const message = cause instanceof Error ? cause.message : String(cause);
-      console.error("chat window failed to open", cause);
-      window.alert(`无法打开聊天窗口: ${message}`);
-    });
+    openChatWindow()
+      .then(() => setError(null))
+      .catch((cause: unknown) => {
+        console.error("chat window failed to open", cause);
+        setError(cause instanceof Error ? cause.message : String(cause));
+      });
   return (
-    <button
-      type="button"
-      onClick={() => void open()}
-      className="px-1 text-slate-400 hover:text-slate-600"
-      aria-label="Open chat window"
-      title="打开聊天窗口"
-    >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
-        <path d="M15 3h6v6" />
-        <path d="m10 14 11-11" />
-        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-      </svg>
-    </button>
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => void open()}
+        className="px-1 text-slate-400 hover:text-slate-600"
+        aria-label="Open chat window"
+        title="打开聊天窗口"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+          <path d="M15 3h6v6" />
+          <path d="m10 14 11-11" />
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        </svg>
+      </button>
+      {error && (
+        <div className="absolute -top-9 right-0 z-10 max-w-72 truncate rounded bg-red-900/85 px-2 py-1 text-[10px] text-red-100">
+          无法打开聊天窗口: {error}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -112,6 +121,9 @@ export function ChatBubble() {
   return (
     <div
       className="pointer-events-auto absolute left-1/2 top-6 flex w-72 -translate-x-1/2 flex-col gap-2"
+      // Marks the bubble's rect as the ONLY interactive area while open — the click-through poll keeps the window
+      // interactive over it and passes everything around it through (element-level, [data-keep-interactive]).
+      data-keep-interactive
       // Keep bubble pointer events out of the pet drag/click seam (the host div behind it owns those handlers).
       onPointerDown={(event) => event.stopPropagation()}
       onPointerUp={(event) => event.stopPropagation()}

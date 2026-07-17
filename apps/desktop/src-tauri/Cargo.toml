@@ -25,7 +25,7 @@ tauri-build = { version = "2.6", features = [] }
 # protocol-asset: serves the Workspace characters/ subtree to the pet webview via the asset: protocol (#18); the
 # scope + CSP live in tauri.conf.json (app.security.assetProtocol). The build script requires this feature when
 # assetProtocol is enabled — a mismatch fails `cargo check` (not at runtime), which is why it is pinned here.
-tauri = { version = "2.11", features = ["protocol-asset"] }
+tauri = { version = "2.11", features = ["protocol-asset", "devtools"] }
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
 # Persists the pet overlay window geometry (position/size) across restarts, scoped to the pet window (issue #14,

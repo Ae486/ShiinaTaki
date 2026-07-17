@@ -103,6 +103,8 @@ export function CharacterPanel({ scene, onClose }: CharacterPanelProps) {
   return (
     <div
       className="pointer-events-auto absolute right-3 top-3 flex w-64 flex-col gap-2 rounded-xl bg-white/95 p-3 text-slate-800 shadow-xl ring-1 ring-black/5"
+      // Marks the panel's rect as the ONLY interactive area while open (element-level click-through, B-test 4).
+      data-keep-interactive
       onPointerDown={(event) => event.stopPropagation()}
       onPointerUp={(event) => event.stopPropagation()}
       onPointerMove={(event) => event.stopPropagation()}
