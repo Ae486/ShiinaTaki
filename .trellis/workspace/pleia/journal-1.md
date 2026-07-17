@@ -358,3 +358,39 @@ Manual smoke of #10 screenshot item 3/4 (session grant + restart) surfaced: no c
 ### Next Steps
 
 - None - task complete
+
+## Session 12: Chat polish: abort entry, unified toast (D34), cancel-retract
+
+**Date**: 2026-07-18
+**Task**: character-import (#18 tail) + #17 chat polish
+**Branch**: `main`
+
+### Summary
+
+Post-B-test polish round, three features shipped. (1) Abort entry: the send button becomes an interrupt button while a turn streams (856ff15). (2) Unified floating toast (D34): transient notices float above the layout, ~6s auto-dismiss, hover pauses the timer, outside-click dismisses; chat notices migrated off the layout-consuming inline bars (0a75827). (3) Cancel-retract (acb2b12): cancel before ANY output retracts the just-appended user row (DB delete + timeline.removed push + draft restored to the composer, memory writes skipped); cancel after output keeps today's stop byte-identically. Load-bearing find during leader verification: AI SDK v7 abort has TWO endings — the impl agent's "never throws" claim was mock-derived and wrong. The plain-string abort reason fails provider-utils isAbortError, so the real transport ERRORS the stream (the prod-common prefill-cancel ending; the old "turn cancelled by operator" toast was its fingerprint). Fixed with an ending-agnostic retract seam (additive catch wrapper + clean-path check, one shared predicate) + a transport-faithful abortRejectingModel mock; the 2x2 cancel matrix (graceful/throw x retract/stop) is pinned in tests. Check (fable5) passed all six axes with 4 header-level self-fixes. Specs sedimented: frontend/packaged-build.md (NEW: CSP packaged-only, WebView2 silent quirks, boot-silence invariants, CDP recipe), chat-window.md get-all grants for getByLabel, agent-runtime.md abort double-ending section. D34 flipped DONE; D35 (bubble retract degradation) logged.
+
+### Main Changes
+
+- packages/core: chat-agent retract seam (both endings), conversation-store removeEntry/onRemove, timeline-repo deleteEntry, timeline-subscriptions publishRemoved, chat-send retracted flag, abortRejectingModel mock
+- packages/shared: ChatError.retracted, TIMELINE_METHODS.removed + TimelineRemovedSchema
+- apps/desktop: ws-client timeline.removed route + retracted threading, chat-timeline-store removeEntry, use-chat-timeline retractedDraft, composer restore-or-toast, toast system (D34)
+- .trellis/spec: packaged-build.md new; chat-window.md + agent-runtime.md updated; D34 DONE + D35 logged
+
+### Git Commits
+
+- 856ff15 feat(ui): abort entry for streaming turns
+- 0a75827 feat(ui): unified floating toast for transient notices (D34)
+- acb2b12 feat(core): cancel before reply retracts the message
+
+### Testing
+
+- [OK] pnpm -r test: 824 passed (shared 171 / cli 18 / desktop 120 / core 515); both tsc clean; lint clean; desktop build OK; core boot smoke OK
+- [PENDING] User packaged verification: toast behavior + cancel-retract round
+
+### Status
+
+[OK] Implementation + check + update-spec complete; awaiting user packaged verification
+
+### Next Steps
+
+- After user verification passes: close #18 (task.py finish), push M4

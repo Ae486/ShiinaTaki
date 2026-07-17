@@ -56,3 +56,33 @@ discipline: the frozen regions are off-limits.
   (traversal is not even expressible), single-sourced in the store; the `media.*` WS methods are thin delegations and
   operator-only (no Rust mirror — see [Server-Push & Connection Auth](./server-push-and-connection-auth.md)). Retained
   bytes are swept on a configurable TTL; the description memory is never swept.
+
+## A cancel has TWO stream endings — cover both, and mock the transport faithfully (#17 cancel-retract)
+
+`ai@7.0.17` ends an aborted stream in either of two ways; which fires is decided by the SDK's `isAbortError` name
+check (provider-utils: an Error/DOMException named AbortError/ResponseAborted/TimeoutError), not by us:
+
+- **Graceful**: the model read resolves (or rejects AbortError-shaped) → the SDK enqueues an `abort` part and closes;
+  the for-await ends cleanly.
+- **Throw**: the read rejects with anything else. Our abort reason is a PLAIN STRING ("turn cancelled by operator")
+  and undici rejects the in-flight body read with `signal.reason` verbatim — a string fails `isAbortError`, the SDK
+  errors the stream, the for-await THROWS the reason. This is the COMMON production ending for a prefill cancel (no
+  chunk ever arrived); the old "turn cancelled by operator" error toast was this ending's fingerprint.
+
+Consequences (all load-bearing):
+
+- Post-loop logic that must run on cancel (the retract seam) lives on BOTH endings: an additive catch wrapper around
+  the frozen try/finally + the clean-path check, sharing ONE predicate (`retractIfCancelledSilent` = aborted AND zero
+  completed steps AND no partial text). Do NOT "fix" the string reason into an AbortError to force the graceful path —
+  correctness must not depend on SDK-internal name lists surviving the next major.
+- **Mock-green ≠ prod-correct.** `simulateReadableStream` reads always RESOLVE, so mock tests structurally see only
+  the graceful ending — the throw ending stayed invisible under 513 green tests. Abort-path tests use the
+  transport-faithful `abortRejectingModel` (errors the model stream with `signal.reason` on abort, mirroring undici).
+  The cancel matrix is 2×2 (graceful/throw × retract/stop) — keep all four pinned.
+- Before relying on any SDK runtime behavior, read the INSTALLED dist (`node_modules/.pnpm/ai@*/**/dist/index.js`) —
+  not the mock's behavior, not training memory. An observed packaged-runtime symptom (which error text, which
+  notification arrived) is evidence about which path actually fires; reconcile a probe against it before believing it.
+- Retract semantics (user-approved 2026-07-17): cancel with NOTHING produced → delete the just-appended user row
+  (DB + `timeline.removed` push), pump sends `chat.error{retracted:true}`, the UI restores the draft (never
+  overwriting newly typed text), autoMemory/imageMemory never fire. Cancel after ANY output → stop, today's behavior
+  byte-identical. "Produced nothing" is exactly "persistTurn would persist nothing beyond the user row".
