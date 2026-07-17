@@ -3,7 +3,8 @@
  * OUTPUT: openChatWindow() — shows+focuses the existing chat window, or creates it at runtime (chat.html).
  * POS:    ui/lib — the pet→chat window opener (research r4). Runtime-created (no tauri.conf.json entry); the chat
  *         window is a disposable client whose own WS dies with it (invariant 4). Needs the pet capability's
- *         core:webview:allow-create-webview-window + core:window:allow-set-focus.
+ *         core:webview:allow-create-webview-window + core:window:allow-set-focus + the get-all pair
+ *         (core:window:allow-get-all-windows, core:webview:allow-get-all-webviews — getByLabel calls them).
  */
 
 import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
