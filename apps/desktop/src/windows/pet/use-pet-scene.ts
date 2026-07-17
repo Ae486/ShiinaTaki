@@ -28,24 +28,34 @@ export function usePetScene(hostRef: RefObject<HTMLElement | null>): { scene: Pe
     let mounted: PetScene | null = null;
 
     const boot = async (): Promise<void> => {
-      for (let attempt = 1; attempt <= STAGE_ATTEMPTS; attempt += 1) {
-        try {
-          const next = await createPetScene(host);
-          if (disposed) return next.dispose();
-          mounted = next;
-          setScene(next);
-          setError(null);
-          return;
-        } catch (cause) {
-          console.error(`pet scene failed to load (attempt ${attempt}/${STAGE_ATTEMPTS})`, cause);
-          if (disposed) return;
-          if (attempt === STAGE_ATTEMPTS) {
-            setError(cause instanceof Error ? cause.message : String(cause));
+      // Failsafe reveal: if boot HANGS (neither resolves nor rejects), the window must still become visible with
+      // its error surface — an invisible pet with zero clue is the worst failure mode this overlay has had.
+      const failsafe = window.setTimeout(() => {
+        setError((prev) => prev ?? "初始化超时(10s)——渲染启动未完成");
+        void getCurrentWindow().show().catch(() => undefined);
+      }, 10_000);
+      try {
+        for (let attempt = 1; attempt <= STAGE_ATTEMPTS; attempt += 1) {
+          try {
+            const next = await createPetScene(host);
+            if (disposed) return next.dispose();
+            mounted = next;
+            setScene(next);
+            setError(null);
             return;
+          } catch (cause) {
+            console.error(`pet scene failed to load (attempt ${attempt}/${STAGE_ATTEMPTS})`, cause);
+            if (disposed) return;
+            if (attempt === STAGE_ATTEMPTS) {
+              setError(cause instanceof Error ? cause.message : String(cause));
+              return;
+            }
+            await new Promise((resolve) => setTimeout(resolve, STAGE_RETRY_MS));
+            if (disposed) return;
           }
-          await new Promise((resolve) => setTimeout(resolve, STAGE_RETRY_MS));
-          if (disposed) return;
         }
+      } finally {
+        window.clearTimeout(failsafe);
       }
     };
     void boot().finally(() => {
