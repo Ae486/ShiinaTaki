@@ -1,9 +1,9 @@
 # core/server/methods/
 - connect.ts — connect: the ONLY pre-auth method; token verify, pairing handshake, or loopback operator auto-trust (P3), then authenticate the socket
-- chat-send.ts — chat.send (operator-only): ack { messageId }, then stream agent tokens as chat.delta/.complete/.error; turns serialized per characterId (queue) + cancellable (registry)
+- chat-send.ts — chat.send (operator-only): ack { messageId }, then stream agent tokens as chat.delta/.complete/.error; turns serialized per characterId (queue) + cancellable (registry); a cancel-before-reply closes with chat.error { retracted:true } (draft restore) instead of complete
 - chat-cancel.ts — chat.cancel (operator-only): abort the character's in-flight turn via the TurnRegistry; idempotent ({cancelled:false} when idle)
 - timeline-history.ts — timeline.history (operator-only): newest-first cursor page of the conversation timeline
-- timeline-subscribe.ts — timeline.subscribe (operator-only): register a timeline.appended sink; auto-unsubscribe on disconnect
+- timeline-subscribe.ts — timeline.subscribe (operator-only): register a timeline.appended/removed sink; auto-unsubscribe on disconnect
 - avatar-subscribe.ts — avatar.subscribe (operator-only): register an avatar.command sink; auto-unsubscribe on disconnect
 - avatar-report.ts — avatar.report (operator-only): record the Pet UI's loaded-model motion/expression names into the vocabulary store
 - media-get.ts — media.get (operator-only): serve one attachment's bytes for scroll-back; thin delegation to attachment-store.read (ref confinement single-sourced there)

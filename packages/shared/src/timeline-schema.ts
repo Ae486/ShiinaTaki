@@ -1,6 +1,6 @@
 /**
  * INPUT:  candidate timeline.* params/event payloads (parsed WS frames + repo rows)
- * OUTPUT: TIMELINE_METHODS + TimelineEntry/Part/History/Subscribe/Appended schemas (append-only conversation log)
+ * OUTPUT: TIMELINE_METHODS + TimelineEntry/Part/History/Subscribe/Appended/Removed schemas (append-only conversation log)
  * POS:    shared/protocol — the timeline persistence contract (ADR 0005, invariants 3, 7); core repo + server + CLI
  */
 import { z } from "zod";
@@ -10,6 +10,7 @@ export const TIMELINE_METHODS = {
   history: "timeline.history",
   subscribe: "timeline.subscribe",
   appended: "timeline.appended",
+  removed: "timeline.removed",
 } as const;
 
 /** A timeline row's authorship — deliberately distinct from the connect Role (operator|node). */
@@ -96,3 +97,11 @@ export type TimelineSubscribeResult = z.infer<typeof TimelineSubscribeResultSche
 // The timeline.appended push payload is exactly the committed entry.
 export const TimelineAppendedSchema = TimelineEntrySchema;
 export type TimelineAppended = z.infer<typeof TimelineAppendedSchema>;
+
+// The timeline.removed push (cancel-retract, M4 closeout): the coordinates of a row deleted from the log. The
+// operator UI drops the entry with this seq. Operator-only push, no Rust mirror — sibling of timeline.appended.
+export const TimelineRemovedSchema = z.object({
+  characterId: z.string().min(1),
+  seq: z.int().positive(),
+});
+export type TimelineRemoved = z.infer<typeof TimelineRemovedSchema>;

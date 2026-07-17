@@ -57,6 +57,25 @@ describe("createTimelineRepo.append", () => {
   });
 });
 
+describe("createTimelineRepo.deleteEntry", () => {
+  it("removes exactly the addressed row; later reads exclude it and other rows survive", () => {
+    repo.append({ characterId: "taki", role: "user", content: "keep-1" });
+    const doomed = repo.append({ characterId: "taki", role: "user", content: "retract-me" });
+    repo.append({ characterId: "taki", role: "user", content: "keep-2" });
+
+    repo.deleteEntry("taki", doomed.seq);
+
+    expect(repo.latestAscending("taki", 10).map((e) => e.content)).toEqual(["keep-1", "keep-2"]);
+  });
+
+  it("is a no-op for an unknown seq and for another character's row (single-writer, scoped delete)", () => {
+    const taki = repo.append({ characterId: "taki", role: "user", content: "mine" });
+    expect(() => repo.deleteEntry("taki", 999)).not.toThrow();
+    repo.deleteEntry("yui", taki.seq); // wrong character — must not touch taki's row
+    expect(repo.latestAscending("taki", 10).map((e) => e.content)).toEqual(["mine"]);
+  });
+});
+
 describe("createTimelineRepo.pageBefore", () => {
   beforeEach(() => {
     for (let i = 1; i <= 5; i += 1) repo.append({ characterId: "taki", role: "user", content: `m${i}` });

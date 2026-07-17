@@ -88,4 +88,21 @@ describe("chat timeline store", () => {
     expect(useChatTimelineStore.getState().inflight).toBeNull();
   });
 
+  it("removes a retracted entry by seq and keeps the rest ascending (cancel-before-reply)", () => {
+    const store = useChatTimelineStore.getState();
+    store.mergeHistory({
+      entries: [entry(1, "user", "a"), entry(2, "assistant", "b"), entry(3, "user", "c")],
+      nextBefore: null,
+    });
+    store.removeEntry(2);
+    expect(useChatTimelineStore.getState().entries.map((e) => e.seq)).toEqual([1, 3]);
+  });
+
+  it("treats removeEntry for an unknown seq as a no-op", () => {
+    const store = useChatTimelineStore.getState();
+    store.mergeHistory({ entries: [entry(1, "user", "a")], nextBefore: null });
+    store.removeEntry(999);
+    expect(useChatTimelineStore.getState().entries.map((e) => e.seq)).toEqual([1]);
+  });
+
 });

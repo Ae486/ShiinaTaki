@@ -122,3 +122,45 @@ describe("chatCancelMethod (D1 #4)", () => {
     expect(res).toMatchObject({ error: { data: { code: "FORBIDDEN" } } });
   });
 });
+
+describe("chatSendMethod cancel-retract (M4 closeout)", () => {
+  it("closes a retracted turn with chat.error { retracted: true } and never chat.complete", async () => {
+    const agent: ChatAgent = {
+      // eslint-disable-next-line require-yield
+      async *stream(_params, turn) {
+        // Mimic the agent's retract seam: nothing streamed, the user row was deleted, signal the pump.
+        turn?.onRetract?.();
+        return;
+      },
+    };
+    const { registry } = harness(agent);
+    const ctx = ctxFor("operator");
+
+    await registry.dispatch(request("chat.send", { characterId: "taki", message: "oops" }), ctx);
+    await vi.waitFor(() => {
+      expect(ctx.notes.some((note) => note.method === "chat.error")).toBe(true);
+    });
+    expect(ctx.notes.find((note) => note.method === "chat.error")?.params).toMatchObject({
+      characterId: "taki",
+      code: "PROVIDER_ERROR",
+      retracted: true,
+    });
+    expect(ctx.notes.some((note) => note.method === "chat.complete")).toBe(false);
+  });
+
+  it("a normal (non-retracted) turn still closes with chat.complete", async () => {
+    const agent: ChatAgent = {
+      async *stream({ message }) {
+        yield message;
+      },
+    };
+    const { registry } = harness(agent);
+    const ctx = ctxFor("operator");
+
+    await registry.dispatch(request("chat.send", { characterId: "taki", message: "hi" }), ctx);
+    await vi.waitFor(() => {
+      expect(ctx.notes.some((note) => note.method === "chat.complete")).toBe(true);
+    });
+    expect(ctx.notes.some((note) => note.method === "chat.error")).toBe(false);
+  });
+});

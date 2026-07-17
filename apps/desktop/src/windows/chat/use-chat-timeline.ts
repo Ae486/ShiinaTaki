@@ -1,9 +1,9 @@
 /**
- * INPUT:  the chat window's WsClient + a `ready` (authenticated) flag; live chat.* + timeline.appended events.
- * OUTPUT: useChatTimeline(client, ready) -> ChatTimeline: date-grouped rows + in-flight row + send/cancel/loadOlder.
- *         Transient errors surface via components/toast (D34), not in-stream rows.
+ * INPUT:  the chat window's WsClient + a `ready` (authenticated) flag; live chat.* + timeline.appended/removed events.
+ * OUTPUT: useChatTimeline(client, ready) -> ChatTimeline: date-grouped rows + in-flight row + send/cancel/loadOlder +
+ *         retractedDraft/consumeRetractedDraft (cancel-before-reply hand-back). Errors toast via components/toast (D34).
  * POS:    ui/windows/chat — the ONLY touchpoint between the window and ws-client/store (hook-guidelines). Wires the WS
- *         to the timeline store: initial history page, live appends, streamed deltas, older-page paging.
+ *         to the timeline store: initial history page, live appends + removals, streamed deltas, older-page paging.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -23,9 +23,15 @@ async function subscribeAndLoad(client: WsClient): Promise<void> {
 }
 
 // One send: deltas grow the in-flight row (keyed by messageId); complete drops it (the persisted entry already
-// arrived via timeline.appended); an error drops the in-flight row and surfaces as a toast (D34). Attachments ride
-// only when present (text-only sends stay byte-identical to the bubble's).
-function runSend(client: WsClient, message: string, attachments: ImageAttachment[]): Promise<void> {
+// arrived via timeline.appended); a plain error drops the in-flight row and surfaces as a toast (D34). A
+// cancel-before-reply is NOT an error — the message was retracted, so its text is handed back via onRetracted
+// (restore/toast, never a red error). Attachments ride only when present (text-only sends stay byte-identical).
+function runSend(
+  client: WsClient,
+  input: { message: string; attachments: ImageAttachment[] },
+  onRetracted: (message: string) => void,
+): Promise<void> {
+  const { message, attachments } = input;
   const params =
     attachments.length > 0
       ? { characterId: ACTIVE_CHARACTER_ID, message, attachments }
@@ -33,9 +39,10 @@ function runSend(client: WsClient, message: string, attachments: ImageAttachment
   return client.chat(params, {
     onDelta: (delta, messageId) => useChatTimelineStore.getState().growInflight(messageId, delta),
     onComplete: () => useChatTimelineStore.getState().clearInflight(),
-    onError: (_code, reason) => {
+    onError: (_code, reason, retracted) => {
       useChatTimelineStore.getState().clearInflight();
-      pushToast(reason);
+      if (retracted) onRetracted(message);
+      else pushToast(reason);
     },
   });
 }
@@ -50,6 +57,10 @@ export interface ChatTimeline {
   send: (message: string, attachments: ImageAttachment[]) => void;
   /** Aborts the in-flight turn (the composer's 中断 button); isSending releases when the cancelled turn settles. */
   cancel: () => void;
+  /** The text of a message retracted by a cancel-before-reply, for the composer to restore; null when none pending. */
+  retractedDraft: string | null;
+  /** Clears the pending retracted draft once the composer has consumed it (restored or toasted). */
+  consumeRetractedDraft: () => void;
 }
 
 export function useChatTimeline(client: WsClient | null, ready: boolean): ChatTimeline {
@@ -58,12 +69,15 @@ export function useChatTimeline(client: WsClient | null, ready: boolean): ChatTi
   const loaded = useChatTimelineStore((s) => s.loaded);
   const nextBefore = useChatTimelineStore((s) => s.nextBefore);
   const [isSending, setSending] = useState(false);
+  // A cancel-before-reply hands the retracted text back here; the composer restores it (or toasts it) then consumes.
+  const [retractedDraft, setRetractedDraft] = useState<string | null>(null);
   const loadingOlder = useRef(false);
 
   useEffect(() => {
     if (!client || !ready) return;
     useChatTimelineStore.getState().reset();
     client.onTimelineAppended((entry) => useChatTimelineStore.getState().appendLive(entry));
+    client.onTimelineRemoved((ref) => useChatTimelineStore.getState().removeEntry(ref.seq));
     let cancelled = false;
     void subscribeAndLoad(client).catch((error: unknown) => {
       if (!cancelled) pushToast(`加载历史失败：${String(error)}`);
@@ -77,7 +91,7 @@ export function useChatTimeline(client: WsClient | null, ready: boolean): ChatTi
     (message: string, attachments: ImageAttachment[]) => {
       if (!client) return;
       setSending(true);
-      void runSend(client, message, attachments)
+      void runSend(client, { message, attachments }, setRetractedDraft)
         .catch((error: unknown) => pushToast(String(error)))
         .finally(() => setSending(false));
     },
@@ -102,5 +116,6 @@ export function useChatTimeline(client: WsClient | null, ready: boolean): ChatTi
   }, [client]);
 
   const groups = useMemo(() => groupByLocalDate(entries), [entries]);
-  return { groups, inflight, loaded, hasMore: nextBefore !== null, isSending, loadOlder, send, cancel };
+  const consumeRetractedDraft = useCallback(() => setRetractedDraft(null), []);
+  return { groups, inflight, loaded, hasMore: nextBefore !== null, isSending, loadOlder, send, cancel, retractedDraft, consumeRetractedDraft };
 }

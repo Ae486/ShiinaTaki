@@ -75,5 +75,8 @@ export const ChatErrorSchema = z.object({
   characterId: z.string(),
   code: ErrorCodeSchema,
   message: z.string(),
+  // Cancel-retract (M4 closeout): true only when the turn was cancelled before it produced anything — its user row
+  // was deleted (timeline.removed pushed) and the draft returns to the composer. Absent on every other error.
+  retracted: z.boolean().optional(),
 });
 export type ChatError = z.infer<typeof ChatErrorSchema>;

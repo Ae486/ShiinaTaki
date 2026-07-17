@@ -2,7 +2,8 @@
  * INPUT:  ChatSendParams (+optional attachments) + an injected LanguageModel (AI SDK v7), ConversationStore,
  *         MemoryEngine, optional AutoMemory/visionModel/attachment store/imageMemory hook
  * OUTPUT: createChatAgent({model, store, memory, ...}) -> ChatAgent whose stream() yields text deltas; persists the
- *         FULL turn (tool-calls + tool-results + text) after the loop; abort-aware, partial text never lost
+ *         FULL turn (tool-calls + tool-results + text) after the loop; abort-aware, partial text never lost;
+ *         a cancel before any output retracts the just-appended user row (deletes it + skips the memory writes)
  * POS:    core/agents — the streaming chat loop; base prompt + memory context + tools per turn; auto-writes detached
  */
 import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type ToolSet } from "ai";
@@ -20,6 +21,9 @@ export interface TurnContext {
   onClose: (cb: () => void) => void;
   /** Aborts the in-flight model stream (chat.cancel / connection close); absent = uncancellable turn (tests). */
   signal?: AbortSignal;
+  /** Fired when a cancel landed before the turn produced anything: the user row was retracted, so the pump closes
+   *  with a retract error (restore the draft) instead of a normal complete. Absent = no retract handling (tests). */
+  onRetract?: () => void;
 }
 
 export interface ChatAgent {
@@ -73,7 +77,8 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   const images = vision
     ? attachments.map((a) => ({ mediaType: a.mediaType, ref: vision.store.save(a.dataBase64, a.mediaType).ref }))
     : [];
-  store.appendUser(characterId, message, images);
+  // Capture the committed user row so a cancel-before-reply can retract exactly this seq (the retract seam below).
+  const userEntry = store.appendUser(characterId, message, images);
   const history = store.history(characterId);
   // Per-turn construction: assembled instructions + characterId-bound tools (construction cost is trivial).
   const agent = new ToolLoopAgent({
@@ -95,7 +100,8 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   // The in-flight image bytes ride ONLY this turn's messages (a FilePart tail swap replacing the just-appended user
   // row's text projection); persistence + replay stay text (decision 6). A text turn sends `history` unchanged.
   const outgoing = vision ? [...history.slice(0, -1), buildMultimodalUser(message, attachments)] : history;
-  // abortSignal is per-call by SDK design (not a constructor setting); abort ends the stream gracefully.
+  // abortSignal is per-call by SDK design (not a constructor setting). A cancel ends the stream by EITHER a graceful
+  // `abort` part or a THROWN reason (see retractIfCancelledSilent) — the retract seam below handles both endings.
   const result = await agent.stream({ messages: outgoing, abortSignal: turn?.signal });
 
   // pendingStepText holds ONLY the in-flight step's text: finish-step clears it because that step's text is then
@@ -103,30 +109,68 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   let pendingStepText = "";
   let streamEnded = false;
   try {
-    // Iterate result.stream (not textStream) so a provider failure surfaces as an error part rather than being
-    // swallowed. Tool/approval/abort parts flow by here — the assembled turn is persisted from responseMessages.
-    for await (const part of result.stream) {
-      if (part.type === "text-delta") {
-        pendingStepText += part.text;
-        yield part.text;
-      } else if (part.type === "finish-step") {
-        pendingStepText = "";
-      } else if (part.type === "error") {
-        throw part.error;
+    try {
+      // Iterate result.stream (not textStream) so a provider failure surfaces as an error part rather than being
+      // swallowed. Tool/approval/abort parts flow by here — the assembled turn is persisted from responseMessages.
+      for await (const part of result.stream) {
+        if (part.type === "text-delta") {
+          pendingStepText += part.text;
+          yield part.text;
+        } else if (part.type === "finish-step") {
+          pendingStepText = "";
+        } else if (part.type === "error") {
+          throw part.error;
+        }
       }
+      streamEnded = true;
+    } finally {
+      // Persist whatever the turn produced — completed steps AND partial text — even on abort/error (D1 #1/#5).
+      await persistTurn(store, characterId, { result, pendingStepText, streamEnded });
     }
-    streamEnded = true;
-  } finally {
-    // Persist whatever the turn produced — completed steps AND partial text — even on abort/error (D1 #1/#5).
-    await persistTurn(store, characterId, { result, pendingStepText, streamEnded });
+  } catch (error) {
+    // Throw ending of a cancel: the transport rejects the read with our string reason (fails isAbortError), so the
+    // SDK errors the stream — same retract rule as the graceful ending (see retractIfCancelledSilent); else propagate.
+    if (await retractIfCancelledSilent(store, { characterId, userSeq: userEntry.seq, result, pendingStepText, turn })) return;
+    throw error;
   }
-  // Detached, never awaited: the auto-write pass must not add latency to the user-facing turn (prd §3 failure policy).
-  void deps.autoMemory?.onTurnCompleted(characterId);
-  // Also detached (mirrors autoMemory): an image turn's authoritative cross-turn record is the vision model's TEXT
-  // description (decision 6), written via the injected hook. Fires only when the turn actually carried images.
-  if (images.length > 0) {
-    void deps.imageMemory?.onImageTurn({ characterId, refs: images.map((img) => img.ref), caption: message });
+  // Graceful ending (the SDK emitted an `abort` part then closed): the same retract check on the clean path.
+  if (await retractIfCancelledSilent(store, { characterId, userSeq: userEntry.seq, result, pendingStepText, turn })) return;
+  fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
+}
+
+// The detached post-turn writes: the auto-memory pass + the image-description hook. Fired void so they never add
+// latency to the user-facing turn (prd §3), and ONLY on the committed path — a retracted turn skips them (it never
+// entered model memory), and a throw ending never reaches here (it rethrew or already retracted).
+function fireDetachedTurnWrites(deps: ChatAgentDeps, ctx: { characterId: string; imageRefs: string[]; message: string }): void {
+  void deps.autoMemory?.onTurnCompleted(ctx.characterId);
+  // An image turn's authoritative cross-turn record is the vision model's TEXT description (decision 6).
+  if (ctx.imageRefs.length > 0) {
+    void deps.imageMemory?.onImageTurn({ characterId: ctx.characterId, refs: ctx.imageRefs, caption: ctx.message });
   }
+}
+
+interface RetractInput {
+  characterId: string;
+  userSeq: number;
+  result: { responseMessages: PromiseLike<TurnMessage[]> };
+  pendingStepText: string;
+  turn?: TurnContext;
+}
+
+// The cancel-before-reply retract, ENDING-AGNOSTIC. A cancel reaches runTurn's post-loop code by either SDK ending:
+// (a) GRACEFUL — the model read resolves (or rejects with an AbortError-shaped error) and the SDK emits an `abort`
+// stream part then closes; (b) THROW — the transport rejects the read with our PLAIN-STRING abort reason, which
+// fails provider-utils `isAbortError` (an Error/DOMException named AbortError/ResponseAborted/TimeoutError), so the
+// SDK errors the stream and the for-await throws the reason. In BOTH, "produced nothing" == aborted with no completed
+// step (responseMessages settles to [] / rejects — verified it does NOT hang after the error ending) and no partial
+// text. On retract: delete exactly the appended user row (DB + timeline.removed) and signal the pump to restore the
+// draft; the message never enters memory. Attachments are NOT restored client-side (bytes stay until TTL GC).
+async function retractIfCancelledSilent(store: ConversationStore, input: RetractInput): Promise<boolean> {
+  if (!(input.turn?.signal?.aborted ?? false) || input.pendingStepText.length > 0) return false;
+  if ((await Promise.resolve(input.result.responseMessages).then((m) => m.length, () => 0)) !== 0) return false;
+  store.removeEntry(input.characterId, input.userSeq);
+  input.turn?.onRetract?.();
+  return true;
 }
 
 // Image turns need BOTH the vision slot and the attachment store; a turn with images but either missing is rejected

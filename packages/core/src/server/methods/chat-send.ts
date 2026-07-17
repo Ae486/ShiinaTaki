@@ -1,7 +1,8 @@
 /**
  * INPUT:  ChatSendParams from a dispatched chat.send request + a ChatAgent + TurnControls (queue + registry)
  * OUTPUT: MethodDefinition (operator-only); acks { messageId }, then streams chat.delta/.complete/.error via ctx;
- *         turns are serialized per characterId and cancellable (chat.cancel / connection close)
+ *         turns are serialized per characterId and cancellable (chat.cancel / connection close); a cancel-before-reply
+ *         closes with chat.error { retracted: true } (draft restore) instead of complete
  * POS:    core/server/methods — one file per WS method; the boundary that turns provider failures into structured errors
  */
 import { randomUUID } from "node:crypto";
@@ -78,14 +79,34 @@ async function pump(args: PumpArgs, controller: AbortController): Promise<void> 
   // A closing operator socket aborts its own in-flight turn — nobody is listening to the deltas anymore.
   // The controller is per-turn, so a late close event can never abort a later turn.
   ctx.onClose(() => controller.abort("connection closed"));
+  // Set by the agent's retract seam when a cancel landed before any reply: the user row was already deleted
+  // (timeline.removed pushed), so this turn closes with a retract error instead of a normal complete.
+  let retracted = false;
   try {
     // The turn handle lets MCP tool approvals ride ctx.notify (approval.request) and deny-on-disconnect via ctx.onClose.
-    const turn = { notify: ctx.notify, onClose: ctx.onClose, signal: controller.signal };
+    const turn = {
+      notify: ctx.notify,
+      onClose: ctx.onClose,
+      signal: controller.signal,
+      onRetract: () => (retracted = true),
+    };
     for await (const delta of chatAgent.stream(params, turn)) {
       ctx.notify(CHAT_METHODS.delta, { messageId, characterId, delta } satisfies ChatDelta);
     }
-    // A cancelled turn also ends here: the stream closes gracefully after the abort, partial text already streamed.
-    ctx.notify(CHAT_METHODS.complete, { messageId, characterId } satisfies ChatComplete);
+    if (retracted) {
+      // Cancelled before any reply: BOTH cancel endings land here, not the catch — a graceful abort closes the
+      // stream cleanly, and the agent swallows the throw ending once it retracts. Tell the UI to restore the draft.
+      ctx.notify(CHAT_METHODS.error, {
+        messageId,
+        characterId,
+        code: ErrorCodeSchema.enum.PROVIDER_ERROR,
+        message: "cancelled before reply; message retracted",
+        retracted: true,
+      } satisfies ChatError);
+    } else {
+      // A cancelled-after-output turn also ends here: the stream closes gracefully after the abort, partial text streamed.
+      ctx.notify(CHAT_METHODS.complete, { messageId, characterId } satisfies ChatComplete);
+    }
   } catch (error) {
     const message = readableError(error);
     log.warn({ messageId, characterId, err: message }, "chat stream failed");

@@ -1,5 +1,6 @@
 /**
- * INPUT:  the user's typed draft + picked image attachments (useImageAttach); an isSending flag + onCancel from the hook.
+ * INPUT:  the user's typed draft + picked image attachments (useImageAttach); an isSending flag + onCancel from the
+ *         hook; a retractedDraft (cancel-before-reply) to restore, with a consume callback.
  * OUTPUT: <Composer> — textarea (Enter=send, Shift+Enter=newline), attach button, thumbnail previews, and a dual-state
  *         action button: 发送 while idle, 中断 (abort the in-flight turn) while sending. Attach-pick problems toast (D34).
  * POS:    ui/windows/chat — presentational; owns the image-attach hook. The attach button stays enabled even without a
@@ -15,6 +16,8 @@ interface ComposerProps {
   onSend: (message: string, attachments: ImageAttachment[]) => void;
   onCancel: () => void;
   isSending: boolean;
+  retractedDraft: string | null;
+  consumeRetractedDraft: () => void;
 }
 
 // Owns the hidden file input + its ref (the ref belongs with the input, and keeps Composer's render lean).
@@ -96,7 +99,7 @@ function ActionButton({ isSending, canSend, onSubmit, onCancel }: { isSending: b
   );
 }
 
-export function Composer({ onSend, onCancel, isSending }: ComposerProps) {
+export function Composer({ onSend, onCancel, isSending, retractedDraft, consumeRetractedDraft }: ComposerProps) {
   const [draft, setDraft] = useState("");
   const { attachments, pick, remove, clear, notice, dismissNotice } = useImageAttach();
   const canSend = !isSending && (draft.trim().length > 0 || attachments.length > 0);
@@ -108,6 +111,15 @@ export function Composer({ onSend, onCancel, isSending }: ComposerProps) {
       dismissNotice();
     }
   }, [notice, dismissNotice]);
+
+  // Cancel-before-reply hands the retracted text back: restore it into an EMPTY composer, but NEVER overwrite a
+  // draft the user already started — surface it as an info toast instead. One-shot: consume it either way.
+  useEffect(() => {
+    if (retractedDraft === null) return;
+    if (draft.trim().length === 0) setDraft(retractedDraft);
+    else pushToast(`已撤回：${retractedDraft}`, "info");
+    consumeRetractedDraft();
+  }, [retractedDraft, draft, consumeRetractedDraft]);
 
   const submit = () => {
     if (!canSend) return;

@@ -30,6 +30,7 @@ import {
   TIMELINE_METHODS,
   TimelineAppendedSchema,
   TimelineHistoryResultSchema,
+  TimelineRemovedSchema,
   type AvatarCommand,
   type AvatarReportParams,
   type CharacterCostumeResolutionResult,
@@ -45,6 +46,7 @@ import {
   type TimelineEntry,
   type TimelineHistoryParams,
   type TimelineHistoryResult,
+  type TimelineRemoved,
 } from "@taki/shared";
 import type { WsTransport } from "./ws-transport.ts";
 
@@ -53,7 +55,9 @@ export interface ChatHandlers {
   // messageId keys the in-flight assistant row (the chat window drops it when its persisted entry arrives, #17).
   onDelta: (delta: string, messageId: string) => void;
   onComplete?: () => void;
-  onError?: (code: ErrorCode, message: string) => void;
+  // retracted=true means the turn was cancelled before any reply: the user row is already gone (timeline.removed),
+  // so the caller restores the draft instead of surfacing the message as an error toast (cancel-retract).
+  onError?: (code: ErrorCode, message: string, retracted?: boolean) => void;
 }
 
 /** The handshake outcome: authenticated, or refused with the app ErrorCode (PAIRING_REQUIRED / AUTH_FAILED / ...). */
@@ -86,6 +90,8 @@ export interface WsClient {
   onAvatarCommand(handler: (command: AvatarCommand) => void): void;
   /** Registers the optional live-timeline sink (shared with the chat window server-side). */
   onTimelineAppended(handler: (entry: TimelineEntry) => void): void;
+  /** Registers the optional retract sink: a row was deleted (cancel-before-reply); the store drops it by seq. */
+  onTimelineRemoved(handler: (ref: TimelineRemoved) => void): void;
   onClose(handler: () => void): void;
   close(): void;
 }
@@ -98,6 +104,7 @@ interface Turn {
 interface PushSlots {
   avatar: ((command: AvatarCommand) => void) | null;
   timeline: ((entry: TimelineEntry) => void) | null;
+  timelineRemoved: ((ref: TimelineRemoved) => void) | null;
 }
 
 interface Routes {
@@ -124,9 +131,9 @@ function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
     });
   });
   rpc.addMethod(CHAT_METHODS.error, (params: unknown) => {
-    const { code, message } = ChatErrorSchema.parse(params);
+    const { code, message, retracted } = ChatErrorSchema.parse(params);
     endTurn((turn) => {
-      turn.handlers.onError?.(code, message);
+      turn.handlers.onError?.(code, message, retracted);
       turn.finish();
     });
   });
@@ -136,6 +143,9 @@ function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
   });
   rpc.addMethod(TIMELINE_METHODS.appended, (params: unknown) => {
     state.push.timeline?.(TimelineAppendedSchema.parse(params));
+  });
+  rpc.addMethod(TIMELINE_METHODS.removed, (params: unknown) => {
+    state.push.timelineRemoved?.(TimelineRemovedSchema.parse(params));
   });
 }
 
@@ -199,7 +209,7 @@ export function createWsClient(deps: { transport: WsTransport }): WsClient {
     new JSONRPCServer(),
     new JSONRPCClient((payload) => transport.send(JSON.stringify(payload))),
   );
-  const state: Routes = { current: null, push: { avatar: null, timeline: null } };
+  const state: Routes = { current: null, push: { avatar: null, timeline: null, timelineRemoved: null } };
   installRoutes(rpc, state);
 
   let opened = false;
@@ -236,6 +246,7 @@ export function createWsClient(deps: { transport: WsTransport }): WsClient {
     ...requestMethods(rpc),
     onAvatarCommand: (handler) => (state.push.avatar = handler),
     onTimelineAppended: (handler) => (state.push.timeline = handler),
+    onTimelineRemoved: (handler) => (state.push.timelineRemoved = handler),
     onClose: (handler) => transport.onClose(handler),
     close: () => transport.close(),
   };

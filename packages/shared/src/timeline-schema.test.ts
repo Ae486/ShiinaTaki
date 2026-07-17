@@ -5,6 +5,7 @@ import {
   TimelineHistoryParamsSchema,
   TimelineHistoryResultSchema,
   TimelinePartSchema,
+  TimelineRemovedSchema,
   TimelineRoleSchema,
   TimelineSubscribeParamsSchema,
 } from "./timeline-schema.ts";
@@ -20,12 +21,22 @@ const entry = {
 };
 
 describe("TIMELINE_METHODS", () => {
-  it("names the three timeline methods", () => {
+  it("names the four timeline methods", () => {
     expect(TIMELINE_METHODS).toEqual({
       history: "timeline.history",
       subscribe: "timeline.subscribe",
       appended: "timeline.appended",
+      removed: "timeline.removed",
     });
+  });
+});
+
+describe("TimelineRemovedSchema", () => {
+  it("round-trips a removed ref and rejects a non-positive seq / empty characterId", () => {
+    const ref = { characterId: "taki", seq: 7 };
+    expect(TimelineRemovedSchema.parse(ref)).toEqual(ref);
+    expect(TimelineRemovedSchema.safeParse({ characterId: "taki", seq: 0 }).success).toBe(false);
+    expect(TimelineRemovedSchema.safeParse({ characterId: "", seq: 1 }).success).toBe(false);
   });
 });
 

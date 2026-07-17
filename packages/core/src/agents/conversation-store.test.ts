@@ -12,10 +12,13 @@ afterEach(() => {
   dbs.length = 0;
 });
 
-function makeStore(onAppend?: (entry: TimelineEntry) => void) {
+function makeStore(
+  onAppend?: (entry: TimelineEntry) => void,
+  onRemove?: (ref: { characterId: string; seq: number }) => void,
+) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
-  return createConversationStore({ repo: createTimelineRepo(db), onAppend });
+  return createConversationStore({ repo: createTimelineRepo(db), onAppend, onRemove });
 }
 
 describe("createConversationStore", () => {
@@ -58,6 +61,33 @@ describe("createConversationStore", () => {
     const store = makeStore();
     expect(() => store.appendUser("taki", "hi")).not.toThrow();
     expect(store.history("taki")).toHaveLength(1);
+  });
+
+  it("appendUser returns the committed entry with its assigned seq (cancel-retract addressing)", () => {
+    const store = makeStore();
+    const first = store.appendUser("taki", "hi");
+    const second = store.appendUser("taki", "again");
+    expect(first).toMatchObject({ seq: 1, characterId: "taki", role: "user", content: "hi" });
+    expect(second.seq).toBe(2);
+  });
+
+  it("removeEntry deletes the row and fires onRemove with its ref (mirrors onAppend)", () => {
+    const removed: { characterId: string; seq: number }[] = [];
+    const store = makeStore(undefined, (ref) => removed.push(ref));
+    const entry = store.appendUser("taki", "retract me");
+    store.appendAssistant("taki", "still here");
+
+    store.removeEntry("taki", entry.seq);
+
+    expect(removed).toEqual([{ characterId: "taki", seq: entry.seq }]);
+    expect(store.history("taki")).toEqual([{ role: "assistant", content: "still here" }]);
+  });
+
+  it("removeEntry without an onRemove sink still deletes the row", () => {
+    const store = makeStore();
+    const entry = store.appendUser("taki", "gone");
+    expect(() => store.removeEntry("taki", entry.seq)).not.toThrow();
+    expect(store.history("taki")).toEqual([]);
   });
 
   it("appendTurn persists tool-calls + tool-results and history replays the full multi-part shape (D1 #1)", () => {

@@ -118,6 +118,7 @@ const timelineSubscriptions = createTimelineSubscriptions();
 const conversationStore = createConversationStore({
   repo: timelineRepo,
   onAppend: (entry) => timelineSubscriptions.publish(entry),
+  onRemove: (ref) => timelineSubscriptions.publishRemoved(ref),
 });
 
 // Avatar channel (#16): LLM-driven expression/motion commands fan out to subscribed Pet UI operators (mirrors the

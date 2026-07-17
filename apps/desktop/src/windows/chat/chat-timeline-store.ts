@@ -1,5 +1,5 @@
 /**
- * INPUT:  history pages (timeline.history), live timeline.appended pushes, and chat.delta/complete from the hook.
+ * INPUT:  history pages (timeline.history), live timeline.appended/removed pushes, and chat.delta/complete from the hook.
  * OUTPUT: the chat window's timeline state (entries by seq + the in-flight assistant row) + reducers. Transient
  *         notices moved to components/toast (D34) — errors clearInflight here and pushToast there.
  * POS:    ui/windows/chat (feature-local store) — the depth-view conversation domain. One continuous timeline, NO
@@ -28,6 +28,8 @@ type ChatTimelineStore = {
   prependOlder: (page: TimelineHistoryResult) => void;
   /** A committed row (user/assistant/tool). An assistant row hands off the in-flight row (drops it). */
   appendLive: (entry: TimelineEntry) => void;
+  /** A retracted row (cancel-before-reply): drop the entry with this seq from the live timeline. */
+  removeEntry: (seq: number) => void;
   growInflight: (messageId: string, delta: string) => void;
   clearInflight: () => void;
   reset: () => void;
@@ -54,6 +56,7 @@ export const useChatTimelineStore = create<ChatTimelineStore>()((set) => ({
       entries: mergeBySeq(state.entries, [entry]),
       inflight: entry.role === "assistant" ? null : state.inflight,
     })),
+  removeEntry: (seq) => set((state) => ({ entries: state.entries.filter((entry) => entry.seq !== seq) })),
   growInflight: (messageId, delta) =>
     set((state) => ({
       inflight:

@@ -81,17 +81,25 @@ describe("chat-agent turn lifecycle (D1)", () => {
     ]);
   });
 
-  it("persists nothing extra when an abort lands before any delta (empty turns leave only the user row)", async () => {
+  it("retracts the user row when an abort lands before any delta (cancel-before-reply leaves no trace)", async () => {
     const f = fresh();
     const model = slowStreamingModel(["never"], 50);
     const agent = createChatAgent({ model, store: f.conversation, memory: f.memory });
     const controller = new AbortController();
     controller.abort("cancelled before start");
-    const turn: TurnContext = { notify: () => undefined, onClose: () => undefined, signal: controller.signal };
+    let retracted = false;
+    const turn: TurnContext = {
+      notify: () => undefined,
+      onClose: () => undefined,
+      signal: controller.signal,
+      onRetract: () => (retracted = true),
+    };
 
     const text = await drain(agent.stream({ characterId: "taki", message: "hi" }, turn));
 
     expect(text).toBe("");
-    expect(f.conversation.history("taki")).toEqual([{ role: "user", content: "hi" }]);
+    expect(retracted).toBe(true);
+    // The turn produced nothing, so the just-appended user row is retracted — the timeline is left empty.
+    expect(f.conversation.history("taki")).toEqual([]);
   });
 });

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { TimelineEntry } from "@taki/shared";
+import type { TimelineEntry, TimelineRemoved } from "@taki/shared";
 import type { Connection } from "./connection-registry.ts";
-import { createTimelineSubscriptions } from "./timeline-subscriptions.ts";
+import { createTimelineSubscriptions, type TimelineSink } from "./timeline-subscriptions.ts";
 
 function conn(): Connection {
   return { state: { status: "awaiting" } };
@@ -18,11 +18,16 @@ function entry(characterId: string, seq = 1): TimelineEntry {
   };
 }
 
+// A sink that records only appended entries (the removed handler is a no-op unless a test overrides it).
+function appendSink(received: TimelineEntry[]): TimelineSink {
+  return { appended: (e) => received.push(e), removed: () => undefined };
+}
+
 describe("createTimelineSubscriptions", () => {
   it("delivers a published entry to a subscriber of that character", () => {
     const subs = createTimelineSubscriptions();
     const received: TimelineEntry[] = [];
-    subs.subscribe("taki", conn(), (e) => received.push(e));
+    subs.subscribe("taki", conn(), appendSink(received));
 
     subs.publish(entry("taki"));
 
@@ -32,7 +37,7 @@ describe("createTimelineSubscriptions", () => {
   it("does not deliver to subscribers of a different character", () => {
     const subs = createTimelineSubscriptions();
     const received: TimelineEntry[] = [];
-    subs.subscribe("yui", conn(), (e) => received.push(e));
+    subs.subscribe("yui", conn(), appendSink(received));
 
     subs.publish(entry("taki"));
 
@@ -43,8 +48,8 @@ describe("createTimelineSubscriptions", () => {
     const subs = createTimelineSubscriptions();
     const a: TimelineEntry[] = [];
     const b: TimelineEntry[] = [];
-    subs.subscribe("taki", conn(), (e) => a.push(e));
-    subs.subscribe("taki", conn(), (e) => b.push(e));
+    subs.subscribe("taki", conn(), appendSink(a));
+    subs.subscribe("taki", conn(), appendSink(b));
 
     subs.publish(entry("taki"));
 
@@ -53,11 +58,24 @@ describe("createTimelineSubscriptions", () => {
     expect(subs.count("taki")).toBe(2);
   });
 
+  it("fans a removed ref out only to the character's subscribers (mirrors publish)", () => {
+    const subs = createTimelineSubscriptions();
+    const takiRemoved: TimelineRemoved[] = [];
+    const yuiRemoved: TimelineRemoved[] = [];
+    subs.subscribe("taki", conn(), { appended: () => undefined, removed: (r) => takiRemoved.push(r) });
+    subs.subscribe("yui", conn(), { appended: () => undefined, removed: (r) => yuiRemoved.push(r) });
+
+    subs.publishRemoved({ characterId: "taki", seq: 7 });
+
+    expect(takiRemoved).toEqual([{ characterId: "taki", seq: 7 }]);
+    expect(yuiRemoved).toEqual([]);
+  });
+
   it("stops delivering after unsubscribe and drops the count", () => {
     const subs = createTimelineSubscriptions();
     const c = conn();
     const received: TimelineEntry[] = [];
-    subs.subscribe("taki", c, (e) => received.push(e));
+    subs.subscribe("taki", c, appendSink(received));
     expect(subs.count("taki")).toBe(1);
 
     subs.unsubscribe("taki", c);

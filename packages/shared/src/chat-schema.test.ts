@@ -107,6 +107,12 @@ describe("chat event round-trips", () => {
     expect(ChatErrorSchema.parse(err)).toEqual(err);
   });
 
+  it("carries the optional retracted flag (cancel-before-reply) and stays absent otherwise", () => {
+    const retracted = { messageId: "m1", characterId: "taki", code: "PROVIDER_ERROR", message: "retracted", retracted: true };
+    expect(ChatErrorSchema.parse(retracted)).toEqual(retracted);
+    expect(ChatErrorSchema.parse({ messageId: "m1", characterId: "taki", code: "PROVIDER_ERROR", message: "boom" }).retracted).toBeUndefined();
+  });
+
   it("rejects an unknown error code", () => {
     expect(
       ChatErrorSchema.safeParse({ messageId: "m1", characterId: "taki", code: "NOPE", message: "x" }).success,

@@ -168,6 +168,49 @@ describe("createWsClient inbound routing", () => {
     expect(received).toEqual([{ characterId: "taki", kind: "expression", name: "smile01" }]);
   });
 
+  it("routes a timeline.removed push to the registered handler (cancel-retract, zod-validated)", () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    const received: unknown[] = [];
+    client.onTimelineRemoved((ref) => received.push(ref));
+    h.open();
+    h.deliver({ jsonrpc: "2.0", method: TIMELINE_METHODS.removed, params: { characterId: "taki", seq: 12 } });
+    expect(received).toEqual([{ characterId: "taki", seq: 12 }]);
+  });
+
+  it("threads the retracted flag from chat.error to onError (cancel-before-reply)", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    let errored: { code: string; message: string; retracted?: boolean } | null = null;
+    const turn = client.chat(
+      { characterId: "taki", message: "oops" },
+      {
+        onDelta: () => undefined,
+        onError: (code, message, retracted) => (errored = { code, message, retracted }),
+      },
+    );
+    await flush();
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "m1" } });
+    h.deliver({
+      jsonrpc: "2.0",
+      method: CHAT_METHODS.error,
+      params: {
+        messageId: "m1",
+        characterId: "taki",
+        code: "PROVIDER_ERROR",
+        message: "cancelled before reply; message retracted",
+        retracted: true,
+      },
+    });
+    await turn;
+    expect(errored).toEqual({
+      code: "PROVIDER_ERROR",
+      message: "cancelled before reply; message retracted",
+      retracted: true,
+    });
+  });
+
   it("drops an invalid inbound frame without throwing", () => {
     const h = harness();
     createWsClient({ transport: h.transport });

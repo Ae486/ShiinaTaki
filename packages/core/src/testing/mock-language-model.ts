@@ -1,7 +1,7 @@
 /**
  * INPUT:  scripted text deltas, or an error to raise on the model call
- * OUTPUT: streamingMockModel / failingMockModel / midStreamErrorModel / scriptedModel (stream) +
- *         generatingModel / failingGenerateModel / scriptedGenerateModel (non-streaming generate) -> MockLanguageModelV4
+ * OUTPUT: streamingMockModel / slowStreamingModel / abortRejectingModel / failingMockModel / midStreamErrorModel /
+ *         scriptedModel (stream) + generatingModel / failingGenerateModel / scriptedGenerateModel (generate) -> MockLanguageModelV4
  * POS:    core/testing — test-only factories (research/ai-sdk-v7-api.md §3); never imported by production code
  */
 import { simulateReadableStream } from "ai";
@@ -42,6 +42,45 @@ export function slowStreamingModel(deltas: string[], chunkDelayInMs: number): Mo
         ],
       }),
     }),
+  });
+}
+
+/**
+ * Transport-faithful cancel: on abort it ERRORS the model stream with the raw (string) reason — mirroring undici
+ * rejecting the in-flight body read with `signal.reason`. That string fails the SDK's isAbortError name check, so the
+ * SDK errors the stream and the chat loop's for-await THROWS the reason. This is the prefill-cancel ending that
+ * simulateReadableStream cannot reproduce (its reads always resolve, always taking the graceful abort branch). Deltas
+ * arrive on a timer so a cancel can be timed before the first (throw-ending retract) or after it (throw-ending stop).
+ */
+export function abortRejectingModel(deltas: string[], chunkDelayInMs: number): MockLanguageModelV4 {
+  return new MockLanguageModelV4({
+    doStream: async ({ abortSignal }) => {
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue({ type: "stream-start" as const, warnings: [] });
+          controller.enqueue({ type: "text-start" as const, id: "t1" });
+          let i = 0;
+          const timer = setInterval(() => {
+            const delta = deltas[i];
+            i += 1;
+            if (delta !== undefined) {
+              controller.enqueue({ type: "text-delta" as const, id: "t1", delta });
+            } else {
+              clearInterval(timer);
+              controller.enqueue({ type: "text-end" as const, id: "t1" });
+              controller.enqueue({ type: "finish" as const, finishReason: { unified: "stop" as const, raw: undefined }, usage: USAGE });
+              controller.close();
+            }
+          }, chunkDelayInMs);
+          // undici rejects the body read with signal.reason verbatim — reproduce that as a stream error.
+          abortSignal?.addEventListener("abort", () => {
+            clearInterval(timer);
+            controller.error(abortSignal.reason);
+          }, { once: true });
+        },
+      });
+      return { stream } as Awaited<ReturnType<MockLanguageModelV4["doStream"]>>;
+    },
   });
 }
 

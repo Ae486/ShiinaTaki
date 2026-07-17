@@ -1,6 +1,6 @@
 /**
  * INPUT:  the Database wrapper + append/paging calls (characterId-scoped)
- * OUTPUT: createTimelineRepo(db) -> { append, pageBefore, latestAscending, latestSeq, rangeAscending } over timeline_messages
+ * OUTPUT: createTimelineRepo(db) -> { append, deleteEntry, pageBefore, latestAscending, latestSeq, rangeAscending } over timeline_messages
  * POS:    core/db — the timeline aggregate's typed SQL; zod-parses rows at the boundary; no node:sqlite import
  */
 import { randomUUID } from "node:crypto";
@@ -25,6 +25,8 @@ export interface AppendInput {
 export interface TimelineRepo {
   /** Appends one entry, returning it with its assigned seq + createdAt. */
   append(input: AppendInput): TimelineEntry;
+  /** Deletes one entry by (characterId, seq); a no-op when it does not exist (cancel-retract, single-writer). */
+  deleteEntry(characterId: string, seq: number): void;
   /** One newest-first page with an exclusive `before` seq cursor; nextBefore=null at the end. */
   pageBefore(query: TimelineHistoryParams): TimelineHistoryResult;
   /** The latest `limit` entries in ascending order (the model replay window). */
@@ -38,6 +40,8 @@ export interface TimelineRepo {
 const INSERT_SQL =
   "INSERT INTO timeline_messages (id, character_id, role, content, parts, created_at) " +
   "VALUES (:id, :characterId, :role, :content, :parts, :createdAt)";
+
+const DELETE_SQL = "DELETE FROM timeline_messages WHERE character_id = :characterId AND seq = :seq";
 
 // (:before IS NULL OR seq < :before): one prepared statement serves both the newest and cursor pages.
 const PAGE_SQL =
@@ -58,6 +62,7 @@ const RANGE_SQL =
 
 export function createTimelineRepo(db: Database): TimelineRepo {
   const insert = db.prepare(INSERT_SQL);
+  const del = db.prepare(DELETE_SQL);
   const page = db.prepare(PAGE_SQL);
   const latest = db.prepare(LATEST_SQL);
   const maxSeq = db.prepare(MAX_SEQ_SQL);
@@ -77,6 +82,10 @@ export function createTimelineRepo(db: Database): TimelineRepo {
         parts: input.parts === undefined ? null : JSON.stringify(input.parts),
       });
       return TimelineEntrySchema.parse({ seq: lastInsertRowid, ...row, parts: input.parts });
+    },
+
+    deleteEntry(characterId, seq) {
+      del.run({ characterId, seq });
     },
 
     pageBefore(query) {

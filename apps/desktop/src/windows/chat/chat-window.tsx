@@ -48,7 +48,13 @@ export function ChatWindow() {
         </header>
         <StatusBanner status={status} />
         <TimelineView timeline={timeline} />
-        <Composer onSend={timeline.send} onCancel={timeline.cancel} isSending={timeline.isSending} />
+        <Composer
+          onSend={timeline.send}
+          onCancel={timeline.cancel}
+          isSending={timeline.isSending}
+          retractedDraft={timeline.retractedDraft}
+          consumeRetractedDraft={timeline.consumeRetractedDraft}
+        />
         <ToastHost />
       </div>
     </ChatClientContext.Provider>
