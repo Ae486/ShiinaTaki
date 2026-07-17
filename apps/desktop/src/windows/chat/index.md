@@ -6,9 +6,9 @@ text, tool cards, image thumbnails; streaming replies; image attachments. One co
 - chat-client-context.ts — React context exposing the WsClient to deep image parts (no prop-drilling)
 - use-chat-connection.ts — the window's own operator WS (shared device identity; concurrent with the pet's socket)
 - use-chat-timeline.ts — wires the WS to the store: initial history page, live appends, streamed deltas, older paging
-- chat-timeline-store.ts — Zustand: entries by seq + the in-flight assistant row + inline notices + reducers
+- chat-timeline-store.ts — timeline entries by seq + in-flight streaming row (zustand); errors toast via components/toast (D34)
 - date-group.ts — pure: chronological entries → consecutive local-date groups (date dividers)
-- timeline-view.tsx — the scroll container: date dividers, rows, in-flight bubble, notices; auto-stick-to-bottom
+- timeline-view.tsx — the scrollable conversation: date dividers, rows, streaming bubble; sticks to bottom, loads older on top-reach
 - use-timeline-scroll.ts — scroll behavior: stick-to-bottom, top-reach load-older, position hold on prepend
 - timeline-message.tsx — one role-styled row (React.memo); dispatches parts (text→markdown, tool→card, image→thumb)
 - markdown-view.tsx — react-markdown@10 + remark-gfm wrapper, default-safe, with prose utilities (Tailwind v4)

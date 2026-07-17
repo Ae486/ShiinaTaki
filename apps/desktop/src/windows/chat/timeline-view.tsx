@@ -1,7 +1,7 @@
 /**
- * INPUT:  a ChatTimeline view-model (date-grouped entries + in-flight row + inline notices + paging) from the hook.
- * OUTPUT: <TimelineView> — the scrollable conversation: date dividers, role-styled rows, the streaming in-flight
- *         bubble, and inline error notices. Auto-sticks to bottom; loads older pages on top-reach.
+ * INPUT:  a ChatTimeline view-model (date-grouped entries + in-flight row + paging) from the hook.
+ * OUTPUT: <TimelineView> — the scrollable conversation: date dividers, role-styled rows, and the streaming in-flight
+ *         bubble. Auto-sticks to bottom; loads older pages on top-reach. Errors are toasts (D34), not in-stream rows.
  * POS:    ui/windows/chat — the scroll container (one continuous timeline, NO session list). Presentational.
  */
 
@@ -40,17 +40,12 @@ function InflightBubble({ text }: { text: string }) {
   );
 }
 
-function NoticeRow({ message }: { message: string }) {
-  return <div className="rounded-md bg-rose-50 px-3 py-2 text-xs text-rose-700 ring-1 ring-rose-200">{message}</div>;
-}
-
 export function TimelineView({ timeline }: { timeline: ChatTimeline }) {
-  const { groups, inflight, notices, loaded, hasMore, loadOlder } = timeline;
+  const { groups, inflight, loaded, hasMore, loadOlder } = timeline;
   const entryCount = groups.reduce((total, group) => total + group.entries.length, 0);
   const { scrollRef, onScroll } = useTimelineScroll({
     entryCount,
     inflightLen: inflight ? inflight.text.length : -1,
-    noticeCount: notices.length,
     hasMore,
     loadOlder,
   });
@@ -68,9 +63,6 @@ export function TimelineView({ timeline }: { timeline: ChatTimeline }) {
             <TimelineMessage key={entry.seq} entry={entry} />
           ))}
         </div>
-      ))}
-      {notices.map((notice) => (
-        <NoticeRow key={notice.id} message={notice.message} />
       ))}
       {inflight && <InflightBubble text={inflight.text} />}
     </div>

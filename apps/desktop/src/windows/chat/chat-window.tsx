@@ -8,6 +8,7 @@
 
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
 import type { ConnectionStatus } from "@/stores/connection-store.js";
+import { ToastHost } from "@/components/toast/toast-host.js";
 import { ChatClientContext } from "./chat-client-context.ts";
 import { useChatConnection } from "./use-chat-connection.ts";
 import { useChatTimeline } from "./use-chat-timeline.ts";
@@ -48,6 +49,7 @@ export function ChatWindow() {
         <StatusBanner status={status} />
         <TimelineView timeline={timeline} />
         <Composer onSend={timeline.send} onCancel={timeline.cancel} isSending={timeline.isSending} />
+        <ToastHost />
       </div>
     </ChatClientContext.Provider>
   );

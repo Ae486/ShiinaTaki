@@ -1,13 +1,14 @@
 /**
  * INPUT:  the user's typed draft + picked image attachments (useImageAttach); an isSending flag + onCancel from the hook.
  * OUTPUT: <Composer> — textarea (Enter=send, Shift+Enter=newline), attach button, thumbnail previews, and a dual-state
- *         action button: 发送 while idle, 中断 (abort the in-flight turn) while sending. Calls onSend then clears.
+ *         action button: 发送 while idle, 中断 (abort the in-flight turn) while sending. Attach-pick problems toast (D34).
  * POS:    ui/windows/chat — presentational; owns the image-attach hook. The attach button stays enabled even without a
- *         vision slot (decision 5, v1) — a no-vision send returns chat.error rendered as an inline timeline notice.
+ *         vision slot (decision 5, v1) — a no-vision send returns chat.error rendered as a toast.
  */
 
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import type { ImageAttachment } from "@taki/shared";
+import { pushToast } from "@/components/toast/toast-store.js";
 import { useImageAttach, type PickedAttachment } from "./use-image-attach.ts";
 
 interface ComposerProps {
@@ -47,17 +48,6 @@ function AttachButton({ onPick }: { onPick: (files: FileList | null) => void }) 
         </svg>
       </button>
     </>
-  );
-}
-
-function NoticeBar({ message, onDismiss }: { message: string; onDismiss: () => void }) {
-  return (
-    <div className="mb-2 flex items-center justify-between rounded-md bg-amber-50 px-3 py-1.5 text-xs text-amber-700">
-      <span>{message}</span>
-      <button type="button" onClick={onDismiss} className="text-amber-500 hover:text-amber-700" aria-label="Dismiss">
-        ×
-      </button>
-    </div>
   );
 }
 
@@ -111,6 +101,14 @@ export function Composer({ onSend, onCancel, isSending }: ComposerProps) {
   const { attachments, pick, remove, clear, notice, dismissNotice } = useImageAttach();
   const canSend = !isSending && (draft.trim().length > 0 || attachments.length > 0);
 
+  // Attach-pick problems (unsupported type, decode failure) surface as toasts (D34) — no layout-height notice bar.
+  useEffect(() => {
+    if (notice) {
+      pushToast(notice);
+      dismissNotice();
+    }
+  }, [notice, dismissNotice]);
+
   const submit = () => {
     if (!canSend) return;
     onSend(draft.trim(), attachments.map((a) => ({ mediaType: a.mediaType, dataBase64: a.dataBase64 })));
@@ -126,7 +124,6 @@ export function Composer({ onSend, onCancel, isSending }: ComposerProps) {
 
   return (
     <div className="border-t border-slate-200 bg-white p-3">
-      {notice && <NoticeBar message={notice} onDismiss={dismissNotice} />}
       {attachments.length > 0 && <Thumbnails attachments={attachments} onRemove={remove} />}
       <div className="flex items-end gap-2">
         <AttachButton onPick={(files) => void pick(files)} />

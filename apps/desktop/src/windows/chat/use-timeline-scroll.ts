@@ -1,5 +1,5 @@
 /**
- * INPUT:  content-change counters (entries/in-flight/notices) + hasMore + a loadOlder callback from the timeline hook.
+ * INPUT:  content-change counters (entries/in-flight) + hasMore + a loadOlder callback from the timeline hook.
  * OUTPUT: useTimelineScroll(...) -> { scrollRef, onScroll }: auto-stick-to-bottom, top-reach loads older, and holds
  *         the reading position when an older page prepends.
  * POS:    ui/windows/chat — the scroll-behavior seam kept out of TimelineView (DOM-only; not the render contract).
@@ -12,7 +12,6 @@ const NEAR_EDGE_PX = 48;
 export interface TimelineScrollInput {
   entryCount: number;
   inflightLen: number; // -1 when no in-flight row, so a clear still changes the value and re-runs the effect
-  noticeCount: number;
   hasMore: boolean;
   loadOlder: () => void;
 }
@@ -23,7 +22,7 @@ export interface TimelineScroll {
 }
 
 export function useTimelineScroll(input: TimelineScrollInput): TimelineScroll {
-  const { entryCount, inflightLen, noticeCount, hasMore, loadOlder } = input;
+  const { entryCount, inflightLen, hasMore, loadOlder } = input;
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const atBottomRef = useRef(true);
   const loadingOlderRef = useRef(false);
@@ -54,7 +53,7 @@ export function useTimelineScroll(input: TimelineScrollInput): TimelineScroll {
     } else if (atBottomRef.current) {
       el.scrollTop = el.scrollHeight;
     }
-  }, [entryCount, inflightLen, noticeCount]);
+  }, [entryCount, inflightLen]);
 
   return { scrollRef, onScroll };
 }

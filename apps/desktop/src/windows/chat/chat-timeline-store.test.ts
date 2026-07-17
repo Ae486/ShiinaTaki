@@ -1,5 +1,5 @@
 /**
- * INPUT:  reducer calls (mergeHistory/prependOlder/appendLive/growInflight/clearInflight/pushNotice) on the singleton.
+ * INPUT:  reducer calls (mergeHistory/prependOlder/appendLive/growInflight/clearInflight) on the singleton.
  * OUTPUT: assertions that a history page renders chronologically, live rows append, deltas grow the in-flight row,
  *         and an appended assistant row (or clearInflight) finalizes it.
  * POS:    unit test for the chat timeline store (T10). Zustand in node (no DOM). Exempt from size caps.
@@ -88,13 +88,4 @@ describe("chat timeline store", () => {
     expect(useChatTimelineStore.getState().inflight).toBeNull();
   });
 
-  it("pushes an inline notice and drops any in-flight row (chat.error)", () => {
-    const store = useChatTimelineStore.getState();
-    store.growInflight("m1", "partial");
-    store.pushNotice("Image attachments require a configured vision model");
-    const state = useChatTimelineStore.getState();
-    expect(state.inflight).toBeNull();
-    expect(state.notices).toHaveLength(1);
-    expect(state.notices[0]?.message).toContain("vision model");
-  });
 });

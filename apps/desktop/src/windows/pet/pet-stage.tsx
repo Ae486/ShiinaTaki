@@ -12,6 +12,7 @@ import { useAvatarStore } from "@/stores/avatar-store.js";
 import { useInteractionStore } from "@/stores/interaction-store.js";
 import { ChatBubble } from "@/features/chat-bubble/chat-bubble.js";
 import { CharacterPanel } from "@/features/character-import/character-panel.js";
+import { ToastHost } from "@/components/toast/toast-host.js";
 import { usePetScene } from "./use-pet-scene.ts";
 import { usePetDrag } from "./use-pet-drag.ts";
 import { usePetClick } from "./use-pet-click.ts";
@@ -59,6 +60,7 @@ export function PetStage() {
       )}
       <ChatBubble />
       {panelOpen && <CharacterPanel scene={scene} onClose={() => setPanelOpen(false)} />}
+      <ToastHost />
     </div>
   );
 }
