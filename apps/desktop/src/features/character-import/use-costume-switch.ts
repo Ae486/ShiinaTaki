@@ -12,6 +12,7 @@ import type { CharacterCostumesResult, CostumeAvailability } from "@taki/shared"
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
 import { costumeAssetResolver } from "@/lib/character-asset-url.js";
 import { loadLastCostume, saveLastCostume } from "@/lib/last-costume.js";
+import { withTimeout } from "@/lib/promise-timeout.js";
 import type { WsClient } from "@/lib/ws-client.js";
 import { useConnectionStore } from "@/stores/connection-store.js";
 import type { PetScene } from "@/renderer/pet-scene.js";
@@ -55,20 +56,10 @@ function packsUnion(availability: Record<string, CostumeAvailability>): string[]
   return [...new Set(Object.values(availability).flatMap((entry) => entry.missingPacks))].sort();
 }
 
-// A wedged model load (resources that never finish — B-test: school_winter_hs) must not freeze the panel forever:
+// A wedged model load (resources that never finish — B-test: roaming C3 hangs) must not freeze the panel forever:
 // reject after this long so isSwitching releases and the error names the costume. pet-scene's switch ticket makes a
 // late completion harmless (a superseded late model is discarded, a non-superseded one simply attaches late).
 const SWITCH_TIMEOUT_MS = 30_000;
-
-function withTimeout<T>(promise: Promise<T>): Promise<T> {
-  return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error("switch timed out after 30s (model resources never finished loading)")), SWITCH_TIMEOUT_MS);
-    promise.then(
-      (value) => { clearTimeout(timer); resolve(value); },
-      (cause: unknown) => { clearTimeout(timer); reject(cause instanceof Error ? cause : new Error(String(cause))); },
-    );
-  });
-}
 
 // Fetch the costume's external-ref resolution, reload it in the renderer, then re-report the re-read vocabulary
 // through the existing avatar.report so the Core's per-character vocab (and next turn's prompt) tracks the new
@@ -81,7 +72,7 @@ async function applySwitch(deps: { client: WsClient; scene: PetScene; costume: s
     settingsFile: deps.settingsFile,
     resolution,
   });
-  const vocabulary = await withTimeout(deps.scene.switchCostume(source));
+  const vocabulary = await withTimeout(deps.scene.switchCostume(source), SWITCH_TIMEOUT_MS, `costume ${deps.costume}`);
   await deps.client.reportAvatar({ characterId: ACTIVE_CHARACTER_ID, ...vocabulary });
 }
 
