@@ -2,7 +2,7 @@
 
 **You are the incoming session. Read this document fully, then the required docs in §2, then act as the Leader (主脑) of a trellis master/worker development flow.** This file is your bootstrap program — what exists, what to read, how to behave, how to drive implementation.
 
-> **Updated 2026-07-18**, at the close of **M4 — Pet UI & Live2D** (M1–M4 shipped: agent runtime hardened, pet overlay + chat window + character import live). The next phase is **M5 — module optimization** (avatar polish, capability governance, sensing, proactivity, memory-learning, settings suite). The M5 blueprint — grilled and signed off with the owner — lives in **`devlog/m5.md`**; this file stays the behavioral bootstrap. Everything below is verified fact, not plan.
+> **Updated 2026-07-18 (second pass, session handoff)**. M1–M4 shipped and pushed. The **M5 blueprint is signed off** (`devlog/m5.md`) and **T1 is created, started, and mid-flight** (research pending — see §1/§4). You are the incoming M5 Leader; this file is your behavioral bootstrap. Everything below is verified fact, not plan.
 
 ---
 
@@ -53,6 +53,11 @@ Three trellis tasks (archived under `.trellis/tasks/archive/2026-07/`) + a confi
 ### M4 — Pet UI & Live2D (6/6 closed)
 Renderer locked by spike (#13: `untitled-pixi-live2d-engine` + pixi 8); transparent always-on pet overlay with render governor + drag (#14); element-level click-through (#15); bubble + LLM-driven avatar — expression/motion tools + reported vocabulary, gaze/click reactions (#16); full chat window — streaming timeline, default-safe markdown, image attachments + VLM describe, abort entry, floating toasts, cancel-before-reply retract (#17); generic character import (Cubism 2/3 + `.zst` clean-room) + costume switching with degrade-and-badge availability + last-costume persistence (#18). Four packaged B-test rounds hardened the packaged-only defect classes (CSP, per-window ACL, WebView2 quirks, boot races) → `.trellis/spec/frontend/packaged-build.md`. See `docs/devlog/m4.md`.
 
+### M5 — kicked off (blueprint signed; T1 in flight)
+- The full blueprint — mission (module optimization: features + bugs + debt cleanup + optimization, per module), rulings Q1–Q5, the memory-redesign six-pack (A1/A2/A3 + MemorySource seam + local user-model + hit-count), the proactivity three-tier model (Hook reflex / Cron clock / Heartbeat conscious), the customization principles (panel-authoritative dual-entry-single-store; data-level vs code-level habit artifacts; imports are untrusted), the 11-task table, and the exclusion list — is **signed off by the owner**: **`devlog/m5.md`** (commit c4a92d9). It is the plan of record; do not re-litigate settled rulings.
+- Research banks (committed): `.trellis/workspace/pleia/m5-proactivity-survey.md` (OpenClaw five-mechanism stack, Hermes identity, B1–B11 borrow list, anti-patterns) + `.trellis/workspace/pleia/hermes-memory-analysis.md` (memory pipeline comparison, adopt/adapt/reject, T5 redesign sketch). Local Hermes clone: `references/hermes-agent-main` (MIT — patterns only, clean-room).
+- **T1 (`.trellis/tasks/07-18-avatar-presentation`) is the CURRENT task** — created, started, `prd.md` complete. Its research agent was dispatched then interrupted and left NO findings; the full dispatch brief is persisted at the task root as **`research-plan.md`** — re-dispatching it is your first work item. Nothing implemented yet.
+
 ### Environment
 - Node 24, pnpm 10, Rust 1.88 msvc, WebView2 present. `gh` authed as `Ae486`, git user `PLeiA`, remote → github.com/Ae486/ShiinaTaki. A real OpenAI-compatible key is in `.env.local` (L2 tests + integration).
 - `apps/desktop/src-tauri/target` was slimmed to ~13 GiB (deleted stale `incremental/` + `release/`); a `cargo clean` needs one `cargo build --bin taki-node` rebuild before e2e (the fixture hard-depends on `target/debug/taki-node.exe`).
@@ -69,7 +74,7 @@ Renderer locked by spike (#13: `untitled-pixi-live2d-engine` + pixi 8); transpar
 5. **`.trellis/workflow.md`** — the trellis phase model + skill routing.
 6. **The target issue**: `gh issue view <n> -R Ae486/ShiinaTaki` — its acceptance criteria are the definition of done.
 
-**Frontend-specific (M4 — read these before touching Pet UI):**
+**Frontend-specific (read before touching Pet UI):**
 7. **`.trellis/spec/frontend/index.md`** + its guides (directory-structure, component, hook, state-management, type-safety, quality). Auto-injected into sub-agents, but read them yourself. Key stances: **Pet UI is a disposable WS client (invariant 4)** — it owns rendering, never state-of-record; talk to Core via `@taki/shared` types, to Shell via `@tauri-apps/api` only; two windows (pet overlay + settings) have **separate Tauri capability files**.
 8. **`docs/TECH-STACK.md`** — renderer decision tree (the #13 spike writes back here), PixiJS/Live2D choices.
 9. **ADR 0005** (continuous timeline) — the model behind #17's chat window.
@@ -77,7 +82,7 @@ Renderer locked by spike (#13: `untitled-pixi-live2d-engine` + pixi 8); transpar
 
 **The backend contracts you CONSUME (know their shape, don't redefine them):**
 11. **`packages/shared/src/chat-schema.ts`** — `chat.send/delta/complete/error/cancel`. **`packages/shared/src/timeline-schema.ts`** — `TimelineEntry` incl. structured `parts` (tool-call/tool-result), `timeline.history/subscribe/appended`. These are how the Pet UI drives conversation and renders the timeline.
-12. **`docs/deferred-decisions.md`** — the debt register; §5 below names the two entries that come due in M4.
+12. **`docs/deferred-decisions.md`** — the debt register; §5 below names the entries that come due in M5 (D9, D29).
 
 ---
 
@@ -121,14 +126,22 @@ TS file ≤ 300 lines, function ≤ 50, params ≤ 3; Rust fn ≤ 100. Do NOT ap
 ### 3.6 Library API discipline
 AI SDK 7, Tauri 2, zod 4, PixiJS 8, the Live2D runtime all move fast. **Never code an external-library API from memory** — verify against installed types (`node_modules`) or current docs (context7/deepwiki/web) first.
 
+### 3.7 Sub-agent operations (hard rules, owner-directed)
+- **Web research tools**: you and every sub-agent use `mcp__exa__*` / `mcp__tavily-remote__*` ONLY — native WebSearch/WebFetch are **forbidden** for research (owner directive 2026-07-18). Sub-agents do not inherit this preference: NAME the allowed tools verbatim in every dispatch prompt.
+- **Model routing**: pass `model` EXPLICITLY on every Agent dispatch — never let it silently inherit the session default (a default switch once sent work to an unavailable tier). Route by complexity: heavier tier for research/implement on hard slices; the check tier per the owner's current directive.
+- **Never TaskStop a running sub-agent** unless the owner explicitly says so — killing it burns its context and tokens.
+- **Idle without a report = demand it.** Agents sometimes go idle without delivering their final report (happened twice in M4). SendMessage: "Reply now with the report per your original instructions", and meanwhile verify their work independently (git status/diff + re-run gates yourself). Trust but verify — one M4 impl agent's "never throws" claim was mock-derived and wrong; leader verification against SDK source caught it.
+- Agents interrupted before delivering die with their session — re-dispatch fresh from the persisted brief; never wait on them.
+
 ---
 
 ## 4. Recommended first moves (M5 Leader)
 
-1. Read §2, then **`devlog/m5.md`** — the signed-off M5 blueprint (decisions Q1–Q5, the memory-redesign six-pack, the proactivity three-tier model, the customization principles, the 11-task table, the exclusion list) — and the two research files it indexes (`.trellis/workspace/pleia/m5-proactivity-survey.md`, `hermes-memory-analysis.md`).
-2. Confirm the base is green: `pnpm -r typecheck && pnpm -w lint && pnpm -r test`, `cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml`.
-3. Drive the 11 tasks in blueprint order: **T1** avatar-presentation → **T2** tool/capability governance → **T3a/T3b** sensing (#19/#20) → **T4** proactivity core (croner + #21 Heartbeat) → **T5** memory-learning (D28 redesign) → **T6** settings suite (#22→#26). Each through §3.2, plus the Q1 cleanup contract: health notes in research, touched-file debt fixed in impl, verified in check.
-4. Cross-task seams to honor from day one: **A1** injection-fence minimum lands with T3a; **A2** write-context tag lands with T4's first heartbeat write; T4's croner is what T5's nightly consolidation rides.
+1. Read §2, then **`devlog/m5.md`** (the signed-off blueprint — plan of record) and the two research banks it indexes. Then the current task: `.trellis/tasks/07-18-avatar-presentation/prd.md` + `research-plan.md`.
+2. Confirm the base is green: `pnpm -r typecheck && pnpm -w lint && pnpm -r test`, `cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml`. Expect ~824 TS tests green as of handoff.
+3. **Resume T1 where it stands**: dispatch a research agent with `research-plan.md` (§3.7 tool/model rules apply — the plan file already embeds the tool rules), then implement → check → update-spec → finish + archive per §3.2, honoring the Q1 cleanup contract (health notes in research; touched-file debt fixed in impl; verified in check).
+4. Continue in blueprint order: **T2** governance → **T3a/T3b** sensing (#19/#20) → **T4** proactivity core → **T5** memory-learning → **T6** settings suite (#22→#26) — with §5's cross-task seams honored from day one (A1 minimum in T3a, A2 tag in T4, croner before T5's nightly pass).
+5. Push cadence (`devlog/index.md`): push at milestone close. Local-ahead at handoff: the blueprint + this handoff + T1 scaffolding — commit per task as usual; push when M5 closes or on owner request.
 
 ---
 
