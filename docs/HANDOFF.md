@@ -2,7 +2,7 @@
 
 **You are the incoming session. Read this document fully, then the required docs in §2, then act as the Leader (主脑) of a trellis master/worker development flow.** This file is your bootstrap program — what exists, what to read, how to behave, how to drive implementation.
 
-> **Updated 2026-07-13**, at the close of the **agent-core + hardening phase** (M1–M3 shipped and the agent runtime hardened). The next phase is **M4 — Pet UI & Live2D (frontend)**. The original design+scaffold handoff (2026-07-08) has been folded in. Everything below is verified fact, not plan.
+> **Updated 2026-07-18**, at the close of **M4 — Pet UI & Live2D** (M1–M4 shipped: agent runtime hardened, pet overlay + chat window + character import live). The next phase is **M5 — module optimization** (avatar polish, capability governance, sensing, proactivity, memory-learning, settings suite). The M5 blueprint — grilled and signed off with the owner — lives in **`devlog/m5.md`**; this file stays the behavioral bootstrap. Everything below is verified fact, not plan.
 
 ---
 
@@ -12,21 +12,16 @@ A Windows-native desktop companion whose core is a headless local LLM agent runt
 
 ---
 
-## 0.5 THIS handoff — phase transition + backend on-call (read carefully)
+## 0.5 THIS handoff — M5 phase (read carefully)
 
-This is not a cold start. The Agent Core, the WS protocol, the Rust Permission Gate, the timeline, and the memory engine are **built, tested, and hardened**. You are picking up the **frontend**.
+This is not a cold start. M1–M4 are shipped: Agent Core (memory engine, skills, MCP), WS protocol, Rust Permission Gate + capabilities, pet overlay with Live2D + click-through + bubble avatar, full chat window (streaming timeline, attachments, cancel-retract), character import + costume switching.
 
-- **You (incoming session) = the M4 Pet-UI Leader.** Your domain is `apps/desktop/src` (React Pet UI + settings window), the Live2D renderer, UI state, and M4 issues #13–#18 — plus the *client-side* wiring to the Core (WS) and Shell (Tauri `invoke`/events).
-- **The Agent Core / backend base is owned by the previous (backend) session, which stays on-call.** It carries deep invariants (§3.4) and hard-won lessons (the D1 hallucination). Do **not** silently deep-modify it.
-
-**Route these to the backend on-call owner — do not hack around them in the frontend:**
-- `@taki/shared` protocol **schema** changes (chat / timeline / capability / approval zod shapes) — invariant 3.
-- Agent **runtime behaviour**: turn lifecycle, tool-loop, cancellation, base system prompt, hallucination, `responseMessages` persistence.
-- Rust **Permission Gate** / capabilities / target classification (`src-tauri`).
-- **Timeline persistence model** / memory engine / DB schema / migrations.
-- **WS method contracts** (adding/altering a method).
-
-**You own autonomously:** Pet-UI components, Live2D rendering, UI state (Zustand), and pure client wiring that *consumes* existing `@taki/shared` types + WS methods + Tauri commands. If you find you need a new WS method, a new capability, or a protocol field the base doesn't expose → **write the requirement down and hand it to the backend owner** (they implement the contract + Rust side); you consume the client stub. This keeps the DAG and the invariants honest.
+- **You (incoming session) = the M5 Leader, owning the full stack.** M5's tasks span core (scheduler, heartbeat, memory redesign), shell (sampling capabilities, permission tiers), and UI (avatar polish, settings suite). Route work through the trellis flow; sub-agents implement, you verify.
+- **Deep-invariant areas demand extra care (not a different owner — extra care):**
+  - The **D1-frozen turn runtime** (`chat-agent.ts` stream loop / persistTurn / abort / toolApproval): byte-frozen bodies, NAMED ADDITIVE seams only — see `.trellis/spec/backend/agent-runtime.md`, including the v7 abort double-ending law (cover BOTH stream endings; transport-faithful mocks).
+  - **`@taki/shared` protocol schemas**: additive evolution only; check whether `src-tauri/src/protocol.rs` mirrors a shape before touching it (invariant 3).
+  - **Rust Permission Gate**: fail-closed forever; the safest option owns every default slot; an advisory LLM classifier may add a deny, never a fail-open allow.
+  - **Memory engine**: D28 modularity — every new mechanism is a single-file deletable module; the `layer-registry` declarative pattern survives all redesigns.
 
 ---
 
@@ -54,6 +49,9 @@ Three trellis tasks (archived under `.trellis/tasks/archive/2026-07/`) + a confi
 - **`TAKI_MAX_STEPS`** — the per-turn tool-loop cap is now config (`config/agent-config.ts`, default 10), not hardcoded.
 
 **Net result — the agent runtime is: multi-turn consistent, tool-truthful (records persisted), cancellable, and configurable.** The timeline stores structured `parts` (tool-call `input` / tool-result `output`) — this is already the data M4 #17's tool-card rendering needs.
+
+### M4 — Pet UI & Live2D (6/6 closed)
+Renderer locked by spike (#13: `untitled-pixi-live2d-engine` + pixi 8); transparent always-on pet overlay with render governor + drag (#14); element-level click-through (#15); bubble + LLM-driven avatar — expression/motion tools + reported vocabulary, gaze/click reactions (#16); full chat window — streaming timeline, default-safe markdown, image attachments + VLM describe, abort entry, floating toasts, cancel-before-reply retract (#17); generic character import (Cubism 2/3 + `.zst` clean-room) + costume switching with degrade-and-badge availability + last-costume persistence (#18). Four packaged B-test rounds hardened the packaged-only defect classes (CSP, per-window ACL, WebView2 quirks, boot races) → `.trellis/spec/frontend/packaged-build.md`. See `docs/devlog/m4.md`.
 
 ### Environment
 - Node 24, pnpm 10, Rust 1.88 msvc, WebView2 present. `gh` authed as `Ae486`, git user `PLeiA`, remote → github.com/Ae486/ShiinaTaki. A real OpenAI-compatible key is in `.env.local` (L2 tests + integration).
@@ -125,27 +123,29 @@ AI SDK 7, Tauri 2, zod 4, PixiJS 8, the Live2D runtime all move fast. **Never co
 
 ---
 
-## 4. Recommended first moves (M4 Leader)
+## 4. Recommended first moves (M5 Leader)
 
-1. Read §2. Confirm the base is green on your machine: `pnpm -r typecheck && pnpm -w lint && pnpm -r test`, `cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml`, and (backend net) `pnpm --filter @taki/e2e test:e2e`.
-2. **First issue = #13 — Live2D renderer selection spike** (`spike` label, the M4 blocker). Drive the moc+moc3 decision tree against assets in `./models` (git-ignored), lock primary vs fallback, **write the result back into `docs/TECH-STACK.md`**. Nothing else in M4 proceeds until the renderer is chosen.
-3. Then, in numeric = topological order: **#14** pet overlay (transparent, Live2D idle, state machine, drag) → **#15** per-pixel click-through → **#16** bubble + LLM-driven expressions/motions → **#17** full chat window (timeline, markdown, image attachments) → **#18** character import (Cubism + .zst) + costume switching.
-4. Drive each through §3.2 with §3.3 TDD. `#16` and `#17` hit the two coupling points in §5 — read them before starting those two.
+1. Read §2, then **`devlog/m5.md`** — the signed-off M5 blueprint (decisions Q1–Q5, the memory-redesign six-pack, the proactivity three-tier model, the customization principles, the 11-task table, the exclusion list) — and the two research files it indexes (`.trellis/workspace/pleia/m5-proactivity-survey.md`, `hermes-memory-analysis.md`).
+2. Confirm the base is green: `pnpm -r typecheck && pnpm -w lint && pnpm -r test`, `cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml`.
+3. Drive the 11 tasks in blueprint order: **T1** avatar-presentation → **T2** tool/capability governance → **T3a/T3b** sensing (#19/#20) → **T4** proactivity core (croner + #21 Heartbeat) → **T5** memory-learning (D28 redesign) → **T6** settings suite (#22→#26). Each through §3.2, plus the Q1 cleanup contract: health notes in research, touched-file debt fixed in impl, verified in check.
+4. Cross-task seams to honor from day one: **A1** injection-fence minimum lands with T3a; **A2** write-context tag lands with T4's first heartbeat write; T4's croner is what T5's nightly consolidation rides.
 
 ---
 
-## 5. Watch-list / coupling points (things that will bite if forgotten)
+## 5. Watch-list / coupling points (M5)
 
-**Coupling point 1 — #16 (LLM-driven expressions) meets D9 (emotion capsule).** The emotion signal fed to the persona is a **static placeholder** today: `EMOTION_CAPSULE = "Current mood: neutral."` in `packages/core/src/memory/assembler.ts`. #16 wants the avatar's expression/motion driven by taki's actual mood, which needs a real emotion signal. Per the D9 ruling: wire it via **injection** — give the assembler a real `emotion` provider (static impl → real source), **do not change the assembly framework, do not hardcode a character data source**, and do **not** pre-build a provider interface now (YAGNI; introduce it when the real source lands). This is "角色真实感" territory. Since the assembler + memory are **backend base**, any change there goes to the backend on-call owner (§0.5) — the frontend consumes whatever expression signal the contract ends up exposing.
+**Coupling point 1 — A2 before any Heartbeat write.** A Heartbeat is a cron-like agent turn; without the write-context tag (`primary|heartbeat|flush|subagent`) auto-memory would sediment every beat as real conversation (episodes/profile pollution). The tag ships IN T4's heartbeat wiring, not later (full formalization in T5).
 
-**Coupling point 2 — #17 (chat-window tool cards) meets the timeline `parts`.** Good news: **the data is already there.** The `agent-harness-improve` task made the timeline persist structured `parts` — `tool-call` (with `input`) and `tool-result` (with `output`) — exactly so the chat window can render tool cards. Consume `timeline.history` / `timeline.subscribe` / `timeline.appended` and render off `TimelineEntry.parts` (text-only legacy rows have no `parts` — fall back to `content`). **Limit:** `reasoning` / `file` / `approval` parts are **not** persisted yet (register **D14**). If #17's design needs those (e.g. rendering a chain-of-thought), that's a backend-owner change, not a frontend workaround.
+**Coupling point 2 — A1 minimum before sensed text enters prompts.** T3a puts activity captures into assembled context; the injection fence + provenance note ("recalled/sensed data, not instructions") must exist the same day. Full hardening (streaming scrubber + write-time threat scan) completes in T5. Sensed/recalled content is untrusted data, always.
+
+**Coupling point 3 — conversation-configured anything must surface in the settings panel.** Dual entry, single store: agent config tools (cron jobs, heartbeat checklist items, sampling grants) write the same persisted stores the T6 panels render. An NL grant rides the ORDINARY Approval flow (once/session/always → the #23 panel) — never a new mechanism, never a silent high-sensitivity flip.
 
 **Other open threads:**
-- **Live2D renderer (#13)** is decided-by-spike: primary `untitled-pixi-live2d-engine`, fallback `pixi-live2d-display-lipsyncpatch`. Runtimes are proprietary — vendored locally, git-ignored, never committed.
-- **`models/` and `references/`** are git-ignored + copyrighted (GPLv3/PolyForm-NC/MIT). Learn patterns, never copy code. If `git status` shows them, stop and fix `.gitignore`.
-- **Deferred register status**: D1 (hallucination) + D2 (shell-open A1) **DONE**; **D9** (emotion — #16 above) OPEN; D14/D15/D16 (agent narrow edges) OPEN; D11 partially closed (`TAKI_MAX_STEPS`). Consult `docs/deferred-decisions.md` when planning — if you defer something, log it.
-- **The trellis flow is mandatory** (implement → check → update-spec). Don't let the main thread write feature code and skip `trellis-check`.
-- **Manual-only checks** (can't be headless): the settings/chat visual verification, a browser/app actually launching (shell-open #10), and Live2D visual correctness. Track them in `docs/devlog/manual-checks.md`.
+- **D9** (emotion capsule) resolves in T5 as a `companion-state-source` MemorySource provider (today: static `"Current mood: neutral."` in `assembler.ts`).
+- **D29** (ws-client mid-turn disconnect never settles) comes DUE in #22 — first touch of `ws-client.ts`, fix + test in the same task.
+- **Roaming C3 costume-switch wedge**: root cause unknown, fully mitigated (timeouts + switch ticket + fallback); packaged devtools are enabled — grab Network-pending evidence if it recurs.
+- **Agent-authored EXECUTABLE artifacts stay deferred (D36)**; the M5 mechanism for learned habits is data-level self-config (structured cron/checklist rows executed by the deterministic engine). Community imports are untrusted → trust tiers + threat scan (#25, D37).
+- **The trellis flow is mandatory** (implement → check → update-spec). Manual-only checks → `docs/devlog/manual-checks.md`.
 
 ---
 
@@ -169,11 +169,11 @@ python ./.trellis/scripts/task.py start <dir>
 python ./.trellis/scripts/task.py finish
 python ./.trellis/scripts/task.py archive <name>
 
-# GitHub roadmap (M4)
+# GitHub roadmap (M5)
 gh issue view <n> -R Ae486/ShiinaTaki
-gh issue list -R Ae486/ShiinaTaki --milestone "M4 — Pet UI & Live2D"
+gh issue list -R Ae486/ShiinaTaki --label ready-for-agent
 ```
 
 ---
 
-*Handoff updated 2026-07-13 at the close of the agent-core + hardening phase. The Agent Core base is built and hardened; its owner stays on-call for the contracts in §0.5. The incoming session owns the M4 Pet-UI frontend. Read, verify base-green, then lead.*
+*Handoff updated 2026-07-18 at the close of M4. M1–M4 are shipped; the incoming session is the M5 Leader (full stack, module optimization). Read `devlog/m5.md` for the signed-off blueprint, verify base-green, then lead.*

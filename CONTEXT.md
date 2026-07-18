@@ -25,6 +25,14 @@ _Avoid_: mute, do-not-disturb
 A Companion-initiated message to the user, driven by Heartbeat, subject to rate limits and quiet hours.
 _Avoid_: notification, push
 
+**Heartbeat**:
+A scheduled Agent Core turn with no user message (OpenClaw-style): the agent reviews a small stable checklist plus current signals and stays silent by default — the "all quiet" ack is never shown to the user. When something genuinely needs attention it acts: a Proactive Utterance, or a silent act such as choosing an avatar expression. Skipped when there is nothing to check, deferred while a real conversation turn is in flight, restricted to active hours. It is a full LLM turn — conscious action, never a reflex.
+_Avoid_: keepalive, ping, polling (networking liveness senses); idle animation driver
+
+**Idle Motion**:
+A motion the Pet UI plays on its own while the Companion is idle — drawn at random intervals from a preset pool — plus the automatic return to the idle state after any one-shot motion finishes. A renderer reflex: deterministic, zero-LLM, zero-cost, works offline. The conscious counterpart (the agent choosing an expression because of context) is a Heartbeat outcome, not an Idle Motion.
+_Avoid_: idle animation (the engine's built-in breathing/blinking), screensaver
+
 ### Architecture
 
 **Agent Core**:
@@ -37,6 +45,10 @@ _Avoid_: host, native layer
 
 **Pet UI**:
 The WebView presentation layer rendering the pet. Just one client of the Agent Core; closing it does not stop the agent.
+
+**Hook**:
+A configuration-defined, deterministic event-to-action binding executed by the runtime itself (Claude Code sense): "when X happens, run the preset Y" — no LLM judgment, no token cost, e.g. a finished motion triggering the idle return. Hooks can exist at any layer that emits events (renderer, Agent Core, Shell).
+_Avoid_: React hook (`use-*.ts` UI code), webhook
 
 ### Capabilities & Permissions
 
@@ -51,6 +63,10 @@ _Avoid_: firewall, guard
 **Approval**:
 A user decision on a Capability request via dialog: once / this session / always / deny.
 _Avoid_: confirmation, prompt
+
+**Permission Level**:
+A global preset that bulk-sets every Capability's policy in one move (a relaxed / standard / strict spectrum); a convenience view over the per-Capability grants, never a second enforcement path — the Permission Gate stays the sole authority. The most permissive level still writes the audit log and cannot lift the hard blocklist. A grant expressed in conversation goes through the ordinary Approval flow and lands in the same store the permissions panel manages.
+_Avoid_: permission mode (that's a per-Capability policy, e.g. Exec's), bypass (colloquial — no level bypasses audit)
 
 **Exec**:
 The general-purpose shell Capability. Governed by `deny | allowlist | full` policy modes, default allowlist.
