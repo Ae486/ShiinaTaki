@@ -1,11 +1,12 @@
 /**
- * INPUT:  an LLM avatar_play_motion call ({ name, priority?, loop? }) + a bound characterId and AvatarSubscriptions
+ * INPUT:  an LLM avatar_play_motion call ({ name, priority?, loop? }) + bound characterId, AvatarSubscriptions, live vocab (name enum, 1e)
  * OUTPUT: createPlayMotionTool(deps) -> ToolSet { avatar_play_motion }; returns { ok:true } (fire-and-forget)
  * POS:    core/avatar — the agent tool; publishes an avatar.command to the Pet UI; execute NEVER throws; no OS/gate (invariant 1/4)
  */
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
 import type { AvatarToolDeps } from "./avatar-tools.ts";
+import { vocabNameSchema } from "./vocab-name-schema.ts";
 
 export function createPlayMotionTool(deps: AvatarToolDeps): ToolSet {
   const log = deps.logger.child({ mod: "avatar" });
@@ -15,9 +16,10 @@ export function createPlayMotionTool(deps: AvatarToolDeps): ToolSet {
         "Play one of your avatar's body motions to express yourself (e.g. a gesture before acting, or a reaction). " +
         "The name MUST be one of the motion names listed in your avatar vocabulary; an unknown name is ignored. " +
         "Fire-and-forget: it animates what the user sees on screen — there is no result to read, and it is fine if no " +
-        "avatar is currently shown.",
+        "avatar is currently shown. After calling it, add a follow-up message only if you have new substantive " +
+        "content to say — never filler.",
       inputSchema: z.object({
-        name: z.string().min(1),
+        name: vocabNameSchema(deps.vocab?.motions ?? []),
         // Optional engine knobs the Pet UI passes through to model.motion(); omit for a normal one-shot motion.
         priority: z.enum(["idle", "normal", "force"]).optional(),
         loop: z.boolean().optional(),

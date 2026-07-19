@@ -6,9 +6,10 @@
  *         a cancel before any output retracts the just-appended user row (deletes it + skips the memory writes)
  * POS:    core/agents — the streaming chat loop; base prompt + memory context + tools per turn; auto-writes detached
  */
-import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type ToolSet } from "ai";
+import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type ToolSet } from "ai";
 import type { ChatSendParams, ImageAttachment } from "@taki/shared";
 import type { ApprovalGate } from "../approval/approval-gate.ts";
+import { COSTUME_CHANGE_NOTICE } from "../avatar/costume-notice.ts";
 import type { AutoMemory } from "../memory/auto-memory.ts";
 import type { MemoryEngine } from "../memory/memory-engine.ts";
 import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
@@ -49,10 +50,16 @@ export interface ChatAgentDeps {
   characterTools?: (characterId: string) => ToolSet;
   /** Extra instructions appended after the assembled memory context (skills list + avatar vocabulary); "" contributes nothing. */
   instructionsExtra?: (characterId: string) => string;
+  /** A one-shot costume-change flag for THIS turn (consumed = acknowledged): true → a COSTUME_CHANGE_NOTICE is prefixed
+   *  onto the model-facing user message (never persisted) so the model adopts the freshly-reported avatar vocabulary
+   *  (1f). Absent = no costume tracking (tests). */
+  costumeChanged?: (characterId: string) => boolean;
   /** MCP tool-approval gate; only consulted when a TurnContext is present (its notify carries the ask). */
   approval?: ApprovalGate;
   /** Tool-loop step cap per turn (round-trips: call -> observe -> decide). Injected from AgentConfig; falls back to DEFAULT_MAX_STEPS. */
   maxSteps?: number;
+  /** Extra stop conditions OR-composed into stopWhen after the step cap (e.g. the avatar presentation tail-stop, 1c). */
+  stopConditions?: StopCondition<ToolSet>[];
 }
 
 // Fallback step cap when no caller injects one (tests). Production injects AgentConfig.maxSteps (env TAKI_MAX_STEPS, D11);
@@ -85,7 +92,7 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
     model: vision ? vision.model : deps.model,
     instructions: composeInstructions(deps, { characterId, history, message }),
     tools: { ...memory.createTools(characterId), ...(deps.extraTools ?? {}), ...(deps.characterTools?.(characterId) ?? {}) },
-    stopWhen: isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS),
+    stopWhen: [isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS), ...(deps.stopConditions ?? [])],
     // MCP tool calls await the operator's decision inside the loop; internal tools return not-applicable (ruling 5).
     // The gate is installed whenever it is configured — without a turn (no notify sink) it denies unremembered
     // MCP tools instead of coming off (fail-closed: a turn without an operator must not bypass approval).
@@ -98,8 +105,12 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
     turn.signal?.addEventListener("abort", () => approval.denyPending("turn cancelled"), { once: true });
   }
   // The in-flight image bytes ride ONLY this turn's messages (a FilePart tail swap replacing the just-appended user
-  // row's text projection); persistence + replay stay text (decision 6). A text turn sends `history` unchanged.
-  const outgoing = vision ? [...history.slice(0, -1), buildMultimodalUser(message, attachments)] : history;
+  // row's text projection); persistence + replay stay text (decision 6). A costume swap since the model's last turn
+  // rides in-flight the same way (a one-shot note prefixed onto the user TEXT, 1f). BOTH are additive seams on the
+  // D1-frozen turn — `history` (the persisted projection) is NEVER mutated; text-turn/no-notice stays byte-identical.
+  // consumeCostumeChanged fires here even if the turn is later cancelled/retracted (baseline advances anyway → a rare
+  // skipped notice, backstopped by the 1e enum; accepted narrow edge).
+  const outgoing = buildOutgoing({ history, isImageTurn: vision !== null, message, attachments, changed: deps.costumeChanged?.(characterId) ?? false });
   // abortSignal is per-call by SDK design (not a constructor setting). A cancel ends the stream by EITHER a graceful
   // `abort` part or a THROWN reason (see retractIfCancelledSilent) — the retract seam below handles both endings.
   const result = await agent.stream({ messages: outgoing, abortSignal: turn?.signal });
@@ -180,6 +191,23 @@ function requireVisionDeps(deps: ChatAgentDeps): { model: LanguageModel; store: 
     throw new Error("Image attachments require a configured vision model (TAKI_VLM_*)");
   }
   return { model: deps.visionModel, store: deps.attachments };
+}
+
+// This turn's model-facing messages. A plain text turn sends `history` unchanged (byte-identical to the pre-1f/pre-image
+// path); an image turn swaps a FilePart tail for the last user row (bytes in-flight only, decision 6); a costume swap
+// prefixes a one-shot note onto the user TEXT (1f). All additive — `history` (the persisted projection) is never
+// mutated; a text turn's history tail is {role:"user", content:message}, so rebuilding it with the prefixed text is faithful.
+function buildOutgoing(args: {
+  history: ModelMessage[];
+  isImageTurn: boolean;
+  message: string;
+  attachments: ImageAttachment[];
+  changed: boolean;
+}): ModelMessage[] {
+  const modelText = args.changed ? `${COSTUME_CHANGE_NOTICE}\n\n${args.message}` : args.message;
+  if (args.isImageTurn) return [...args.history.slice(0, -1), buildMultimodalUser(modelText, args.attachments)];
+  if (args.changed) return [...args.history.slice(0, -1), { role: "user", content: modelText }];
+  return args.history;
 }
 
 // The canonical v7 multimodal user message: a FilePart per attachment (ImagePart is @deprecated in v7), `data` = RAW

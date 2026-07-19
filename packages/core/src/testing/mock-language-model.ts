@@ -117,10 +117,14 @@ export function midStreamErrorModel(deltas: string[], error: unknown): MockLangu
  * fresh stream per LLM call. A tool step ends with finishReason `tool-calls` (which continues the loop); its
  * `input` is a JSON STRING (the provider-level shape). Never reuse a consumed simulateReadableStream — each step
  * builds its own. Total LLM calls across the run must not exceed steps.length.
+ *
+ * The `textTool` variant emits text AND a tool call in ONE step (finishReason `tool-calls`) — the shape a real model
+ * uses when it speaks and emotes together, which plain `text`/`tool` steps cannot express (they are separate steps).
  */
 export type ScriptStep =
   | { kind: "text"; deltas: string[] }
-  | { kind: "tool"; toolCallId: string; toolName: string; input: unknown };
+  | { kind: "tool"; toolCallId: string; toolName: string; input: unknown }
+  | { kind: "textTool"; deltas: string[]; toolCallId: string; toolName: string; input: unknown };
 
 export function scriptedModel(steps: ScriptStep[]): MockLanguageModelV4 {
   return new MockLanguageModelV4({ doStream: steps.map(stepToResult) });
@@ -132,6 +136,20 @@ function stepToResult(step: ScriptStep) {
       stream: simulateReadableStream({
         chunks: [
           { type: "stream-start" as const, warnings: [] },
+          { type: "tool-call" as const, toolCallId: step.toolCallId, toolName: step.toolName, input: JSON.stringify(step.input) },
+          { type: "finish" as const, finishReason: { unified: "tool-calls" as const, raw: undefined }, usage: USAGE },
+        ],
+      }),
+    };
+  }
+  if (step.kind === "textTool") {
+    return {
+      stream: simulateReadableStream({
+        chunks: [
+          { type: "stream-start" as const, warnings: [] },
+          { type: "text-start" as const, id: "t1" },
+          ...step.deltas.map((delta) => ({ type: "text-delta" as const, id: "t1", delta })),
+          { type: "text-end" as const, id: "t1" },
           { type: "tool-call" as const, toolCallId: step.toolCallId, toolName: step.toolName, input: JSON.stringify(step.input) },
           { type: "finish" as const, finishReason: { unified: "tool-calls" as const, raw: undefined }, usage: USAGE },
         ],
@@ -182,6 +200,15 @@ function stepToGenerateResult(step: ScriptStep) {
   if (step.kind === "tool") {
     return generateResult(
       [{ type: "tool-call", toolCallId: step.toolCallId, toolName: step.toolName, input: JSON.stringify(step.input) }],
+      "tool-calls",
+    );
+  }
+  if (step.kind === "textTool") {
+    return generateResult(
+      [
+        { type: "text", text: step.deltas.join("") },
+        { type: "tool-call", toolCallId: step.toolCallId, toolName: step.toolName, input: JSON.stringify(step.input) },
+      ],
       "tool-calls",
     );
   }

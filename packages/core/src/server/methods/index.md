@@ -5,7 +5,7 @@
 - timeline-history.ts — timeline.history (operator-only): newest-first cursor page of the conversation timeline
 - timeline-subscribe.ts — timeline.subscribe (operator-only): register a timeline.appended/removed sink; auto-unsubscribe on disconnect
 - avatar-subscribe.ts — avatar.subscribe (operator-only): register an avatar.command sink; auto-unsubscribe on disconnect
-- avatar-report.ts — avatar.report (operator-only): record the Pet UI's loaded-model motion/expression names into the vocabulary store
+- avatar-report.ts — avatar.report (operator-only): record the Pet UI's loaded-model motion/expression names (+ the worn costume id for 1f change-detection) into the vocabulary store
 - media-get.ts — media.get (operator-only): serve one attachment's bytes for scroll-back; thin delegation to attachment-store.read (ref confinement single-sourced there)
 - media-clear.ts — media.clear (operator-only): purge retained attachment bytes on demand (the description-memory is untouched)
 - media-usage.ts — media.usage (operator-only): attachment + memory-text byte footprint; RESERVED for the M5 settings UI (D27)

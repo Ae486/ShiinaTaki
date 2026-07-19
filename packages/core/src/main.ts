@@ -17,6 +17,7 @@ import { createDecisionStore } from "./approval/decision-store.ts";
 import { createAvatarSubscriptions } from "./avatar/avatar-subscriptions.ts";
 import { createAvatarTools } from "./avatar/avatar-tools.ts";
 import { createAvatarVocabulary } from "./avatar/avatar-vocabulary.ts";
+import { presentationTailStop } from "./avatar/presentation-stop.ts";
 import { createCapabilityBroker } from "./capabilities/capability-broker.ts";
 import { createClipboardReadTool } from "./capabilities/clipboard-read-tool.ts";
 import { createClipboardWriteTool } from "./capabilities/clipboard-write-tool.ts";
@@ -279,6 +280,9 @@ registry.register(
       memory,
       autoMemory,
       maxSteps: agentConfig.maxSteps,
+      // Presentation tools (avatar expression/motion) return nothing to read; stop the loop after a spoken,
+      // presentation-only step so the SDK does not force a padded filler generation (1c). See presentation-stop.ts.
+      stopConditions: [presentationTailStop],
       // Vision slot + attachment store (#17): an image turn routes to visionModel and its bytes ride in-flight only; with
       // no vision slot an image turn is rejected upstream (the text model never receives an image).
       visionModel,
@@ -296,10 +300,13 @@ registry.register(
         ...mcpManager.tools(),
       },
       // Per-character avatar tools bind their publish target (the turn's characterId) here — same lifetime as memory tools.
-      characterTools: (characterId) => createAvatarTools({ subscriptions: avatarSubscriptions, characterId, logger }),
+      // vocab makes `name` a dynamic enum of the worn costume's live names (1e), so a costume swap rejects stale names.
+      characterTools: (characterId) =>
+        createAvatarTools({ subscriptions: avatarSubscriptions, characterId, logger, vocab: avatarVocabulary.get(characterId) }),
       // Skills list + the active character's reported avatar vocabulary (Option A names); blank sections contribute nothing.
       instructionsExtra: (characterId) =>
         [skillsLoader.renderList(), avatarVocabulary.render(characterId)].filter((section) => section.length > 0).join("\n\n"),
+      costumeChanged: (characterId) => avatarVocabulary.consumeCostumeChanged(characterId),
       approval: approvalGate,
     }),
     logger,

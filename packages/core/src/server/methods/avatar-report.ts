@@ -17,9 +17,10 @@ export function avatarReportMethod(vocabulary: AvatarVocabulary): MethodDefiniti
     method: AVATAR_METHODS.report,
     roles: ["operator"],
     paramsSchema: AvatarReportParamsSchema,
-    handler: ({ characterId, motions, expressions }): AvatarReportResult => {
-      // The Pet UI re-reports on load / costume-swap; a set() fully replaces the character's prior vocabulary.
-      vocabulary.set(characterId, { motions, expressions });
+    handler: ({ characterId, motions, expressions, costume }): AvatarReportResult => {
+      // The Pet UI re-reports on load / costume-swap; a set() fully replaces the character's prior vocabulary. The
+      // costume id (undefined on a boot / drift self-heal report) drives the per-turn costume-change detection (1f).
+      vocabulary.set(characterId, { motions, expressions }, costume);
       return { status: "ok" };
     },
   };
