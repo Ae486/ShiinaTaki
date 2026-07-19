@@ -11,9 +11,9 @@
 import { useEffect, useRef } from "react";
 import type { CharacterCostumesResult } from "@taki/shared";
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
-import { costumeAssetResolver, resolveSettingsFile } from "@/lib/character-asset-url.js";
+import { resolveSettingsFile } from "@/lib/character-asset-url.js";
 import { loadLastCostume } from "@/lib/last-costume.js";
-import { withTimeout } from "@/lib/promise-timeout.js";
+import { resolveSwitchReport } from "@/lib/resolve-switch-report.js";
 import type { WsClient } from "@/lib/ws-client.js";
 import { useConnectionStore } from "@/stores/connection-store.js";
 import type { PetScene } from "@/renderer/pet-scene.js";
@@ -28,15 +28,12 @@ function pickCostume(costumes: CharacterCostumesResult): string {
   return (costumes.availability?.[remembered]?.renderable ?? true) ? remembered : costumes.defaultCostume;
 }
 
-// One promotion attempt: resolve → prune-load via the scene's switchCostume → re-report vocabulary.
+// One promotion attempt: resolve the settings file, then the shared switch+report dance (prune-load via switchCostume,
+// re-report the re-read vocabulary through the existing avatar.report).
 async function promote(deps: { client: WsClient; scene: PetScene; costumes: CharacterCostumesResult; costume: string }): Promise<void> {
   const settingsFile = resolveSettingsFile(deps.costumes, deps.costume);
   if (!settingsFile) throw new Error(`no settings file for costume ${deps.costume}`);
-  // The resolution feeds pruning so an unresolvable `..` ref never reaches the asset protocol (#18).
-  const { resolution } = await deps.client.costumeResolution(ACTIVE_CHARACTER_ID, deps.costume);
-  const source = await costumeAssetResolver({ characterId: ACTIVE_CHARACTER_ID, costume: deps.costume, settingsFile, resolution });
-  const vocabulary = await withTimeout(deps.scene.switchCostume(source), PROMOTE_TIMEOUT_MS, `costume ${deps.costume}`);
-  await deps.client.reportAvatar({ characterId: ACTIVE_CHARACTER_ID, ...vocabulary });
+  await resolveSwitchReport({ client: deps.client, scene: deps.scene, costume: deps.costume, settingsFile, timeoutMs: PROMOTE_TIMEOUT_MS });
 }
 
 export function useInitialCostume(scene: PetScene | null): void {

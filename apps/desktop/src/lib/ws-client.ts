@@ -184,7 +184,12 @@ function appErrorCode(data: unknown): ErrorCode | null {
 function requestMethods(rpc: JSONRPCServerAndClient) {
   return {
     subscribeAvatar: async (characterId: string) => void (await rpc.request(AVATAR_METHODS.subscribe, { characterId })),
-    reportAvatar: async (params: AvatarReportParams) => void (await rpc.request(AVATAR_METHODS.report, params)),
+    reportAvatar: async (params: AvatarReportParams) => {
+      // One centralized trace for EVERY re-report (boot / costume promotion / manual switch / drift self-heal): the
+      // provable-re-report the acceptance needs. A dead-names regression shows here as a count mismatch (1b).
+      console.info(`[avatar] reported vocab motions=${params.motions.length} expressions=${params.expressions.length}`);
+      await rpc.request(AVATAR_METHODS.report, params);
+    },
     chatCancel: async (characterId: string) =>
       ChatCancelResultSchema.parse(await rpc.request(CHAT_METHODS.cancel, { characterId })).cancelled,
     timelineHistory: async (params: TimelineHistoryParams) =>

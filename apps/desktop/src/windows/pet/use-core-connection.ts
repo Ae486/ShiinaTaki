@@ -1,7 +1,8 @@
 /**
  * INPUT:  the loaded PetScene (nullable while the model loads); a locally-persisted operator device identity.
- * OUTPUT: useCoreConnection(scene) — opens the operator WS to the Core, reports the model vocabulary, subscribes to
- *         avatar commands, and applies each through the shared presentation gate. Publishes status to the store.
+ * OUTPUT: useCoreConnection(scene) — opens the operator WS to the Core, reports the model vocabulary (on connect and
+ *         on drift self-heal), subscribes to avatar commands, and applies each through the shared presentation gate.
+ *         An avatar command naming an absent motion/expression re-reports the live inventory. Publishes status to the store.
  * POS:    ui/windows/pet — the ws-client ↔ renderer bridge (renderer stays framework-free; the WS lives here). The
  *         bubble feature reads the same client from the connection store.
  */
@@ -58,8 +59,11 @@ export function useCoreConnection(scene: PetScene | null): void {
   // the shared gate so an expression surfaces with the reply bubble. Re-runs only when scene/client/status flip.
   useEffect(() => {
     if (!scene || !client || status.kind !== "connected") return;
-    client.onAvatarCommand((command) => sharedPresentationGate.present(() => scene.applyAvatarCommand(command)));
-    void client.reportAvatar({ characterId: ACTIVE_CHARACTER_ID, ...scene.reportVocabulary() });
+    // Boot report AND drift self-heal share one re-reader: a command naming something the worn costume lacks provokes
+    // an immediate corrective re-report of the live inventory instead of a silent drop (1b).
+    const reReport = (): void => void client.reportAvatar({ characterId: ACTIVE_CHARACTER_ID, ...scene.reportVocabulary() });
+    client.onAvatarCommand((command) => sharedPresentationGate.present(() => scene.applyAvatarCommand(command, reReport)));
+    reReport();
     void client.subscribeAvatar(ACTIVE_CHARACTER_ID);
   }, [scene, client, status.kind]);
 }

@@ -1,9 +1,11 @@
 /**
  * INPUT:  a DOM host + a local renderThrottling flag + an initial model source (asset: URL, or the dev route default).
- * OUTPUT: a PetScene controller — governor, setAvatarState, isOpaqueAt, the avatar surface, switchCostume
- *         (teardown+reload a new costume, returns its re-read vocabulary), and dispose. The scene may boot MODEL-LESS
- *         (initial source unreachable — normal in a packaged build, where the dev route does not exist): the stage
- *         runs empty, avatar methods no-op, and the first switchCostume (initial-costume promotion) attaches a model.
+ * OUTPUT: a PetScene controller — governor, setAvatarState, isOpaqueAt, the avatar surface (applyAvatarCommand with an
+ *         optional drift sink, handleClick, focusAt, handleProximity), switchCostume (teardown+reload a new costume,
+ *         returns its re-read vocabulary), abortSwitch (mark an in-flight switch stale so a late model self-discards),
+ *         and dispose. The scene may boot MODEL-LESS (initial source unreachable —
+ *         normal in a packaged build, where the dev route does not exist): the stage runs empty, avatar methods no-op,
+ *         and the first switchCostume (initial-costume promotion) attaches a model.
  * POS:    ui/renderer — framework-free (ZERO React/Tauri imports). The single assembly point the React bridge
  *         (windows/pet/pet-stage.tsx) mounts; keeps all Pixi/Live2D ownership out of the React tree.
  */
@@ -14,7 +16,7 @@ import { createStage } from "./stage.ts";
 import { RenderGovernor } from "./render-governor.ts";
 import { renderActivityFor, type AvatarState } from "./state-machine.ts";
 import { loadCharacterModel, DEV_MODEL_SOURCE, type CostumeSource } from "./live2d/load-character-model.ts";
-import { startIdleAnimation } from "./live2d/idle-behavior.ts";
+import { createIdleMotionScheduler, type IdleMotionScheduler } from "./live2d/idle-motion.ts";
 import { createAvatarController, type AvatarController } from "./live2d/avatar-controller.ts";
 import { reloadModel } from "./live2d/costume-switch.ts";
 import { readVocabulary, type AvatarVocabulary } from "./live2d/model-vocabulary.ts";
@@ -40,22 +42,30 @@ export type PetScene = {
   // The loaded model's motion/expression names — reported to the Core (avatar.report) for Option A prompt injection.
   // Empty while the scene is model-less; the promotion path re-reports the real vocabulary after attach.
   reportVocabulary: () => AvatarVocabulary;
-  // Applies an LLM-driven avatar command (validated vs the vocabulary; unknown names no-op). F3.
-  applyAvatarCommand: (command: AvatarCommand) => void;
+  // Applies an LLM-driven avatar command (validated vs the vocabulary); an unknown name fires onVocabularyDrift so the
+  // caller re-reports the live inventory (self-heal, 1b). F3.
+  applyAvatarCommand: (command: AvatarCommand, onVocabularyDrift?: () => void) => void;
   // Reacts to a click at canvas-local px (region reaction) and returns the region hit for the caller's precedence. F4.
   handleClick: (x: number, y: number) => ClickRegion | null;
   // Gaze follow: point the model at a canvas-local cursor position (clamped + delta-gated). F4.
   focusAt: (x: number, y: number) => void;
+  // Deterministic proximity reflex: a cursor entering the near zone triggers a cooldown-gated reaction (D17).
+  handleProximity: (x: number, y: number) => void;
   // Swaps to another costume's model and returns its re-read vocabulary for the caller to avatar.report (#18). The
   // source carries the settings URL + a per-sub-resource resolve fn (see load-character-model / lib). Doubles as
   // the FIRST attach when the scene booted model-less.
   switchCostume: (source: CostumeSource) => Promise<AvatarVocabulary>;
+  // Marks any in-flight switchCostume stale (bumps the switch ticket) so its late-resolving model self-discards
+  // instead of attaching a costume the identity stores never advanced to. Called on a switch timeout/failure and on
+  // an operator Cancel; idempotent + model-less safe. See resolve-switch-report / use-costume-switch (1f Fix 1).
+  abortSwitch: () => void;
   dispose: () => void;
 };
 
 interface SceneModel {
   model: Live2DModel;
   avatar: AvatarController;
+  idle: IdleMotionScheduler;
 }
 
 interface SwitchContext {
@@ -98,11 +108,14 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
     setAvatarState: (state) => governor.setActivity(renderActivityFor(state)),
     isOpaqueAt: (x, y) => mask.isOpaque(x, y),
     reportVocabulary: () => slot.current?.avatar.vocabulary ?? { motions: [], expressions: [] },
-    applyAvatarCommand: (command) => slot.current?.avatar.applyCommand(command),
+    applyAvatarCommand: (command, onVocabularyDrift) => slot.current?.avatar.applyCommand(command, onVocabularyDrift),
     handleClick: (x, y) => slot.current?.avatar.reactToClick(x, y) ?? null,
     focusAt: (x, y) => slot.current?.avatar.focusAt(x, y),
+    handleProximity: (x, y) => slot.current?.avatar.handleProximity(x, y),
     switchCostume: (source) => switchCostume(ctx, source),
+    abortSwitch: () => abortSwitch(ctx),
     dispose: () => {
+      slot.current?.idle.dispose();
       app.ticker.remove(mask.refresh);
       mask.dispose();
       app.destroy(true, { children: true });
@@ -110,7 +123,7 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
   };
 }
 
-// Teardown+reload the new costume, rebuild its avatar controller + idle loop, and return the re-read vocabulary the
+// Teardown+reload the new costume, rebuild its avatar controller + idle scheduler, and return the re-read vocabulary the
 // caller re-reports through the EXISTING avatar.report (arch §6b — no new vocab plumbing, no costume.switch WS method).
 async function switchCostume(ctx: SwitchContext, source: CostumeSource): Promise<AvatarVocabulary> {
   const ticket = ++ctx.seq.current;
@@ -123,8 +136,22 @@ async function switchCostume(ctx: SwitchContext, source: CostumeSource): Promise
   return vocabulary;
 }
 
-// One attach site for both the initial best-effort load and every costume swap: controller rebuild + idle loop.
+// Mark any in-flight costume switch stale so its late-resolving model self-discards (reloadModel's isStale flips true →
+// removeChild+destroy+throw) instead of attaching a costume the identity stores never advanced to (screen/vocabulary
+// drift, 1f Fix 1). Bumping the shared switch ticket is all it takes; idempotent + model-less safe (touches only the
+// counter). The load itself is not cancelled — a late completion is simply discarded, which is enough for correctness.
+function abortSwitch(ctx: SwitchContext): void {
+  ctx.seq.current += 1;
+}
+
+// One attach site for both the initial best-effort load and every costume swap: dispose the outgoing scheduler, then
+// rebuild the controller + idle scheduler. The scheduler goes stale (and self-disposes) once a newer switch bumps seq.
 function attachModel(ctx: SwitchContext, model: Live2DModel): void {
-  ctx.slot.current = { model, avatar: createAvatarController({ model, center: ctx.center, characterId: ctx.characterId }) };
-  void startIdleAnimation(model);
+  ctx.slot.current?.idle.dispose();
+  const ticket = ctx.seq.current;
+  ctx.slot.current = {
+    model,
+    avatar: createAvatarController({ model, center: ctx.center, characterId: ctx.characterId }),
+    idle: createIdleMotionScheduler({ model, isStale: () => ctx.seq.current !== ticket }),
+  };
 }

@@ -1,6 +1,7 @@
 /**
  * INPUT:  avatar commands (known/unknown names, motion knobs) + a stub model capturing expression()/motion() calls.
- * OUTPUT: assertions that a known name plays and an unknown name no-ops WITHOUT throwing (Option A layer 3 degrade).
+ * OUTPUT: assertions that a known name plays, an unknown name no-ops WITHOUT throwing (Option A layer 3 degrade), and
+ *         an unknown name fires the drift sink so the caller re-reports the live inventory (self-heal, 1b).
  * POS:    unit test for the avatar command applier (F3). The engine is mocked so its runtime enum loads in node
  *         (avatar-commands imports MotionPriority as a value). Exempt from size caps.
  */
@@ -32,28 +33,30 @@ function command(overrides: Partial<AvatarCommand>): AvatarCommand {
 describe("applyAvatarCommand", () => {
   it("plays a known expression and returns true", () => {
     const { model, expression, motion } = stubModel();
-    expect(applyAvatarCommand(model, command({ kind: "expression", name: "shame01" }), VOCAB)).toBe(true);
+    expect(applyAvatarCommand({ model, command: command({ kind: "expression", name: "shame01" }), vocabulary: VOCAB })).toBe(true);
     expect(expression).toHaveBeenCalledWith("shame01");
     expect(motion).not.toHaveBeenCalled();
   });
 
   it("plays a known motion with the mapped priority and loop knob", () => {
     const { model, motion } = stubModel();
-    expect(applyAvatarCommand(model, command({ kind: "motion", name: "angry01", priority: "force", loop: true }), VOCAB)).toBe(true);
+    expect(
+      applyAvatarCommand({ model, command: command({ kind: "motion", name: "angry01", priority: "force", loop: true }), vocabulary: VOCAB }),
+    ).toBe(true);
     expect(motion).toHaveBeenCalledWith("angry01", undefined, 3, { loop: true });
   });
 
   it("defaults an unspecified motion to normal priority, no loop", () => {
     const { model, motion } = stubModel();
-    applyAvatarCommand(model, command({ kind: "motion", name: "smile01" }), VOCAB);
+    applyAvatarCommand({ model, command: command({ kind: "motion", name: "smile01" }), vocabulary: VOCAB });
     expect(motion).toHaveBeenCalledWith("smile01", undefined, 2, { loop: false });
   });
 
   it("no-ops an unknown expression without throwing or touching the model (graceful degrade)", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const { model, expression, motion } = stubModel();
-    expect(() => applyAvatarCommand(model, command({ kind: "expression", name: "nope" }), VOCAB)).not.toThrow();
-    expect(applyAvatarCommand(model, command({ kind: "expression", name: "nope" }), VOCAB)).toBe(false);
+    expect(() => applyAvatarCommand({ model, command: command({ kind: "expression", name: "nope" }), vocabulary: VOCAB })).not.toThrow();
+    expect(applyAvatarCommand({ model, command: command({ kind: "expression", name: "nope" }), vocabulary: VOCAB })).toBe(false);
     expect(expression).not.toHaveBeenCalled();
     expect(motion).not.toHaveBeenCalled();
     warn.mockRestore();
@@ -62,8 +65,25 @@ describe("applyAvatarCommand", () => {
   it("no-ops an unknown motion name", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const { model, motion } = stubModel();
-    expect(applyAvatarCommand(model, command({ kind: "motion", name: "ghost99" }), VOCAB)).toBe(false);
+    expect(applyAvatarCommand({ model, command: command({ kind: "motion", name: "ghost99" }), vocabulary: VOCAB })).toBe(false);
     expect(motion).not.toHaveBeenCalled();
     warn.mockRestore();
+  });
+
+  it("fires onVocabularyDrift once when an unknown name is dropped (self-heal re-report, 1b)", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const { model } = stubModel();
+    const onVocabularyDrift = vi.fn();
+    applyAvatarCommand({ model, command: command({ kind: "motion", name: "ghost99" }), vocabulary: VOCAB, onVocabularyDrift });
+    expect(onVocabularyDrift).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
+  });
+
+  it("does NOT fire onVocabularyDrift when the name is known", () => {
+    const { model } = stubModel();
+    const onVocabularyDrift = vi.fn();
+    applyAvatarCommand({ model, command: command({ kind: "expression", name: "shame01" }), vocabulary: VOCAB, onVocabularyDrift });
+    applyAvatarCommand({ model, command: command({ kind: "motion", name: "angry01" }), vocabulary: VOCAB, onVocabularyDrift });
+    expect(onVocabularyDrift).not.toHaveBeenCalled();
   });
 });

@@ -8,4 +8,5 @@ Cross-cutting Pet UI clients + seams (talk to the Agent Core / hold window-share
 - last-costume.ts — the last-worn costume per character (localStorage) so restarts re-wear it, not the default (M5 #24 moves this into real config)
 - promise-timeout.ts — withTimeout(promise, ms, label): labeled rejection for loads that can wedge (costume switches / boot promotion)
 - character-asset-url.ts — costume settings + per-sub-resource asset: URLs (convertFileSrc per file) with external-ref resolution; unresolvable/`..` refs resolve to null and get stripped before the engine (#18)
+- resolve-switch-report.ts — the shared costume switch+report dance (resolution → asset source → timeout-guarded switchCostume → avatar.report with the worn costume id); aborts the switch on timeout/failure so a late model self-discards (1f Fix 1); used by boot promotion and manual switch (1b)
 - open-chat-window.ts — pet→chat window opener (#17): show/focus an existing chat window or runtime-create chat.html

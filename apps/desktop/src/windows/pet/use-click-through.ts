@@ -2,8 +2,9 @@
  * INPUT:  the loaded PetScene (isOpaqueAt alpha test + focusAt gaze) + the shared dragging flag; Tauri's global
  *         cursorPosition, the pet window geometry (innerPosition/scaleFactor), and setIgnoreCursorEvents; the DOM
  *         (elementFromPoint) for element-level UI hit-testing ([data-keep-interactive] bubble/panel).
- * OUTPUT: drives per-pixel click-through AND gaze follow from ONE global-cursor poll — maps the cursor to canvas-local
- *         px, toggles ignore-cursor-events (only on change), and points the model's gaze at the cursor each tick.
+ * OUTPUT: drives per-pixel click-through, gaze follow, AND the proximity reflex from ONE global-cursor poll — maps the
+ *         cursor to canvas-local px, toggles ignore-cursor-events (only on change), points the model's gaze at the
+ *         cursor, and feeds the same coords to the scene's proximity reactor each tick.
  * POS:    ui/windows/pet — hook owns the Tauri window access (approach B, no Rust). An open bubble/panel keeps only
  *         its OWN rect interactive (element-level, B-test 4); exposes error state (async Tauri calls) per hook guidelines.
  */
@@ -44,6 +45,9 @@ async function pollOnce(ctx: PollContext): Promise<void> {
     const y = (cursor.y - origin.y) / ctx.scaleFactor;
     // Gaze follow (F4) rides this same cursor read — no second poll, so it adds zero IPC to the always-on overlay.
     ctx.scene.focusAt(x, y);
+    // Proximity reflex (D17) rides the SAME read too: a cursor entering the near zone triggers a cooldown-gated
+    // reaction. Zero new IPC; the reactor throttles internally.
+    ctx.scene.handleProximity(x, y);
     const opaque = ctx.scene.isOpaqueAt(x, y);
     const ignore = shouldIgnoreCursor({
       dragging: ctx.isDragging(),

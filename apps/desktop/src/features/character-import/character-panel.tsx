@@ -65,24 +65,46 @@ function CostumeRow(props: { id: string; badge: string | null; isCurrent: boolea
   );
 }
 
+// The ONE costume currently mid-switch: a spinner + name + an inline Cancel that aborts the switch and releases the
+// panel immediately (Fix 2 — a wedged load no longer freezes the whole list for the full timeout).
+function SwitchingRow({ id, onCancel }: { id: string; onCancel: () => void }) {
+  return (
+    <div className="flex w-full items-center justify-between rounded-md bg-slate-800 px-2 py-1 text-xs text-white">
+      <span className="flex items-center gap-1.5 truncate">
+        <span className="inline-block h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+        <span className="truncate">{id}</span>
+      </span>
+      <button type="button" onClick={onCancel} className="ml-2 shrink-0 text-slate-300 hover:text-white">
+        取消
+      </button>
+    </div>
+  );
+}
+
 // Renderable costumes stay selectable (degraded ones badge their missing count — graceful degrade, not a lock);
-// only costumes that cannot render at all are disabled, sorted to the bottom under the import-packs notice.
+// only costumes that cannot render at all are disabled, sorted to the bottom under the import-packs notice. While one
+// costume is switching, ONLY that row shows a spinner + Cancel (Fix 2); the rest stay live (a re-entrancy guard in the
+// hook makes a second click a safe no-op) so a wedged switch never freezes the whole list.
 function CostumeList({ costume }: { costume: CostumeSwitch }) {
   if (costume.costumes.length === 0) return <p className="text-xs text-slate-400">尚未导入角色（开发环境使用内置模型）</p>;
   const locked = costume.costumes.filter((id) => costume.availability[id]?.renderable === false);
   const selectable = costume.costumes.filter((id) => !locked.includes(id));
   return (
     <div className="flex max-h-48 flex-col gap-0.5 overflow-y-auto">
-      {selectable.map((id) => (
-        <CostumeRow
-          key={id}
-          id={id}
-          badge={badgeFor(costume.availability[id])}
-          isCurrent={costume.current === id}
-          disabled={costume.isSwitching}
-          onSelect={() => void costume.switchTo(id)}
-        />
-      ))}
+      {selectable.map((id) =>
+        id === costume.switchingId ? (
+          <SwitchingRow key={id} id={id} onCancel={costume.cancelSwitch} />
+        ) : (
+          <CostumeRow
+            key={id}
+            id={id}
+            badge={badgeFor(costume.availability[id])}
+            isCurrent={costume.current === id}
+            disabled={false}
+            onSelect={() => void costume.switchTo(id)}
+          />
+        ),
+      )}
       {costume.missingPacksUnion.length > 0 && (
         <p className="mt-1 text-[11px] leading-snug text-amber-600">
           ⚠ 需导入其他角色包可解锁/补全动作：{costume.missingPacksUnion.join("、")}

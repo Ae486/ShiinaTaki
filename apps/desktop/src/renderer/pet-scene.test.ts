@@ -1,0 +1,129 @@
+/**
+ * INPUT:  createPetScene with all heavy renderer deps mocked (stage/loader/mask/controller/costume-switch) and the idle
+ *         scheduler stubbed so its dispose is observable.
+ * OUTPUT: assertions that the initial attach creates one idle scheduler, a costume switch disposes the previous one and
+ *         creates a new one, scene.dispose() tears down the live scheduler (1a wiring), and abortSwitch marks an
+ *         in-flight switch stale so its late-resolving model self-discards without attaching (1f Fix 1).
+ * POS:    unit test for pet-scene's scheduler lifecycle. The engine value is never loaded (every engine-touching module
+ *         is mocked), so this stays node-safe without a real Pixi stage. Exempt from size caps.
+ */
+
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { idleDisposers } = vi.hoisted(() => ({ idleDisposers: [] as Array<ReturnType<typeof vi.fn>> }));
+
+vi.mock("./stage.ts", () => ({
+  createStage: vi.fn(async () => ({
+    ticker: { add: vi.fn(), remove: vi.fn(), start: vi.fn(), stop: vi.fn(), maxFPS: 0, started: false },
+    screen: { width: 400, height: 600 },
+    renderer: {},
+    stage: {},
+    destroy: vi.fn(),
+  })),
+}));
+vi.mock("./alpha-mask-source.ts", () => ({
+  createAlphaMaskSource: () => ({ refresh: vi.fn(), isOpaque: () => false, dispose: vi.fn() }),
+}));
+vi.mock("./live2d/load-character-model.ts", () => ({
+  loadCharacterModel: vi.fn(async () => ({ tag: "model" })),
+  DEV_MODEL_SOURCE: "dev",
+}));
+vi.mock("./live2d/avatar-controller.ts", () => ({
+  createAvatarController: () => ({
+    vocabulary: { motions: [], expressions: [] },
+    applyCommand: vi.fn(),
+    reactToClick: vi.fn(),
+    focusAt: vi.fn(),
+    handleProximity: vi.fn(),
+  }),
+}));
+vi.mock("./live2d/costume-switch.ts", () => ({
+  reloadModel: vi.fn(async () => ({ model: { tag: "next" }, vocabulary: { motions: ["idle01"], expressions: [] } })),
+}));
+vi.mock("./live2d/idle-motion.ts", () => ({
+  createIdleMotionScheduler: vi.fn(() => {
+    const dispose = vi.fn();
+    idleDisposers.push(dispose);
+    return { dispose };
+  }),
+}));
+
+import { createPetScene } from "./pet-scene.ts";
+import { reloadModel } from "./live2d/costume-switch.ts";
+
+const host = {} as unknown as HTMLElement;
+
+beforeEach(() => {
+  idleDisposers.length = 0;
+});
+
+describe("createPetScene idle scheduler lifecycle", () => {
+  it("creates one scheduler on the initial attach", async () => {
+    await createPetScene(host, { renderThrottling: false });
+    expect(idleDisposers).toHaveLength(1);
+    expect(idleDisposers[0]).not.toHaveBeenCalled();
+  });
+
+  it("disposes the previous scheduler and creates a new one on a costume switch", async () => {
+    const scene = await createPetScene(host, { renderThrottling: false });
+    await scene.switchCostume({ settingsUrl: "asset://x", resolve: () => null });
+    expect(idleDisposers).toHaveLength(2);
+    expect(idleDisposers[0]).toHaveBeenCalledTimes(1); // outgoing scheduler torn down
+    expect(idleDisposers[1]).not.toHaveBeenCalled(); // incoming scheduler still live
+  });
+
+  it("disposes the live scheduler on scene dispose", async () => {
+    const scene = await createPetScene(host, { renderThrottling: false });
+    scene.dispose();
+    expect(idleDisposers[0]).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("createPetScene abortSwitch (1f Fix 1)", () => {
+  it("marks an in-flight switch stale so a late-resolving load self-discards without attaching", async () => {
+    const scene = await createPetScene(host, { renderThrottling: false });
+    expect(idleDisposers).toHaveLength(1); // initial attach
+
+    // A controllable slow-but-finite load that honors isStale exactly like the real reloadModel (discard + throw when
+    // superseded). It stays pending until the test releases it — mimicking a costume that loads AFTER the timeout.
+    let capturedIsStale: (() => boolean) | undefined;
+    let releaseLoad!: () => void;
+    const loadGate = new Promise<void>((resolve) => {
+      releaseLoad = resolve;
+    });
+    const destroyLate = vi.fn();
+    vi.mocked(reloadModel).mockImplementationOnce(async (deps) => {
+      capturedIsStale = deps.isStale;
+      await loadGate;
+      if (deps.isStale?.() === true) {
+        destroyLate();
+        throw new Error("costume switch superseded by a newer one");
+      }
+      return { model: { tag: "late" } as never, vocabulary: { motions: [], expressions: [] } };
+    });
+
+    const switching = scene.switchCostume({ settingsUrl: "asset://x", resolve: () => null });
+    const settled = switching.then(() => "ok", () => "rejected");
+
+    expect(capturedIsStale?.()).toBe(false); // the in-flight switch is not yet stale
+    scene.abortSwitch(); // timeout/failure path bumps the ticket
+    expect(capturedIsStale?.()).toBe(true); // ...so the in-flight switch is now stale
+
+    releaseLoad(); // the late load finally resolves → the mock sees isStale → discards + throws (no attach)
+    expect(await settled).toBe("rejected");
+    expect(destroyLate).toHaveBeenCalledTimes(1); // late model destroyed
+    expect(idleDisposers).toHaveLength(1); // attachModel never ran → no new scheduler
+    expect(idleDisposers[0]).not.toHaveBeenCalled(); // the pre-switch model's scheduler is untouched
+  });
+
+  it("is model-less + idempotent safe and does not wedge future switches", async () => {
+    const scene = await createPetScene(host, { renderThrottling: false });
+    expect(() => {
+      scene.abortSwitch();
+      scene.abortSwitch();
+    }).not.toThrow();
+    // A normal switch after the aborts still attaches (the ticket bumps do not stale a fresh switch's own ticket).
+    await scene.switchCostume({ settingsUrl: "asset://y", resolve: () => null });
+    expect(idleDisposers).toHaveLength(2);
+  });
+});
