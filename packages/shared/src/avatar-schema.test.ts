@@ -40,6 +40,16 @@ describe("AvatarReportParamsSchema", () => {
     expect(AvatarReportParamsSchema.safeParse({ characterId: "taki", motions: [], expressions: [] }).success).toBe(true);
   });
 
+  it("round-trips the optional costume id and stays valid when it is absent (1f)", () => {
+    const withCostume = { characterId: "taki", motions: ["mtn_idle01_C"], expressions: [], costume: "arbeit_ring_01" };
+    expect(AvatarReportParamsSchema.parse(withCostume)).toEqual(withCostume);
+    // Absent costume (boot / drift self-heal report carries no formal id) is valid and stays absent.
+    const noCostume = { characterId: "taki", motions: [], expressions: [] };
+    expect(AvatarReportParamsSchema.parse(noCostume)).toEqual(noCostume);
+    // A non-string costume is rejected.
+    expect(AvatarReportParamsSchema.safeParse({ ...noCostume, costume: 7 }).success).toBe(false);
+  });
+
   it("rejects a non-string motion entry and a missing characterId", () => {
     expect(AvatarReportParamsSchema.safeParse({ characterId: "taki", motions: [1], expressions: [] }).success).toBe(false);
     expect(AvatarReportParamsSchema.safeParse({ motions: [], expressions: [] }).success).toBe(false);

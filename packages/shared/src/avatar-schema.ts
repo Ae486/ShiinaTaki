@@ -23,10 +23,14 @@ export type AvatarSubscribeResult = z.infer<typeof AvatarSubscribeResultSchema>;
 
 // The Pet UI reports its loaded model's available names on load / costume-swap; the Core stores them per character
 // and injects the valid names into the turn instructions (Option A — no baked enum, names come from the manifest).
+// `costume` is the worn costume's stable id (arbeit / arbeit_ring_01); the Core diffs it across turns to inject a
+// one-shot costume-change reminder (1f). Optional + operator-only, NO Rust mirror — undefined = no formal id available
+// (boot / drift self-heal report), which the Core treats as "keep the known id" rather than a change.
 export const AvatarReportParamsSchema = z.object({
   characterId: z.string().min(1),
   motions: z.array(z.string()), // motion group names (Object.keys(motionManager.definitions))
   expressions: z.array(z.string()), // expression names (expressionManager.definitions.map(d => d.name ?? d.Name))
+  costume: z.string().optional(), // worn costume id (1f change-detection key); absent when no formal id is available
 });
 export type AvatarReportParams = z.infer<typeof AvatarReportParamsSchema>;
 
