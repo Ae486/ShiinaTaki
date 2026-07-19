@@ -1,1 +1,11 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Verify D1-freeze compliance: stream loop/persistTurn/abort/toolApproval bodies byte-identical; only construction touched"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Verify core-side headers/caps/index.md on touched files"}
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "Verify renderer stays framework-free, ticket/isStale safety, {loop:false} one-shot discipline"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Verify component/hook boundaries on pet window changes"}
+{"file": ".trellis/spec/frontend/hook-guidelines.md", "reason": "Verify use-click-through / use-core-connection changes follow hook rules"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Verify frontend headers/caps/index.md on touched files"}
+{"file": ".trellis/spec/frontend/packaged-build.md", "reason": "Verify no packaged-only defect classes introduced (no new Tauri API without ACL, no CSP surface)"}
+{"file": ".trellis/tasks/07-18-avatar-presentation/research/ra-tool-reply-discipline.md", "reason": "1c acceptance source: recommended combo, test definitions incl. RED proof"}
+{"file": ".trellis/tasks/07-18-avatar-presentation/research/rb-vocabulary-report-trace.md", "reason": "1b acceptance source: scope is log + drift self-heal; prune/report paths must NOT be rewritten"}
+{"file": ".trellis/tasks/07-18-avatar-presentation/research/rc-idle-motion-and-proximity.md", "reason": "1a/D17 acceptance source: scheduler/proximity design + tests; render-governor interaction must be resolved"}
+{"file": ".trellis/tasks/07-18-avatar-presentation/research/rd-module-health.md", "reason": "Q1 contract verification: fix-in-T1 items done in touched files; note-only items NOT touched (esp. frozen runTurn)"}

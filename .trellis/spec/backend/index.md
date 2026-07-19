@@ -24,7 +24,7 @@ Before writing backend code:
 | [E2E Harness](./e2e-harness.md) | Headless `withStack` fixture; L1 (deterministic) + L2 (real-agent) dual-track per capability |
 | [Permission Authorization](./permission-authorization.md) | Authorize on `(capability, argClass)` for arg-risk capabilities, name for fixed-risk; no cross-class leakage |
 | [Server-Push & Connection Auth](./server-push-and-connection-auth.md) | Fan-out channel pattern (timeline/avatar, no Rust mirror for operator-only); connection auth vs capability authz; loopback auto-trust (P3) fail-closed rules |
-| [Agent Runtime](./agent-runtime.md) | Persist full turn (tool-call/result) or hallucinate; base-prompt truthfulness floor; test the deterministic root cause |
+| [Agent Runtime](./agent-runtime.md) | Persist full turn (tool-call/result) or hallucinate; base-prompt truthfulness floor; test the deterministic root cause; presentation vs informational tool taxonomy (stopWhen, not result shape) |
 
 ## Quality Check (run before handing off)
 

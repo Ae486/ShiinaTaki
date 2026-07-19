@@ -86,3 +86,60 @@ Consequences (all load-bearing):
   (DB + `timeline.removed` push), pump sends `chat.error{retracted:true}`, the UI restores the draft (never
   overwriting newly typed text), autoMemory/imageMemory never fire. Cancel after ANY output → stop, today's behavior
   byte-identical. "Produced nothing" is exactly "persistTurn would persist nothing beyond the user row".
+
+## Classify every tool: presentation (fire-and-forget) vs informational (T1 1c)
+
+Every tool call ends a ToolLoopAgent step, and the SDK **forces another generation** after tool results ("until there
+are no further tool calls or the stopping condition is met"). For a tool whose result carries nothing to read, that
+forced step has nothing substantive to say — the model pads (filler "嗯。") and drifts into answering its own last
+message (owner evidence 2026-07-18, one user message → 5 assistant segments).
+
+- **Informational** tools (screenshot, files_read, memory recall) return data the model reasons over — the loop MUST
+  continue after them. **Presentation / fire-and-forget** tools (`avatar_set_expression`, `avatar_play_motion`) act on
+  what the user sees and return only `{ok:true}` — the model must NOT be forced to generate again just because one ran.
+- AI SDK v7 `execute` must return a value (no LiveKit-style `None`/`StopResponse` escape), so a presentation tool's
+  non-continuation is enforced by a **construction-level `stopWhen` predicate**, never by the tool result shape:
+  `presentationTailStop` (`packages/core/src/avatar/presentation-stop.ts`) stops the loop after a step whose tool calls
+  are ALL presentation tools once the turn has produced text. The `spoke` guard preserves express-first-then-talk (a
+  tool-only leading step does not stop the turn — the reply still comes).
+- **Convention for every NEW tool — classify it at birth.** Presentation tool: name added to `PRESENTATION_TOOL_NAMES`,
+  description states fire-and-forget ("no result to read"), execute returns `{ok:true}`/structured error only. An
+  informational tool must NEVER enter `PRESENTATION_TOOL_NAMES` — a step co-calling it last would stop the loop with
+  its result unread. Mixed-tail steps (presentation + informational together) intentionally do NOT stop (`.every`).
+- Prompt rules alone are unreliable across models (QwenPaw #4838: "only use the tool, don't write text" ignored by
+  Qwen/GPT/Claude alike) — ship the structural stop as the guarantee; the avatar-vocabulary usage rules are bias only.
+- Tests: the taxonomy edge (mixed tail must not stop) is pinned in `presentation-stop.test.ts`; the turn-level fix is
+  pinned by `chat-agent-presentation.test.ts` against the transport-faithful `textTool` mock step (text + tool call in
+  ONE step, finish `"tool-calls"`) — the plain two-step mock cannot reproduce the bug shape.
+- **Presentation-tool `name` args are a per-turn runtime enum, not free text (T1 1e).** A costume switch changes which
+  expression/motion names are playable; a stale name (remembered from a prior costume, or hallucinated) must not reach
+  the Pet UI. Each turn the avatar tools build `name` as `z.enum([...current vocabulary])` (`avatar/vocab-name-schema.ts`),
+  empty/unknown vocab degrading to `z.string().min(1)` (`z.enum([])` is invalid). This is the SOURCE clamp; the
+  renderer's `onVocabularyDrift` re-report (1b) is the FALLBACK — a double net. An out-of-enum arg does NOT crash the
+  turn: `parseToolCall` marks the call `invalid:true` and the stream loop enqueues a `tool-error` the model reads next
+  step (verified in `ai@7.0.17` dist — parseToolCall catch + the `toolCall.invalid` branch), so the model self-corrects.
+  This runtime enum does NOT violate #16's "no baked enum" — that rejected a COMPILE-TIME enum (multi-character /
+  multi-costume can't fix names at build time); deriving the enum per turn from the live manifest is the SAME Option-A
+  data, moved from the prompt into the schema. Only ever build the enum from the reported (pruned, playable) vocabulary.
+
+## Costume-change notice: a one-shot reminder on a baseline-snapshot diff (T1 1f)
+
+The dynamic enum stops a stale tag from taking EFFECT, but the model — primed by the persisted history of its OWN past
+tool calls — may still TRY a prior costume's tag on its first post-switch turn (a wasted invalid round-trip, self-corrected
+by the tool-error feedback; the provider treats enum as a hint, so the client zod check is what catches it). A one-shot
+notice biases it to switch immediately: when the worn costume changed since the model last saw it, prefix a short
+`[System · no reply needed] Costume changed...` note onto the MODEL-FACING last user message (an additive seam at outgoing
+construction — the persisted `history` is never mutated; one-shot; not stored).
+
+- **Decide on a baseline SNAPSHOT, not an adjacent diff.** Store the worn costume id + `lastSeen` (what the model saw
+  last turn); `set()` updates current but does NOT advance lastSeen; a turn-time `consumeCostumeChanged` returns true
+  (and advances lastSeen) iff current ≠ lastSeen. This handles churn (A→B→C→A with no turns between → current==lastSeen
+  → no notice) that an adjacent-diff (each set vs the previous) would false-fire on.
+- **Baseline at first CONSUME, not first SET** — order-independent, so a boot sequence report(undefined)→report(id)
+  snapshots the promoted costume as baseline instead of firing a spurious turn-1 notice.
+- **`set(costume=undefined)` keeps the last id** (a drift self-heal re-report carries no costume) — never clobber to
+  undefined, or a self-heal fakes a change / the next real switch looks unchanged.
+- Identify a costume by its UNIQUE id (arbeit / arbeit_ring_01), NOT by comparing tag-set contents (two costumes can
+  share a tag set). The id rides `avatar.report` as an additive optional `costume` field (operator-only, no Rust mirror).
+- Narrow edge: a cancel-retract of the first post-change message advances lastSeen anyway → one possibly-skipped notice,
+  backstopped by the enum. Accepted.

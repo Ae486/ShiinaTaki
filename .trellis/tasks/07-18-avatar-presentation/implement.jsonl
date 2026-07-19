@@ -1,1 +1,10 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "D1-freeze law for chat-agent.ts — frozen bodies vs editable construction; 1c's stopWhen edit must comply; taxonomy section lands here later via update-spec"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Core-side headers/size-caps/index.md rules for the new presentation-stop.ts and touched avatar files"}
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "Live2D renderer law (mandatory injection for Live2D-touching work): framework-free, ticket/isStale, {loop:false} discipline"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Mandatory companion injection for Live2D work (owner directive after #16 miss)"}
+{"file": ".trellis/spec/frontend/hook-guidelines.md", "reason": "use-click-through / use-core-connection are touched (proximity call site, drift callback injection)"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Frontend headers/caps/index.md rules for idle-motion.ts and proximity-reaction.ts"}
+{"file": ".trellis/tasks/07-18-avatar-presentation/research/ra-tool-reply-discipline.md", "reason": "1c authoritative impl spec: presentation-stop code, wiring points, prompt prose, tests, D1 compliance analysis"}
+{"file": ".trellis/tasks/07-18-avatar-presentation/research/rb-vocabulary-report-trace.md", "reason": "1b authoritative impl spec: report path is CORRECT — scope is observability log + onVocabularyDrift self-heal only"}
+{"file": ".trellis/tasks/07-18-avatar-presentation/research/rc-idle-motion-and-proximity.md", "reason": "1a/D17 authoritative impl spec: engine facts, scheduler + proximity design, wiring, tests"}
+{"file": ".trellis/tasks/07-18-avatar-presentation/research/rd-module-health.md", "reason": "Q1 cleanup contract: fix-in-T1 debt list (headers, dedup, idle-behavior orphan) — touched files only"}
