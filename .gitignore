@@ -21,3 +21,6 @@ apps/desktop/public/vendor/
 
 # One-off local scripts (machine-specific)
 scripts/migrate-node-to-g.ps1
+
+# Claude Code local worktrees (agent isolation scratch — never commit)
+.claude/worktrees/
