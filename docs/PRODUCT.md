@@ -4,6 +4,12 @@ A desktop AI companion living on your Windows desktop: an animated Live2D charac
 
 Engineering counterparts: `TECH-STACK.md` (stack), `MEMORY-DESIGN.md` (memory), `adr/` (foundational decisions), `CONTEXT.md` (vocabulary).
 
+## North star: a BANGCLAW
+
+Beyond the v1 companion surface, TakiAgent is at its core an **OpenClaw / Hermes-style desktop agent** — the working shorthand is **"BANGCLAW" (BanG Dream × claw)**: a persona-driven pet whose engine is a free, broad-capability agent that genuinely lives in and operates the computer (files, processes, scripts), not a scripted mascot. (Indexing convention: **龙虾 = OpenClaw, 马 = Hermes**.)
+
+This is a **direction, not a v1 deliverable**. Capability grows incrementally, and every expansion stays behind the Permission Gate. But it is a binding **design constraint now**: capability, permission, and tool-governance code must be written to LEAVE ROOM for that breadth — reference OpenClaw (龙虾) and Hermes (马) architectures rather than inventing, and never hard-code today's handful of capabilities such that later file/process/script/tool growth is painful to graft on. When a governance decision would box out that future (e.g. the deferred agent-self-authored-code line, D36), flag it rather than silently closing the door.
+
 ## Core features (user-facing)
 
 - **Living avatar**: Live2D character, transparent always-on-top, per-pixel click-through; blinks, tracks your cursor, reacts to clicks; visible states (thinking / working / sleeping). Import any generic Cubism model or the BanG Dream collection; character = model + persona card + voice, freely combinable.
