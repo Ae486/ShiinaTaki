@@ -25,10 +25,11 @@ Before writing backend code:
 | [Permission Authorization](./permission-authorization.md) | Authorize on `(capability, argClass)` for arg-risk capabilities, name for fixed-risk; no cross-class leakage |
 | [Server-Push & Connection Auth](./server-push-and-connection-auth.md) | Fan-out channel pattern (timeline/avatar, no Rust mirror for operator-only); connection auth vs capability authz; loopback auto-trust (P3) fail-closed rules |
 | [Agent Runtime](./agent-runtime.md) | Persist full turn (tool-call/result) or hallucinate; base-prompt truthfulness floor; test the deterministic root cause; presentation vs informational tool taxonomy (stopWhen, not result shape) |
+| [Tool Design Standard](./tool-design.md) | The governance contract every new `*-tool.ts` follows: naming / description / schema / result-error / idempotency / birth-checklist rules, each sourced (Anthropic/OpenAI/MCP/OpenClaw/Hermes); strict-ready authoring |
 
 ## Quality Check (run before handing off)
 
-- `pnpm -r typecheck && pnpm -r lint && pnpm -r test` green
+- `pnpm -r typecheck && pnpm lint && pnpm -r test` green (lint is the ROOT script — `pnpm -r lint` matches zero packages and false-greens)
 - `cargo clippy --manifest-path apps/desktop/src-tauri/Cargo.toml -- -D warnings` green
 - No architecture invariant violated (esp. invariant 1: no OS access from TS)
 
