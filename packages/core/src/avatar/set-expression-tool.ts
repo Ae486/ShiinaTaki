@@ -1,7 +1,8 @@
 /**
  * INPUT:  an LLM avatar_set_expression call ({ name }) + bound characterId, AvatarSubscriptions, and live vocab (name enum, 1e)
  * OUTPUT: createSetExpressionTool(deps) -> ToolSet { avatar_set_expression }; returns { ok:true } (fire-and-forget)
- * POS:    core/avatar — the agent tool; publishes an avatar.command to the Pet UI; execute NEVER throws; no OS/gate (invariant 1/4)
+ * POS:    core/avatar — the agent tool; publishes an avatar.command to the Pet UI; execute NEVER throws; no OS/gate (invariant 1/4).
+ *         Risk posture (MCP vocab, doc-only — the Rust Permission Gate is the sole enforcement, tool-design I1/C-5): readOnly (no OS side effect), non-destructive, idempotent, closed-world.
  */
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
@@ -13,7 +14,8 @@ export function createSetExpressionTool(deps: AvatarToolDeps): ToolSet {
   return {
     avatar_set_expression: tool({
       description:
-        "Set your avatar's facial expression to show how you feel (e.g. before replying, or reacting to the user). " +
+        "Set your avatar's facial expression to show how you feel (e.g. before replying, or reacting to the user); " +
+        "to play a body motion instead, use avatar_play_motion. " +
         "The name MUST be one of the expression names listed in your avatar vocabulary; an unknown name is ignored. " +
         "Fire-and-forget: it changes what the user sees on screen — there is no result to read, and it is fine if no " +
         "avatar is currently shown. After calling it, add a follow-up message only if you have new substantive " +

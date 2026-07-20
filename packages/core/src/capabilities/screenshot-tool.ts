@@ -3,7 +3,8 @@
  *         VLM describe bridge (screenshot-describe, wired only when the vision slot is configured)
  * OUTPUT: createScreenshotTool(deps) -> ToolSet { screenshot }; returns { ok, path, width, height, bytes,
  *         description? } or { ok:false, code } — description present only when the VLM bridge produced one
- * POS:    core/capabilities — the agent tool; thin over route→broker→persist(→describe); execute NEVER throws (ruling 7/8A)
+ * POS:    core/capabilities — the agent tool; thin over route→broker→persist(→describe); execute NEVER throws (ruling 7/8A).
+ *         Risk posture (MCP vocab, doc-only — the Rust Permission Gate is the sole enforcement, tool-design I1/C-5): readOnly (does not modify the screen), open-world (VLM description is untrusted content), gated (sensitive capture, approval required).
  */
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
