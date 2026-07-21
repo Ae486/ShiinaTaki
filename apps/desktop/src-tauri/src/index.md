@@ -3,10 +3,10 @@
 - lib.rs — Tauri composition root: dirs/approver/status-sink resolution, TauriStatusEmitter, node::build_node call, commands
 - node.rs — tauri-FREE node assembly: NodeConfig + build_node (gate/audit/capabilities/WsClient) + init_tracing; shared by lib.rs and bin/taki-node
 - status.rs — StatusEmitter trait (status sink seam) + TracingStatusEmitter (headless log-only impl)
-- protocol.rs — serde mirrors of @taki/shared (connect, app-error, client frames, capability channel) + golden-fixture sweep
+- protocol.rs — serde mirrors of @taki/shared (connect, app-error, client frames, capability channel, permission-level config) + golden-fixture sweep
 - ws_client.rs — the reconnecting node client: handshake, token persist, capability.request → gate → respond; tauri-free
-- gate.rs — the Permission Gate policy core (name-keyed evaluate + command-keyed evaluate_exec + class-keyed evaluate_shell_open, fail-closed) + gate/ submodules
-- gate/ — decisions store + approver trait/dialog impl/scripted (debug-only) impl
+- gate.rs — the Permission Gate policy core (name-keyed evaluate + command-keyed evaluate_exec + Level-engine evaluate_by_class/evaluate_class behind the ArgClass mount-point, fail-closed) + gate/ submodules
+- gate/ — decisions store + approver trait/dialog impl/scripted (debug-only) impl + governance registry (Level projection) + level loader
 - audit.rs — Shell-owned JSONL audit trail (append-only, names-only EXCEPT exec's command, ruling 9) + ISO-8601 timestamp
 - secrets.rs — SecretStore trait + Windows Credential Manager (keyring) + in-memory fake
 - capabilities_impl.rs — capability handler registry (invariant 7; opaque Value output + optional dialog detail) + capabilities_impl/ executors

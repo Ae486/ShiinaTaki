@@ -16,6 +16,7 @@ use crate::capabilities_impl::shell_open::ShellOpenExec;
 use crate::capabilities_impl::CapabilityRegistry;
 use crate::gate::approver::Approver;
 use crate::gate::decisions::DecisionStore;
+use crate::gate::level::load_level;
 use crate::gate::{Gate, GatePolicy};
 use crate::secrets::SecretStore;
 use crate::status::StatusEmitter;
@@ -28,7 +29,8 @@ const DEVICE_ID_KEY: &str = "device-id";
 
 /// Everything a node needs that depends on WHERE it runs (Tauri app vs headless bin); build_node supplies the rest.
 pub struct NodeConfig {
-    /// Node-owned state root (gate-decisions.json / audit.jsonl / exec-policy.json) — outside the Workspace (D7).
+    /// Node-owned state root (gate-decisions.json / audit.jsonl / exec-policy.json / permission-level.json) —
+    /// outside the Workspace (D7).
     pub data_dir: PathBuf,
     /// The default exec working directory (a config `cwd` still overrides it inside ExecPolicy::load).
     pub exec_cwd: PathBuf,
@@ -58,7 +60,10 @@ pub fn build_node(config: NodeConfig) -> Result<WsClient, Box<dyn std::error::Er
     let device_id = ensure_device_id(secrets.as_ref());
     let decisions = Arc::new(DecisionStore::load(data_dir.join("gate-decisions.json")));
     let auditor = Arc::new(FileAuditor::new(data_dir.join("audit.jsonl")));
-    let gate = Arc::new(Gate::new(GatePolicy::new(), decisions, approver, auditor));
+    // The active Permission Level is read exactly once here — operator-written file, frozen for the process
+    // lifetime, out of the agent's reach (research §3.2 clause 3).
+    let level = load_level(&data_dir.join("permission-level.json"));
+    let gate = Arc::new(Gate::new(GatePolicy::new().with_level(level), decisions, approver, auditor));
 
     // The policy is load-or-degrade-safe and shared between the ExecExec handler (sandbox config) and the WS task
     // (classify) — exec's gate decision depends on the parsed command, not just the capability name (ruling 6).

@@ -1,5 +1,5 @@
 //! INPUT:  JSON wire frames (parsed by serde) + the shared golden fixtures under packages/shared/fixtures/protocol
-//! OUTPUT: serde mirrors of the @taki/shared protocol (connect, app-error, client frames, capability channel)
+//! OUTPUT: serde mirrors of the @taki/shared protocol (connect, app-error, client frames, capability channel, permission-level config)
 //! POS:    shell/protocol — the ONLY Rust declaration of the wire shapes (invariant 3); NO tauri:: types here
 #![allow(dead_code)] // Wire DTOs: some fields exist purely for serde (de)serialization parity, not all are read.
 
@@ -232,6 +232,56 @@ impl CapabilityRespond {
     }
 }
 
+/// The operator-selectable Permission Level (mirror of PermissionLevelSchema, T2b).
+/// A preset VIEW over per-cell postures — never a second enforcement path; the gate projects through it.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum PermissionLevel {
+    Strict,
+    Standard,
+    Relaxed,
+}
+
+/// A projected cell posture (mirror of PermissionPostureSchema): run silently, ask the human, or refuse.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum PermissionPosture {
+    Auto,
+    Ask,
+    Deny,
+}
+
+/// Mirror of PermissionLevelStateSchema — the active-level get/set payload (strictObject parity).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct PermissionLevelState {
+    pub level: PermissionLevel,
+}
+
+/// Mirror of PermissionCellStateSchema — one `capability[:argClass]` row as the settings panel reads it.
+/// denyByDefault marks a floor cell: user-configurable over this surface only, agent-immovable.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct PermissionCellState {
+    pub key: String,
+    pub level: PermissionLevel,
+    pub posture: PermissionPosture,
+    #[serde(rename = "denyByDefault")]
+    pub deny_by_default: bool,
+}
+
+/// Mirror of PermissionCellSetParamsSchema — an operator cell override; secondConfirm must accompany
+/// any change that loosens a deny-by-default cell (the panel re-asks the human before sending it).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct PermissionCellSetParams {
+    pub key: String,
+    pub level: PermissionLevel,
+    pub posture: PermissionPosture,
+    #[serde(rename = "secondConfirm", skip_serializing_if = "Option::is_none")]
+    pub second_confirm: Option<bool>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -260,6 +310,10 @@ mod tests {
             "clipboard-write-output" => serde_json::from_str::<ClipboardWriteOutput>(text).ok().map(to_value),
             "shell-open-output" => serde_json::from_str::<ShellOpenOutput>(text).ok().map(to_value),
             "exec-output" => serde_json::from_str::<ExecOutput>(text).ok().map(to_value),
+            // Permission Level config surface (T2b) — leaf shapes the settings panel and the gate share.
+            "permission-level-state" => serde_json::from_str::<PermissionLevelState>(text).ok().map(to_value),
+            "permission-cell-state" => serde_json::from_str::<PermissionCellState>(text).ok().map(to_value),
+            "permission-cell-set" => serde_json::from_str::<PermissionCellSetParams>(text).ok().map(to_value),
             other => panic!("no serde type mapped for fixture prefix {other:?}"),
         }
     }

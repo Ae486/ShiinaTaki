@@ -4,6 +4,7 @@
 
 mod parser;
 mod policy;
+mod resolve;
 mod sandbox;
 
 use std::sync::Arc;
@@ -44,11 +45,12 @@ impl CapabilityExec for ExecExec {
 }
 
 /// The gate-facing classification (ruling 6): exec computes the class, `Gate::evaluate_exec` turns it into approve+audit.
-/// A malformed request (no command) is Deny — nothing to run, refused without a dialog.
+/// A malformed request (no command) maps to `Disabled` — the exec-unavailable pseudo-class: a direct deny with no
+/// dialog, distinct from the catastrophic `Blocked` floor (nothing to run, so nothing to classify against a cell).
 pub fn classify(policy: &ExecPolicy, input: &Value) -> ExecClass {
     match input.get("command").and_then(Value::as_str) {
         Some(command) if !command.trim().is_empty() => policy.classify(command),
-        _ => ExecClass::Deny,
+        _ => ExecClass::Disabled,
     }
 }
 
@@ -70,10 +72,10 @@ mod tests {
     use serde_json::json;
 
     #[test]
-    fn a_missing_command_classifies_as_deny_and_fails_to_run() {
+    fn a_missing_command_classifies_as_disabled_and_fails_to_run() {
         let policy = ExecPolicy::load(std::path::Path::new("none.json"), std::path::PathBuf::from("."));
-        assert_eq!(classify(&policy, &json!({})), ExecClass::Deny);
-        assert_eq!(classify(&policy, &json!({ "command": "  " })), ExecClass::Deny);
+        assert_eq!(classify(&policy, &json!({})), ExecClass::Disabled);
+        assert_eq!(classify(&policy, &json!({ "command": "  " })), ExecClass::Disabled);
         assert!(ExecExec::new(Arc::new(policy)).run(&json!({})).is_err());
     }
 

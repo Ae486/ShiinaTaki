@@ -188,9 +188,12 @@ impl WsClient {
                 gate.evaluate_shell_open(&request_id, class, detail.as_deref())
             } else {
                 // The dialog detail (e.g. the shell-open target) is derived from the input by the capability itself; it
-                // is shown to the user for approval but never audited or logged (ruling 4).
+                // is shown to the user for approval but never audited or logged (ruling 4). Fixed-risk capabilities
+                // (screenshot / process-list / clipboard read+write) ride the Level engine via their BARE name as the
+                // cell key — so `relaxed` = yolo (no prompt), strict/standard keep the existing ask-then-remember
+                // once/session/always flow (T2b batch D).
                 let detail = handlers.detail(&capability, &input);
-                gate.evaluate(&request_id, &capability, detail.as_deref())
+                gate.evaluate_by_class(&request_id, &capability, detail.as_deref())
             };
             if authorized {
                 handlers.respond(request_id, &capability, &input)

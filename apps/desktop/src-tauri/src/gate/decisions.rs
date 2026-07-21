@@ -1,5 +1,5 @@
 //! INPUT:  a capability + an approver Scope/allow; a gate-decisions.json path (Shell-owned app_data_dir)
-//! OUTPUT: DecisionStore { get, remember } — persisted always/never + in-memory session decisions
+//! OUTPUT: DecisionStore { get, remember (pub(super) — gate-tree-only writer) } — persisted always/never + in-memory session decisions
 //! POS:    shell/gate — decision memory (D7); deny+always == never; corrupt file -> warn + empty; NO tauri:: types
 
 use std::collections::HashMap;
@@ -57,7 +57,9 @@ impl DecisionStore {
     }
 
     /// Records the decision per scope: once -> nothing, session -> memory, always -> persisted (allow->always, deny->never).
-    pub fn remember(&self, capability: &str, scope: Scope, allow: bool) {
+    /// pub(super): only the gate module tree can write decision memory — the compiler half of the NL red line
+    /// (research §3.2 clause 2); the source-scan test in gate.rs pins the single call site within it.
+    pub(super) fn remember(&self, capability: &str, scope: Scope, allow: bool) {
         let remembered = if allow { Remembered::Always } else { Remembered::Never };
         match scope {
             Scope::Once => {}

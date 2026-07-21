@@ -1,8 +1,9 @@
 //! INPUT:  an approved/auto-run command string + a Sandbox (cwd, timeout, output cap)
 //! OUTPUT: run(command, sandbox) -> ExecOutput { exitCode, stdout, stderr, truncated, timedOut, durationMs }
-//! POS:    shell/capabilities/exec — the spawn half (ruling 12-15): explicit argv, NO shell, scrubbed env, hand-rolled timeout/caps
+//! POS:    shell/capabilities/exec — the spawn half (ruling 12-15): D3 resolved-absolute-path spawn, NO shell, scrubbed env, hand-rolled timeout/caps
 
 use std::io::Read;
+use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -14,6 +15,7 @@ use crate::protocol::ExecOutput;
 
 use super::parser::{analyze, Structure};
 use super::policy::Sandbox;
+use super::resolve;
 
 // How often the timeout loop wakes to check the child / cap flag. A 50 ms poll against a 30 s deadline is ample and
 // keeps us zero-dep (no wait-timeout crate) — consistent with #10's hand-rolled base64/uuid stance (ruling 14).
@@ -60,7 +62,8 @@ pub fn run(command: &str, sandbox: &Sandbox) -> Result<ExecOutput, ExecError> {
 }
 
 fn spawn(argv: &[String], sandbox: &Sandbox) -> Result<Child, ExecError> {
-    let mut command = Command::new(&argv[0]);
+    let program = resolve_spawn_target(&argv[0], &sandbox.cwd)?;
+    let mut command = Command::new(&program);
     command
         .args(&argv[1..])
         .current_dir(&sandbox.cwd)
@@ -75,6 +78,22 @@ fn spawn(argv: &[String], sandbox: &Sandbox) -> Result<Child, ExecError> {
         }
     }
     command.spawn().map_err(|error| ExecError::failed(format!("spawn failed: {error}")))
+}
+
+// D3: build the child from an ABSOLUTE path so neither CreateProcess nor Rust's own resolver can fall back to the
+// child cwd for a bare name (research §4). A bare name resolves on the cwd-EXCLUDED PATH — a structured error,
+// never a panic, if it is not there. A path-qualified argv[0] runs verbatim: an absolute one as-is (it skips the
+// cwd search), a user-approved relative one joined onto the child cwd so it is unambiguous (the std docs call
+// relative-program resolution "platform specific and unstable"; classification already forces such a command
+// through approval). This re-resolves rather than threading a PathBuf across the gate boundary — the narrow
+// classify->spawn TOCTOU is accepted for Windows v1 with no sandbox (research §Caveats).
+fn resolve_spawn_target(program: &str, cwd: &Path) -> Result<PathBuf, ExecError> {
+    if resolve::is_path_qualified(program) {
+        let candidate = Path::new(program);
+        return Ok(if candidate.is_absolute() { candidate.to_path_buf() } else { cwd.join(program) });
+    }
+    resolve::resolve_on_path(program, cwd)
+        .ok_or_else(|| ExecError::failed(format!("cannot locate `{program}` on the trusted PATH (cwd excluded)")))
 }
 
 // Drives the child to completion: two capped reader threads (a single-thread dual read can deadlock) + a poll loop
@@ -158,7 +177,6 @@ fn spawn_capped_reader(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::PathBuf;
 
     const DEFAULT_SHORT: Duration = Duration::from_secs(5);
 
