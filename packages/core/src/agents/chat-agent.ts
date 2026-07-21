@@ -12,6 +12,7 @@ import type { ApprovalGate } from "../approval/approval-gate.ts";
 import { COSTUME_CHANGE_NOTICE } from "../avatar/costume-notice.ts";
 import type { AutoMemory } from "../memory/auto-memory.ts";
 import type { MemoryEngine } from "../memory/memory-engine.ts";
+import { renderCurrentTime, renderDayDate } from "../time/time-context.ts";
 import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
 import type { ConversationStore } from "./conversation-store.ts";
 import type { TurnMessage } from "./turn-mapping.ts";
@@ -241,18 +242,28 @@ async function persistTurn(store: ConversationStore, characterId: string, outcom
 }
 
 // Instructions = the stable base prompt (identity + the "never claim a tool ran without a tool-result" floor,
-// D1 #2), then the assembled memory context, then any extra section (skills list); blank sections dropped. The
-// skills list enters HERE, never through the memory assembler (module boundary, ruling 10).
+// D1 #2), the day-date line (stable within a calendar day → cache-safe), then the assembled memory context, then any
+// extra section (skills list), then the current-time line LAST. Time bookends the "stable-early / volatile-late"
+// rule (survey §3): the day-date sits in the stable prefix, the minute-granularity time in the volatile tail so a
+// same-day recomposition churns only the last line. `now` is read ONCE so both lines agree. Blank sections dropped;
+// the skills list enters HERE, never through the memory assembler (module boundary, ruling 10).
 function composeInstructions(
   deps: ChatAgentDeps,
   turn: { characterId: string; history: ModelMessage[]; message: string },
 ): string {
+  const now = Date.now();
   const assembled = deps.memory.assemble({
     characterId: turn.characterId,
     queryText: recentText(turn.history),
     currentMessage: turn.message,
   });
-  return [BASE_SYSTEM_PROMPT, assembled, deps.instructionsExtra?.(turn.characterId) ?? ""]
+  return [
+    BASE_SYSTEM_PROMPT,
+    renderDayDate(now),
+    assembled,
+    deps.instructionsExtra?.(turn.characterId) ?? "",
+    renderCurrentTime(now),
+  ]
     .filter((section) => section.length > 0)
     .join("\n\n");
 }

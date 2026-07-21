@@ -4,6 +4,7 @@
  * POS:    core/memory — deterministic per-turn context assembly with per-section budgets (MEMORY-DESIGN §Context assembly)
  */
 import type { MemoryEntryRow, MemoryRepo } from "../db/memory-repo.ts";
+import { formatRelativeAge } from "../time/time-context.ts";
 import { disclosureMatches } from "./disclosure-gate.ts";
 import { V1_MEMORY_LAYERS } from "./layer-registry.ts";
 import type { PersonaProvider } from "./persona-provider.ts";
@@ -43,19 +44,22 @@ export function createAssembler(deps: { repo: MemoryRepo; retriever: Retriever; 
 
   return {
     assemble({ characterId, queryText, currentMessage }) {
-      const now = new Date().toISOString();
+      const nowMs = Date.now();
+      const now = new Date(nowMs).toISOString();
       // Injection order (prompt/README.md): global assistant layer FIRST, then the per-character persona, then emotion.
       const sections = [persona.assistantLayer(), persona.persona(characterId), EMOTION_CAPSULE];
 
       const pinned = selectPinned(repo.listActiveByLayers({ characterId, layers: PINNED_LAYER_IDS, now }), PINNED_BUDGET);
-      if (pinned.length > 0) sections.push(renderBlock(PINNED_HEADER, pinned));
+      if (pinned.length > 0) sections.push(renderBlock(PINNED_HEADER, pinned, nowMs));
 
       const pinnedIds = new Set(pinned.map((row) => row.id));
       const candidates = retriever
         .retrieve({ text: queryText, characterId, layers: RETRIEVED_LAYER_IDS, limit: RETRIEVED_LIMIT })
         .filter((entry) => !pinnedIds.has(entry.id));
       const retrieved = fitToBudget(candidates, RETRIEVED_BUDGET, (entry) => entry.content);
-      if (retrieved.length > 0) sections.push(renderBlock(RETRIEVED_HEADER, retrieved));
+      // Retrieved rows expose `created`; normalize to the `createdAt` renderBlock reads (pinned rows carry it directly).
+      if (retrieved.length > 0)
+        sections.push(renderBlock(RETRIEVED_HEADER, retrieved.map((e) => ({ content: e.content, createdAt: e.created })), nowMs));
 
       const intention = pickIntention({ repo, characterId, queryText: currentMessage ?? queryText, now });
       if (intention) sections.push(`A quiet thought you might share: ${intention.content}`);
@@ -73,6 +77,7 @@ function pickIntention(args: { repo: MemoryRepo; characterId: string; queryText:
   return candidates.find((entry) => disclosureMatches(entry.disclosure, args.queryText));
 }
 
-function renderBlock(header: string, rows: Array<{ content: string }>): string {
-  return `${header}\n${rows.map((row) => `- ${row.content}`).join("\n")}`;
+// Each entry carries its relative age ("(3 days ago)"), computed by code (models miscompute date arithmetic).
+function renderBlock(header: string, rows: Array<{ content: string; createdAt: string }>, nowMs: number): string {
+  return `${header}\n${rows.map((row) => `- (${formatRelativeAge(row.createdAt, nowMs)}) ${row.content}`).join("\n")}`;
 }

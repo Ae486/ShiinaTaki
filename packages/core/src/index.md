@@ -15,4 +15,5 @@
 - capabilities/ — core→node capability channel: ask/await broker + route helper + screenshot/process-list/clipboard/shell-open tools + sanctioned Workspace PNG write site
 - workspace/ — core-side Workspace-confined file RW tools + the path-escape confinement security core
 - skills/ — SKILL.md discovery + enable/disable state + lazy load_skill tool
+- time/ — the single home for prompt-facing time rendering: day-date + current-time prompt lines + relative memory-age formatter + the pure get_current_time tool (injected-clock, OS-neutral, provider-neutral)
 - testing/ — test-only mock-model factories + memory/companion fixtures + capture logger + MCP stdio fixture

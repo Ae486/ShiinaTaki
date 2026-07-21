@@ -63,6 +63,28 @@ describe("assembler (T9 deterministic order + budgets)", () => {
     const out = assembler.assemble({ characterId: "taki", queryText: "hello" });
     expect(out.split("\n\n")).toHaveLength(3); // assistant layer + persona + emotion only
   });
+
+  it("prefixes each memory bullet with a code-computed relative age", () => {
+    const { f, assembler } = fresh();
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+    f.repo.upsert({
+      path: "/m/r-1.md",
+      id: "0001-r",
+      layer: "relationship",
+      characterId: "taki",
+      importance: 10,
+      status: "active",
+      expiresAt: null,
+      disclosure: "",
+      content: "每周五一起看电影",
+      createdAt: threeDaysAgo,
+      contentHash: "h-r",
+    });
+
+    const out = assembler.assemble({ characterId: "taki", queryText: "看电影" });
+    // Age is computed by code (never left to the model): the bullet carries the "(3 days ago)" prefix.
+    expect(out).toContain("- (3 days ago) 每周五一起看电影");
+  });
 });
 
 describe("assembler intention gate (T11, AC 9)", () => {

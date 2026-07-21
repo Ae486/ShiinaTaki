@@ -11,7 +11,7 @@
 - fts5-retriever.ts — v1 Retriever impl: bm25/LIKE recall + layer + disclosure post-filters
 - token-estimator.ts — soft token budgeting: estimateTokens (CJK-aware) + fitToBudget
 - pinned-block.ts — pinned-block policy: non-truncatable layers survive budget; oldest truncatable drop first
-- assembler.ts — deterministic per-turn context assembly with per-section budgets
+- assembler.ts — deterministic per-turn context assembly with per-section budgets; memory rows render a code-computed relative age ("(3 days ago)")
 - persona-provider.ts — reads prompt/ cards (assistant layer + per-character persona), strips the `>` editor note, sync + cached + safe fallback; injected into the assembler (#16)
 - memory-tools.ts — the first agent tools (memory_write/search/archive); thin, characterId-bound, never throw
 - memory-engine.ts — the memory subsystem composition root (store+repo+indexer+retriever+assembler+tools; exposes writeEntry)
