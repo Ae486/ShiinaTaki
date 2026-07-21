@@ -1,0 +1,4 @@
+{"file": ".trellis/tasks/07-21-perception-activity-layer/prd.md", "reason": "Verify implementation against every ratified decision + AC"}
+{"file": ".trellis/tasks/07-21-perception-activity-layer/research/ra-perception-comparables.md", "reason": "Verify adopted defaults match their cited sources"}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Spec-compliance of the governance cell + ask-over-poll behavior"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "size caps / headers / index.md / test bar"}

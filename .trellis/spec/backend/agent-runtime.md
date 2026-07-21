@@ -143,3 +143,22 @@ construction — the persisted `history` is never mutated; one-shot; not stored)
   share a tag set). The id rides `avatar.report` as an additive optional `costume` field (operator-only, no Rust mirror).
 - Narrow edge: a cancel-retract of the first post-change message advances lastSeen anyway → one possibly-skipped notice,
   backstopped by the enum. Accepted.
+
+## Untrusted external content enters a prompt ONLY through the fence (T3a, A1 minimal)
+
+Any string sampled from the outside world — a window title, screen text, a VLM description — is an injection surface
+(a title can literally read "ignore previous instructions"). The rule: such content reaches a prompt ONLY wrapped by
+`agents/untrusted-fence.ts::fenceUntrusted({source, content})` — an XML `<untrusted-observation source=...>` block whose
+label declares the payload DATA-never-INSTRUCTIONS (Hermes smart-review XML-delimiting [H-APR:2585]; survey injection-trap
+mandate). Never hand-roll a second fence or paste raw sensed text into a section.
+
+- **Escape-proof by construction**: the fence neutralizes any literal `</untrusted-observation>` inside the content
+  (case-insensitive, U+200B wedge) so the payload cannot close the fence early; the `source` attribute strips
+  quote/angle chars. Both properties are unit-pinned — extend those tests when touching the fence.
+- **Producers fence at render time, not at storage time** — store raw (bounded) data; fence where it joins a prompt
+  (the activity block fences in `render-activity.ts`; the join stays in `instructionsExtra`, ruling 10).
+- Known debt: the screenshot VLM description flows unfenced today (predates the fence); route it through
+  `fenceUntrusted` when next touched (T3b/T5 will).
+- **Ambient context joins via `instructionsExtra`, event notices via the outgoing-message seam** — an always-current
+  status block (activity) is a per-turn system-prompt section; a one-shot event (costume change) is a message prefix.
+  Pick by shape, don't mix.

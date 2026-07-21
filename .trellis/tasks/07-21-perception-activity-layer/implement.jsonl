@@ -1,0 +1,7 @@
+{"file": ".trellis/tasks/07-21-perception-activity-layer/prd.md", "reason": "All owner-ratified decisions + adopted design; the contract"}
+{"file": ".trellis/tasks/07-21-perception-activity-layer/research/ra-perception-comparables.md", "reason": "Sourced defaults (cadence/coalescing/UX shapes); every rule cited (owner hard constraint)"}
+{"file": ".trellis/tasks/07-21-perception-activity-layer/research/rb-win32-foreground-api.md", "reason": "Doc-verified Win32/xcap/sysinfo path + caveats (no-focus, UWP, encoding)"}
+{"file": ".trellis/tasks/07-21-perception-activity-layer/research/rc-codebase-frontload.md", "reason": "Exact wiring map: every seam file:line, risks (deny-backoff, name-site agreement)"}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Governance registry rules the new cell must obey"}
+{"file": ".trellis/spec/backend/tool-design.md", "reason": "Capability/tool design standard (naming, schema, error shape)"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "never-throw, structured degradation on every capability path"}
