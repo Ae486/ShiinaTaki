@@ -1,0 +1,6 @@
+{
+  "key": "shell-open:local-exec",
+  "level": "standard",
+  "posture": "auto",
+  "secondConfirm": true
+}

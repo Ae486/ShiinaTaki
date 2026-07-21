@@ -173,6 +173,28 @@ export type {
 } from "./approval-schema.ts";
 
 export {
+  PERMISSION_METHODS,
+  PermissionCellKeySchema,
+  PermissionCellSetParamsSchema,
+  PermissionCellSetResultSchema,
+  PermissionCellsStateSchema,
+  PermissionCellStateSchema,
+  PermissionLevelSchema,
+  PermissionLevelStateSchema,
+  PermissionPostureSchema,
+} from "./permission-level-schema.ts";
+export type {
+  PermissionCellKey,
+  PermissionCellSetParams,
+  PermissionCellSetResult,
+  PermissionCellsState,
+  PermissionCellState,
+  PermissionLevel,
+  PermissionLevelState,
+  PermissionPosture,
+} from "./permission-level-schema.ts";
+
+export {
   CAPABILITY_METHODS,
   CapabilityErrorCodeSchema,
   CapabilityErrorSchema,

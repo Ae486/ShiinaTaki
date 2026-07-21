@@ -1,0 +1,6 @@
+{
+  "key": "shell-open:blocked",
+  "level": "relaxed",
+  "posture": "deny",
+  "denyByDefault": true
+}

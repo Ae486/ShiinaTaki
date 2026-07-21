@@ -10,6 +10,7 @@
 - avatar-schema.ts — AVATAR_METHODS + avatar.subscribe/report/command schemas (LLM-driven expression/motion push); report carries the worn costume id (1f change-detection); operator-only, NO Rust mirror
 - character-schema.ts — CHARACTER_METHODS + character.import/list/costumes/costumeResolution schemas + CostumeAvailability + CharacterId slug + import-error vocabulary (#18); operator-only, NO Rust mirror
 - approval-schema.ts — APPROVAL_METHODS + tool-approval request/respond schemas (MCP gate; M3 Permission Gate reuse)
+- permission-level-schema.ts — PERMISSION_METHODS (operator-role, mirrors approval.respond) + PermissionLevel/Posture/CellKey/Cell schemas + secondConfirm floor-change marker (T2b; leaf shapes serde-mirrored — the Shell gate enforces the same vocabulary)
 - capability-schema.ts — CAPABILITY_METHODS + core↔node capability request/respond/error schemas; respond output is opaque (Option A)
 - capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen); mirrored in Rust serde
 - ws-defaults.ts — default loopback WS host/port constants

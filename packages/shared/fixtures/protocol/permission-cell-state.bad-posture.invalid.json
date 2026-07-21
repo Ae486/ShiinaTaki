@@ -1,0 +1,6 @@
+{
+  "key": "shell-open:url-safe",
+  "level": "standard",
+  "posture": "allow",
+  "denyByDefault": false
+}

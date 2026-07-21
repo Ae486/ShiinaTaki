@@ -13,6 +13,11 @@ import { JsonRpcClientFrameSchema, JsonRpcIdSchema } from "./json-rpc-schema.ts"
 import { ConnectParamsSchema, ConnectResultSchema } from "./connect-schema.ts";
 import { CapabilityRequestSchema, CapabilityRespondParamsSchema } from "./capability-schema.ts";
 import {
+  PermissionCellSetParamsSchema,
+  PermissionCellStateSchema,
+  PermissionLevelStateSchema,
+} from "./permission-level-schema.ts";
+import {
   ClipboardReadOutputSchema,
   ClipboardWriteOutputSchema,
   ExecOutputSchema,
@@ -51,6 +56,10 @@ const SCHEMA_BY_PREFIX: Record<string, ZodType> = {
   "clipboard-write-output": ClipboardWriteOutputSchema,
   "shell-open-output": ShellOpenOutputSchema,
   "exec-output": ExecOutputSchema,
+  // Permission Level config surface (T2b): leaf shapes only — enforced Shell-side too, so drift is a gate bug.
+  "permission-level-state": PermissionLevelStateSchema,
+  "permission-cell-state": PermissionCellStateSchema,
+  "permission-cell-set": PermissionCellSetParamsSchema,
 };
 
 const FIXTURE_DIR = fileURLToPath(new URL("../fixtures/protocol", import.meta.url));
