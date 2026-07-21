@@ -45,6 +45,12 @@ tracing = "0.1"
 # fmt is a default feature; env-filter (RUST_LOG) is opt-in — without a subscriber every tracing line is dropped (R1).
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
+# Session idle time for the foreground-window sampler (T3a): GetLastInputInfo + GetTickCount64. windows 0.62 is ALREADY
+# transitive via xcap/sysinfo, so this pins it direct with ONLY the two Win32 sub-namespaces those calls need — no new
+# crate enters the tree. Target-gated: the crate compiles Windows-only; the sampler cfg-falls-back to None elsewhere.
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", features = ["Win32_UI_Input_KeyboardAndMouse", "Win32_System_SystemInformation"] }
+
 [dev-dependencies]
 tempfile = "3"
 

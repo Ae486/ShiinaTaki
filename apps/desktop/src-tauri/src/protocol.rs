@@ -186,6 +186,22 @@ pub struct ExecOutput {
     pub duration_ms: u64,
 }
 
+/// The foreground-window sample output (mirror of ForegroundWindowOutputSchema, T3a perception). available=false is a
+/// no-sample SUCCESS (pet window / desktop foreground) — processName/windowTitle are null then, never an error. No
+/// skip_serializing_if: a null field stays on the wire (the zod fields are required + nullable). windowTitle is
+/// untrusted content (Core A1-fences it before any prompt); idleSeconds is session idle (GetLastInputInfo).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct ForegroundWindowOutput {
+    pub available: bool,
+    #[serde(rename = "processName")]
+    pub process_name: Option<String>,
+    #[serde(rename = "windowTitle")]
+    pub window_title: Option<String>,
+    #[serde(rename = "idleSeconds")]
+    pub idle_seconds: Option<u64>,
+}
+
 /// The closed wire error union shared with the core (`capability-schema.ts`).
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -310,6 +326,7 @@ mod tests {
             "clipboard-write-output" => serde_json::from_str::<ClipboardWriteOutput>(text).ok().map(to_value),
             "shell-open-output" => serde_json::from_str::<ShellOpenOutput>(text).ok().map(to_value),
             "exec-output" => serde_json::from_str::<ExecOutput>(text).ok().map(to_value),
+            "foreground-window-output" => serde_json::from_str::<ForegroundWindowOutput>(text).ok().map(to_value),
             // Permission Level config surface (T2b) — leaf shapes the settings panel and the gate share.
             "permission-level-state" => serde_json::from_str::<PermissionLevelState>(text).ok().map(to_value),
             "permission-cell-state" => serde_json::from_str::<PermissionCellState>(text).ok().map(to_value),

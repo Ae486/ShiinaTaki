@@ -4,6 +4,7 @@
 
 pub mod clipboard;
 pub mod exec;
+pub mod foreground_window;
 pub mod process_list;
 pub mod screenshot;
 pub mod shell_open;

@@ -10,6 +10,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use crate::audit::FileAuditor;
 use crate::capabilities_impl::clipboard::{ClipboardReadExec, ClipboardWriteExec};
 use crate::capabilities_impl::exec::{ExecExec, ExecPolicy};
+use crate::capabilities_impl::foreground_window::ForegroundWindowExec;
 use crate::capabilities_impl::process_list::ProcessListExec;
 use crate::capabilities_impl::screenshot::ScreenshotExec;
 use crate::capabilities_impl::shell_open::ShellOpenExec;
@@ -45,7 +46,7 @@ pub struct NodeConfig {
 /// The full capability set this node build ships. One entry here + one register call in build_node per capability
 /// (invariant 7). clipboard is two independently-gated names; workspace-files executes Core-side (ruling 1).
 pub fn default_capabilities() -> Vec<String> {
-    ["screenshot", "process-list", "clipboard-read", "clipboard-write", "shell-open", "exec"]
+    ["screenshot", "process-list", "clipboard-read", "clipboard-write", "shell-open", "exec", "foreground-window"]
         .into_iter()
         .map(str::to_string)
         .collect()
@@ -76,6 +77,7 @@ pub fn build_node(config: NodeConfig) -> Result<WsClient, Box<dyn std::error::Er
     handlers.register(Arc::new(ClipboardWriteExec));
     handlers.register(Arc::new(ShellOpenExec));
     handlers.register(Arc::new(ExecExec::new(exec_policy.clone())));
+    handlers.register(Arc::new(ForegroundWindowExec));
 
     Ok(WsClient {
         url,

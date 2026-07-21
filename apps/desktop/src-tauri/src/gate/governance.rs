@@ -100,6 +100,11 @@ const FIXED_RISK: CapabilityGovernance = CapabilityGovernance {
         GovernanceCell { key: "process-list", strict: Ask, standard: Ask, relaxed: Auto, persist: true },
         GovernanceCell { key: "clipboard-read", strict: Ask, standard: Ask, relaxed: Auto, persist: true },
         GovernanceCell { key: "clipboard-write", strict: Ask, standard: Ask, relaxed: Auto, persist: true },
+        // foreground-window (T3a perception sampler): same fixed-risk shape as process-list — its action is identical
+        // every call, so it is name-keyed. Polled continuously, so ask-over-poll is the UX: the first tick under an ask
+        // posture raises ONE dialog offering session/always; that answer silences later ticks via DecisionStore
+        // (persist:true), a de-facto standing toggle. A deny posture / unanswered tick makes Core back off, no re-prompt.
+        GovernanceCell { key: "foreground-window", strict: Ask, standard: Ask, relaxed: Auto, persist: true },
     ],
     floor_classes: &[],
 };
@@ -225,7 +230,7 @@ mod tests {
         // {strict:Ask, standard:Ask, relaxed:Auto}, persist:true (owner-ratified factory default 2026-07-21,
         // deviating standard->Ask from the prd table's {ask,auto,auto}; user-editable via #23). None is a floor.
         let registry = GovernanceRegistry::factory();
-        for key in ["screenshot", "process-list", "clipboard-read", "clipboard-write"] {
+        for key in ["screenshot", "process-list", "clipboard-read", "clipboard-write", "foreground-window"] {
             let cell = registry.cell(key).expect(key);
             assert_eq!(cell.posture(PermissionLevel::Strict), Ask, "{key} strict");
             assert_eq!(cell.posture(PermissionLevel::Standard), Ask, "{key} standard");
@@ -240,9 +245,9 @@ mod tests {
         let registry = GovernanceRegistry::factory();
         for level in [PermissionLevel::Strict, PermissionLevel::Standard, PermissionLevel::Relaxed] {
             let projection = registry.project_level(level);
-            // 3 shell-open + 4 exec + 4 fs-write + 4 fixed-risk = 15 cells; + 4 floor keys (shell-open:blocked,
-            // exec:blocked, fs-write:sensitive, fs-write:self-escalation) = 19 rows (fixed-risk adds no floor).
-            assert_eq!(projection.len(), 19, "every cell + every floor row appears");
+            // 3 shell-open + 4 exec + 4 fs-write + 5 fixed-risk = 16 cells; + 4 floor keys (shell-open:blocked,
+            // exec:blocked, fs-write:sensitive, fs-write:self-escalation) = 20 rows (fixed-risk adds no floor).
+            assert_eq!(projection.len(), 20, "every cell + every floor row appears");
             for floor in ["shell-open:blocked", "exec:blocked", "fs-write:sensitive", "fs-write:self-escalation"] {
                 let row = projection.iter().find(|(key, _)| *key == floor).unwrap();
                 assert_eq!(row.1, Deny, "the floor {floor} is deny in {level:?}");

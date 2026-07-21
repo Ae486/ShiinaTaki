@@ -10,5 +10,5 @@
 - audit.rs — Shell-owned JSONL audit trail (append-only, names-only EXCEPT exec's command, ruling 9) + ISO-8601 timestamp
 - secrets.rs — SecretStore trait + Windows Credential Manager (keyring) + in-memory fake
 - capabilities_impl.rs — capability handler registry (invariant 7; opaque Value output + optional dialog detail) + capabilities_impl/ executors
-- capabilities_impl/ — one executor per capability (screenshot, process-list, clipboard read/write, shell-open, exec)
+- capabilities_impl/ — one executor per capability (screenshot, process-list, clipboard read/write, shell-open, exec, foreground-window)
 - bin/ — extra crate roots (taki-node, the headless e2e/CI node)

@@ -6,3 +6,4 @@
 - shell_open/ — target.rs: the target classifier (url-safe/local-file/local-exec/blocked) feeding Gate::evaluate_shell_open (A1 fix)
 - exec.rs — the exec capability handler: classify (gate Shape B) + spawn via sandbox; opaque `{command}` pass-through (ruling 16)
 - exec/ — the exec governance pipeline: parser (structural sieve) + policy (mode/allow/blocklist) + sandbox (spawn/timeout/caps)
+- foreground_window.rs — the foreground-window perception sampler (T3a): xcap focused window → app name + title (truncated 140) + GetLastInputInfo idle; no-focus → available:false (read-only; blocking)
