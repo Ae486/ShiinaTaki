@@ -1,6 +1,6 @@
 /**
  * INPUT:  a capability.respond Ok payload (opaque Value on the wire) parsed by the core tool that owns it
- * OUTPUT: one output schema per capability (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec) + types
+ * OUTPUT: one output schema per capability (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec/ForegroundWindow) + types
  * POS:    shared/protocol — the per-capability output contracts (Option A); each mirrored by that capability's Rust serde struct (invariant 3)
  */
 import { z } from "zod";
@@ -64,3 +64,16 @@ export const ExecOutputSchema = z.strictObject({
   durationMs: z.number().int().nonnegative(),
 });
 export type ExecOutput = z.infer<typeof ExecOutputSchema>;
+
+// The foreground-window sample (T3a perception): the focused window's app name + title + session idle seconds.
+// available=false is a clean no-sample SUCCESS (pet window / desktop foreground — never an error), with the window
+// fields null. windowTitle is UNTRUSTED external content — Core A1-fences it (XML-delimited + labeled) before it can
+// reach any prompt; it is whitespace-normalized + truncated to 140 chars Shell-side. idleSeconds is session idle
+// (GetLastInputInfo), present whenever computable. All fields required + nullable (strict-ready, tool-design S7).
+export const ForegroundWindowOutputSchema = z.strictObject({
+  available: z.boolean(),
+  processName: z.string().nullable(),
+  windowTitle: z.string().nullable(),
+  idleSeconds: z.number().int().nonnegative().nullable(),
+});
+export type ForegroundWindowOutput = z.infer<typeof ForegroundWindowOutputSchema>;

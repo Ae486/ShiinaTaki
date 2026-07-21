@@ -12,5 +12,5 @@
 - approval-schema.ts — APPROVAL_METHODS + tool-approval request/respond schemas (MCP gate; M3 Permission Gate reuse)
 - permission-level-schema.ts — PERMISSION_METHODS (operator-role, mirrors approval.respond) + PermissionLevel/Posture/CellKey/Cell schemas + secondConfirm floor-change marker (T2b; leaf shapes serde-mirrored — the Shell gate enforces the same vocabulary)
 - capability-schema.ts — CAPABILITY_METHODS + core↔node capability request/respond/error schemas; respond output is opaque (Option A)
-- capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen); mirrored in Rust serde
+- capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec/ForegroundWindow); mirrored in Rust serde
 - ws-defaults.ts — default loopback WS host/port constants

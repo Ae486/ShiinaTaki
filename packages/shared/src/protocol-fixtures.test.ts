@@ -21,6 +21,7 @@ import {
   ClipboardReadOutputSchema,
   ClipboardWriteOutputSchema,
   ExecOutputSchema,
+  ForegroundWindowOutputSchema,
   ProcessListOutputSchema,
   ScreenshotOutputSchema,
   ShellOpenOutputSchema,
@@ -56,6 +57,7 @@ const SCHEMA_BY_PREFIX: Record<string, ZodType> = {
   "clipboard-write-output": ClipboardWriteOutputSchema,
   "shell-open-output": ShellOpenOutputSchema,
   "exec-output": ExecOutputSchema,
+  "foreground-window-output": ForegroundWindowOutputSchema,
   // Permission Level config surface (T2b): leaf shapes only — enforced Shell-side too, so drift is a gate bug.
   "permission-level-state": PermissionLevelStateSchema,
   "permission-cell-state": PermissionCellStateSchema,
