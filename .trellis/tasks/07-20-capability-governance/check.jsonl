@@ -1,0 +1,4 @@
+{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/tasks/07-20-capability-governance/research/ra-permission-capability-governance.md", "reason": "Verify design rules against their cited sources"}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Spec-compliance of the gate/floor/orthogonality changes"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "size caps / lint / test bar"}
