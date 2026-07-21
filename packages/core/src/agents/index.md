@@ -5,3 +5,4 @@
 - turn-mapping.ts — maps AI SDK response messages <-> TimelineEntry (tool-call/result + image parts persist; image replays as text projection); + toUserEntryInput; conversation-store's only consumer
 - turn-queue.ts — per-characterId async mutex serializing turns (append user -> stream -> append turn commits before the next send); concurrent across characters
 - turn-registry.ts — per-character AbortController registry (begin/end/cancel); the cancellation seam shared by chat.send + chat.cancel
+- untrusted-fence.ts — the A1 minimal fence: fenceUntrusted({source,content}) → XML-delimited `<untrusted-observation>` block labeling content DATA-never-INSTRUCTIONS; neutralizes any literal closing tag so hostile content can't escape; reused by every untrusted-content producer (T3a activity, later T3b/screenshot/T5)

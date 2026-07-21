@@ -3,7 +3,7 @@
  * OUTPUT: a running headless Agent Core — WS server bound to loopback; exits 0 on SIGINT/SIGTERM
  * POS:    core — the process entry/composition root; wires config → logger → model(s) → db/store/media/subscriptions → ws-server
  */
-import { mkdirSync, readdirSync, statSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import type { ToolSet } from "ai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
@@ -11,6 +11,8 @@ import { createChatAgent } from "./agents/chat-agent.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
 import { createTurnQueue } from "./agents/turn-queue.ts";
 import { createTurnRegistry } from "./agents/turn-registry.ts";
+import { createActivityLayer } from "./activity/activity-layer.ts";
+import { renderActivityContext } from "./activity/render-activity.ts";
 import { createApprovalBroker } from "./approval/approval-broker.ts";
 import { createApprovalGate } from "./approval/approval-gate.ts";
 import { createDecisionStore } from "./approval/decision-store.ts";
@@ -23,6 +25,7 @@ import { createClipboardReadTool } from "./capabilities/clipboard-read-tool.ts";
 import { createClipboardWriteTool } from "./capabilities/clipboard-write-tool.ts";
 import { createExecTool } from "./capabilities/exec-tool.ts";
 import { createProcessListTool } from "./capabilities/process-list-tool.ts";
+import { routeCapability } from "./capabilities/route-capability.ts";
 import { createScreenshotDescriber } from "./capabilities/screenshot-describe.ts";
 import { createScreenshotStore } from "./capabilities/screenshot-store.ts";
 import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
@@ -44,6 +47,7 @@ import { createMcpManager } from "./mcp/mcp-manager.ts";
 import { createCharacterImporter } from "./characters/character-import.ts";
 import { createCharacterStore } from "./characters/character-store.ts";
 import { createAttachmentStore } from "./media/attachment-store.ts";
+import { directoryByteSize } from "./media/directory-size.ts";
 import { createAutoMemory } from "./memory/auto-memory.ts";
 import { createEpisodicWriter } from "./memory/episodic-writer.ts";
 import { createFlushWriter } from "./memory/flush-writer.ts";
@@ -247,6 +251,14 @@ const capabilityTools: ToolSet = {
   ...execTool,
 };
 
+// Perception activity layer (#19 T3a): a SYSTEM-initiated poll of the foreground window feeds an OS-neutral, bounded
+// rolling state (invariant 8) that T4's reason-gate will read; the layer owns its deterministic defaults (D11).
+const activity = createActivityLayer({
+  route: (capability, input) => routeCapability(shellCapabilityDeps, capability, input),
+  logger,
+});
+activity.sampler.start();
+
 // Workspace file RW (#11): CORE-side tools (no broker/gate) confined to the Workspace root — the agent's own scratch
 // space, the same subtree memory/ and screenshots/ live under. read+write are auto-allowed within it (ruling 1/8).
 const workspacePaths = createWorkspacePaths({ root: join(serverConfig.dataDir, "workspace") });
@@ -303,9 +315,12 @@ registry.register(
       // vocab makes `name` a dynamic enum of the worn costume's live names (1e), so a costume swap rejects stale names.
       characterTools: (characterId) =>
         createAvatarTools({ subscriptions: avatarSubscriptions, characterId, logger, vocab: avatarVocabulary.get(characterId) }),
-      // Skills list + the active character's reported avatar vocabulary (Option A names); blank sections contribute nothing.
+      // Skills list + the active character's reported avatar vocabulary + the fenced foreground-activity context (T3a;
+      // ruling 10 — non-memory sections enter HERE, never via the memory assembler); blank sections contribute nothing.
       instructionsExtra: (characterId) =>
-        [skillsLoader.renderList(), avatarVocabulary.render(characterId)].filter((section) => section.length > 0).join("\n\n"),
+        [skillsLoader.renderList(), avatarVocabulary.render(characterId), renderActivityContext(activity.state, Date.now())]
+          .filter((section) => section.length > 0)
+          .join("\n\n"),
       costumeChanged: (characterId) => avatarVocabulary.consumeCostumeChanged(characterId),
       approval: approvalGate,
     }),
@@ -360,23 +375,6 @@ const server = await startWsServer({
   connectionRegistry,
   logger,
 });
-
-// Recursive byte total of a directory's files (the memory-text footprint for media.usage); a missing dir = 0. Best-effort
-// (single-writer core), reserved for the M5 settings surface (D27).
-function directoryByteSize(root: string): number {
-  let names: string[];
-  try {
-    names = readdirSync(root, { recursive: true }).filter((name): name is string => typeof name === "string");
-  } catch {
-    return 0; // dir not created yet
-  }
-  let total = 0;
-  for (const name of names) {
-    const stat = statSync(join(root, name));
-    if (stat.isFile()) total += stat.size;
-  }
-  return total;
-}
 
 function shutdown(signal: string): void {
   logger.info({ signal }, "shutting down");

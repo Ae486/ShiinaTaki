@@ -1,12 +1,13 @@
 # core/src/
 - index.ts — package public entry; empty until an external consumer exists (core runs as a process)
-- main.ts — process entry: wires config → logger → model(s) → db/store/subscriptions → memory engine → media store + attachment GC → skills + MCP + approval gate + capability channel → registries → ws-server; closes MCP clients + db on SIGINT/SIGTERM
+- main.ts — process entry: wires config → logger → model(s) → db/store/subscriptions → memory engine → media store + attachment GC → skills + MCP + approval gate + capability channel → activity sampler → registries → ws-server; closes MCP clients + db on SIGINT/SIGTERM
 - config/ — env → validated boot config
 - logging/ — pino root logger factory
 - server/ — WS JSON-RPC server + method table + connection auth state
 - devices/ — paired-device store + pairing/token registry (device identity security state)
 - db/ — SQLite wrapper + migrations + repos (the only node:sqlite importer; single-writer durable store)
 - agents/ — streaming chat agent + SQLite-backed conversation store
+- activity/ — OS-neutral perception activity layer (#19 T3a): foreground-sample rolling state + system-initiated poll sampler + fenced prompt renderer
 - memory/ — layer-generic memory engine: files-as-truth store + FTS5 index + retriever + assembler + tools
 - media/ — content-addressed attachment store (chat image bytes) under the Workspace; the DB never holds bytes (#17)
 - mcp/ — MCP client: connect operator servers at boot, namespace + error-wrap their tools (ADR 0006 spawn carve-out)
