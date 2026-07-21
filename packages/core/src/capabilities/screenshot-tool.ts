@@ -1,6 +1,6 @@
 /**
- * INPUT:  an LLM screenshot call (no args) + a ConnectionRegistry, CapabilityBroker, ScreenshotStore, and an optional
- *         VLM describe bridge (screenshot-describe, wired only when the vision slot is configured)
+ * INPUT:  an LLM screenshot call ({ describePrompt? }) + a ConnectionRegistry, CapabilityBroker, ScreenshotStore, and
+ *         an optional VLM describe bridge (screenshot-describe, wired only when the vision slot is configured)
  * OUTPUT: createScreenshotTool(deps) -> ToolSet { screenshot }; returns { ok, path, width, height, bytes,
  *         description? } or { ok:false, code } — description present only when the VLM bridge produced one
  * POS:    core/capabilities — the agent tool; thin over route→broker→persist(→describe); execute NEVER throws (ruling 7/8A).
@@ -17,7 +17,7 @@ const CAPABILITY = "screenshot";
 export interface ScreenshotToolDeps extends CapabilityRouteDeps {
   store: ScreenshotStore;
   /** Optional screenshot→VLM bridge; a null description (failure/empty) degrades to the plain result. */
-  describe?: (input: { dataBase64: string; mediaType: string }) => Promise<string | null>;
+  describe?: (input: { dataBase64: string; mediaType: string; prompt?: string }) => Promise<string | null>;
 }
 
 export function createScreenshotTool(deps: ScreenshotToolDeps): ToolSet {
@@ -27,11 +27,19 @@ export function createScreenshotTool(deps: ScreenshotToolDeps): ToolSet {
       description:
         "Capture a screenshot of the user's primary monitor. The user is asked to approve on their device; " +
         (deps.describe
-          ? "on success you receive the saved file path, its pixel dimensions, and a textual description of the screen."
+          ? "on success you receive the saved file path, its pixel dimensions, and a textual description of the screen. " +
+            "You may optionally supply describePrompt to focus that description on what you need."
           : "on success you receive the saved file path and its pixel dimensions (the image itself is stored, not shown to you)."),
-      inputSchema: z.object({}),
+      inputSchema: z.object({
+        // Steers only HOW the screen is described, never WHAT is captured — capture crosses the gate unchanged (T2b §3.6).
+        describePrompt: z
+          .string()
+          .max(500)
+          .optional()
+          .describe("Optional focus for the screen description, e.g. 'the error dialog text'. Ignored when no vision model is configured."),
+      }),
       // Every failure degrades into a structured result the model can read; this execute never throws (error-handling spec).
-      execute: async () => {
+      execute: async ({ describePrompt }) => {
         try {
           const routed = await routeCapability(deps, CAPABILITY, {});
           if (!routed.ok) return routed;
@@ -41,7 +49,7 @@ export function createScreenshotTool(deps: ScreenshotToolDeps): ToolSet {
           const { path, bytes } = deps.store.save(output.dataBase64);
           // The describe bridge reads the in-flight bytes (no fs round-trip); its failures degrade to null inside it.
           const description = deps.describe
-            ? await deps.describe({ dataBase64: output.dataBase64, mediaType: output.mediaType })
+            ? await deps.describe({ dataBase64: output.dataBase64, mediaType: output.mediaType, prompt: describePrompt })
             : null;
           log.info({ width: output.width, height: output.height, bytes, described: description !== null }, "screenshot persisted");
           const result = { ok: true as const, path, width: output.width, height: output.height, bytes };

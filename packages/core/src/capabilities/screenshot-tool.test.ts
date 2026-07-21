@@ -40,7 +40,7 @@ function toolWith(deps: {
   registry: ConnectionRegistry;
   broker: CapabilityBroker;
   store: ScreenshotStore;
-  describe?: (input: { dataBase64: string; mediaType: string }) => Promise<string | null>;
+  describe?: (input: { dataBase64: string; mediaType: string; prompt?: string }) => Promise<string | null>;
 }) {
   const { logger } = createCaptureLogger();
   return createScreenshotTool({ ...deps, logger });
@@ -114,5 +114,37 @@ describe("createScreenshotTool", () => {
     });
     const result = await tools.screenshot?.execute?.({}, EXEC_OPTS);
     expect(result).toEqual({ ok: true, path: "x.png", width: 1920, height: 1080, bytes: 42 });
+  });
+
+  it("threads describePrompt from the tool input into the describe bridge (T2b item 6)", async () => {
+    const seen: Array<{ dataBase64: string; mediaType: string; prompt?: string }> = [];
+    const tools = toolWith({
+      registry: registryReturning(nodeConnection()),
+      broker: brokerReturning({ ok: true, output: OUTPUT }),
+      store: store(() => ({ path: "x.png", bytes: 42 })),
+      describe: (input) => {
+        seen.push(input);
+        return Promise.resolve("focused description");
+      },
+    });
+    const result = await tools.screenshot?.execute?.({ describePrompt: "the error dialog" }, EXEC_OPTS);
+    expect(seen[0]?.prompt).toBe("the error dialog");
+    expect(result).toMatchObject({ ok: true, description: "focused description" });
+  });
+
+  it("calls the describe bridge with no prompt when describePrompt is absent (default path unchanged)", async () => {
+    const seen: Array<{ dataBase64: string; mediaType: string; prompt?: string }> = [];
+    const tools = toolWith({
+      registry: registryReturning(nodeConnection()),
+      broker: brokerReturning({ ok: true, output: OUTPUT }),
+      store: store(() => ({ path: "x.png", bytes: 42 })),
+      describe: (input) => {
+        seen.push(input);
+        return Promise.resolve("plain description");
+      },
+    });
+    const result = await tools.screenshot?.execute?.({}, EXEC_OPTS);
+    expect(seen[0]?.prompt).toBeUndefined();
+    expect(result).toEqual({ ok: true, path: "x.png", width: 1920, height: 1080, bytes: 42, description: "plain description" });
   });
 });

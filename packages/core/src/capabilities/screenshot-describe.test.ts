@@ -8,6 +8,11 @@ function captureWarn() {
   return { warn: vi.fn() };
 }
 
+function systemInstructions(model: ReturnType<typeof generatingModel>): string {
+  const message = model.doGenerateCalls[0]?.prompt.find((part) => part.role === "system");
+  return typeof message?.content === "string" ? message.content : "";
+}
+
 describe("createScreenshotDescriber", () => {
   it("returns the VLM's trimmed description", async () => {
     const describer = createScreenshotDescriber({
@@ -27,5 +32,23 @@ describe("createScreenshotDescriber", () => {
     const describer = createScreenshotDescriber({ model: failingGenerateModel(new Error("boom")), logger });
     await expect(describer.describe(INPUT)).resolves.toBeNull();
     expect(logger.warn).toHaveBeenCalledOnce();
+  });
+
+  it("appends the caller focus to the base framing — the guardrails survive, never replaced", async () => {
+    const model = generatingModel("A dialog.");
+    const describer = createScreenshotDescriber({ model, logger: captureWarn() });
+    await describer.describe({ ...INPUT, prompt: "  the error dialog text  " });
+    const instructions = systemInstructions(model);
+    expect(instructions).toContain("at most 200 words");
+    expect(instructions).toContain("Focus especially on: the error dialog text");
+  });
+
+  it("treats a blank/whitespace prompt as absent (base framing only)", async () => {
+    const model = generatingModel("A screen.");
+    const describer = createScreenshotDescriber({ model, logger: captureWarn() });
+    await describer.describe({ ...INPUT, prompt: "   " });
+    const instructions = systemInstructions(model);
+    expect(instructions).toContain("at most 200 words");
+    expect(instructions).not.toContain("Focus especially on");
   });
 });

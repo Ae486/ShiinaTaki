@@ -1,7 +1,8 @@
 /**
- * INPUT:  a vision-slot LanguageModel (TAKI_VLM_*) + a screenshot's raw base64 bytes and mediaType
- * OUTPUT: createScreenshotDescriber(deps) -> describe({dataBase64, mediaType}) => Promise<string | null> — a faithful
- *         textual description of the screen, or null (empty reply / VLM failure; warn + degrade, never throws)
+ * INPUT:  a vision-slot LanguageModel (TAKI_VLM_*) + a screenshot's raw base64 bytes, mediaType, and an optional
+ *         caller focus prompt
+ * OUTPUT: createScreenshotDescriber(deps) -> describe({dataBase64, mediaType, prompt?}) => Promise<string | null> — a
+ *         faithful textual description of the screen, or null (empty reply / VLM failure; warn + degrade, never throws)
  * POS:    core/capabilities — the OPTIONAL screenshot→VLM bridge (reuses #17's vision slot); wired only when the
  *         slot is configured. The text model reads the description in the tool result; pixels never reach it.
  */
@@ -14,12 +15,19 @@ const DESCRIBE_PROMPT =
   "concisely and objectively — applications, windows, notable content, and any readable text that matters. " +
   "Reply with ONLY the description, at most 200 words.";
 
+// The caller focus is APPENDED to the base framing, never a replacement — the guardrails (objective,
+// only-the-description, 200-word cap) survive any caller-supplied prompt (T2b research §3.6).
+function composeInstructions(prompt: string | undefined): string {
+  const focus = prompt?.trim();
+  return focus ? `${DESCRIBE_PROMPT}\n\nFocus especially on: ${focus}` : DESCRIBE_PROMPT;
+}
+
 export interface ScreenshotDescriberLogger {
   warn(obj: object, msg: string): void;
 }
 
 export interface ScreenshotDescriber {
-  describe(input: { dataBase64: string; mediaType: string }): Promise<string | null>;
+  describe(input: { dataBase64: string; mediaType: string; prompt?: string }): Promise<string | null>;
 }
 
 export function createScreenshotDescriber(deps: {
@@ -27,9 +35,9 @@ export function createScreenshotDescriber(deps: {
   logger: ScreenshotDescriberLogger;
 }): ScreenshotDescriber {
   return {
-    async describe({ dataBase64, mediaType }) {
+    async describe({ dataBase64, mediaType, prompt }) {
       try {
-        const agent = new ToolLoopAgent({ model: deps.model, instructions: DESCRIBE_PROMPT });
+        const agent = new ToolLoopAgent({ model: deps.model, instructions: composeInstructions(prompt) });
         const result = await agent.generate({
           messages: [
             {
