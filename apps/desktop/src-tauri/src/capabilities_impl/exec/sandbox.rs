@@ -1,10 +1,12 @@
 //! INPUT:  an approved/auto-run command string + a Sandbox (cwd, timeout, output cap)
 //! OUTPUT: run(command, sandbox) -> ExecOutput { exitCode, stdout, stderr, truncated, timedOut, durationMs }
-//! POS:    shell/capabilities/exec — the spawn half (ruling 12-15): D3 resolved-absolute-path spawn, NO shell, scrubbed env, hand-rolled timeout/caps
+//! POS:    shell/capabilities/exec — the spawn half (ruling 12-15): D3 resolved-absolute-path spawn, NO shell, scrubbed env, no console window (Windows), hand-rolled timeout/caps
 
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
@@ -20,6 +22,15 @@ use super::resolve;
 // How often the timeout loop wakes to check the child / cap flag. A 50 ms poll against a 30 s deadline is ample and
 // keeps us zero-dep (no wait-timeout crate) — consistent with #10's hand-rolled base64/uuid stance (ruling 14).
 const POLL_INTERVAL: Duration = Duration::from_millis(50);
+
+// The GUI host (Tauri) must never flash a console window when it spawns a console subprocess: with no creation flag,
+// Windows allocates a fresh console for a console child of a windowed parent (owner-reported defect — every approved
+// exec briefly flashed a black window). CREATE_NO_WINDOW = 0x08000000 runs a console app with no console window and no
+// console handle set; it does NOT touch our already-piped stdout/stderr or the exit-code/timeout paths. It is ignored
+// for non-console apps. Docs: Microsoft Learn "Process Creation Flags" (CREATE_NO_WINDOW 0x08000000); std API
+// `std::os::windows::process::CommandExt::creation_flags` (ORed with CREATE_UNICODE_ENVIRONMENT by std).
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 
 // The Windows-safe env allowlist (ruling 13): start from EMPTY, copy in only these. Everything else is dropped —
 // notably every API-key-shaped var. PATH is set so `std::process::Command` resolves argv[0] against OUR curated PATH.
@@ -70,6 +81,9 @@ fn spawn(argv: &[String], sandbox: &Sandbox) -> Result<Child, ExecError> {
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
+    // Suppress the console-window flash a windowed host would otherwise cause for a console child (see const above).
+    #[cfg(windows)]
+    command.creation_flags(CREATE_NO_WINDOW);
     // Allowlist-from-empty: drop the inherited environment, then copy only the safe keys (ruling 13).
     command.env_clear();
     for key in SAFE_ENV_KEYS {
