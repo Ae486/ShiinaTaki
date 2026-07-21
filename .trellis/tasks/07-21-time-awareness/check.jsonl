@@ -1,0 +1,4 @@
+{"file": ".trellis/tasks/07-21-time-awareness/prd.md", "reason": "Verify implementation against every ratified decision + AC (esp. provider-neutrality grep + cache-shape test)"}
+{"file": ".trellis/tasks/07-21-time-awareness/research/time-awareness-survey.md", "reason": "Verify adopted shapes match cited evidence; §OMITTED caveats resolved or carried"}
+{"file": ".trellis/spec/backend/tool-design.md", "reason": "Tool standard compliance of get_current_time"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "size caps / headers / index.md / test bar"}

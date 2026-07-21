@@ -1,0 +1,5 @@
+{"file": ".trellis/tasks/07-21-time-awareness/prd.md", "reason": "All owner-ratified decisions incl. provider-neutrality hard principle; the contract"}
+{"file": ".trellis/tasks/07-21-time-awareness/research/time-awareness-survey.md", "reason": "Sourced hybrid-shape evidence (Hermes/OpenClaw practice, cache economics, §OMITTED caveats)"}
+{"file": ".trellis/spec/backend/tool-design.md", "reason": "get_current_time tool must follow the 27-rule standard (description, strict-ready schema, never-throw)"}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "composeInstructions join-point rules (ruling 10); instructionsExtra vs message-seam shapes"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "never-throw structured results"}

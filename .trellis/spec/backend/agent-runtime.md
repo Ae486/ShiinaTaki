@@ -162,3 +162,23 @@ mandate). Never hand-roll a second fence or paste raw sensed text into a section
 - **Ambient context joins via `instructionsExtra`, event notices via the outgoing-message seam** — an always-current
   status block (activity) is a per-turn system-prompt section; a one-shot event (costume change) is a message prefix.
   Pick by shape, don't mix.
+
+## Time enters prompts from ONE module, stable-early / volatile-late (time-awareness task)
+
+The agent's time sense is assembled, never ambient: `core/time/time-context.ts` is the SINGLE home for prompt-facing
+time rendering (day-date line, tail time line, relative ages, the T4-reserved wall-clock) — never scatter `new Date()`
+formatting into prompt code. Grounding: Hermes date-only-in-cached-prefix + anti-churn comment; Claude Code day-date
+practice; the pull-only shape was rejected on evidence (models never proactively check time — Hermes wall-clock fix PR,
+4 Claude Code issues; survey `research/time-awareness-survey.md`).
+
+- **Stable-early / volatile-late is a UNIVERSAL rule, not provider tuning**: the day-granularity date sits right after
+  the base prompt (byte-stable for a calendar day → prefix-cache-safe on every exact-prefix-caching provider, harmless
+  elsewhere); the minute-granularity time line is the LAST section (the memory sections before it already vary per
+  turn). ZERO provider-conditional code, no provider-private cache APIs (owner hard principle 2026-07-21) — provider
+  cache docs may be consulted as COST notes only, never as design inputs.
+- **Ages are computed by code, never by the model** (models miscompute date arithmetic): memory bullets render
+  `(3 days ago)` via `formatRelativeAge`; future/unparseable timestamps degrade to "just now", never negative/NaN.
+- **`get_current_time` is an informational pure-Core tool** (no OS crossing → no Gate); its description tells the
+  model NOT to call it for the date/rough time (already injected) — pull covers only precision/timezone.
+- Prompt WORDING about time discipline (awareness norms) is deliberately absent — it lands with T4's prompt-design
+  pass, as one optimization, not piecemeal.
