@@ -26,6 +26,8 @@ const DEFAULTS = {
 
 export interface ActivityLayerDeps {
   route: (capability: string, input: unknown) => Promise<RouteResult>;
+  /** True iff a node currently provides foreground-window; forwarded to the sampler's pre-route offline skip. */
+  hasNode: () => boolean;
   logger: Logger;
 }
 
@@ -44,6 +46,7 @@ export function createActivityLayer(deps: ActivityLayerDeps): ActivityLayer {
   });
   const sampler = createActivitySampler({
     route: deps.route,
+    hasNode: deps.hasNode,
     state,
     logger: deps.logger,
     config: { pollMs: DEFAULTS.pollMs, errorBackoffThreshold: DEFAULTS.errorBackoffThreshold, maxBackoffMs: DEFAULTS.maxBackoffMs },

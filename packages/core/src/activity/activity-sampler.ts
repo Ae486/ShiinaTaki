@@ -1,5 +1,5 @@
 /**
- * INPUT:  a route fn (partial-applied routeCapability), an ActivityState sink, a Logger, cadence/backoff config
+ * INPUT:  a route fn (partial-applied routeCapability), a hasNode predicate, an ActivityState sink, a Logger, cadence/backoff config
  * OUTPUT: createActivitySampler(deps) -> { start, stop }; a self-scheduling poll that feeds the activity layer
  * POS:    core/activity — the SYSTEM-initiated poll loop (no LLM, no tool()): calls the foreground-window capability
  *         directly over the WS→Gate seam. setInterval(...).unref() per the attachment-GC precedent (main.ts:337).
@@ -23,6 +23,8 @@ export interface ActivitySamplerConfig {
 
 export interface ActivitySamplerDeps {
   route: (capability: string, input: unknown) => Promise<RouteResult>;
+  /** True iff a node currently provides foreground-window; a false skips routing entirely so no route-level log fires. */
+  hasNode: () => boolean;
   state: ActivityState;
   logger: Logger;
   config: ActivitySamplerConfig;
@@ -87,6 +89,13 @@ async function tick(rt: SamplerRuntime): Promise<void> {
   if (rt.stopped || rt.inflight) return;
   const at = rt.now();
   if (at < rt.backoffUntil) return; // still inside a backoff window
+  // Pre-flight: with no node providing the capability, routeCapability would log a per-call "tool invoked" + NO_NODE
+  // "routing failed" pair every tick. Skip routing entirely and take the same quiet once-per-streak NO_NODE arm; the
+  // route-side handleFailure NO_NODE branch stays as defense-in-depth (a node can drop between this check and the route).
+  if (!rt.deps.hasNode()) {
+    handleFailure(rt, "NO_NODE", at);
+    return;
+  }
   rt.inflight = true;
   try {
     const routed = await rt.deps.route(CAPABILITY, {});

@@ -26,11 +26,15 @@ function fakeState(): { state: ActivityState; pushed: Array<{ sample: Foreground
 let clock = 0;
 const now = (): number => clock;
 
-function harness(route: (capability: string, input: unknown) => Promise<RouteResult>) {
+function harness(
+  route: (capability: string, input: unknown) => Promise<RouteResult>,
+  hasNode: () => boolean = () => true,
+) {
   const { state, pushed } = fakeState();
   const { logger, records } = createCaptureLogger();
   const sampler = createActivitySampler({
     route,
+    hasNode,
     state,
     logger,
     now,
@@ -73,6 +77,32 @@ describe("createActivitySampler", () => {
     expect(pushed).toHaveLength(0);
     expect(route).toHaveBeenCalledTimes(2); // keeps polling — no backoff on offline
     expect(records.filter((r) => r.msg?.includes("sampler idle until one connects"))).toHaveLength(1);
+    sampler.stop();
+  });
+
+  it("never routes while no node is connected, logging offline at most once across many ticks", async () => {
+    const route = vi.fn(async (): Promise<RouteResult> => ({ ok: true, output: OK_SAMPLE }));
+    const { sampler, pushed, records } = harness(route, () => false);
+    sampler.start();
+    for (let i = 0; i < 5; i++) await step();
+    expect(route).not.toHaveBeenCalled(); // no route-level "tool invoked"/NO_NODE logs can fire
+    expect(pushed).toHaveLength(0);
+    expect(records.filter((r) => r.msg?.includes("sampler idle until one connects"))).toHaveLength(1);
+    sampler.stop();
+  });
+
+  it("resumes routing once a node connects (hasNode flips true)", async () => {
+    const route = vi.fn(async (): Promise<RouteResult> => ({ ok: true, output: OK_SAMPLE }));
+    let online = false;
+    const { sampler, pushed } = harness(route, () => online);
+    sampler.start();
+    await step();
+    await step();
+    expect(route).not.toHaveBeenCalled();
+    online = true;
+    await step();
+    expect(route).toHaveBeenCalledTimes(1);
+    expect(pushed).toHaveLength(1);
     sampler.stop();
   });
 

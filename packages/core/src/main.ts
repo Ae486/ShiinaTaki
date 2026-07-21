@@ -77,6 +77,7 @@ import { createLoadSkillTool } from "./skills/load-skill-tool.ts";
 import { createSkillsLoader } from "./skills/skills-loader.ts";
 import { createSkillsState } from "./skills/skills-state.ts";
 import { scanSkills } from "./skills/skill-scanner.ts";
+import { createCurrentTimeTool } from "./time/current-time-tool.ts";
 import { createTimelineSubscriptions } from "./server/timeline-subscriptions.ts";
 import { startWsServer } from "./server/ws-server.ts";
 import { createReadFileTool } from "./workspace/read-file-tool.ts";
@@ -255,6 +256,7 @@ const capabilityTools: ToolSet = {
 // rolling state (invariant 8) that T4's reason-gate will read; the layer owns its deterministic defaults (D11).
 const activity = createActivityLayer({
   route: (capability, input) => routeCapability(shellCapabilityDeps, capability, input),
+  hasNode: () => connectionRegistry.findNodeForCapability("foreground-window") !== undefined,
   logger,
 });
 activity.sampler.start();
@@ -303,9 +305,11 @@ registry.register(
       imageMemory: imageDescriptionWriter
         ? { onImageTurn: (input) => void imageDescriptionWriter.onImageTurn(input) }
         : undefined,
-      // Extra tools = the skills meta-tool + every capability tool (Shell-gated + core-side Workspace files) + MCP tools.
+      // Extra tools = the skills meta-tool + every capability tool (Shell-gated + core-side Workspace files) + MCP tools
+      // + the pure get_current_time tool (no Gate/broker — reads new Date(); the precision pull for the ambient time lines).
       extraTools: {
         ...createLoadSkillTool(skillsLoader),
+        ...createCurrentTimeTool(),
         ...capabilityTools,
         ...readFileTool,
         ...writeFileTool,
