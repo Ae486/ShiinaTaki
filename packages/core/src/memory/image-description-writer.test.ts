@@ -57,6 +57,26 @@ describe("createImageDescriptionWriter (T9b)", () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  it("PII-scrubs the description before it is stored (D44 memory half; the fence stays out of storage — D47)", async () => {
+    const f = fresh();
+    const writer = createImageDescriptionWriter({
+      model: generatingModel("A terminal showing OPENAI_API_KEY=sk-abcdefghijklmnop1234 and a mail to alice@example.com"),
+      attachments: okAttachments,
+      writeEpisode: episodeOp(f),
+      logger: { warn: vi.fn() },
+    });
+
+    await writer.onImageTurn({ characterId: "taki", refs: [`attachments/${"b".repeat(64)}.png`], caption: "" });
+
+    const body = readFileSync(join(f.root, "memory", episodeFiles(f.root)[0] as string), "utf8");
+    // A memory is PERMANENT: a credential the user happened to photograph must never become part of it.
+    expect(body).not.toContain("sk-abcdefghijklmnop1234");
+    expect(body).not.toContain("alice@example.com");
+    expect(body).toContain("[redacted:email]");
+    // Storage-time text carries no fence: the fence is a prompt-assembly wrapper, not a storage format (D47).
+    expect(body).not.toContain("<untrusted-observation");
+  });
+
   it("drops (warn, no throw, no write) when the vision model fails", async () => {
     const f = fresh();
     const logger = { warn: vi.fn() };

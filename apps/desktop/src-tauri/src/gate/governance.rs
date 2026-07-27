@@ -97,6 +97,12 @@ const FIXED_RISK: CapabilityGovernance = CapabilityGovernance {
     name: "fixed-risk",
     cells: &[
         GovernanceCell { key: "screenshot", strict: Ask, standard: Ask, relaxed: Auto, persist: true },
+        // screenshot-ambient (T3b): the SAME postures as on-demand screenshot, but a SEPARATE cell — so an "always
+        // allow" on chat screenshots can never authorize perpetual background capture (prd ruling 1). The
+        // DEFAULT-OFF property is NOT expressed here: a posture only decides how a request is authorized, never
+        // whether one is made. Core owns the off state (the ambient sampler is not even scheduled without an
+        // explicit enable), so with ambient off this cell is simply never reached — Recall's silent off-state.
+        GovernanceCell { key: "screenshot-ambient", strict: Ask, standard: Ask, relaxed: Auto, persist: true },
         GovernanceCell { key: "process-list", strict: Ask, standard: Ask, relaxed: Auto, persist: true },
         GovernanceCell { key: "clipboard-read", strict: Ask, standard: Ask, relaxed: Auto, persist: true },
         GovernanceCell { key: "clipboard-write", strict: Ask, standard: Ask, relaxed: Auto, persist: true },
@@ -226,11 +232,14 @@ mod tests {
 
     #[test]
     fn the_fixed_risk_projection_matches_the_factory_default() {
-        // Batch D: the four fixed-risk capabilities are name-keyed cells (single-segment key) projecting
+        // Batch D (+ T3a foreground-window, + T3b screenshot-ambient): every fixed-risk capability is a name-keyed
+        // cell (single-segment key) projecting
         // {strict:Ask, standard:Ask, relaxed:Auto}, persist:true (owner-ratified factory default 2026-07-21,
         // deviating standard->Ask from the prd table's {ask,auto,auto}; user-editable via #23). None is a floor.
         let registry = GovernanceRegistry::factory();
-        for key in ["screenshot", "process-list", "clipboard-read", "clipboard-write", "foreground-window"] {
+        for key in
+            ["screenshot", "screenshot-ambient", "process-list", "clipboard-read", "clipboard-write", "foreground-window"]
+        {
             let cell = registry.cell(key).expect(key);
             assert_eq!(cell.posture(PermissionLevel::Strict), Ask, "{key} strict");
             assert_eq!(cell.posture(PermissionLevel::Standard), Ask, "{key} standard");
@@ -245,9 +254,9 @@ mod tests {
         let registry = GovernanceRegistry::factory();
         for level in [PermissionLevel::Strict, PermissionLevel::Standard, PermissionLevel::Relaxed] {
             let projection = registry.project_level(level);
-            // 3 shell-open + 4 exec + 4 fs-write + 5 fixed-risk = 16 cells; + 4 floor keys (shell-open:blocked,
-            // exec:blocked, fs-write:sensitive, fs-write:self-escalation) = 20 rows (fixed-risk adds no floor).
-            assert_eq!(projection.len(), 20, "every cell + every floor row appears");
+            // 3 shell-open + 4 exec + 4 fs-write + 6 fixed-risk = 17 cells; + 4 floor keys (shell-open:blocked,
+            // exec:blocked, fs-write:sensitive, fs-write:self-escalation) = 21 rows (fixed-risk adds no floor).
+            assert_eq!(projection.len(), 21, "every cell + every floor row appears");
             for floor in ["shell-open:blocked", "exec:blocked", "fs-write:sensitive", "fs-write:self-escalation"] {
                 let row = projection.iter().find(|(key, _)| *key == floor).unwrap();
                 assert_eq!(row.1, Deny, "the floor {floor} is deny in {level:?}");

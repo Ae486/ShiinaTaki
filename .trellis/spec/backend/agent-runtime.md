@@ -157,11 +157,59 @@ mandate). Never hand-roll a second fence or paste raw sensed text into a section
   quote/angle chars. Both properties are unit-pinned — extend those tests when touching the fence.
 - **Producers fence at render time, not at storage time** — store raw (bounded) data; fence where it joins a prompt
   (the activity block fences in `render-activity.ts`; the join stays in `instructionsExtra`, ruling 10).
-- Known debt: the screenshot VLM description flows unfenced today (predates the fence); route it through
-  `fenceUntrusted` when next touched (T3b/T5 will).
+- **Scrub-then-fence, once at the sense seam** (T3b): sensed text is minimized by `perception/pii-scrub.ts::scrubPii`
+  BEFORE it is fenced and before it is stored, so the prompt path and any store inherit the same string. The fence is a
+  *labelling* control, the scrub a *content-minimization* one; they compose in that order, never the reverse.
+- The screenshot VLM description is fenced on the TOOL-RESULT path (`screenshot-tool.ts::safeDescription`) and on the
+  ambient path (`perception/screen-context.ts`) — D44 CLOSED (T3b). Remaining debt: a description written to episodic
+  memory is scrubbed but carries no observed-origin marker for the assembler to fence at render (D47).
 - **Ambient context joins via `instructionsExtra`, event notices via the outgoing-message seam** — an always-current
   status block (activity) is a per-turn system-prompt section; a one-shot event (costume change) is a message prefix.
   Pick by shape, don't mix.
+
+## Ambient observation: two privacy layers, fail-closed, silent when off (T3b)
+
+Everything that observes the user *without being asked* composes in ONE place: `perception/perception-layer.ts` builds
+the privacy controls (Privacy Pause, sensitive-process skip, PII scrub) once and hands them to every sampler, so adding
+a sampler never adds a privacy decision. On-demand chat captures are deliberately NOT part of this layer — they are
+explicit in-the-moment consent through the Gate, and the pause never gates them.
+
+- **TWO independent layers over ambient capture; neither replaces the other.** *Layer 1 — deterministic, prevents
+  TRANSMISSION*: the exe-name skip (`perception/sensitive-processes.ts`), `ActivityState.seal()` on a sensitive hit,
+  and one FRESH `foreground-window` screen taken immediately before every capture (`perception/foreground-screen.ts`)
+  — which NARROWS but does not close the gap: foreground and capture are still two WS round-trips, so the residual
+  non-atomic window is real and tracked (D48), never described as closed.
+  *Layer 2 — semantic, prevents RETENTION/USE*: the mandatory ambient VLM pass doubles as a privacy screen
+  (`perception/sensitive-screen.ts` — a structural `SENSITIVE_SCREEN` sentinel whose matcher is deliberately more
+  forgiving than the prompt); a sensitive verdict discards the frame whatever the retention config says, publishes
+  nothing, and logs neither the description nor the window identity. Layer 2 can NEVER substitute for layer 1: the VLM
+  is a REMOTE endpoint, so by the time it can judge a frame the pixels have already left the machine. Layer 1 in turn
+  cannot see inside an app (incognito is still `chrome.exe`) — hence both, always.
+- **Fail-closed is the rule for any observation we cannot screen.** Route failure, schema miss, no focused window, no
+  process name, a foreground sample older than the freshness tolerance — all collapse into ONE refusal: the correct
+  reaction to each is identical, and distinguishing them tempts a log line that discloses more than "we did not look".
+  A capture we cannot screen is exactly the one to refuse, and a refusal never names what it refused to look at.
+- **Seal, do not merely drop.** A sensitive foreground makes the activity sampler call `state.seal()` — argument-less
+  and data-free (no name, no title, no timestamp) — ending the live stretch so a sibling sampler's unknown-foreground
+  guard refuses instead of acting on the last non-sensitive entry. It self-clears by construction: the next ordinary
+  sample opens a fresh entry and observation resumes on the very next tick, so no reset and no permanent block exists.
+- **Off by default means SILENT, not merely denied.** Without an explicit enable the ambient sampler is not scheduled
+  at all: zero captures, zero dialogs — and deliberately no log line either, because a boot-time "ambient sampling
+  disabled" line advertises a feature the user never enabled (Recall's off-state).
+- **A pause is a withdrawal of consent, so it survives a restart.** The flag is DB-persisted (`db/privacy-pause-repo.ts`
+  — one row, an ABSOLUTE deadline that settles on read, so boot needs no "was that yesterday" special case) and
+  hydrated through the FACTORY, never through a mutator: restoring must not look like a mutation, because the mutators
+  have exactly ONE production caller — the operator-only `perception.pauseSet`. That single-writer property is the
+  proof the agent cannot un-pause its own observation; it is source-swept by `privacy-pause-writer.test.ts`.
+- **Retention is enforced by a sweeper, and ambient frames live in their own store.** A retention policy nobody sweeps
+  is not a policy: `perception/ambient-shot-gc.ts` sweeps at boot and on an interval regardless of the enable flag
+  (frames captured before ambient sensing was switched off must still expire). Ambient frames get their own directory
+  AND their own filename prefix (`perception/ambient-shot-store.ts`), so an automatic aggressive sweep is structurally
+  unable to address a user-requested capture even if it were pointed at the wrong directory.
+- **One identity rule, single-sourced.** The stale pre-filter and the fresh pre-capture screen compare foregrounds with
+  the SAME key (`foregroundKey`, over the already-SCRUBBED title) or they drift — and a drift here is a capture taken
+  on an assumption nobody re-checked. An ambient observation also carries its age and stops rendering once stale
+  (`perception/screen-context.ts`), so a paused or stopped sampler bleeds out of the prompt instead of lingering.
 
 ## Time enters prompts from ONE module, stable-early / volatile-late (time-awareness task)
 

@@ -1,0 +1,6 @@
+{"file": ".trellis/tasks/07-21-perception-privacy/prd.md", "reason": "All owner-ratified decisions + AC; the contract"}
+{"file": ".trellis/tasks/07-21-perception-privacy/research/ra-privacy-controls.md", "reason": "Sourced privacy design (scrub class set, skip norms, pause semantics, ambient-vs-on-demand grant)"}
+{"file": ".trellis/tasks/07-21-perception-privacy/research/rb-codebase-frontload.md", "reason": "Exact seam map file:line + the R1 unswept-PNG finding and missing sampler hooks"}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Untrusted-content fence rule + prompt join-point rulings the sensed text must obey"}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Governance cell rules incl. ask-over-poll etiquette for polled capabilities"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "never-throw, structured degradation on every sampling path"}

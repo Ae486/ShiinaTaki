@@ -8,10 +8,12 @@ import { timelineMigration001 } from "./001-timeline.ts";
 import { memoryMigration002 } from "./002-memory.ts";
 import { memoryAutoStateMigration003 } from "./003-memory-auto-state.ts";
 import { timelinePartsMigration004 } from "./004-timeline-parts.ts";
+import { privacyPauseMigration005 } from "./005-privacy-pause.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
   memoryMigration002,
   memoryAutoStateMigration003,
   timelinePartsMigration004,
+  privacyPauseMigration005,
 ];

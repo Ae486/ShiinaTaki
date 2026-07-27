@@ -1,0 +1,4 @@
+{"file": ".trellis/tasks/07-21-perception-privacy/prd.md", "reason": "Verify against every ratified decision + AC (default-OFF, pause scope, skip scope, scrub-then-fence ordering, retention enforcement)"}
+{"file": ".trellis/tasks/07-21-perception-privacy/research/ra-privacy-controls.md", "reason": "Verify adopted rules match their cited sources; §OMITTED not smuggled in"}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Spec compliance of the new cell + polled-capability etiquette"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "size caps / headers / index.md / test bar"}

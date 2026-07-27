@@ -9,6 +9,10 @@
 - media-get.ts — media.get (operator-only): serve one attachment's bytes for scroll-back; thin delegation to attachment-store.read (ref confinement single-sourced there)
 - media-clear.ts — media.clear (operator-only): purge retained attachment bytes on demand (the description-memory is untouched)
 - media-usage.ts — media.usage (operator-only): attachment + memory-text byte footprint; RESERVED for the M5 settings UI (D27)
+- perception-methods.ts — the perception surface's registration seam: one call registers pauseGet/pauseSet/card so the composition root never grows per method
+- perception-pause-get.ts — perception.pauseGet (operator-only): the Privacy Pause snapshot (a lapsed deadline self-resumes on this read)
+- perception-pause-set.ts — perception.pauseSet (operator-only): pause until resumed / until a caller-supplied epoch-ms deadline / resume; the ONLY production writer of the pause state (the agent has no path — swept by privacy-pause-writer.test.ts)
+- perception-card.ts — perception.card (operator-only): one activity-card snapshot { current, recent, samplingStatus, pauseState }; a READ, not a subscription (nothing publishes perception changes today) — panel at #26
 - character-import.ts — character.import (operator-only): extract an uploaded model archive into the Workspace characters/ subtree; thin delegation to the characters importer
 - character-list.ts — character.list (operator-only): enumerate imported characters from their character.json markers
 - character-costumes.ts — character.costumes (operator-only): one character's costumes + settings filenames + on-demand availability (renderable / missing motions+packs)

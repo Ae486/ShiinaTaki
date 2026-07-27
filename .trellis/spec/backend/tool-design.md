@@ -178,8 +178,11 @@ unbounded) is capability/Shell-side hardening → **T2b**; state the rule now.
 **R5. Sanitize tool text before it re-enters the transcript when it can carry open-world content: strip role/framing
 tokens, cap length (defense-in-depth against injected framing).** Hermes `_sanitize_tool_error` strips `</tool_call>`-style
 tags, code fences, CDATA, caps at 2000 chars `[H-MT]`, applied on the dispatch error path `[H-REG]`. Injection surface is
-low for first-party/Shell-mediated outputs; this is a **forward rule** for open-world tool outputs (a screenshot VLM
-description, future web tools) → revisit with T2b. State it now.
+low for first-party/Shell-mediated outputs; this is a **forward rule** for open-world tool outputs. — Landed since
+(T3b): the one open-world output we ship, the screenshot VLM description, now leaves `screenshot-tool.ts` only
+PII-scrubbed and A1-fenced (`safeDescription`; scrub-then-fence, see `agent-runtime.md`), which covers the framing-token
+half by construction. The LENGTH cap and a generic sanitizer for FUTURE open-world tools (web fetch) stay unbuilt —
+state the rule now, build it with the tool that needs it.
 
 ## I — Idempotency / risk labeling
 

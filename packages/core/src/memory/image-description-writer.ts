@@ -2,11 +2,12 @@
  * INPUT:  onImageTurn({characterId, refs, caption}) after an image chat turn; an injected vision LanguageModel, a narrow
  *         attachment reader, a bound episodic write op, and a logger
  * OUTPUT: createImageDescriptionWriter(deps) -> { onImageTurn } — reads the retained bytes, asks the VLM for a faithful
- *         description, writes ONE episodic memory via the EXISTING store path; never throws (warn + drop)
+ *         description, PII-scrubs it, writes ONE episodic memory via the EXISTING store path; never throws (warn + drop)
  * POS:    core/memory — the thin, DELETABLE image→text bridge (#17 decision 6, D28); adds no memory machinery, rides the
  *         existing write path; fired detached from chat-agent (mirrors autoMemory) so it costs the turn nothing
  */
 import { ToolLoopAgent, type LanguageModel, type ModelMessage } from "ai";
+import { scrubPii } from "../perception/pii-scrub.ts";
 import type { EpisodicWriteOp } from "./episodic-writer.ts";
 
 // The description is the authoritative, PERMANENT record that replaces the image after its bytes expire (decision 6);
@@ -50,8 +51,11 @@ export function createImageDescriptionWriter(deps: ImageDescriptionWriterDeps): 
         const result = await agent.generate({ messages: [describeMessage(caption, fileParts)] });
         const description = result.text.trim();
         if (description.length === 0) return;
+        // Scrub BEFORE storage (prd ruling 5 / D44): a permanent memory must never hold a credential the user happened
+        // to photograph. The A1 fence deliberately does NOT go here — it is a prompt-assembly wrapper, and the memory
+        // assembler renders stored entries later without it, so a fenced string would be stored, not fenced (D47).
         // ONE entry via the EXISTING episodic write path (no new memory machinery — D28); the prefix keeps recall readable.
-        deps.writeEpisode({ characterId, content: `[image] ${description}`, importance: IMAGE_IMPORTANCE });
+        deps.writeEpisode({ characterId, content: `[image] ${scrubPii(description)}`, importance: IMAGE_IMPORTANCE });
       } catch (error) {
         // Auto-memory's policy: a failed description is dropped (warn), never surfaced — the caller fired us detached.
         deps.logger.warn({ characterId, err: readable(error) }, "image description write failed; dropped");

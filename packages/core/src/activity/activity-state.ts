@@ -1,6 +1,6 @@
 /**
  * INPUT:  parsed ForegroundWindowOutput samples + an injected epoch-ms clock (never reads the OS/Date itself)
- * OUTPUT: createActivityState(config) -> { push, entries, current }; a bounded, coalesced rolling window of activity
+ * OUTPUT: createActivityState(config) -> { push, seal, entries, current }; a bounded, coalesced rolling window of activity
  * POS:    core/activity — the OS-neutral activity layer (invariant 8); pure/deterministic, zero timers, zero Windows deps.
  *         T4's heartbeat reason-gate reads entries()/current(); the sampler feeds push(). In-memory only (no DB in T3a).
  */
@@ -32,6 +32,12 @@ export interface ActivityEntry {
 export interface ActivityState {
   /** Fold one parsed sample taken at epoch-ms `at` into the rolling window (coalesce / split / drop-old). */
   push(sample: ForegroundWindowOutput, at: number): void;
+  /**
+   * End the live stretch WITHOUT recording anything: current() goes undefined and the next push opens a fresh entry.
+   * Deliberately argument-less and data-free — a caller that must not disclose WHAT it saw (the sensitive-app skip)
+   * can still say "the foreground left the entry we were tracking", and the record itself leaks nothing.
+   */
+  seal(): void;
   /** Reportable entries (>= dwellMinSamples), oldest-first, as defensive copies. */
   entries(): ActivityEntry[];
   /** The live entry still accepting merges, or undefined when the foreground is currently unavailable / empty. */
@@ -42,26 +48,33 @@ export interface ActivityState {
 // stable placeholder so coalescing identity stays well-defined even on the degraded path.
 const UNKNOWN_PROCESS = "unknown";
 
+/** Bound the window: drop entries that ended before the span cutoff, then anything past the hard entry cap. */
+function prune(list: ActivityEntry[], config: ActivityConfig, at: number): void {
+  const cutoff = at - config.spanMs;
+  let head = list[0];
+  while (head !== undefined && head.startedAt + head.durationMs < cutoff) {
+    list.shift();
+    head = list[0];
+  }
+  while (list.length > config.maxEntries) list.shift();
+}
+
 export function createActivityState(config: ActivityConfig): ActivityState {
   const list: ActivityEntry[] = [];
-  // After an available:false sample the live entry is sealed: the next available sample always opens a fresh entry
-  // (its growth "ended"), so idle/away gaps never silently extend a stretch the user has left.
+  // A sealed live entry has ended: the next available sample always opens a fresh entry, so idle/away gaps (and the
+  // sensitive-app skip, which pushes nothing at all) never silently extend a stretch the user has left.
   let sealed = false;
 
-  function prune(at: number): void {
-    const cutoff = at - config.spanMs;
-    let head = list[0];
-    while (head !== undefined && head.startedAt + head.durationMs < cutoff) {
-      list.shift();
-      head = list[0];
-    }
-    while (list.length > config.maxEntries) list.shift();
+  // The ONE writer of the flag — push's unavailable branch delegates here, so "the foreground left" means exactly the
+  // same thing whichever caller says it.
+  function seal(): void {
+    sealed = true;
   }
 
   return {
     push(sample, at) {
       if (!sample.available) {
-        sealed = true;
+        seal();
         return;
       }
       const processName = sample.processName ?? UNKNOWN_PROCESS;
@@ -84,8 +97,9 @@ export function createActivityState(config: ActivityConfig): ActivityState {
         list.push({ processName, windowTitle, startedAt: at, durationMs: 0, samples: 1, idle });
       }
       sealed = false;
-      prune(at);
+      prune(list, config, at);
     },
+    seal,
     entries() {
       return list.filter((e) => e.samples >= config.dwellMinSamples).map((e) => ({ ...e }));
     },

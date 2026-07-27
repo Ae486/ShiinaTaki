@@ -1,0 +1,155 @@
+/**
+ * INPUT:  a route fn (partial-applied routeCapability), a per-capability hasNode predicate, the optional VLM describe
+ *         bridge, the ambient enable/retention config + the ambient frame directory, the pause store, a Logger
+ * OUTPUT: createPerceptionLayer(deps) -> { pause, isSensitive, activity, screen, ambient, start, renderContext, card }
+ * POS:    core/perception — the SINGLE composition point for everything that observes the user. The privacy controls
+ *         are built HERE, once, and shared by every sampler (the T3a foreground poll, the T3b ambient screen loop), so
+ *         adding a sampler never grows the composition root: main.ts constructs this, calls start(), and joins
+ *         renderContext() into the turn prompt. On-demand chat captures are not part of this layer and are never
+ *         gated by its pause.
+ */
+import type { PerceptionCard } from "@taki/shared";
+import { createActivityLayer, ACTIVITY_POLL_MS, type ActivityLayer } from "../activity/activity-layer.ts";
+import { renderActivityContext } from "../activity/render-activity.ts";
+import type { RouteResult } from "../capabilities/route-capability.ts";
+import type { AmbientScreenshotConfig } from "../config/ambient-screenshot-config.ts";
+import type { Logger } from "../logging/logger.ts";
+import {
+  createAmbientScreenshotSampler,
+  type AmbientForeground,
+  type AmbientScreenshotSampler,
+  type AmbientScreenshotSamplerConfig,
+} from "./ambient-screenshot-sampler.ts";
+import { startAmbientShotGc } from "./ambient-shot-gc.ts";
+import { createAmbientShotStore } from "./ambient-shot-store.ts";
+import { buildPerceptionCard, type PerceptionCardDeps } from "./perception-card.ts";
+import { createPrivacyPause, type PrivacyPause, type PrivacyPauseStore } from "./privacy-pause.ts";
+import { createScreenContext, renderScreenContext, type ScreenContext } from "./screen-context.ts";
+import { createSensitiveProcessCheck } from "./sensitive-processes.ts";
+
+// Ambient defaults, beside the activity layer's own (D11 config-ize when #26 gives them a panel):
+// - POLL: 30s, the same ambient floor T3a took (research ra R2 — how often a capture is CONSIDERED, not taken).
+// - REFRESH: DERIVED (research ra §OMITTED holds no sourced number). Re-describe a still window every 5 min so the
+//   screen block cannot silently go stale, while capture stays event-driven (~12 VLM calls/h at rest, not 120).
+// - STALE: 2x REFRESH, so a running sampler always has a current observation and a stopped/paused one bleeds out of
+//   the prompt within one window instead of lingering forever.
+// - FOREGROUND_MAX_AGE: 2x the T3a poll — the same pulsetime tolerance the activity state uses to call a sample
+//   contiguous; older than that we do not know what is on screen (fail-closed, see captureTarget).
+const AMBIENT_POLL_MS = 30_000;
+const AMBIENT_REFRESH_MS = 5 * 60 * 1000;
+const SCREEN_STALE_MS = 2 * AMBIENT_REFRESH_MS;
+const FOREGROUND_MAX_AGE_MS = 2 * ACTIVITY_POLL_MS;
+const AMBIENT_BACKOFF = { errorBackoffThreshold: 3, maxBackoffMs: 10 * 60 * 1000 };
+
+export interface PerceptionLayerDeps {
+  route: (capability: string, input: unknown) => Promise<RouteResult>;
+  /** True iff a node currently provides `capability`; each sampler asks about its OWN capability name. */
+  hasNode: (capability: string) => boolean;
+  /** The screenshot→VLM bridge (vision slot); absent = ambient sampling never starts (capture with no text is cost). */
+  describe?: (input: { dataBase64: string; mediaType: string; prompt?: string }) => Promise<string | null>;
+  /** The ambient switch + raw-frame retention (env today, panel at #26). */
+  ambient: AmbientScreenshotConfig;
+  /** The ambient-ONLY frame directory — never the on-demand screenshots dir, which the sweeper must not reach. */
+  ambientShotsDir: string;
+  /** Where the Privacy Pause survives a restart (the DB row in production); absent = in-memory only. */
+  pauseStore?: PrivacyPauseStore;
+  logger: Logger;
+}
+
+export interface PerceptionLayer {
+  /** The Privacy Pause every ambient sampler consults; its operator WS surface + UI land with #26. */
+  pause: PrivacyPause;
+  /** The shared sensitive-process skip predicate; the user-editable list lands with #26. */
+  isSensitive: (processName: string | null) => boolean;
+  activity: ActivityLayer;
+  screen: ScreenContext;
+  ambient: AmbientScreenshotSampler;
+  /** Start every ambient sampler + the retention sweeper (one call from the composition root). */
+  start(): void;
+  /** The fenced ambient prompt sections (activity + screen), joined; "" when nothing is reportable. */
+  renderContext(now: number): string;
+  /** The human-facing status card served by `perception.card` (panel at #26) — never a prompt surface. */
+  card(now: number): PerceptionCard;
+}
+
+/** The foreground the T3a sampler last recorded. `startedAt + durationMs` IS the last sample's timestamp (freshness). */
+function foregroundOf(activity: ActivityLayer): AmbientForeground | undefined {
+  const current = activity.state.current();
+  if (current === undefined) return undefined;
+  return {
+    processName: current.processName,
+    windowTitle: current.windowTitle,
+    observedAt: current.startedAt + current.durationMs,
+  };
+}
+
+/** The ambient sampler's cadence/retention knobs: the layer's own defaults + the two user-facing config values. */
+function ambientConfigOf(ambient: AmbientScreenshotConfig): AmbientScreenshotSamplerConfig {
+  return {
+    enabled: ambient.enabled,
+    pollMs: AMBIENT_POLL_MS,
+    refreshMs: AMBIENT_REFRESH_MS,
+    foregroundMaxAgeMs: FOREGROUND_MAX_AGE_MS,
+    dropRawAfterDescribe: ambient.retention.mode === "drop-after-describe",
+    ...AMBIENT_BACKOFF,
+  };
+}
+
+/** The card's live source. Each sampler's scheduling is probed per READ, never cached: one that stopped itself on a
+ *  denial must not keep claiming it observes. */
+function cardDepsOf(parts: { activity: ActivityLayer; ambient: AmbientScreenshotSampler; pause: PrivacyPause }): PerceptionCardDeps {
+  return {
+    activity: parts.activity.state,
+    pause: parts.pause,
+    sampling: () => ({ foreground: parts.activity.sampler.running(), ambientScreen: parts.ambient.running() }),
+  };
+}
+
+export function createPerceptionLayer(deps: PerceptionLayerDeps): PerceptionLayer {
+  // Hydrated from the store by the FACTORY: restoring a pause must never look like a mutation (privacy-pause.ts).
+  const pause = createPrivacyPause({ store: deps.pauseStore });
+  const isSensitive = createSensitiveProcessCheck();
+  const activity = createActivityLayer({
+    route: deps.route,
+    hasNode: () => deps.hasNode("foreground-window"),
+    isPaused: () => pause.isPaused(),
+    isSensitive,
+    logger: deps.logger,
+  });
+  const screen = createScreenContext({ staleAfterMs: SCREEN_STALE_MS });
+  const store = createAmbientShotStore({ ambientDir: deps.ambientShotsDir });
+  const ambient = createAmbientScreenshotSampler({
+    route: deps.route,
+    // Two capabilities, not one: the capture itself and the fresh foreground-window screen it takes immediately
+    // before capturing (the sampler asks per capability, so a missing node for either one keeps it quiet).
+    hasNode: deps.hasNode,
+    isPaused: () => pause.isPaused(),
+    isSensitive,
+    foreground: () => foregroundOf(activity),
+    describe: deps.describe,
+    store,
+    context: screen,
+    logger: deps.logger,
+    config: ambientConfigOf(deps.ambient),
+  });
+  const cardDeps = cardDepsOf({ activity, ambient, pause });
+  return {
+    pause,
+    isSensitive,
+    activity,
+    screen,
+    ambient,
+    start() {
+      activity.sampler.start();
+      ambient.start();
+      // Retention runs regardless of the enable flag: frames captured before ambient sensing was switched off must
+      // still expire. `keep` schedules nothing at all.
+      startAmbientShotGc({ store, retention: deps.ambient.retention, logger: deps.logger });
+    },
+    renderContext: (now) =>
+      [renderActivityContext(activity.state, now), renderScreenContext(screen, now)]
+        .filter((section) => section.length > 0)
+        .join("\n\n"),
+    card: (now) => buildPerceptionCard(cardDeps, now),
+  };
+}

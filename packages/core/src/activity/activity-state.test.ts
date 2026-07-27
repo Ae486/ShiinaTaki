@@ -84,6 +84,21 @@ describe("createActivityState", () => {
     expect(state.entries()).toHaveLength(2);
   });
 
+  it("seal() ends the live stretch with no record: current() goes undefined and the next push opens a NEW entry", () => {
+    const state = createActivityState({ ...CONFIG, dwellMinSamples: 1 });
+    state.push(sample(), 0);
+    state.push(sample(), 30_000);
+    expect(state.entries()).toHaveLength(1);
+
+    state.seal(); // the sensitive-app skip's signal: "the foreground left" — carrying no name, title or timestamp
+    expect(state.current()).toBeUndefined();
+    expect(state.entries()).toHaveLength(1); // sealing records nothing of its own
+
+    state.push(sample(), 45_000); // identical sample, inside pulsetime — sealed means it may NOT extend the stretch
+    expect(state.entries()).toHaveLength(2);
+    expect(state.current()).toMatchObject({ startedAt: 45_000, samples: 1 });
+  });
+
   it("enforces the hard entry cap, dropping the oldest", () => {
     const state = createActivityState({ ...CONFIG, dwellMinSamples: 1, maxEntries: 2 });
     state.push(sample({ windowTitle: "a" }), 0);

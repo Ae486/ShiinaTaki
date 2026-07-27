@@ -195,6 +195,26 @@ export type {
 } from "./permission-level-schema.ts";
 
 export {
+  PERCEPTION_METHODS,
+  PerceptionActivityEntrySchema,
+  PerceptionCardParamsSchema,
+  PerceptionCardSchema,
+  PerceptionPauseGetParamsSchema,
+  PerceptionPauseSetParamsSchema,
+  PerceptionPauseStateSchema,
+  PerceptionSamplingStatusSchema,
+} from "./perception-schema.ts";
+export type {
+  PerceptionActivityEntry,
+  PerceptionCard,
+  PerceptionCardParams,
+  PerceptionPauseGetParams,
+  PerceptionPauseSetParams,
+  PerceptionPauseState,
+  PerceptionSamplingStatus,
+} from "./perception-schema.ts";
+
+export {
   CAPABILITY_METHODS,
   CapabilityErrorCodeSchema,
   CapabilityErrorSchema,

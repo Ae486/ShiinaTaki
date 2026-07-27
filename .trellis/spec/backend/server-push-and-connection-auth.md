@@ -4,12 +4,13 @@ Two reusable backend patterns from the avatar/bubble work.
 
 ## Server→client push channel (the timeline/avatar fan-out pattern)
 
-When the Core must push events to a subscribed client mid-turn (timeline entries, avatar commands, future activity cards), clone the established fan-out — do NOT invent a new mechanism:
+When the Core must push events to a subscribed client mid-turn (timeline entries, avatar commands), clone the established fan-out — do NOT invent a new mechanism:
 
 - `server/<x>-subscriptions.ts` — a `Map<characterId, Map<Connection, sink>>` with `subscribe / unsubscribe / publish / count`; `publish(payload)` fans to every sink registered for `payload.characterId`.
 - `server/methods/<x>-subscribe.ts` — role-gated (`["operator"]`), calls `subscriptions.subscribe(characterId, connection, (p) => ctx.notify(METHOD, p))` and `ctx.onClose(() => unsubscribe(...))` for auto-cleanup on socket close.
 - The producer (conversation store's `onAppend`, an avatar tool's `execute`) calls `subscriptions.publish(...)`. Fan-out is synchronous → the event reaches the client the instant it's produced, even mid-turn.
 - Reference impls: `server/timeline-subscriptions.ts` + `server/methods/timeline-subscribe.ts`; `avatar/avatar-subscriptions.ts` + `server/methods/avatar-subscribe.ts`.
+- **A snapshot with no producer is a READ, not a channel.** The perception/activity card shipped as the operator-only one-shot `perception.card` (T3b) because nothing PUBLISHES a perception change — the state is polled in the background and read on demand. Clone the fan-out when a producer exists and the client must learn mid-turn; otherwise a `media.usage`-shaped read method is the honest surface (a subscription with no publisher is dead wiring).
 
 **No Rust serde mirror for operator-only channels.** Invariant 3 mirrors only shapes the Rust Shell (a *node*) actually handles — connect/capability/approval. `chat.*`, `timeline.*`, `avatar.*` are operator↔core direct (the Pet UI webview + CLI open their own loopback WS as operators); the Rust Shell never sees these frames, so they live in `@taki/shared` zod only. Test their round-trips in a standalone `<x>-schema.test.ts`, NOT `protocol-fixtures.test.ts` (that sweep asserts a Rust serde struct per prefix — adding an unmirrored prefix reds the cargo side).
 

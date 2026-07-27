@@ -3,7 +3,8 @@ import type { ForegroundWindowOutput } from "@taki/shared";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import type { RouteResult } from "../capabilities/route-capability.ts";
 import { createActivitySampler } from "./activity-sampler.ts";
-import type { ActivityState } from "./activity-state.ts";
+import { createActivityState, type ActivityState } from "./activity-state.ts";
+import { renderActivityContext } from "./render-activity.ts";
 
 const POLL_MS = 30_000;
 const OK_SAMPLE: ForegroundWindowOutput = {
@@ -13,34 +14,41 @@ const OK_SAMPLE: ForegroundWindowOutput = {
   idleSeconds: 0,
 };
 
-function fakeState(): { state: ActivityState; pushed: Array<{ sample: ForegroundWindowOutput; at: number }> } {
+function fakeState() {
   const pushed: Array<{ sample: ForegroundWindowOutput; at: number }> = [];
+  const seals: number[] = [];
   const state: ActivityState = {
     push: (sample, at) => void pushed.push({ sample, at }),
+    seal: () => void seals.push(clock),
     entries: () => [],
     current: () => undefined,
   };
-  return { state, pushed };
+  return { state, pushed, seals };
 }
 
 let clock = 0;
 const now = (): number => clock;
 
-function harness(
-  route: (capability: string, input: unknown) => Promise<RouteResult>,
-  hasNode: () => boolean = () => true,
-) {
-  const { state, pushed } = fakeState();
+interface HarnessOptions {
+  hasNode?: () => boolean;
+  isPaused?: () => boolean;
+  isSensitive?: (processName: string | null) => boolean;
+}
+
+function harness(route: (capability: string, input: unknown) => Promise<RouteResult>, opts: HarnessOptions = {}) {
+  const { state, pushed, seals } = fakeState();
   const { logger, records } = createCaptureLogger();
   const sampler = createActivitySampler({
     route,
-    hasNode,
+    hasNode: opts.hasNode ?? (() => true),
+    isPaused: opts.isPaused ?? (() => false),
+    isSensitive: opts.isSensitive ?? (() => false),
     state,
     logger,
     now,
     config: { pollMs: POLL_MS, errorBackoffThreshold: 3, maxBackoffMs: 10 * 60 * 1000 },
   });
-  return { sampler, pushed, records };
+  return { sampler, pushed, records, seals };
 }
 
 /** Advance the injected clock AND the fake timers by one poll interval, flushing the async tick. */
@@ -82,7 +90,7 @@ describe("createActivitySampler", () => {
 
   it("never routes while no node is connected, logging offline at most once across many ticks", async () => {
     const route = vi.fn(async (): Promise<RouteResult> => ({ ok: true, output: OK_SAMPLE }));
-    const { sampler, pushed, records } = harness(route, () => false);
+    const { sampler, pushed, records } = harness(route, { hasNode: () => false });
     sampler.start();
     for (let i = 0; i < 5; i++) await step();
     expect(route).not.toHaveBeenCalled(); // no route-level "tool invoked"/NO_NODE logs can fire
@@ -94,7 +102,7 @@ describe("createActivitySampler", () => {
   it("resumes routing once a node connects (hasNode flips true)", async () => {
     const route = vi.fn(async (): Promise<RouteResult> => ({ ok: true, output: OK_SAMPLE }));
     let online = false;
-    const { sampler, pushed } = harness(route, () => online);
+    const { sampler, pushed } = harness(route, { hasNode: () => online });
     sampler.start();
     await step();
     await step();
@@ -136,6 +144,94 @@ describe("createActivitySampler", () => {
     expect(route).toHaveBeenCalledTimes(5);
     expect(pushed).toHaveLength(2);
     sampler.stop();
+  });
+
+  it("never routes while Privacy Pause is active, logging the pause at most once per streak", async () => {
+    const route = vi.fn(async (): Promise<RouteResult> => ({ ok: true, output: OK_SAMPLE }));
+    let paused = true;
+    const { sampler, pushed, records } = harness(route, { isPaused: () => paused });
+    sampler.start();
+    for (let i = 0; i < 5; i++) await step();
+    expect(route).not.toHaveBeenCalled(); // no capture, no approval dialog, no route-level log pair
+    expect(pushed).toHaveLength(0);
+    expect(records.filter((r) => r.msg?.includes("privacy pause active"))).toHaveLength(1);
+
+    // Resuming is immediate: the very next tick samples again, and a later pause logs a fresh streak line.
+    paused = false;
+    await step();
+    expect(route).toHaveBeenCalledTimes(1);
+    expect(pushed).toHaveLength(1);
+    paused = true;
+    await step();
+    expect(route).toHaveBeenCalledTimes(1);
+    expect(records.filter((r) => r.msg?.includes("privacy pause active"))).toHaveLength(2);
+    sampler.stop();
+  });
+
+  it("drops the whole sample for a sensitive foreground app — the title never reaches the state", async () => {
+    const sensitive: ForegroundWindowOutput = {
+      available: true,
+      processName: "1Password",
+      windowTitle: "Chase Visa 4512 — 1Password",
+      idleSeconds: 0,
+    };
+    const route = vi.fn(async (): Promise<RouteResult> => ({ ok: true, output: sensitive }));
+    const { sampler, pushed } = harness(route, { isSensitive: (name) => name === "1Password" });
+    sampler.start();
+    await step();
+    expect(route).toHaveBeenCalledTimes(1); // the skip is post-route: it reads the name the sampler already has
+    expect(pushed).toHaveLength(0);
+    sampler.stop();
+  });
+
+  it("seals the state on a sensitive hit, so a sibling sampler cannot keep acting on the last non-sensitive entry", async () => {
+    const sensitive: ForegroundWindowOutput = { available: true, processName: "1Password", windowTitle: "Vault", idleSeconds: 0 };
+    let sample = OK_SAMPLE;
+    const route = vi.fn(async (): Promise<RouteResult> => ({ ok: true, output: sample }));
+    const { sampler, pushed, seals } = harness(route, { isSensitive: (name) => name === "1Password" });
+    sampler.start();
+    await step();
+    expect(seals).toHaveLength(0); // an ordinary sample never seals
+
+    sample = sensitive;
+    await step();
+    await step();
+    expect(seals).toEqual([2 * POLL_MS, 3 * POLL_MS]); // every sensitive tick re-seals (idempotent, no drift window)
+    expect(pushed).toHaveLength(1); // and still nothing about it is recorded
+
+    sample = OK_SAMPLE;
+    await step();
+    expect(pushed).toHaveLength(2); // self-clearing: ordinary observation resumes with no reset
+    sampler.stop();
+  });
+
+  it("scrubs PII out of a non-sensitive title BEFORE it is stored (scrub-then-fence)", async () => {
+    const leaky: ForegroundWindowOutput = {
+      available: true,
+      processName: "Thunderbird",
+      windowTitle: "Re: invoice — alice@example.com",
+      idleSeconds: 0,
+    };
+    const route = vi.fn(async (): Promise<RouteResult> => ({ ok: true, output: leaky }));
+    const { sampler, pushed } = harness(route);
+    sampler.start();
+    await step();
+    expect(pushed).toHaveLength(1);
+    expect(pushed[0]?.sample.windowTitle).toBe("Re: invoice — [redacted:email]");
+    sampler.stop();
+
+    // End-to-end ordering proof: the fenced prompt block can only ever carry the already-scrubbed string.
+    const state = createActivityState({
+      pulsetimeMs: 2 * POLL_MS,
+      dwellMinSamples: 1,
+      idleThresholdSeconds: 180,
+      spanMs: 60 * 60 * 1000,
+      maxEntries: 10,
+    });
+    state.push(pushed[0]!.sample, POLL_MS);
+    const rendered = renderActivityContext(state, POLL_MS);
+    expect(rendered).toContain("[redacted:email]");
+    expect(rendered).not.toContain("alice@example.com");
   });
 
   it("skips a malformed sample without throwing or pushing", async () => {

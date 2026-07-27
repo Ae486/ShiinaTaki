@@ -11,8 +11,6 @@ import { createChatAgent } from "./agents/chat-agent.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
 import { createTurnQueue } from "./agents/turn-queue.ts";
 import { createTurnRegistry } from "./agents/turn-registry.ts";
-import { createActivityLayer } from "./activity/activity-layer.ts";
-import { renderActivityContext } from "./activity/render-activity.ts";
 import { createApprovalBroker } from "./approval/approval-broker.ts";
 import { createApprovalGate } from "./approval/approval-gate.ts";
 import { createDecisionStore } from "./approval/decision-store.ts";
@@ -31,12 +29,14 @@ import { createScreenshotStore } from "./capabilities/screenshot-store.ts";
 import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
 import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
 import { loadAgentConfig } from "./config/agent-config.ts";
+import { loadAmbientScreenshotConfig } from "./config/ambient-screenshot-config.ts";
 import { loadAttachmentConfig } from "./config/attachment-config.ts";
 import { loadProviderConfig } from "./config/provider-config.ts";
 import { loadServerConfig } from "./config/server-config.ts";
 import { loadVisionConfig } from "./config/vision-config.ts";
 import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
 import { MIGRATIONS } from "./db/migrations/index-list.ts";
+import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
 import { openDatabase } from "./db/sqlite.ts";
 import { createTimelineRepo } from "./db/timeline-repo.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
@@ -46,6 +46,7 @@ import { loadMcpConfig } from "./mcp/mcp-config.ts";
 import { createMcpManager } from "./mcp/mcp-manager.ts";
 import { createCharacterImporter } from "./characters/character-import.ts";
 import { createCharacterStore } from "./characters/character-store.ts";
+import { startAttachmentGc } from "./media/attachment-gc.ts";
 import { createAttachmentStore } from "./media/attachment-store.ts";
 import { directoryByteSize } from "./media/directory-size.ts";
 import { createAutoMemory } from "./memory/auto-memory.ts";
@@ -54,6 +55,7 @@ import { createFlushWriter } from "./memory/flush-writer.ts";
 import { createImageDescriptionWriter } from "./memory/image-description-writer.ts";
 import { createMemoryEngine } from "./memory/memory-engine.ts";
 import { createPersonaProvider } from "./memory/persona-provider.ts";
+import { createPerceptionLayer } from "./perception/perception-layer.ts";
 import { createConnectionRegistry } from "./server/connection-registry.ts";
 import { createMethodRegistry } from "./server/method-registry.ts";
 import { approvalRespondMethod } from "./server/methods/approval-respond.ts";
@@ -71,6 +73,7 @@ import { connectMethod } from "./server/methods/connect.ts";
 import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
 import { mediaUsageMethod } from "./server/methods/media-usage.ts";
+import { registerPerceptionMethods } from "./server/methods/perception-methods.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
 import { createLoadSkillTool } from "./skills/load-skill-tool.ts";
@@ -93,6 +96,8 @@ const agentConfig = loadAgentConfig(process.env);
 // fatal-fast — a partial TAKI_VLM_* set or a garbage TTL fails the boot, never silently degrades.
 const visionConfig = loadVisionConfig(process.env);
 const attachmentConfig = loadAttachmentConfig(process.env);
+// Ambient screen sampling (#20 T3b): OFF unless explicitly enabled, raw frames dropped right after describe.
+const ambientConfig = loadAmbientScreenshotConfig(process.env);
 
 const logger = createLogger(serverConfig.logLevel);
 
@@ -223,43 +228,49 @@ connectionRegistry.onRemove((connection) => {
     capabilityBroker.denyAll("node disconnected");
   }
 });
+// Screenshot→VLM bridge: reuses the OPTIONAL vision slot; without it a result stays path+dims (no pixels to the text
+// model) and ambient sampling never starts. ONE bridge, shared by the on-demand tool and the ambient sampler.
+const describeScreenshot = visionModel ? createScreenshotDescriber({ model: visionModel, logger }).describe : undefined;
 const screenshotTool = createScreenshotTool({
   registry: connectionRegistry,
   broker: capabilityBroker,
   // The core is the single sanctioned Workspace writer (invariant 2); the Shell only returns base64 over the wire.
   store: createScreenshotStore({ screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots") }),
-  // Screenshot→VLM bridge: reuses the OPTIONAL vision slot; without it the result stays path+dims (no pixels to the text model).
-  describe: visionModel ? createScreenshotDescriber({ model: visionModel, logger }).describe : undefined,
+  describe: describeScreenshot,
   logger,
 });
-// The other three Shell-backed capabilities (#11) share the route→broker path; each is gate-authorized on the Shell.
+// The other Shell-backed capabilities (#11, and exec #12) share the route→broker path; each is gate-authorized on
+// the Shell, which parses, governs, spawns and audits.
 const shellCapabilityDeps = { registry: connectionRegistry, broker: capabilityBroker, logger };
-const processListTool = createProcessListTool(shellCapabilityDeps);
-const clipboardReadTool = createClipboardReadTool(shellCapabilityDeps);
-const clipboardWriteTool = createClipboardWriteTool(shellCapabilityDeps);
-const shellOpenTool = createShellOpenTool(shellCapabilityDeps);
-// exec (#12): the general-purpose shell tool on the same route→broker path; the Shell parses, governs, spawns, audits.
-const execTool = createExecTool(shellCapabilityDeps);
 
 // The six Shell-routed capability tools as one bag (invariant 7): the chat agent's extraTools spreads it AND the
 // dev capability.trigger reuses these exact objects — never a second execute path to the same capabilities.
 const capabilityTools: ToolSet = {
   ...screenshotTool,
-  ...processListTool,
-  ...clipboardReadTool,
-  ...clipboardWriteTool,
-  ...shellOpenTool,
-  ...execTool,
+  ...createProcessListTool(shellCapabilityDeps),
+  ...createClipboardReadTool(shellCapabilityDeps),
+  ...createClipboardWriteTool(shellCapabilityDeps),
+  ...createShellOpenTool(shellCapabilityDeps),
+  ...createExecTool(shellCapabilityDeps),
 };
 
-// Perception activity layer (#19 T3a): a SYSTEM-initiated poll of the foreground window feeds an OS-neutral, bounded
-// rolling state (invariant 8) that T4's reason-gate will read; the layer owns its deterministic defaults (D11).
-const activity = createActivityLayer({
+// Perception (#19 T3a + #20 T3b): SYSTEM-initiated polls of the foreground window (always-on, low sensitivity) and of
+// the screen itself (DEFAULT OFF, its own `screenshot-ambient` grant) feed an OS-neutral, bounded state (invariant 8)
+// that T4's reason-gate will read, composed with the perception-WIDE privacy controls — Privacy Pause + the
+// sensitive-process skip + the PII scrub — that gate every ambient sampler. On-demand chat captures stay ungated
+// (explicit consent through the Gate); the pause/skip/retention operator surfaces land with the settings panel (#26).
+const perception = createPerceptionLayer({
   route: (capability, input) => routeCapability(shellCapabilityDeps, capability, input),
-  hasNode: () => connectionRegistry.findNodeForCapability("foreground-window") !== undefined,
+  hasNode: (capability) => connectionRegistry.findNodeForCapability(capability) !== undefined,
+  describe: describeScreenshot,
+  ambient: ambientConfig,
+  ambientShotsDir: join(serverConfig.dataDir, "workspace", "ambient-screenshots"),
+  // A pause is a withdrawal of consent, so it lives in the DB (single writer, invariant 2) and is restored at boot —
+  // a crash/upgrade/reboot must never silently resume observation.
+  pauseStore: createPrivacyPauseRepo(db),
   logger,
 });
-activity.sampler.start();
+perception.start();
 
 // Workspace file RW (#11): CORE-side tools (no broker/gate) confined to the Workspace root — the agent's own scratch
 // space, the same subtree memory/ and screenshots/ live under. read+write are auto-allowed within it (ruling 1/8).
@@ -319,10 +330,10 @@ registry.register(
       // vocab makes `name` a dynamic enum of the worn costume's live names (1e), so a costume swap rejects stale names.
       characterTools: (characterId) =>
         createAvatarTools({ subscriptions: avatarSubscriptions, characterId, logger, vocab: avatarVocabulary.get(characterId) }),
-      // Skills list + the active character's reported avatar vocabulary + the fenced foreground-activity context (T3a;
-      // ruling 10 — non-memory sections enter HERE, never via the memory assembler); blank sections contribute nothing.
+      // Skills list + the active character's reported avatar vocabulary + the fenced perception context (T3a activity
+      // + T3b screen; ruling 10 — non-memory sections enter HERE, never via the memory assembler); blanks contribute nothing.
       instructionsExtra: (characterId) =>
-        [skillsLoader.renderList(), avatarVocabulary.render(characterId), renderActivityContext(activity.state, Date.now())]
+        [skillsLoader.renderList(), avatarVocabulary.render(characterId), perception.renderContext(Date.now())]
           .filter((section) => section.length > 0)
           .join("\n\n"),
       costumeChanged: (characterId) => avatarVocabulary.consumeCostumeChanged(characterId),
@@ -351,16 +362,12 @@ registry.register(characterImportMethod(characterImporter));
 registry.register(characterListMethod(characterStore));
 registry.register(characterCostumesMethod({ store: characterStore, charactersDir }));
 registry.register(characterCostumeResolutionMethod({ store: characterStore, charactersDir }));
+// Perception methods (T3b): Privacy Pause read/write + the activity card. Operator-only — the agent has no path to
+// un-pause its own observation (pinned by privacy-pause-writer.test.ts); the panel lands with #26.
+registerPerceptionMethods(registry, perception);
 
-// Attachment GC (#17): a lightweight boot sweep + a 6h interval (NOT the croner scheduler — D5 is M5). Only raw bytes
-// expire; the description-memory is permanent. unref() keeps the timer from holding the process open on shutdown.
-const attachmentLog = logger.child({ mod: "attachments" });
-function sweepAttachments(): void {
-  const swept = attachmentStore.sweepExpired(attachmentConfig.ttlMs);
-  if (swept.removedCount > 0) attachmentLog.info(swept, "expired attachments swept");
-}
-sweepAttachments();
-setInterval(sweepAttachments, 6 * 60 * 60 * 1000).unref();
+// Attachment GC (#17): a boot sweep + a 6h interval; only raw bytes expire, the description-memory is permanent.
+startAttachmentGc({ store: attachmentStore, ttlMs: attachmentConfig.ttlMs, logger });
 
 // Dev-only L1 drive (env double-gate, mirror of the Shell's ScriptedApprover): registered ONLY with TAKI_DEV_TRIGGER=1
 // so it has zero production surface. It drives the same capability tools the agent does — the node-side gate still

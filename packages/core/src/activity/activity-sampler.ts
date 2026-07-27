@@ -1,13 +1,18 @@
 /**
- * INPUT:  a route fn (partial-applied routeCapability), a hasNode predicate, an ActivityState sink, a Logger, cadence/backoff config
- * OUTPUT: createActivitySampler(deps) -> { start, stop }; a self-scheduling poll that feeds the activity layer
+ * INPUT:  a route fn (partial-applied routeCapability), hasNode / isPaused / isSensitive predicates, an ActivityState
+ *         sink, a Logger, cadence/backoff config
+ * OUTPUT: createActivitySampler(deps) -> { start, stop, running }; a self-scheduling poll that feeds the activity layer
  * POS:    core/activity — the SYSTEM-initiated poll loop (no LLM, no tool()): calls the foreground-window capability
  *         directly over the WS→Gate seam. setInterval(...).unref() per the attachment-GC precedent (main.ts:337).
  *         Never throws; a denied grant stops the loop for the session (at most ONE approval dialog ever originates here).
+ *         Privacy controls (T3b) gate it on BOTH sides of the route: Privacy Pause before, sensitive-process skip +
+ *         PII scrub after — a title is minimized HERE, at the sense seam, before it can be stored or rendered, and a
+ *         sensitive hit SEALS the state so no sibling sampler can keep acting on the last non-sensitive foreground.
  */
-import { ForegroundWindowOutputSchema } from "@taki/shared";
+import { ForegroundWindowOutputSchema, type ForegroundWindowOutput } from "@taki/shared";
 import type { Logger } from "../logging/logger.ts";
 import type { RouteFailureCode, RouteResult } from "../capabilities/route-capability.ts";
+import { scrubPii } from "../perception/pii-scrub.ts";
 import type { ActivityState } from "./activity-state.ts";
 
 const CAPABILITY = "foreground-window";
@@ -25,6 +30,10 @@ export interface ActivitySamplerDeps {
   route: (capability: string, input: unknown) => Promise<RouteResult>;
   /** True iff a node currently provides foreground-window; a false skips routing entirely so no route-level log fires. */
   hasNode: () => boolean;
+  /** True while Privacy Pause suspends ambient observation: the tick never routes — no sample, no dialog, no noise. */
+  isPaused: () => boolean;
+  /** True when the sampled app is on the sensitive skip list; its whole sample (title included) is dropped. */
+  isSensitive: (processName: string | null) => boolean;
   state: ActivityState;
   logger: Logger;
   config: ActivitySamplerConfig;
@@ -35,6 +44,8 @@ export interface ActivitySamplerDeps {
 export interface ActivitySampler {
   start(): void;
   stop(): void;
+  /** True while the poll is scheduled — false before start(), after stop(), and once a denial ended the session. */
+  running(): boolean;
 }
 
 // The loop's mutable state travels in one context so the tick/failure logic lives at module scope (function size cap).
@@ -48,6 +59,52 @@ interface SamplerRuntime {
   consecutiveErrors: number;
   backoffUntil: number;
   offlineLogged: boolean;
+  pausedLogged: boolean;
+  sensitiveLogged: boolean;
+}
+
+// A paused core must stay silent (Recall off-state): log once per pause streak, exactly like the offline skip, and
+// never route — so a pause produces no capture, no approval dialog and no per-tick log pair.
+function pausedSkip(rt: SamplerRuntime): boolean {
+  if (!rt.deps.isPaused()) {
+    rt.pausedLogged = false;
+    return false;
+  }
+  if (!rt.pausedLogged) {
+    rt.log.info("privacy pause active; foreground sampling suspended");
+    rt.pausedLogged = true;
+  }
+  return true;
+}
+
+// A skip-list hit drops the WHOLE sample: a password-manager / banking window TITLE leaks by itself, so it never
+// enters the activity layer. The process name is deliberately absent from the log — naming it would re-leak the very
+// observation the skip exists to prevent.
+// SEAL, don't merely drop (prd ruling 6, privacy layer 1): dropping would leave the last NON-sensitive entry live, so
+// for up to one staleness window the ambient sampler would still believe that app is in front and photograph the
+// sensitive one — pixels sent to a REMOTE endpoint, past any semantic check. Sealing carries no data (no name, no
+// title, no timestamp) and self-clears: the next ordinary sample opens a fresh entry and observation resumes.
+// It takes effect from the tick AFTER this one (the ambient sampler reads a foreground that is one poll old by
+// construction); the window BEFORE T3a's first sight of the app is closed by that sampler's own fresh pre-capture
+// screen (perception/foreground-screen.ts), not here — D48 tracks what is left of it.
+function sensitiveSkip(rt: SamplerRuntime, sample: ForegroundWindowOutput): boolean {
+  if (!rt.deps.isSensitive(sample.processName)) {
+    rt.sensitiveLogged = false;
+    return false;
+  }
+  rt.deps.state.seal();
+  if (!rt.sensitiveLogged) {
+    rt.log.debug("sensitive foreground app; sample dropped");
+    rt.sensitiveLogged = true;
+  }
+  return true;
+}
+
+// Scrub-then-fence (prd ruling 5): PII leaves the title HERE, at the sense seam, so the prompt path (fenced in
+// render-activity) and any future store both inherit the same minimized string. The fence stays where it is.
+function scrubSample(sample: ForegroundWindowOutput): ForegroundWindowOutput {
+  if (sample.windowTitle === null) return sample;
+  return { ...sample, windowTitle: scrubPii(sample.windowTitle) };
 }
 
 function stop(rt: SamplerRuntime): void {
@@ -89,6 +146,7 @@ async function tick(rt: SamplerRuntime): Promise<void> {
   if (rt.stopped || rt.inflight) return;
   const at = rt.now();
   if (at < rt.backoffUntil) return; // still inside a backoff window
+  if (pausedSkip(rt)) return;
   // Pre-flight: with no node providing the capability, routeCapability would log a per-call "tool invoked" + NO_NODE
   // "routing failed" pair every tick. Skip routing entirely and take the same quiet once-per-streak NO_NODE arm; the
   // route-side handleFailure NO_NODE branch stays as defense-in-depth (a node can drop between this check and the route).
@@ -111,7 +169,8 @@ async function tick(rt: SamplerRuntime): Promise<void> {
       rt.log.warn({ code: "MALFORMED_SAMPLE" }, "foreground sample failed schema; skipping tick");
       return;
     }
-    rt.deps.state.push(parsed.data, at);
+    if (sensitiveSkip(rt, parsed.data)) return;
+    rt.deps.state.push(scrubSample(parsed.data), at);
   } catch (error) {
     // Defense-in-depth: routeCapability never throws, but the loop must survive any surprise without crashing.
     const message = error instanceof Error ? error.message : String(error);
@@ -132,6 +191,8 @@ export function createActivitySampler(deps: ActivitySamplerDeps): ActivitySample
     consecutiveErrors: 0,
     backoffUntil: 0,
     offlineLogged: false,
+    pausedLogged: false,
+    sensitiveLogged: false,
   };
   return {
     start() {
@@ -140,5 +201,6 @@ export function createActivitySampler(deps: ActivitySamplerDeps): ActivitySample
       rt.timer.unref();
     },
     stop: () => stop(rt),
+    running: () => rt.timer !== undefined && !rt.stopped,
   };
 }

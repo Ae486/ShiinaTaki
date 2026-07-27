@@ -12,7 +12,7 @@ use crate::capabilities_impl::clipboard::{ClipboardReadExec, ClipboardWriteExec}
 use crate::capabilities_impl::exec::{ExecExec, ExecPolicy};
 use crate::capabilities_impl::foreground_window::ForegroundWindowExec;
 use crate::capabilities_impl::process_list::ProcessListExec;
-use crate::capabilities_impl::screenshot::ScreenshotExec;
+use crate::capabilities_impl::screenshot::{ScreenshotAmbientExec, ScreenshotExec};
 use crate::capabilities_impl::shell_open::ShellOpenExec;
 use crate::capabilities_impl::CapabilityRegistry;
 use crate::gate::approver::Approver;
@@ -45,11 +45,22 @@ pub struct NodeConfig {
 
 /// The full capability set this node build ships. One entry here + one register call in build_node per capability
 /// (invariant 7). clipboard is two independently-gated names; workspace-files executes Core-side (ruling 1).
+/// screenshot-ambient shares screenshot's capture but is advertised (and governed) under its own name so the two
+/// grants can never merge — this list, the exec's `capability()` and the governance cell key must agree exactly.
 pub fn default_capabilities() -> Vec<String> {
-    ["screenshot", "process-list", "clipboard-read", "clipboard-write", "shell-open", "exec", "foreground-window"]
-        .into_iter()
-        .map(str::to_string)
-        .collect()
+    [
+        "screenshot",
+        "screenshot-ambient",
+        "process-list",
+        "clipboard-read",
+        "clipboard-write",
+        "shell-open",
+        "exec",
+        "foreground-window",
+    ]
+    .into_iter()
+    .map(str::to_string)
+    .collect()
 }
 
 /// Assembles the gate (policy + decisions + injected approver + audit), the capability handlers, and the WS client.
@@ -72,6 +83,7 @@ pub fn build_node(config: NodeConfig) -> Result<WsClient, Box<dyn std::error::Er
 
     let mut handlers = CapabilityRegistry::new();
     handlers.register(Arc::new(ScreenshotExec));
+    handlers.register(Arc::new(ScreenshotAmbientExec));
     handlers.register(Arc::new(ProcessListExec));
     handlers.register(Arc::new(ClipboardReadExec));
     handlers.register(Arc::new(ClipboardWriteExec));
@@ -135,5 +147,22 @@ fn fill_random(slice: &mut [u8], seed: u64) {
     let value = hasher.finish();
     for (index, byte) in slice.iter_mut().enumerate() {
         *byte = (value >> (index * 8)) as u8;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::default_capabilities;
+    use crate::capabilities_impl::screenshot::ScreenshotAmbientExec;
+    use crate::capabilities_impl::CapabilityExec;
+
+    #[test]
+    fn the_ambient_capture_is_advertised_under_the_execs_own_name_beside_the_on_demand_one() {
+        // Ties two of the three name sites together (advertised list <-> exec name); the third (the governance cell
+        // key) is pinned in gate::governance's fixed-risk test. A drift on any of them is a runtime-only failure:
+        // an unadvertised name never routes, an ungoverned key is a fail-closed deny.
+        let capabilities = default_capabilities();
+        assert!(capabilities.contains(&ScreenshotAmbientExec.capability().to_string()));
+        assert!(capabilities.contains(&"screenshot".to_string()), "the on-demand name stays advertised separately");
     }
 }

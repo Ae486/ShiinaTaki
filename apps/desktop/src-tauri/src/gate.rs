@@ -406,7 +406,7 @@ mod tests {
         // RED-proof #1 (yolo [H-APR:333-357]): at relaxed every fixed-risk capability runs with NO prompt — the
         // denying approver proves it was never consulted — while still auditing exactly once. (RED if a fixed-risk
         // capability is not registered / not routed through evaluate_by_class: it would fall to ask and deny here.)
-        for capability in ["screenshot", "process-list", "clipboard-read", "clipboard-write"] {
+        for capability in ["screenshot", "screenshot-ambient", "process-list", "clipboard-read", "clipboard-write"] {
             let h = harness(leveled(PermissionLevel::Relaxed), ApproverOutcome::Deny);
             assert!(h.gate.evaluate_by_class("req", capability, None), "{capability} is silent at relaxed");
             assert_eq!(last_decision(&h.audit), Decision::AutoAllowed);

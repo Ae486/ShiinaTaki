@@ -12,10 +12,11 @@ import { createActivityState, type ActivityState } from "./activity-state.ts";
 // Deterministic defaults (tunable later): pulsetime = 2× poll so one missed tick never splits a stretch; dwell 2
 // samples (~60s) before an entry is reportable; idle 180s (ActivityWatch/BANDORI convergent default); 2h rolling span;
 // maxEntries 240 = 2h ÷ 30s poll (worst case: every tick a distinct window, never coalesced).
-const POLL_MS = 30_000;
+/** Exported so a sibling sampler can express its freshness tolerance in TICKS of this poll, never as a magic number. */
+export const ACTIVITY_POLL_MS = 30_000;
 const DEFAULTS = {
-  pollMs: POLL_MS,
-  pulsetimeMs: 2 * POLL_MS,
+  pollMs: ACTIVITY_POLL_MS,
+  pulsetimeMs: 2 * ACTIVITY_POLL_MS,
   dwellMinSamples: 2,
   idleThresholdSeconds: 180,
   spanMs: 2 * 60 * 60 * 1000,
@@ -28,6 +29,10 @@ export interface ActivityLayerDeps {
   route: (capability: string, input: unknown) => Promise<RouteResult>;
   /** True iff a node currently provides foreground-window; forwarded to the sampler's pre-route offline skip. */
   hasNode: () => boolean;
+  /** Privacy Pause (core/perception): forwarded verbatim — the layer owns cadence, never privacy policy. */
+  isPaused: () => boolean;
+  /** Sensitive-process skip (core/perception): forwarded verbatim; a hit drops the sample before it is stored. */
+  isSensitive: (processName: string | null) => boolean;
   logger: Logger;
 }
 
@@ -47,6 +52,8 @@ export function createActivityLayer(deps: ActivityLayerDeps): ActivityLayer {
   const sampler = createActivitySampler({
     route: deps.route,
     hasNode: deps.hasNode,
+    isPaused: deps.isPaused,
+    isSensitive: deps.isSensitive,
     state,
     logger: deps.logger,
     config: { pollMs: DEFAULTS.pollMs, errorBackoffThreshold: DEFAULTS.errorBackoffThreshold, maxBackoffMs: DEFAULTS.maxBackoffMs },

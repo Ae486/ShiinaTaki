@@ -11,6 +11,7 @@
 - character-schema.ts — CHARACTER_METHODS + character.import/list/costumes/costumeResolution schemas + CostumeAvailability + CharacterId slug + import-error vocabulary (#18); operator-only, NO Rust mirror
 - approval-schema.ts — APPROVAL_METHODS + tool-approval request/respond schemas (MCP gate; M3 Permission Gate reuse)
 - permission-level-schema.ts — PERMISSION_METHODS (operator-role, mirrors approval.respond) + PermissionLevel/Posture/CellKey/Cell schemas + secondConfirm floor-change marker (T2b; leaf shapes serde-mirrored — the Shell gate enforces the same vocabulary)
+- perception-schema.ts — PERCEPTION_METHODS + Privacy Pause state/set + activity-card schemas (current/recent/samplingStatus/pauseState) (T3b; panel UI at #26); operator-only, NO Rust mirror
 - capability-schema.ts — CAPABILITY_METHODS + core↔node capability request/respond/error schemas; respond output is opaque (Option A)
 - capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec/ForegroundWindow); mirrored in Rust serde
 - ws-defaults.ts — default loopback WS host/port constants
