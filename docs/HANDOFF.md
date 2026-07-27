@@ -2,7 +2,7 @@
 
 **You are the incoming session. Read this document fully, then the required docs in §2, then act as the Leader (主脑) of a trellis master/worker development flow.** This file is your bootstrap program — what exists, what to read, how to behave, how to drive implementation.
 
-> **Updated 2026-07-18 (second pass, session handoff)**. M1–M4 shipped and pushed. The **M5 blueprint is signed off** (`devlog/m5.md`) and **T1 is created, started, and mid-flight** (research pending — see §1/§4). You are the incoming M5 Leader; this file is your behavioral bootstrap. Everything below is verified fact, not plan.
+> **Updated 2026-07-27 (third pass, T3b close → T5 kickoff handoff)**. M1–M4 shipped and pushed. M5 is **mid-flight with T1/T2/T3a/T3b + time-awareness DONE** (see §1). **You are the incoming T5 Leader** — T5 (memory + context) runs **BEFORE T4** (owner-ratified 2026-07-27; T4's heartbeat burns memory as fuel and T5 reshapes memory, so building T4 first means rework). T5's design space is FULLY grilled: **`.trellis/workspace/pleia/t5-decisions.md` holds 22 owner-ratified rulings (R0–R22) and is BINDING** — do not re-litigate; 立项 from it. Everything below is verified fact, not plan.
 
 ---
 
@@ -53,10 +53,16 @@ Three trellis tasks (archived under `.trellis/tasks/archive/2026-07/`) + a confi
 ### M4 — Pet UI & Live2D (6/6 closed)
 Renderer locked by spike (#13: `untitled-pixi-live2d-engine` + pixi 8); transparent always-on pet overlay with render governor + drag (#14); element-level click-through (#15); bubble + LLM-driven avatar — expression/motion tools + reported vocabulary, gaze/click reactions (#16); full chat window — streaming timeline, default-safe markdown, image attachments + VLM describe, abort entry, floating toasts, cancel-before-reply retract (#17); generic character import (Cubism 2/3 + `.zst` clean-room) + costume switching with degrade-and-badge availability + last-costume persistence (#18). Four packaged B-test rounds hardened the packaged-only defect classes (CSP, per-window ACL, WebView2 quirks, boot races) → `.trellis/spec/frontend/packaged-build.md`. See `docs/devlog/m4.md`.
 
-### M5 — kicked off (blueprint signed; T1 in flight)
-- The full blueprint — mission (module optimization: features + bugs + debt cleanup + optimization, per module), rulings Q1–Q5, the memory-redesign six-pack (A1/A2/A3 + MemorySource seam + local user-model + hit-count), the proactivity three-tier model (Hook reflex / Cron clock / Heartbeat conscious), the customization principles (panel-authoritative dual-entry-single-store; data-level vs code-level habit artifacts; imports are untrusted), the 11-task table, and the exclusion list — is **signed off by the owner**: **`devlog/m5.md`** (commit c4a92d9). It is the plan of record; do not re-litigate settled rulings.
-- Research banks (committed): `.trellis/workspace/pleia/m5-proactivity-survey.md` (OpenClaw five-mechanism stack, Hermes identity, B1–B11 borrow list, anti-patterns) + `.trellis/workspace/pleia/hermes-memory-analysis.md` (memory pipeline comparison, adopt/adapt/reject, T5 redesign sketch). Local Hermes clone: `references/hermes-agent-main` (MIT — patterns only, clean-room).
-- **T1 (`.trellis/tasks/07-18-avatar-presentation`) is the CURRENT task** — created, started, `prd.md` complete. Its research agent was dispatched then interrupted and left NO findings; the full dispatch brief is persisted at the task root as **`research-plan.md`** — re-dispatching it is your first work item. Nothing implemented yet.
+### M5 — mid-flight (T1/T2/T3a/T3b + time-awareness DONE; next = T5, then T4, then T6)
+- The blueprint (`devlog/m5.md`, signed off) remains the plan of record; the task table's T4/T5 ORDER was swapped by owner ruling 2026-07-27 (T5 first). Do not re-litigate settled rulings.
+- **T1 avatar presentation** — DONE, archived (`.trellis/tasks/archive/2026-07/`). Same-step expression/motion discipline (1c), costume-change notice (1f), presentation-tail stop.
+- **T2 governance** — DONE, archived. Permission Level projection (strict/standard/relaxed over per-cell postures), `describePrompt` seam (T2b §3.6: caller focus APPENDED to base guardrails), approval etiquette.
+- **T3a perception activity layer** — DONE, archived. Foreground-window capability (Rust) → activity sampler → coalescing `ActivityState` → fenced activity block via `instructionsExtra`. The A1 minimal fence (`agents/untrusted-fence.ts`) ships here.
+- **Time awareness** — DONE, archived (e10adec). Day-date line early + current-time line last in `composeInstructions` (stable-early/volatile-late), `get_current_time` tool, code-computed memory ages.
+- **T3b perception privacy** — DONE (commit 0133874, task dir committed, NOT yet archived — see §4). `packages/core/src/perception/`: ambient screenshot sampling (own `screenshot-ambient` cell, DEFAULT OFF, silent off-state), TWO privacy layers (deterministic transmission-blocking: sensitive-skip + `seal()` + pre-capture fresh foreground screen; semantic retention-blocking: `SENSITIVE_SCREEN` VLM verdict, fail-closed), PII scrub (scrub-then-fence at the sense seam), Privacy Pause (DB-persisted, single production writer RED-proved), frame retention GC, operator-only `perception.*` WS methods, D44 closed on the tool path. Manual checks 76–83 owner-verified 2026-07-27 (79 deferred to #26, 83 ongoing material collection).
+- **Prompt guidance pass** — DONE (commit 9f41646). BASE_SYSTEM_PROMPT teaches the fence contract, the two time lines, anti-recitation; behavior norms in `prompt/system/assistant-layer.md`.
+- **Research banks (committed, e5a0c49)**: `t4-decisions.md` (R1–R12, T4 立项-ready), 4 T4 research docs, **`t5-decisions.md` (R0–R22, BINDING for T5)**, `t5-context-management-survey.md`, `t5-memory-systems-survey.md` (§11 covers promotion/archived-tier/write-restraint + the Nocturne system prompt read in full). Earlier banks: `m5-proactivity-survey.md`, `hermes-memory-analysis.md`. Local references: `references/hermes-agent-main` (MIT), `references/nocturne_memory-main` (MIT — its `docs/system_prompt_en.md` is the closest prior art for T5's R12 prompt; clean-room only).
+- **Deferred-decisions register**: D44 CLOSED; D47 (memory-path fence → T5/A1), D48 (residual one-round-trip blind window), D49/D50 (audit volume / dwell fallback — unruled tuning), OPEN; D51 DONE. T5 also owns: D4 (context compaction, SCHEDULED(T5)), D9 (emotion capsule).
 
 ### Environment
 - Node 24, pnpm 10, Rust 1.88 msvc, WebView2 present. `gh` authed as `Ae486`, git user `PLeiA`, remote → github.com/Ae486/ShiinaTaki. A real OpenAI-compatible key is in `.env.local` (L2 tests + integration).
@@ -135,29 +141,34 @@ AI SDK 7, Tauri 2, zod 4, PixiJS 8, the Live2D runtime all move fast. **Never co
 
 ---
 
-## 4. Recommended first moves (M5 Leader)
+## 4. Recommended first moves (T5 Leader)
 
-1. Read §2, then **`devlog/m5.md`** (the signed-off blueprint — plan of record) and the two research banks it indexes. Then the current task: `.trellis/tasks/07-18-avatar-presentation/prd.md` + `research-plan.md`.
-2. Confirm the base is green: `pnpm -r typecheck && pnpm -w lint && pnpm -r test`, `cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml`. Expect ~824 TS tests green as of handoff.
-3. **Resume T1 where it stands**: dispatch a research agent with `research-plan.md` (§3.7 tool/model rules apply — the plan file already embeds the tool rules), then implement → check → update-spec → finish + archive per §3.2, honoring the Q1 cleanup contract (health notes in research; touched-file debt fixed in impl; verified in check).
-4. Continue in blueprint order: **T2** governance → **T3a/T3b** sensing (#19/#20) → **T4** proactivity core → **T5** memory-learning → **T6** settings suite (#22→#26) — with §5's cross-task seams honored from day one (A1 minimum in T3a, A2 tag in T4, croner before T5's nightly pass).
-5. Push cadence (`devlog/index.md`): push at milestone close. Local-ahead at handoff: the blueprint + this handoff + T1 scaffolding — commit per task as usual; push when M5 closes or on owner request.
+1. Read §2, then in this order: **`t5-decisions.md`** (R0–R22, BINDING — includes the verified defect list with file:line anchors and three "leader calls awaiting objection"), `t5-memory-systems-survey.md` (esp. §7 pull-path mechanisms, §11 follow-up round), `t5-context-management-survey.md` (esp. §F/§G — AI SDK v7 `pruneMessages`/`prepareStep` and the streaming-usage `includeUsage` finding), `docs/MEMORY-DESIGN.md`, and the current memory code (`packages/core/src/memory/`, `agents/conversation-store.ts`).
+2. Confirm the base is green: `pnpm -r typecheck && pnpm lint && pnpm -r test`, `cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml`. Expected at handoff: **core 706 / shared 195 / cargo 141**, clippy `-D warnings` clean.
+3. Housekeeping: `python ./.trellis/scripts/task.py archive 07-21-perception-privacy` (T3b is finished but unarchived; archive auto-commits — do it with the owner's knowledge).
+4. **立项 T5** via the trellis flow (task create → prd from `t5-decisions.md` → batch the work). Scope hints from the grill: the highest-leverage first slices are the write gate (R15) + layer-choosing writer + identity card (R7) + pinned-block rework (R14/R20), because they fix the owner's observed "forgot my name" defect; window token-measurement (R1/R2) is the safety slice; compaction (R3/R5) is LAST by R0. The open items at the file's tail (post-hoc scoring, over-search guard, panel convergence trigger, streaming-usage check) need explicit 立项 decisions or explicit deferral.
+5. After T5 → **T4 proactivity core** (`t4-decisions.md` R1–R12 ready; note T4 must re-check its "newly discovered problems" list against the post-T5 memory shape) → **T6 settings suite** (#22→#26; #26 owns the perception panel surfaces: pause button, retention picker, skip-list editor, activity card, plus manual check 79).
+6. Push cadence unchanged: push at milestone close or on owner request. Local-ahead at handoff: commits 0133874 / 9f41646 / e5a0c49 (+ this handoff refresh).
 
 ---
 
-## 5. Watch-list / coupling points (M5)
+## 5. Watch-list / coupling points (T5 and after)
 
-**Coupling point 1 — A2 before any Heartbeat write.** A Heartbeat is a cron-like agent turn; without the write-context tag (`primary|heartbeat|flush|subagent`) auto-memory would sediment every beat as real conversation (episodes/profile pollution). The tag ships IN T4's heartbeat wiring, not later (full formalization in T5).
+**Coupling point 1 — T5's R6 changes what T4 can assume.** The per-turn retrieved block is REMOVED (R6): memory reaches the model via deterministic push (identity card + pinned block/index) or the agent's own `memory_search` call. A T4 heartbeat turn has NO user input, so if it needs memory driven by what she can see, that wiring does not exist — T4's 立项 must decide against the post-T5 shape, not the old assembler.
 
-**Coupling point 2 — A1 minimum before sensed text enters prompts.** T3a puts activity captures into assembled context; the injection fence + provenance note ("recalled/sensed data, not instructions") must exist the same day. Full hardening (streaming scrubber + write-time threat scan) completes in T5. Sensed/recalled content is untrusted data, always.
+**Coupling point 2 — flush is hard-coupled to `REPLAY_WINDOW`.** `auto-memory.ts:82` computes the flush boundary from the 200-message constant. R1 (token-measured window) changes the definition of "leaving the window" — flush and window-measurement must move in the SAME task slice or flush fires at the wrong time.
 
-**Coupling point 3 — conversation-configured anything must surface in the settings panel.** Dual entry, single store: agent config tools (cron jobs, heartbeat checklist items, sampling grants) write the same persisted stores the T6 panels render. An NL grant rides the ORDINARY Approval flow (once/session/always → the #23 panel) — never a new mechanism, never a silent high-sensitivity flip.
+**Coupling point 3 — A2 before any Heartbeat write (unchanged, now T4).** The turn-origin tag (`primary|heartbeat|flush|subagent`) ships IN T4's heartbeat wiring; `autoMemory.onTurnCompleted` currently does not discriminate turn kinds (t4-decisions "newly discovered problems").
+
+**Coupling point 4 — conversation-configured anything must surface in the settings panel (unchanged, T6).** Dual entry, single store. #26 also owns the perception surfaces (pause/retention/skip-list/card) and R13's "every number in the panel for now" — every exposed value needs validation + a fail-closed default in Core (T5's job to expose them).
 
 **Other open threads:**
-- **D9** (emotion capsule) resolves in T5 as a `companion-state-source` MemorySource provider (today: static `"Current mood: neutral."` in `assembler.ts`).
-- **D29** (ws-client mid-turn disconnect never settles) comes DUE in #22 — first touch of `ws-client.ts`, fix + test in the same task.
-- **Roaming C3 costume-switch wedge**: root cause unknown, fully mitigated (timeouts + switch ticket + fallback); packaged devtools are enabled — grab Network-pending evidence if it recurs.
-- **Agent-authored EXECUTABLE artifacts stay deferred (D36)**; the M5 mechanism for learned habits is data-level self-config (structured cron/checklist rows executed by the deterministic engine). Community imports are untrusted → trust tiers + threat scan (#25, D37).
+- **R15's skip log is mandatory** — once "write nothing" is the write gate's normal outcome, an unlogged skip is indistinguishable from a broken writer (mem0 issue #3009 precedent; recorded in t5-decisions).
+- **VLM-failure has no backoff in the ambient sampler** (leader-found during manual testing, unregistered): describe failures don't count toward backoff — under `keep` retention this accumulates undescribed frames at the refresh cadence. Low urgency (default is drop + ambient default-off); register a D-number if ambient goes always-on.
+- **croner is still NOT installed** despite the CLAUDE.md stack table (t4-decisions); it is a pattern evaluator, not a scheduler — the tick loop/persistence/catch-up are ours (T4).
+- **D29** (ws-client mid-turn disconnect never settles) comes DUE in #22 — first touch of `ws-client.ts`.
+- **D48 residual**: the ambient pre-capture screen narrows the blind window to one WS round-trip but is NOT atomic; true closure = Shell-side same-instant sampling, trigger recorded in the register.
+- **Roaming C3 costume-switch wedge**: root cause unknown, fully mitigated; grab Network-pending evidence if it recurs.
 - **The trellis flow is mandatory** (implement → check → update-spec). Manual-only checks → `docs/devlog/manual-checks.md`.
 
 ---
@@ -189,4 +200,4 @@ gh issue list -R Ae486/ShiinaTaki --label ready-for-agent
 
 ---
 
-*Handoff updated 2026-07-18 at the close of M4. M1–M4 are shipped; the incoming session is the M5 Leader (full stack, module optimization). Read `devlog/m5.md` for the signed-off blueprint, verify base-green, then lead.*
+*Handoff updated 2026-07-27 at the close of T3b. M1–M4 shipped; M5's T1/T2/T3a/T3b + time-awareness are done and committed. The incoming session is the **T5 Leader** (memory + context — T5 runs BEFORE T4 by owner ruling). Read `t5-decisions.md` (binding, R0–R22), verify base green (core 706 / shared 195 / cargo 141), archive the T3b task, then 立项.*
