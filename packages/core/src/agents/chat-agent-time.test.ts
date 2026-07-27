@@ -42,9 +42,10 @@ describe("chat-agent time injection (hybrid date/time)", () => {
     // Current-time line is the very last section (the volatile tail).
     expect(text).toMatch(/\n\nCurrent local time: \d{2}:\d{2}\.$/);
 
-    // Ordering: base < date < skills(extra) < time.
-    expect(text.indexOf("Today is ")).toBeLessThan(text.indexOf("SKILLS"));
-    expect(text.indexOf("SKILLS")).toBeLessThan(text.indexOf("Current local time:"));
+    // Ordering: base < date < skills(extra) < time. Measured on the RENDERED lines, not on the bare phrases: the base
+    // prompt now quotes both line prefixes (it teaches what they are), so a phrase-first search would hit the lesson.
+    expect(text.search(/\n\nToday is [A-Z][a-z]+, \d{4}-\d{2}-\d{2}\.\n\n/)).toBeLessThan(text.indexOf("SKILLS"));
+    expect(text.indexOf("SKILLS")).toBeLessThan(text.search(/\n\nCurrent local time: \d{2}:\d{2}\.$/));
   });
 
   it("keeps the day-date line byte-identical across a same-day recomposition (cache-shape)", async () => {

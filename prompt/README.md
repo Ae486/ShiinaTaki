@@ -34,6 +34,7 @@ The settings panel exposes a persona selector that lists every `characters/<id>/
 
 ## Conventions
 
+- **Layer split (binding)**: mechanics + safety that must survive a user editing these files live in the code constant `BASE_SYSTEM_PROMPT` (what an `<untrusted-observation>` block is and that only those exact tags are trusted, what the two time lines are and never to work the time out from memory, anti-recitation). Behavior norms for the same surfaces live in `system/assistant-layer.md` (how to use what is noticed, time-of-day feel, memory weighting, emote norms). Persona cards carry neither — they color HOW, never WHETHER.
 - Persona speech-style examples (口头禅, reply samples, tone) are written in the character's spoken language (Chinese for taki) — living samples for the LLM to imitate. Structural/section notes stay English.
 - One character = one `characters/<id>/` dir (future: `voice-clips/`, click-preset defaults, etc. colocate here).
 - Editing a card changes behavior with no code change or rebuild (the Core re-reads on load).
