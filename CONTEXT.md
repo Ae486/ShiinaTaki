@@ -50,6 +50,14 @@ The WebView presentation layer rendering the pet. Just one client of the Agent C
 A configuration-defined, deterministic event-to-action binding executed by the runtime itself (Claude Code sense): "when X happens, run the preset Y" — no LLM judgment, no token cost, e.g. a finished motion triggering the idle return. Hooks can exist at any layer that emits events (renderer, Agent Core, Shell).
 _Avoid_: React hook (`use-*.ts` UI code), webhook
 
+**Replay View**:
+What the model actually sees each turn: derived fresh from the stored timeline (window, summary substitution, folds) plus ephemeral in-flight additions that are never persisted. Recomputed every turn, never accumulated; the stored timeline is never rewritten for context reasons (ADR 0008).
+_Avoid_: context window (the model-side size limit), compaction (one operation within the view), transcript (that's the stored timeline)
+
+**Utility Slot**:
+The separate model slot for background work (memory writes, tidy passes, compaction), falling back to the main model when unconfigured — isomorphic with the vision slot. Background token spend is reportable; multiple background tasks in one trigger run serially.
+_Avoid_: worker model, background LLM
+
 ### Capabilities & Permissions
 
 **Capability**:
@@ -85,6 +93,22 @@ _Avoid_: device, client (ambiguous — operators are also clients)
 **Memory Layer**:
 A declaratively-registered scope of memory carrying its own policy: ownership (global vs per-character), write path, recall behavior, retention. The engine is generic over layers; the taxonomy is data, not code.
 _Avoid_: memory type (layers carry policy, not just a type tag), category
+
+**Memory Block**:
+An always-in-context memory document rewritten as a whole, never appended to — the storage shape of the always-visible tier (searchable memory stays Memory Layer rows). Each block declares its writer: the user, a background pass, or the agent.
+_Avoid_: memory entry (that's a searchable row), note
+
+**Identity Card**:
+The user-owned Memory Block of identity facts (name, form of address, timezone, hard preferences). The agent reads it every turn and never writes it; on conflict with agent-written memory, the card wins.
+_Avoid_: profile (the agent-written Memory Layer), user settings
+
+**Write Gate**:
+The behaviour-change test every automatic memory write must pass: save only what is likely to change future behaviour in a similar situation. Silence is the normal outcome and every skip is logged; the user's explicit "remember this" always passes. Replaces any fixed writing quota.
+_Avoid_: importance filter (importance grades what passes; the gate decides whether anything is written), quota
+
+**Visibility Ladder**:
+The four rungs a memory can occupy: (1) always in the prompt, (2) named in an always-visible index, (3) present only in the search index, (4) archived out of every index. Decay moves entries down; promotion up is deliberate (the user's card, the agent's own pin, the tidy pass) — the automatic writer can never mint rung-1 visibility.
+_Avoid_: memory tier (vague — name the rung), hot/cold storage
 
 **Character**:
 A user-selectable identity for the Companion: a Live2D model + a persona prompt + a voice profile, three decoupled parts. Any generic Cubism model can be bound to any persona. v1 ships exactly one: Shiina Taki (椎名立希).

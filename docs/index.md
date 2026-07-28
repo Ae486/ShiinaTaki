@@ -25,6 +25,7 @@ Start here. Every design decision has exactly one canonical home; nothing is dup
 | [0005](adr/0005-continuous-timeline-no-sessions.md) | Conversation model | One continuous timeline per character; no session list; bubble + chat window share the stream |
 | [0006](adr/0006-mcp-processes-vs-no-os-invariant.md) | MCP boundary | MCP servers are operator-configured processes (single sanctioned spawn site); agent-initiated exec still crosses the Permission Gate |
 | [0007](adr/0007-capability-data-locality-split-machine.md) | Deployment locality | One codebase, two topologies (single-machine / VPS split); Stance A — host is the agent's world, VPS is pure compute offload; OS/data capabilities execute Node-side |
+| [0008](adr/0008-replay-view-context-seam.md) | Context seam | The model sees a per-turn Replay View derived from the stored timeline; all context management (windowing, summaries, folds, ephemeral in-flight additions) happens only there — idempotent, never persisted, cache-shaped |
 
 ADR conventions: sequential numbering `NNNN-slug.md`, 1-3 paragraph body, only for hard-to-reverse + surprising + real-trade-off decisions.
 
