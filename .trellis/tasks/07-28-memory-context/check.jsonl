@@ -1,1 +1,5 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/tasks/07-28-memory-context/prd.md", "reason": "Verify against every ruling + batch AC; out-of-scope list must not be silently re-entered"}
+{"file": ".trellis/tasks/07-28-memory-context/notes.md", "reason": "Verify implementation matches the grill rulings verbatim (ceiling below pin line, gate semantics, tidy recipe, fence sites)"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "size caps / headers / index.md / test bar"}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "D1 frozen-zone byte-compare + seam law + fence rule compliance"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "No memory content in logs sweep"}

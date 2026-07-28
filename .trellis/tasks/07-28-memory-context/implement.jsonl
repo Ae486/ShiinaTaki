@@ -1,1 +1,11 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/tasks/07-28-memory-context/prd.md", "reason": "The contract: all owner-ratified rulings, 7-batch plan, out-of-scope list, acceptance"}
+{"file": ".trellis/tasks/07-28-memory-context/notes.md", "reason": "Grill ruling log with rationale - wins over t5-decisions on conflict; contains the tidy recipe, block design, corrections"}
+{"file": ".trellis/workspace/pleia/t5-decisions.md", "reason": "Binding R0-R22 with full reasoning (grill notes supersede where they overlap)"}
+{"file": ".trellis/tasks/07-28-memory-context/research/ra-retrieval-stack.md", "reason": "LAW for batch 3: tokenizer migration, Intl.Segmenter evidence, weights regressions, test case classes"}
+{"file": ".trellis/tasks/07-28-memory-context/research/rb-projection-precedents.md", "reason": "LAW for batches 5-7: volatile placement, fold windows, ADR 0008 properties"}
+{"file": ".trellis/tasks/07-28-memory-context/research/rc-letta-sleeptime-and-search-governance.md", "reason": "LAW for batch 4: the tidy recipe (triggers, input shape, prompt lines, structural exit)"}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "D1-frozen zones + additive seam law + untrusted-fence rule + time-context conventions the prompt work must obey"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Migration runner conventions for the origin column + memory_events + FTS rebuild migrations"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "never-throw, structured degradation on every memory/tool path"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Memory content NEVER in logs - events carry ids/counts/ranges only"}
+{"file": ".trellis/spec/backend/tool-design.md", "reason": "Tool description/schema rules for memory_write guidance, block-write tool, finish tool"}
