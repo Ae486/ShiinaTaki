@@ -14,6 +14,8 @@ export interface MemoryUpsert {
   importance: number;
   status: string;
   createdAt: string;
+  updatedAt: string | null;
+  origin: string;
   expiresAt: string | null;
   contentHash: string;
   disclosure: string;
@@ -33,6 +35,9 @@ export interface MemoryEntryRow {
   importance: number;
   status: string;
   createdAt: string;
+  /** Set when the entry was reinforced (R9); the age a prompt renders anchors on this, not on createdAt. */
+  updatedAt: string | null;
+  origin: string;
   expiresAt: string | null;
   disclosure: string;
   content: string;
@@ -61,7 +66,7 @@ export interface MemoryRepo {
 
 // Column list shared by every read; disclosure/content come from the FTS side, metadata from memory_entries.
 const COLS =
-  "m.path, m.id, m.layer, m.character_id, m.importance, m.status, m.created_at, m.expires_at, " +
+  "m.path, m.id, m.layer, m.character_id, m.importance, m.status, m.created_at, m.updated_at, m.origin, m.expires_at, " +
   "memory_fts.disclosure, memory_fts.content";
 const JOIN = "memory_fts JOIN memory_entries m ON m.path = memory_fts.path";
 // Active + unexpired + (global OR this character) — the recall scope shared by search and listActiveByLayers.
@@ -70,10 +75,12 @@ const SCOPE =
   "AND (m.character_id IS NULL OR m.character_id = :characterId)";
 
 const UPSERT_META_SQL =
-  "INSERT INTO memory_entries (path, id, layer, character_id, importance, status, created_at, expires_at, content_hash) " +
-  "VALUES (:path, :id, :layer, :characterId, :importance, :status, :createdAt, :expiresAt, :contentHash) " +
+  "INSERT INTO memory_entries (path, id, layer, character_id, importance, status, created_at, updated_at, origin, " +
+  "expires_at, content_hash) " +
+  "VALUES (:path, :id, :layer, :characterId, :importance, :status, :createdAt, :updatedAt, :origin, :expiresAt, :contentHash) " +
   "ON CONFLICT(path) DO UPDATE SET id=excluded.id, layer=excluded.layer, character_id=excluded.character_id, " +
   "importance=excluded.importance, status=excluded.status, created_at=excluded.created_at, " +
+  "updated_at=excluded.updated_at, origin=excluded.origin, " +
   "expires_at=excluded.expires_at, content_hash=excluded.content_hash";
 
 // bm25 weights are positional over ALL columns incl. the UNINDEXED path (col 0): path 0, disclosure 1, content 2.
@@ -144,6 +151,8 @@ function toMetaParams(input: MemoryUpsert): SqlRow {
     importance: input.importance,
     status: input.status,
     createdAt: input.createdAt,
+    updatedAt: input.updatedAt,
+    origin: input.origin,
     expiresAt: input.expiresAt,
     contentHash: input.contentHash,
   };
@@ -157,6 +166,8 @@ const RowSchema = z.object({
   importance: z.int(),
   status: z.string(),
   createdAt: z.string(),
+  updatedAt: z.string().nullable(),
+  origin: z.string(),
   expiresAt: z.string().nullable(),
   disclosure: z.string(),
   content: z.string(),
@@ -171,6 +182,8 @@ function toRow(row: SqlRow): MemoryEntryRow {
     importance: row.importance,
     status: row.status,
     createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    origin: row.origin,
     expiresAt: row.expires_at,
     disclosure: row.disclosure,
     content: row.content,

@@ -93,3 +93,76 @@ describe("memory store (T5)", () => {
     expect(invalid[0]?.reason).toMatch(/fence/);
   });
 });
+
+describe("memory store origin (T5 Q8)", () => {
+  it("defaults a write to origin 'self' and records 'observed' when the caller sensed it", () => {
+    const store = freshStore();
+    expect(store.write({ layer: "episodes", characterId: "taki", content: "她说很累", importance: 5 }).entry.origin).toBe(
+      "self",
+    );
+
+    const observed = store.write({
+      layer: "episodes",
+      characterId: "taki",
+      content: "[image] 桌上有一杯咖啡",
+      importance: 4,
+      origin: "observed",
+    });
+    expect(observed.entry.origin).toBe("observed");
+    expect(readFileSync(observed.filePath, "utf8")).toContain('origin: "observed"');
+  });
+});
+
+describe("memory store reinforcement (T5-R9)", () => {
+  it("raises importance, stamps `updated`, and starts the reinforce count at 1", () => {
+    const store = freshStore();
+    const stored = store.write({ layer: "episodes", characterId: "taki", content: "他喜欢拉面", importance: 4 });
+    expect(stored.entry.updated).toBeUndefined();
+
+    const reinforced = store.reinforceAtPath(stored.filePath, 6);
+
+    expect(reinforced.entry.importance).toBe(6);
+    expect(reinforced.entry.reinforceCount).toBe(1);
+    expect(reinforced.entry.updated).toBeDefined();
+    expect(Date.parse(reinforced.entry.updated as string)).not.toBeNaN();
+    // The bump lands on disk, not just in the returned object.
+    expect(entryFromFile(readFileSync(stored.filePath, "utf8")).entry.importance).toBe(6);
+  });
+
+  it("never DEMOTES importance — a deliberate high-importance entry survives a later automatic write", () => {
+    const store = freshStore();
+    const stored = store.write({ layer: "profile", characterId: "taki", content: "他叫 pleia", importance: 10 });
+
+    const reinforced = store.reinforceAtPath(stored.filePath, 3);
+    expect(reinforced.entry.importance).toBe(10);
+  });
+
+  it("increments the count across repeated reinforcements", () => {
+    const store = freshStore();
+    const stored = store.write({ layer: "episodes", characterId: "taki", content: "他喜欢拉面", importance: 4 });
+
+    store.reinforceAtPath(stored.filePath, 5);
+    const third = store.reinforceAtPath(store.reinforceAtPath(stored.filePath, 5).filePath, 5);
+    expect(third.entry.reinforceCount).toBe(3);
+  });
+
+  it("leaves the body and the rest of the frontmatter untouched", () => {
+    const store = freshStore();
+    const stored = store.write({
+      layer: "episodes",
+      characterId: "taki",
+      content: "他喜欢拉面",
+      importance: 4,
+      disclosure: "拉面",
+      origin: "observed",
+    });
+
+    const reinforced = store.reinforceAtPath(stored.filePath, 6);
+    expect(reinforced.body).toBe("他喜欢拉面");
+    expect(reinforced.entry.id).toBe(stored.entry.id);
+    expect(reinforced.entry.created).toBe(stored.entry.created);
+    expect(reinforced.entry.disclosure).toBe("拉面");
+    expect(reinforced.entry.origin).toBe("observed");
+    expect(reinforced.contentHash).not.toBe(stored.contentHash); // the file changed, so the index must re-read it
+  });
+});

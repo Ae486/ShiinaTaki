@@ -1,6 +1,7 @@
 /**
  * INPUT:  n/a (declarative data) — validated at module load
- * OUTPUT: MemoryLayerDefinitionSchema + V1_MEMORY_LAYERS + selectors (getLayer, WRITABLE_LAYER_IDS, isWritableLayer)
+ * OUTPUT: MemoryLayerDefinitionSchema + V1_MEMORY_LAYERS + selectors (getLayer, WRITABLE_LAYER_IDS, isWritableLayer,
+ *         AUTO_WRITABLE_LAYER_IDS)
  * POS:    core/memory — the layer taxonomy as DATA (invariant 7); the engine reads ONLY these fields, adding a layer = a row
  */
 import { z } from "zod";
@@ -85,3 +86,10 @@ export const WRITABLE_LAYER_IDS: readonly string[] = V1_MEMORY_LAYERS.filter(
 export function isWritableLayer(id: string): boolean {
   return WRITABLE_LAYER_IDS.includes(id);
 }
+
+// The AUTOMATIC writer may choose only writable layers that are NOT pinned by policy (T5 Q11-1): a pinned-policy
+// layer grants always-visible status at ANY importance, so allowing it would mint rung-1 visibility that the
+// importance clamp cannot take back. Always-visible stays deliberate — the user's card, her explicit pin, or tidy.
+export const AUTO_WRITABLE_LAYER_IDS: readonly string[] = V1_MEMORY_LAYERS.filter(
+  (layer) => isWritableLayer(layer.id) && layer.recallPolicy !== "pinned",
+).map((layer) => layer.id);

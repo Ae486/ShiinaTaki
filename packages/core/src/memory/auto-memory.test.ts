@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import { createMemoryAutoRepo } from "../db/memory-auto-repo.ts";
+import type { MemoryEvent, MemoryEventsRepo } from "../db/memory-events-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
 import { generatingModel } from "../testing/mock-language-model.ts";
@@ -25,30 +26,54 @@ interface SegmentInput {
   segment: Array<{ seq: number; content: string }>;
 }
 
-// A recording episodic writer whose failure is togglable (proves the retry-on-next-trigger policy).
-function spyEpisodic(): { calls: SegmentInput[]; failNext: { value: boolean }; writer: EpisodicWriter } {
+// A recording episodic writer whose failure and its returned entry ids are both togglable (the empty return is
+// the T5-R15 normal outcome, which must be distinguishable from a broken writer — hence the skip event).
+function spyEpisodic(): {
+  calls: SegmentInput[];
+  failNext: { value: boolean };
+  entryIds: { value: string[] };
+  writer: EpisodicWriter;
+} {
   const calls: SegmentInput[] = [];
   const failNext = { value: false };
+  const entryIds = { value: ["0001-episode"] };
   return {
     calls,
     failNext,
+    entryIds,
     writer: {
       async summarize({ characterId, segment }) {
         calls.push({ characterId, segment: segment.map((e) => ({ seq: e.seq, content: e.content })) });
         if (failNext.value) throw new Error("llm down");
-        return { entryIds: ["0001-episode"] };
+        return { entryIds: entryIds.value };
       },
     },
   };
 }
 
-function spyFlush(): { calls: SegmentInput[]; writer: FlushWriter } {
+// The event log seam: a capturing double (the real repo is exercised in db/memory-events-repo.test.ts).
+function spyEvents(): { records: MemoryEvent[]; repo: MemoryEventsRepo } {
+  const records: MemoryEvent[] = [];
+  return {
+    records,
+    repo: {
+      record: (event) => void records.push(event),
+      listByCharacter: () => [],
+    },
+  };
+}
+
+// A recording flush writer whose reported write count is togglable (zero writes is the T5-R15 normal outcome).
+function spyFlush(): { calls: SegmentInput[]; writes: { value: number }; writer: FlushWriter } {
   const calls: SegmentInput[] = [];
+  const writes = { value: 1 };
   return {
     calls,
+    writes,
     writer: {
       async run({ characterId, segment }) {
         calls.push({ characterId, segment: segment.map((e) => ({ seq: e.seq, content: e.content })) });
+        return { writes: writes.value };
       },
     },
   };
@@ -75,7 +100,8 @@ function seed(f: CompanionFixture, n: number): void {
 function wire(f: CompanionFixture, w: { episodic: EpisodicWriter; flush: FlushWriter; logger: AutoMemoryLogger }) {
   const timeline = createTimelineRepo(f.db);
   const autoState = createMemoryAutoRepo(f.db);
-  return { autoState, auto: createAutoMemory({ timeline, autoState, ...w }) };
+  const events = spyEvents();
+  return { autoState, events, auto: createAutoMemory({ timeline, autoState, events: events.repo, ...w }) };
 }
 
 describe("auto-memory episodic trigger (T2/T3/T4)", () => {
@@ -130,8 +156,8 @@ describe("auto-memory episodic trigger (T2/T3/T4)", () => {
   it("lands real episode entries on disk via the store when wired to the real writer (T3 file+index)", async () => {
     const f = fresh();
     const episodic = createEpisodicWriter({
-      model: generatingModel(JSON.stringify([{ content: "聊了很久关于旅行的事", importance: 6 }])),
-      writeEpisode: (input) => f.memory.writeEntry({ ...input, type: "episodes" }),
+      model: generatingModel(JSON.stringify([{ layer: "episodes", content: "聊了很久关于旅行的事", importance: 6 }])),
+      writeMemory: ({ layer, ...rest }) => f.memory.writeEntry({ ...rest, type: layer }),
     });
     const { auto } = wire(f, { episodic, flush: spyFlush().writer, logger: captureLogger().logger });
     seed(f, 20);
@@ -142,6 +168,86 @@ describe("auto-memory episodic trigger (T2/T3/T4)", () => {
       (p): p is string => typeof p === "string" && p.includes("episodes") && p.endsWith(".md"),
     );
     expect(files).toHaveLength(1);
+  });
+});
+
+describe("auto-memory write-gate skip log (T5-R15)", () => {
+  it("records a skip event exactly when the episodic writer kept nothing", async () => {
+    const f = fresh();
+    const ep = spyEpisodic();
+    ep.entryIds.value = []; // the gate found nothing worth keeping — the normal outcome, not a failure
+    const { autoState, events, auto } = wire(f, {
+      episodic: ep.writer,
+      flush: spyFlush().writer,
+      logger: captureLogger().logger,
+    });
+    seed(f, 20);
+
+    await auto.onTurnCompleted("taki");
+
+    // Silence must leave a trace, or "nothing was worth writing" and "the writer is broken" look identical.
+    expect(events.records).toEqual([{ kind: "skip", characterId: "taki", turnSeq: 20 }]);
+    expect(autoState.get("taki").lastEpisodicSeq).toBe(20); // a skip still advances the watermark
+  });
+
+  it("records NO skip event when the writer kept something", async () => {
+    const f = fresh();
+    const ep = spyEpisodic(); // default: one entry written
+    const { events, auto } = wire(f, { episodic: ep.writer, flush: spyFlush().writer, logger: captureLogger().logger });
+    seed(f, 20);
+
+    await auto.onTurnCompleted("taki");
+    expect(events.records).toEqual([]);
+  });
+
+  it("records no skip event when the pass FAILED (a failure is not a skip — it retries)", async () => {
+    const f = fresh();
+    const ep = spyEpisodic();
+    ep.failNext.value = true;
+    const { events, auto } = wire(f, { episodic: ep.writer, flush: spyFlush().writer, logger: captureLogger().logger });
+    seed(f, 20);
+
+    await auto.onTurnCompleted("taki");
+    expect(events.records).toEqual([]);
+  });
+
+  it("records a skip event for the FLUSH half of the gate too, keyed to the segment it judged", async () => {
+    const f = fresh();
+    const fl = spyFlush();
+    fl.writes.value = 0; // the flush turn called memory_write zero times
+    const { events, auto } = wire(f, { episodic: spyEpisodic().writer, flush: fl.writer, logger: captureLogger().logger });
+    seed(f, 201); // latest 201, through = 1 -> the flush fires over (0, 1]
+
+    await auto.onTurnCompleted("taki");
+
+    // Both halves of the write gate must be equally observable; the episodic half wrote, so only flush skipped.
+    expect(events.records).toEqual([{ kind: "skip", characterId: "taki", turnSeq: 1 }]);
+  });
+
+  it("records NO skip event when the flush kept something", async () => {
+    const f = fresh();
+    const fl = spyFlush(); // default: one write
+    const { events, auto } = wire(f, { episodic: spyEpisodic().writer, flush: fl.writer, logger: captureLogger().logger });
+    seed(f, 201);
+
+    await auto.onTurnCompleted("taki");
+    expect(events.records).toEqual([]);
+  });
+});
+
+describe("auto-memory turn origin seam (M-A2)", () => {
+  it("defaults to 'primary' and carries the caller's origin into the log fields", async () => {
+    const f = fresh();
+    const cap = captureLogger();
+    const { auto } = wire(f, { episodic: spyEpisodic().writer, flush: spyFlush().writer, logger: cap.logger });
+    seed(f, 20);
+
+    await auto.onTurnCompleted("taki");
+    expect(cap.infos.find((i) => i.kind === "episodic")?.origin).toBe("primary");
+
+    seed(f, 20);
+    await auto.onTurnCompleted("taki", "heartbeat"); // T4 fills real values; T5 only carries them
+    expect(cap.infos.filter((i) => i.kind === "episodic").at(-1)?.origin).toBe("heartbeat");
   });
 });
 

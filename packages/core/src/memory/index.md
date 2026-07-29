@@ -1,9 +1,11 @@
 # core/memory/
 - layer-registry.ts — the layer taxonomy as DATA (MemoryLayerDefinitionSchema + V1_MEMORY_LAYERS + writable-layer selectors)
+- auto-layer-policy.ts — T5 Q11-1: the AUTOMATIC writer's layer choice set + importance ceiling, both derived from the registry (it may never reach the always-visible rung)
 - frontmatter.ts — zero-dep YAML-frontmatter SUBSET parse/serialize (flat scalars only)
-- entry.ts — memory-entry domain codec: MemoryEntrySchema + frontmatter <-> entry (file text codec)
+- entry.ts — memory-entry domain codec: MemoryEntrySchema + frontmatter <-> entry (file text codec); carries `origin` (self|observed) + the R9 reinforcement fields
 - naming.ts — slugify + IdSchema + assertSafeSegment + resolveWithin (path containment); no fs
-- store.ts — THE sanctioned node:fs site (Workspace-scoped): entry files, atomic write, id allocation, archive, list (invalid files reported, not thrown)
+- store.ts — THE sanctioned node:fs site (Workspace-scoped): entry files, atomic write, id allocation, archive, reinforce-in-place, list (invalid files reported, not thrown)
+- dedupe.ts — T5-R9 write-time near-duplicate check: normalized-string key only, never a model call on the write path
 - indexer.ts — index sync: indexEntry (write path) + reconcile (rebuild the derived index from files; reports invalid files)
 - fts5-query.ts — FTS5 query hygiene: trigram-decompose + quote (MATCH) or escaped LIKE fallback
 - disclosure-gate.ts — the shared "when to recall" keyword gate (retriever + intention gate use one definition)
@@ -13,10 +15,11 @@
 - pinned-block.ts — pinned-block policy: non-truncatable layers survive budget; oldest truncatable drop first
 - assembler.ts — deterministic per-turn context assembly with per-section budgets; memory rows render a code-computed relative age ("(3 days ago)")
 - persona-provider.ts — reads prompt/ cards (assistant layer + per-character persona), strips the `>` editor note, sync + cached + safe fallback; injected into the assembler (#16)
-- memory-tools.ts — the first agent tools (memory_write/search/archive); thin, characterId-bound, never throw
-- memory-engine.ts — the memory subsystem composition root (store+repo+indexer+retriever+assembler+tools; exposes writeEntry)
+- memory-tools.ts — the first agent tools (memory_write/search/archive); thin, characterId-bound, never throw; plus the BACKGROUND set whose memory_write is schema-restricted to the auto layers + importance ceiling (Q11-1 covers every automatic path)
+- memory-engine.ts — the memory subsystem composition root (store+repo+indexer+retriever+assembler+tools; exposes writeEntry, createTools, createBackgroundTools)
 - render-transcript.ts — shared helper: a timeline segment -> "role: text" transcript for the auto-write prompts
-- episodic-writer.ts — auto-write path 2: segment -> 1-3 episode entries via a non-streaming generate + the store API
-- flush-writer.ts — auto-write path 3: pre-compaction flush as one SILENT tool-enabled turn (output discarded)
-- auto-memory.ts — auto-write orchestrator: watermarks + per-character mutex + failure policy; onTurnCompleted trigger
-- image-description-writer.ts — thin, DELETABLE image→text bridge (#17 decision 6, D28): VLM describes a turn's images, PII-scrubs the text, writes ONE episode via the existing store path (no fence at storage time — D47); detached, warn+drop
+- write-convention.ts — the ONE shared write-side prompt wording: WRITE_GATE_RULE (T5-R15 behaviour-change test) + MEMORY_VOICE_RULE (T5-R10 first person, user's words); episodic + flush import it so the voices cannot diverge
+- episodic-writer.ts — auto-write path 2: segment -> 0..3 entries in the layer the model chooses, write-gated (silence is the normal outcome), importance clamped below the pin line
+- flush-writer.ts — auto-write path 3: pre-compaction flush as one SILENT tool-enabled turn on the BACKGROUND toolset (prose discarded, successful-write count returned); shares the write-convention fragments
+- auto-memory.ts — auto-write orchestrator: watermarks + per-character mutex + failure policy; onTurnCompleted(characterId, origin) trigger, skip events when either the episodic or the flush pass kept nothing
+- image-description-writer.ts — thin, DELETABLE image→text bridge (#17 decision 6, D28): VLM describes a turn's images, PII-scrubs the text, writes ONE episode via the existing store path with origin "observed" (the marker the render sites fence on — D47); detached, warn+drop

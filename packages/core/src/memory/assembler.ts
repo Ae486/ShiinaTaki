@@ -78,6 +78,9 @@ function pickIntention(args: { repo: MemoryRepo; characterId: string; queryText:
 }
 
 // Each entry carries its relative age ("(3 days ago)"), computed by code (models miscompute date arithmetic).
-function renderBlock(header: string, rows: Array<{ content: string; createdAt: string }>, nowMs: number): string {
-  return `${header}\n${rows.map((row) => `- (${formatRelativeAge(row.createdAt, nowMs)}) ${row.content}`).join("\n")}`;
+// A reinforced entry (R9) ages from its LAST reinforcement: the duplicate write proved it was live again.
+function renderBlock(header: string, rows: Array<{ content: string; createdAt: string; updatedAt?: string | null }>, nowMs: number): string {
+  return `${header}\n${rows
+    .map((row) => `- (${formatRelativeAge(row.updatedAt ?? row.createdAt, nowMs)}) ${row.content}`)
+    .join("\n")}`;
 }

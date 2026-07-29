@@ -4,5 +4,6 @@
 - timeline-repo.ts — timeline_messages SQL: append / deleteEntry / pageBefore / latestAscending / latestSeq / rangeAscending (zod-parse at the row boundary)
 - memory-repo.ts — memory_entries + memory_fts SQL: upsert / deleteByPath / listHashes / listActiveByLayers / search / resolvePath
 - memory-auto-repo.ts — memory_auto_state SQL: get / setEpisodic / setFlush (per-character auto-write watermarks)
+- memory-events-repo.ts — memory_events SQL: record / listByCharacter (the memory system's decision log — skips, reinforcements; ids/counts only, never memory content)
 - privacy-pause-repo.ts — privacy_pause_state SQL: load / save (the single global Privacy Pause row; a consent withdrawal must survive a restart)
 - migrations/ — numbered TS-constant migrations + their ordered registry

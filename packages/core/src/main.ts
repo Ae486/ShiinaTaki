@@ -35,6 +35,7 @@ import { loadProviderConfig } from "./config/provider-config.ts";
 import { loadServerConfig } from "./config/server-config.ts";
 import { loadVisionConfig } from "./config/vision-config.ts";
 import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
+import { createMemoryEventsRepo } from "./db/memory-events-repo.ts";
 import { MIGRATIONS } from "./db/migrations/index-list.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
 import { openDatabase } from "./db/sqlite.ts";
@@ -50,7 +51,7 @@ import { startAttachmentGc } from "./media/attachment-gc.ts";
 import { createAttachmentStore } from "./media/attachment-store.ts";
 import { directoryByteSize } from "./media/directory-size.ts";
 import { createAutoMemory } from "./memory/auto-memory.ts";
-import { createEpisodicWriter } from "./memory/episodic-writer.ts";
+import { createEpisodicWriter, type MemoryWriteOp } from "./memory/episodic-writer.ts";
 import { createFlushWriter } from "./memory/flush-writer.ts";
 import { createImageDescriptionWriter } from "./memory/image-description-writer.ts";
 import { createMemoryEngine } from "./memory/memory-engine.ts";
@@ -155,15 +156,15 @@ if (reconciled.invalid.length > 0)
   memoryLog.warn({ invalid: reconciled.invalid }, "invalid memory files skipped (fix or remove them)");
 
 // Automatic memory writes (#7): episodic summaries + pre-compaction flush, fired detached after each chat turn.
-// Both writers share the chat model; all writes ride the memory engine's store API (never raw fs).
+// Both writers share the chat model; all writes ride the memory engine's store API (never raw fs) through ONE bound
+// write op — the writer chooses the layer (T5 Q11-1), so the binding no longer pins one.
+const writeMemory: MemoryWriteOp = ({ layer, ...rest }) => memory.writeEntry({ ...rest, type: layer });
 const autoMemory = createAutoMemory({
   timeline: timelineRepo,
   autoState: createMemoryAutoRepo(db),
-  episodic: createEpisodicWriter({
-    model,
-    writeEpisode: (input) => memory.writeEntry({ ...input, type: "episodes" }),
-  }),
-  flush: createFlushWriter({ model, createTools: (id) => memory.createTools(id) }),
+  events: createMemoryEventsRepo(db),
+  episodic: createEpisodicWriter({ model, writeMemory }),
+  flush: createFlushWriter({ model, createTools: (id) => memory.createBackgroundTools(id) }),
   logger: logger.child({ mod: "memory-auto" }),
 });
 
@@ -183,7 +184,7 @@ const imageDescriptionWriter = visionModel
   ? createImageDescriptionWriter({
       model: visionModel,
       attachments: attachmentStore,
-      writeEpisode: (input) => memory.writeEntry({ ...input, type: "episodes" }),
+      writeEpisode: writeMemory,
       logger: logger.child({ mod: "image-memory" }),
     })
   : undefined;

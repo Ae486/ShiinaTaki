@@ -3,7 +3,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
 import { failingGenerateModel, generatingModel } from "../testing/mock-language-model.ts";
-import type { EpisodicWriteOp } from "./episodic-writer.ts";
+import type { MemoryWriteOp } from "./episodic-writer.ts";
 import { createImageDescriptionWriter, type ImageDescriptionAttachments } from "./image-description-writer.ts";
 
 const fixtures: CompanionFixture[] = [];
@@ -17,8 +17,20 @@ afterEach(() => {
 });
 
 // The SAME bound write op auto-memory uses — the writer adds no new memory machinery (D28).
-function episodeOp(f: CompanionFixture): EpisodicWriteOp {
-  return (input) => f.memory.writeEntry({ ...input, type: "episodes" });
+function episodeOp(f: CompanionFixture): MemoryWriteOp {
+  return ({ layer, ...rest }) => f.memory.writeEntry({ ...rest, type: layer });
+}
+
+type WriteCall = Parameters<MemoryWriteOp>[0];
+function recordingOp(): { calls: WriteCall[]; op: MemoryWriteOp } {
+  const calls: WriteCall[] = [];
+  return {
+    calls,
+    op: (input) => {
+      calls.push(input);
+      return { id: `id-${calls.length}` };
+    },
+  };
 }
 
 const okAttachments: ImageDescriptionAttachments = {
@@ -54,7 +66,25 @@ describe("createImageDescriptionWriter (T9b)", () => {
     const body = readFileSync(join(f.root, "memory", files[0] as string), "utf8");
     expect(body).toContain("[image] A red maple leaf resting on a wooden desk.");
     expect(body).toContain("importance: 4");
+    // Origin marks the content as SENSED, which is what lets the render sites fence it (Q8; D47 closes in T5).
+    expect(body).toContain('origin: "observed"');
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it("writes into the episodes layer with origin 'observed' (Q8)", async () => {
+    const rec = recordingOp();
+    const writer = createImageDescriptionWriter({
+      model: generatingModel("A cat asleep on a keyboard."),
+      attachments: okAttachments,
+      writeEpisode: rec.op,
+      logger: { warn: vi.fn() },
+    });
+
+    await writer.onImageTurn({ characterId: "taki", refs: [`attachments/${"c".repeat(64)}.png`], caption: "" });
+
+    expect(rec.calls).toHaveLength(1);
+    expect(rec.calls[0]?.layer).toBe("episodes");
+    expect(rec.calls[0]?.origin).toBe("observed");
   });
 
   it("PII-scrubs the description before it is stored (D44 memory half; the fence stays out of storage — D47)", async () => {

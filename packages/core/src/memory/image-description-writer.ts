@@ -8,7 +8,7 @@
  */
 import { ToolLoopAgent, type LanguageModel, type ModelMessage } from "ai";
 import { scrubPii } from "../perception/pii-scrub.ts";
-import type { EpisodicWriteOp } from "./episodic-writer.ts";
+import type { MemoryWriteOp } from "./episodic-writer.ts";
 
 // The description is the authoritative, PERMANENT record that replaces the image after its bytes expire (decision 6);
 // keep it faithful, concise, and in the conversation's language so later text-model recall reads naturally.
@@ -19,6 +19,8 @@ const DESCRIBE_PROMPT =
 
 // Mid-range episodic importance for an auto-written image description (the store's own range is 3-7).
 const IMAGE_IMPORTANCE = 4;
+// An image description is a moment in the conversation, so it lands in the same layer the episodic writer defaults to.
+const IMAGE_LAYER = "episodes";
 
 // The narrow reader (zero coupling to the media module): the store's AttachmentRead is assignable to this.
 export interface ImageDescriptionAttachments {
@@ -37,7 +39,7 @@ export interface ImageDescriptionWriter {
 export interface ImageDescriptionWriterDeps {
   model: LanguageModel;
   attachments: ImageDescriptionAttachments;
-  writeEpisode: EpisodicWriteOp;
+  writeEpisode: MemoryWriteOp;
   logger: ImageDescriptionLogger;
 }
 
@@ -53,9 +55,16 @@ export function createImageDescriptionWriter(deps: ImageDescriptionWriterDeps): 
         if (description.length === 0) return;
         // Scrub BEFORE storage (prd ruling 5 / D44): a permanent memory must never hold a credential the user happened
         // to photograph. The A1 fence deliberately does NOT go here — it is a prompt-assembly wrapper, and the memory
-        // assembler renders stored entries later without it, so a fenced string would be stored, not fenced (D47).
+        // assembler renders stored entries later without it, so a fenced string would be stored, not fenced. The entry
+        // instead carries origin "observed" (Q8), which is what lets the render sites fence it (D47 closes in T5).
         // ONE entry via the EXISTING episodic write path (no new memory machinery — D28); the prefix keeps recall readable.
-        deps.writeEpisode({ characterId, content: `[image] ${scrubPii(description)}`, importance: IMAGE_IMPORTANCE });
+        deps.writeEpisode({
+          characterId,
+          layer: IMAGE_LAYER,
+          content: `[image] ${scrubPii(description)}`,
+          importance: IMAGE_IMPORTANCE,
+          origin: "observed",
+        });
       } catch (error) {
         // Auto-memory's policy: a failed description is dropped (warn), never surfaced — the caller fired us detached.
         deps.logger.warn({ characterId, err: readable(error) }, "image description write failed; dropped");

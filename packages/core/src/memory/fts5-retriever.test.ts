@@ -21,6 +21,8 @@ function craft(over: Partial<MemoryUpsert> & Pick<MemoryUpsert, "path" | "id" | 
     importance: 5,
     status: "active",
     createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: null,
+    origin: "self",
     expiresAt: null,
     contentHash: over.path,
     disclosure: "",

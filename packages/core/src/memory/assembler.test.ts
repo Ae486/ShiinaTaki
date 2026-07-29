@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import type { MemoryUpsert } from "../db/memory-repo.ts";
 import { createMemoryFixture, type MemoryFixture } from "../testing/memory-fixture.ts";
 import { createAssembler, type Assembler } from "./assembler.ts";
 import { createFts5Retriever } from "./fts5-retriever.ts";
@@ -9,6 +10,23 @@ const STUB_PERSONA: PersonaProvider = {
   assistantLayer: () => "ASSISTANT_LAYER",
   persona: (characterId) => `PERSONA(${characterId})`,
 };
+
+// Crafted index rows (deterministic created_at); the T5 schema fields default to a plain unreinforced self-write.
+function upsert(over: Partial<MemoryUpsert> & Pick<MemoryUpsert, "path" | "id" | "content">): MemoryUpsert {
+  return {
+    layer: "profile",
+    characterId: "taki",
+    importance: 10,
+    status: "active",
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: null,
+    origin: "self",
+    expiresAt: null,
+    contentHash: over.path,
+    disclosure: "",
+    ...over,
+  };
+}
 
 const fixtures: MemoryFixture[] = [];
 function fresh(): { f: MemoryFixture; assembler: Assembler } {
@@ -67,23 +85,39 @@ describe("assembler (T9 deterministic order + budgets)", () => {
   it("prefixes each memory bullet with a code-computed relative age", () => {
     const { f, assembler } = fresh();
     const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
-    f.repo.upsert({
-      path: "/m/r-1.md",
-      id: "0001-r",
-      layer: "relationship",
-      characterId: "taki",
-      importance: 10,
-      status: "active",
-      expiresAt: null,
-      disclosure: "",
-      content: "每周五一起看电影",
-      createdAt: threeDaysAgo,
-      contentHash: "h-r",
-    });
+    f.repo.upsert(
+      upsert({
+        path: "/m/r-1.md",
+        id: "0001-r",
+        layer: "relationship",
+        content: "每周五一起看电影",
+        createdAt: threeDaysAgo,
+        contentHash: "h-r",
+      }),
+    );
 
     const out = assembler.assemble({ characterId: "taki", queryText: "看电影" });
     // Age is computed by code (never left to the model): the bullet carries the "(3 days ago)" prefix.
     expect(out).toContain("- (3 days ago) 每周五一起看电影");
+  });
+
+  it("ages a REINFORCED entry from its last reinforcement, not from its creation (T5-R9)", () => {
+    const { f, assembler } = fresh();
+    const day = 24 * 60 * 60 * 1000;
+    f.repo.upsert(
+      upsert({
+        path: "/m/r-2.md",
+        id: "0002-r",
+        layer: "relationship",
+        content: "答应帮她修电脑",
+        createdAt: new Date(Date.now() - 5 * day).toISOString(),
+        updatedAt: new Date(Date.now() - 1 * day).toISOString(),
+        contentHash: "h-r2",
+      }),
+    );
+
+    // The duplicate write proved the memory was live again, so the prompt must not present it as five days stale.
+    expect(assembler.assemble({ characterId: "taki", queryText: "电脑" })).toContain("- (1 day ago) 答应帮她修电脑");
   });
 });
 
@@ -121,12 +155,11 @@ describe("assembler intention gate (T11, AC 9)", () => {
       layer: "intentions",
       characterId: "taki",
       importance: 5,
-      status: "active",
       expiresAt: "2999-01-01T00:00:00.000Z",
       disclosure: "电影",
     };
-    f.repo.upsert({ ...base, path: "/m/i-old.md", id: "0001-old", content: "旧念头关于电影", createdAt: "2026-01-01T00:00:00.000Z", contentHash: "h-old" });
-    f.repo.upsert({ ...base, path: "/m/i-new.md", id: "0002-new", content: "新念头关于电影", createdAt: "2026-06-01T00:00:00.000Z", contentHash: "h-new" });
+    f.repo.upsert(upsert({ ...base, path: "/m/i-old.md", id: "0001-old", content: "旧念头关于电影", createdAt: "2026-01-01T00:00:00.000Z", contentHash: "h-old" }));
+    f.repo.upsert(upsert({ ...base, path: "/m/i-new.md", id: "0002-new", content: "新念头关于电影", createdAt: "2026-06-01T00:00:00.000Z", contentHash: "h-new" }));
 
     const out = assembler.assemble({ characterId: "taki", queryText: "想看电影了" });
     expect(out).toContain("A quiet thought you might share: 新念头关于电影");

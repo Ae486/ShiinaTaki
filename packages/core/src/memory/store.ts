@@ -1,12 +1,13 @@
 /**
  * INPUT:  MemoryWriteInput / entry file paths + a memory root dir under the Workspace
- * OUTPUT: createMemoryStore({root}) -> { write, archiveAtPath, readAtPath, list, root }; StoredEntry; StoreListing
+ * OUTPUT: createMemoryStore({root}) -> { write, archiveAtPath, reinforceAtPath, readAtPath, list, root };
+ *         StoredEntry; StoreListing
  * POS:    core/memory — THE sanctioned node:fs site (invariant 1, Workspace-scoped); files are truth, atomic temp+rename
  */
 import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from "node:fs";
 import { basename, dirname, relative, sep } from "node:path";
-import { entryFromFile, entryToFile, MemoryEntrySchema, type MemoryEntry } from "./entry.ts";
+import { entryFromFile, entryToFile, MemoryEntrySchema, type MemoryEntry, type MemoryOrigin } from "./entry.ts";
 import { getLayer, type MemoryLayerDefinition } from "./layer-registry.ts";
 import { assertSafeSegment, resolveWithin, slugify } from "./naming.ts";
 
@@ -34,6 +35,7 @@ export interface MemoryWriteInput {
   content: string;
   importance: number;
   disclosure?: string;
+  origin?: MemoryOrigin;
   emotionalWeight?: number;
   expires?: string;
 }
@@ -41,6 +43,8 @@ export interface MemoryWriteInput {
 export interface MemoryStore {
   write(input: MemoryWriteInput): StoredEntry;
   archiveAtPath(filePath: string): StoredEntry;
+  /** T5-R9: bump an existing entry in place (importance up, recency refreshed) instead of inserting a duplicate row. */
+  reinforceAtPath(filePath: string, importance: number): StoredEntry;
   readAtPath(filePath: string): StoredEntry;
   /** Every entry file under the root, parsed — the reconciliation source of truth. */
   list(): StoreListing;
@@ -50,32 +54,18 @@ export interface MemoryStore {
 export function createMemoryStore(deps: { root: string }): MemoryStore {
   const { root } = deps;
 
-  function write(input: MemoryWriteInput): StoredEntry {
-    const layer = requireLayer(input.layer);
-    const { segments, characterId } = placement(layer, input.characterId);
-    const id = allocateId(root, input.content);
-    const entry = MemoryEntrySchema.parse({
-      id,
-      layer: layer.id,
-      importance: input.importance,
-      disclosure: input.disclosure,
-      created: new Date().toISOString(),
-      status: "active",
-      emotionalWeight: input.emotionalWeight,
-      expires: input.expires,
-    });
-    const text = entryToFile(entry, input.content);
-    const filePath = resolveWithin(root, ...segments, `${id}.md`);
-    writeAtomic(filePath, text);
-    return { entry, characterId, filePath, body: input.content, contentHash: hashText(text) };
+  function archiveAtPath(filePath: string): StoredEntry {
+    return rewriteEntry(root, filePath, (entry) => ({ ...entry, status: "archived" }));
   }
 
-  function archiveAtPath(filePath: string): StoredEntry {
-    resolveWithin(root, filePath); // containment guard (path came from the DB index)
-    const { entry, body } = entryFromFile(readFileSync(filePath, "utf8"));
-    const text = entryToFile({ ...entry, status: "archived" }, body);
-    writeAtomic(filePath, text);
-    return toStored(root, filePath, text);
+  // Importance only ever rises: an explicit high-importance entry must not be demoted by a later automatic write.
+  function reinforceAtPath(filePath: string, importance: number): StoredEntry {
+    return rewriteEntry(root, filePath, (entry) => ({
+      ...entry,
+      importance: Math.max(entry.importance, importance),
+      updated: new Date().toISOString(),
+      reinforceCount: (entry.reinforceCount ?? 0) + 1,
+    }));
   }
 
   function readAtPath(filePath: string): StoredEntry {
@@ -98,7 +88,38 @@ export function createMemoryStore(deps: { root: string }): MemoryStore {
     return { entries, invalid };
   }
 
-  return { write, archiveAtPath, readAtPath, list, root };
+  return { write: (input) => createEntryFile(root, input), archiveAtPath, reinforceAtPath, readAtPath, list, root };
+}
+
+function createEntryFile(root: string, input: MemoryWriteInput): StoredEntry {
+  const layer = requireLayer(input.layer);
+  const { segments, characterId } = placement(layer, input.characterId);
+  const id = allocateId(root, input.content);
+  const entry = MemoryEntrySchema.parse({
+    id,
+    layer: layer.id,
+    importance: input.importance,
+    disclosure: input.disclosure,
+    created: new Date().toISOString(),
+    status: "active",
+    origin: input.origin,
+    emotionalWeight: input.emotionalWeight,
+    expires: input.expires,
+  });
+  const text = entryToFile(entry, input.content);
+  const filePath = resolveWithin(root, ...segments, `${id}.md`);
+  writeAtomic(filePath, text);
+  return { entry, characterId, filePath, body: input.content, contentHash: hashText(text) };
+}
+
+// Every in-place edit is this shape: containment guard (the path came from the DB index), read, transform the
+// FRONTMATTER only, atomic write. The body is never rewritten — a stored memory's text is not ours to change.
+function rewriteEntry(root: string, filePath: string, transform: (entry: MemoryEntry) => MemoryEntry): StoredEntry {
+  resolveWithin(root, filePath);
+  const { entry, body } = entryFromFile(readFileSync(filePath, "utf8"));
+  const text = entryToFile(transform(entry), body);
+  writeAtomic(filePath, text);
+  return toStored(root, filePath, text);
 }
 
 function requireLayer(id: string): MemoryLayerDefinition {

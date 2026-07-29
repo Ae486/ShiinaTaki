@@ -58,6 +58,8 @@ function toUpsert(stored: StoredEntry): MemoryUpsert {
     importance: entry.importance,
     status: entry.status,
     createdAt: entry.created,
+    updatedAt: entry.updated ?? null,
+    origin: entry.origin,
     expiresAt: entry.expires ?? null,
     contentHash: stored.contentHash,
     disclosure: entry.disclosure ?? "",
