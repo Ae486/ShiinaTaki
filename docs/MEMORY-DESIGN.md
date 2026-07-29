@@ -60,6 +60,48 @@ data, no per-layer special cases) makes entry-level atomicity, `status`, retenti
 
 Frontmatter (all layers): `id`, `layer`, `importance: 1-10`, `disclosure` (free-text "when to recall" hint, keyword-matched), `created`, `status: active|archived`, optional `emotional_weight`, optional `expires`.
 
+## Blocks: the always-visible tier (T5)
+
+Storage shape follows the tier, and the two answers are different (T5-R20). **Entry rows** (everything above) are the
+*searchable* tier: one thing per file, frontmatter, FTS-indexed, scored, deduped, decayed. **Memory Blocks** are the
+*always-visible* tier: whole documents that are deterministically pushed into every turn's context, edited by rewriting
+rather than by accumulating. Rows are right where retrieval and per-item policy apply; blocks are right where the
+content must be integrated and compressed instead of appended.
+
+Blocks are **pure markdown — zero frontmatter**. Every policy (who may write it, whether it is global or per-character,
+its prompt framing, its token budget) is a row in the block registry (`memory/block-registry.ts`), so a block file
+holds nothing but the content a human would want to read.
+
+```
+workspace/
+├── memory/                            # searchable tier (entry files above) — FTS-indexed
+└── blocks/                            # always-visible tier — NEVER indexed
+    ├── global/
+    │   ├── user-card.md
+    │   └── user-model.md
+    └── characters/taki/
+        └── memory-index.md
+```
+
+The two trees are siblings, never nested: the entry store's recursive walk cannot reach a block, so "blocks are never
+indexed" is structural rather than a filter someone could forget.
+
+| Block | Scope | Writer | What it holds |
+| --- | --- | --- | --- |
+| `user-card` | global | **the user** (hand-edited; no agent path may write it) | identity facts the user states about themselves — name, form of address, timezone, hard preferences. On conflict this wins over anything she remembers (T5-R7) |
+| `user-model` | global | background (tidy pass) | her own consolidated understanding of the user: patterns and well-supported inferences, not stated facts (M-D4) |
+| `memory-index` | per-character | background (tidy pass) | a compact index of what her memory holds, phrased as recall triggers — pointers, never bulk content (T5-R14) |
+
+Injection: blocks render in registry order — the table above IS that order (hard facts, then her reading of the
+user, then the index as navigation) — right after the persona/emotion sections and before the pinned rows, each
+under its registry `header` and carrying its budget number (`[budget: N/M tokens]`) so the background writer that
+maintains it can see how close it is to the ceiling. Over-budget content is trimmed **in the prompt only** — the file
+on disk stays whole, and the visible cut is the signal to consolidate.
+
+The user card is not seeded: create `workspace/blocks/global/user-card.md` by hand and it takes effect on the next
+turn (blocks are read fresh, never cached). Symmetrically, **deleting a block file removes that feature completely**
+(D28) — a missing block renders nothing at all, no header and no error.
+
 ## Context assembly (deterministic order, per-section token budgets)
 
 1. Character persona prompt (static)
