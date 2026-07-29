@@ -20,6 +20,12 @@ decay-archive tier / ranking tiebreak only)?
 - §0.1 A5: Nocturne priority-tiered staleness (`3.5 * 2^prio` days) — arithmetic, no counter.
 - §0.2 R3/R6: decay maths must not enter similarity ranking without a closed loop; exposure != effective
   (Elastic `last_success_at` is the only honest precedent).
+- (added 2026-07-29) Hermes **Holographic** provider (`hermes-memory-analysis.md:97-103`, code-verified):
+  the closest SHIPPED design — `retrieval_count` incremented on every hit (read-side usage counter IS
+  recorded), but score adjustment comes from explicit `record_feedback(helpful)` (+0.05/−0.10 asymmetric),
+  consumed as `ORDER BY fts.rank, trust_score DESC` + a `min_trust` floor. So: shipped precedent for
+  recording the counter and for a score column in ranking — still NOT for counter→importance promotion
+  (survey §11.2 claim stands). Our batch-3 search events already record the read-side signal.
 
 **Gaps to research when triggered:**
 - Re-scan the field: has any shipped system landed counter-based promotion/demotion since 2026-07?

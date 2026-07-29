@@ -297,6 +297,17 @@ tool-call boot read; the "reading memory is remembering" framing goes to the bas
   sets `expires` (the memory_write tool has no expires field either — pre-existing gap); batch 4's
   "intentions archive on expiry" sweeper must decide how null-expiry intentions age, or it will
   never reach them.
+- 2026-07-29 BATCH-2 LEADER RULING (block order): PRD §3 prose order WINS — `V1_BLOCKS` =
+  [user-card, user-model, memory-index] (hard facts, then her interpretation of the user, index
+  last as navigation). The batch-2-design §3 array (card, index, model) was the leader's
+  transcription slip against the owner-approved PRD; the batch-2 check applies the reorder (and
+  moves the "above" wording in the user-model header with it).
+- 2026-07-29 BATCH-4 PLANNING NOTES (from batch-2): (3) `main.ts` sits at 299/300 lines — the
+  memory bootstrap block (persona provider + block store + engine + reconcile logging) needs
+  extraction at batch-4 kickoff; note `memoryRoot` is still read later by the mediaUsage
+  registration, so the extraction carries a small seam decision. (4) `memory-index`
+  budgetTokens=400 is a LOCAL choice with no external source (flagged per source-grounding) —
+  revisit when batch 4 gives the block real content.
 
 ## Standing kickoff agenda (from earlier session rounds)
 

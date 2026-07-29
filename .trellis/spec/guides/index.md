@@ -23,6 +23,7 @@ These guides help you **ask the right questions before coding**.
 |-------|---------|-------------|
 | [Code Reuse Thinking Guide](./code-reuse-thinking-guide.md) | Identify patterns and reduce duplication | When you notice repeated patterns |
 | [Cross-Layer Thinking Guide](./cross-layer-thinking-guide.md) | Think through data flow across layers | Features spanning multiple layers |
+| [Source Grounding Guide](./source-grounding-guide.md) | Fill information gaps by exploration, never invention | Whenever the design doc's detail runs out mid-build |
 
 ---
 
@@ -46,6 +47,14 @@ These guides help you **ask the right questions before coding**.
 - [ ] **You're creating a new utility/helper function** ← Search first!
 
 → Read [Code Reuse Thinking Guide](./code-reuse-thinking-guide.md)
+
+### When to Think About Source Grounding
+
+- [ ] The design doc doesn't cover the detail you need right now
+- [ ] You're about to write an external-API call, a format, or a number from memory
+- [ ] The flow skipped a separate explore/research stage (the duty is now YOURS)
+
+→ Read [Source Grounding Guide](./source-grounding-guide.md)
 
 ---
 
