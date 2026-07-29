@@ -6,6 +6,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Logger } from "../logging/logger.ts";
+import { stripNoteBlock } from "./strip-note.ts";
 
 export interface PersonaProvider {
   /** The global assistant-capability layer, injected FIRST; loaded once at construction. */
@@ -58,18 +59,4 @@ function readCard(path: string, fallback: string, log?: Logger): string {
     log?.warn({ path, err: error instanceof Error ? error.message : String(error) }, "persona card missing; using fallback");
     return fallback;
   }
-}
-
-// Removes only the FIRST contiguous run of markdown blockquote (`>`) lines plus the blank separator it leaves;
-// content below (and the title above) is untouched, and any accidental triple blank is collapsed.
-function stripNoteBlock(markdown: string): string {
-  const lines = markdown.split(/\r?\n/);
-  const isQuote = (line: string | undefined): boolean => line !== undefined && line.trimStart().startsWith(">");
-  const start = lines.findIndex((line) => isQuote(line));
-  if (start === -1) return markdown.trim();
-  let end = start;
-  while (isQuote(lines[end])) end += 1;
-  if (lines[end]?.trim() === "") end += 1; // consume the blank line the note block leaves behind
-  lines.splice(start, end - start);
-  return lines.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }

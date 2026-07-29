@@ -1,10 +1,14 @@
 # core/memory/
 - layer-registry.ts — the layer taxonomy as DATA (MemoryLayerDefinitionSchema + V1_MEMORY_LAYERS + writable-layer selectors)
+- block-registry.ts — the Memory Block taxonomy as DATA (BlockDefinitionSchema + V1_BLOCKS; array order = injection order; ownership/writer/header/budget are all rows)
+- block-store.ts — Memory Block IO: pure-markdown files outside the entry tree (never FTS-indexed), read fresh per turn, written only by the registry's declared writer
 - auto-layer-policy.ts — T5 Q11-1: the AUTOMATIC writer's layer choice set + importance ceiling, both derived from the registry (it may never reach the always-visible rung)
 - frontmatter.ts — zero-dep YAML-frontmatter SUBSET parse/serialize (flat scalars only)
 - entry.ts — memory-entry domain codec: MemoryEntrySchema + frontmatter <-> entry (file text codec); carries `origin` (self|observed) + the R9 reinforcement fields
-- naming.ts — slugify + IdSchema + assertSafeSegment + resolveWithin (path containment); no fs
-- store.ts — THE sanctioned node:fs site (Workspace-scoped): entry files, atomic write, id allocation, archive, reinforce-in-place, list (invalid files reported, not thrown)
+- naming.ts — slugify + IdSchema + assertSafeSegment/isSafeSegment (throw vs skip) + resolveWithin (path containment); no fs
+- write-atomic.ts — the ONE Workspace write primitive (temp + rename), shared by the entry store and the block store
+- strip-note.ts — the shared `>` editor-note convention (D22): strips a human-only note block from persona cards and memory blocks
+- store.ts — the sanctioned node:fs site for ENTRY files (Workspace-scoped): atomic write, id allocation, archive, reinforce-in-place, list (invalid files reported, not thrown)
 - dedupe.ts — T5-R9 write-time near-duplicate check: normalized-string key only, never a model call on the write path
 - indexer.ts — index sync: indexEntry (write path) + reconcile (rebuild the derived index from files; reports invalid files)
 - fts5-query.ts — FTS5 query hygiene: trigram-decompose + quote (MATCH) or escaped LIKE fallback
@@ -13,7 +17,7 @@
 - fts5-retriever.ts — v1 Retriever impl: bm25/LIKE recall + layer + disclosure post-filters
 - token-estimator.ts — soft token budgeting: estimateTokens (CJK-aware) + fitToBudget
 - pinned-block.ts — pinned-block policy: non-truncatable layers survive budget; oldest truncatable drop first
-- assembler.ts — deterministic per-turn context assembly with per-section budgets; memory rows render a code-computed relative age ("(3 days ago)")
+- assembler.ts — deterministic per-turn context assembly with per-section budgets (blocks in registry order, then pinned rows); memory rows render a code-computed relative age ("(3 days ago)") and observed-origin rows only inside the untrusted fence
 - persona-provider.ts — reads prompt/ cards (assistant layer + per-character persona), strips the `>` editor note, sync + cached + safe fallback; injected into the assembler (#16)
 - memory-tools.ts — the first agent tools (memory_write/search/archive); thin, characterId-bound, never throw; plus the BACKGROUND set whose memory_write is schema-restricted to the auto layers + importance ceiling (Q11-1 covers every automatic path)
 - memory-engine.ts — the memory subsystem composition root (store+repo+indexer+retriever+assembler+tools; exposes writeEntry, createTools, createBackgroundTools)

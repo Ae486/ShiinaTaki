@@ -1,12 +1,13 @@
 /**
- * INPUT:  the Database wrapper + a memory root dir (under the Workspace) + an optional PersonaProvider (prompt cards)
- * OUTPUT: createMemoryEngine({db, memoryRoot, persona?}) -> { reconcile, assemble, createTools, writeEntry }
+ * INPUT:  the Database wrapper + a memory root dir (under the Workspace) + optional PersonaProvider / BlockStore / budget
+ * OUTPUT: createMemoryEngine(deps) -> { reconcile, assemble, createTools, createBackgroundTools, writeEntry }
  * POS:    core/memory — the memory subsystem's composition root: wires store+repo+indexer+retriever+assembler+tools
  */
 import type { Database } from "../db/sqlite.ts";
 import { createMemoryEventsRepo, type MemoryEventsRepo } from "../db/memory-events-repo.ts";
 import { createMemoryRepo, type MemoryRepo } from "../db/memory-repo.ts";
 import { createAssembler, type AssembleParams } from "./assembler.ts";
+import type { BlockStore } from "./block-store.ts";
 import { findDuplicate } from "./dedupe.ts";
 import { createFts5Retriever } from "./fts5-retriever.ts";
 import { indexEntry, reconcile, type ReconcileStats } from "./indexer.ts";
@@ -31,14 +32,29 @@ export interface MemoryEngine {
   writeEntry(input: MemoryWriteRequest): { id: string; layer: string };
 }
 
-export function createMemoryEngine(deps: { db: Database; memoryRoot: string; persona?: PersonaProvider }): MemoryEngine {
+export interface MemoryEngineDeps {
+  db: Database;
+  memoryRoot: string;
+  persona?: PersonaProvider;
+  /** The always-visible Memory Blocks (Workspace `blocks/` tree); absent = the assembler emits no block sections. */
+  blocks?: BlockStore;
+  pinnedBudget?: number;
+}
+
+export function createMemoryEngine(deps: MemoryEngineDeps): MemoryEngine {
   const store = createMemoryStore({ root: deps.memoryRoot });
   const repo = createMemoryRepo(deps.db);
   // Created here rather than injected: the engine already owns the db, so the write path can never ship unwired.
   const events = createMemoryEventsRepo(deps.db);
   const retriever = createFts5Retriever(repo);
   // The persona provider is injected in production (main.ts, reading prompt/); tests without one degrade to fallbacks.
-  const assembler = createAssembler({ repo, retriever, persona: deps.persona ?? createFallbackPersonaProvider() });
+  const assembler = createAssembler({
+    repo,
+    retriever,
+    persona: deps.persona ?? createFallbackPersonaProvider(),
+    blocks: deps.blocks,
+    pinnedBudget: deps.pinnedBudget,
+  });
 
   // The write path is file-first, then index (a crash between the two heals at the next startup reconcile).
   const ops: MemoryToolOps = {

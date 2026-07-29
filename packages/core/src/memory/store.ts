@@ -2,14 +2,16 @@
  * INPUT:  MemoryWriteInput / entry file paths + a memory root dir under the Workspace
  * OUTPUT: createMemoryStore({root}) -> { write, archiveAtPath, reinforceAtPath, readAtPath, list, root };
  *         StoredEntry; StoreListing
- * POS:    core/memory — THE sanctioned node:fs site (invariant 1, Workspace-scoped); files are truth, atomic temp+rename
+ * POS:    core/memory — the sanctioned node:fs site for ENTRY files (invariant 1, Workspace-scoped); files are truth,
+ *         atomic temp+rename (blocks are the other tier and live in block-store.ts)
  */
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from "node:fs";
-import { basename, dirname, relative, sep } from "node:path";
+import { readFileSync, readdirSync } from "node:fs";
+import { basename, relative, sep } from "node:path";
 import { entryFromFile, entryToFile, MemoryEntrySchema, type MemoryEntry, type MemoryOrigin } from "./entry.ts";
 import { getLayer, type MemoryLayerDefinition } from "./layer-registry.ts";
 import { assertSafeSegment, resolveWithin, slugify } from "./naming.ts";
+import { writeAtomic } from "./write-atomic.ts";
 
 export interface StoredEntry {
   entry: MemoryEntry;
@@ -168,13 +170,6 @@ function toStored(root: string, filePath: string, text: string): StoredEntry {
 function characterIdFromPath(root: string, filePath: string): string | null {
   const parts = relative(root, filePath).split(sep);
   return parts[0] === "characters" ? (parts[1] ?? null) : null;
-}
-
-function writeAtomic(filePath: string, text: string): void {
-  mkdirSync(dirname(filePath), { recursive: true });
-  const tempPath = `${filePath}.tmp`;
-  writeFileSync(tempPath, text);
-  renameSync(tempPath, filePath); // same-volume atomic replace (Workspace-local)
 }
 
 function hashText(text: string): string {

@@ -31,6 +31,7 @@ import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
 import { loadAgentConfig } from "./config/agent-config.ts";
 import { loadAmbientScreenshotConfig } from "./config/ambient-screenshot-config.ts";
 import { loadAttachmentConfig } from "./config/attachment-config.ts";
+import { loadMemoryConfig } from "./config/memory-config.ts";
 import { loadProviderConfig } from "./config/provider-config.ts";
 import { loadServerConfig } from "./config/server-config.ts";
 import { loadVisionConfig } from "./config/vision-config.ts";
@@ -51,6 +52,7 @@ import { startAttachmentGc } from "./media/attachment-gc.ts";
 import { createAttachmentStore } from "./media/attachment-store.ts";
 import { directoryByteSize } from "./media/directory-size.ts";
 import { createAutoMemory } from "./memory/auto-memory.ts";
+import { createBlockStore } from "./memory/block-store.ts";
 import { createEpisodicWriter, type MemoryWriteOp } from "./memory/episodic-writer.ts";
 import { createFlushWriter } from "./memory/flush-writer.ts";
 import { createImageDescriptionWriter } from "./memory/image-description-writer.ts";
@@ -97,6 +99,7 @@ const agentConfig = loadAgentConfig(process.env);
 // fatal-fast — a partial TAKI_VLM_* set or a garbage TTL fails the boot, never silently degrades.
 const visionConfig = loadVisionConfig(process.env);
 const attachmentConfig = loadAttachmentConfig(process.env);
+const memoryConfig = loadMemoryConfig(process.env);
 // Ambient screen sampling (#20 T3b): OFF unless explicitly enabled, raw frames dropped right after describe.
 const ambientConfig = loadAmbientScreenshotConfig(process.env);
 
@@ -145,11 +148,10 @@ const memoryLog = logger.child({ mod: "memory" });
 // FIRST in the assembled turn context (prompt/README.md order). A missing card degrades to a built-in fallback.
 const personaProvider = createPersonaProvider({ promptDir: serverConfig.promptDir, logger });
 const memoryRoot = join(serverConfig.dataDir, "workspace", "memory");
-const memory = createMemoryEngine({
-  db,
-  memoryRoot,
-  persona: personaProvider,
-});
+// Memory Blocks (T5 Q7): the always-visible tier — pure markdown BESIDE the entry tree, so the FTS index can never
+// ingest one; `blocks/global/user-card.md` is the user's hand-edited identity card, re-read on every turn.
+const blocks = createBlockStore({ root: join(serverConfig.dataDir, "workspace", "blocks") });
+const memory = createMemoryEngine({ db, memoryRoot, persona: personaProvider, blocks, pinnedBudget: memoryConfig.pinnedBudget });
 const reconciled = memory.reconcile();
 memoryLog.info(reconciled, "memory index reconciled from workspace");
 if (reconciled.invalid.length > 0)
