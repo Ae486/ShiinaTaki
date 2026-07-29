@@ -271,6 +271,33 @@ fixed for M-/D- numbers. From here on cite **T5-R#** / **T4-R#**; bare R# is amb
 Boot read from R12: NOT adopted — deterministic push (blocks injected by code) supersedes a
 tool-call boot read; the "reading memory is remembering" framing goes to the base prompt.
 
+- 2026-07-28 IMPLEMENTATION CLARIFICATION (leader, pre-batch-1): Q11-1's ceiling implies the AUTO
+  writer's layer choice set EXCLUDES pinned-policy layers (relationship is pinned by POLICY at any
+  importance — choosing it would mint rung-1 visibility regardless of the importance clamp). Auto
+  writer chooses among writable non-pinned layers (profile/episodes/intentions), importance clamped
+  below `pinnedImportanceThreshold`. Promises reach `relationship` via the EXPLICIT in-conversation
+  tool path (user says 记住 → she writes relationship/10 deliberately — R16 family) or tidy
+  promotion. This is what makes Q11-1's accepted description ("误判代价限于多一条可检索记忆") true.
+- 2026-07-28 EVENTS SUBSTRATE (leader call): memory events land in a NEW `memory_events` DB table
+  (kind/character_id/turn_seq/entry_id/created_at; batch 1 kinds: skip, reinforce; batch 3 adds
+  search) — DB is local+private and SQL-joinable for 其四 diagnosis; pino keeps count-only summary
+  lines per logging-guidelines.
+- 2026-07-29 BATCH-1 CHECK RULING (leader, check finding F2): the flush writer IS an automatic
+  pass, so the Q11-1 ceiling applies to it too — its ToolSet gets a RESTRICTED memory_write
+  (layer enum = AUTO_WRITABLE_LAYER_IDS, importance clamped via clampAutoImportance, description
+  matching the restricted reality). This keeps the accepted Q11-1 property literal (NO automatic
+  path can mint always-visible rows) and makes the conversation tool's "the background writer
+  never can" sentence true. A 记住 promise the in-conversation path missed still gets SAVED by
+  the flush (R15's override protects saving, not the rung), just below the pin line; recovery to
+  always-visible = R16 pin-on-repeat (batch 5 prompt) or tidy promotion (batch 4). Cost accepted:
+  such a promise is not always-visible until then.
+- 2026-07-29 BATCH-4 PLANNING NOTES (from batch-1 check, informational): (1) R9 reinforce keeps
+  the EXISTING entry's disclosure and discards the incoming one — confirmed as R9-literal; tidy's
+  set-disclosure op is the improvement path. (2) `intentions` is now auto-writable but nothing
+  sets `expires` (the memory_write tool has no expires field either — pre-existing gap); batch 4's
+  "intentions archive on expiry" sweeper must decide how null-expiry intentions age, or it will
+  never reach them.
+
 ## Standing kickoff agenda (from earlier session rounds)
 
 - Grill scope decision pending owner: terminology→CONTEXT.md (block vs row tiers, identity card, write
