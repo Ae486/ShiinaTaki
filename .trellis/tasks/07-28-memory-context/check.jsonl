@@ -1,6 +1,8 @@
 {"file": ".trellis/tasks/07-28-memory-context/prd.md", "reason": "Verify against every ruling + batch AC; out-of-scope list must not be silently re-entered"}
 {"file": ".trellis/tasks/07-28-memory-context/notes.md", "reason": "Verify implementation matches the grill rulings verbatim (ceiling below pin line, gate semantics, tidy recipe, fence sites)"}
 {"file": ".trellis/tasks/07-28-memory-context/batch-2-design.md", "reason": "Batch 2 contract: verify block registry/store/assembler work against this design verbatim"}
+{"file": ".trellis/tasks/07-28-memory-context/batch-3-design.md", "reason": "Batch 3 contract: verify retrieval migration against this design verbatim"}
+{"file": ".trellis/tasks/07-28-memory-context/batch-4-design.md", "reason": "Batch 4 contract: verify maintenance work against this design verbatim"}
 {"file": ".trellis/spec/guides/source-grounding-guide.md", "reason": "Verify no fabricated facts: numbers/APIs/formats trace to design, sources, repo, or installed deps"}
 {"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "size caps / headers / index.md / test bar"}
 {"file": ".trellis/spec/backend/agent-runtime.md", "reason": "D1 frozen-zone byte-compare + seam law + fence rule compliance"}

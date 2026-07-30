@@ -1,6 +1,8 @@
 {"file": ".trellis/tasks/07-28-memory-context/prd.md", "reason": "The contract: all owner-ratified rulings, 7-batch plan, out-of-scope list, acceptance"}
 {"file": ".trellis/tasks/07-28-memory-context/notes.md", "reason": "Grill ruling log with rationale - wins over t5-decisions on conflict; contains the tidy recipe, block design, corrections"}
 {"file": ".trellis/tasks/07-28-memory-context/batch-2-design.md", "reason": "Batch 2 pre-dev design: disk layout, block registry schema, store API, assembler integration, TDD table, frozen zones"}
+{"file": ".trellis/tasks/07-28-memory-context/batch-3-design.md", "reason": "Batch 3 contract: tokenizer migration, segmenter seam, weights config, gate removal, search events"}
+{"file": ".trellis/tasks/07-28-memory-context/batch-4-design.md", "reason": "Batch 4 contract: utility slot, tidy pass recipe (rc-derived), retention sweeper, block content duties"}
 {"file": ".trellis/spec/guides/source-grounding-guide.md", "reason": "Owner-mandated: fill missing detail by exploring the design's cited sources, never by invention"}
 {"file": ".trellis/workspace/pleia/t5-decisions.md", "reason": "Binding R0-R22 with full reasoning (grill notes supersede where they overlap)"}
 {"file": ".trellis/tasks/07-28-memory-context/research/ra-retrieval-stack.md", "reason": "LAW for batch 3: tokenizer migration, Intl.Segmenter evidence, weights regressions, test case classes"}
