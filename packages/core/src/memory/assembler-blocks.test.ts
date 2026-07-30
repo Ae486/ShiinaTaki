@@ -9,14 +9,17 @@ import { createAssembler, type Assembler } from "./assembler.ts";
 import { createBlockStore, type BlockStore } from "./block-store.ts";
 import { createFts5Retriever } from "./fts5-retriever.ts";
 import type { PersonaProvider } from "./persona-provider.ts";
+import { createIntlSegmenterTokenizer } from "./search-tokenizer.ts";
 
 const STUB_PERSONA: PersonaProvider = {
   assistantLayer: () => "ASSISTANT_LAYER",
   persona: (characterId) => `PERSONA(${characterId})`,
 };
 
+const TOKENIZER = createIntlSegmenterTokenizer({ stoplist: true });
+
 function upsert(over: Partial<MemoryUpsert> & Pick<MemoryUpsert, "path" | "id" | "content">): MemoryUpsert {
-  return {
+  const row = {
     layer: "profile",
     characterId: "taki",
     importance: 10,
@@ -27,8 +30,10 @@ function upsert(over: Partial<MemoryUpsert> & Pick<MemoryUpsert, "path" | "id" |
     expiresAt: null,
     contentHash: over.path,
     disclosure: "",
+    searchTerms: "",
     ...over,
   };
+  return { ...row, searchTerms: TOKENIZER.tokenize(`${row.disclosure} ${row.content}`).join(" ") };
 }
 
 const fixtures: MemoryFixture[] = [];
@@ -44,7 +49,7 @@ function fresh(opts: { pinnedBudget?: number } = {}): { f: MemoryFixture; blocks
     blocks,
     assembler: createAssembler({
       repo: f.repo,
-      retriever: createFts5Retriever(f.repo),
+      retriever: createFts5Retriever({ repo: f.repo, tokenizer: f.tokenizer }),
       persona: STUB_PERSONA,
       blocks,
       pinnedBudget: opts.pinnedBudget,

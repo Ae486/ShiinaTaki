@@ -7,8 +7,8 @@
 import { z } from "zod";
 import type { Database } from "./sqlite.ts";
 
-// Batch 1 kinds; batch 3 adds "search". Kind is plain TEXT in SQLite, so extending is one entry here.
-export const MemoryEventKindSchema = z.enum(["skip", "reinforce"]);
+// Batch 1 kinds + batch 3's "search". Kind is plain TEXT in SQLite, so extending is one entry here.
+export const MemoryEventKindSchema = z.enum(["skip", "reinforce", "search"]);
 export type MemoryEventKind = z.infer<typeof MemoryEventKindSchema>;
 
 export interface MemoryEvent {
@@ -17,6 +17,8 @@ export interface MemoryEvent {
   /** The timeline seq this decision belongs to; absent when the write path has no turn context. */
   turnSeq?: number;
   entryId?: string;
+  /** How many rows the decision touched — a search's hit count (其四). Absent for skip/reinforce. */
+  count?: number;
 }
 
 export interface MemoryEventRow {
@@ -25,6 +27,7 @@ export interface MemoryEventRow {
   characterId: string;
   turnSeq: number | null;
   entryId: string | null;
+  count: number | null;
   createdAt: string;
 }
 
@@ -35,10 +38,10 @@ export interface MemoryEventsRepo {
 }
 
 const INSERT_SQL =
-  "INSERT INTO memory_events (kind, character_id, turn_seq, entry_id, created_at) " +
-  "VALUES (:kind, :characterId, :turnSeq, :entryId, :createdAt)";
+  "INSERT INTO memory_events (kind, character_id, turn_seq, entry_id, count, created_at) " +
+  "VALUES (:kind, :characterId, :turnSeq, :entryId, :count, :createdAt)";
 const LIST_SQL =
-  "SELECT id, kind, character_id, turn_seq, entry_id, created_at FROM memory_events " +
+  "SELECT id, kind, character_id, turn_seq, entry_id, count, created_at FROM memory_events " +
   "WHERE character_id = :characterId ORDER BY id DESC LIMIT :limit";
 
 const RowSchema = z.object({
@@ -47,6 +50,7 @@ const RowSchema = z.object({
   characterId: z.string(),
   turnSeq: z.int().nullable(),
   entryId: z.string().nullable(),
+  count: z.int().nullable(),
   createdAt: z.string(),
 });
 
@@ -55,12 +59,13 @@ export function createMemoryEventsRepo(db: Database): MemoryEventsRepo {
   const list = db.prepare(LIST_SQL);
 
   return {
-    record({ kind, characterId, turnSeq, entryId }) {
+    record({ kind, characterId, turnSeq, entryId, count }) {
       insert.run({
         kind,
         characterId,
         turnSeq: turnSeq ?? null,
         entryId: entryId ?? null,
+        count: count ?? null,
         createdAt: new Date().toISOString(),
       });
     },
@@ -72,6 +77,7 @@ export function createMemoryEventsRepo(db: Database): MemoryEventsRepo {
           characterId: row.character_id,
           turnSeq: row.turn_seq,
           entryId: row.entry_id,
+          count: row.count,
           createdAt: row.created_at,
         }),
       );

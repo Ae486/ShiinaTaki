@@ -1,9 +1,10 @@
 /**
- * INPUT:  the Database wrapper + upsert/delete/list/search calls (the derived memory index)
- * OUTPUT: createMemoryRepo(db) -> { upsert, deleteByPath, listHashes, listActiveByLayers, search, resolvePath }
+ * INPUT:  the Database wrapper + upsert/delete/list/search calls (the derived memory index) + bm25 column weights
+ * OUTPUT: createMemoryRepo(db, weights?) -> { upsert, deleteByPath, listHashes, listActiveByLayers, search, resolvePath }
  * POS:    core/db — the memory aggregate's typed SQL over memory_entries + memory_fts; no node:sqlite import (uses the wrapper)
  */
 import { z } from "zod";
+import { DEFAULT_BM25_WEIGHTS, type Bm25Weights } from "../config/memory-config.ts";
 import type { Database, SqlRow } from "./sqlite.ts";
 
 export interface MemoryUpsert {
@@ -20,6 +21,8 @@ export interface MemoryUpsert {
   contentHash: string;
   disclosure: string;
   content: string;
+  /** App-segmented terms for the CJK-live FTS column; REQUIRED so no write path can silently lose 2-char recall. */
+  searchTerms: string;
 }
 
 export interface MemoryHashRow {
@@ -83,26 +86,45 @@ const UPSERT_META_SQL =
   "updated_at=excluded.updated_at, origin=excluded.origin, " +
   "expires_at=excluded.expires_at, content_hash=excluded.content_hash";
 
-// bm25 weights are positional over ALL columns incl. the UNINDEXED path (col 0): path 0, disclosure 1, content 2.
-const SEARCH_MATCH_SQL =
-  `SELECT ${COLS} FROM ${JOIN} WHERE memory_fts MATCH :match AND ${SCOPE} ` +
-  "ORDER BY bm25(memory_fts, 0.0, 1.0, 2.0), m.importance DESC, m.created_at DESC LIMIT :limit";
+// bm25 weights are positional over ALL columns incl. the UNINDEXED path (col 0): path 0, disclosure 1, content 2,
+// search_terms 3. They are boot-time config rather than caller input, so they are baked into the prepared statement
+// at repo construction — search()'s parameter set stays the same for every call site.
+function searchMatchSql(weights: Bm25Weights): string {
+  return (
+    `SELECT ${COLS} FROM ${JOIN} WHERE memory_fts MATCH :match AND ${SCOPE} ` +
+    `ORDER BY bm25(memory_fts, 0.0, ${weights.disclosure}, ${weights.content}, ${weights.searchTerms}), ` +
+    "m.importance DESC, m.created_at DESC LIMIT :limit"
+  );
+}
 const SEARCH_LIKE_SQL =
   `SELECT ${COLS} FROM ${JOIN} ` +
   "WHERE (memory_fts.content LIKE :like ESCAPE '\\' OR memory_fts.disclosure LIKE :like ESCAPE '\\') " +
   `AND ${SCOPE} ORDER BY m.importance DESC, m.created_at DESC LIMIT :limit`;
+const RESOLVE_SQL =
+  "SELECT path FROM memory_entries WHERE id = :id AND (character_id IS NULL OR character_id = :characterId) " +
+  "ORDER BY path LIMIT 1";
 
-export function createMemoryRepo(db: Database): MemoryRepo {
-  const upsertMeta = db.prepare(UPSERT_META_SQL);
-  const ftsDelete = db.prepare("DELETE FROM memory_fts WHERE path = :path");
-  const ftsInsert = db.prepare("INSERT INTO memory_fts (path, disclosure, content) VALUES (:path, :disclosure, :content)");
-  const metaDelete = db.prepare("DELETE FROM memory_entries WHERE path = :path");
-  const hashes = db.prepare("SELECT path, content_hash FROM memory_entries");
-  const searchMatch = db.prepare(SEARCH_MATCH_SQL);
-  const searchLike = db.prepare(SEARCH_LIKE_SQL);
-  const resolve = db.prepare(
-    "SELECT path FROM memory_entries WHERE id = :id AND (character_id IS NULL OR character_id = :characterId) " +
-      "ORDER BY path LIMIT 1",
+// Every statement this repo owns, prepared once. Separated from the method surface below so the weights (which are
+// baked into the MATCH statement) have exactly one place they can enter.
+function prepareStatements(db: Database, weights: Bm25Weights) {
+  return {
+    upsertMeta: db.prepare(UPSERT_META_SQL),
+    ftsDelete: db.prepare("DELETE FROM memory_fts WHERE path = :path"),
+    ftsInsert: db.prepare(
+      "INSERT INTO memory_fts (path, disclosure, content, search_terms) VALUES (:path, :disclosure, :content, :searchTerms)",
+    ),
+    metaDelete: db.prepare("DELETE FROM memory_entries WHERE path = :path"),
+    hashes: db.prepare("SELECT path, content_hash FROM memory_entries"),
+    searchMatch: db.prepare(searchMatchSql(weights)),
+    searchLike: db.prepare(SEARCH_LIKE_SQL),
+    resolve: db.prepare(RESOLVE_SQL),
+  };
+}
+
+export function createMemoryRepo(db: Database, weights: Bm25Weights = DEFAULT_BM25_WEIGHTS): MemoryRepo {
+  const { upsertMeta, ftsDelete, ftsInsert, metaDelete, hashes, searchMatch, searchLike, resolve } = prepareStatements(
+    db,
+    weights,
   );
 
   return {
@@ -110,7 +132,8 @@ export function createMemoryRepo(db: Database): MemoryRepo {
       db.transaction(() => {
         upsertMeta.run(toMetaParams(input));
         ftsDelete.run({ path: input.path });
-        ftsInsert.run({ path: input.path, disclosure: input.disclosure, content: input.content });
+        const { path, disclosure, content, searchTerms } = input;
+        ftsInsert.run({ path, disclosure, content, searchTerms });
       });
     },
     deleteByPath(path) {

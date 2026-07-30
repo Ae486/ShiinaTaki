@@ -8,7 +8,10 @@ import { openDatabase, type Database } from "../db/sqlite.ts";
 import { rmTempDir } from "../testing/rm-temp.ts";
 import { createBlockStore } from "./block-store.ts";
 import { reconcile } from "./indexer.ts";
+import { createIntlSegmenterTokenizer } from "./search-tokenizer.ts";
 import { createMemoryStore } from "./store.ts";
+
+const tokenizer = createIntlSegmenterTokenizer({ stoplist: true });
 
 const dataDirs: string[] = [];
 const dbs: Database[] = [];
@@ -34,7 +37,7 @@ describe("Memory Blocks never enter the FTS index (structural, not a filter)", (
     blocks.writeBlock({ id: "memory-index", characterId: "taki", content: "拉面", caller: "background" });
     store.write({ layer: "episodes", characterId: "taki", content: "今天聊到了豚骨拉面", importance: 4 });
 
-    const stats = reconcile({ repo, store });
+    const stats = reconcile({ repo, tokenizer, store });
     expect(stats).toMatchObject({ total: 1, upserted: 1, invalid: [] });
     expect(repo.listHashes().map((row) => row.path).some((path) => path.includes("blocks"))).toBe(false);
 
@@ -59,7 +62,7 @@ describe("Memory Blocks never enter the FTS index (structural, not a filter)", (
     mkdirSync(dirname(stray), { recursive: true });
     writeFileSync(stray, "Name: pleia\n常在深夜写代码");
 
-    const stats = reconcile({ repo, store });
+    const stats = reconcile({ repo, tokenizer, store });
     expect(stats).toMatchObject({ total: 0, upserted: 0 });
     expect(stats.invalid).toEqual([stray]);
     expect(repo.search({ like: "%深夜%", characterId: "taki", now: new Date().toISOString(), limit: 10 })).toHaveLength(0);

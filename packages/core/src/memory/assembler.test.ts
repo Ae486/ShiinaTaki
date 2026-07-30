@@ -4,6 +4,7 @@ import { createMemoryFixture, type MemoryFixture } from "../testing/memory-fixtu
 import { createAssembler, type Assembler } from "./assembler.ts";
 import { createFts5Retriever } from "./fts5-retriever.ts";
 import type { PersonaProvider } from "./persona-provider.ts";
+import { createIntlSegmenterTokenizer } from "./search-tokenizer.ts";
 
 // Recognizable stub cards so the fixed-order assertions can pin exactly where persona content lands.
 const STUB_PERSONA: PersonaProvider = {
@@ -11,9 +12,12 @@ const STUB_PERSONA: PersonaProvider = {
   persona: (characterId) => `PERSONA(${characterId})`,
 };
 
+const TOKENIZER = createIntlSegmenterTokenizer({ stoplist: true });
+
 // Crafted index rows (deterministic created_at); the T5 schema fields default to a plain unreinforced self-write.
+// search_terms is segmented here exactly as the indexer would, so a crafted row is findable like a written one.
 function upsert(over: Partial<MemoryUpsert> & Pick<MemoryUpsert, "path" | "id" | "content">): MemoryUpsert {
-  return {
+  const row = {
     layer: "profile",
     characterId: "taki",
     importance: 10,
@@ -24,8 +28,10 @@ function upsert(over: Partial<MemoryUpsert> & Pick<MemoryUpsert, "path" | "id" |
     expiresAt: null,
     contentHash: over.path,
     disclosure: "",
+    searchTerms: "",
     ...over,
   };
+  return { ...row, searchTerms: TOKENIZER.tokenize(`${row.disclosure} ${row.content}`).join(" ") };
 }
 
 const fixtures: MemoryFixture[] = [];
@@ -34,7 +40,11 @@ function fresh(): { f: MemoryFixture; assembler: Assembler } {
   fixtures.push(f);
   return {
     f,
-    assembler: createAssembler({ repo: f.repo, retriever: createFts5Retriever(f.repo), persona: STUB_PERSONA }),
+    assembler: createAssembler({
+      repo: f.repo,
+      retriever: createFts5Retriever({ repo: f.repo, tokenizer: f.tokenizer }),
+      persona: STUB_PERSONA,
+    }),
   };
 }
 afterEach(() => {

@@ -14,6 +14,8 @@ export interface RankedEntry {
   importance: number;
   created: string;
   disclosure: string;
+  /** "self" | "observed" — render sites fence observed content (Q8/D47); kept as a string so the seam stays db-shaped. */
+  origin: string;
   content: string;
 }
 

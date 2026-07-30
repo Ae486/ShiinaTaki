@@ -11,6 +11,8 @@ import { timelinePartsMigration004 } from "./004-timeline-parts.ts";
 import { privacyPauseMigration005 } from "./005-privacy-pause.ts";
 import { memoryOriginMigration006 } from "./006-memory-origin.ts";
 import { memoryEventsMigration007 } from "./007-memory-events.ts";
+import { memoryFtsUnicode61Migration008 } from "./008-memory-fts-unicode61.ts";
+import { memoryEventsCountMigration009 } from "./009-memory-events-count.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -20,4 +22,6 @@ export const MIGRATIONS: Migration[] = [
   privacyPauseMigration005,
   memoryOriginMigration006,
   memoryEventsMigration007,
+  memoryFtsUnicode61Migration008,
+  memoryEventsCountMigration009,
 ];

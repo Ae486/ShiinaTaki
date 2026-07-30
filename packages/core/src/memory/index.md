@@ -10,17 +10,18 @@
 - strip-note.ts — the shared `>` editor-note convention (D22): strips a human-only note block from persona cards and memory blocks
 - store.ts — the sanctioned node:fs site for ENTRY files (Workspace-scoped): atomic write, id allocation, archive, reinforce-in-place, list (invalid files reported, not thrown)
 - dedupe.ts — T5-R9 write-time near-duplicate check: normalized-string key only, never a model call on the write path
-- indexer.ts — index sync: indexEntry (write path) + reconcile (rebuild the derived index from files; reports invalid files)
-- fts5-query.ts — FTS5 query hygiene: trigram-decompose + quote (MATCH) or escaped LIKE fallback
-- disclosure-gate.ts — the shared "when to recall" keyword gate (retriever + intention gate use one definition)
-- retriever.ts — the Retriever seam (interface + RankedEntry; v2 hybrid-vector plan documented)
-- fts5-retriever.ts — v1 Retriever impl: bm25/LIKE recall + layer + disclosure post-filters
+- indexer.ts — index sync: indexEntry (write path) + reconcile (rebuild the derived index from files; reports invalid files); computes the segmented search_terms column
+- search-tokenizer.ts — THE swappable segmentation seam (D53): SearchTokenizer + the Intl.Segmenter v1 impl + the CJK function-word stoplist; index side and query side share one instance
+- fts5-query.ts — FTS5 query hygiene: segment the query through the tokenizer and OR the quoted terms (MATCH), or fall back to an escaped LIKE for input with no usable term
+- disclosure-gate.ts — the "when to recall" keyword gate; the assembler's intention gate is its only consumer (the retriever's AND post-filter was removed in T5 Q2)
+- retriever.ts — the Retriever seam (interface + RankedEntry incl. disclosure/origin; v2 hybrid-vector plan documented)
+- fts5-retriever.ts — v1 Retriever impl: bm25 recall (config-weighted, 4-column) + LIKE fallback + the layer post-filter
 - token-estimator.ts — soft token budgeting: estimateTokens (CJK-aware) + fitToBudget
 - pinned-block.ts — pinned-block policy: non-truncatable layers survive budget; oldest truncatable drop first
 - assembler.ts — deterministic per-turn context assembly with per-section budgets (blocks in registry order, then pinned rows); memory rows render a code-computed relative age ("(3 days ago)") and observed-origin rows only inside the untrusted fence
 - persona-provider.ts — reads prompt/ cards (assistant layer + per-character persona), strips the `>` editor note, sync + cached + safe fallback; injected into the assembler (#16)
-- memory-tools.ts — the first agent tools (memory_write/search/archive); thin, characterId-bound, never throw; plus the BACKGROUND set whose memory_write is schema-restricted to the auto layers + importance ceiling (Q11-1 covers every automatic path)
-- memory-engine.ts — the memory subsystem composition root (store+repo+indexer+retriever+assembler+tools; exposes writeEntry, createTools, createBackgroundTools)
+- memory-tools.ts — the first agent tools (memory_write/search/archive); thin, characterId-bound, never throw; search hits carry disclosure + origin (observed content fenced) and record a search event; plus the BACKGROUND set whose memory_write is schema-restricted to the auto layers + importance ceiling (Q11-1 covers every automatic path)
+- memory-engine.ts — the memory subsystem composition root (store+repo+tokenizer+indexer+retriever+assembler+tools; exposes writeEntry, createTools, createBackgroundTools)
 - render-transcript.ts — shared helper: a timeline segment -> "role: text" transcript for the auto-write prompts
 - write-convention.ts — the ONE shared write-side prompt wording: WRITE_GATE_RULE (T5-R15 behaviour-change test) + MEMORY_VOICE_RULE (T5-R10 first person, user's words); episodic + flush import it so the voices cannot diverge
 - episodic-writer.ts — auto-write path 2: segment -> 0..3 entries in the layer the model chooses, write-gated (silence is the normal outcome), importance clamped below the pin line

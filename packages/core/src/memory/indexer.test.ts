@@ -23,7 +23,7 @@ describe("indexer reconciliation (T6)", () => {
 
     const stats = f.reconcile();
     expect(stats).toMatchObject({ upserted: 2, deleted: 0, total: 2 });
-    expect(f.repo.search({ match: '"豚骨拉"', characterId: "taki", now: NOW, limit: 10 })).toHaveLength(1);
+    expect(f.repo.search({ match: '"拉面"', characterId: "taki", now: NOW, limit: 10 })).toHaveLength(1);
   });
 
   it("re-indexes a changed file and drops an orphaned row", () => {
@@ -39,7 +39,7 @@ describe("indexer reconciliation (T6)", () => {
 
     expect(stats).toMatchObject({ upserted: 1, deleted: 1, total: 1 });
     // Archived entry is excluded from active search; deleted file's row is gone.
-    expect(f.repo.search({ match: '"旧约定"', characterId: "taki", now: NOW, limit: 10 })).toHaveLength(0);
+    expect(f.repo.search({ match: '"约定"', characterId: "taki", now: NOW, limit: 10 })).toHaveLength(0);
     expect(f.repo.listHashes()).toHaveLength(1);
   });
 
@@ -67,7 +67,7 @@ describe("indexer reconciliation (T6)", () => {
     expect(stats).toMatchObject({ upserted: 1, deleted: 0, total: 1 });
     expect(stats.invalid).toHaveLength(1);
     expect(stats.invalid[0]).toContain("broken.md");
-    expect(f.repo.search({ match: '"豚骨拉"', characterId: "taki", now: NOW, limit: 10 })).toHaveLength(1);
+    expect(f.repo.search({ match: '"拉面"', characterId: "taki", now: NOW, limit: 10 })).toHaveLength(1);
   });
 });
 
@@ -79,7 +79,7 @@ describe("rebuild-equivalence — delete DB, reindex from files, identical retri
     f.store.write({ layer: "profile", content: "最爱豚骨拉面", importance: 9 });
     f.reconcile();
 
-    const query = { match: '"豚骨拉"', characterId: "taki", now: NOW, limit: 10 } as const;
+    const query = { match: '"拉面"', characterId: "taki", now: NOW, limit: 10 } as const;
     const before = f.repo.search(query);
     expect(before.length).toBeGreaterThan(1);
 
@@ -90,5 +90,28 @@ describe("rebuild-equivalence — delete DB, reindex from files, identical retri
     expect(stats.upserted).toBe(3);
     const after = f.repo.search(query);
     expect(after).toEqual(before); // identical rows AND identical bm25 order
+  });
+
+  it("gives a blank-hash reconcile (the migration-008 path) the same rows as incremental indexing", () => {
+    const f = fresh();
+    f.store.write({ layer: "profile", characterId: "taki", content: "记住：用户对香菜过敏", importance: 8, disclosure: "过敏,饮食" });
+    f.store.write({ layer: "episodes", characterId: "taki", content: "今天用VSCode写了TypeScript代码", importance: 4 });
+    f.store.write({ layer: "relationship", characterId: "taki", content: "答应周五一起看电影", importance: 10 });
+    f.reconcile();
+
+    const queries = ['"过敏"', '"vscode"', '"电影"', '"拉面"'];
+    const incremental = queries.map((match) => f.repo.search({ match, characterId: "taki", now: NOW, limit: 10 }));
+    const terms = f.db.prepare("SELECT path, search_terms FROM memory_fts ORDER BY path").all();
+
+    // Exactly what migration 008 does: keep the metadata rows, blank the hashes, let the boot reconcile refill the
+    // index from the files. It must land on the same rows as the incremental write path, or a migrated store and a
+    // freshly written one would retrieve differently.
+    f.db.prepare("UPDATE memory_entries SET content_hash = ''").run();
+    expect(f.reconcile().upserted).toBe(3);
+
+    expect(queries.map((match) => f.repo.search({ match, characterId: "taki", now: NOW, limit: 10 }))).toEqual(
+      incremental,
+    );
+    expect(f.db.prepare("SELECT path, search_terms FROM memory_fts ORDER BY path").all()).toEqual(terms);
   });
 });

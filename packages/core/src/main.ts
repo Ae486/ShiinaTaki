@@ -151,7 +151,7 @@ const memoryRoot = join(serverConfig.dataDir, "workspace", "memory");
 // Memory Blocks (T5 Q7): the always-visible tier — pure markdown BESIDE the entry tree, so the FTS index can never
 // ingest one; `blocks/global/user-card.md` is the user's hand-edited identity card, re-read on every turn.
 const blocks = createBlockStore({ root: join(serverConfig.dataDir, "workspace", "blocks") });
-const memory = createMemoryEngine({ db, memoryRoot, persona: personaProvider, blocks, pinnedBudget: memoryConfig.pinnedBudget });
+const memory = createMemoryEngine({ db, memoryRoot, persona: personaProvider, blocks, config: memoryConfig, timeline: timelineRepo });
 const reconciled = memory.reconcile();
 memoryLog.info(reconciled, "memory index reconciled from workspace");
 if (reconciled.invalid.length > 0)

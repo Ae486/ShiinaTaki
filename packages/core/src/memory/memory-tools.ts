@@ -1,11 +1,12 @@
 /**
- * INPUT:  MemoryToolOps (engine-backed) + a bound characterId + LLM-supplied tool args
- * OUTPUT: createMemoryTools(ops, characterId) -> ToolSet { memory_write, memory_search, memory_archive };
- *         createBackgroundMemoryTools(ops, characterId) -> the same set with memory_write restricted to the auto rungs
+ * INPUT:  MemoryToolOps (engine-backed) + a bound characterId + an optional turn-seq getter + LLM-supplied tool args
+ * OUTPUT: createMemoryTools(ops, characterId, seq?) -> ToolSet { memory_write, memory_search, memory_archive };
+ *         createBackgroundMemoryTools(ops, characterId, seq?) -> the same set with memory_write restricted to the auto rungs
  * POS:    core/memory — the FIRST agent tools; thin, characterId-closured; execute NEVER throws (returns {ok:false})
  */
 import { tool, type Tool, type ToolSet } from "ai";
 import { z } from "zod";
+import { fenceUntrusted } from "../agents/untrusted-fence.ts";
 import { AUTO_LAYER_CHOICES, autoLayerGuidance, clampAutoImportance } from "./auto-layer-policy.ts";
 import type { MemoryOrigin } from "./entry.ts";
 import { V1_MEMORY_LAYERS, WRITABLE_LAYER_IDS, isWritableLayer } from "./layer-registry.ts";
@@ -19,6 +20,11 @@ const LAYER_IDS = V1_MEMORY_LAYERS.map((layer) => layer.id) as [string, ...strin
 const LayerEnum = z.enum(LAYER_IDS);
 // The automatic write tool's layer set — derived from the registry via the Q11-1 policy, never listed here.
 const AutoLayerEnum = z.enum(AUTO_LAYER_CHOICES);
+// Content sensed from the outside world (a VLM's screen description) is open-world text wherever it renders (Q8/D47).
+const OBSERVED_ORIGIN: MemoryOrigin = "observed";
+
+/** Reads the timeline seq the current turn is at, so a memory event can be joined back to the turn that caused it. */
+export type TurnSeqGetter = () => number | undefined;
 
 /** One write request for the engine's file-first-then-index path; the tool path fills only the first four fields. */
 export interface MemoryWriteRequest {
@@ -38,12 +44,14 @@ export interface MemoryToolOps {
   writeEntry(input: MemoryWriteRequest): { id: string; layer: string };
   archiveEntry(input: { characterId: string; id: string }): boolean;
   search(input: { characterId: string; query: string; layer?: string }): RankedEntry[];
+  /** 其四: one row per memory_search so under- and over-searching are both observable. Counts only, never the query. */
+  recordSearch(input: { characterId: string; turnSeq?: number; count: number }): void;
 }
 
-export function createMemoryTools(ops: MemoryToolOps, characterId: string): ToolSet {
+export function createMemoryTools(ops: MemoryToolOps, characterId: string, seq?: TurnSeqGetter): ToolSet {
   return {
     memory_write: writeTool(ops, characterId),
-    memory_search: searchTool(ops, characterId),
+    memory_search: searchTool(ops, characterId, seq),
     memory_archive: archiveTool(ops, characterId),
   };
 }
@@ -53,10 +61,10 @@ export function createMemoryTools(ops: MemoryToolOps, characterId: string): Tool
  * count key off `memory_write` — but the write tool cannot reach the always-visible rung: Q11-1's accepted cost of a
  * misjudged background write is "one more searchable row", and that only holds if EVERY automatic path is clamped.
  */
-export function createBackgroundMemoryTools(ops: MemoryToolOps, characterId: string): ToolSet {
+export function createBackgroundMemoryTools(ops: MemoryToolOps, characterId: string, seq?: TurnSeqGetter): ToolSet {
   return {
     memory_write: backgroundWriteTool(ops, characterId),
-    memory_search: searchTool(ops, characterId),
+    memory_search: searchTool(ops, characterId, seq),
     memory_archive: archiveTool(ops, characterId),
   };
 }
@@ -136,13 +144,15 @@ function backgroundWriteTool(ops: MemoryToolOps, characterId: string): Tool {
   });
 }
 
-function searchTool(ops: MemoryToolOps, characterId: string): Tool {
+function searchTool(ops: MemoryToolOps, characterId: string, seq?: TurnSeqGetter): Tool {
   return tool({
     description: "Search your long-term memory for something you may have forgotten. Optionally restrict to one layer.",
     inputSchema: z.object({ query: z.string().min(1), layer: LayerEnum.optional() }),
     execute: ({ query, layer }): ToolResult => {
       try {
-        return { ok: true, results: ops.search({ characterId, query, layer }).map(toHit) };
+        const hits = ops.search({ characterId, query, layer });
+        ops.recordSearch({ characterId, turnSeq: seq?.(), count: hits.length });
+        return { ok: true, results: hits.map(toHit) };
       } catch (error) {
         return { ok: false, code: TOOL_ERR.io, message: readable(error) };
       }
@@ -166,8 +176,23 @@ function archiveTool(ops: MemoryToolOps, characterId: string): Tool {
   });
 }
 
+/**
+ * `disclosure` rides along so she can see WHY a hit came back (and fix a bad trigger on the spot, T5-R17); `origin`
+ * so the fence below is legible rather than mysterious. Observed content is fenced HERE because the search path is a
+ * second way memory reaches the prompt — the assembler's row sites fence on the same rule (Q8/D47).
+ */
 function toHit(entry: RankedEntry): Record<string, unknown> {
-  return { id: entry.id, layer: entry.layer, content: entry.content, importance: entry.importance, created: entry.created };
+  const content =
+    entry.origin === OBSERVED_ORIGIN ? fenceUntrusted({ source: "memory", content: entry.content }) : entry.content;
+  return {
+    id: entry.id,
+    layer: entry.layer,
+    content,
+    importance: entry.importance,
+    created: entry.created,
+    disclosure: entry.disclosure,
+    origin: entry.origin,
+  };
 }
 
 function readable(error: unknown): string {

@@ -29,8 +29,10 @@ export function createCompanionFixture(opts: { dbPath?: string } = {}): Companio
   const dbPath = opts.dbPath ?? ":memory:";
 
   let db = openDatabase({ path: dbPath, migrations: MIGRATIONS });
-  let conversation = createConversationStore({ repo: createTimelineRepo(db) });
-  let memory = createMemoryEngine({ db, memoryRoot });
+  let timeline = createTimelineRepo(db);
+  let conversation = createConversationStore({ repo: timeline });
+  // Same wiring as main.ts: the engine reads the timeline's latest seq so a memory event can name the turn it came from.
+  let memory = createMemoryEngine({ db, memoryRoot, timeline });
   memory.reconcile();
 
   return {
@@ -47,8 +49,9 @@ export function createCompanionFixture(opts: { dbPath?: string } = {}): Companio
     reopen() {
       db.close();
       db = openDatabase({ path: dbPath, migrations: MIGRATIONS });
-      conversation = createConversationStore({ repo: createTimelineRepo(db) });
-      memory = createMemoryEngine({ db, memoryRoot });
+      timeline = createTimelineRepo(db);
+      conversation = createConversationStore({ repo: timeline });
+      memory = createMemoryEngine({ db, memoryRoot, timeline });
       memory.reconcile();
     },
     cleanup() {
