@@ -1,6 +1,7 @@
 /**
  * INPUT:  active pinned-eligible candidate rows + a token budget
- * OUTPUT: selectPinned(rows, budget) -> the kept rows, render-ordered (layer order, then chronological)
+ * OUTPUT: selectPinned(rows, budget) -> the kept rows, render-ordered (layer order, then chronological);
+ *         isPinnedEligible(row) — the shared always-visible predicate
  * POS:    core/memory — the pinned-block policy: non-truncatable layers survive budget pressure; oldest truncatable drop first
  */
 import type { MemoryEntryRow } from "../db/memory-repo.ts";
@@ -29,7 +30,9 @@ export function selectPinned(rows: MemoryEntryRow[], budget: number): MemoryEntr
 }
 
 // A retrieved layer contributes to the pinned block only for entries at/above its threshold (profile: >= 9).
-function isPinnedEligible(row: MemoryEntryRow): boolean {
+// Exported for the tidy report: a pinned-visible row is never "stale" (it needs no recall), and that judgement
+// must be THIS rule, not a drifted copy.
+export function isPinnedEligible(row: MemoryEntryRow): boolean {
   const layer = getLayer(row.layer);
   if (!layer) return false;
   if (layer.recallPolicy === "pinned") return true;

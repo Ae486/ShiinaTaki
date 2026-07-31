@@ -93,6 +93,14 @@ export type {
 } from "./timeline-schema.ts";
 
 export {
+  MEMORY_METHODS,
+  MemoryTidyDefectsSchema,
+  MemoryTidyParamsSchema,
+  MemoryTidyResultSchema,
+} from "./memory-schema.ts";
+export type { MemoryTidyDefects, MemoryTidyParams, MemoryTidyResult } from "./memory-schema.ts";
+
+export {
   MEDIA_METHODS,
   MediaClearParamsSchema,
   MediaClearResultSchema,

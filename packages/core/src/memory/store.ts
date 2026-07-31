@@ -1,12 +1,12 @@
 /**
  * INPUT:  MemoryWriteInput / entry file paths + a memory root dir under the Workspace
- * OUTPUT: createMemoryStore({root}) -> { write, archiveAtPath, reinforceAtPath, readAtPath, list, root };
- *         StoredEntry; StoreListing
+ * OUTPUT: createMemoryStore({root}) -> { write, archiveAtPath, reinforceAtPath, setDisclosureAtPath, refileAtPath,
+ *         deleteAtPath, readAtPath, list, root }; StoredEntry; StoreListing
  * POS:    core/memory — the sanctioned node:fs site for ENTRY files (invariant 1, Workspace-scoped); files are truth,
  *         atomic temp+rename (blocks are the other tier and live in block-store.ts)
  */
 import { createHash } from "node:crypto";
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, rmSync } from "node:fs";
 import { basename, relative, sep } from "node:path";
 import { entryFromFile, entryToFile, MemoryEntrySchema, type MemoryEntry, type MemoryOrigin } from "./entry.ts";
 import { getLayer, type MemoryLayerDefinition } from "./layer-registry.ts";
@@ -47,6 +47,15 @@ export interface MemoryStore {
   archiveAtPath(filePath: string): StoredEntry;
   /** T5-R9: bump an existing entry in place (importance up, recency refreshed) instead of inserting a duplicate row. */
   reinforceAtPath(filePath: string, importance: number): StoredEntry;
+  /** Tidy repair: replace the recall trigger in place; the body is untouched (a stored memory's text is not ours). */
+  setDisclosureAtPath(filePath: string, disclosure: string): StoredEntry;
+  /** Tidy repair: move an entry to another layer's directory — id, body, importance and dates all survive the move. */
+  refileAtPath(filePath: string, layer: string, characterId?: string): { stored: StoredEntry; oldPath: string };
+  /**
+   * Remove an entry file outright. The ONLY sanctioned hard delete (T5-R8): a rolling-window layer's machine-written
+   * rows. Everything an agent or a user authored ARCHIVES instead, because a misjudged archive is recoverable.
+   */
+  deleteAtPath(filePath: string): void;
   readAtPath(filePath: string): StoredEntry;
   /** Every entry file under the root, parsed — the reconciliation source of truth. */
   list(): StoreListing;
@@ -75,6 +84,14 @@ export function createMemoryStore(deps: { root: string }): MemoryStore {
     return toStored(root, filePath, readFileSync(filePath, "utf8"));
   }
 
+  // The containment guard runs BEFORE the unlink (the path came from the DB index, but a delete is the one operation
+  // whose blast radius is not recoverable from the files). A file already gone is not an error: the index row is what
+  // the caller is really clearing, and reconcile heals either way.
+  function deleteAtPath(filePath: string): void {
+    resolveWithin(root, filePath);
+    rmSync(filePath, { force: true });
+  }
+
   // Files are user-editable truth: a hand-broken file is REPORTED as invalid, never a boot crash (research §1).
   function list(): StoreListing {
     const entries: StoredEntry[] = [];
@@ -90,7 +107,20 @@ export function createMemoryStore(deps: { root: string }): MemoryStore {
     return { entries, invalid };
   }
 
-  return { write: (input) => createEntryFile(root, input), archiveAtPath, reinforceAtPath, readAtPath, list, root };
+  return {
+    write: (input) => createEntryFile(root, input),
+    archiveAtPath,
+    reinforceAtPath,
+    // `updated` is refreshed so a just-repaired trigger restarts the stale clock — without it the same row would
+    // return as a stale candidate every pass. reinforceCount is NOT bumped: that counter records R9 duplicate evidence.
+    setDisclosureAtPath: (filePath, disclosure) =>
+      rewriteEntry(root, filePath, (entry) => ({ ...entry, disclosure, updated: new Date().toISOString() })),
+    refileAtPath: (filePath, layer, characterId) => refileEntry(root, filePath, { layer, characterId }),
+    deleteAtPath,
+    readAtPath,
+    list,
+    root,
+  };
 }
 
 function createEntryFile(root: string, input: MemoryWriteInput): StoredEntry {
@@ -122,6 +152,26 @@ function rewriteEntry(root: string, filePath: string, transform: (entry: MemoryE
   const text = entryToFile(transform(entry), body);
   writeAtomic(filePath, text);
   return toStored(root, filePath, text);
+}
+
+// Write-first-then-delete: a crash between the two leaves both files; reconcile indexes both and resolvePath picks
+// deterministically, so the store heals into a duplicate rather than losing the entry. Frontmatter changes ONLY the
+// layer — dates and importance survive, so a refiled row neither decays nor un-stales by the move alone.
+function refileEntry(
+  root: string,
+  filePath: string,
+  args: { layer: string; characterId?: string },
+): { stored: StoredEntry; oldPath: string } {
+  resolveWithin(root, filePath);
+  const target = requireLayer(args.layer);
+  const { entry, body } = entryFromFile(readFileSync(filePath, "utf8"));
+  const cid = args.characterId ?? characterIdFromPath(root, filePath) ?? undefined;
+  const { segments } = placement(target, cid);
+  const nextPath = resolveWithin(root, ...segments, basename(filePath));
+  const text = entryToFile({ ...entry, layer: target.id }, body);
+  writeAtomic(nextPath, text);
+  if (nextPath !== filePath) rmSync(filePath, { force: true });
+  return { stored: toStored(root, nextPath, text), oldPath: filePath };
 }
 
 function requireLayer(id: string): MemoryLayerDefinition {

@@ -6,11 +6,13 @@
  */
 import { z } from "zod";
 
-// Retention: permanent | rolling window (rollingDays) | expiring (per-entry `expires`). Data, not code branches.
+// Retention: permanent | rolling window (rollingDays) | expiring (per-entry `expires`) | importance-decay
+// (archive a low-importance entry once it is old). Data, not code branches — the sweeper reads these rows only.
 const RetentionSchema = z.union([
   z.literal("permanent"),
   z.object({ rollingDays: z.int().positive() }).strict(),
   z.literal("expiring"),
+  z.object({ archiveBelowImportance: z.int().min(1).max(10), afterDays: z.int().positive() }).strict(),
 ]);
 
 export const MemoryLayerDefinitionSchema = z
@@ -60,7 +62,10 @@ export const V1_MEMORY_LAYERS: readonly MemoryLayerDefinition[] = z.array(Memory
     writePolicy: "agent",
     recallPolicy: "retrieved",
     truncatable: true,
-    retention: "permanent",
+    // T5-R8: an episode below the importance cut ARCHIVES once it is old (never deletes — a misjudged archive is
+    // recoverable, files stay on disk). Both numbers are LOCAL choices with no external source: 4 sits just under the
+    // episodic writer's mid band and 90 days is a season. Tune them here — they are registry data, not code.
+    retention: { archiveBelowImportance: 4, afterDays: 90 },
   },
   {
     id: "intentions",

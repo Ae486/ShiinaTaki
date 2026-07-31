@@ -1,5 +1,5 @@
 # core/memory/
-- layer-registry.ts — the layer taxonomy as DATA (MemoryLayerDefinitionSchema + V1_MEMORY_LAYERS + writable-layer selectors)
+- layer-registry.ts — the layer taxonomy as DATA (MemoryLayerDefinitionSchema + V1_MEMORY_LAYERS + writable-layer selectors); `retention` covers permanent / rolling-window / expiring / importance-decay, and is the retention sweeper's only policy source
 - block-registry.ts — the Memory Block taxonomy as DATA (BlockDefinitionSchema + V1_BLOCKS; array order = injection order; ownership/writer/header/budget are all rows)
 - block-store.ts — Memory Block IO: pure-markdown files outside the entry tree (never FTS-indexed), read fresh per turn, written only by the registry's declared writer
 - auto-layer-policy.ts — T5 Q11-1: the AUTOMATIC writer's layer choice set + importance ceiling, both derived from the registry (it may never reach the always-visible rung)
@@ -8,7 +8,7 @@
 - naming.ts — slugify + IdSchema + assertSafeSegment/isSafeSegment (throw vs skip) + resolveWithin (path containment); no fs
 - write-atomic.ts — the ONE Workspace write primitive (temp + rename), shared by the entry store and the block store
 - strip-note.ts — the shared `>` editor-note convention (D22): strips a human-only note block from persona cards and memory blocks
-- store.ts — the sanctioned node:fs site for ENTRY files (Workspace-scoped): atomic write, id allocation, archive, reinforce-in-place, list (invalid files reported, not thrown)
+- store.ts — the sanctioned node:fs site for ENTRY files (Workspace-scoped): atomic write, id allocation, archive, reinforce-in-place, set-disclosure (stale clock restarts), refile across layer dirs (id/dates survive), containment-guarded delete (retention's rolling-window case only), list (invalid files reported, not thrown)
 - dedupe.ts — T5-R9 write-time near-duplicate check: normalized-string key only, never a model call on the write path
 - indexer.ts — index sync: indexEntry (write path) + reconcile (rebuild the derived index from files; reports invalid files); computes the segmented search_terms column
 - search-tokenizer.ts — THE swappable segmentation seam (D53): SearchTokenizer + the Intl.Segmenter v1 impl + the CJK function-word stoplist; index side and query side share one instance
@@ -17,14 +17,20 @@
 - retriever.ts — the Retriever seam (interface + RankedEntry incl. disclosure/origin; v2 hybrid-vector plan documented)
 - fts5-retriever.ts — v1 Retriever impl: bm25 recall (config-weighted, 4-column) + LIKE fallback + the layer post-filter
 - token-estimator.ts — soft token budgeting: estimateTokens (CJK-aware) + fitToBudget
-- pinned-block.ts — pinned-block policy: non-truncatable layers survive budget; oldest truncatable drop first
+- pinned-block.ts — pinned-block policy: non-truncatable layers survive budget; oldest truncatable drop first; exports the shared isPinnedEligible predicate (the tidy report's "never stale" rule)
 - assembler.ts — deterministic per-turn context assembly with per-section budgets (blocks in registry order, then pinned rows); memory rows render a code-computed relative age ("(3 days ago)") and observed-origin rows only inside the untrusted fence
 - persona-provider.ts — reads prompt/ cards (assistant layer + per-character persona), strips the `>` editor note, sync + cached + safe fallback; injected into the assembler (#16)
 - memory-tools.ts — the first agent tools (memory_write/search/archive); thin, characterId-bound, never throw; search hits carry disclosure + origin (observed content fenced) and record a search event; plus the BACKGROUND set whose memory_write is schema-restricted to the auto layers + importance ceiling (Q11-1 covers every automatic path)
-- memory-engine.ts — the memory subsystem composition root (store+repo+tokenizer+indexer+retriever+assembler+tools; exposes writeEntry, createTools, createBackgroundTools)
+- memory-engine.ts — the memory subsystem composition root (store+repo+tokenizer+indexer+retriever+assembler+tools; exposes writeEntry, createTools, createBackgroundTools, retention's narrow list/archive/hard-delete seam, and the tidy view — report reads + the maintenance toolset)
+- bootstrap.ts — the subsystem's BOOT wiring lifted out of main.ts: memory + utility config, persona provider, block store, engine + startup reconcile, the utility slot, the auto-write orchestrator, the tidy pass and the retention sweeper; returns what the composition root still needs (engine, autoMemory, utility, tidy, memoryRoot, writeMemory)
+- utility-slot.ts — T5-R11's background model slot: the utility provider when configured else the MAIN model (Letta's inherit-the-primary shape), one GLOBAL serial task chain that never rejects outward, cumulative token spend since boot
+- retention-sweeper.ts — T5-R8 enforcement and the registry `retention` field's first consumer: hard-delete for a rolling-window machine layer, ARCHIVE (files kept, reversible) everywhere else; age anchored on COALESCE(updated_at, created_at) so a reinforced row never decays on its birth date; runs on scheduler/sweep-runner
 - render-transcript.ts — shared helper: a timeline segment -> "role: text" transcript for the auto-write prompts
 - write-convention.ts — the ONE shared write-side prompt wording: WRITE_GATE_RULE (T5-R15 behaviour-change test) + MEMORY_VOICE_RULE (T5-R10 first person, user's words); episodic + flush import it so the voices cannot diverge
 - episodic-writer.ts — auto-write path 2: segment -> 0..3 entries in the layer the model chooses, write-gated (silence is the normal outcome), importance clamped below the pin line
 - flush-writer.ts — auto-write path 3: pre-compaction flush as one SILENT tool-enabled turn on the BACKGROUND toolset (prose discarded, successful-write count returned); shares the write-convention fragments
-- auto-memory.ts — auto-write orchestrator: watermarks + per-character mutex + failure policy; onTurnCompleted(characterId, origin) trigger, skip events when either the episodic or the flush pass kept nothing
+- auto-memory.ts — auto-write orchestrator: watermarks + per-character mutex + failure policy; onTurnCompleted(characterId, origin) trigger, skip events when either the episodic or the flush pass kept nothing, plus the OPTIONAL tidy hook that runs after both inside the same per-character chain
+- tidy-report.ts — the tidy pass's deterministic health report (rc five-class contract): facts flat (missing trigger, over-budget incl. block used/limit beside full content), hypotheses as questions (stale, near-duplicate) + the new-writes slice carrying the misfiled question; per-class caps with dropped counts stated; observed content fenced; never prescribes an action
+- tidy-tools.ts — the maintenance verbs the foreground agent never gets: memory_reinforce / memory_archive_supersede (the sanctioned promotion route) / memory_set_disclosure / memory_refile / block_rethink (background blocks only) / memory_finish_edits (the structural terminal); never-throw envelopes
+- tidy-pass.ts — the model-led maintenance pass: write-count trigger (maybeRun) + operator runNow over one execute path; clean store = zero model calls; system-reminder input framing; six refinement principles + do-nothing permission + imported R10 voice; stopWhen finish-tool/step-cap; watermark advances only on success; tidy event + counts-only log line
 - image-description-writer.ts — thin, DELETABLE image→text bridge (#17 decision 6, D28): VLM describes a turn's images, PII-scrubs the text, writes ONE episode via the existing store path with origin "observed" (the marker the render sites fence on — D47); detached, warn+drop

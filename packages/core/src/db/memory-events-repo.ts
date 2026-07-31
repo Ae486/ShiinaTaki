@@ -7,8 +7,8 @@
 import { z } from "zod";
 import type { Database } from "./sqlite.ts";
 
-// Batch 1 kinds + batch 3's "search". Kind is plain TEXT in SQLite, so extending is one entry here.
-export const MemoryEventKindSchema = z.enum(["skip", "reinforce", "search"]);
+// Batch 1 kinds + batch 3's "search" + batch 4's "tidy". Kind is plain TEXT in SQLite, so extending is one entry here.
+export const MemoryEventKindSchema = z.enum(["skip", "reinforce", "search", "tidy"]);
 export type MemoryEventKind = z.infer<typeof MemoryEventKindSchema>;
 
 export interface MemoryEvent {
@@ -17,7 +17,7 @@ export interface MemoryEvent {
   /** The timeline seq this decision belongs to; absent when the write path has no turn context. */
   turnSeq?: number;
   entryId?: string;
-  /** How many rows the decision touched — a search's hit count (其四). Absent for skip/reinforce. */
+  /** How many rows the decision touched — a search's hit count (其四) or a tidy pass's edit count. Absent for skip/reinforce. */
   count?: number;
 }
 

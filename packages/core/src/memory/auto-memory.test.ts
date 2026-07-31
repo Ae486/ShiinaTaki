@@ -6,7 +6,7 @@ import type { MemoryEvent, MemoryEventsRepo } from "../db/memory-events-repo.ts"
 import { createTimelineRepo } from "../db/timeline-repo.ts";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
 import { generatingModel } from "../testing/mock-language-model.ts";
-import { createAutoMemory, type AutoMemoryLogger } from "./auto-memory.ts";
+import { createAutoMemory, type AutoMemoryLogger, type AutoMemoryTidy } from "./auto-memory.ts";
 import { createEpisodicWriter } from "./episodic-writer.ts";
 import type { EpisodicWriter } from "./episodic-writer.ts";
 import type { FlushWriter } from "./flush-writer.ts";
@@ -97,7 +97,10 @@ function seed(f: CompanionFixture, n: number): void {
   for (let i = 0; i < n; i += 1) f.conversation.appendUser("taki", `m${i + 1}`);
 }
 
-function wire(f: CompanionFixture, w: { episodic: EpisodicWriter; flush: FlushWriter; logger: AutoMemoryLogger }) {
+function wire(
+  f: CompanionFixture,
+  w: { episodic: EpisodicWriter; flush: FlushWriter; logger: AutoMemoryLogger; tidy?: AutoMemoryTidy },
+) {
   const timeline = createTimelineRepo(f.db);
   const autoState = createMemoryAutoRepo(f.db);
   const events = spyEvents();
@@ -312,5 +315,94 @@ describe("auto-memory mutex (T8)", () => {
     await auto.onTurnCompleted("taki");
     expect(ep.calls).toHaveLength(2);
     expect(ep.calls[1]?.segment.map((e) => e.seq)).toEqual(Array.from({ length: 20 }, (_, i) => i + 21));
+  });
+});
+
+describe("auto-memory tidy seam (batch 4a: additive, absent = unchanged)", () => {
+  function spyTidy(): { calls: string[]; failNext: { value: boolean }; tidy: AutoMemoryTidy } {
+    const calls: string[] = [];
+    const failNext = { value: false };
+    return {
+      calls,
+      failNext,
+      tidy: {
+        async maybeRun(characterId) {
+          calls.push(characterId);
+          if (failNext.value) throw new Error("tidy exploded");
+        },
+      },
+    };
+  }
+
+  it("calls the hook once per pass, after the write passes, inside the same chain", async () => {
+    const f = fresh();
+    const order: string[] = [];
+    const ep = spyEpisodic();
+    const tidy: AutoMemoryTidy = {
+      async maybeRun() {
+        order.push("tidy");
+      },
+    };
+    const flush: FlushWriter = {
+      async run() {
+        order.push("flush");
+        return { writes: 0 };
+      },
+    };
+    const { auto } = wire(f, { episodic: ep.writer, flush, logger: captureLogger().logger, tidy });
+    seed(f, 201); // crosses both the episodic and the flush thresholds
+
+    await auto.onTurnCompleted("taki");
+
+    // The pass judges a store the writers have finished with; ordering is what makes it need no mutex of its own.
+    expect(order).toEqual(["flush", "tidy"]);
+  });
+
+  it("runs even on a turn where neither write pass fired (the trigger decides for itself)", async () => {
+    const f = fresh();
+    const t = spyTidy();
+    const { auto } = wire(f, {
+      episodic: spyEpisodic().writer,
+      flush: spyFlush().writer,
+      logger: captureLogger().logger,
+      tidy: t.tidy,
+    });
+    seed(f, 3); // below every write threshold
+
+    await auto.onTurnCompleted("taki");
+    expect(t.calls).toEqual(["taki"]);
+  });
+
+  it("with NO tidy dep the pass behaves exactly as before (byte-identical write path)", async () => {
+    const f = fresh();
+    const ep = spyEpisodic();
+    const cap = captureLogger();
+    const { autoState, auto } = wire(f, { episodic: ep.writer, flush: spyFlush().writer, logger: cap.logger });
+    seed(f, 20);
+
+    await auto.onTurnCompleted("taki");
+
+    expect(ep.calls).toHaveLength(1);
+    expect(autoState.get("taki").lastEpisodicSeq).toBe(20);
+    expect(cap.warns).toEqual([]);
+  });
+
+  it("a failing tidy warns and never breaks the turn's write passes", async () => {
+    const f = fresh();
+    const t = spyTidy();
+    t.failNext.value = true;
+    const ep = spyEpisodic();
+    const cap = captureLogger();
+    const { autoState, auto } = wire(f, {
+      episodic: ep.writer,
+      flush: spyFlush().writer,
+      logger: cap.logger,
+      tidy: t.tidy,
+    });
+    seed(f, 20);
+
+    await expect(auto.onTurnCompleted("taki")).resolves.toBeUndefined();
+    expect(autoState.get("taki").lastEpisodicSeq).toBe(20); // the episodic write still landed
+    expect(cap.warns.some((w) => w.kind === "tidy")).toBe(true);
   });
 });

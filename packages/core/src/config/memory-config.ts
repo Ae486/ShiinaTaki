@@ -1,6 +1,9 @@
 /**
- * INPUT:  process env (TAKI_MEMORY_PINNED_BUDGET, TAKI_MEMORY_BM25_WEIGHTS, TAKI_MEMORY_STOPLIST)
- * OUTPUT: loadMemoryConfig(env) -> { pinnedBudget, bm25Weights, stoplist }; the fail-closed defaults; Bm25Weights
+ * INPUT:  process env (TAKI_MEMORY_PINNED_BUDGET, TAKI_MEMORY_BM25_WEIGHTS, TAKI_MEMORY_STOPLIST,
+ *         TAKI_MEMORY_INTENTIONS_DEFAULT_DAYS, TAKI_MEMORY_TIDY_* — write threshold / max steps / stale days /
+ *         report cap)
+ * OUTPUT: loadMemoryConfig(env) -> { pinnedBudget, bm25Weights, stoplist, intentionsDefaultDays, tidyWriteThreshold,
+ *         tidyMaxSteps, tidyStaleDays, reportClassCap }; the fail-closed defaults; Bm25Weights
  * POS:    core/config — the memory subsystem's tunable numbers (T5-R13); garbage values are fatal at boot, never
  *         silently defaulted. The panel surfaces for these are #26's
  */
@@ -9,6 +12,27 @@ import { z } from "zod";
 // The pinned region's content is naturally bounded (promises + high-importance profile), so this number is a SAFETY
 // VALVE rather than a target (T5-R13's correction). Blocks carry their own per-block budgets in the block registry.
 export const DEFAULT_PINNED_BUDGET = 800;
+
+// How long an `intentions` entry that carries NO explicit `expires` may sit before retention archives it. A LOCAL
+// choice with no external source: nothing sets `expires` today, so without an age fallback the expiring layer would
+// never expire anything at all. Raise it if real intentions turn out to outlive a month.
+export const DEFAULT_INTENTIONS_DAYS = 30;
+
+// The tidy pass's write-count trigger (T5 Q9). Nocturne's "every 30-50 new memories" cadence was NOT found at source
+// (rc §OMITTED), so 40 is a TUNABLE default, not a sourced constant.
+export const DEFAULT_TIDY_WRITE_THRESHOLD = 40;
+
+// Step ceiling for one tidy pass — a structural exit alongside the finish tool, deliberately far below Letta's
+// DEFAULT_MAX_STEPS = 50 (rc A2): our input is a bounded defect report, not an open transcript.
+export const DEFAULT_TIDY_MAX_STEPS = 12;
+
+// Age past which a searchable row becomes a "why was this never recalled?" candidate. A LOCAL choice with no external
+// source (Nocturne tiers stale per priority; a flat window is the v1 seam — batch-4 design §5).
+export const DEFAULT_TIDY_STALE_DAYS = 45;
+
+// Per-class candidate cap in the tidy report, so a degraded store cannot blow the pass's context. A LOCAL choice
+// with no external source; dropped counts are stated in the report itself.
+export const DEFAULT_TIDY_REPORT_CAP = 10;
 
 /**
  * bm25 column weights for `memory_fts(path UNINDEXED, disclosure, content, search_terms)`.
@@ -42,11 +66,25 @@ export const MemoryConfigSchema = z
     TAKI_MEMORY_BM25_WEIGHTS: z.string().optional().transform(parseWeights).pipe(Bm25WeightsSchema),
     // Explicit on/off only: an unrecognized value is fatal in either direction (the ambient-config discipline).
     TAKI_MEMORY_STOPLIST: z.enum(["on", "off"]).default("on"),
+    // Same fail-closed parse as the budget: a garbage retention window must not silently archive every intention
+    // (or none of them).
+    TAKI_MEMORY_INTENTIONS_DEFAULT_DAYS: z.coerce.number().int().positive().default(DEFAULT_INTENTIONS_DAYS),
+    // The four tidy numbers share the budget's discipline: coerce + int + positive, garbage fatal at boot. A silently
+    // defaulted threshold would change when the maintenance model runs — and what it costs — behind the operator's back.
+    TAKI_MEMORY_TIDY_WRITE_THRESHOLD: z.coerce.number().int().positive().default(DEFAULT_TIDY_WRITE_THRESHOLD),
+    TAKI_MEMORY_TIDY_MAX_STEPS: z.coerce.number().int().positive().default(DEFAULT_TIDY_MAX_STEPS),
+    TAKI_MEMORY_TIDY_STALE_DAYS: z.coerce.number().int().positive().default(DEFAULT_TIDY_STALE_DAYS),
+    TAKI_MEMORY_TIDY_REPORT_CAP: z.coerce.number().int().positive().default(DEFAULT_TIDY_REPORT_CAP),
   })
   .transform((env) => ({
     pinnedBudget: env.TAKI_MEMORY_PINNED_BUDGET,
     bm25Weights: env.TAKI_MEMORY_BM25_WEIGHTS,
     stoplist: env.TAKI_MEMORY_STOPLIST === "on",
+    intentionsDefaultDays: env.TAKI_MEMORY_INTENTIONS_DEFAULT_DAYS,
+    tidyWriteThreshold: env.TAKI_MEMORY_TIDY_WRITE_THRESHOLD,
+    tidyMaxSteps: env.TAKI_MEMORY_TIDY_MAX_STEPS,
+    tidyStaleDays: env.TAKI_MEMORY_TIDY_STALE_DAYS,
+    reportClassCap: env.TAKI_MEMORY_TIDY_REPORT_CAP,
   }));
 
 export type MemoryConfig = z.infer<typeof MemoryConfigSchema>;
@@ -56,6 +94,11 @@ export function loadMemoryConfig(env: Record<string, string | undefined>): Memor
     TAKI_MEMORY_PINNED_BUDGET: env.TAKI_MEMORY_PINNED_BUDGET,
     TAKI_MEMORY_BM25_WEIGHTS: env.TAKI_MEMORY_BM25_WEIGHTS,
     TAKI_MEMORY_STOPLIST: env.TAKI_MEMORY_STOPLIST,
+    TAKI_MEMORY_INTENTIONS_DEFAULT_DAYS: env.TAKI_MEMORY_INTENTIONS_DEFAULT_DAYS,
+    TAKI_MEMORY_TIDY_WRITE_THRESHOLD: env.TAKI_MEMORY_TIDY_WRITE_THRESHOLD,
+    TAKI_MEMORY_TIDY_MAX_STEPS: env.TAKI_MEMORY_TIDY_MAX_STEPS,
+    TAKI_MEMORY_TIDY_STALE_DAYS: env.TAKI_MEMORY_TIDY_STALE_DAYS,
+    TAKI_MEMORY_TIDY_REPORT_CAP: env.TAKI_MEMORY_TIDY_REPORT_CAP,
   });
 }
 

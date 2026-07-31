@@ -40,6 +40,16 @@ describe("createMemoryEventsRepo (T5 events substrate)", () => {
     expect(event?.entryId).toBeNull();
   });
 
+  it("records a tidy pass with its edit count and no turn (batch 4b — a pass belongs to no single turn)", () => {
+    repo.record({ kind: "tidy", characterId: "taki", count: 3 });
+
+    const [event] = repo.listByCharacter({ characterId: "taki", limit: 10 });
+    expect(event?.kind).toBe("tidy");
+    expect(event?.count).toBe(3);
+    expect(event?.turnSeq).toBeNull();
+    expect(event?.entryId).toBeNull();
+  });
+
   it("lists newest first and honours the limit", () => {
     for (const turnSeq of [1, 2, 3]) repo.record({ kind: "skip", characterId: "taki", turnSeq });
 

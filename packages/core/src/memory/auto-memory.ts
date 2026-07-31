@@ -25,6 +25,11 @@ export interface AutoMemoryLogger {
   warn(obj: object, msg: string): void;
 }
 
+/** The tidy pass's trigger seam (batch 4b fills it): it decides for itself whether this turn earns a pass. */
+export interface AutoMemoryTidy {
+  maybeRun(characterId: string): Promise<void>;
+}
+
 export interface AutoMemory {
   /**
    * Fire-and-forget after a completed turn. Returns a promise (never rejects) that resolves when this trigger's
@@ -40,6 +45,11 @@ export interface AutoMemoryDeps {
   episodic: EpisodicWriter;
   flush: FlushWriter;
   logger: AutoMemoryLogger;
+  /**
+   * OPTIONAL store-maintenance hook, run after the write passes inside the SAME per-character chain — so the tidy
+   * pass reads a store the writers have finished with, and needs no mutex of its own. Absent = today's behavior.
+   */
+  tidy?: AutoMemoryTidy;
 }
 
 export function createAutoMemory(deps: AutoMemoryDeps): AutoMemory {
@@ -67,6 +77,18 @@ async function runPass(deps: AutoMemoryDeps, characterId: string, origin: TurnOr
   const latest = deps.timeline.latestSeq(characterId);
   await maybeEpisodic(deps, { characterId, origin, latest }); // episodic before flush (prd §3); both may fire in one pass
   await maybeFlush(deps, { characterId, origin, latest });
+  await maybeTidy(deps, characterId);
+}
+
+// Maintenance runs LAST: it judges the store this pass just wrote into. Its own failure is swallowed here for the
+// same reason the write passes swallow theirs — background upkeep must never surface on a chat turn.
+async function maybeTidy(deps: AutoMemoryDeps, characterId: string): Promise<void> {
+  if (!deps.tidy) return;
+  try {
+    await deps.tidy.maybeRun(characterId);
+  } catch (error) {
+    deps.logger.warn({ kind: "tidy", characterId, err: readable(error) }, "tidy pass failed; will retry");
+  }
 }
 
 interface PassContext {

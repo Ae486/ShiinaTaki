@@ -21,6 +21,8 @@ describe("layer registry (T1)", () => {
     expect(getLayer("profile")?.pinnedImportanceThreshold).toBe(9);
     expect(getLayer("activity")?.retention).toEqual({ rollingDays: 30 });
     expect(getLayer("intentions")?.retention).toBe("expiring");
+    // T5-R8: episodes decay by importance tier instead of living forever (archive, never delete).
+    expect(getLayer("episodes")?.retention).toEqual({ archiveBelowImportance: 4, afterDays: 90 });
   });
 
   it("derives the writable-layer set from writePolicy data", () => {
@@ -41,6 +43,16 @@ describe("layer registry (T1)", () => {
     expect(MemoryLayerDefinitionSchema.safeParse(bad).success).toBe(false);
     const bad2 = { ...V1_MEMORY_LAYERS[0], retention: "forever" };
     expect(MemoryLayerDefinitionSchema.safeParse(bad2).success).toBe(false);
+    // The importance-decay variant is validated data too: an out-of-range cut or a stray key must not reach the sweeper.
+    for (const retention of [
+      { archiveBelowImportance: 0, afterDays: 90 },
+      { archiveBelowImportance: 11, afterDays: 90 },
+      { archiveBelowImportance: 4, afterDays: 0 },
+      { archiveBelowImportance: 4 },
+      { archiveBelowImportance: 4, afterDays: 90, surprise: true },
+    ]) {
+      expect(MemoryLayerDefinitionSchema.safeParse({ ...V1_MEMORY_LAYERS[0], retention }).success).toBe(false);
+    }
   });
 
   it("rejects unknown extra fields (strict schema keeps the taxonomy honest)", () => {

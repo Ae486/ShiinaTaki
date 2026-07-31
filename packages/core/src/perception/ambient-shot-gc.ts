@@ -1,16 +1,15 @@
 /**
  * INPUT:  an AmbientShotStore, the configured AmbientRetention, a Logger, an optional injected clock
  * OUTPUT: startAmbientShotGc(deps) -> void; one boot sweep plus a 6h unref'd interval (nothing at all under `keep`)
- * POS:    core/perception — the retention ENFORCEMENT arm of ambient capture (attachment-gc precedent). Retention that
- *         nobody sweeps is not retention: the inline drop-after-describe covers the normal path, this covers the
- *         crash-interrupted one and the day-granularity policy. Runs independently of the enable flag, so frames
- *         captured before ambient sensing was switched off still expire.
+ * POS:    core/perception — the retention ENFORCEMENT arm of ambient capture. Retention that nobody sweeps is not
+ *         retention: the inline drop-after-describe covers the normal path, this covers the crash-interrupted one and
+ *         the day-granularity policy. Runs independently of the enable flag, so frames captured before ambient
+ *         sensing was switched off still expire. The schedule/log shape is scheduler/sweep-runner.ts (T5-R8).
  */
+import { startSweeper } from "../scheduler/sweep-runner.ts";
 import type { AmbientRetention } from "../config/ambient-screenshot-config.ts";
 import type { Logger } from "../logging/logger.ts";
 import type { AmbientShotStore } from "./ambient-shot-store.ts";
-
-const SWEEP_INTERVAL_MS = 6 * 60 * 60 * 1000;
 
 export interface AmbientShotGcDeps {
   store: AmbientShotStore;
@@ -29,14 +28,16 @@ function cutoffFor(retention: AmbientRetention, at: number): number | null {
 
 export function startAmbientShotGc(deps: AmbientShotGcDeps): void {
   if (deps.retention.mode === "keep") return; // the user asked to keep every frame: no timer, no sweep, no surprise
-  const log = deps.logger.child({ mod: "ambient-shots" });
   const now = deps.now ?? Date.now;
-  const sweep = (): void => {
-    const cutoff = cutoffFor(deps.retention, now());
-    if (cutoff === null) return;
-    const swept = deps.store.sweepOlderThan(cutoff);
-    if (swept.removedCount > 0) log.info({ ...swept, retention: deps.retention.mode }, "ambient frames swept");
-  };
-  sweep();
-  setInterval(sweep, SWEEP_INTERVAL_MS).unref();
+  startSweeper({
+    name: "ambient-shots",
+    message: "ambient frames swept",
+    logger: deps.logger,
+    sweep: () => {
+      const cutoff = cutoffFor(deps.retention, now());
+      if (cutoff === null) return undefined;
+      const swept = deps.store.sweepOlderThan(cutoff);
+      return swept.removedCount > 0 ? { ...swept, retention: deps.retention.mode } : undefined;
+    },
+  });
 }

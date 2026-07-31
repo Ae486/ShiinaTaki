@@ -31,12 +31,9 @@ import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
 import { loadAgentConfig } from "./config/agent-config.ts";
 import { loadAmbientScreenshotConfig } from "./config/ambient-screenshot-config.ts";
 import { loadAttachmentConfig } from "./config/attachment-config.ts";
-import { loadMemoryConfig } from "./config/memory-config.ts";
 import { loadProviderConfig } from "./config/provider-config.ts";
 import { loadServerConfig } from "./config/server-config.ts";
 import { loadVisionConfig } from "./config/vision-config.ts";
-import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
-import { createMemoryEventsRepo } from "./db/memory-events-repo.ts";
 import { MIGRATIONS } from "./db/migrations/index-list.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
 import { openDatabase } from "./db/sqlite.ts";
@@ -51,13 +48,8 @@ import { createCharacterStore } from "./characters/character-store.ts";
 import { startAttachmentGc } from "./media/attachment-gc.ts";
 import { createAttachmentStore } from "./media/attachment-store.ts";
 import { directoryByteSize } from "./media/directory-size.ts";
-import { createAutoMemory } from "./memory/auto-memory.ts";
-import { createBlockStore } from "./memory/block-store.ts";
-import { createEpisodicWriter, type MemoryWriteOp } from "./memory/episodic-writer.ts";
-import { createFlushWriter } from "./memory/flush-writer.ts";
+import { createMemorySubsystem } from "./memory/bootstrap.ts";
 import { createImageDescriptionWriter } from "./memory/image-description-writer.ts";
-import { createMemoryEngine } from "./memory/memory-engine.ts";
-import { createPersonaProvider } from "./memory/persona-provider.ts";
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
 import { createConnectionRegistry } from "./server/connection-registry.ts";
 import { createMethodRegistry } from "./server/method-registry.ts";
@@ -76,6 +68,7 @@ import { connectMethod } from "./server/methods/connect.ts";
 import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
 import { mediaUsageMethod } from "./server/methods/media-usage.ts";
+import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
 import { registerPerceptionMethods } from "./server/methods/perception-methods.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
@@ -96,10 +89,10 @@ const serverConfig = loadServerConfig(process.env);
 const providerConfig = loadProviderConfig(process.env);
 const agentConfig = loadAgentConfig(process.env);
 // Two user-adjustable model slots (#17 decision 5): the required text slot (above) + an OPTIONAL vision slot. Both are
-// fatal-fast — a partial TAKI_VLM_* set or a garbage TTL fails the boot, never silently degrades.
+// fatal-fast — a partial TAKI_VLM_* set or a garbage TTL fails the boot, never silently degrades. The third slot
+// (TAKI_UTILITY_*, background work) is parsed inside the memory subsystem's boot wiring, on the same fail-fast terms.
 const visionConfig = loadVisionConfig(process.env);
 const attachmentConfig = loadAttachmentConfig(process.env);
-const memoryConfig = loadMemoryConfig(process.env);
 // Ambient screen sampling (#20 T3b): OFF unless explicitly enabled, raw frames dropped right after describe.
 const ambientConfig = loadAmbientScreenshotConfig(process.env);
 
@@ -142,32 +135,16 @@ const avatarSubscriptions = createAvatarSubscriptions();
 const avatarVocabulary = createAvatarVocabulary();
 
 // The memory engine's Workspace: markdown files under the app data root (beside the db, NOT in it — invariant 1).
-// Startup reconciliation rebuilds the derived index from those files (files are truth).
-const memoryLog = logger.child({ mod: "memory" });
-// Persona cards (#16): the global assistant layer + per-character persona, read from prompt/ at boot and injected
-// FIRST in the assembled turn context (prompt/README.md order). A missing card degrades to a built-in fallback.
-const personaProvider = createPersonaProvider({ promptDir: serverConfig.promptDir, logger });
-const memoryRoot = join(serverConfig.dataDir, "workspace", "memory");
-// Memory Blocks (T5 Q7): the always-visible tier — pure markdown BESIDE the entry tree, so the FTS index can never
-// ingest one; `blocks/global/user-card.md` is the user's hand-edited identity card, re-read on every turn.
-const blocks = createBlockStore({ root: join(serverConfig.dataDir, "workspace", "blocks") });
-const memory = createMemoryEngine({ db, memoryRoot, persona: personaProvider, blocks, config: memoryConfig, timeline: timelineRepo });
-const reconciled = memory.reconcile();
-memoryLog.info(reconciled, "memory index reconciled from workspace");
-if (reconciled.invalid.length > 0)
-  memoryLog.warn({ invalid: reconciled.invalid }, "invalid memory files skipped (fix or remove them)");
-
-// Automatic memory writes (#7): episodic summaries + pre-compaction flush, fired detached after each chat turn.
-// Both writers share the chat model; all writes ride the memory engine's store API (never raw fs) through ONE bound
-// write op — the writer chooses the layer (T5 Q11-1), so the binding no longer pins one.
-const writeMemory: MemoryWriteOp = ({ layer, ...rest }) => memory.writeEntry({ ...rest, type: layer });
-const autoMemory = createAutoMemory({
+// One call wires persona cards + block store + engine + startup reconcile + the utility slot every background pass
+// runs on + the auto-write orchestrator + the tidy pass + the retention sweeper (memory/bootstrap.ts).
+const { engine: memory, autoMemory, tidy, memoryRoot, writeMemory } = createMemorySubsystem({
+  db,
+  dataDir: serverConfig.dataDir,
+  promptDir: serverConfig.promptDir,
+  model,
   timeline: timelineRepo,
-  autoState: createMemoryAutoRepo(db),
-  events: createMemoryEventsRepo(db),
-  episodic: createEpisodicWriter({ model, writeMemory }),
-  flush: createFlushWriter({ model, createTools: (id) => memory.createBackgroundTools(id) }),
-  logger: logger.child({ mod: "memory-auto" }),
+  env: process.env,
+  logger,
 });
 
 // Attachment store (#17): the sanctioned content-addressed Workspace R/W site for chat image attachments — the DB never
@@ -368,6 +345,9 @@ registry.register(characterCostumeResolutionMethod({ store: characterStore, char
 // Perception methods (T3b): Privacy Pause read/write + the activity card. Operator-only — the agent has no path to
 // un-pause its own observation (pinned by privacy-pause-writer.test.ts); the panel lands with #26.
 registerPerceptionMethods(registry, perception);
+// Memory maintenance (T5 batch 4b): run the tidy pass on demand. Operator-only, NO Rust mirror; the write-count
+// trigger rides autoMemory internally — this surface exists for the settings panel/CLI (#26).
+registry.register(memoryTidyMethod(tidy));
 
 // Attachment GC (#17): a boot sweep + a 6h interval; only raw bytes expire, the description-memory is permanent.
 startAttachmentGc({ store: attachmentStore, ttlMs: attachmentConfig.ttlMs, logger });

@@ -1,6 +1,7 @@
 /**
- * INPUT:  the Database wrapper + upsert/delete/list/search calls (the derived memory index) + bm25 column weights
- * OUTPUT: createMemoryRepo(db, weights?) -> { upsert, deleteByPath, listHashes, listActiveByLayers, search, resolvePath }
+ * INPUT:  the Database wrapper + upsert/delete/list/search/count calls (the derived memory index) + bm25 column weights
+ * OUTPUT: createMemoryRepo(db, weights?) -> { upsert, deleteByPath, listHashes, listActiveByLayers, listActiveInLayer,
+ *         countActiveSince, search, resolvePath }
  * POS:    core/db — the memory aggregate's typed SQL over memory_entries + memory_fts; no node:sqlite import (uses the wrapper)
  */
 import { z } from "zod";
@@ -54,6 +55,16 @@ export interface MemorySearchParams {
   limit: number;
 }
 
+/** Retention's view of a row: policy metadata only, never the content (the sweeper decides, it never reads memories). */
+export interface RetentionRow {
+  path: string;
+  layer: string;
+  importance: number;
+  createdAt: string;
+  updatedAt: string | null;
+  expiresAt: string | null;
+}
+
 export interface MemoryRepo {
   upsert(input: MemoryUpsert): void;
   deleteByPath(path: string): void;
@@ -61,6 +72,14 @@ export interface MemoryRepo {
   listHashes(): MemoryHashRow[];
   /** All active, unexpired, in-scope entries in the given layers (pinned/intention selection; no FTS). */
   listActiveByLayers(params: { characterId: string; layers: string[]; now: string }): MemoryEntryRow[];
+  /** Every ACTIVE row of one layer store-wide, metadata only — expired rows included (retention must find them). */
+  listActiveInLayer(layer: string): RetentionRow[];
+  /**
+   * How many in-scope entries were written or reinforced after `since` (null = never marked -> everything counts).
+   * The tidy trigger reads this instead of keeping a counter column: an R9 reinforcement bumps `updated_at`, and a
+   * reinforced store IS a changed store.
+   */
+  countActiveSince(params: { characterId: string; since: string | null; now?: string }): number;
   /** FTS candidates: MATCH (bm25 order) or LIKE fallback; filtered active/unexpired/in-scope. */
   search(params: MemorySearchParams): MemoryEntryRow[];
   /** id -> file path, scoped to the character (+ globals); deterministic pick if an id ever collides. */
@@ -103,6 +122,16 @@ const SEARCH_LIKE_SQL =
 const RESOLVE_SQL =
   "SELECT path FROM memory_entries WHERE id = :id AND (character_id IS NULL OR character_id = :characterId) " +
   "ORDER BY path LIMIT 1";
+// Retention reads metadata only (no FTS join, no content) and deliberately does NOT filter by expiry — an expired
+// intention is precisely what the `expiring` policy has to find.
+const RETENTION_ROWS_SQL =
+  "SELECT path, layer, importance, created_at, updated_at, expires_at FROM memory_entries " +
+  "WHERE status = 'active' AND layer = :layer ORDER BY created_at";
+// The age anchor is COALESCE(updated_at, created_at) so an R9 reinforcement counts as fresh activity. `since` is
+// passed as '' when the character has never been tidied: ISO strings compare lexicographically, so '' is before
+// every timestamp — one statement covers both cases (a NULL comparison would silently count nothing).
+const COUNT_SINCE_SQL =
+  `SELECT COUNT(*) AS n FROM memory_entries m WHERE ${SCOPE} AND COALESCE(m.updated_at, m.created_at) > :since`;
 
 // Every statement this repo owns, prepared once. Separated from the method surface below so the weights (which are
 // baked into the MATCH statement) have exactly one place they can enter.
@@ -118,14 +147,14 @@ function prepareStatements(db: Database, weights: Bm25Weights) {
     searchMatch: db.prepare(searchMatchSql(weights)),
     searchLike: db.prepare(SEARCH_LIKE_SQL),
     resolve: db.prepare(RESOLVE_SQL),
+    retentionRows: db.prepare(RETENTION_ROWS_SQL),
+    countSince: db.prepare(COUNT_SINCE_SQL),
   };
 }
 
 export function createMemoryRepo(db: Database, weights: Bm25Weights = DEFAULT_BM25_WEIGHTS): MemoryRepo {
-  const { upsertMeta, ftsDelete, ftsInsert, metaDelete, hashes, searchMatch, searchLike, resolve } = prepareStatements(
-    db,
-    weights,
-  );
+  const { upsertMeta, ftsDelete, ftsInsert, metaDelete, hashes, searchMatch, searchLike, resolve, retentionRows, countSince } =
+    prepareStatements(db, weights);
 
   return {
     upsert(input) {
@@ -157,6 +186,13 @@ export function createMemoryRepo(db: Database, weights: Bm25Weights = DEFAULT_BM
       if (match !== undefined) return searchMatch.all({ match, characterId, now, limit }).map(toRow);
       if (like !== undefined) return searchLike.all({ like, characterId, now, limit }).map(toRow);
       return [];
+    },
+    listActiveInLayer(layer) {
+      return retentionRows.all({ layer }).map(toRetentionRow);
+    },
+    countActiveSince({ characterId, since, now = new Date().toISOString() }) {
+      const row = countSince.get({ characterId, now, since: since ?? "" });
+      return row ? Number(row.n) : 0;
     },
     resolvePath({ id, characterId }) {
       const row = resolve.get({ id, characterId });
@@ -210,5 +246,25 @@ function toRow(row: SqlRow): MemoryEntryRow {
     expiresAt: row.expires_at,
     disclosure: row.disclosure,
     content: row.content,
+  });
+}
+
+const RetentionRowSchema = z.object({
+  path: z.string(),
+  layer: z.string(),
+  importance: z.int(),
+  createdAt: z.string(),
+  updatedAt: z.string().nullable(),
+  expiresAt: z.string().nullable(),
+});
+
+function toRetentionRow(row: SqlRow): RetentionRow {
+  return RetentionRowSchema.parse({
+    path: row.path,
+    layer: row.layer,
+    importance: row.importance,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    expiresAt: row.expires_at,
   });
 }
