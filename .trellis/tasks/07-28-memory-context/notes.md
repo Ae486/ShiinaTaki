@@ -308,6 +308,21 @@ tool-call boot read; the "reading memory is remembering" framing goes to the bas
   registration, so the extraction carries a small seam decision. (4) `memory-index`
   budgetTokens=400 is a LOCAL choice with no external source (flagged per source-grounding) —
   revisit when batch 4 gives the block real content.
+- 2026-07-31 BATCH 4 CLOSED (waves 4a+4b; owner-approved commit). Implement 4a report lost with
+  its agent (work leader-verified); 4b report delivered; check reconstructed 4a per design row
+  and passed BOTH waves with ZERO defects and zero self-fixes. Six mutation audits closed
+  (finish-stop, step-cap, zero-call clean exit, below-threshold spy, store-enforced card refusal,
+  R9 age anchor). Eight implementer deviations ALL ruled grounded: isStepCount is ai@7.0.17's
+  real export (`stepCountIs` only an alias); block used/limit estimates FULL content (rethink
+  needs the whole file); stale/missing-disclosure scoped to search-reliant rows via exported
+  `isPinnedEligible`; reinforce keeps importance; archive_supersede is the SANCTIONED unclamped
+  promotion path (Q11-1 exception per notes:78/292 + t5-decisions:409, reachable only from tidy
+  tools); internal "failed" never crosses protocol; shared 195→199 (invariant 3); report renders
+  blocks in full (user-card READ-ONLY-labelled, refusal store-enforced). Gates at close:
+  core 936 / shared 199 / desktop 143 / cli 18 / cargo 141 / e2e 25; frozen zones byte-clean;
+  boot smoke clean (migrations [1..10], no orphans). Known first-run semantics: with lastTidyAt
+  NULL the stale class is 0 and old rows fold into the new-writes review (manual check 85 warns).
+  Manual checks 85-88 queued.
 
 ## Standing kickoff agenda (from earlier session rounds)
 
