@@ -1,11 +1,12 @@
 /**
  * INPUT:  ChatSendParams (+optional attachments) + an injected LanguageModel (AI SDK v7), ConversationStore,
- *         MemoryEngine, optional AutoMemory/visionModel/attachment store/imageMemory hook
+ *         MemoryEngine, optional AutoMemory/visionModel/attachment store/imageMemory/onUsage hooks
  * OUTPUT: createChatAgent({model, store, memory, ...}) -> ChatAgent whose stream() yields text deltas; persists the
  *         FULL turn (tool-calls + tool-results + text) after the loop; abort-aware, partial text never lost;
  *         a cancel before any output retracts the just-appended user row (deletes it + skips the memory writes)
  * POS:    core/agents — the streaming chat loop; DAY-STABLE instructions (base prompt + day line + memory context)
- *         with the volatile <turn-context> tail riding the outgoing user message (Q4/ADR 0008); auto-writes detached
+ *         with the volatile <turn-context> tail riding the outgoing user message (Q4/ADR 0008); auto-writes detached;
+ *         a classified context-overflow retries ONCE after recalibration (R2 seam — never compaction)
  */
 import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type ToolSet } from "ai";
 import type { ChatSendParams, ImageAttachment } from "@taki/shared";
@@ -13,10 +14,12 @@ import type { ApprovalGate } from "../approval/approval-gate.ts";
 import { COSTUME_CHANGE_NOTICE } from "../avatar/costume-notice.ts";
 import type { AutoMemory } from "../memory/auto-memory.ts";
 import type { MemoryEngine } from "../memory/memory-engine.ts";
+import { estimateMessagesTokens, estimateTokens } from "../memory/token-estimator.ts";
 import { renderCurrentTime, renderDayDate } from "../time/time-context.ts";
 import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
 import type { ConversationStore } from "./conversation-store.ts";
-import type { TurnMessage } from "./turn-mapping.ts";
+import { isContextOverflowError, observedTokensOf } from "./overflow-error.ts";
+import type { TurnMessage, UserImageInput } from "./turn-mapping.ts";
 
 /** Per-turn WS handle: notify pushes to the asking operator socket; onClose denies pending approvals on disconnect. */
 export interface TurnContext {
@@ -31,6 +34,14 @@ export interface TurnContext {
 
 export interface ChatAgent {
   stream(params: ChatSendParams, turn?: TurnContext): AsyncIterable<string>;
+}
+
+/** One committed turn's usage sample: the provider's post-hoc numbers + our estimate for the SAME request. */
+export interface TurnUsageReport {
+  inputTokens?: number;
+  outputTokens?: number;
+  /** estimateTokens(instructions) + estimateMessagesTokens(outgoing) — the calibration denominator (R1 tier 2). */
+  estimatedInput: number;
 }
 
 /** model + store + memory are injected so tests supply a MockLanguageModelV4 and a tmp-workspace engine (no network/disk deps). */
@@ -65,6 +76,13 @@ export interface ChatAgentDeps {
   maxSteps?: number;
   /** Extra stop conditions OR-composed into stopWhen after the step cap (e.g. the avatar presentation tail-stop, 1c). */
   stopConditions?: StopCondition<ToolSet>[];
+  /** Usage-capture seam (batch 6, R1 tier 2): fired DETACHED on committed turns only, alongside the auto-memory
+   *  fire (same never-adds-latency contract); a retract or a thrown ending fires nothing. Absent = today's behavior. */
+  onUsage?: (report: TurnUsageReport) => void;
+  /** R2 overflow seam (batch 6): fired ONCE per turn, right before the single classified retry, with the observed
+   *  input tokens (parsed from the provider error body, else our own estimate of the same request). main.ts wires
+   *  the window calibrator's onOverflow + the counts-only warn. Absent = no retry, today's propagation. */
+  onOverflow?: (observedInput: number) => void;
 }
 
 // Fallback step cap when no caller injects one (tests). Production injects AgentConfig.maxSteps (env TAKI_MAX_STEPS, D11);
@@ -75,8 +93,29 @@ export function createChatAgent(deps: ChatAgentDeps): ChatAgent {
   return { stream: (params, turn) => runTurn(deps, params, turn) };
 }
 
+// Narrowed vision pair (decision 5): model + attachment store, present iff the turn carries images.
+type VisionDeps = { model: LanguageModel; store: NonNullable<ChatAgentDeps["attachments"]> };
+
+/** The per-turn stable inputs each attempt replays; `state` is re-created per attempt (the R2 retry reads it). */
+interface TurnAttempt {
+  characterId: string;
+  message: string;
+  attachments: ImageAttachment[];
+  images: UserImageInput[];
+  vision: VisionDeps | null;
+  userSeq: number;
+  state: AttemptState;
+}
+
+/** What an attempt exposes to the R2 classifier: the composed request (lazy estimate fallback) + step completion. */
+interface AttemptState {
+  instructions: string;
+  outgoing: ModelMessage[];
+  stepEnded: boolean;
+}
+
 async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: TurnContext): AsyncIterable<string> {
-  const { store, memory, approval } = deps;
+  const { store, approval } = deps;
   const { characterId, message } = params;
   const attachments = params.attachments ?? [];
   // Image turns route to the vision slot (decision 5). A turn carrying images with no slot/store configured is rejected
@@ -87,36 +126,78 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   const images = vision
     ? attachments.map((a) => ({ mediaType: a.mediaType, ref: vision.store.save(a.dataBase64, a.mediaType).ref }))
     : [];
-  // Capture the committed user row so a cancel-before-reply can retract exactly this seq (the retract seam below).
+  // Capture the committed user row so a cancel-before-reply can retract exactly this seq (the retract seam in the
+  // attempt). Appended ONCE — an R2 retry replays the same committed row, never a second one.
   const userEntry = store.appendUser(characterId, message, images);
+  if (approval && turn) wireApprovalDenial(approval, turn);
+  const base = { characterId, message, attachments, images, vision, userSeq: userEntry.seq };
+  // R2 retry seam (batch 6): ONE overflow-classified retry around the whole attempt. Retry ONLY when the failed
+  // attempt was provably side-effect-free — zero text yielded (nothing user-visible lost) AND zero completed steps
+  // (no tool can have acted; re-running the model after a completed tool step could act twice — the error-handling
+  // spec's never-blind-retry rule). Unrecognized errors and second failures propagate as today (fail-open), and an
+  // absent onOverflow seam disables the retry entirely (nothing would have recalibrated the window). NEVER any
+  // compaction/summarization here — batch 7 owns that (R2).
+  for (let attempt = 0; ; attempt += 1) {
+    const state: AttemptState = { instructions: "", outgoing: [], stepEnded: false };
+    let yielded = false;
+    try {
+      for await (const delta of runAttempt(deps, { ...base, state }, turn)) {
+        yielded = true;
+        yield delta;
+      }
+      return;
+    } catch (error) {
+      const onOverflow = deps.onOverflow;
+      const clean = !yielded && !state.stepEnded;
+      if (attempt > 0 || !clean || onOverflow === undefined || !isContextOverflowError(error)) throw error;
+      // Observed = the provider-reported request size when the body names one, else our own estimate of the SAME
+      // request (computed only here, off every hot path). The calibrator persists the shrunken window, so the
+      // retry's fresh history() pull re-windows through the store's budget closure.
+      onOverflow(observedTokensOf(error) ?? estimateTokens(state.instructions) + estimateMessagesTokens(state.outgoing));
+    }
+  }
+}
+
+// ONE model attempt — request composition, streaming, persistence, retract, detached fires — extracted so the R2
+// retry can re-run it under the recalibrated window (batch-6 design §3.1's named-fn relief; the machinery below is
+// the pre-batch-6 runTurn body, moved verbatim). The fresh per-attempt history() pull is the point: the retry's
+// window is computed under the budget the calibrator just shrank.
+async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): AsyncIterable<string> {
+  const { store, memory, approval } = deps;
+  const { characterId, message, attachments, images, vision, userSeq, state } = attempt;
   const history = store.history(characterId);
-  // ONE clock read per turn: the instructions' day line and the tail's time line must agree (Q4).
+  // ONE clock read per attempt: the instructions' day line and the tail's time line must agree (Q4).
   const now = Date.now();
+  // Hoisted so the batch-6 usage seam can estimate the SAME instructions string the request carries.
+  const instructions = composeInstructions(deps, { characterId, message }, now);
   // Per-turn construction: assembled instructions + characterId-bound tools (construction cost is trivial).
   const agent = new ToolLoopAgent({
     model: vision ? vision.model : deps.model,
-    instructions: composeInstructions(deps, { characterId, message }, now),
+    instructions,
     tools: { ...memory.createTools(characterId), ...(deps.extraTools ?? {}), ...(deps.characterTools?.(characterId) ?? {}) },
     stopWhen: [isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS), ...(deps.stopConditions ?? [])],
     // MCP tool calls await the operator's decision inside the loop; internal tools return not-applicable (ruling 5).
     // The gate is installed whenever it is configured — without a turn (no notify sink) it denies unremembered
     // MCP tools instead of coming off (fail-closed: a turn without an operator must not bypass approval).
     toolApproval: approval ? ({ toolCall }) => approval.decide(toolCall, turn?.notify) : undefined,
+    // A completed step disqualifies the R2 retry (see runTurn's seam comment); construction-level on purpose so the
+    // frozen stream loop body below stays byte-identical (`onStepFinish` is this callback's deprecated alias).
+    onStepEnd: () => {
+      state.stepEnded = true;
+    },
   });
-  if (approval && turn) {
-    // A disconnect mid-turn denies every pending approval immediately (fail-closed, ruling 3); so does an abort —
-    // a cancelled turn stuck awaiting an approval must resolve now, not when the operator eventually answers.
-    turn.onClose(() => approval.denyPending("connection closed"));
-    turn.signal?.addEventListener("abort", () => approval.denyPending("turn cancelled"), { once: true });
-  }
   // THREE additive seams ride ONLY this turn's outgoing copy of the last user row (the D1-frozen turn is otherwise
   // untouched): the in-flight image bytes as a FilePart tail swap (decision 6), a one-shot costume note prefixed onto
   // the user TEXT (1f), and the <turn-context> tail suffixed onto it (Q4 — time line + volatile perception ride the
   // REQUEST, never the store). `history` (the persisted projection) is NEVER mutated; the tail always exists, so every
   // turn rebuilds its last user row (the old text-turn "history unchanged" fast path is superseded).
-  // consumeCostumeChanged fires here even if the turn is later cancelled/retracted (baseline advances anyway → a rare
-  // skipped notice, backstopped by the 1e enum; accepted narrow edge).
+  // consumeCostumeChanged fires here even if the turn is later cancelled/retracted or R2-retried (baseline advances
+  // anyway, and a retry attempt carries no second notice → a rare skipped notice, backstopped by the 1e enum;
+  // accepted narrow edge).
   const outgoing = buildOutgoing({ history, isImageTurn: vision !== null, message, attachments, changed: deps.costumeChanged?.(characterId) ?? false, tail: buildTurnTail(now, deps.volatileContext) });
+  // Exposed for the R2 estimate fallback — read only on the retry path, never on the hot path.
+  state.instructions = instructions;
+  state.outgoing = outgoing;
   // abortSignal is per-call by SDK design (not a constructor setting). A cancel ends the stream by EITHER a graceful
   // `abort` part or a THROWN reason (see retractIfCancelledSilent) — the retract seam below handles both endings.
   const result = await agent.stream({ messages: outgoing, abortSignal: turn?.signal });
@@ -147,12 +228,22 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   } catch (error) {
     // Throw ending of a cancel: the transport rejects the read with our string reason (fails isAbortError), so the
     // SDK errors the stream — same retract rule as the graceful ending (see retractIfCancelledSilent); else propagate.
-    if (await retractIfCancelledSilent(store, { characterId, userSeq: userEntry.seq, result, pendingStepText, turn })) return;
+    if (await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
     throw error;
   }
   // Graceful ending (the SDK emitted an `abort` part then closed): the same retract check on the clean path.
-  if (await retractIfCancelledSilent(store, { characterId, userSeq: userEntry.seq, result, pendingStepText, turn })) return;
+  if (await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
   fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
+  fireUsageReport(deps, { usage: result.usage, instructions, outgoing });
+}
+
+// A disconnect mid-turn denies every pending approval immediately (fail-closed, ruling 3); so does an abort —
+// a cancelled turn stuck awaiting an approval must resolve now, not when the operator eventually answers.
+// (Pure move out of runTurn: the batch-6 usage seam pushed it past the 50-line fn cap — the design's named-fn
+// relief clause.)
+function wireApprovalDenial(approval: ApprovalGate, turn: TurnContext): void {
+  turn.onClose(() => approval.denyPending("connection closed"));
+  turn.signal?.addEventListener("abort", () => approval.denyPending("turn cancelled"), { once: true });
 }
 
 // The detached post-turn writes: the auto-memory pass + the image-description hook. Fired void so they never add
@@ -164,6 +255,24 @@ function fireDetachedTurnWrites(deps: ChatAgentDeps, ctx: { characterId: string;
   if (ctx.imageRefs.length > 0) {
     void deps.imageMemory?.onImageTurn({ characterId: ctx.characterId, refs: ctx.imageRefs, caption: ctx.message });
   }
+}
+
+// Batch-6 usage-capture seam (R1 tier 2), committed path only: `result.usage` is a PromiseLike settled after stream
+// end (the all-steps sum, verified against ai@7.0.17 dist). Fired void with the rejection swallowed — a usage
+// promise that rejects (abort during step 0) reports nothing; no sample beats a fabricated one. The estimate is
+// computed HERE (off the turn's critical path) from the exact strings/messages the request carried; tool schemas
+// deliberately ride the historyRatio reserve instead of the estimate (batch-6 design §2.1).
+function fireUsageReport(
+  deps: ChatAgentDeps,
+  ctx: { usage: PromiseLike<{ inputTokens: number | undefined; outputTokens: number | undefined }>; instructions: string; outgoing: ModelMessage[] },
+): void {
+  const report = deps.onUsage;
+  if (!report) return;
+  const estimatedInput = estimateTokens(ctx.instructions) + estimateMessagesTokens(ctx.outgoing);
+  void Promise.resolve(ctx.usage).then(
+    (usage) => report({ inputTokens: usage.inputTokens, outputTokens: usage.outputTokens, estimatedInput }),
+    () => undefined,
+  );
 }
 
 interface RetractInput {
@@ -192,7 +301,7 @@ async function retractIfCancelledSilent(store: ConversationStore, input: Retract
 
 // Image turns need BOTH the vision slot and the attachment store; a turn with images but either missing is rejected
 // (the guard). Returns the narrowed non-optional pair so the save + model-pick sites carry no `undefined` (decision 5).
-function requireVisionDeps(deps: ChatAgentDeps): { model: LanguageModel; store: NonNullable<ChatAgentDeps["attachments"]> } {
+function requireVisionDeps(deps: ChatAgentDeps): VisionDeps {
   if (!deps.visionModel || !deps.attachments) {
     throw new Error("Image attachments require a configured vision model (TAKI_VLM_*)");
   }

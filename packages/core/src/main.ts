@@ -6,11 +6,11 @@
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import type { ToolSet } from "ai";
-import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { createChatAgent } from "./agents/chat-agent.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
 import { createTurnQueue } from "./agents/turn-queue.ts";
 import { createTurnRegistry } from "./agents/turn-registry.ts";
+import { createWindowCalibrator } from "./agents/window-calibrator.ts";
 import { createApprovalBroker } from "./approval/approval-broker.ts";
 import { createApprovalGate } from "./approval/approval-gate.ts";
 import { createDecisionStore } from "./approval/decision-store.ts";
@@ -31,13 +31,16 @@ import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
 import { loadAgentConfig } from "./config/agent-config.ts";
 import { loadAmbientScreenshotConfig } from "./config/ambient-screenshot-config.ts";
 import { loadAttachmentConfig } from "./config/attachment-config.ts";
+import { loadContextConfig } from "./config/context-config.ts";
 import { loadProviderConfig } from "./config/provider-config.ts";
+import { createModels } from "./config/provider-factory.ts";
 import { loadServerConfig } from "./config/server-config.ts";
 import { loadVisionConfig } from "./config/vision-config.ts";
 import { MIGRATIONS } from "./db/migrations/index-list.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
 import { openDatabase } from "./db/sqlite.ts";
 import { createTimelineRepo } from "./db/timeline-repo.ts";
+import { createWindowStateRepo } from "./db/window-state-repo.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
 import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
 import { createLogger } from "./logging/logger.ts";
@@ -95,21 +98,13 @@ const visionConfig = loadVisionConfig(process.env);
 const attachmentConfig = loadAttachmentConfig(process.env);
 // Ambient screen sampling (#20 T3b): OFF unless explicitly enabled, raw frames dropped right after describe.
 const ambientConfig = loadAmbientScreenshotConfig(process.env);
+// Per-slot declared context windows + the history ratio (T5-R1 tier 1; batch 6).
+const contextConfig = loadContextConfig(process.env);
 
 const logger = createLogger(serverConfig.logLevel);
 
-const provider = createOpenAICompatible({
-  name: "taki-provider",
-  baseURL: providerConfig.baseUrl,
-  apiKey: providerConfig.apiKey,
-});
-const model = provider.languageModel(providerConfig.model);
-// The vision slot mirrors the text-slot block; absent config = no vision model (image turns are then rejected upstream).
-const visionModel = visionConfig
-  ? createOpenAICompatible({ name: "taki-vision", baseURL: visionConfig.baseUrl, apiKey: visionConfig.apiKey }).languageModel(
-      visionConfig.model,
-    )
-  : undefined;
+// Model construction lives in config/provider-factory.ts (batch-6 line-cap relief); Q14's includeUsage rides it.
+const { model, visionModel } = createModels({ provider: providerConfig, vision: visionConfig, includeUsage: contextConfig.includeUsage });
 
 // The composition root ensures the app data root exists before opening the db (first-boot);
 // the db layer itself stays fs-free (invariant). Mirrors the paired-device-store sanctioned site.
@@ -122,11 +117,16 @@ const db = openDatabase({
     dbLog.info({ applied }, applied.length > 0 ? "migrations applied" : "schema already up to date"),
 });
 const timelineRepo = createTimelineRepo(db);
+// R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
+// their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).
+const windowCalibrator = createWindowCalibrator({ repo: createWindowStateRepo(db), slot: "main", declared: contextConfig.contextTokens.main });
 const timelineSubscriptions = createTimelineSubscriptions();
 const conversationStore = createConversationStore({
   repo: timelineRepo,
   onAppend: (entry) => timelineSubscriptions.publish(entry),
   onRemove: (ref) => timelineSubscriptions.publishRemoved(ref),
+  // History replays historyRatio × the calibrated window; the remainder covers instructions + tools + the response.
+  window: { budget: () => Math.floor(windowCalibrator.effectiveWindow() * contextConfig.historyRatio) },
 });
 
 // Avatar channel (#16): LLM-driven expression/motion commands fan out to subscribed Pet UI operators (mirrors the
@@ -143,6 +143,8 @@ const { engine: memory, autoMemory, tidy, memoryRoot, writeMemory } = createMemo
   promptDir: serverConfig.promptDir,
   model,
   timeline: timelineRepo,
+  // The flush boundary IS the store's replay boundary (batch 6 coupling point 2 — same slice, no drift window).
+  windowStart: conversationStore.windowStart,
   env: process.env,
   logger,
 });
@@ -323,6 +325,15 @@ registry.register(
       volatileContext: (now) => perception.renderContext(now),
       costumeChanged: (characterId) => avatarVocabulary.consumeCostumeChanged(characterId),
       approval: approvalGate,
+      // Batch-6 usage seam: each committed turn's real usage calibrates the main slot's window (the calibrator
+      // ignores the 0 that stands in for an absent inputTokens field).
+      onUsage: (report) => windowCalibrator.onUsage(report.inputTokens ?? 0, report.estimatedInput),
+      // R2 (batch 6): a classified overflow shrinks the persisted window — the retry then re-windows through the
+      // store's budget closure above. Counts-only warn: sizes and the new window, never content (logging-guidelines).
+      onOverflow: (observedInput) =>
+        logger
+          .child({ mod: "chat" })
+          .warn({ observedInput, effectiveWindow: windowCalibrator.onOverflow(observedInput) }, "provider context overflow — window recalibrated, retrying once"),
     }),
     logger,
     turnControls,

@@ -1,7 +1,8 @@
 /**
  * INPUT:  scripted text deltas, or an error to raise on the model call
- * OUTPUT: streamingMockModel / slowStreamingModel / abortRejectingModel / failingMockModel / midStreamErrorModel /
- *         scriptedModel (stream) + generatingModel / failingGenerateModel / scriptedGenerateModel (generate) -> MockLanguageModelV4
+ * OUTPUT: streamingMockModel / slowStreamingModel / abortRejectingModel / failingMockModel / failThenStreamModel /
+ *         errorPartThenStreamModel / midStreamErrorModel / scriptedModel (stream) + generatingModel /
+ *         failingGenerateModel / scriptedGenerateModel (generate) -> MockLanguageModelV4
  * POS:    core/testing — test-only factories (research/ai-sdk-v7-api.md §3); never imported by production code
  */
 import { simulateReadableStream } from "ai";
@@ -91,6 +92,53 @@ export function failingMockModel(error: unknown): MockLanguageModelV4 {
       throw error;
     },
   });
+}
+
+/**
+ * R2 retry mocks (batch 6): the FIRST call fails, later calls stream the deltas — one factory per transport ending.
+ * `failThenStreamModel` REJECTS the doStream call (the thrown ending — an HTTP-level 400 surfaces this way);
+ * `errorPartThenStreamModel` emits a mid-stream `error` part then closes (the graceful ending the SDK produces when
+ * it catches the provider error itself). Both leave `doStreamCalls` populated so tests can compare the two prompts.
+ */
+export function failThenStreamModel(error: unknown, deltas: string[]): MockLanguageModelV4 {
+  let calls = 0;
+  return new MockLanguageModelV4({
+    doStream: async () => {
+      calls += 1;
+      if (calls === 1) throw error;
+      return successStream(deltas);
+    },
+  });
+}
+
+export function errorPartThenStreamModel(error: unknown, deltas: string[]): MockLanguageModelV4 {
+  let calls = 0;
+  return new MockLanguageModelV4({
+    doStream: async () => {
+      calls += 1;
+      if (calls === 1) {
+        return {
+          stream: simulateReadableStream({
+            chunks: [{ type: "stream-start" as const, warnings: [] }, { type: "error" as const, error }],
+          }),
+        };
+      }
+      return successStream(deltas);
+    },
+  });
+}
+
+function successStream(deltas: string[]) {
+  return {
+    stream: simulateReadableStream({
+      chunks: [
+        { type: "text-start" as const, id: "t1" },
+        ...deltas.map((delta) => ({ type: "text-delta" as const, id: "t1", delta })),
+        { type: "text-end" as const, id: "t1" },
+        { type: "finish" as const, finishReason: { unified: "stop" as const, raw: undefined }, usage: USAGE },
+      ],
+    }),
+  };
 }
 
 /**

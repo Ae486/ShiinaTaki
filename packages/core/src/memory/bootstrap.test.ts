@@ -40,12 +40,15 @@ function boot(
   opened.push({ db, dir: dataDir });
   const { logger, records } = createCaptureLogger();
   const mainModel = generatingModel(modelText);
+  const timeline = createTimelineRepo(db);
   const subsystem = createMemorySubsystem({
     db,
     dataDir,
     promptDir: join(dataDir, "prompt"),
     model: mainModel,
-    timeline: createTimelineRepo(db),
+    timeline,
+    // Same wiring as main.ts: the flush boundary is the conversation store's replay boundary (batch 6).
+    windowStart: createConversationStore({ repo: timeline }).windowStart,
     env,
     logger,
   });

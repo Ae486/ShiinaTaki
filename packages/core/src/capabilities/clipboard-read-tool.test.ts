@@ -13,14 +13,16 @@ function toolWith(registry: ConnectionRegistry, broker: CapabilityBroker) {
 }
 
 describe("createClipboardReadTool (T5)", () => {
-  it("returns the clipboard text", async () => {
+  it("returns the clipboard text with its capture stamp (Q5)", async () => {
     const tools = toolWith(registryReturning(fakeNode("clipboard-read")), brokerReturning({ ok: true, output: { text: "hi" } }));
-    expect(await tools.clipboard_read?.execute?.({}, EXEC_OPTS)).toEqual({ ok: true, text: "hi" });
+    const result = (await tools.clipboard_read?.execute?.({}, EXEC_OPTS)) as { ok: boolean; text: string; capturedAt: string };
+    expect(result).toMatchObject({ ok: true, text: "hi" });
+    expect(Number.isNaN(Date.parse(result.capturedAt))).toBe(false); // ISO stamp, stamped at execute (Q5)
   });
 
   it("returns an empty string for an empty clipboard (ruling 6)", async () => {
     const tools = toolWith(registryReturning(fakeNode("clipboard-read")), brokerReturning({ ok: true, output: { text: "" } }));
-    expect(await tools.clipboard_read?.execute?.({}, EXEC_OPTS)).toEqual({ ok: true, text: "" });
+    expect(await tools.clipboard_read?.execute?.({}, EXEC_OPTS)).toMatchObject({ ok: true, text: "" });
   });
 
   it("passes a Shell failure through and never throws (T7)", async () => {

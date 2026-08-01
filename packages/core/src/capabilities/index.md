@@ -1,11 +1,12 @@
 # core/capabilities/
 - capability-broker.ts — core→node ask/await broker; correlate by requestId; 90s backstop + denyAll on disconnect; logs requested/responded
+- capture-stamp.ts — captureStamp(): the Q5 state-snapshot capture moment (ISO, stamped once at execute, persists byte-stable into replay); shared by the screenshot/process-list/clipboard-read results
 - route-capability.ts — shared route→broker step (findNode → request → normalize); reused by every Shell-backed tool; logs invoked/routing-failed
 - screenshot-store.ts — the sanctioned Workspace write site: base64 PNG → screenshots/<ts>.png (invariant 2)
 - screenshot-describe.ts — the OPTIONAL screenshot→VLM bridge (vision slot): bytes (+ optional caller focus appended to the base framing) → textual description; null on failure
-- screenshot-tool.ts — the agent tool: route → broker.request → persist(→describe, optional describePrompt focus → PII scrub → A1 fence, D44) → { ok, path, width, height, bytes, description? }
-- process-list-tool.ts — the agent tool: route → broker → { ok, processes, count } (read-only, no kill)
-- clipboard-read-tool.ts — the agent tool: route → broker → { ok, text } (empty clipboard → "")
+- screenshot-tool.ts — the agent tool: route → broker.request → persist(→describe, optional describePrompt focus → PII scrub → A1 fence, D44) → { ok, path, width, height, bytes, capturedAt, description? }
+- process-list-tool.ts — the agent tool: route → broker → { ok, processes, count, capturedAt } (read-only, no kill)
+- clipboard-read-tool.ts — the agent tool: route → broker → { ok, text, capturedAt } (empty clipboard → "")
 - clipboard-write-tool.ts — the agent tool: route → broker → { ok:true } (text is content, never logged)
 - shell-open-tool.ts — the agent tool: route → broker → { ok:true, opened } (url/path launch; dialog shows target)
 - exec-tool.ts — the agent tool: route → broker → ExecOutput (opaque `{command}` pass-through; parsed/governed Shell-side)

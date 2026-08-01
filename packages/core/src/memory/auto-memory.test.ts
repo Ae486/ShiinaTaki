@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
+import { createConversationStore } from "../agents/conversation-store.ts";
 import { createMemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import type { MemoryEvent, MemoryEventsRepo } from "../db/memory-events-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
@@ -99,12 +100,24 @@ function seed(f: CompanionFixture, n: number): void {
 
 function wire(
   f: CompanionFixture,
-  w: { episodic: EpisodicWriter; flush: FlushWriter; logger: AutoMemoryLogger; tidy?: AutoMemoryTidy },
+  w: {
+    episodic: EpisodicWriter;
+    flush: FlushWriter;
+    logger: AutoMemoryLogger;
+    tidy?: AutoMemoryTidy;
+    windowStart?: (characterId: string) => number;
+  },
 ) {
   const timeline = createTimelineRepo(f.db);
   const autoState = createMemoryAutoRepo(f.db);
   const events = spyEvents();
-  return { autoState, events, auto: createAutoMemory({ timeline, autoState, events: events.repo, ...w }) };
+  // Default boundary = the fixture's legacy store (no token budget): identical to the old latest-REPLAY_WINDOW math.
+  const windowStart = w.windowStart ?? ((characterId: string) => f.conversation.windowStart(characterId));
+  return {
+    autoState,
+    events,
+    auto: createAutoMemory({ timeline, autoState, events: events.repo, ...w, windowStart }),
+  };
 }
 
 describe("auto-memory episodic trigger (T2/T3/T4)", () => {
@@ -281,6 +294,43 @@ describe("auto-memory flush trigger (T5/T7)", () => {
     await auto.onTurnCompleted("taki");
     await auto.onTurnCompleted("taki"); // no new messages
     expect(fl.calls).toHaveLength(1);
+  });
+});
+
+describe("auto-memory flush boundary == history boundary (batch 6 coupling point 2)", () => {
+  it("with a token-windowed store the flush covers EXACTLY the rows history() no longer replays", async () => {
+    const f = fresh();
+    const fl = spyFlush();
+    // A second store over the SAME timeline, with a token budget: each "mN" row costs 5 estimator units, so a
+    // budget of 20 replays the newest 4 rows. Production wires this exact shape (calibrator × historyRatio).
+    const windowed = createConversationStore({ repo: createTimelineRepo(f.db), window: { budget: () => 20 } });
+    const { auto } = wire(f, {
+      episodic: spyEpisodic().writer,
+      flush: fl.writer,
+      logger: captureLogger().logger,
+      windowStart: (id) => windowed.windowStart(id),
+    });
+    seed(f, 30);
+
+    await auto.onTurnCompleted("taki");
+
+    // Both paths, same fixture: the replay begins at windowStart and the flush segment ends one row below it.
+    const boundary = windowed.windowStart("taki");
+    expect(windowed.history("taki")).toHaveLength(30 - boundary + 1);
+    expect(fl.calls).toHaveLength(1);
+    expect(fl.calls[0]?.segment.map((e) => e.seq)).toEqual(Array.from({ length: boundary - 1 }, (_, i) => i + 1));
+    expect(fl.calls[0]?.segment.at(-1)?.seq).toBe(boundary - 1);
+  });
+
+  it("under the legacy store (no budget) the flush stays byte-identical to the old REPLAY_WINDOW math", async () => {
+    const f = fresh();
+    const fl = spyFlush();
+    const { auto } = wire(f, { episodic: spyEpisodic().writer, flush: fl.writer, logger: captureLogger().logger });
+    seed(f, 205); // legacy window = seqs 6..205 -> the leaving segment is (0, 5]
+
+    await auto.onTurnCompleted("taki");
+
+    expect(fl.calls[0]?.segment.map((e) => e.seq)).toEqual([1, 2, 3, 4, 5]);
   });
 });
 

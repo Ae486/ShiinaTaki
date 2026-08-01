@@ -23,6 +23,7 @@ describe("get_current_time tool", () => {
       local: string;
       timezone: string;
       epochMs: number;
+      capturedAt: string;
     };
     expect(result.ok).toBe(true);
     expect(Number.isNaN(Date.parse(result.iso))).toBe(false);
@@ -31,6 +32,9 @@ describe("get_current_time tool", () => {
     expect(typeof result.timezone).toBe("string");
     expect(result.timezone.length).toBeGreaterThan(0);
     expect(typeof result.epochMs).toBe("number");
+    // Q5 class marker: identical to `iso` BY CONSTRUCTION (same Date) — the state-snapshot family is uniformly
+    // foldable by capturedAt (batch 7 reads one field name across the class).
+    expect(result.capturedAt).toBe(result.iso);
   });
 
   it("documents when NOT to use it and takes no arguments", () => {

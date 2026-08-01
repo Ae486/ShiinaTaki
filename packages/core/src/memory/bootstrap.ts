@@ -31,6 +31,8 @@ export interface MemorySubsystemDeps {
   /** The MAIN chat model — the utility slot's fallback when no separate background slot is configured. */
   model: LanguageModel;
   timeline: TimelineRepo;
+  /** The conversation store's replay boundary — the flush computes "leaving the window" from it (batch 6). */
+  windowStart: (characterId: string) => number;
   env: Record<string, string | undefined>;
   logger: Logger;
 }
@@ -79,6 +81,7 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
     episodic: createEpisodicWriter({ model: utility.model, writeMemory }),
     flush: createFlushWriter({ model: utility.model, createTools: (id) => engine.createBackgroundTools(id) }),
     tidy,
+    windowStart: deps.windowStart,
     logger: logger.child({ mod: "memory-auto" }),
   });
 

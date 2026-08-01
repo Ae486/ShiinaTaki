@@ -1,9 +1,9 @@
 /**
- * INPUT:  onTurnCompleted(characterId, origin) after each turn; injected timeline/auto-state/events repos and writers
+ * INPUT:  onTurnCompleted(characterId, origin) after each turn; injected timeline/auto-state/events repos, writers
+ *         and the conversation store's window boundary
  * OUTPUT: createAutoMemory(deps) -> { onTurnCompleted } — detached episodic + flush passes, watermark-guarded
  * POS:    core/memory — the auto-write orchestrator (MEMORY-DESIGN §Write paths 2-3); never blocks the chat turn
  */
-import { REPLAY_WINDOW } from "../agents/conversation-store.ts";
 import type { MemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import type { MemoryEventsRepo } from "../db/memory-events-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
@@ -45,6 +45,12 @@ export interface AutoMemoryDeps {
   episodic: EpisodicWriter;
   flush: FlushWriter;
   logger: AutoMemoryLogger;
+  /**
+   * The conversation store's window boundary (seq of the oldest replayed entry): the flush treats every row below
+   * it as having left the model's window — the SAME selectWindow boundary history() replays, so flush and replay
+   * cannot drift apart (batch 6 coupling point 2).
+   */
+  windowStart: (characterId: string) => number;
   /**
    * OPTIONAL store-maintenance hook, run after the write passes inside the SAME per-character chain — so the tidy
    * pass reads a store the writers have finished with, and needs no mutex of its own. Absent = today's behavior.
@@ -118,9 +124,11 @@ async function maybeEpisodic(deps: AutoMemoryDeps, ctx: PassContext): Promise<vo
 
 async function maybeFlush(deps: AutoMemoryDeps, ctx: PassContext): Promise<void> {
   const { timeline, autoState, flush, events, logger } = deps;
-  const { characterId, origin, latest } = ctx;
+  const { characterId, origin } = ctx;
   const { lastFlushSeq } = autoState.get(characterId);
-  const through = latest - REPLAY_WINDOW; // the segment (lastFlushSeq, through] is leaving the model's window
+  // Everything below the store's replay boundary has left the model's window — the segment (lastFlushSeq, through]
+  // is exactly what history() no longer shows (batch 6: same selectWindow slice, no drift window).
+  const through = deps.windowStart(characterId) - 1;
   if (through <= lastFlushSeq) return;
   const segment = timeline.rangeAscending(characterId, lastFlushSeq, through);
   try {

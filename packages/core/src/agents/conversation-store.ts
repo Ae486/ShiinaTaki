@@ -1,16 +1,18 @@
 /**
  * INPUT:  appendUser(characterId, text, images?)/appendAssistant(characterId, text) + appendTurn(characterId, ModelMessage[]) +
- *         removeEntry(characterId, seq) + an injected TimelineRepo and onAppend/onRemove sinks
- * OUTPUT: createConversationStore({repo, onAppend, onRemove}) -> { appendUser, appendAssistant, appendTurn, removeEntry, history }
- * POS:    core/agents — SQLite-backed conversation store; persists each turn (full multi-part fidelity), replays history
+ *         removeEntry(characterId, seq) + an injected TimelineRepo, onAppend/onRemove sinks and an optional window budget
+ * OUTPUT: createConversationStore({repo, onAppend, onRemove, window}) -> { appendUser, appendAssistant, appendTurn, removeEntry, history, windowStart }
+ * POS:    core/agents — SQLite-backed conversation store; persists each turn (full multi-part fidelity), replays the
+ *         token-measured window (selectWindow — the flush shares windowStart as the SAME boundary, batch 6)
  */
 import type { ModelMessage } from "ai";
 import type { TimelineEntry } from "@taki/shared";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
+import { selectWindow } from "./context-window.ts";
 import { toEntryInput, toModelMessage, toUserEntryInput, type TurnEntryInput, type TurnMessage, type UserImageInput } from "./turn-mapping.ts";
 
-// The model receives the latest REPLAY_WINDOW messages; compaction/token-budgeting is a later concern (ADR 0005).
-// Exported as the single source: the pre-compaction flush (#7) treats this boundary AS the context edge.
+// The HARD BACKSTOP on replayed messages (T5-R1: context is measured in tokens; a message count survives ONLY as
+// the guard against a broken estimator). Without an injected window budget it is also the whole window (legacy).
 export const REPLAY_WINDOW = 200;
 
 export interface ConversationStore {
@@ -29,6 +31,11 @@ export interface ConversationStore {
   removeEntry(characterId: string, seq: number): void;
   /** The replay window as AI SDK messages, oldest-first (full multi-part fidelity when parts are present). */
   history(characterId: string): ModelMessage[];
+  /**
+   * Seq of the oldest entry history() still replays — every row below it has LEFT the model's window. The flush
+   * computes "leaving the window" from THIS boundary (same selectWindow call: same slice, no drift — batch 6).
+   */
+  windowStart(characterId: string): number;
 }
 
 export interface ConversationStoreDeps {
@@ -37,15 +44,24 @@ export interface ConversationStoreDeps {
   onAppend?: (entry: TimelineEntry) => void;
   /** Fired after a retract delete; the server fans it out as timeline.removed (mirrors onAppend). */
   onRemove?: (ref: { characterId: string; seq: number }) => void;
+  /**
+   * Token budget (estimator units) for replayed history; production wires calibrator.effectiveWindow ×
+   * historyRatio. Absent = legacy REPLAY_WINDOW-only behavior (message-count window, byte-identical).
+   */
+  window?: { budget(): number };
 }
 
 export function createConversationStore(deps: ConversationStoreDeps): ConversationStore {
-  const { repo, onAppend, onRemove } = deps;
+  const { repo, onAppend, onRemove, window } = deps;
   const commit = (characterId: string, input: TurnEntryInput): TimelineEntry => {
     const entry = repo.append({ characterId, ...input });
     onAppend?.(entry);
     return entry;
   };
+  // history() and windowStart() MUST go through this one call — a second boundary computation is how the flush
+  // and the replay drift apart (prd coupling point 2).
+  const select = (characterId: string) =>
+    selectWindow(repo.latestAscending(characterId, REPLAY_WINDOW), window?.budget() ?? Number.POSITIVE_INFINITY, REPLAY_WINDOW);
   return {
     // No images = toUserEntryInput returns the legacy `{role:"user", content}` row (byte-identical to before #17).
     appendUser: (characterId, text, images = []) => commit(characterId, toUserEntryInput(text, images)),
@@ -61,14 +77,10 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
       onRemove?.({ characterId, seq });
     },
     // Legacy text-only rows reconstruct via content; parts-carrying rows replay their full multi-part shape.
-    history: (characterId) => {
-      const entries = repo.latestAscending(characterId, REPLAY_WINDOW);
-      // The hard window cut can strand tool rows whose assistant tool-call fell outside the window; a leading
-      // tool message is invalid replay input for providers, so drop rows until the first non-tool one.
-      const first = entries.findIndex((entry) => entry.role !== "tool");
-      return (first === -1 ? [] : entries.slice(first))
-        .map(toModelMessage)
-        .filter((message): message is ModelMessage => message !== null);
-    },
+    history: (characterId) =>
+      select(characterId)
+        .entries.map(toModelMessage)
+        .filter((message): message is ModelMessage => message !== null),
+    windowStart: (characterId) => select(characterId).windowStartSeq,
   };
 }

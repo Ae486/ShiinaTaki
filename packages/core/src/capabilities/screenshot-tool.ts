@@ -1,7 +1,7 @@
 /**
  * INPUT:  an LLM screenshot call ({ describePrompt? }) + a ConnectionRegistry, CapabilityBroker, ScreenshotStore, and
  *         an optional VLM describe bridge (screenshot-describe, wired only when the vision slot is configured)
- * OUTPUT: createScreenshotTool(deps) -> ToolSet { screenshot }; returns { ok, path, width, height, bytes,
+ * OUTPUT: createScreenshotTool(deps) -> ToolSet { screenshot }; returns { ok, path, width, height, bytes, capturedAt,
  *         description? } or { ok:false, code } — description present only when the VLM bridge produced one, and then
  *         only PII-scrubbed and wrapped in the A1 untrusted fence (D44)
  * POS:    core/capabilities — the agent tool; thin over route→broker→persist(→describe→scrub→fence); execute NEVER throws (ruling 7/8A).
@@ -12,6 +12,7 @@ import { z } from "zod";
 import { ScreenshotOutputSchema } from "@taki/shared";
 import { fenceUntrusted } from "../agents/untrusted-fence.ts";
 import { scrubPii } from "../perception/pii-scrub.ts";
+import { captureStamp } from "./capture-stamp.ts";
 import { routeCapability, type CapabilityRouteDeps } from "./route-capability.ts";
 import type { ScreenshotStore } from "./screenshot-store.ts";
 
@@ -57,13 +58,16 @@ export function createScreenshotTool(deps: ScreenshotToolDeps): ToolSet {
 
           // The channel output is opaque (Option A); the screenshot tool owns and parses its own payload shape.
           const output = ScreenshotOutputSchema.parse(routed.output);
+          // Q5: stamped at the CAPTURE, before the (possibly slow) describe round-trip — the stamp says when the
+          // screen looked like this; it persists byte-stable with the tool result.
+          const capturedAt = captureStamp();
           const { path, bytes } = deps.store.save(output.dataBase64);
           // The describe bridge reads the in-flight bytes (no fs round-trip); its failures degrade to null inside it.
           const description = deps.describe
             ? await deps.describe({ dataBase64: output.dataBase64, mediaType: output.mediaType, prompt: describePrompt })
             : null;
           log.info({ width: output.width, height: output.height, bytes, described: description !== null }, "screenshot persisted");
-          const result = { ok: true as const, path, width: output.width, height: output.height, bytes };
+          const result = { ok: true as const, path, width: output.width, height: output.height, bytes, capturedAt };
           return description === null ? result : { ...result, description: safeDescription(description) };
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);

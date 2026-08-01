@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { ScreenshotOutput } from "@taki/shared";
 import { fenceUntrusted } from "../agents/untrusted-fence.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
@@ -54,14 +54,35 @@ function toolWith(deps: {
 }
 
 describe("createScreenshotTool", () => {
-  it("routes, persists the output and returns { ok, path, width, height, bytes } (T8)", async () => {
+  it("routes, persists the output and returns { ok, path, width, height, bytes, capturedAt } (T8/Q5)", async () => {
     const tools = toolWith({
       registry: registryReturning(nodeConnection()),
       broker: brokerReturning({ ok: true, output: OUTPUT }),
       store: store(() => ({ path: "C:/ws/screenshots/x.png", bytes: 42 })),
     });
     const result = await tools.screenshot?.execute?.({}, EXEC_OPTS);
-    expect(result).toEqual({ ok: true, path: "C:/ws/screenshots/x.png", width: 1920, height: 1080, bytes: 42 });
+    expect(result).toMatchObject({ ok: true, path: "C:/ws/screenshots/x.png", width: 1920, height: 1080, bytes: 42 });
+    expect(Number.isNaN(Date.parse((result as { capturedAt: string }).capturedAt))).toBe(false);
+  });
+
+  it("stamps capturedAt at the CAPTURE, not after the (possibly slow) describe round-trip (Q5)", async () => {
+    vi.useFakeTimers({ now: new Date("2026-08-01T10:00:00.000Z") });
+    try {
+      const tools = toolWith({
+        registry: registryReturning(nodeConnection()),
+        broker: brokerReturning({ ok: true, output: OUTPUT }),
+        store: store(() => ({ path: "x.png", bytes: 42 })),
+        describe: () => {
+          // The VLM answers seconds later — the stamp must still say when the SCREEN looked like this.
+          vi.setSystemTime(new Date("2026-08-01T10:00:07.000Z"));
+          return Promise.resolve("late description");
+        },
+      });
+      const result = (await tools.screenshot?.execute?.({}, EXEC_OPTS)) as { capturedAt: string };
+      expect(result.capturedAt).toBe("2026-08-01T10:00:00.000Z");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("returns NO_NODE when no capable device is connected (T9)", async () => {
@@ -141,7 +162,8 @@ describe("createScreenshotTool", () => {
       describe: () => Promise.resolve(null),
     });
     const result = await tools.screenshot?.execute?.({}, EXEC_OPTS);
-    expect(result).toEqual({ ok: true, path: "x.png", width: 1920, height: 1080, bytes: 42 });
+    expect(result).toMatchObject({ ok: true, path: "x.png", width: 1920, height: 1080, bytes: 42 });
+    expect(result).not.toHaveProperty("description");
   });
 
   it("threads describePrompt from the tool input into the describe bridge (T2b item 6)", async () => {
@@ -190,6 +212,6 @@ describe("createScreenshotTool", () => {
       store: store(() => ({ path: "x.png", bytes: 42 })),
     });
     const result = await tools.screenshot?.execute?.({}, EXEC_OPTS);
-    expect(result).toEqual({ ok: true, path: "x.png", width: 1920, height: 1080, bytes: 42 });
+    expect(result).toMatchObject({ ok: true, path: "x.png", width: 1920, height: 1080, bytes: 42 });
   });
 });
