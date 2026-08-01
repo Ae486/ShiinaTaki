@@ -192,5 +192,12 @@ node --env-file-if-exists=../../.env.local src/main.ts
 - [ ] **89. turn-context 卷尾真机观察（Q4/ADR 0008）**：正常聊几轮（可开 `TAKI_AMBIENT_SCREENSHOT=true` 让感知块有内容）→ 每轮 outgoing 的最后一条 user 消息末尾应带 `<turn-context>`（首行 `Current local time:`，感知的活动/屏幕块在其内、各自围栏保留）；**时间线里落库的 user 行必须没有它**（in-flight only）；系统提示词整段在同一天内应字节不变（分钟级内容已全部离开 system prompt）。问她"现在几点/我在用什么程序" → 应从卷尾读对，不再从旧位置找。观感项：卷尾措辞是否引发她复述时间/屏幕（反复述条款应压住）。
 - [ ] **90. 旗舰 L2 名字回忆留证（batch 5 设计 §5 RED 协议）**：结果记录——实现期 pre-overhaul 探针（新接线 + 旧提示词）**连续 3 次 GREEN**（工具描述 + disclosure 提问词汇已足以带动 memory_search），设计 §5 预授权此结果：旗舰改为**保持性证明**（retention，非 red→green delta），测试文件头注已如实陈述。证据 JSON（booleans/counts/roles，无内容）：pre-overhaul 三次在 implement 报告；post-overhaul GREEN 两证——实现期单跑（21:40，`replyContainsSeededName:true, memorySearchToolRows:1`）+ **主脑验证轮全量 e2e 26/26 含 L2 通过（2026-07-31 23:20，真钥）**。若后续 L2 变红（搜索未发生/答错名字），是 5b 提示词回归，立即报。
 
+## 来自 M5 T5 batch 6（token 窗口：测量 / 校准 / 溢出自愈）
+
+> 机器可验部分全绿：core **1043** + shared **199** + desktop **143** + cli **18** + typecheck×5 + root lint；check 双波审计（6a 报告因系统故障由 check 重建）+ 五项变异闭环。真弹探针证据（2026-08-01，实现代理跑，一次性）已入 implement 报告。以下是长期观察项。
+
+- [ ] **91. usage 校准活样本观察（R1/Q14）**：真弹探针已证明——**当前网关在 `TAKI_PROVIDER_INCLUDE_USAGE` 关着时也主动返回真实 usage**（`inputTokens:90/outputTokens:8`，选项开关双向都不呛）。因此出厂默认保持 OFF，校准器开箱即有活样本。观察：正常使用若干轮后查 `slot_window_state` 表（或日志）——`factor` 应从 1.0 漂向稳定值（估算器 CJK 启发式 vs 网关真实计数的比值），不应剧烈摆动（EMA α=0.3 + 限幅 [0.5,2]）。**待你决策**：换网关时若发现 usage 不再到达（校准器饿死、factor 恒 1.0），把 `TAKI_PROVIDER_INCLUDE_USAGE=true` 打开即可。
+- [ ] **92. 长对话窗口行为（R1/R2，慢燃）**：长期聊天（尤其带截图描述/exec 输出的重型回合）→ 上下文不再按 200 条硬切，而按 token 预算裁窗（200 条降级为估算器坏死时的硬兜底）。预期:**永不见**上下文溢出错误;若网关某天真的 400 一次 → 日志应见**恰好一条** counts-only 的重试 warn（`observedInput/effectiveWindow`），窗口自愈收缩且重启不丢（迁移 011 持久化）。注意：当前网关实测**吞下 27.5 万 token 不报错**（吸收/截断），R2 在此网关上可能是休眠保险——若发现她在超长对话里"忘记很近的事"（网关静默截断的现场表现），记一行报我，那是换算力时要盯的第一件事。
+
 
 

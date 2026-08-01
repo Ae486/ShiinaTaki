@@ -349,6 +349,32 @@ tool-call boot read; the "reading memory is remembering" framing goes to the bas
   list lacks a multi-skill decision procedure; shipped assistant-layer default has no snapshot
   pin. Registered D56 (episodic JSON-vs-tool-call unification, deferred with trigger).
   Batch-6 watchout: main.ts at 289/300 counted lines — 11 lines of headroom.
+- 2026-08-01 BATCH 6 CLOSED (waves 6a+6b; commit pending owner approval). 6a implement agent
+  died in a SYSTEM FAULT after finishing (name unreachable, cross-session crash); recovery =
+  disk-verdict route (leader gates on recovered tree: core 1007, boot [1..11]) + check
+  reconstruction — third validated use of the pattern. 6a: context-config (3 slot windows 32768
+  LOCAL + ratio 0.55), estimator message/image/tool extension (constants in-code per the R13
+  interpretation note), window-calibrator (EMA 0.3, clamp [0.5,2], onOverflow ×0.9) + migration
+  011 + window-state-repo, selectWindow token cut (REPLAY_WINDOW demoted to backstop),
+  windowStart flush coupling (equality test load-bearing), onUsage detached seam; provider-factory
+  extraction (main.ts cap relief, sanctioned §7). 6b: overflow-error classifier (cited phrase
+  family incl. opencode OVERFLOW_PATTERNS; fail-open on unrecognized; observedTokensOf parses
+  REQUESTED never LIMIT), R2 retry seam (runAttempt extraction verbatim; D1 tightening:
+  zero-COMPLETED-STEPS guard via construction-level onStepEnd — error-handling spec's
+  no-side-effect-retry at turn granularity), Q14 includeUsage via provider-factory
+  (spread-conditional, default OFF), Q5 capturedAt stamps (screenshot/process-list/clipboard-read/
+  current-time; exec excluded per N2; no agent-facing foreground tool exists — prd item vacuous).
+  REAL-GATEWAY PROBES (owner-authorized, one-shot): usage arrives WITH the option OFF on this
+  gateway (calibrator live under shipped defaults; default stays OFF); overflow NOT reachable —
+  gateway absorbed a ~275k-token prompt (R2 = dormant insurance here; silent-truncation watchout
+  recorded in manual check 92). Check: PASS, 3 self-fixes (two 6a fault-loss index.md lines, one
+  costume-comment edge naming); 5 mutation runs (2 equivalent mutants on the usage seam recorded
+  honestly — transport-guaranteed property); lint-cap counted: chat-agent 228/300, main 286/300.
+  Gates at close: core 1043 / shared 199 / desktop 143 / cli 18 / cargo 141 / e2e 26; boot
+  smoke [1..11]. Batch-7 pickups: calibrator no-shrink-when-observed>declared (multi-turn
+  geometric heal — acceptable, revisit only if seen thrashing); per-call budget() reads are NOT a
+  defect (monotonic lastFlushSeq guard, single selectWindow path); costume-notice consumed on a
+  retried attempt (accepted narrow edge, 1e enum backstop); D3/D5 semantics.
 
 ## Standing kickoff agenda (from earlier session rounds)
 

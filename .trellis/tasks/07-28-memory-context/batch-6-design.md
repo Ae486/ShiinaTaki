@@ -122,10 +122,11 @@ compaction/summarization (R2; batch 7 owns that).
 `TAKI_PROVIDER_INCLUDE_USAGE` (boolean env, default false, zod) → when true, main.ts passes the
 openai-compatible streaming-usage option at provider/model construction (exact option name/site
 verified against installed dist types — R1's verified fact names `stream_options:{include_usage:
-true}` as the wire shape). OFF default because gateway compatibility is unverified (R1). The
-one-shot real-gateway verification is the LEADER's manual step at close (queued as a manual check):
-enable on the real gateway, run one turn, confirm usage arrives and nothing breaks, report, turn
-back off (or leave on if clean — owner's call).
+true}` as the wire shape). OFF default because gateway compatibility is unverified (R1).
+REAL-MODEL ALLOWANCE (owner, 2026-07-31): batch-6 implement/check agents MAY run one-shot
+real-gateway probes with the local key to verify functional correctness — the Q14 usage-arrival
+test, a live `result.usage` shape check for the calibrator, and (if reachable safely) an overflow
+classification sample. Evidence verbatim in the report; probes are one-shot, never load loops.
 
 ### 3.3 Q5 — state-snapshot tool results embed capture timestamps
 
