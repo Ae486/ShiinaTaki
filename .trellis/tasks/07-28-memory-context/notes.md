@@ -323,6 +323,32 @@ tool-call boot read; the "reading memory is remembering" framing goes to the bas
   boot smoke clean (migrations [1..10], no orphans). Known first-run semantics: with lastTidyAt
   NULL the stale class is 0 and old rows fold into the new-writes review (manual check 85 warns).
   Manual checks 85-88 queued.
+- 2026-07-31 BATCH 5 CLOSED (waves 5a+5b; commit pending owner approval). 5a: R6 removal
+  (assembler retrieved section + RECALL_WINDOW/recentText; retrieval serves memory_search only;
+  AssembleParams {characterId, currentMessage}) + Q4 relocation (`<turn-context>` in-flight tail
+  on the outgoing user message — third named additive seam on the D1-frozen turn; instructions
+  now same-day byte-stable, pinned by test). 5b: base-prompt "Memory (non-negotiable)" section
+  (R12 OpenClaw-shaped procedure + non-triggers + post-miss "say you checked" + card-wins last;
+  R16/R17/R18+correction-signal/R19), assistant-layer memory section rebuilt on the single
+  "reading memory is remembering" criterion, tool-description grain hints (R18 preference line
+  byte-identical across its two sanctioned surfaces; old R18-flow parenthetical removed from
+  memory_write). Drafting style bound to research/rd-prompt-philosophy.md (owner-ordered survey:
+  Anthropic incl. July-2026 reversal, OpenAI Model Spec + GPT-4.1, OpenClaw, Manus).
+  FLAGSHIP FINDING: the design-§5 RED run came back GREEN 3x pre-overhaul (real key) — the
+  batch-1..3 infrastructure (disclosure question-vocabulary bridge + unicode61 migration) already
+  carried the name-recall scenario; flagship reframed as RETENTION per the design's own
+  pre-authorization (post-overhaul GREEN confirmed by implementer + leader full-suite run).
+  Check: PASS, 5 self-fixes (R18 bullet 2-line cap split, budget-comment off-by-one, stale
+  prompt/README.md + MEMORY-DESIGN §assembly retrieved references, manual checks 89-90 queued);
+  4 mutation audits closed; volatileContext throw-probe: no HIGH (risk relocated not created;
+  seam tolerates only non-throwing wirings — future wirings guard at composition root, D55 shape).
+  Gates at close: core 948 / shared 199 / desktop 143 / cli 18 / cargo 141 / e2e 26 (incl. L2);
+  boot smoke clean. T4 handoff items from the prompt audit (leader, vs rd rules): converge the
+  base/assistant-layer Truthfulness bullet-1 restatement to one home; screenshot/observation
+  tools lack non-triggers (turn-context now carries a screen card — overtrigger risk); skills
+  list lacks a multi-skill decision procedure; shipped assistant-layer default has no snapshot
+  pin. Registered D56 (episodic JSON-vs-tool-call unification, deferred with trigger).
+  Batch-6 watchout: main.ts at 289/300 counted lines — 11 lines of headroom.
 
 ## Standing kickoff agenda (from earlier session rounds)
 

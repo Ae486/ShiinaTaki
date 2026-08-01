@@ -106,14 +106,16 @@ turn (blocks are read fresh, never cached). Symmetrically, **deleting a block fi
 
 1. Character persona prompt (static)
 2. Emotion capsule (from companion state module — adjacent, not memory)
-3. Pinned block: all `promise`/`rule` + facts with importance >= 9 (budget ~800 tokens; overflow = oldest-milestone truncation, promises never truncated)
-4. Retrieved block, framed as associations ("things that come to mind"), max ~600 tokens: FTS5 bm25 over current message + last N turns → filter by `disclosure` keyword match and `status: active` → rank bm25, then importance, then recency
+3. Memory Blocks in registry order, each under its header and budget number (§Blocks above)
+4. Pinned block: all `promise`/`rule` + facts with importance >= 9 (budget ~800 tokens; overflow = oldest-milestone truncation, promises never truncated)
 5. At most one `intention` when the emotion gate passes (never listed as a checklist)
+
+No per-turn retrieved section (T5-R6): search-policy rows reach the model only through her own `memory_search` call.
 
 ## Write paths
 
 1. **Explicit tools** (LLM-invoked): `memory_write(type, content, importance, disclosure?)`, `memory_search(query)`, `memory_archive(id)`. "记住这个约定" → `promise` write, importance 10.
-2. **Auto episodic**: end-of-session (or every N turns) summarizer appends 1-3 entries to today's episode file.
+2. **Auto episodic**: a background pass reviews the stretch of conversation and writes only what passes the behaviour-change test (T5-R15) — no quota, silence is the normal outcome, every skip logged.
 3. **Pre-compaction flush** (OpenClaw pattern): before context compaction, a silent turn saves anything important that exists only in the conversation window.
 4. **Nightly consolidation** (croner, v1.5): distill the day's episodes → diary entry + promote/merge/archive suggestions. Ships after the core loop is stable; the schema carries `status` from day one so consolidation is additive.
 
@@ -121,7 +123,7 @@ All writes go through the memory store API (file write + index upsert + event lo
 
 ## CJK retrieval note (technical, load-bearing)
 
-FTS5's default unicode61 tokenizer does not segment Chinese. v1 uses the FTS5 **trigram** tokenizer (substring matching, CJK-safe, zero deps). If quality disappoints, alternatives are a JS segmenter (`Intl.Segmenter`) feeding a custom-tokenized index — decided by usage, not upfront.
+FTS5's default unicode61 tokenizer does not segment Chinese. v1 (since T5 batch 3) indexes a `search_terms` column produced by an application-layer segmenter (`Intl.Segmenter` behind the `SearchTokenizer` seam, D53) over a `unicode61` FTS table — the earlier trigram tokenizer was migrated away after A/B evidence (rank@1 17/25 → 24/25). Segmenter swaps stay behind the seam; decided by usage, not upfront.
 
 ## Upgrade path (interfaces over engines)
 

@@ -185,5 +185,12 @@ node --env-file-if-exists=../../.env.local src/main.ts
 - [ ] **87. Utility Slot 路由（T5-R11）**：配 `TAKI_UTILITY_BASE_URL/_API_KEY/_MODEL` 三件套指向便宜模型再启动 → 背景写手（episodic/flush）与 tidy 的 LLM 调用应走该模型（供应商后台/日志可见模型名与主对话分流）；**不配时全部回落主模型**，行为完全不变。**只配一两个**启动应 fail-fast，报错点名缺哪个变量。
 - [ ] **88. 保留清扫观察（T5-R8，慢燃项非即时验收）**：用一段时间后观察——`activity` 滚动窗外的行被**硬删**（文件+索引都消失）；`intentions` 过期转归档（文件还在，`archived` 标记）；`episodes` 低重要度（<4）满 90 天转归档。清扫在开机与每 6h 跑，**无可回收时日志完全安静**（不许刷"扫了 0 条"）。若发现"该消失的还在 / 不该消失的没了"（尤其是**被 reinforce 过的行按旧出生日期被误清**——已有单测钉死，真机若现形即报），记一行给我。
 
+## 来自 M5 T5 batch 5（R6 移除 / turn-context 卷尾 / 提示词大修 / 旗舰 L2）
+
+> 机器可验部分全绿：core **948** + shared **199** + desktop **143** + cli **18** + typecheck×5 + root lint；check 变异审计三项闭环（去尾/持久化尾/RECALL_WINDOW 复活全红后复原）。检索区/块区/batch-4 文件冻结字节不变。e2e 回归网 + 真钥 L2 + boot smoke 由主脑验证轮跑。以下要的是**真模型真桌面**下的观感与留证。
+
+- [ ] **89. turn-context 卷尾真机观察（Q4/ADR 0008）**：正常聊几轮（可开 `TAKI_AMBIENT_SCREENSHOT=true` 让感知块有内容）→ 每轮 outgoing 的最后一条 user 消息末尾应带 `<turn-context>`（首行 `Current local time:`，感知的活动/屏幕块在其内、各自围栏保留）；**时间线里落库的 user 行必须没有它**（in-flight only）；系统提示词整段在同一天内应字节不变（分钟级内容已全部离开 system prompt）。问她"现在几点/我在用什么程序" → 应从卷尾读对，不再从旧位置找。观感项：卷尾措辞是否引发她复述时间/屏幕（反复述条款应压住）。
+- [ ] **90. 旗舰 L2 名字回忆留证（batch 5 设计 §5 RED 协议）**：结果记录——实现期 pre-overhaul 探针（新接线 + 旧提示词）**连续 3 次 GREEN**（工具描述 + disclosure 提问词汇已足以带动 memory_search），设计 §5 预授权此结果：旗舰改为**保持性证明**（retention，非 red→green delta），测试文件头注已如实陈述。证据 JSON（booleans/counts/roles，无内容）：pre-overhaul 三次在 implement 报告；post-overhaul GREEN 两证——实现期单跑（21:40，`replyContainsSeededName:true, memorySearchToolRows:1`）+ **主脑验证轮全量 e2e 26/26 含 L2 通过（2026-07-31 23:20，真钥）**。若后续 L2 变红（搜索未发生/答错名字），是 5b 提示词回归，立即报。
+
 
 

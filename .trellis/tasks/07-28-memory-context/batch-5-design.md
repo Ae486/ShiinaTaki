@@ -22,6 +22,7 @@ the implementer fills missing detail from the cited sources or the repo, never b
 | Supersede-don't-append + user-correction trigger | R18 (+ leader addition, flagged in ruling); current `memory_archive` description quoted at memory-tools.ts:165 |
 | Experience shape Baseline/Deviation/Outcome/Reusable-judgment, non-strict | R19 (Nocturne structural format; strictness explicitly NOT adopted) |
 | Flagship scenario + red→green proof duty | prd §Batch 5 + §6 Acceptance; L2 harness pattern = `e2e/src/hallucination-l2.e2e.test.ts` (withStack, realProviderEnv gate, evidence JSON) |
+| Drafting style for the 5b prompt legs (phrasing, grains, ordering) | `research/rd-prompt-philosophy.md` (2026-07-31, owner-ordered): Anthropic official guidance + July-2026 context-engineering reversal, OpenAI Model Spec + GPT-4.1 agentic guide, OpenClaw shipped Memory Recall section, Manus context-engineering |
 | `<turn-context>` tag NAME | LOCAL choice (grep-verified unused). The PATTERN is sourced (rb P1); the name is ours — styled after our existing `<untrusted-observation>` |
 
 ## 1. Wave plan
@@ -114,8 +115,12 @@ In `base-prompt.ts` injected-context section:
 
 ### `base-prompt.ts` — new "Memory (non-negotiable)" section
 
-Floors + mechanics (must survive assistant-layer edits). Drafting latitude is the implementer's;
-the CONTENT is fixed by the rulings:
+Floors + mechanics (must survive assistant-layer edits). Drafting STYLE is bound by
+`research/rd-prompt-philosophy.md` §Rules (14 drafting rules — notably: R12 triggers phrased as an
+OpenClaw-shaped procedure, topic classes → one search → use what returns; the impression floor and
+card-wins spend the section's start/end attention budget; explain-the-why in one clause where the
+ruling already supplies it; floors may stay prohibitions — severity of register tracks authority
+level). The CONTENT below is fixed by the rulings:
 1. Impression floor (R12): never state a fact about the user's past from impression — if it was not
    read from memory in this conversation, search first.
 2. Search triggers, strongest first (R12): the user raises a topic your memory plausibly covers
@@ -123,7 +128,9 @@ the CONTENT is fixed by the rulings:
    recall-trigger line matches; you are about to say you don't remember (backstop); anaphora
    (上次 / 之前 / 还记得吗); an unrecognized proper noun.
 3. Non-triggers (R12): the present moment, anything already visible in your pinned/blocks/card,
-   small talk. ONE search per occasion — no retry loops.
+   small talk. ONE search per occasion — no retry loops. Post-miss fallback (rd §3, OpenClaw
+   pattern): when the one search misses, say you checked and don't remember — never retry, never
+   fall back to impression. This line closes R12 into the truthfulness floor.
 4. Card-wins: if the user's identity card and any other memory disagree, the card wins.
 5. Pin-on-repeat (R16): repeatedly searching for the same fact means pin it.
 6. Fix-on-read (R17): a defect noticed in a memory you touched is repaired now (missing trigger,
@@ -136,6 +143,12 @@ the CONTENT is fixed by the rulings:
    worked, a constraint discovered) are written deliberately by you; shape them as
    baseline / deviation / outcome / reusable judgment when it fits — never forced.
 
+Grain assignment (rd rule "one rule, one home; different surfaces get different GRAINS, not
+paraphrases" — the 2026 Anthropic conflict finding): the base section carries the DECISION FLOW;
+tool descriptions carry a one-line per-call hint; the assistant layer carries feel/weighting.
+Never restate a rule across surfaces in drifted wording — the check diffs the three surfaces for
+paraphrase drift.
+
 ### `prompt/system/assistant-layer.md` — tone half (user-editable)
 
 Rewrite §"What comes back to you (your memory)" for the post-R6 world: nothing surfaces on its own
@@ -146,6 +159,8 @@ weigh-by-age and don't-recite guidance — both survive verbatim.
 
 ### `memory-tools.ts` description touch-ups (descriptions are prompt surface)
 
+Per the grain rule above: descriptions get the per-call HINT only, never a restatement of the base
+section's flow (GPT-4.1 guide: keep descriptions concise, usage flow belongs in the system prompt):
 - `memory_archive` (:165): fold in R18 — prefer correcting: archive the old and write the new;
   wrong memories are more dangerous than no memories.
 - `memory_write`: one-line R19 shape hint. Keep within tool-design spec length norms.
@@ -213,6 +228,9 @@ untouched). Therefore no new config keys and no #26 panel additions.
   e2e net green (25 + the gated L2).
 - Grep sweeps at check: `RECALL_WINDOW|RETRIEVED_|recentText|queryText` → zero hits in src;
   "Current local time" appears in time-context, base-prompt teaching, and the tail builder only.
+- Prompt-surface drift diff at check (rd grain rule): compare base Memory section vs
+  assistant-layer vs tool descriptions — a rule restated across surfaces in drifted wording is a
+  finding (each surface gets its own grain, never a paraphrase).
 - Boot smoke (node direct launch, temp TAKI_DATA_DIR, non-default port, kill tree).
 - Manual-checks queue: volatile-tail observation in a real chat; L2 RED/GREEN evidence.
 
