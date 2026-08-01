@@ -55,7 +55,7 @@ describe("chat-agent costume-change notice (1f)", () => {
     expect(prompt2).toContain("again");
   });
 
-  it("keeps the turn byte-identical when no costume change is pending (no notice injected)", async () => {
+  it("injects no notice when no costume change is pending (persisted history stays the plain turn)", async () => {
     const f = fresh();
     const model = streamingMockModel(["ok"]);
     const agent = createChatAgent({
@@ -70,7 +70,8 @@ describe("chat-agent costume-change notice (1f)", () => {
     const prompt = JSON.stringify(model.doStreamCalls[0]?.prompt ?? []);
     expect(prompt).not.toContain(COSTUME_CHANGE_NOTICE);
     expect(prompt).toContain("plain");
-    // The last user message the model saw is exactly the plain text (outgoing === history for a no-notice text turn).
+    // The persisted projection is exactly the plain turn (the outgoing copy differs only by the in-flight
+    // turn-context tail, which never persists — pinned in chat-agent-tail.test.ts).
     expect(f.conversation.history("taki")).toEqual([
       { role: "user", content: "plain" },
       { role: "assistant", content: "ok" },

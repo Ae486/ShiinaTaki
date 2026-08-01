@@ -7,7 +7,6 @@ import { createMemoryFixture, type MemoryFixture } from "../testing/memory-fixtu
 import { rmTempDir } from "../testing/rm-temp.ts";
 import { createAssembler, type Assembler } from "./assembler.ts";
 import { createBlockStore, type BlockStore } from "./block-store.ts";
-import { createFts5Retriever } from "./fts5-retriever.ts";
 import type { PersonaProvider } from "./persona-provider.ts";
 import { createIntlSegmenterTokenizer } from "./search-tokenizer.ts";
 
@@ -49,7 +48,6 @@ function fresh(opts: { pinnedBudget?: number } = {}): { f: MemoryFixture; blocks
     blocks,
     assembler: createAssembler({
       repo: f.repo,
-      retriever: createFts5Retriever({ repo: f.repo, tokenizer: f.tokenizer }),
       persona: STUB_PERSONA,
       blocks,
       pinnedBudget: opts.pinnedBudget,
@@ -68,7 +66,7 @@ describe("assembler — Memory Blocks (the always-visible tier)", () => {
     blocks.writeBlock({ id: "user-model", content: "常在深夜写代码", caller: "background" });
     blocks.writeBlock({ id: "memory-index", characterId: "taki", content: "拉面 / 每周五的电影", caller: "background" });
 
-    const sections = assembler.assemble({ characterId: "taki", queryText: "hi" }).split("\n\n");
+    const sections = assembler.assemble({ characterId: "taki", currentMessage: "hi" }).split("\n\n");
     expect(sections.slice(0, 3)).toEqual(["ASSISTANT_LAYER", "PERSONA(taki)", "Current mood: neutral."]);
     // PRD §3 order: the user's hard facts, then her reading of the user, then the index as navigation.
     expect(sections[3]).toContain("What the user has written about themselves");
@@ -84,7 +82,7 @@ describe("assembler — Memory Blocks (the always-visible tier)", () => {
     const { blocks, assembler } = fresh();
     blocks.writeBlock({ id: "user-card", content: "Name: pleia", caller: "user" });
 
-    const out = assembler.assemble({ characterId: "taki", queryText: "hi" });
+    const out = assembler.assemble({ characterId: "taki", currentMessage: "hi" });
     expect(out.split("\n\n")).toHaveLength(4); // the three persona sections + the one block that exists
     expect(out).not.toContain("come to understand about the user");
     expect(out).not.toContain("Topics your memory holds");
@@ -93,13 +91,13 @@ describe("assembler — Memory Blocks (the always-visible tier)", () => {
   it("reads per-character blocks for the character being assembled", () => {
     const { blocks, assembler } = fresh();
     blocks.writeBlock({ id: "memory-index", characterId: "other", content: "别人的索引", caller: "background" });
-    expect(assembler.assemble({ characterId: "taki", queryText: "hi" })).not.toContain("别人的索引");
+    expect(assembler.assemble({ characterId: "taki", currentMessage: "hi" })).not.toContain("别人的索引");
   });
 
   it("renders each block's budget number beside it (the background writer must see the ceiling)", () => {
     const { blocks, assembler } = fresh();
     blocks.writeBlock({ id: "user-card", content: "Name: pleia", caller: "user" });
-    expect(assembler.assemble({ characterId: "taki", queryText: "hi" })).toMatch(/\[budget: \d+\/500 tokens\]/);
+    expect(assembler.assemble({ characterId: "taki", currentMessage: "hi" })).toMatch(/\[budget: \d+\/500 tokens\]/);
   });
 
   it("trims an over-budget block in the prompt and says so (the file on disk stays whole)", () => {
@@ -107,7 +105,7 @@ describe("assembler — Memory Blocks (the always-visible tier)", () => {
     const line = "记".repeat(50);
     blocks.writeBlock({ id: "user-card", content: Array.from({ length: 20 }, (_, i) => `${i}${line}`).join("\n"), caller: "user" });
 
-    const out = assembler.assemble({ characterId: "taki", queryText: "hi" });
+    const out = assembler.assemble({ characterId: "taki", currentMessage: "hi" });
     const block = out.split("\n\n")[3] ?? "";
     expect(block).toContain("trimmed to fit this block's budget");
     expect(block.split("\n").length).toBeLessThan(20); // 20 lines x ~51 tokens cannot fit a 500-token budget
@@ -120,8 +118,8 @@ describe("assembler — Memory Blocks (the always-visible tier)", () => {
     blocks.writeBlock({ id: "user-card", content: "Name: pleia", caller: "user" });
     // `chat.send` validates characterId only as a non-empty string; a path-unsafe one must degrade to "no
     // per-character block", never crash the turn before a single token streams.
-    expect(() => assembler.assemble({ characterId: "../evil", queryText: "hi" })).not.toThrow();
-    expect(assembler.assemble({ characterId: "../evil", queryText: "hi" })).toContain("Name: pleia");
+    expect(() => assembler.assemble({ characterId: "../evil", currentMessage: "hi" })).not.toThrow();
+    expect(assembler.assemble({ characterId: "../evil", currentMessage: "hi" })).toContain("Name: pleia");
   });
 
   it("is byte-stable across assembles while the block files are unchanged", () => {
@@ -129,12 +127,12 @@ describe("assembler — Memory Blocks (the always-visible tier)", () => {
     blocks.writeBlock({ id: "user-card", content: "Name: pleia", caller: "user" });
     blocks.writeBlock({ id: "user-model", content: "常在深夜写代码", caller: "background" });
 
-    const first = assembler.assemble({ characterId: "taki", queryText: "hi" });
-    expect(assembler.assemble({ characterId: "taki", queryText: "hi" })).toBe(first);
+    const first = assembler.assemble({ characterId: "taki", currentMessage: "hi" });
+    expect(assembler.assemble({ characterId: "taki", currentMessage: "hi" })).toBe(first);
 
     // ...and it picks up a rewrite without a restart (no boot cache anywhere on the block path).
     blocks.writeBlock({ id: "user-model", content: "常在深夜写代码，讨厌被打断", caller: "background" });
-    expect(assembler.assemble({ characterId: "taki", queryText: "hi" })).toContain("讨厌被打断");
+    expect(assembler.assemble({ characterId: "taki", currentMessage: "hi" })).toContain("讨厌被打断");
   });
 });
 
@@ -148,12 +146,12 @@ describe("assembler — pinned row budget comes from config (T5-R13)", () => {
   it("keeps every row under the default budget and drops the oldest under a tight one", () => {
     const roomy = fresh();
     seedThreeProfileRows(roomy.f);
-    const roomyBullets = roomy.assembler.assemble({ characterId: "taki", queryText: "x" }).match(/^- \(/gmu) ?? [];
+    const roomyBullets = roomy.assembler.assemble({ characterId: "taki", currentMessage: "x" }).match(/^- \(/gmu) ?? [];
     expect(roomyBullets).toHaveLength(3);
 
     const tight = fresh({ pinnedBudget: 40 });
     seedThreeProfileRows(tight.f);
-    const tightBullets = tight.assembler.assemble({ characterId: "taki", queryText: "x" }).match(/^- \(/gmu) ?? [];
+    const tightBullets = tight.assembler.assemble({ characterId: "taki", currentMessage: "x" }).match(/^- \(/gmu) ?? [];
     expect(tightBullets).toHaveLength(1);
   });
 });
@@ -172,7 +170,7 @@ describe("assembler — observed-origin rows enter the prompt only inside the fe
       }),
     );
 
-    const out = assembler.assemble({ characterId: "taki", queryText: "电影" });
+    const out = assembler.assemble({ characterId: "taki", currentMessage: "电影" });
     const pinned = out.split("\n\n").find((s) => s.startsWith("Promises and facts")) ?? "";
     expect(pinned).toContain('<untrusted-observation source="memory">');
     // The observed row sits INSIDE the fence; the self row stays outside it.
@@ -187,7 +185,7 @@ describe("assembler — observed-origin rows enter the prompt only inside the fe
   it("emits no fence at all when every row is self-authored", () => {
     const { f, assembler } = fresh();
     f.repo.upsert(upsert({ path: "/m/r-1.md", id: "0001-r", layer: "relationship", content: "每周五一起看电影" }));
-    expect(assembler.assemble({ characterId: "taki", queryText: "电影" })).not.toContain("untrusted-observation");
+    expect(assembler.assemble({ characterId: "taki", currentMessage: "电影" })).not.toContain("untrusted-observation");
   });
 
   it("fences an observed intention line too", () => {
@@ -195,7 +193,7 @@ describe("assembler — observed-origin rows enter the prompt only inside the fe
     const base = { layer: "intentions", disclosure: "电影", expiresAt: "2999-01-01T00:00:00.000Z" };
     f.repo.upsert(upsert({ ...base, path: "/m/i-obs.md", id: "0003-i", origin: "observed", content: "屏幕上有电影票" }));
 
-    const out = assembler.assemble({ characterId: "taki", queryText: "想看电影了" });
+    const out = assembler.assemble({ characterId: "taki", currentMessage: "想看电影了" });
     expect(out).toContain("A quiet thought you might share: <untrusted-observation source=\"memory\">");
     expect(out).toContain("屏幕上有电影票");
   });

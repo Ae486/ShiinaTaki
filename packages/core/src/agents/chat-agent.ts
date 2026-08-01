@@ -4,7 +4,8 @@
  * OUTPUT: createChatAgent({model, store, memory, ...}) -> ChatAgent whose stream() yields text deltas; persists the
  *         FULL turn (tool-calls + tool-results + text) after the loop; abort-aware, partial text never lost;
  *         a cancel before any output retracts the just-appended user row (deletes it + skips the memory writes)
- * POS:    core/agents — the streaming chat loop; base prompt + memory context + tools per turn; auto-writes detached
+ * POS:    core/agents — the streaming chat loop; DAY-STABLE instructions (base prompt + day line + memory context)
+ *         with the volatile <turn-context> tail riding the outgoing user message (Q4/ADR 0008); auto-writes detached
  */
 import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type ToolSet } from "ai";
 import type { ChatSendParams, ImageAttachment } from "@taki/shared";
@@ -51,6 +52,9 @@ export interface ChatAgentDeps {
   characterTools?: (characterId: string) => ToolSet;
   /** Extra instructions appended after the assembled memory context (skills list + avatar vocabulary); "" contributes nothing. */
   instructionsExtra?: (characterId: string) => string;
+  /** Volatile per-turn context (perception activity/screen, fenced upstream) carried INSIDE the <turn-context> tail
+   *  on the outgoing user message — in-flight only, never persisted (Q4/ADR 0008). Absent/blank = a time-only tail. */
+  volatileContext?: (now: number) => string;
   /** A one-shot costume-change flag for THIS turn (consumed = acknowledged): true → a COSTUME_CHANGE_NOTICE is prefixed
    *  onto the model-facing user message (never persisted) so the model adopts the freshly-reported avatar vocabulary
    *  (1f). Absent = no costume tracking (tests). */
@@ -66,8 +70,6 @@ export interface ChatAgentDeps {
 // Fallback step cap when no caller injects one (tests). Production injects AgentConfig.maxSteps (env TAKI_MAX_STEPS, D11);
 // a turn hitting the cap ends cleanly instead of looping forever.
 const DEFAULT_MAX_STEPS = 10;
-// Retrieval + intention gate look at the current message plus the last few turns.
-const RECALL_WINDOW = 5;
 
 export function createChatAgent(deps: ChatAgentDeps): ChatAgent {
   return { stream: (params, turn) => runTurn(deps, params, turn) };
@@ -88,10 +90,12 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   // Capture the committed user row so a cancel-before-reply can retract exactly this seq (the retract seam below).
   const userEntry = store.appendUser(characterId, message, images);
   const history = store.history(characterId);
+  // ONE clock read per turn: the instructions' day line and the tail's time line must agree (Q4).
+  const now = Date.now();
   // Per-turn construction: assembled instructions + characterId-bound tools (construction cost is trivial).
   const agent = new ToolLoopAgent({
     model: vision ? vision.model : deps.model,
-    instructions: composeInstructions(deps, { characterId, history, message }),
+    instructions: composeInstructions(deps, { characterId, message }, now),
     tools: { ...memory.createTools(characterId), ...(deps.extraTools ?? {}), ...(deps.characterTools?.(characterId) ?? {}) },
     stopWhen: [isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS), ...(deps.stopConditions ?? [])],
     // MCP tool calls await the operator's decision inside the loop; internal tools return not-applicable (ruling 5).
@@ -105,13 +109,14 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
     turn.onClose(() => approval.denyPending("connection closed"));
     turn.signal?.addEventListener("abort", () => approval.denyPending("turn cancelled"), { once: true });
   }
-  // The in-flight image bytes ride ONLY this turn's messages (a FilePart tail swap replacing the just-appended user
-  // row's text projection); persistence + replay stay text (decision 6). A costume swap since the model's last turn
-  // rides in-flight the same way (a one-shot note prefixed onto the user TEXT, 1f). BOTH are additive seams on the
-  // D1-frozen turn — `history` (the persisted projection) is NEVER mutated; text-turn/no-notice stays byte-identical.
+  // THREE additive seams ride ONLY this turn's outgoing copy of the last user row (the D1-frozen turn is otherwise
+  // untouched): the in-flight image bytes as a FilePart tail swap (decision 6), a one-shot costume note prefixed onto
+  // the user TEXT (1f), and the <turn-context> tail suffixed onto it (Q4 — time line + volatile perception ride the
+  // REQUEST, never the store). `history` (the persisted projection) is NEVER mutated; the tail always exists, so every
+  // turn rebuilds its last user row (the old text-turn "history unchanged" fast path is superseded).
   // consumeCostumeChanged fires here even if the turn is later cancelled/retracted (baseline advances anyway → a rare
   // skipped notice, backstopped by the 1e enum; accepted narrow edge).
-  const outgoing = buildOutgoing({ history, isImageTurn: vision !== null, message, attachments, changed: deps.costumeChanged?.(characterId) ?? false });
+  const outgoing = buildOutgoing({ history, isImageTurn: vision !== null, message, attachments, changed: deps.costumeChanged?.(characterId) ?? false, tail: buildTurnTail(now, deps.volatileContext) });
   // abortSignal is per-call by SDK design (not a constructor setting). A cancel ends the stream by EITHER a graceful
   // `abort` part or a THROWN reason (see retractIfCancelledSilent) — the retract seam below handles both endings.
   const result = await agent.stream({ messages: outgoing, abortSignal: turn?.signal });
@@ -194,21 +199,35 @@ function requireVisionDeps(deps: ChatAgentDeps): { model: LanguageModel; store: 
   return { model: deps.visionModel, store: deps.attachments };
 }
 
-// This turn's model-facing messages. A plain text turn sends `history` unchanged (byte-identical to the pre-1f/pre-image
-// path); an image turn swaps a FilePart tail for the last user row (bytes in-flight only, decision 6); a costume swap
-// prefixes a one-shot note onto the user TEXT (1f). All additive — `history` (the persisted projection) is never
-// mutated; a text turn's history tail is {role:"user", content:message}, so rebuilding it with the prefixed text is faithful.
+// This turn's model-facing messages: history with its last user row REBUILT as the outgoing copy — costume notice
+// prefix (1f), the current message, then the turn-context tail suffix (Q4); an image turn carries that text as the
+// text part before its FileParts (bytes in-flight only, decision 6). All in-flight: `history` (the persisted
+// projection) is never mutated, so replay never accumulates notices or tails.
 function buildOutgoing(args: {
   history: ModelMessage[];
   isImageTurn: boolean;
   message: string;
   attachments: ImageAttachment[];
   changed: boolean;
+  tail: string;
 }): ModelMessage[] {
-  const modelText = args.changed ? `${COSTUME_CHANGE_NOTICE}\n\n${args.message}` : args.message;
+  const modelText = [args.changed ? COSTUME_CHANGE_NOTICE : "", args.message, args.tail]
+    .filter((part) => part.length > 0)
+    .join("\n\n");
   if (args.isImageTurn) return [...args.history.slice(0, -1), buildMultimodalUser(modelText, args.attachments)];
-  if (args.changed) return [...args.history.slice(0, -1), { role: "user", content: modelText }];
-  return args.history;
+  return [...args.history.slice(0, -1), { role: "user", content: modelText }];
+}
+
+// The volatile tail (Q4/ADR 0008): every minute-granular item — the wall-clock line first, unconditionally, then
+// whatever volatile context the composition root wires (perception activity/screen, fenced upstream) — inside ONE
+// <turn-context> block appended to the outgoing user message. The wrapper conveys "app-appended, not user-typed";
+// an <untrusted-observation> fence inside it keeps conveying "data, never instructions" — two orthogonal contracts,
+// two tags. The tag NAME is a LOCAL choice (grep-verified unused in-tree); the PATTERN is Claude Code's
+// <system-reminder> / Codex's <environment_context> (rb §P1 verdict).
+function buildTurnTail(now: number, volatileContext?: (now: number) => string): string {
+  const volatile = volatileContext?.(now) ?? "";
+  const body = volatile.length > 0 ? `${renderCurrentTime(now)}\n\n${volatile}` : renderCurrentTime(now);
+  return `<turn-context>\n${body}\n</turn-context>`;
 }
 
 // The canonical v7 multimodal user message: a FilePart per attachment (ImagePart is @deprecated in v7), `data` = RAW
@@ -241,42 +260,19 @@ async function persistTurn(store: ConversationStore, characterId: string, outcom
   if (outcome.pendingStepText.length > 0) store.appendAssistant(characterId, outcome.pendingStepText);
 }
 
-// Instructions = the stable base prompt (identity + the "never claim a tool ran without a tool-result" floor,
-// D1 #2), the day-date line (stable within a calendar day → cache-safe), then the assembled memory context, then any
-// extra section (skills list), then the current-time line LAST. Time bookends the "stable-early / volatile-late"
-// rule (survey §3): the day-date sits in the stable prefix, the minute-granularity time in the volatile tail so a
-// same-day recomposition churns only the last line. `now` is read ONCE so both lines agree. Blank sections dropped;
-// the skills list enters HERE, never through the memory assembler (module boundary, ruling 10).
+// Instructions = the stable base prompt (identity + the "never claim a tool ran without a tool-result" floor, D1 #2),
+// the day-date line (byte-stable for a calendar day), the assembled memory context, then any extra section (skills
+// list + avatar vocabulary — boot/costume-stable). DAY-STABLE by construction (Q4, rb §A5): nothing minute-granular
+// remains here — the time line and perception moved to the turn-context tail — so on a breakpoint-less prefix cache
+// the byte-stable instructions AND the whole replayed history stay cached across same-day turns. Blank sections
+// dropped; the skills list enters HERE, never through the memory assembler (module boundary, ruling 10).
 function composeInstructions(
   deps: ChatAgentDeps,
-  turn: { characterId: string; history: ModelMessage[]; message: string },
+  turn: { characterId: string; message: string },
+  now: number,
 ): string {
-  const now = Date.now();
-  const assembled = deps.memory.assemble({
-    characterId: turn.characterId,
-    queryText: recentText(turn.history),
-    currentMessage: turn.message,
-  });
-  return [
-    BASE_SYSTEM_PROMPT,
-    renderDayDate(now),
-    assembled,
-    deps.instructionsExtra?.(turn.characterId) ?? "",
-    renderCurrentTime(now),
-  ]
+  const assembled = deps.memory.assemble({ characterId: turn.characterId, currentMessage: turn.message });
+  return [BASE_SYSTEM_PROMPT, renderDayDate(now), assembled, deps.instructionsExtra?.(turn.characterId) ?? ""]
     .filter((section) => section.length > 0)
     .join("\n\n");
-}
-
-// The recall query: the last RECALL_WINDOW messages' text, joined (tool messages contribute nothing).
-function recentText(history: ModelMessage[]): string {
-  return history.slice(-RECALL_WINDOW).map(messageText).filter((text) => text.length > 0).join(" ");
-}
-
-function messageText(message: ModelMessage): string {
-  if (typeof message.content === "string") return message.content;
-  return message.content
-    .map((part) => (part.type === "text" ? part.text : ""))
-    .join(" ")
-    .trim();
 }

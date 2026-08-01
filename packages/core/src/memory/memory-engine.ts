@@ -50,7 +50,7 @@ export interface TidyEngineView {
 export interface MemoryEngine {
   /** Startup reconciliation: rebuild the derived index from the files (files are truth). */
   reconcile(): ReconcileStats;
-  /** The per-turn assembled context string (persona + emotion + pinned + retrieved + intention). */
+  /** The per-turn assembled context string (persona + emotion + blocks + pinned + intention) — deterministic push only. */
   assemble(params: AssembleParams): string;
   /** characterId-bound memory tools for one chat stream; `seq` overrides the engine's timeline for the event log. */
   createTools(characterId: string, seq?: TurnSeqGetter): ToolSet;
@@ -87,11 +87,11 @@ export function createMemoryEngine(deps: MemoryEngineDeps): MemoryEngine {
   const index: IndexDeps = { repo, tokenizer };
   // Created here rather than injected: the engine already owns the db, so the write path can never ship unwired.
   const events = createMemoryEventsRepo(deps.db);
+  // The retriever serves the PULL path only (memory_search via ops.search) — the assembler no longer sees it (T5-R6).
   const retriever = createFts5Retriever({ repo, tokenizer });
   // The persona provider is injected in production (main.ts, reading prompt/); tests without one degrade to fallbacks.
   const assembler = createAssembler({
     repo,
-    retriever,
     persona: deps.persona ?? createFallbackPersonaProvider(),
     blocks: deps.blocks,
     pinnedBudget: deps.config?.pinnedBudget ?? DEFAULT_PINNED_BUDGET,

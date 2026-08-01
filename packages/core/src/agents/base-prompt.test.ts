@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createMemoryTools, type MemoryToolOps } from "../memory/memory-tools.ts";
 import { createCurrentTimeTool } from "../time/current-time-tool.ts";
 import { renderCurrentTime, renderDayDate } from "../time/time-context.ts";
 import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
@@ -45,6 +46,37 @@ describe("BASE_SYSTEM_PROMPT — time-line contract", () => {
   });
 });
 
+describe("BASE_SYSTEM_PROMPT — memory floors (T5-R12/R16-R19)", () => {
+  // Raw (unflattened) section text: the positional assertions below need bullet structure, not just phrase presence.
+  const section = BASE_SYSTEM_PROMPT.split("Memory (non-negotiable):")[1]?.split("\n\n")[0] ?? "";
+  const bullets = section.split("\n- ").slice(1); // wrapped continuation lines stay inside their bullet
+
+  it("puts the impression floor first and card-wins last (rd §8.10 attention positions)", () => {
+    expect(bullets[0]).toContain("from impression");
+    expect(bullets.at(-1)).toContain("the card wins");
+  });
+
+  it("names the real search tool and teaches one-search + the post-miss fallback (R12)", () => {
+    const ops: MemoryToolOps = {
+      writeEntry: () => ({ id: "x", layer: "episodes" }),
+      archiveEntry: () => true,
+      search: () => [],
+      recordSearch: () => undefined,
+    };
+    expect(Object.keys(createMemoryTools(ops, "taki"))).toContain("memory_search");
+    expect(FLAT).toContain("run memory_search");
+    expect(FLAT).toContain("One search per occasion");
+    expect(FLAT).toContain("say you checked and don't remember");
+  });
+
+  it("carries the maintenance floors: pin-on-repeat (R16), fix-on-read (R17), supersede (R18), experience (R19)", () => {
+    expect(FLAT).toContain("pin it");
+    expect(FLAT).toContain("the next you won't remember seeing it");
+    expect(FLAT).toContain("never keep two versions");
+    expect(FLAT).toContain("write it to memory yourself");
+  });
+});
+
 describe("BASE_SYSTEM_PROMPT — standing floors", () => {
   it("keeps the anti-recitation line (the user cannot see any injected context)", () => {
     expect(FLAT).toContain("Do not narrate your own machinery");
@@ -56,8 +88,10 @@ describe("BASE_SYSTEM_PROMPT — standing floors", () => {
   });
 
   // Prompt budget: this constant ships on EVERY turn. Guidance that must live here stays dense (survey §6); anything
-  // that pushes past this cap is behavior norm and belongs in prompt/system/assistant-layer.md instead.
+  // that pushes past this cap is behavior norm and belongs in prompt/system/assistant-layer.md instead. Raised
+  // 30 → 50 for the batch-5b Memory section (owner-ratified floor scope, T5-R12/R16-R19) — the cap still guards
+  // against unratified creep on top of the current 46 lines.
   it("stays within its prompt budget", () => {
-    expect(BASE_SYSTEM_PROMPT.split("\n").length).toBeLessThanOrEqual(30);
+    expect(BASE_SYSTEM_PROMPT.split("\n").length).toBeLessThanOrEqual(50);
   });
 });

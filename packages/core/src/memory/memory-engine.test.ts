@@ -30,14 +30,17 @@ describe("memory engine restart (T14, AC 2/11)", () => {
     await run(f.memory.createTools("taki").memory_write, { type: "relationship", content: "每周五一起看电影", importance: 10 });
     await run(f.memory.createTools("taki").memory_write, { type: "profile", content: "最爱豚骨拉面", importance: 9 });
 
-    const before = f.memory.assemble({ characterId: "taki", queryText: "约定 拉面" });
+    const before = f.memory.assemble({ characterId: "taki", currentMessage: "约定 拉面" });
     expect(before).toContain("每周五一起看电影");
+    // The pull path (the only search surface post-R6) is what "identical retrieval" means now.
+    const searchBefore = await run(f.memory.createTools("taki").memory_search, { query: "拉面" });
 
     f.reopen(); // fresh DB -> boot reconcile rebuilds the index purely from the markdown files
 
-    const after = f.memory.assemble({ characterId: "taki", queryText: "约定 拉面" });
+    const after = f.memory.assemble({ characterId: "taki", currentMessage: "约定 拉面" });
     expect(after).toBe(before);
     expect(after).toContain("Promises and facts you always keep in mind:");
+    expect(await run(f.memory.createTools("taki").memory_search, { query: "拉面" })).toEqual(searchBefore);
   });
 
   it("keeps the pinned promise across a restart over the SAME db file", async () => {
@@ -46,11 +49,11 @@ describe("memory engine restart (T14, AC 2/11)", () => {
     cleanups.push(() => rmTempDir(dbDir)); // then remove the db dir
 
     await run(f.memory.createTools("taki").memory_write, { type: "relationship", content: "答应帮她修好电脑", importance: 10 });
-    const before = f.memory.assemble({ characterId: "taki", queryText: "电脑" });
+    const before = f.memory.assemble({ characterId: "taki", currentMessage: "电脑" });
 
     f.reopen(); // new engine instances over the persisted db + workspace
 
-    expect(f.memory.assemble({ characterId: "taki", queryText: "电脑" })).toBe(before);
+    expect(f.memory.assemble({ characterId: "taki", currentMessage: "电脑" })).toBe(before);
   });
 });
 
@@ -66,7 +69,7 @@ function entryFiles(root: string): string[] {
 }
 
 describe("memory engine dedupe -> reinforce (T5-R9)", () => {
-  it("reinforces the EXISTING entry instead of writing a second row", () => {
+  it("reinforces the EXISTING entry instead of writing a second row", async () => {
     const f = withFixture();
     const first = f.memory.writeEntry({ characterId: "taki", type: "episodes", content: "他喜欢吃豚骨拉面", importance: 4 });
 
@@ -83,9 +86,14 @@ describe("memory engine dedupe -> reinforce (T5-R9)", () => {
     expect(second.layer).toBe("episodes");
     expect(entryFiles(f.root)).toHaveLength(1);
 
-    // The reinforcement is visible through the index, not only on disk.
-    const rows = f.memory.assemble({ characterId: "taki", queryText: "豚骨拉面" });
-    expect(rows.match(/他喜欢吃豚骨拉面/g)).toHaveLength(1);
+    // The reinforcement is visible through the index, not only on disk — via the pull path, the only search
+    // surface post-R6 (episodes never render in the assembled push).
+    const result = (await run(f.memory.createTools("taki").memory_search, { query: "豚骨拉面" })) as {
+      ok: boolean;
+      results: Array<{ content: string }>;
+    };
+    expect(result.ok).toBe(true);
+    expect(result.results.filter((hit) => hit.content.includes("他喜欢吃豚骨拉面"))).toHaveLength(1);
   });
 
   it("records a reinforce event carrying the entry id and the turn that caused it", () => {
@@ -107,7 +115,7 @@ describe("memory engine dedupe -> reinforce (T5-R9)", () => {
     f.memory.writeEntry({ characterId: "taki", type: "profile", content: "他叫 pleia", importance: 3 });
 
     // Importance 10 keeps it in the pinned block; a demotion to 3 would silently drop it out of every prompt.
-    expect(f.memory.assemble({ characterId: "taki", queryText: "名字" })).toContain(
+    expect(f.memory.assemble({ characterId: "taki", currentMessage: "名字" })).toContain(
       "Promises and facts you always keep in mind:",
     );
   });

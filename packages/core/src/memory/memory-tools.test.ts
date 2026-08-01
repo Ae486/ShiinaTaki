@@ -94,7 +94,7 @@ describe("background memory tools (T5 Q11-1 — every AUTOMATIC path is clamped)
 
     expect(result).toMatchObject({ ok: true, layer: "profile" });
     // The pinned block is the property that matters: a clamped profile row must not reach it.
-    expect(f.memory.assemble({ characterId: "taki", queryText: "名字" })).not.toContain(
+    expect(f.memory.assemble({ characterId: "taki", currentMessage: "名字" })).not.toContain(
       "Promises and facts you always keep in mind:",
     );
   });
@@ -110,6 +110,21 @@ describe("background memory tools (T5 Q11-1 — every AUTOMATIC path is clamped)
     const written = await run(tools.memory_write, { type: "episodes", content: "一次聊到豚骨拉面", importance: 4 });
     expect(resultsOf(await run(tools.memory_search, { query: "豚骨拉面" }))).toHaveLength(1);
     expect(await run(tools.memory_archive, { id: written.id as string })).toMatchObject({ ok: true });
+  });
+});
+
+describe("memory-tool descriptions (T5-R18/R19 — descriptions are prompt surface)", () => {
+  it("memory_archive carries the prefer-correcting preference and its why (R18)", () => {
+    const description = fresh().memory.createTools("taki").memory_archive?.description ?? "";
+    expect(description).toContain("archive the old entry and write the new one");
+    expect(description).toContain("wrong memories are more dangerous than no memories");
+  });
+
+  it("memory_write carries the experience-shape hint (R19) as a per-call hint, not a flow", () => {
+    const description = fresh().memory.createTools("taki").memory_write?.description ?? "";
+    expect(description).toContain("baseline / deviation / outcome / reusable judgment");
+    // The supersede FLOW lives in the base prompt (grain rule) — the description must not restate it.
+    expect(description).not.toContain("appending a second version");
   });
 });
 

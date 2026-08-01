@@ -310,12 +310,17 @@ registry.register(
       // vocab makes `name` a dynamic enum of the worn costume's live names (1e), so a costume swap rejects stale names.
       characterTools: (characterId) =>
         createAvatarTools({ subscriptions: avatarSubscriptions, characterId, logger, vocab: avatarVocabulary.get(characterId) }),
-      // Skills list + the active character's reported avatar vocabulary + the fenced perception context (T3a activity
-      // + T3b screen; ruling 10 — non-memory sections enter HERE, never via the memory assembler); blanks contribute nothing.
+      // Skills list + the active character's reported avatar vocabulary (ruling 10 — non-memory sections enter HERE,
+      // never via the memory assembler); blanks contribute nothing. Boot/costume-stable → the instructions stay
+      // day-stable (T5 Q4).
       instructionsExtra: (characterId) =>
-        [skillsLoader.renderList(), avatarVocabulary.render(characterId), perception.renderContext(Date.now())]
+        [skillsLoader.renderList(), avatarVocabulary.render(characterId)]
           .filter((section) => section.length > 0)
           .join("\n\n"),
+      // The fenced perception context (T3a activity + T3b screen) is minute-volatile, so it rides the <turn-context>
+      // tail on the outgoing user message (T5 Q4/ADR 0008) — ruling 10 still holds: it never enters via the memory
+      // assembler; only the sanctioned entry point moved from the instructions to the tail.
+      volatileContext: (now) => perception.renderContext(now),
       costumeChanged: (characterId) => avatarVocabulary.consumeCostumeChanged(characterId),
       approval: approvalGate,
     }),

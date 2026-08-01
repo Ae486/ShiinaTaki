@@ -1,8 +1,9 @@
 /**
- * INPUT:  AssembleParams (characterId + queryText) + an injected MemoryRepo, Retriever, PersonaProvider, BlockStore
+ * INPUT:  AssembleParams (characterId + currentMessage) + an injected MemoryRepo, PersonaProvider, BlockStore
  * OUTPUT: createAssembler(deps) -> { assemble(params) -> instructions string }
  * POS:    core/memory — deterministic per-turn context assembly with per-section budgets (MEMORY-DESIGN §Context
- *         assembly); this section list IS the memory-source seam (no source registry — M-D1 declined)
+ *         assembly); this section list IS the memory-source seam (no source registry — M-D1 declined); nothing
+ *         search-driven renders here (T5-R6) — retrieval reaches the model only through memory_search
  */
 import { fenceUntrusted } from "../agents/untrusted-fence.ts";
 import { DEFAULT_PINNED_BUDGET } from "../config/memory-config.ts";
@@ -15,15 +16,11 @@ import type { MemoryOrigin } from "./entry.ts";
 import { V1_MEMORY_LAYERS } from "./layer-registry.ts";
 import type { PersonaProvider } from "./persona-provider.ts";
 import { selectPinned } from "./pinned-block.ts";
-import type { Retriever } from "./retriever.ts";
 import { estimateTokens, fitToBudget } from "./token-estimator.ts";
 
 // Emotion capsule is a static placeholder (D9, docs/deferred-decisions.md); the persona card now loads from disk (#16).
 const EMOTION_CAPSULE = "Current mood: neutral.";
 const PINNED_HEADER = "Promises and facts you always keep in mind:";
-const RETRIEVED_HEADER = "Things that come to mind right now:";
-const RETRIEVED_BUDGET = 600;
-const RETRIEVED_LIMIT = 12;
 // A block over its budget is trimmed in the PROMPT only — the file on disk stays whole. The visible cut is the signal
 // to consolidate (an always-loaded curated file behaves the same way in OpenClaw), never a silent deletion.
 const BLOCK_TRIM_NOTE = "(… trimmed to fit this block's budget; the full text is still on disk.)";
@@ -34,20 +31,16 @@ const OBSERVED_ORIGIN: MemoryOrigin = "observed";
 const PINNED_LAYER_IDS = V1_MEMORY_LAYERS.filter(
   (layer) => layer.recallPolicy === "pinned" || layer.pinnedImportanceThreshold !== undefined,
 ).map((layer) => layer.id);
-const RETRIEVED_LAYER_IDS = V1_MEMORY_LAYERS.filter((layer) => layer.recallPolicy === "retrieved").map((l) => l.id);
 const MOOD_GATED_LAYER_IDS = V1_MEMORY_LAYERS.filter((layer) => layer.recallPolicy === "mood-gated").map((l) => l.id);
 
 export interface AssembleParams {
   characterId: string;
-  /** Current message + recent turns — drives the retrieved block. */
-  queryText: string;
-  /** The current message alone — the intention gate matches ONLY this (AC 9); defaults to queryText. */
-  currentMessage?: string;
+  /** The current user message alone — it feeds ONLY the intention gate (AC 9); recall is memory_search's (T5-R6). */
+  currentMessage: string;
 }
 
 export interface AssemblerDeps {
   repo: MemoryRepo;
-  retriever: Retriever;
   persona: PersonaProvider;
   /** The always-visible Memory Blocks. Absent = no block sections at all (the same degradation as a missing file). */
   blocks?: BlockStore;
@@ -60,31 +53,23 @@ export interface Assembler {
 }
 
 export function createAssembler(deps: AssemblerDeps): Assembler {
-  const { repo, retriever, persona, blocks } = deps;
+  const { repo, persona, blocks } = deps;
   const pinnedBudget = deps.pinnedBudget ?? DEFAULT_PINNED_BUDGET;
 
   return {
-    assemble({ characterId, queryText, currentMessage }) {
+    assemble({ characterId, currentMessage }) {
       const nowMs = Date.now();
       const now = new Date(nowMs).toISOString();
       // Injection order (prompt/README.md): global assistant layer FIRST, then the per-character persona, then emotion,
-      // then the always-visible blocks, then the pinned rows — deterministic push before anything search-driven.
+      // then the always-visible blocks, then the pinned rows — deterministic push only; the retrieved section is gone
+      // (T5-R6) and `recallPolicy: "retrieved"` now means reachable via memory_search alone.
       const sections = [persona.assistantLayer(), persona.persona(characterId), EMOTION_CAPSULE];
       sections.push(...renderBlocks(blocks, characterId));
 
       const pinned = selectPinned(repo.listActiveByLayers({ characterId, layers: PINNED_LAYER_IDS, now }), pinnedBudget);
       if (pinned.length > 0) sections.push(renderBlock(PINNED_HEADER, pinned, nowMs));
 
-      const pinnedIds = new Set(pinned.map((row) => row.id));
-      const candidates = retriever
-        .retrieve({ text: queryText, characterId, layers: RETRIEVED_LAYER_IDS, limit: RETRIEVED_LIMIT })
-        .filter((entry) => !pinnedIds.has(entry.id));
-      const retrieved = fitToBudget(candidates, RETRIEVED_BUDGET, (entry) => entry.content);
-      // Retrieved rows expose `created`; normalize to the `createdAt` renderBlock reads (pinned rows carry it directly).
-      if (retrieved.length > 0)
-        sections.push(renderBlock(RETRIEVED_HEADER, retrieved.map((e) => ({ content: e.content, createdAt: e.created })), nowMs));
-
-      const intention = pickIntention({ repo, characterId, queryText: currentMessage ?? queryText, now });
+      const intention = pickIntention({ repo, characterId, currentMessage, now });
       if (intention) sections.push(`A quiet thought you might share: ${rowContent(intention)}`);
 
       return sections.join("\n\n");
@@ -121,11 +106,11 @@ function fitBlockContent(content: string, budget: number): string {
 }
 
 // At most one intention: the newest active, unexpired one whose disclosure hint matches the current message (AC 9).
-function pickIntention(args: { repo: MemoryRepo; characterId: string; queryText: string; now: string }): MemoryEntryRow | undefined {
+function pickIntention(args: { repo: MemoryRepo; characterId: string; currentMessage: string; now: string }): MemoryEntryRow | undefined {
   const candidates = args.repo
     .listActiveByLayers({ characterId: args.characterId, layers: MOOD_GATED_LAYER_IDS, now: args.now })
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : a.createdAt > b.createdAt ? -1 : 0));
-  return candidates.find((entry) => disclosureMatches(entry.disclosure, args.queryText));
+  return candidates.find((entry) => disclosureMatches(entry.disclosure, args.currentMessage));
 }
 
 interface RenderRow {

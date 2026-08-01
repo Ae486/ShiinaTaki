@@ -14,6 +14,7 @@ import { fetchTimelineEntries, sayToAgent, pairOperator, triggerCapability, type
 import { childEnv, getFreePort, killTree, spawnProc, type Proc } from "./procs.ts";
 import { CORE_DIR, dummyProviderEnv, realProviderEnv, TAKI_NODE_BIN } from "./paths.ts";
 import { openRpcSocket, type RpcSocket } from "./rpc-socket.ts";
+import { seedMemoryEntries, type SeedMemoryEntry } from "./seed-memory.ts";
 import { seedTimeline, type SeedRow } from "./seed-timeline.ts";
 
 /** taki-node.rs hardcodes this device name; pairing lines for the node are matched by it. */
@@ -35,6 +36,9 @@ export interface StackOptions {
   gateDecisions?: { capability: string; decision: "always" | "never" }[];
   /** Seed the core timeline (character "taki") BEFORE the core boots — polluted-history scenarios (D1 L2). */
   seedTimeline?: SeedRow[];
+  /** Seed entry files into the workspace memory tree BEFORE the core boots — startup reconcile indexes them (files
+   *  are truth); the name-recall L2's "known only in memory" setup. */
+  seedMemory?: SeedMemoryEntry[];
 }
 
 /** One node-side gate decision from <node dataDir>/audit.jsonl (names-only except exec's command). */
@@ -120,15 +124,19 @@ async function bootParts(options: StackOptions): Promise<Parts> {
   const coreEnv = baseCoreEnv(port, coreDataDir, provider);
   // The dev L1 drive is env double-gated: the core only registers capability.trigger when this is exactly "1".
   if (options.devTrigger) coreEnv.TAKI_DEV_TRIGGER = "1";
-  // Timeline pollution must land BEFORE the core opens the db (sequential single-writer). The teardown guard
-  // below starts at the core spawn, so a failed seed cleans its own temp dirs here.
-  if (options.seedTimeline !== undefined && options.seedTimeline.length > 0) {
-    try {
+  // Pre-boot seeding (timeline rows and/or memory entry files) must land BEFORE the core opens the db and runs its
+  // startup reconcile (sequential single-writer). The teardown guard below starts at the core spawn, so a failed
+  // seed cleans its own temp dirs here.
+  try {
+    if (options.seedTimeline !== undefined && options.seedTimeline.length > 0) {
       seedTimeline(coreDataDir, options.seedTimeline);
-    } catch (error) {
-      for (const dir of [coreDataDir, nodeDataDir]) rmSync(dir, { recursive: true, force: true });
-      throw error;
     }
+    if (options.seedMemory !== undefined && options.seedMemory.length > 0) {
+      seedMemoryEntries(coreDataDir, options.seedMemory);
+    }
+  } catch (error) {
+    for (const dir of [coreDataDir, nodeDataDir]) rmSync(dir, { recursive: true, force: true });
+    throw error;
   }
   const parts: Parts = {
     autoApprove: options.autoApprove ?? "allow-once",

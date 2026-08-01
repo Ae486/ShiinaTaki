@@ -20,14 +20,27 @@ async function drain(stream: AsyncIterable<string>): Promise<string> {
   return text;
 }
 
-function systemText(model: { doStreamCalls: Array<{ prompt?: Array<{ role: string; content: unknown }> }> }, call: number): string {
+type PromptMessage = { role: string; content: unknown };
+type MockWithCalls = { doStreamCalls: Array<{ prompt?: PromptMessage[] }> };
+
+function systemText(model: MockWithCalls, call: number): string {
   const system = model.doStreamCalls[call]?.prompt?.[0];
   expect(system?.role).toBe("system");
   return String(system?.content);
 }
 
-describe("chat-agent time injection (hybrid date/time)", () => {
-  it("puts the day-date line immediately after the base prompt and the current-time line last", async () => {
+// The raw text of the LAST user message the model saw (provider-level user content is text parts; join them).
+function lastUserText(model: MockWithCalls, call: number): string {
+  const prompt = model.doStreamCalls[call]?.prompt ?? [];
+  const last = [...prompt].reverse().find((m) => m.role === "user");
+  const content = last?.content;
+  if (typeof content === "string") return content;
+  const parts = (Array.isArray(content) ? content : []) as Array<{ type?: string; text?: unknown }>;
+  return parts.map((part) => (part.type === "text" ? String(part.text) : "")).join("");
+}
+
+describe("chat-agent time injection (Q4: day line in instructions, time line in the tail)", () => {
+  it("keeps the day-date line after the base prompt and moves the time line into the turn-context tail", async () => {
     const f = fresh();
     const model = streamingMockModel(["ok"]);
     const agent = createChatAgent({ model, store: f.conversation, memory: f.memory, instructionsExtra: () => "SKILLS" });
@@ -38,17 +51,17 @@ describe("chat-agent time injection (hybrid date/time)", () => {
     // Date line sits directly after the base prompt (one blank-line join), before any memory/extra section.
     expect(text).toContain(`${BASE_SYSTEM_PROMPT}\n\nToday is `);
     expect(text).toMatch(/\n\nToday is [A-Z][a-z]+, \d{4}-\d{2}-\d{2}\.\n\n/);
-
-    // Current-time line is the very last section (the volatile tail).
-    expect(text).toMatch(/\n\nCurrent local time: \d{2}:\d{2}\.$/);
-
-    // Ordering: base < date < skills(extra) < time. Measured on the RENDERED lines, not on the bare phrases: the base
-    // prompt now quotes both line prefixes (it teaches what they are), so a phrase-first search would hit the lesson.
     expect(text.search(/\n\nToday is [A-Z][a-z]+, \d{4}-\d{2}-\d{2}\.\n\n/)).toBeLessThan(text.indexOf("SKILLS"));
-    expect(text.indexOf("SKILLS")).toBeLessThan(text.search(/\n\nCurrent local time: \d{2}:\d{2}\.$/));
+
+    // No RENDERED time line anywhere in the instructions (the base prompt still QUOTES the "Current local time: ..."
+    // prefix to teach where it arrives, so the assertion pins the rendered form, not the phrase).
+    expect(text).not.toMatch(/Current local time: \d{2}:\d{2}\./);
+
+    // The time line now rides the outgoing user message — the first line inside the turn-context tail (Q4).
+    expect(lastUserText(model, 0)).toMatch(/\n\n<turn-context>\nCurrent local time: \d{2}:\d{2}\.\n<\/turn-context>$/);
   });
 
-  it("keeps the day-date line byte-identical across a same-day recomposition (cache-shape)", async () => {
+  it("keeps the ENTIRE instructions byte-identical across a same-day recomposition (Q4 cache shape)", async () => {
     const f = fresh();
     const model = streamingMockModel(["a", "b"]);
     const agent = createChatAgent({ model, store: f.conversation, memory: f.memory });
@@ -56,7 +69,8 @@ describe("chat-agent time injection (hybrid date/time)", () => {
     await drain(agent.stream({ characterId: "taki", message: "one" }));
     await drain(agent.stream({ characterId: "taki", message: "two" }));
 
-    const dateLine = (text: string) => text.split("\n\n").find((s) => s.startsWith("Today is "));
-    expect(dateLine(systemText(model, 0))).toBe(dateLine(systemText(model, 1)));
+    // Strengthened from the day-line-only pin (pre-Q4): with the volatile set gone the whole instructions string is
+    // the stable prefix — byte-identity across same-day turns IS the acceptance property (no memory writes between).
+    expect(systemText(model, 1)).toBe(systemText(model, 0));
   });
 });

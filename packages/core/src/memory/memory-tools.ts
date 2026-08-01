@@ -79,9 +79,9 @@ function writeTool(ops: MemoryToolOps, characterId: string): Tool {
       "importance 9 or 10 when the fact is identity-level (their name, how they want to be addressed, an allergy, a " +
       "hard boundary) so it stays in front of you, and 5-8 for an ordinary preference; 'episodes' for a notable " +
       "moment (3-7); 'intentions' for a private thought to raise later. " +
-      "Do NOT use this for fleeting chit-chat, for something your memory already holds (correct the old entry with " +
-      "memory_archive plus a fresh write instead of appending a second version), or to look something up — that is " +
-      "memory_search. " +
+      "Do NOT use this for fleeting chit-chat, for something your memory already holds, or to look something up — " +
+      "that is memory_search. A lesson learned from real work keeps best as baseline / deviation / outcome / " +
+      "reusable judgment — use that shape when it fits, never force it. " +
       "`disclosure` is a short phrase describing WHEN this should come back to you, worded the way the question " +
       "would be asked ('用户问自己叫什么').",
     inputSchema: z.object({
@@ -162,7 +162,10 @@ function searchTool(ops: MemoryToolOps, characterId: string, seq?: TurnSeqGetter
 
 function archiveTool(ops: MemoryToolOps, characterId: string): Tool {
   return tool({
-    description: "Archive a memory by id when it is outdated or was a mistake; it stops surfacing but is not deleted.",
+    description:
+      "Archive a memory by id when it is outdated, wrong, or superseded; it stops surfacing but is not deleted. " +
+      "Prefer correcting over appending: archive the old entry and write the new one — wrong memories are more " +
+      "dangerous than no memories.",
     inputSchema: z.object({ id: z.string().min(1) }),
     execute: ({ id }): ToolResult => {
       try {
