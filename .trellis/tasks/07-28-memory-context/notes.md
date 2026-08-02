@@ -376,6 +376,42 @@ tool-call boot read; the "reading memory is remembering" framing goes to the bas
   defect (monotonic lastFlushSeq guard, single selectWindow path); costume-notice consumed on a
   retried attempt (accepted narrow edge, 1e enum backstop); D3/D5 semantics.
 
+- **Batch 7 closed (2026-08-02, FINAL batch)** — compaction end-to-end. 7a projection: migration 012
+  `conversation_summary` (STRICT, PK character_id) + summary-repo (strict zod at row boundary),
+  select pipeline substitution → R4 folds → cut (extracted to module-level selectView), fenced
+  summary head as role:user, windowStart substitution-aware (all-covered edge = through+1;
+  stale-summary renders no head), estimatedTokens surfaced through the one select closure. 7b
+  compactor: compaction-pass.ts on the SHARED flush-writer (bootstrap hoists one instance) +
+  utility slot; trigger = estimatedTokens > ratio × view.budget(); boundary = all but newest
+  KEEP_MESSAGES rows fixed at pass start; flush-first, ONE generateText rolling rewrite,
+  through_seq advances only on successful upsert (retry never re-flushes; monotonicity guarded);
+  auto-memory chain episodic → flush → tidy → compact; config rider 131072/0.7 + TRIGGER_RATIO 0.8
+  + KEEP_MESSAGES 40; base-prompt summary bullet with memory-store-wins precedence (Hermes
+  over-restriction caution honored: `not.toMatch(/reference only/i)` pinned); wall-hit warn deduped
+  per advancing boundary. Owner rulings honored in executable form: NO summary length limit or
+  truncation anywhere (32k-char output stored byte-identical, `toBe`), summarizer never reads the
+  memory store, prompt = re-compaction-prompts Part D + exactly 3 amendments (verified line-by-line
+  at check). D-b7-1 leader-endorsed design correction: §3.1's "effectiveWindow" denominator was a
+  dead formula (view pre-cut to 0.7×EW can never reach 0.8×EW) — trigger measures the history wall
+  itself; owner-intent arithmetic ≈ 85% of total context at fire. REAL-GATEWAY PROBE (one-shot,
+  authorized): 44-turn synthetic companion chat → six priority classes ALL survived (promise
+  accounting even tracked partial verification: "只对账了8月5日晚上一次"); register slightly
+  clerk-ish (invented headings, 「对方」) — the OPPOSITE of the feared persona-displaces-facts;
+  **model INVENTED year "2025"** (material carried month-day only; the prompt has no current-date
+  anchor — Hermes' TEMPORAL ANCHORING line was dropped at Part D drafting). RESOLVED same day:
+  owner approved the anchor ("加入时间信息") and STRESSED time-sense as an important part of this
+  agent (T4 signal — time across prompt surfaces); leader added renderDayDate (base-prompt
+  convention, weekday included) to the prompt input, pinned by two tests. Cost note: ~15k reasoning tokens
+  per compaction on deepseek-v4-flash — utility-slot cheap non-reasoning model worth configuring.
+  Check: PASS, zero defects, zero self-fixes; 4 mutation probes all killed (trigger boundary,
+  watermark re-flush guard, summary truncation, fold in-place mutation); tree byte-identical after.
+  Gates at close: core 1101 / shared 199 / desktop 143 / cli 18 / cargo 141 / e2e 26 (first run
+  25/26 — L2 single 6s fast-fail, real-model flake; immediate full rerun green) / boot smoke
+  [1..12]. Manual checks 93-95 added. Close-out/T4 pickups: main.ts 298/300 (extraction REQUIRED
+  before any next touch); year-anchor prompt line (owner decision); D56 writer output form; D57
+  prose folds deferred; mid-turn through_seq accepted (leading-tool-drop + next-flush backstop);
+  wallWarnedAt dedupe is in-memory (re-warns once after restart — correct for a log dedupe).
+
 ## Standing kickoff agenda (from earlier session rounds)
 
 - Grill scope decision pending owner: terminology→CONTEXT.md (block vs row tiers, identity card, write

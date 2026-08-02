@@ -116,10 +116,16 @@ No per-turn retrieved section (T5-R6): search-policy rows reach the model only t
 
 1. **Explicit tools** (LLM-invoked): `memory_write(type, content, importance, disclosure?)`, `memory_search(query)`, `memory_archive(id)`. "记住这个约定" → `promise` write, importance 10.
 2. **Auto episodic**: a background pass reviews the stretch of conversation and writes only what passes the behaviour-change test (T5-R15) — no quota, silence is the normal outcome, every skip logged.
-3. **Pre-compaction flush** (OpenClaw pattern): before context compaction, a silent turn saves anything important that exists only in the conversation window.
+3. **Pre-compaction flush** (OpenClaw pattern): before a compaction pass advances its watermark, the background flush writer saves anything important that exists only in the retiring span (shared writer instance with the auto-memory chain).
 4. **Nightly consolidation** (croner, v1.5): distill the day's episodes → diary entry + promote/merge/archive suggestions. Ships after the core loop is stable; the schema carries `status` from day one so consolidation is additive.
 
 All writes go through the memory store API (file write + index upsert + event log line) — never raw file appends from tools.
+
+## Conversation summary (compaction, since T5 batch 7)
+
+One rolling summary per character (`conversation_summary` table, `through_seq` watermark). When the selected history view exceeds `TAKI_COMPACT_TRIGGER_RATIO` (0.8) of its own token wall, the post-turn auto-memory chain (episodic → flush → tidy → compact) runs a background pass on the Utility Slot: flush the retiring span first (§Write paths 3), then one LLM call rewrites old summary + retiring rows into a new first-person record; the watermark advances only on success, so a failed pass self-heals at the next trigger. Everything except the newest `TAKI_COMPACT_KEEP_MESSAGES` (40) message rows retires. The summary text is stored unmodified — no length cap, no truncation (owner ruling: quality over length management).
+
+Replay substitutes the summary as a fenced `<conversation-summary>` head message and keeps the live tail; stored timeline rows are never mutated (ADR 0008 projection). Under residual token pressure, tool-result payloads fold to one-line traces at render time (snapshot class keep-3-per-tool → fact class → oversized args); prose and user words never fold (D57). Layer discipline: the summarizer never reads the memory store; permanent facts are excluded from the summary (they belong here); on conflict the memory store wins — the summary is a snapshot, memory gets corrected.
 
 ## CJK retrieval note (technical, load-bearing)
 
@@ -151,6 +157,6 @@ packages/core/src/memory/
 
 | Phase | Scope |
 | --- | --- |
-| v1 | Store + index + FTS5 retriever + assembler + explicit tools + auto episodic + pre-compaction flush |
+| v1 | Store + index + FTS5 retriever + assembler + explicit tools + auto episodic + pre-compaction flush + rolling summary compaction |
 | v1.5 | Nightly consolidation + diary as Pet UI panel + intention surfacing gate |
 | v2 | Embedding retriever behind `Retriever`, emotion-memory coupling refinements, optional MCP archive |
