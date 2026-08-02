@@ -1,6 +1,6 @@
 /**
  * INPUT:  a readable input stream (stdin) + a writable output stream; authenticate + per-line deps
- * OUTPUT: runRepl(io, deps) -> resolves when input closes; buffers lines from readline creation
+ * OUTPUT: runRepl(io, deps) -> resolves when input closes; buffers lines from readline creation; askOnce(io, query)
  * POS:    cli — the REPL loop, split from main for testability; owns readline + line buffering (no OS access)
  */
 import { createInterface } from "node:readline";
@@ -83,4 +83,17 @@ export async function runRepl(io: ReplIo, deps: ReplDeps): Promise<void> {
   } finally {
     rl.close();
   }
+}
+
+/** One prompt without the loop, for non-REPL entries (`--call` still needs the pairing code on first run). */
+export function askOnce(io: ReplIo, query: string): Promise<string> {
+  const rl = createInterface({ input: io.input, output: io.output });
+  return new Promise((resolve) => {
+    // EOF before an answer (closed or piped stdin) resolves empty instead of hanging the one-shot path.
+    rl.on("close", () => resolve(""));
+    rl.question(query, (answer) => {
+      rl.close();
+      resolve(answer);
+    });
+  });
 }

@@ -118,11 +118,19 @@ describe("connectChatClient", () => {
 
     expect(errors).toEqual([{ code: "PROVIDER_ERROR", message: "boom" }]);
   });
+
+  it("rejects when nothing is listening, so the entry can print one friendly line instead of a stack", async () => {
+    const server = await scriptServer(() => {});
+    await server.close(); // the OS just handed us this port, so it is now reliably closed
+
+    await expect(connectChatClient(server.url)).rejects.toThrow(/ECONNREFUSED/);
+  });
 });
 
 interface ConnectApi {
   send: (frame: unknown) => void;
   requestId: JsonRpcId;
+  method: string;
   params: Record<string, unknown>;
 }
 
@@ -135,6 +143,7 @@ async function scriptConnect(onConnect: (api: ConnectApi) => void): Promise<Scri
       onConnect({
         send: (frame) => socket.send(JSON.stringify(frame)),
         requestId: request.id,
+        method: request.method,
         params: (request.params ?? {}) as Record<string, unknown>,
       });
     });
@@ -180,6 +189,36 @@ describe("ChatClient.history (timeline paging)", () => {
 
     expect(result.entries).toEqual([HISTORY_ENTRY]);
     expect(result.nextBefore).toBeNull();
+  });
+});
+
+describe("ChatClient.call (generic operator invoker)", () => {
+  it("forwards an arbitrary method + params and returns the raw result", async () => {
+    const seen: Array<{ method: string; params: unknown }> = [];
+    const client = await bootConnect(({ send, requestId, method, params }) => {
+      seen.push({ method, params });
+      send({ jsonrpc: "2.0", id: requestId, result: { status: "clean" } });
+    });
+
+    const result = await client.call("memory.tidy", { characterId: "taki" });
+
+    expect(seen).toEqual([{ method: "memory.tidy", params: { characterId: "taki" } }]);
+    expect(result).toEqual({ status: "clean" });
+  });
+
+  it("rejects with the JSON-RPC error so the caller can print its app code", async () => {
+    const client = await bootConnect(({ send, requestId }) => {
+      send({
+        jsonrpc: "2.0",
+        id: requestId,
+        error: { code: JSON_RPC_APP_ERROR, message: "operator role required", data: { code: "PERMISSION_DENIED" } },
+      });
+    });
+
+    await expect(client.call("memory.tidy", {})).rejects.toMatchObject({
+      code: JSON_RPC_APP_ERROR,
+      data: { code: "PERMISSION_DENIED" },
+    });
   });
 });
 

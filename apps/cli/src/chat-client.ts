@@ -1,6 +1,6 @@
 /**
  * INPUT:  a WS URL; inbound JSON-RPC frames (ack + chat.* notifications)
- * OUTPUT: connectChatClient(url) -> ChatClient: connect()/chat()/history()/close over one WS
+ * OUTPUT: connectChatClient(url) -> ChatClient: connect()/chat()/history()/call()/close over one WS
  * POS:    cli — the transport client; @taki/shared-typed, zod-validates inbound frames; never imports @taki/core
  */
 import { once } from "node:events";
@@ -51,6 +51,8 @@ export interface ChatClient {
   chat(params: ChatSendParams, handlers: ChatHandlers): Promise<void>;
   /** Fetches one newest-first page of the conversation timeline. */
   history(params: TimelineHistoryParams): Promise<TimelineHistoryResult>;
+  /** Invokes any server method by name (operator tooling); the server registry gates roles and validates params. */
+  call(method: string, params: unknown): Promise<unknown>;
   /** Registers the handler asked to approve/deny each MCP tool call the agent proposes mid-turn. */
   onApprovalRequest(handler: ApprovalRequestHandler): void;
   close(): void;
@@ -183,6 +185,9 @@ export async function connectChatClient(url: string): Promise<ChatClient> {
       await done;
     },
     history: async (params) => TimelineHistoryResultSchema.parse(await rpc.request(TIMELINE_METHODS.history, params)),
+    // Deliberately unvalidated and unfiltered: the generic operator surface forwards the raw result so a new
+    // server method works here the day it ships (the caller decides what to do with the shape).
+    call: async (method, params) => rpc.request(method, params),
     onApprovalRequest: (handler) => {
       approvalSlot.handler = handler;
     },
