@@ -4,10 +4,11 @@ import { join } from "node:path";
 import { createConversationStore } from "../agents/conversation-store.ts";
 import { createMemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import type { MemoryEvent, MemoryEventsRepo } from "../db/memory-events-repo.ts";
+import { createSummaryRepo } from "../db/summary-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
 import { generatingModel } from "../testing/mock-language-model.ts";
-import { createAutoMemory, type AutoMemoryLogger, type AutoMemoryTidy } from "./auto-memory.ts";
+import { createAutoMemory, type AutoMemoryCompact, type AutoMemoryLogger, type AutoMemoryTidy } from "./auto-memory.ts";
 import { createEpisodicWriter } from "./episodic-writer.ts";
 import type { EpisodicWriter } from "./episodic-writer.ts";
 import type { FlushWriter } from "./flush-writer.ts";
@@ -105,6 +106,7 @@ function wire(
     flush: FlushWriter;
     logger: AutoMemoryLogger;
     tidy?: AutoMemoryTidy;
+    compact?: AutoMemoryCompact;
     windowStart?: (characterId: string) => number;
   },
 ) {
@@ -332,6 +334,32 @@ describe("auto-memory flush boundary == history boundary (batch 6 coupling point
 
     expect(fl.calls[0]?.segment.map((e) => e.seq)).toEqual([1, 2, 3, 4, 5]);
   });
+
+  it("with a summary substituted the boundary equality still holds: retired rows have left the flush window (batch 7)", async () => {
+    const f = fresh();
+    const fl = spyFlush();
+    const timeline = createTimelineRepo(f.db);
+    const summaries = createSummaryRepo(f.db);
+    const windowed = createConversationStore({ repo: timeline, summaries, window: { budget: () => 1_000_000 } });
+    const { auto } = wire(f, {
+      episodic: spyEpisodic().writer,
+      flush: fl.writer,
+      logger: captureLogger().logger,
+      windowStart: (id) => windowed.windowStart(id),
+    });
+    seed(f, 30);
+    // The compactor's shape: rows 1..26 retired into the summary (through=26), flush watermark NOT yet advanced
+    // here — so the auto-memory flush must sweep exactly the retired span the view no longer replays.
+    summaries.upsert({ characterId: "taki", throughSeq: 26, text: "早前的对话已折叠" });
+
+    await auto.onTurnCompleted("taki");
+
+    const boundary = windowed.windowStart("taki");
+    expect(boundary).toBe(27); // first LIVE seq — substitution moved the boundary, not the token cut
+    expect(windowed.history("taki")[0]?.content).toContain("<conversation-summary>");
+    expect(windowed.history("taki")).toHaveLength(30 - boundary + 2); // head + live rows
+    expect(fl.calls[0]?.segment.map((e) => e.seq)).toEqual(Array.from({ length: boundary - 1 }, (_, i) => i + 1));
+  });
 });
 
 describe("auto-memory mutex (T8)", () => {
@@ -454,5 +482,104 @@ describe("auto-memory tidy seam (batch 4a: additive, absent = unchanged)", () =>
     await expect(auto.onTurnCompleted("taki")).resolves.toBeUndefined();
     expect(autoState.get("taki").lastEpisodicSeq).toBe(20); // the episodic write still landed
     expect(cap.warns.some((w) => w.kind === "tidy")).toBe(true);
+  });
+});
+
+describe("auto-memory compact seam (batch 7b: additive, runs LAST, absent = unchanged)", () => {
+  function spyCompact(): { calls: string[]; failNext: { value: boolean }; compact: AutoMemoryCompact } {
+    const calls: string[] = [];
+    const failNext = { value: false };
+    return {
+      calls,
+      failNext,
+      compact: {
+        async maybeRun(characterId) {
+          calls.push(characterId);
+          if (failNext.value) throw new Error("compactor exploded");
+        },
+      },
+    };
+  }
+
+  it("runs the chain in order: episodic → flush → tidy → compact (row 10)", async () => {
+    const f = fresh();
+    const order: string[] = [];
+    const episodic: EpisodicWriter = {
+      async summarize() {
+        order.push("episodic");
+        return { entryIds: ["0001-episode"] };
+      },
+    };
+    const flush: FlushWriter = {
+      async run() {
+        order.push("flush");
+        return { writes: 0 };
+      },
+    };
+    const tidy: AutoMemoryTidy = {
+      async maybeRun() {
+        order.push("tidy");
+      },
+    };
+    const compact: AutoMemoryCompact = {
+      async maybeRun() {
+        order.push("compact");
+      },
+    };
+    const { auto } = wire(f, { episodic, flush, logger: captureLogger().logger, tidy, compact });
+    seed(f, 201); // crosses both the episodic and the flush thresholds
+
+    await auto.onTurnCompleted("taki");
+
+    // The compactor re-runs the flush over its retiring span, so it must see watermarks this pass finished with.
+    expect(order).toEqual(["episodic", "flush", "tidy", "compact"]);
+  });
+
+  it("runs even on a turn where no write pass fired (its trigger decides for itself)", async () => {
+    const f = fresh();
+    const c = spyCompact();
+    const { auto } = wire(f, {
+      episodic: spyEpisodic().writer,
+      flush: spyFlush().writer,
+      logger: captureLogger().logger,
+      compact: c.compact,
+    });
+    seed(f, 3);
+
+    await auto.onTurnCompleted("taki");
+    expect(c.calls).toEqual(["taki"]);
+  });
+
+  it("with NO compact dep the pass behaves exactly as before (byte-identical write path)", async () => {
+    const f = fresh();
+    const ep = spyEpisodic();
+    const cap = captureLogger();
+    const { autoState, auto } = wire(f, { episodic: ep.writer, flush: spyFlush().writer, logger: cap.logger });
+    seed(f, 20);
+
+    await auto.onTurnCompleted("taki");
+
+    expect(ep.calls).toHaveLength(1);
+    expect(autoState.get("taki").lastEpisodicSeq).toBe(20);
+    expect(cap.warns).toEqual([]);
+  });
+
+  it("a failing compactor warns (kind: compact) and never breaks the turn's write passes", async () => {
+    const f = fresh();
+    const c = spyCompact();
+    c.failNext.value = true;
+    const ep = spyEpisodic();
+    const cap = captureLogger();
+    const { autoState, auto } = wire(f, {
+      episodic: ep.writer,
+      flush: spyFlush().writer,
+      logger: cap.logger,
+      compact: c.compact,
+    });
+    seed(f, 20);
+
+    await expect(auto.onTurnCompleted("taki")).resolves.toBeUndefined();
+    expect(autoState.get("taki").lastEpisodicSeq).toBe(20);
+    expect(cap.warns.some((w) => w.kind === "compact")).toBe(true);
   });
 });

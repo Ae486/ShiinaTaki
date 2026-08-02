@@ -2,8 +2,10 @@ import { afterEach, describe, expect, it } from "vitest";
 import type { TimelineEntry } from "@taki/shared";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
+import { createSummaryRepo } from "../db/summary-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
-import { createConversationStore, REPLAY_WINDOW } from "./conversation-store.ts";
+import { estimateMessageTokens } from "../memory/token-estimator.ts";
+import { createConversationStore, REPLAY_WINDOW, type WallHit } from "./conversation-store.ts";
 
 const dbs: Database[] = [];
 
@@ -244,5 +246,200 @@ describe("token-windowed history (batch 6 — R1)", () => {
   it("an empty timeline has windowStart 1 (nothing exists, nothing has left the window)", () => {
     expect(makeStore().windowStart("taki")).toBe(1);
     expect(makeWindowedStore(100).windowStart("taki")).toBe(1);
+  });
+});
+
+// A store with the batch-7 summary seam wired over the SAME db (production shape: summary-repo + optional budget).
+function makeSummaryStore(opts: { budget?: number; onWallHit?: (hit: WallHit) => void } = {}) {
+  const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+  dbs.push(db);
+  const repo = createTimelineRepo(db);
+  const summaries = createSummaryRepo(db);
+  const store = createConversationStore({
+    repo,
+    summaries,
+    window: opts.budget === undefined ? undefined : { budget: () => opts.budget! },
+    onWallHit: opts.onWallHit,
+  });
+  return { store, summaries, repo };
+}
+
+const HEAD_TEXT = "我们之前聊了很多，他答应周五请我吃拉面";
+const HEAD_CONTENT = `<conversation-summary>\n${HEAD_TEXT}\n</conversation-summary>`;
+
+describe("summary substitution (batch 7 — R3 head message)", () => {
+  it("drops covered rows and prepends the fenced head message as role:user", () => {
+    const { store, summaries } = makeSummaryStore();
+    seedUsers(store, 10);
+    summaries.upsert({ characterId: "taki", throughSeq: 5, text: HEAD_TEXT });
+
+    expect(store.history("taki")).toEqual([
+      { role: "user", content: HEAD_CONTENT },
+      { role: "user", content: "m6" },
+      { role: "user", content: "m7" },
+      { role: "user", content: "m8" },
+      { role: "user", content: "m9" },
+      { role: "user", content: "m10" },
+    ]);
+  });
+
+  it("with the seam wired but NO summary row the view is byte-identical to the legacy store", () => {
+    const { store } = makeSummaryStore();
+    const legacy = makeStore();
+    seedUsers(store, 5);
+    seedUsers(legacy, 5);
+
+    expect(JSON.stringify(store.history("taki"))).toBe(JSON.stringify(legacy.history("taki")));
+    expect(store.windowStart("taki")).toBe(legacy.windowStart("taki"));
+  });
+
+  it("renders NO head when the loaded window no longer reaches covered territory (stale summary)", () => {
+    const { store, summaries } = makeSummaryStore();
+    seedUsers(store, REPLAY_WINDOW + 15); // backstop fetch = seqs 16..215 — nothing <= 5 left to substitute
+    summaries.upsert({ characterId: "taki", throughSeq: 5, text: HEAD_TEXT });
+
+    const history = store.history("taki");
+    expect(history).toHaveLength(REPLAY_WINDOW);
+    expect(history[0]).toEqual({ role: "user", content: "m16" });
+    expect(store.windowStart("taki")).toBe(16);
+  });
+
+  it("when the summary covers every loaded row the view is the head alone and windowStart is through+1", () => {
+    const { store, summaries } = makeSummaryStore();
+    seedUsers(store, 10);
+    summaries.upsert({ characterId: "taki", throughSeq: 10, text: HEAD_TEXT });
+
+    expect(store.history("taki")).toEqual([{ role: "user", content: HEAD_CONTENT }]);
+    expect(store.windowStart("taki")).toBe(11);
+  });
+
+  it("windowStart is the first LIVE seq — rows the summary retired have left the flush window too", () => {
+    const { store, summaries } = makeSummaryStore();
+    seedUsers(store, 10);
+    summaries.upsert({ characterId: "taki", throughSeq: 7, text: HEAD_TEXT });
+
+    expect(store.windowStart("taki")).toBe(8);
+  });
+
+  it("a substitution stranding a leading tool row still yields valid replay input (orphan drop)", () => {
+    const { store, summaries } = makeSummaryStore();
+    store.appendUser("taki", "screenshot please"); // seq 1
+    store.appendTurn("taki", [
+      { role: "assistant", content: [{ type: "tool-call", toolCallId: "c1", toolName: "exec", input: {} }] }, // seq 2
+      {
+        role: "tool",
+        content: [{ type: "tool-result", toolCallId: "c1", toolName: "exec", output: { type: "text", value: "x" } }],
+      }, // seq 3
+    ]);
+    store.appendUser("taki", "next"); // seq 4
+    summaries.upsert({ characterId: "taki", throughSeq: 2, text: HEAD_TEXT }); // through lands mid-turn
+
+    expect(store.history("taki")).toEqual([
+      { role: "user", content: HEAD_CONTENT },
+      { role: "user", content: "next" },
+    ]);
+  });
+
+  it("estimatedTokens covers head + kept rows and stays 0 in unmeasured mode", () => {
+    const { store, summaries } = makeSummaryStore({ budget: 1_000_000 });
+    seedUsers(store, 6);
+    summaries.upsert({ characterId: "taki", throughSeq: 2, text: HEAD_TEXT });
+    const headCost = estimateMessageTokens({ role: "user", content: HEAD_CONTENT });
+
+    expect(store.estimatedTokens("taki")).toBe(headCost + 4 * ROW_COST);
+
+    const unmeasured = makeSummaryStore();
+    seedUsers(unmeasured.store, 6);
+    expect(unmeasured.store.estimatedTokens("taki")).toBe(0);
+  });
+});
+
+describe("replay-view pipeline (batch 7 — idempotence + stage order, ADR 0008)", () => {
+  it("double render is byte-identical and the stored rows are never mutated", () => {
+    const { store, summaries, repo } = makeSummaryStore({ budget: 60 });
+    store.appendUser("taki", "old stuff"); // seq 1 — retired
+    store.appendTurn("taki", [
+      { role: "assistant", content: [{ type: "tool-call", toolCallId: "c1", toolName: "exec", input: {} }] },
+      {
+        role: "tool",
+        content: [
+          {
+            type: "tool-result",
+            toolCallId: "c1",
+            toolName: "exec",
+            output: { type: "json", value: { ok: true, out: "z".repeat(400) } },
+          },
+        ],
+      },
+    ]);
+    seedUsers(store, 3);
+    summaries.upsert({ characterId: "taki", throughSeq: 1, text: HEAD_TEXT });
+    const rawBefore = JSON.stringify(repo.latestAscending("taki", REPLAY_WINDOW));
+
+    const first = JSON.stringify(store.history("taki"));
+    const second = JSON.stringify(store.history("taki"));
+
+    expect(second).toBe(first);
+    expect(JSON.stringify(repo.latestAscending("taki", REPLAY_WINDOW))).toBe(rawBefore);
+  });
+
+  it("composes substitution -> folds -> cut: head present, oversized fact result folded, view fits", () => {
+    const { store, summaries } = makeSummaryStore({ budget: 120 });
+    store.appendUser("taki", "old stuff"); // seq 1 — retired by the summary
+    store.appendTurn("taki", [
+      { role: "assistant", content: [{ type: "tool-call", toolCallId: "c1", toolName: "exec", input: {} }] }, // seq 2
+      {
+        role: "tool",
+        content: [
+          {
+            type: "tool-result",
+            toolCallId: "c1",
+            toolName: "exec",
+            output: { type: "json", value: { ok: true, out: "z".repeat(600) } },
+          },
+        ],
+      }, // seq 3
+    ]);
+    seedUsers(store, 2); // seqs 4-5
+    summaries.upsert({ characterId: "taki", throughSeq: 1, text: HEAD_TEXT });
+
+    const history = store.history("taki");
+    const flat = JSON.stringify(history);
+    expect(history[0]).toEqual({ role: "user", content: HEAD_CONTENT });
+    expect(flat).toContain("[exec] result folded —");
+    expect(flat).not.toContain("zzzz");
+    // The fold sufficed — nothing was cut, so the view still starts right after the summary boundary.
+    expect(store.windowStart("taki")).toBe(2);
+  });
+});
+
+describe("wall-hit warn (batch 7 — R5 hard-truncation visibility)", () => {
+  it("fires (counts only) when the cut drops rows the summary has not retired, deduped per boundary", () => {
+    const hits: WallHit[] = [];
+    const { store, summaries } = makeSummaryStore({ budget: ROW_COST * 2, onWallHit: (hit) => hits.push(hit) });
+    seedUsers(store, 10);
+    summaries.upsert({ characterId: "taki", throughSeq: 4, text: HEAD_TEXT });
+
+    store.history("taki");
+    store.history("taki"); // same pressure, same boundary — the warn must not repeat per render
+
+    expect(hits).toHaveLength(1);
+    expect(hits[0]).toMatchObject({ characterId: "taki", throughSeq: 4 });
+    expect(hits[0]!.windowStartSeq).toBeGreaterThan(5); // the cut outran the summary boundary
+    expect(hits[0]!.dropped).toBeGreaterThan(0);
+
+    seedUsers(store, 1); // the boundary advances -> the sustained overrun warns once more
+    store.history("taki");
+    expect(hits).toHaveLength(2);
+  });
+
+  it("does not fire while the summary keeps the view under budget (no cut of live rows)", () => {
+    const hits: WallHit[] = [];
+    const { store, summaries } = makeSummaryStore({ budget: 1_000_000, onWallHit: (hit) => hits.push(hit) });
+    seedUsers(store, 10);
+    summaries.upsert({ characterId: "taki", throughSeq: 5, text: HEAD_TEXT });
+
+    store.history("taki");
+    expect(hits).toEqual([]);
   });
 });

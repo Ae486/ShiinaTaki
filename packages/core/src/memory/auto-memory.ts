@@ -1,7 +1,8 @@
 /**
- * INPUT:  onTurnCompleted(characterId, origin) after each turn; injected timeline/auto-state/events repos, writers
- *         and the conversation store's window boundary
- * OUTPUT: createAutoMemory(deps) -> { onTurnCompleted } — detached episodic + flush passes, watermark-guarded
+ * INPUT:  onTurnCompleted(characterId, origin) after each turn; injected timeline/auto-state/events repos, writers,
+ *         the conversation store's window boundary and the optional tidy/compact hooks
+ * OUTPUT: createAutoMemory(deps) -> { onTurnCompleted } — detached episodic + flush passes (watermark-guarded),
+ *         then tidy, then compaction, all in one per-character chain
  * POS:    core/memory — the auto-write orchestrator (MEMORY-DESIGN §Write paths 2-3); never blocks the chat turn
  */
 import type { MemoryAutoRepo } from "../db/memory-auto-repo.ts";
@@ -27,6 +28,11 @@ export interface AutoMemoryLogger {
 
 /** The tidy pass's trigger seam (batch 4b fills it): it decides for itself whether this turn earns a pass. */
 export interface AutoMemoryTidy {
+  maybeRun(characterId: string): Promise<void>;
+}
+
+/** The compaction pass's trigger seam (batch 7b fills it): same self-deciding shape as tidy, runs LAST. */
+export interface AutoMemoryCompact {
   maybeRun(characterId: string): Promise<void>;
 }
 
@@ -56,6 +62,12 @@ export interface AutoMemoryDeps {
    * pass reads a store the writers have finished with, and needs no mutex of its own. Absent = today's behavior.
    */
   tidy?: AutoMemoryTidy;
+  /**
+   * OPTIONAL compaction hook, run LAST in the same chain (episodic → flush → tidy → compact): the compactor
+   * re-runs the flush over its retiring span, so it must see watermarks this pass has finished advancing.
+   * Absent = today's behavior byte-identical.
+   */
+  compact?: AutoMemoryCompact;
 }
 
 export function createAutoMemory(deps: AutoMemoryDeps): AutoMemory {
@@ -84,6 +96,7 @@ async function runPass(deps: AutoMemoryDeps, characterId: string, origin: TurnOr
   await maybeEpisodic(deps, { characterId, origin, latest }); // episodic before flush (prd §3); both may fire in one pass
   await maybeFlush(deps, { characterId, origin, latest });
   await maybeTidy(deps, characterId);
+  await maybeCompact(deps, characterId);
 }
 
 // Maintenance runs LAST: it judges the store this pass just wrote into. Its own failure is swallowed here for the
@@ -94,6 +107,17 @@ async function maybeTidy(deps: AutoMemoryDeps, characterId: string): Promise<voi
     await deps.tidy.maybeRun(characterId);
   } catch (error) {
     deps.logger.warn({ kind: "tidy", characterId, err: readable(error) }, "tidy pass failed; will retry");
+  }
+}
+
+// Compaction runs after even tidy (batch 7): it retires conversation the flush above has finished judging, and its
+// own flush-before-retire step must read the watermark this pass just advanced. Failure = warn + retry next trigger.
+async function maybeCompact(deps: AutoMemoryDeps, characterId: string): Promise<void> {
+  if (!deps.compact) return;
+  try {
+    await deps.compact.maybeRun(characterId);
+  } catch (error) {
+    deps.logger.warn({ kind: "compact", characterId, err: readable(error) }, "compaction pass failed; will retry");
   }
 }
 

@@ -77,6 +77,22 @@ describe("BASE_SYSTEM_PROMPT — memory floors (T5-R12/R16-R19)", () => {
   });
 });
 
+describe("BASE_SYSTEM_PROMPT — conversation-summary contract (batch 7)", () => {
+  it("names the exact tag the replay view emits and frames the record as her own memory", () => {
+    expect(FLAT).toContain("<conversation-summary>");
+    expect(FLAT).toContain("your own earlier record");
+  });
+
+  it("restricts ONLY recitation and states the memory-store precedence (R18 corrects rows; the record is a snapshot)", () => {
+    expect(FLAT).toContain("never recite it or mention that it exists");
+    expect(FLAT).toContain("the memory store wins");
+    // Hermes caution (re B5): an over-strong "reference only" framing suppressed tool use in production — the
+    // bullet must never forbid USING the record or anything beyond recitation.
+    expect(FLAT).not.toMatch(/reference only/i);
+    expect(FLAT).toContain("Use it like any memory you hold");
+  });
+});
+
 describe("BASE_SYSTEM_PROMPT — standing floors", () => {
   it("keeps the anti-recitation line (the user cannot see any injected context)", () => {
     expect(FLAT).toContain("Do not narrate your own machinery");
@@ -89,9 +105,10 @@ describe("BASE_SYSTEM_PROMPT — standing floors", () => {
 
   // Prompt budget: this constant ships on EVERY turn. Guidance that must live here stays dense (survey §6); anything
   // that pushes past this cap is behavior norm and belongs in prompt/system/assistant-layer.md instead. Raised
-  // 30 → 50 for the batch-5b Memory section (owner-ratified floor scope, T5-R12/R16-R19) — the cap still guards
-  // against unratified creep on top of the current 46 lines.
+  // 30 → 50 for the batch-5b Memory section (owner-ratified floor scope, T5-R12/R16-R19), then 50 → 54 for the
+  // batch-7 <conversation-summary> teaching bullet (the ONE sanctioned prompt addition of the compaction batch) —
+  // the cap still guards against unratified creep on top of the current 50 lines.
   it("stays within its prompt budget", () => {
-    expect(BASE_SYSTEM_PROMPT.split("\n").length).toBeLessThanOrEqual(50);
+    expect(BASE_SYSTEM_PROMPT.split("\n").length).toBeLessThanOrEqual(54);
   });
 });

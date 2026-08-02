@@ -1,17 +1,20 @@
 /**
- * INPUT:  the open Database, the data/prompt dirs, the MAIN model, the timeline repo, process env, a Logger
+ * INPUT:  the open Database, the data/prompt dirs, the MAIN model, the timeline repo, the window boundary, the
+ *         optional compaction wiring (summary repo + view numbers + knobs), process env, a Logger
  * OUTPUT: createMemorySubsystem(deps) -> { engine, autoMemory, utility, tidy, memoryRoot, writeMemory }
  * POS:    core/memory — the subsystem's BOOT wiring, lifted out of the composition root: memory config, persona
  *         cards, block store, engine + startup reconcile, the utility slot every background pass runs on, the
- *         auto-write orchestrator, the tidy pass, and the retention sweeper. main.ts keeps one call
+ *         auto-write orchestrator, the tidy pass, the compactor and the retention sweeper. main.ts keeps one call
  */
 import { join } from "node:path";
 import type { LanguageModel } from "ai";
+import { createCompactionPass, type CompactionView } from "../agents/compaction-pass.ts";
 import { loadMemoryConfig } from "../config/memory-config.ts";
 import { loadUtilityConfig } from "../config/utility-config.ts";
 import { createMemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import { createMemoryEventsRepo } from "../db/memory-events-repo.ts";
 import type { Database } from "../db/sqlite.ts";
+import type { SummaryRepo } from "../db/summary-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import type { Logger } from "../logging/logger.ts";
 import { createAutoMemory, type AutoMemory } from "./auto-memory.ts";
@@ -24,6 +27,13 @@ import { startRetentionSweeper } from "./retention-sweeper.ts";
 import { createTidyPass, type TidyPass } from "./tidy-pass.ts";
 import { createUtilitySlot, type UtilitySlot } from "./utility-slot.ts";
 
+/** Batch-7 compaction wiring: the summary record + the store's view numbers + the context-config knobs. */
+export interface CompactionWiring {
+  summaries: SummaryRepo;
+  view: CompactionView;
+  config: { triggerRatio: number; keepMessages: number };
+}
+
 export interface MemorySubsystemDeps {
   db: Database;
   dataDir: string;
@@ -33,6 +43,8 @@ export interface MemorySubsystemDeps {
   timeline: TimelineRepo;
   /** The conversation store's replay boundary — the flush computes "leaving the window" from it (batch 6). */
   windowStart: (characterId: string) => number;
+  /** Absent = no compactor (tests/legacy); production wires it so long chats retire into the rolling summary. */
+  compaction?: CompactionWiring;
   env: Record<string, string | undefined>;
   logger: Logger;
 }
@@ -74,13 +86,31 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
   // All writes ride the engine's store API (never raw fs) through ONE bound op — the writer chooses the layer
   // (T5 Q11-1), so the binding no longer pins one.
   const writeMemory: MemoryWriteOp = ({ layer, ...rest }) => engine.writeEntry({ ...rest, type: layer });
+  // ONE flush writer instance: auto-memory's leaving-the-window trigger and the compactor's flush-before-retire
+  // step must share the watermark-guarded path, or the same span could be judged twice (batch 7 §3.2).
+  const flush = createFlushWriter({ model: utility.model, createTools: (id) => engine.createBackgroundTools(id) });
+  // The compactor (batch 7b): retires everything but the newest tail into the rolling summary, on the utility
+  // slot, LAST in the per-character chain. Wiring absent = no compaction (legacy behavior byte-identical).
+  const compact = deps.compaction
+    ? createCompactionPass({
+        view: deps.compaction.view,
+        timeline,
+        summaries: deps.compaction.summaries,
+        autoState,
+        flush,
+        slot: utility,
+        config: deps.compaction.config,
+        logger: logger.child({ mod: "compaction" }),
+      })
+    : undefined;
   const autoMemory = createAutoMemory({
     timeline,
     autoState,
     events,
     episodic: createEpisodicWriter({ model: utility.model, writeMemory }),
-    flush: createFlushWriter({ model: utility.model, createTools: (id) => engine.createBackgroundTools(id) }),
+    flush,
     tidy,
+    compact,
     windowStart: deps.windowStart,
     logger: logger.child({ mod: "memory-auto" }),
   });

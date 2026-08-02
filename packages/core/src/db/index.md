@@ -6,5 +6,6 @@
 - memory-auto-repo.ts — memory_auto_state SQL: get / setEpisodic / setFlush / setTidy (per-character auto-write + tidy watermarks)
 - memory-events-repo.ts — memory_events SQL: record / listByCharacter (the memory system's decision log — skips, reinforcements, searches, tidy passes; ids/counts only, never memory content or a query)
 - privacy-pause-repo.ts — privacy_pause_state SQL: load / save (the single global Privacy Pause row; a consent withdrawal must survive a restart)
+- summary-repo.ts — conversation_summary SQL: get / upsert (the per-character rolling compaction summary + its through_seq coverage — T5-R3, batch 7)
 - window-state-repo.ts — slot_window_state SQL: get / set (per-model-slot effective window + EMA factor — the window calibrator's persistence, batch 6)
 - migrations/ — numbered TS-constant migrations + their ordered registry

@@ -39,6 +39,7 @@ import { loadVisionConfig } from "./config/vision-config.ts";
 import { MIGRATIONS } from "./db/migrations/index-list.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
 import { openDatabase } from "./db/sqlite.ts";
+import { createSummaryRepo } from "./db/summary-repo.ts";
 import { createTimelineRepo } from "./db/timeline-repo.ts";
 import { createWindowStateRepo } from "./db/window-state-repo.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
@@ -121,12 +122,19 @@ const timelineRepo = createTimelineRepo(db);
 // their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).
 const windowCalibrator = createWindowCalibrator({ repo: createWindowStateRepo(db), slot: "main", declared: contextConfig.contextTokens.main });
 const timelineSubscriptions = createTimelineSubscriptions();
+const chatLog = logger.child({ mod: "chat" });
+// History replays historyRatio × the calibrated window; the remainder covers instructions + tools + the response.
+// The compaction trigger measures against this SAME wall (batch 7 — the replay view can never exceed it).
+const historyBudget = () => Math.floor(windowCalibrator.effectiveWindow() * contextConfig.historyRatio);
+const summaryRepo = createSummaryRepo(db);
 const conversationStore = createConversationStore({
   repo: timelineRepo,
   onAppend: (entry) => timelineSubscriptions.publish(entry),
   onRemove: (ref) => timelineSubscriptions.publishRemoved(ref),
-  // History replays historyRatio × the calibrated window; the remainder covers instructions + tools + the response.
-  window: { budget: () => Math.floor(windowCalibrator.effectiveWindow() * contextConfig.historyRatio) },
+  window: { budget: historyBudget },
+  // R3: the rolling summary substitutes as the replay head; the wall-hit warn means the compactor is being outrun.
+  summaries: summaryRepo,
+  onWallHit: (hit) => chatLog.warn(hit, "context wall hit — live rows truncated past the summary boundary"),
 });
 
 // Avatar channel (#16): LLM-driven expression/motion commands fan out to subscribed Pet UI operators (mirrors the
@@ -145,6 +153,12 @@ const { engine: memory, autoMemory, tidy, memoryRoot, writeMemory } = createMemo
   timeline: timelineRepo,
   // The flush boundary IS the store's replay boundary (batch 6 coupling point 2 — same slice, no drift window).
   windowStart: conversationStore.windowStart,
+  // Batch 7: the compactor retires all-but-tail into the rolling summary once the view crosses the trigger ratio.
+  compaction: {
+    summaries: summaryRepo,
+    view: { estimatedTokens: conversationStore.estimatedTokens, budget: historyBudget },
+    config: contextConfig.compact,
+  },
   env: process.env,
   logger,
 });
@@ -331,9 +345,10 @@ registry.register(
       // R2 (batch 6): a classified overflow shrinks the persisted window — the retry then re-windows through the
       // store's budget closure above. Counts-only warn: sizes and the new window, never content (logging-guidelines).
       onOverflow: (observedInput) =>
-        logger
-          .child({ mod: "chat" })
-          .warn({ observedInput, effectiveWindow: windowCalibrator.onOverflow(observedInput) }, "provider context overflow — window recalibrated, retrying once"),
+        chatLog.warn(
+          { observedInput, effectiveWindow: windowCalibrator.onOverflow(observedInput) },
+          "provider context overflow — window recalibrated, retrying once",
+        ),
     }),
     logger,
     turnControls,

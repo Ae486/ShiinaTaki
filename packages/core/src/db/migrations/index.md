@@ -9,4 +9,6 @@
 - 008-memory-fts-unicode61.ts — migration 8: memory_fts dropped and rebuilt as unicode61 + a search_terms column; content_hash blanked so the boot reconcile re-segments every file
 - 009-memory-events-count.ts — migration 9: memory_events gains a nullable count (a search records its hit count; skip/reinforce stay NULL)
 - 010-memory-tidy-state.ts — migration 10: memory_auto_state gains a nullable last_tidy_at (the tidy pass's per-character high-water mark; NULL = never tidied)
+- 011-slot-window-state.ts — migration 11: slot_window_state (per-model-slot effective window + EMA factor — the window calibrator's persistence, batch 6)
+- 012-conversation-summary.ts — migration 12: conversation_summary (one overwritable rolling-summary row per character + through_seq coverage, T5-R3; never a timeline row)
 - index-list.ts — the explicit ordered MIGRATIONS registry (no fs/glob discovery)
