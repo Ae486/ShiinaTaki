@@ -7,6 +7,10 @@
  *         it each cursor poll and calls setIgnoreCursorEvents only on a change. Framework-free.
  */
 
+/** The marker an overlay puts on its root to stay clickable over transparent pixels (bubble, panel, wheel). */
+export const KEEP_INTERACTIVE_ATTR = "data-keep-interactive";
+export const KEEP_INTERACTIVE_SELECTOR = `[${KEEP_INTERACTIVE_ATTR}]`;
+
 export type ClickThroughInputs = {
   dragging: boolean;
   buttonDown: boolean;

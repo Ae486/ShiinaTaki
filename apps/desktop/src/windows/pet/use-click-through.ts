@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import { cursorPosition, getCurrentWindow, type Window as TauriWindow } from "@tauri-apps/api/window";
 import type { PetScene } from "@/renderer/pet-scene.js";
 import { useInteractionStore } from "@/stores/interaction-store.js";
-import { shouldIgnoreCursor } from "./click-through-toggle.ts";
+import { KEEP_INTERACTIVE_SELECTOR, shouldIgnoreCursor } from "./click-through-toggle.ts";
 
 // ~40Hz: responsive enough that the toggle feels instant, far below the rate that would peg a core (IPC per tick).
 const POLL_INTERVAL_MS = 24;
@@ -22,7 +22,7 @@ const POLL_INTERVAL_MS = 24;
 // window interactive while everything around them passes through. Works regardless of the current ignore state —
 // elementFromPoint is a render-tree query, not an OS event.
 function isOverUi(x: number, y: number): boolean {
-  return document.elementFromPoint(x, y)?.closest("[data-keep-interactive]") != null;
+  return document.elementFromPoint(x, y)?.closest(KEEP_INTERACTIVE_SELECTOR) != null;
 }
 
 type PollContext = {

@@ -1,8 +1,9 @@
 /**
- * INPUT:  avatar state from the Zustand store; the pet canvas host DOM node; panel open state (interaction store).
+ * INPUT:  avatar state from the Zustand store; the pet canvas host DOM node; panel + wheel open state (interaction store).
  * OUTPUT: <PetStage> — the PixiJS canvas host that mounts the Live2D renderer scene, drives its render tier from
  *         avatar state, wires the render governor + window drag + per-pixel click-through + initial imported costume,
- *         reveals the window after first paint, and opens the operator character/costume panel on right-click.
+ *         reveals the window after first paint, and summons the operation wheel on right-click (the wheel's costume
+ *         row is now the only way into the character/costume panel).
  * POS:    ui/renderer bridge — the ONLY component allowed to touch renderer/ APIs. Root remains transparent
  *         (no opaque background) so the overlay stays a per-pixel cut-out.
  */
@@ -12,6 +13,8 @@ import { useAvatarStore } from "@/stores/avatar-store.js";
 import { useInteractionStore } from "@/stores/interaction-store.js";
 import { ChatBubble } from "@/features/chat-bubble/chat-bubble.js";
 import { CharacterPanel } from "@/features/character-import/character-panel.js";
+import { OperationWheel } from "@/features/operation-wheel/operation-wheel.js";
+import { summonWheel } from "@/features/operation-wheel/wheel-summon.js";
 import { ToastHost } from "@/components/toast/toast-host.js";
 import { usePetScene } from "./use-pet-scene.ts";
 import { usePetDrag } from "./use-pet-drag.ts";
@@ -27,6 +30,10 @@ export function PetStage() {
   const avatarState = useAvatarStore((s) => s.state);
   const panelOpen = useInteractionStore((s) => s.panelOpen);
   const setPanelOpen = useInteractionStore((s) => s.setPanelOpen);
+  const wheelOpen = useInteractionStore((s) => s.wheelOpen);
+  const wheelPoint = useInteractionStore((s) => s.wheelPoint);
+  const openWheel = useInteractionStore((s) => s.openWheel);
+  const closeWheel = useInteractionStore((s) => s.closeWheel);
   const onPetClick = usePetClick(scene);
   const drag = usePetDrag(onPetClick);
   useRenderGovernor(scene?.governor ?? null);
@@ -42,11 +49,8 @@ export function PetStage() {
     <div
       ref={hostRef}
       className="relative h-full w-full"
-      // Right-click opens the operator character/costume panel (left-click is the chat bubble, #16).
-      onContextMenu={(event) => {
-        event.preventDefault();
-        setPanelOpen(true);
-      }}
+      // Right-click summons the operation wheel at the cursor (left-click stays the touch reaction + bubble, #16).
+      onContextMenu={(event) => summonWheel(event, openWheel)}
       {...drag}
     >
       {/* Stage/poll failures were previously console-only — an invisible pet with no visible reason (defect 0/B6). */}
@@ -59,6 +63,9 @@ export function PetStage() {
         </div>
       )}
       <ChatBubble />
+      {wheelOpen && (
+        <OperationWheel point={wheelPoint} onClose={closeWheel} onOpenCostume={() => setPanelOpen(true)} />
+      )}
       {panelOpen && <CharacterPanel scene={scene} onClose={() => setPanelOpen(false)} />}
       <ToastHost />
     </div>
