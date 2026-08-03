@@ -1,7 +1,7 @@
 /**
  * INPUT:  a picked File's size + MIME type; a FileReader data-URL string.
  * OUTPUT: classifyImage(...) -> reject | asis | normalize; parseDataUrl(...) -> { mediaType, base64 } (raw base64).
- * POS:    ui/windows/chat — the pure, node-testable core of use-image-attach (the canvas/FileReader path stays in the
+ * POS:    ui/windows/home/pages/chat — the pure, node-testable core of use-image-attach (the canvas/FileReader path stays in the
  *         hook). Size gates + data-URL split per research r3; every accepted attachment ends up an IMAGE_MEDIA_TYPES type.
  */
 

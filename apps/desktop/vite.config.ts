@@ -44,7 +44,7 @@ export default defineConfig({
       input: {
         main: fileURLToPath(new URL("./index.html", import.meta.url)),
         pet: fileURLToPath(new URL("./pet.html", import.meta.url)),
-        chat: fileURLToPath(new URL("./chat.html", import.meta.url)),
+        home: fileURLToPath(new URL("./home.html", import.meta.url)),
         spike: fileURLToPath(new URL("./spike.html", import.meta.url)),
       },
     },

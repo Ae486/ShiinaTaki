@@ -1,7 +1,7 @@
 /**
  * INPUT:  a tool part (tool-call or tool-result) already persisted on a timeline row (#16 records).
  * OUTPUT: <ToolCard> — a compact one-line card: tool name + a status label; subtle, non-conversational.
- * POS:    ui/windows/chat — the tool-part renderer used by timeline-message. Presentational; no WS/model output dump.
+ * POS:    ui/windows/home/pages/chat — the tool-part renderer used by timeline-message. Presentational; no WS/model output dump.
  */
 
 import type { TimelineToolOutput } from "@taki/shared";

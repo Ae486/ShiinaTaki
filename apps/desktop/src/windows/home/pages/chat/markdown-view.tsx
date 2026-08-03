@@ -1,7 +1,7 @@
 /**
  * INPUT:  a markdown string (an assistant/tool/user text part, possibly still streaming).
  * OUTPUT: <MarkdownView> — GFM-rendered markdown, default-safe (raw HTML escaped, javascript: URLs defanged).
- * POS:    ui/windows/chat — the ONE markdown wrapper (react-markdown@10 + remark-gfm@4, research r2). No rehype-raw /
+ * POS:    ui/windows/home/pages/chat — the ONE markdown wrapper (react-markdown@10 + remark-gfm@4, research r2). No rehype-raw /
  *         rehype-sanitize. Tailwind v4 preflight strips list/heading styles, so prose utilities are applied here.
  */
 

@@ -1,7 +1,7 @@
 /**
- * INPUT:  the chat window's WsClient (provided at the ChatWindow root once its connection is created).
+ * INPUT:  the chat page's WsClient (provided at the ChatPage root once its connection is created).
  * OUTPUT: ChatClientContext + useChatClient() — the client handle for deep consumers (image parts fetch bytes lazily).
- * POS:    ui/windows/chat — a thin React context so image-attachment can call media.get without prop-drilling the
+ * POS:    ui/windows/home/pages/chat — a thin React context so image-attachment can call media.get without prop-drilling the
  *         client through every timeline row. Null until the connection exists.
  */
 

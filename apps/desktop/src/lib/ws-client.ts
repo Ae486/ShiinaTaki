@@ -1,69 +1,39 @@
 /**
- * INPUT:  a WsTransport (browser WebSocket by default) + inbound JSON-RPC frames from the Core; every frame is zod-parsed here.
+ * INPUT:  a WsTransport (browser WebSocket by default) + inbound JSON-RPC frames from the Core (parsed in ws-client-routes).
  * OUTPUT: createWsClient({transport}) -> WsClient: connect()/chat()/subscribeAvatar()/reportAvatar() +
- *         timelineHistory()/subscribeTimeline()/mediaGet() (chat window) + importCharacter()/listCharacters()/
- *         characterCostumes()/costumeResolution() (#18) + avatar/timeline push handlers.
- * POS:    ui/lib — the Pet UI's operator transport to the Agent Core (mirrors apps/cli chat-client, browser WS). THE
- *         zod boundary: past this file inbound data is trusted typed data (type-safety spec). No React/Tauri imports.
+ *         timelineHistory()/subscribeTimeline()/mediaGet() (chat page) + importCharacter()/listCharacters()/
+ *         characterCostumes()/costumeResolution() (#18) + configList()/configSet()/subscribeConfig() + push handlers.
+ * POS:    ui/lib — the Pet UI's operator transport to the Agent Core (mirrors apps/cli chat-client, browser WS). The
+ *         composition root over ws-client-routes (inbound) and ws-client-methods (outbound). No React/Tauri imports.
  */
 
-import { JSONRPCClient, JSONRPCErrorException, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
-import {
-  AVATAR_METHODS,
-  AvatarCommandSchema,
-  CHARACTER_METHODS,
-  CHAT_METHODS,
-  CONNECT_METHOD,
-  ChatCancelResultSchema,
-  ChatCompleteSchema,
-  ChatDeltaSchema,
-  ChatErrorSchema,
-  CharacterCostumeResolutionResultSchema,
-  CharacterCostumesResultSchema,
-  CharacterImportResultSchema,
-  CharacterListResultSchema,
-  ConnectResultSchema,
-  ErrorCodeSchema,
-  JsonRpcClientFrameSchema,
-  MEDIA_METHODS,
-  MediaGetResultSchema,
-  TIMELINE_METHODS,
-  TimelineAppendedSchema,
-  TimelineHistoryResultSchema,
-  TimelineRemovedSchema,
-  type AvatarCommand,
-  type AvatarReportParams,
-  type CharacterCostumeResolutionResult,
-  type CharacterCostumesResult,
-  type CharacterImportParams,
-  type CharacterImportResult,
-  type CharacterListResult,
-  type ChatSendParams,
-  type ConnectParams,
-  type ErrorCode,
-  type JsonRpcClientFrame,
-  type MediaGetResult,
-  type TimelineEntry,
-  type TimelineHistoryParams,
-  type TimelineHistoryResult,
-  type TimelineRemoved,
+import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
+import { CHAT_METHODS } from "@taki/shared";
+import type {
+  AvatarCommand,
+  AvatarReportParams,
+  CharacterCostumeResolutionResult,
+  CharacterCostumesResult,
+  CharacterImportParams,
+  CharacterImportResult,
+  CharacterListResult,
+  ChatSendParams,
+  ConfigChanged,
+  ConfigListResult,
+  ConfigSetParams,
+  ConfigSetResult,
+  ConnectParams,
+  MediaGetResult,
+  TimelineEntry,
+  TimelineHistoryParams,
+  TimelineHistoryResult,
+  TimelineRemoved,
 } from "@taki/shared";
+import { handshake, requestMethods, type ConnectOutcome } from "./ws-client-methods.ts";
+import { bindTransport, createRoutes, installRoutes, CONNECTION_LOST_MESSAGE, type ChatHandlers } from "./ws-client-routes.ts";
 import type { WsTransport } from "./ws-transport.ts";
 
-/** Streamed-turn callbacks: deltas append into the bubble, complete/error settle it (mirrors the CLI's ChatHandlers). */
-export interface ChatHandlers {
-  // messageId keys the in-flight assistant row (the chat window drops it when its persisted entry arrives, #17).
-  onDelta: (delta: string, messageId: string) => void;
-  onComplete?: () => void;
-  // retracted=true means the turn was cancelled before any reply: the user row is already gone (timeline.removed),
-  // so the caller restores the draft instead of surfacing the message as an error toast (cancel-retract).
-  onError?: (code: ErrorCode, message: string, retracted?: boolean) => void;
-}
-
-/** The handshake outcome: authenticated, or refused with the app ErrorCode (PAIRING_REQUIRED / AUTH_FAILED / ...). */
-export type ConnectOutcome =
-  | { ok: true; token?: string }
-  | { ok: false; code: ErrorCode | null; message: string };
+export type { ChatHandlers, ConnectOutcome };
 
 export interface WsClient {
   connect(params: ConnectParams): Promise<ConnectOutcome>;
@@ -72,9 +42,9 @@ export interface WsClient {
   chatCancel(characterId: string): Promise<boolean>;
   subscribeAvatar(characterId: string): Promise<void>;
   reportAvatar(params: AvatarReportParams): Promise<void>;
-  /** Fetches one newest-first page of a character's timeline (the chat window's history paging). */
+  /** Fetches one newest-first page of a character's timeline (the chat page's history paging). */
   timelineHistory(params: TimelineHistoryParams): Promise<TimelineHistoryResult>;
-  /** Subscribes this socket to a character's live timeline.appended pushes (chat window backlog + live). */
+  /** Subscribes this socket to a character's live timeline.appended pushes (chat page backlog + live). */
   subscribeTimeline(characterId: string): Promise<void>;
   /** Fetches one attachment's bytes for scroll-back rendering; rejects (FORBIDDEN/missing) surface to the caller. */
   mediaGet(ref: string): Promise<MediaGetResult>;
@@ -86,126 +56,22 @@ export interface WsClient {
   characterCostumes(characterId: string): Promise<CharacterCostumesResult>;
   /** Reads one costume's external-ref resolution map (feeds settings pruning + resolve before a switch, #18). */
   costumeResolution(characterId: string, costume: string): Promise<CharacterCostumeResolutionResult>;
+  /** Reads every config knob with its effective value + provenance (the settings pages' source of truth). */
+  configList(): Promise<ConfigListResult>;
+  /** Stores a knob value (null resets to env/default); refusals arrive as a CONFIG_REFUSED rejection. */
+  configSet(params: ConfigSetParams): Promise<ConfigSetResult>;
+  /** Subscribes this socket to config.changed pushes (another operator surface edited a knob). */
+  subscribeConfig(): Promise<void>;
   /** Registers the fire-and-forget avatar command sink (core -> operator push). Replaces any prior handler. */
   onAvatarCommand(handler: (command: AvatarCommand) => void): void;
-  /** Registers the optional live-timeline sink (shared with the chat window server-side). */
+  /** Registers the optional live-timeline sink (shared with the chat page server-side). */
   onTimelineAppended(handler: (entry: TimelineEntry) => void): void;
   /** Registers the optional retract sink: a row was deleted (cancel-before-reply); the store drops it by seq. */
   onTimelineRemoved(handler: (ref: TimelineRemoved) => void): void;
+  /** Registers the optional config.changed sink (the settings pages re-render the knob). */
+  onConfigChanged(handler: (changed: ConfigChanged) => void): void;
   onClose(handler: () => void): void;
   close(): void;
-}
-
-interface Turn {
-  handlers: ChatHandlers;
-  finish: () => void;
-}
-
-interface PushSlots {
-  avatar: ((command: AvatarCommand) => void) | null;
-  timeline: ((entry: TimelineEntry) => void) | null;
-  timelineRemoved: ((ref: TimelineRemoved) => void) | null;
-}
-
-interface Routes {
-  current: Turn | null;
-  push: PushSlots;
-}
-
-/** Routes the Core's notifications (chat stream + avatar/timeline pushes) to their handlers; each is zod-validated. */
-function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
-  const endTurn = (act: (turn: Turn) => void): void => {
-    const turn = state.current;
-    state.current = null;
-    if (turn) act(turn);
-  };
-  rpc.addMethod(CHAT_METHODS.delta, (params: unknown) => {
-    const { delta, messageId } = ChatDeltaSchema.parse(params);
-    state.current?.handlers.onDelta(delta, messageId);
-  });
-  rpc.addMethod(CHAT_METHODS.complete, (params: unknown) => {
-    ChatCompleteSchema.parse(params);
-    endTurn((turn) => {
-      turn.handlers.onComplete?.();
-      turn.finish();
-    });
-  });
-  rpc.addMethod(CHAT_METHODS.error, (params: unknown) => {
-    const { code, message, retracted } = ChatErrorSchema.parse(params);
-    endTurn((turn) => {
-      turn.handlers.onError?.(code, message, retracted);
-      turn.finish();
-    });
-  });
-  // Fire-and-forget pushes: a missing handler is harmless (closing the Pet UI must not break a turn, invariant 4).
-  rpc.addMethod(AVATAR_METHODS.command, (params: unknown) => {
-    state.push.avatar?.(AvatarCommandSchema.parse(params));
-  });
-  rpc.addMethod(TIMELINE_METHODS.appended, (params: unknown) => {
-    state.push.timeline?.(TimelineAppendedSchema.parse(params));
-  });
-  rpc.addMethod(TIMELINE_METHODS.removed, (params: unknown) => {
-    state.push.timelineRemoved?.(TimelineRemovedSchema.parse(params));
-  });
-}
-
-/** null = not a valid client frame; the caller drops it (never a silent swallow that corrupts routing). */
-function parseFrame(text: string): JsonRpcClientFrame | null {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    return null;
-  }
-  const frame = JsonRpcClientFrameSchema.safeParse(parsed);
-  return frame.success ? frame.data : null;
-}
-
-async function handshake(rpc: JSONRPCServerAndClient, params: ConnectParams): Promise<ConnectOutcome> {
-  try {
-    const result = ConnectResultSchema.parse(await rpc.request(CONNECT_METHOD, params));
-    return { ok: true, token: result.token };
-  } catch (error) {
-    if (error instanceof JSONRPCErrorException) {
-      return { ok: false, code: appErrorCode(error.data), message: error.message };
-    }
-    throw error;
-  }
-}
-
-function appErrorCode(data: unknown): ErrorCode | null {
-  if (typeof data !== "object" || data === null || !("code" in data)) return null;
-  const parsed = ErrorCodeSchema.safeParse(data.code);
-  return parsed.success ? parsed.data : null;
-}
-
-// The plain request/response methods (no turn/handshake state) — split out to keep createWsClient within the size cap.
-// Each parses its result through a @taki/shared schema: the zod boundary holds for every inbound frame.
-function requestMethods(rpc: JSONRPCServerAndClient) {
-  return {
-    subscribeAvatar: async (characterId: string) => void (await rpc.request(AVATAR_METHODS.subscribe, { characterId })),
-    reportAvatar: async (params: AvatarReportParams) => {
-      // One centralized trace for EVERY re-report (boot / costume promotion / manual switch / drift self-heal): the
-      // provable-re-report the acceptance needs. A dead-names regression shows here as a count mismatch (1b).
-      console.info(`[avatar] reported vocab motions=${params.motions.length} expressions=${params.expressions.length}`);
-      await rpc.request(AVATAR_METHODS.report, params);
-    },
-    chatCancel: async (characterId: string) =>
-      ChatCancelResultSchema.parse(await rpc.request(CHAT_METHODS.cancel, { characterId })).cancelled,
-    timelineHistory: async (params: TimelineHistoryParams) =>
-      TimelineHistoryResultSchema.parse(await rpc.request(TIMELINE_METHODS.history, params)),
-    subscribeTimeline: async (characterId: string) => void (await rpc.request(TIMELINE_METHODS.subscribe, { characterId })),
-    mediaGet: async (ref: string) => MediaGetResultSchema.parse(await rpc.request(MEDIA_METHODS.get, { ref })),
-    importCharacter: async (params: CharacterImportParams) =>
-      CharacterImportResultSchema.parse(await rpc.request(CHARACTER_METHODS.import, params)),
-    listCharacters: async () => CharacterListResultSchema.parse(await rpc.request(CHARACTER_METHODS.list, {})),
-    characterCostumes: async (characterId: string) =>
-      CharacterCostumesResultSchema.parse(await rpc.request(CHARACTER_METHODS.costumes, { characterId })),
-    costumeResolution: async (characterId: string, costume: string) =>
-      CharacterCostumeResolutionResultSchema.parse(
-        await rpc.request(CHARACTER_METHODS.costumeResolution, { characterId, costume }),
-      ),
-  };
 }
 
 export function createWsClient(deps: { transport: WsTransport }): WsClient {
@@ -214,22 +80,9 @@ export function createWsClient(deps: { transport: WsTransport }): WsClient {
     new JSONRPCServer(),
     new JSONRPCClient((payload) => transport.send(JSON.stringify(payload))),
   );
-  const state: Routes = { current: null, push: { avatar: null, timeline: null, timelineRemoved: null } };
+  const state = createRoutes();
   installRoutes(rpc, state);
-
-  let opened = false;
-  const openWaiters: Array<() => void> = [];
-  transport.onOpen(() => {
-    opened = true;
-    for (const wake of openWaiters.splice(0)) wake();
-  });
-  transport.onMessage((data) => {
-    const frame = parseFrame(data);
-    if (frame) void rpc.receiveAndSend(frame);
-  });
-  transport.onClose(() => rpc.rejectAllPendingRequests("connection closed"));
-  const whenOpen = (): Promise<void> =>
-    opened ? Promise.resolve() : new Promise<void>((resolve) => openWaiters.push(resolve));
+  const { whenOpen, isClosed } = bindTransport(transport, rpc, state);
 
   return {
     async connect(params) {
@@ -237,6 +90,8 @@ export function createWsClient(deps: { transport: WsTransport }): WsClient {
       return handshake(rpc, params);
     },
     async chat(params, handlers) {
+      // A turn started on a dead socket can never be answered — reject now instead of leaving the caller pending (D29).
+      if (isClosed()) throw new Error(CONNECTION_LOST_MESSAGE);
       const done = new Promise<void>((resolve) => {
         state.current = { handlers, finish: resolve };
       });
@@ -252,6 +107,7 @@ export function createWsClient(deps: { transport: WsTransport }): WsClient {
     onAvatarCommand: (handler) => (state.push.avatar = handler),
     onTimelineAppended: (handler) => (state.push.timeline = handler),
     onTimelineRemoved: (handler) => (state.push.timelineRemoved = handler),
+    onConfigChanged: (handler) => (state.push.config = handler),
     onClose: (handler) => transport.onClose(handler),
     close: () => transport.close(),
   };

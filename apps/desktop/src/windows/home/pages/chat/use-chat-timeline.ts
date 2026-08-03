@@ -1,8 +1,8 @@
 /**
- * INPUT:  the chat window's WsClient + a `ready` (authenticated) flag; live chat.* + timeline.appended/removed events.
+ * INPUT:  the chat page's WsClient + a `ready` (authenticated) flag; live chat.* + timeline.appended/removed events.
  * OUTPUT: useChatTimeline(client, ready) -> ChatTimeline: date-grouped rows + in-flight row + send/cancel/loadOlder +
  *         retractedDraft/consumeRetractedDraft (cancel-before-reply hand-back). Errors toast via components/toast (D34).
- * POS:    ui/windows/chat — the ONLY touchpoint between the window and ws-client/store (hook-guidelines). Wires the WS
+ * POS:    ui/windows/home/pages/chat — the ONLY touchpoint between the page and ws-client/store (hook-guidelines). Wires the WS
  *         to the timeline store: initial history page, live appends + removals, streamed deltas, older-page paging.
  */
 

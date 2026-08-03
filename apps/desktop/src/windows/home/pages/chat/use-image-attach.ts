@@ -2,7 +2,7 @@
  * INPUT:  files chosen from a hidden <input type="file"> (the composer's attach button).
  * OUTPUT: useImageAttach() -> { attachments, pick, remove, clear, notice, dismissNotice }; each attachment is
  *         { id, mediaType, dataBase64 (raw), previewUrl } — capped at MAX_ATTACHMENTS_PER_MESSAGE.
- * POS:    ui/windows/chat — the file-pick → base64 path (web-platform APIs; no Tauri plugin, research r3). Pure size
+ * POS:    ui/windows/home/pages/chat — the file-pick → base64 path (web-platform APIs; no Tauri plugin, research r3). Pure size
  *         gates + data-URL split live in image-attach-decode (tested); the canvas/FileReader path stays here.
  */
 

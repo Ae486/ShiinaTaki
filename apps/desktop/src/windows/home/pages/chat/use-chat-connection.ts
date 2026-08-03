@@ -1,8 +1,8 @@
 /**
  * INPUT:  a locally-persisted operator device identity (shared with the pet window via same-origin localStorage).
- * OUTPUT: useChatConnection() -> { client, status } — the chat window's OWN operator WS to the Core.
- * POS:    ui/windows/chat — the chat window's connection seam. A disposable client: it dies with the window; the Core
- *         allows concurrent same-device sockets (research r4), so this coexists with the pet window's socket.
+ * OUTPUT: useChatConnection() -> { client, status } — the chat page's OWN operator WS to the Core.
+ * POS:    ui/windows/home/pages/chat — the chat page's connection seam. A disposable client: it dies with the home
+ *         window; the Core allows concurrent same-device sockets (research r4), so this coexists with the pet's socket.
  */
 
 import { useEffect, useState } from "react";

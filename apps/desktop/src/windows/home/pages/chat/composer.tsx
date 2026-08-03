@@ -3,7 +3,7 @@
  *         hook; a retractedDraft (cancel-before-reply) to restore, with a consume callback.
  * OUTPUT: <Composer> — textarea (Enter=send, Shift+Enter=newline), attach button, thumbnail previews, and a dual-state
  *         action button: 发送 while idle, 中断 (abort the in-flight turn) while sending. Attach-pick problems toast (D34).
- * POS:    ui/windows/chat — presentational; owns the image-attach hook. The attach button stays enabled even without a
+ * POS:    ui/windows/home/pages/chat — presentational; owns the image-attach hook. The attach button stays enabled even without a
  *         vision slot (decision 5, v1) — a no-vision send returns chat.error rendered as a toast.
  */
 

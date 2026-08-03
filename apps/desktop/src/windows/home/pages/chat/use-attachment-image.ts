@@ -1,7 +1,7 @@
 /**
  * INPUT:  an image part's workspace-relative ref (zod-parsed timeline part) + the chat WsClient (context).
  * OUTPUT: useAttachmentImage(ref) -> loading | error | { url } — lazy media.get, cached ref→dataURL across rows.
- * POS:    ui/windows/chat — the media.get touchpoint (hook-guidelines: components never call ws-client). ONE image
+ * POS:    ui/windows/home/pages/chat — the media.get touchpoint (hook-guidelines: components never call ws-client). ONE image
  *         path for live + scroll-back (prd §4.3); the data URL's mediaType comes from the zod-parsed closed enum.
  */
 

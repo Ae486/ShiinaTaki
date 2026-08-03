@@ -1,7 +1,7 @@
 /**
  * INPUT:  one committed TimelineEntry (role + parts, or a legacy text-only row via `content`).
  * OUTPUT: <TimelineMessage> — one role-styled row; dispatches each part (text→markdown, tool→card, image→thumbnail).
- * POS:    ui/windows/chat — the row renderer, wrapped in React.memo so only the in-flight row re-parses markdown per
+ * POS:    ui/windows/home/pages/chat — the row renderer, wrapped in React.memo so only the in-flight row re-parses markdown per
  *         delta (research r2); settled rows keep a stable entry reference from the store and skip re-render.
  */
 

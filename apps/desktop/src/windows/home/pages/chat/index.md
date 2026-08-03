@@ -1,10 +1,10 @@
-# windows/chat/
-On-demand opaque chat window (#17): the depth view of the same per-character timeline the bubble glances at. Markdown
-text, tool cards, image thumbnails; streaming replies; image attachments. One continuous timeline, NO session list.
-- main.tsx — React root mounting <ChatWindow> into chat.html #root
-- chat-window.tsx — root: own WS connection + layout (header + timeline + composer); provides the client via context
+# windows/home/pages/chat/
+The home window's chat page (#17, migrated out of the retired standalone chat window): the depth view of the same
+per-character timeline the bubble glances at. Markdown text, tool cards, image thumbnails; streaming replies; image
+attachments. One continuous timeline, NO session list.
+- chat-page.tsx — page root: own WS connection + layout (character header + status banner + timeline + composer); provides the client via context
 - chat-client-context.ts — React context exposing the WsClient to deep image parts (no prop-drilling)
-- use-chat-connection.ts — the window's own operator WS (shared device identity; concurrent with the pet's socket)
+- use-chat-connection.ts — the page's own operator WS (shared device identity; concurrent with the pet's socket)
 - use-chat-timeline.ts — wires the WS to the store: initial history page, live appends + removals (retract), streamed deltas, older paging; hands a retracted draft back to the composer
 - chat-timeline-store.ts — timeline entries by seq (+removeEntry for retract) + in-flight streaming row (zustand); errors toast via components/toast (D34)
 - date-group.ts — pure: chronological entries → consecutive local-date groups (date dividers)

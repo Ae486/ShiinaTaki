@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "pet",
-  "description": "Pet overlay window: drag, show-after-first-paint, position persistence, window events, per-pixel click-through (cursor position + ignore-cursor-events); opens the chat window on demand",
+  "description": "Pet overlay window: drag, show-after-first-paint, position persistence, window events, per-pixel click-through (cursor position + ignore-cursor-events); opens/navigates the home window on demand",
   "windows": ["pet"],
   "permissions": [
     "core:event:default",

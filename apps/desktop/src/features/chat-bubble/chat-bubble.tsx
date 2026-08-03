@@ -8,7 +8,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import { openChatWindow } from "@/lib/open-chat-window.js";
+import { openHome } from "@/lib/open-home-window.js";
 import { pushToast } from "@/components/toast/toast-store.js";
 import { useChatBubble } from "./use-chat-bubble.ts";
 import type { BubbleReply } from "./chat-bubble-store.ts";
@@ -37,21 +37,21 @@ function BubbleReplyView({ reply }: { reply: BubbleReply }) {
   );
 }
 
-// Owns the expand-to-chat-window action. Inline SVG, not a glyph: WebView2 rendered the previous ⤢ invisibly,
-// hiding the ONLY entry to the full chat window (B8). Failures toast (D34) — WebView2 has no native JS dialogs.
+// Owns the expand-to-home-chat action. Inline SVG, not a glyph: WebView2 rendered the previous ⤢ invisibly,
+// hiding the ONLY entry to the full chat page (B8). Failures toast (D34) — WebView2 has no native JS dialogs.
 function OpenChatButton() {
   const open = () =>
-    openChatWindow().catch((cause: unknown) => {
-      console.error("chat window failed to open", cause);
-      pushToast(`无法打开聊天窗口: ${cause instanceof Error ? cause.message : String(cause)}`);
+    openHome("chat").catch((cause: unknown) => {
+      console.error("home window failed to open", cause);
+      pushToast(`无法打开聊天页: ${cause instanceof Error ? cause.message : String(cause)}`);
     });
   return (
     <button
       type="button"
       onClick={() => void open()}
       className="px-1 text-slate-400 hover:text-slate-600"
-      aria-label="Open chat window"
-      title="打开聊天窗口"
+      aria-label="Open chat page"
+      title="打开聊天页"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
         <path d="M15 3h6v6" />

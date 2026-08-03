@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { AVATAR_METHODS, CHARACTER_METHODS, CHAT_METHODS, CONNECT_METHOD, JSON_RPC_APP_ERROR, MEDIA_METHODS, TIMELINE_METHODS } from "@taki/shared";
+import { AVATAR_METHODS, CHARACTER_METHODS, CHAT_METHODS, CONFIG_METHODS, CONNECT_METHOD, JSON_RPC_APP_ERROR, MEDIA_METHODS, TIMELINE_METHODS } from "@taki/shared";
 import { createWsClient } from "./ws-client.ts";
 import type { WsTransport } from "./ws-transport.ts";
 
@@ -15,11 +15,13 @@ interface Harness {
   sent: string[];
   deliver: (frame: unknown) => void;
   open: () => void;
+  closeSocket: () => void;
 }
 
 function harness(): Harness {
   const messageHandlers: Array<(data: string) => void> = [];
   const openHandlers: Array<() => void> = [];
+  const closeHandlers: Array<() => void> = [];
   const sent: string[] = [];
   return {
     transport: {
@@ -27,11 +29,12 @@ function harness(): Harness {
       close: () => undefined,
       onMessage: (handler) => messageHandlers.push(handler),
       onOpen: (handler) => openHandlers.push(handler),
-      onClose: () => undefined,
+      onClose: (handler) => closeHandlers.push(handler),
     },
     sent,
     deliver: (frame) => messageHandlers.forEach((handler) => handler(JSON.stringify(frame))),
     open: () => openHandlers.forEach((handler) => handler()),
+    closeSocket: () => closeHandlers.forEach((handler) => handler()),
   };
 }
 
@@ -241,5 +244,95 @@ describe("createWsClient inbound routing", () => {
       error: { code: JSON_RPC_APP_ERROR, message: "pairing required", data: { code: "PAIRING_REQUIRED" } },
     });
     expect(await outcome).toEqual({ ok: false, code: "PAIRING_REQUIRED", message: "pairing required" });
+  });
+});
+
+describe("createWsClient disconnect handling (D29)", () => {
+  it("settles an in-flight turn with a structured error when the socket dies mid-turn", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    let errored: { code: string; message: string } | null = null;
+    const turn = client.chat(
+      { characterId: "taki", message: "hi" },
+      { onDelta: () => undefined, onError: (code, message) => (errored = { code, message }) },
+    );
+    await flush();
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "m1" } });
+    h.deliver({ jsonrpc: "2.0", method: CHAT_METHODS.delta, params: { messageId: "m1", characterId: "taki", delta: "He" } });
+    h.closeSocket();
+    await turn; // the defect was an await that never resolved
+    expect(errored).not.toBeNull();
+    expect(errored!.code).toBe("INTERNAL_ERROR");
+  });
+
+  it("rejects a chat started after the socket closed instead of hanging", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    h.closeSocket();
+    await expect(client.chat({ characterId: "taki", message: "hi" }, { onDelta: () => undefined })).rejects.toThrow();
+  });
+
+  it("still rejects pending JSON-RPC requests on close, and a close with no turn is harmless", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const page = client.timelineHistory({ characterId: "taki", limit: 50 });
+    await flush();
+    expect(() => h.closeSocket()).not.toThrow();
+    await expect(page).rejects.toThrow();
+  });
+});
+
+describe("createWsClient config methods", () => {
+  it("configList round-trips the knob entries", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const got = client.configList();
+    await flush();
+    expect(JSON.parse(h.sent[h.sent.length - 1] ?? "{}").method).toBe(CONFIG_METHODS.list);
+    const entry = {
+      key: "TAKI_LOG_LEVEL",
+      value: "info",
+      stored: false,
+      envLocked: false,
+      default: "info",
+      apply: "restart",
+      secret: false,
+      secretSet: false,
+      input: { kind: "enum", options: ["info", "debug"] },
+      description: "log level",
+    };
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { entries: [entry] } });
+    expect((await got).entries).toEqual([entry]);
+  });
+
+  it("configSet sends the key/value pair and parses the apply verdict", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const done = client.configSet({ key: "TAKI_LOG_LEVEL", value: "debug" });
+    await flush();
+    const sent = JSON.parse(h.sent[h.sent.length - 1] ?? "{}");
+    expect(sent.method).toBe(CONFIG_METHODS.set);
+    expect(sent.params).toEqual({ key: "TAKI_LOG_LEVEL", value: "debug" });
+    h.deliver({
+      jsonrpc: "2.0",
+      id: lastRequestId(h.sent),
+      result: { status: "ok", key: "TAKI_LOG_LEVEL", value: "debug", apply: "restart" },
+    });
+    expect(await done).toEqual({ status: "ok", key: "TAKI_LOG_LEVEL", value: "debug", apply: "restart" });
+  });
+
+  it("routes a config.changed push to the registered handler (zod-validated)", () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    const received: unknown[] = [];
+    client.onConfigChanged((changed) => received.push(changed));
+    h.open();
+    h.deliver({ jsonrpc: "2.0", method: CONFIG_METHODS.changed, params: { key: "TAKI_LOG_LEVEL", value: "debug" } });
+    expect(received).toEqual([{ key: "TAKI_LOG_LEVEL", value: "debug" }]);
   });
 });

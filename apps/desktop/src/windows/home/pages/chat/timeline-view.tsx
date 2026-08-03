@@ -2,7 +2,7 @@
  * INPUT:  a ChatTimeline view-model (date-grouped entries + in-flight row + paging) from the hook.
  * OUTPUT: <TimelineView> — the scrollable conversation: date dividers, role-styled rows, and the streaming in-flight
  *         bubble. Auto-sticks to bottom; loads older pages on top-reach. Errors are toasts (D34), not in-stream rows.
- * POS:    ui/windows/chat — the scroll container (one continuous timeline, NO session list). Presentational.
+ * POS:    ui/windows/home/pages/chat — the scroll container (one continuous timeline, NO session list). Presentational.
  */
 
 import type { ChatTimeline } from "./use-chat-timeline.ts";

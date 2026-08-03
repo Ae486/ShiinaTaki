@@ -2,7 +2,7 @@
  * INPUT:  content-change counters (entries/in-flight) + hasMore + a loadOlder callback from the timeline hook.
  * OUTPUT: useTimelineScroll(...) -> { scrollRef, onScroll }: auto-stick-to-bottom, top-reach loads older, and holds
  *         the reading position when an older page prepends.
- * POS:    ui/windows/chat — the scroll-behavior seam kept out of TimelineView (DOM-only; not the render contract).
+ * POS:    ui/windows/home/pages/chat — the scroll-behavior seam kept out of TimelineView (DOM-only; not the render contract).
  */
 
 import { useLayoutEffect, useRef, type RefObject } from "react";

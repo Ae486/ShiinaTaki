@@ -1,7 +1,7 @@
 /**
  * INPUT:  timeline entries (ascending by seq, i.e. chronological) from the chat timeline store.
  * OUTPUT: groupByLocalDate(entries) -> consecutive runs sharing a LOCAL calendar day, for date-divider rendering.
- * POS:    ui/windows/chat — a pure grouping helper (no React/WS). The timeline view renders one divider per group.
+ * POS:    ui/windows/home/pages/chat — a pure grouping helper (no React/WS). The timeline view renders one divider per group.
  */
 
 import type { TimelineEntry } from "@taki/shared";

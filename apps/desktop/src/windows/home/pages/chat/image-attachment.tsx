@@ -2,7 +2,7 @@
  * INPUT:  an image part's workspace-relative ref (from a zod-parsed timeline part).
  * OUTPUT: <ImageAttachment> — the thumbnail: a shimmer while loading, a "图片已过期" placeholder when the bytes are
  *         gone (TTL sweep / FORBIDDEN), else the resolved data-URL image.
- * POS:    ui/windows/chat — presentational image-part renderer; byte fetching lives in use-attachment-image.
+ * POS:    ui/windows/home/pages/chat — presentational image-part renderer; byte fetching lives in use-attachment-image.
  *         Text stays authoritative — an expired image degrades to a placeholder, never a crash.
  */
 

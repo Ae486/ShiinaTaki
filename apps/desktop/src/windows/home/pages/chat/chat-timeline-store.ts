@@ -1,8 +1,8 @@
 /**
  * INPUT:  history pages (timeline.history), live timeline.appended/removed pushes, and chat.delta/complete from the hook.
- * OUTPUT: the chat window's timeline state (entries by seq + the in-flight assistant row) + reducers. Transient
+ * OUTPUT: the chat page's timeline state (entries by seq + the in-flight assistant row) + reducers. Transient
  *         notices moved to components/toast (D34) — errors clearInflight here and pushToast there.
- * POS:    ui/windows/chat (feature-local store) — the depth-view conversation domain. One continuous timeline, NO
+ * POS:    ui/windows/home/pages/chat (page-local store) — the depth-view conversation domain. One continuous timeline, NO
  *         session list. The hook wires the WS to these reducers; components read via the hook (hook-guidelines).
  */
 
