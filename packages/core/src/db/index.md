@@ -8,4 +8,5 @@
 - privacy-pause-repo.ts — privacy_pause_state SQL: load / save (the single global Privacy Pause row; a consent withdrawal must survive a restart)
 - summary-repo.ts — conversation_summary SQL: get / upsert (the per-character rolling compaction summary + its through_seq coverage — T5-R3, batch 7)
 - window-state-repo.ts — slot_window_state SQL: get / set (per-model-slot effective window + EMA factor — the window calibrator's persistence, batch 6)
+- config-repo.ts — config SQL: get / all / upsert / delete (the sparse operator-set settings store; a row that is not a JSON primitive throws at the boundary)
 - migrations/ — numbered TS-constant migrations + their ordered registry

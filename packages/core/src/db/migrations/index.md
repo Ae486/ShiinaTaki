@@ -11,4 +11,5 @@
 - 010-memory-tidy-state.ts — migration 10: memory_auto_state gains a nullable last_tidy_at (the tidy pass's per-character high-water mark; NULL = never tidied)
 - 011-slot-window-state.ts — migration 11: slot_window_state (per-model-slot effective window + EMA factor — the window calibrator's persistence, batch 6)
 - 012-conversation-summary.ts — migration 12: conversation_summary (one overwritable rolling-summary row per character + through_seq coverage, T5-R3; never a timeline row)
+- 013-config.ts — migration 13: config (the sparse operator-set settings store: key/JSON value/updated_at; a row exists only for a knob the panel actually set)
 - index-list.ts — the explicit ordered MIGRATIONS registry (no fs/glob discovery)

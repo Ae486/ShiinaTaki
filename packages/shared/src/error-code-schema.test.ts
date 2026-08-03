@@ -10,6 +10,7 @@ describe("ErrorCodeSchema", () => {
     "NOT_AUTHENTICATED",
     "ALREADY_CONNECTED",
     "FORBIDDEN",
+    "CONFIG_REFUSED",
   ])("accepts the %s code", (code) => {
     expect(ErrorCodeSchema.safeParse(code).success).toBe(true);
   });

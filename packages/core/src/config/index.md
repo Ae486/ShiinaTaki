@@ -9,3 +9,7 @@
 - server-config.ts — TAKI_WS_* / TAKI_LOG_LEVEL / TAKI_DATA_DIR / TAKI_PROMPT_DIR / TAKI_TRUST_LOOPBACK_OPERATOR env → { host, port, logLevel, dataDir, promptDir, trustLoopbackOperator } with defaults
 - agent-config.ts — TAKI_MAX_STEPS env → { maxSteps } per-turn tool-loop cap (default 10; D11 config-ization)
 - ambient-screenshot-config.ts — TAKI_AMBIENT_SCREENSHOT / _RETENTION env → { enabled, retention }; ambient screen sampling is OFF by default and its raw frames drop right after describe (keep / N days are the opt-ins; garbage = fatal)
+- knob-registry.ts — CONFIG_KNOBS: one declarative row per operator-visible env knob (key/value schema/default/apply class/secret/input hint/description) + findKnob; the SINGLE source config.list renders from (#26 batch 1)
+- config-source.ts — createConfigSource({env, repo}) → { env(), resolve(key), effectiveAll() }; the ONE place precedence lives: env (explicitly set) > stored > built-in default; secrets masked to presence only
+- config-writer.ts — createConfigWriter({env, repo, onChanged}) → { set }; the store's only write path, with five distinct fail-closed refusals (unknown key / invalid value / env-locked / secret / env-only)
+- config-subscriptions.ts — createConfigSubscriptions() → { subscribe, unsubscribe, publish, count }; the config.changed fan-out registry (global, not character-scoped)

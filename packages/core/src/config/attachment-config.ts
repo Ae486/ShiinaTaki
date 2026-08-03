@@ -5,7 +5,7 @@
  */
 import { z } from "zod";
 
-const DEFAULT_TTL_DAYS = 14;
+export const DEFAULT_TTL_DAYS = 14;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // Env-var name IS the schema key so a fatal boot error names it. Coerce + int + positive: "abc"/"0"/"-1"/"3.5" all throw

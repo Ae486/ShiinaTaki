@@ -101,6 +101,36 @@ export {
 export type { MemoryTidyDefects, MemoryTidyParams, MemoryTidyResult } from "./memory-schema.ts";
 
 export {
+  CONFIG_METHODS,
+  ConfigApplySchema,
+  ConfigChangedSchema,
+  ConfigEntrySchema,
+  ConfigInputSchema,
+  ConfigListParamsSchema,
+  ConfigListResultSchema,
+  ConfigRefusalReasonSchema,
+  ConfigSetParamsSchema,
+  ConfigSetResultSchema,
+  ConfigSubscribeParamsSchema,
+  ConfigSubscribeResultSchema,
+  ConfigValueSchema,
+} from "./config-schema.ts";
+export type {
+  ConfigApply,
+  ConfigChanged,
+  ConfigEntry,
+  ConfigInput,
+  ConfigListParams,
+  ConfigListResult,
+  ConfigRefusalReason,
+  ConfigSetParams,
+  ConfigSetResult,
+  ConfigSubscribeParams,
+  ConfigSubscribeResult,
+  ConfigValue,
+} from "./config-schema.ts";
+
+export {
   MEDIA_METHODS,
   MediaClearParamsSchema,
   MediaClearResultSchema,

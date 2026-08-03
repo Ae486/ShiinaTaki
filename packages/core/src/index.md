@@ -1,7 +1,8 @@
 # core/src/
 - index.ts — package public entry; empty until an external consumer exists (core runs as a process)
 - main.ts — process entry: wires config → logger → model(s) → db/store/subscriptions → memory subsystem (memory/bootstrap.ts) → media store + attachment GC → skills + MCP + approval gate + capability channel → perception layer (activity + ambient-screen samplers, privacy controls, frame retention) → registries → ws-server; closes MCP clients + db on SIGINT/SIGTERM
-- config/ — env → validated boot config
+- config/ — env → validated boot config; plus the operator-facing settings store (knob registry, precedence source, writer, change fan-out)
+- boot/ — the composition root's config+storage phase: open the DB on the env-only data root, then resolve every other knob (env > stored > default) for the loaders
 - logging/ — pino root logger factory
 - server/ — WS JSON-RPC server + method table + connection auth state
 - devices/ — paired-device store + pairing/token registry (device identity security state)

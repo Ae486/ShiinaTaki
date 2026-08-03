@@ -1,9 +1,9 @@
 /**
- * INPUT:  process env (server + provider + optional vision/attachment config) and OS signals
+ * INPUT:  process env (bootstrap) + the config store's resolved knobs, and OS signals
  * OUTPUT: a running headless Agent Core — WS server bound to loopback; exits 0 on SIGINT/SIGTERM
- * POS:    core — the process entry/composition root; wires config → logger → model(s) → db/store/media/subscriptions → ws-server
+ * POS:    core — the process entry/composition root; wires boot (config store → logger → model(s) → db) →
+ *         store/media/subscriptions → ws-server
  */
-import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import type { ToolSet } from "ai";
 import { createChatAgent } from "./agents/chat-agent.ts";
@@ -28,23 +28,13 @@ import { createScreenshotDescriber } from "./capabilities/screenshot-describe.ts
 import { createScreenshotStore } from "./capabilities/screenshot-store.ts";
 import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
 import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
-import { loadAgentConfig } from "./config/agent-config.ts";
-import { loadAmbientScreenshotConfig } from "./config/ambient-screenshot-config.ts";
-import { loadAttachmentConfig } from "./config/attachment-config.ts";
-import { loadContextConfig } from "./config/context-config.ts";
-import { loadProviderConfig } from "./config/provider-config.ts";
-import { createModels } from "./config/provider-factory.ts";
-import { loadServerConfig } from "./config/server-config.ts";
-import { loadVisionConfig } from "./config/vision-config.ts";
-import { MIGRATIONS } from "./db/migrations/index-list.ts";
+import { bootstrapCore } from "./boot/core-bootstrap.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
-import { openDatabase } from "./db/sqlite.ts";
 import { createSummaryRepo } from "./db/summary-repo.ts";
 import { createTimelineRepo } from "./db/timeline-repo.ts";
 import { createWindowStateRepo } from "./db/window-state-repo.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
 import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
-import { createLogger } from "./logging/logger.ts";
 import { loadMcpConfig } from "./mcp/mcp-config.ts";
 import { createMcpManager } from "./mcp/mcp-manager.ts";
 import { createCharacterImporter } from "./characters/character-import.ts";
@@ -68,6 +58,7 @@ import { characterCostumeResolutionMethod } from "./server/methods/character-cos
 import { characterCostumesMethod } from "./server/methods/character-costumes.ts";
 import { characterImportMethod } from "./server/methods/character-import.ts";
 import { characterListMethod } from "./server/methods/character-list.ts";
+import { registerConfigMethods } from "./server/methods/config-methods.ts";
 import { connectMethod } from "./server/methods/connect.ts";
 import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
@@ -87,36 +78,10 @@ import { createReadFileTool } from "./workspace/read-file-tool.ts";
 import { createWorkspacePaths } from "./workspace/workspace-paths.ts";
 import { createWriteFileTool } from "./workspace/write-file-tool.ts";
 
-// Config parse is fatal-fast at boot; env is supplied by the run script's
-// --env-file flag, never read from disk by code (invariant 1).
-const serverConfig = loadServerConfig(process.env);
-const providerConfig = loadProviderConfig(process.env);
-const agentConfig = loadAgentConfig(process.env);
-// Two user-adjustable model slots (#17 decision 5): the required text slot (above) + an OPTIONAL vision slot. Both are
-// fatal-fast — a partial TAKI_VLM_* set or a garbage TTL fails the boot, never silently degrades. The third slot
-// (TAKI_UTILITY_*, background work) is parsed inside the memory subsystem's boot wiring, on the same fail-fast terms.
-const visionConfig = loadVisionConfig(process.env);
-const attachmentConfig = loadAttachmentConfig(process.env);
-// Ambient screen sampling (#20 T3b): OFF unless explicitly enabled, raw frames dropped right after describe.
-const ambientConfig = loadAmbientScreenshotConfig(process.env);
-// Per-slot declared context windows + the history ratio (T5-R1 tier 1; batch 6).
-const contextConfig = loadContextConfig(process.env);
-
-const logger = createLogger(serverConfig.logLevel);
-
-// Model construction lives in config/provider-factory.ts (batch-6 line-cap relief); Q14's includeUsage rides it.
-const { model, visionModel } = createModels({ provider: providerConfig, vision: visionConfig, includeUsage: contextConfig.includeUsage });
-
-// The composition root ensures the app data root exists before opening the db (first-boot);
-// the db layer itself stays fs-free (invariant). Mirrors the paired-device-store sanctioned site.
-mkdirSync(serverConfig.dataDir, { recursive: true });
-const dbLog = logger.child({ mod: "db" });
-const db = openDatabase({
-  path: join(serverConfig.dataDir, "taki.db"),
-  migrations: MIGRATIONS,
-  onMigrated: (applied) =>
-    dbLog.info({ applied }, applied.length > 0 ? "migrations applied" : "schema already up to date"),
-});
+// Boot phase (batch-1 #26): the data root comes from env alone, the DB opens on it, and every other knob is then
+// resolved as env > stored > built-in default — so a value the settings panel stored takes effect at THIS boot.
+const boot = bootstrapCore(process.env);
+const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
 const timelineRepo = createTimelineRepo(db);
 // R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
 // their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).
@@ -159,7 +124,8 @@ const { engine: memory, autoMemory, tidy, memoryRoot, writeMemory } = createMemo
     view: { estimatedTokens: conversationStore.estimatedTokens, budget: historyBudget },
     config: contextConfig.compact,
   },
-  env: process.env,
+  // The memory + utility knobs come from the RESOLVED env too, so the panel governs them like every other knob.
+  env: boot.env,
   logger,
 });
 
@@ -259,7 +225,7 @@ const perception = createPerceptionLayer({
   route: (capability, input) => routeCapability(shellCapabilityDeps, capability, input),
   hasNode: (capability) => connectionRegistry.findNodeForCapability(capability) !== undefined,
   describe: describeScreenshot,
-  ambient: ambientConfig,
+  ambient: boot.ambientConfig,
   ambientShotsDir: join(serverConfig.dataDir, "workspace", "ambient-screenshots"),
   // A pause is a withdrawal of consent, so it lives in the DB (single writer, invariant 2) and is restored at boot —
   // a crash/upgrade/reboot must never silently resume observation.
@@ -300,7 +266,7 @@ registry.register(
       store: conversationStore,
       memory,
       autoMemory,
-      maxSteps: agentConfig.maxSteps,
+      maxSteps: boot.agentConfig.maxSteps,
       // Presentation tools (avatar expression/motion) return nothing to read; stop the loop after a spoken,
       // presentation-only step so the SDK does not force a padded filler generation (1c). See presentation-stop.ts.
       stopConditions: [presentationTailStop],
@@ -379,9 +345,12 @@ registerPerceptionMethods(registry, perception);
 // Memory maintenance (T5 batch 4b): run the tidy pass on demand. Operator-only, NO Rust mirror; the write-count
 // trigger rides autoMemory internally — this surface exists for the settings panel/CLI (#26).
 registry.register(memoryTidyMethod(tidy));
+// Settings store (#26 batch 1): read every knob with its provenance, store operator values, push config.changed.
+// Operator-only, NO Rust mirror; secrets are reported as set/not-set and refused on write (invariant 5).
+registerConfigMethods(registry, { ...boot.config, logger });
 
 // Attachment GC (#17): a boot sweep + a 6h interval; only raw bytes expire, the description-memory is permanent.
-startAttachmentGc({ store: attachmentStore, ttlMs: attachmentConfig.ttlMs, logger });
+startAttachmentGc({ store: attachmentStore, ttlMs: boot.attachmentConfig.ttlMs, logger });
 
 // Dev-only L1 drive (env double-gate, mirror of the Shell's ScriptedApprover): registered ONLY with TAKI_DEV_TRIGGER=1
 // so it has zero production surface. It drives the same capability tools the agent does — the node-side gate still
