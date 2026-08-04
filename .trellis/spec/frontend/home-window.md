@@ -1,0 +1,69 @@
+# Home Window, Pages & Streaming Timeline Contract
+
+> The home window (`src/windows/home/`) is the ONE settings-family surface: a left menu plus one page per registry row, with **chat as a page** (#26 retired the standalone chat window #17 built). These are the executable contracts — follow them, don't re-derive.
+
+## Window topology
+
+| label | entry | declared | capability | role |
+|-------|-------|----------|-----------|------|
+| `pet` | `pet.html` | `tauri.conf.json` (transparent, undecorated, always-on-top, hidden until first paint) | `pet.json` | the overlay: Live2D scene, chat bubble, operation wheel |
+| `home` | `home.html?page=<id>` | **runtime** (`lib/open-home-window.ts`) | `home.json` | every page: chat / settings / operations / perception / costume |
+| `main` | `index.html` | `tauri.conf.json` | `default.json` (broadest) | LEGACY pairing panel, unrelated to the home surface — do not extend it; whether it is consolidated into home or retired is still an open decision (#26 close) |
+| `spike` | `spike.html` | Vite input only | — | the #13 renderer spike, dev-only |
+
+Window-state persistence is configured POSITION-only with `main` on the denylist (`src-tauri/src/lib.rs`): which labels persist is a plugin-side decision, not something a window's capability file grants (the `window-state:*` permissions only gate the JS save/restore calls).
+
+## Runtime-created windows (NOT a tauri.conf.json entry)
+
+A secondary window is created at runtime, not declared in `tauri.conf.json`:
+
+- **Open-on-demand** via a `lib/open-<name>-window.ts` helper: `await WebviewWindow.getByLabel("<label>")` (async in `@tauri-apps/api` v2) → if it exists `show()` + push it to the right page + `setFocus()`; else `new WebviewWindow("<label>", { url: "<name>.html", ... })`. Fixed label, fixed url — never interpolate runtime data into either (the home page id rides a `?page=` query param, which is not the url). Single instance is BY CONSTRUCTION: the label is a constant and an existing window is reused, never re-created.
+- **Await the create race**: `tauri://created` resolves, `tauri://error` rejects, so a failed open reaches the caller. Packaged builds have no devtools and `window.alert` is a no-op — a rejected open MUST surface as a toast (`pushToast`), never console-only (D34; the dead opener defect).
+- **Entry**: a root `<name>.html` (opaque; no Cubism/renderer scripts unless it renders Live2D) + `src/windows/<name>/main.tsx`, added to `vite.config.ts` `build.rollupOptions.input.<name>`.
+- **Capability**: a dedicated `src-tauri/capabilities/<name>.json` with `"windows": ["<label>"]` granting only what that window needs (home needs just `core:event:default`: its Core traffic is a plain browser WebSocket, its file `<input>` is a web-platform API, and events cover `home:navigate` inbound + `pet:costume-switch` outbound). The window that OPENS another needs `core:webview:allow-create-webview-window` + `core:window:allow-set-focus` + `core:window:allow-get-all-windows` + `core:webview:allow-get-all-webviews` (the `getByLabel` lookup enumerates windows/webviews; without the get-all pair opening throws `plugin:window|get_all_windows not allowed by ACL`, #18 round 4) in ITS capability file — that is why `pet.json`, not `home.json`, carries them. A wrong/oversized permission set is a review-blocker; capability ids are validated by `cargo check` (tauri build script), so run it after editing capabilities.
+- **Every `@tauri-apps/api/*` call is ACL-gated PER WINDOW, and `cargo check` does NOT catch a missing grant — only running that window does.** Front-end JS calls like `path.homeDir`/`join`/`resolve` (→ `core:path:default`), `window.*`, `fs.*`, `dialog.*` each need their permission in the CALLING window's capability file. `cargo check` validates that a listed id is spelled right; it does NOT verify a window has every permission it will USE at runtime — a missing grant compiles clean and throws `<command> not allowed on window "<label>" ... allowed on: [windows: "main"]` the moment that window invokes it (real example: `path.homeDir` in `character-asset-url.ts` worked from `main` but threw in `pet` until `core:path:default` was added to `pet.json`, #18). Web-platform APIs (WebSocket, `<input type=file>`, `fetch`) are NOT gated. `convertFileSrc` needs no capability (pure URL rewrite). When adding a Tauri API call to a window, grant it in that window's capability AND smoke that window — a passing build proves nothing here.
+
+## The page registry is the only page list
+
+- `windows/home/pages.ts` holds `HOME_PAGES`: `{ id, label, icon, component }` rows, `as const satisfies readonly HomePage[]`. `PageId` is DERIVED from it, `DEFAULT_PAGE_ID` names the boot page, and `isPageId()` gates ids arriving from outside the type system (the `?page=` param, a Tauri event payload). **Adding a page = one row here + one directory under `pages/<id>/`** (invariant 7); no other page list may exist, and no page imports another page.
+- Navigation state is a small zustand store (`home-store.ts`: `currentPage` + `navigate`) — one store per domain, UI state only (invariant 4). A fresh window boots from `?page=`; an ALREADY-open window is pushed with the `home:navigate` Tauri event (`use-home-navigate-event.ts`).
+- The pet overlay's operation wheel (`features/operation-wheel/wheel-items.ts`) is the same shape: one registry row per shortcut, each row calling `openHome(page)`. Its rows and the home menu rows are independent registries on purpose — the wheel is a shortcut set, not a mirror of the menu.
+- **Static-render caveat for tests**: zustand serves `renderToStaticMarkup` its INITIAL state, so a static shell render always shows `DEFAULT_PAGE_ID` no matter what `navigate()` was called with. Assert nav/highlight behaviour against the default row.
+
+## Own WS connection per window
+
+Each window opens its OWN operator socket via `lib/ws-client.ts` (concurrent same-device sockets are allowed by the Core's connection registry — verified). A window does NOT share JS memory or a socket with another window; cross-window liveness is the Core's `timeline.appended` / event fan-out, never shared memory (matches state-management.md). Loopback operators auto-trust (P3) — no pairing UI. Inside home there are exactly TWO sockets: `use-home-connection.ts` (shared with every settings-family page through `HomeClientContext`) and the chat page's own (`use-chat-connection.ts`) — the streaming turn state must not share a client with request/response pages.
+
+## Cross-window commands (the pet owns the scene, the pages own the surface)
+
+A page that needs something only the pet window can do COMMANDS it and does not reach into it:
+
+- Costume switching: `lib/costume-switch-event.ts` — the costume page emits `pet:costume-switch` to the `pet` label; the pet window parses the payload (malformed → dropped with a breadcrumb, never thrown in a callback) and runs its existing switch path. Presentation only: the state of record still rides the pet's WS persist, so this is not a second writer (invariant 2).
+- The reverse direction is `openHome(page)` + `home:navigate`.
+- Anything the Core can mediate SHOULD go through the Core instead (a WS method + its push), not through a window-to-window event.
+
+## Page presentation contract
+
+- The shell (`home-shell.tsx`) owns the nav column and a `<main>` flex column; a page renders `<PageHeader>` + `<PageBody>` from `page-chrome.tsx` — except a page that owns its own scroll (chat: header, banner, timeline, composer).
+- Shared primitives, declared once, restyled once: `page-chrome.tsx` (`PageHeader` / `PageBody` / `PageAlert`), `page-card.tsx` (`PageCard` / `LabeledRows`), `badge.tsx` (tones: `warn` = needs the operator's attention, `ok` = in effect, `neutral`/`muted` = a plain fact), `action-button.tsx` (`primary` / `secondary` / `danger-soft` / `danger`). A page that hand-rolls card, badge or button markup is a review finding.
+- Palette: slate neutral, **rose is the one accent** (selection + identity + primary chat action), amber = attention, emerald = confirmed/in effect, rose = error. The solid `danger` fill is reserved for an irreversible confirm (today only the D46 attachment purge, which is two-step by construction).
+- Icons live in `lib/icons/` as self-drawn inline SVG components (`Glyph` base + one glyph per file, `className` passthrough). **No icon package, no imported third-party asset file.**
+- **`references/BANDORI-PET-REV` is GPLv3: a LAYOUT and organization reference only.** Read it to learn shape (sidebar with brand row + icon nav, card-grouped right pane, label-left/control-right rows); never transcribe code, class schemes, or asset files into this repo.
+- Overlay animation is CSS-only (the wheel's appear keyframe is registered in `styles.css` under Tailwind v4 `@theme`) — no JS timers on the pet window, whose idle CPU is a feature.
+
+## Streaming timeline: the in-flight assistant row lifecycle
+
+The persisted timeline and the live stream are two sources merged in one store (`pages/chat/chat-timeline-store.ts`), keyed by `seq`:
+
+- Persisted entries: initial `timeline.history` page (newest-first → reverse for display) + live `timeline.appended`, both **Map-keyed by `seq`** (dedup + ascending sort; loadOlder prepends without duplicating; a subscribe-before-history race dedups by seq).
+- The streaming assistant reply is a SEPARATE **in-flight row keyed by `chat.send`'s `messageId`** (which is NOT the persisted entry's uuid — do not try to id-match them). `chat.delta` grows it; the assistant's `timeline.appended` (the persisted version) **drops the in-flight row and inserts the entry in ONE atomic `set()`** — this ordering (Core sends `persistTurn` fan-out just before `chat.complete`) is what prevents a duplicate flash. `chat.complete` → `clearInflight` is the safety net, not the primary path.
+- Only an **assistant**-role `appended` drops the in-flight row; user/tool appended rows must not. `chat.error` mid-stream clears the in-flight row and pushes an inline notice atomically. A new `messageId` replaces a stale in-flight row.
+- The in-flight bubble uses identical assistant-row styling for a seamless swap.
+
+## Rendering server-owned binary refs (images)
+
+A timeline `image` part carries `{ mediaType, ref }` — **never bytes**. ONE render path for both live-attached and scroll-back images: a `use-attachment-image.ts` hook calls `media.get(ref)` lazily, cached in a module-level `Map<ref, Promise<dataURL>>` (one fetch per ref across all rows and re-mounts; evict on failure so it can retry). A `FORBIDDEN`/missing ref (TTL-expired image) degrades to a placeholder — **text stays authoritative** (the image's meaning already lives in memory as the vision description). The `<img src>` is a `data:` URL whose mediaType comes ONLY from the zod-parsed `MediaGetResult` closed enum.
+
+## Markdown is default-safe (XSS surface)
+
+Assistant AND user text render through ONE `markdown-view.tsx` = `react-markdown` + `remark-gfm`, used **default-safe**: NO `rehype-raw`, NO `rehype-sanitize`, NO `dangerouslySetInnerHTML`, NO `urlTransform` override, NO `components` prop that reintroduces raw HTML. react-markdown escapes raw HTML and defangs `javascript:`/`data:` hrefs by default; adding any of the above re-opens the hole. Keep a markdown XSS regression test (`markdown-view.test.tsx`) whenever this file changes. Wrap settled rows in `React.memo` so only the in-flight row re-parses each delta.

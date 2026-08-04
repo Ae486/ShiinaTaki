@@ -7,7 +7,7 @@
 1. Read `CLAUDE.md` (root) — naming (kebab-case files), size caps, anti-sprawl rules.
 2. Read `CONTEXT.md` — Pet UI is a disposable WS client; it owns rendering, not state of record.
 3. Talking to the Agent Core? Types come from `@taki/shared`; talking to the Shell? `@tauri-apps/api` `invoke`/events only.
-4. Two windows exist (pet overlay, settings) with separate Tauri capability files — know which one you are in.
+4. Three windows exist (pet overlay, home, the legacy `main` pairing panel) with separate Tauri capability files — know which one you are in.
 
 ## Guidelines Index
 
@@ -20,7 +20,7 @@
 | [Type Safety](./type-safety.md) | zod boundaries, no-any policy |
 | [Quality Guidelines](./quality-guidelines.md) | Size caps, perf rules (this window is always-on), tests |
 | [Live2D Renderer Contract](./live2d-renderer.md) | Locked renderer stack, load order, generation-split param API, BanG Dream model facts |
-| [Chat Window & Streaming Timeline](./chat-window.md) | Runtime-created windows + per-window capability, in-flight row lifecycle, media.get render path, markdown default-safe (the M5-settings-window template) |
+| [Home Window, Pages & Streaming Timeline](./home-window.md) | Window topology, runtime-created windows + per-window capability, the page registry, cross-window commands, page presentation primitives, in-flight row lifecycle, media.get render path, markdown default-safe |
 | [Packaged-Build Defect Classes](./packaged-build.md) | CSP packaged-only, WebView2 silent quirks (dialogs/glyphs), boot-silence invariants, CDP debugging recipe |
 
 ## Quality Check (run before handing off)
