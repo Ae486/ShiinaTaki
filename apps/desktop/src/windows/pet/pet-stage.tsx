@@ -1,9 +1,9 @@
 /**
- * INPUT:  avatar state from the Zustand store; the pet canvas host DOM node; panel + wheel open state (interaction store).
+ * INPUT:  avatar state from the Zustand store; the pet canvas host DOM node; wheel open state (interaction store).
  * OUTPUT: <PetStage> — the PixiJS canvas host that mounts the Live2D renderer scene, drives its render tier from
  *         avatar state, wires the render governor + window drag + per-pixel click-through + initial imported costume,
- *         reveals the window after first paint, and summons the operation wheel on right-click (the wheel's costume
- *         row is now the only way into the character/costume panel).
+ *         reveals the window after first paint, summons the operation wheel on right-click, and executes costume
+ *         switches commanded by the home window's costume page.
  * POS:    ui/renderer bridge — the ONLY component allowed to touch renderer/ APIs. Root remains transparent
  *         (no opaque background) so the overlay stays a per-pixel cut-out.
  */
@@ -12,7 +12,6 @@ import { useEffect, useRef } from "react";
 import { useAvatarStore } from "@/stores/avatar-store.js";
 import { useInteractionStore } from "@/stores/interaction-store.js";
 import { ChatBubble } from "@/features/chat-bubble/chat-bubble.js";
-import { CharacterPanel } from "@/features/character-import/character-panel.js";
 import { OperationWheel } from "@/features/operation-wheel/operation-wheel.js";
 import { summonWheel } from "@/features/operation-wheel/wheel-summon.js";
 import { ToastHost } from "@/components/toast/toast-host.js";
@@ -23,13 +22,12 @@ import { useCoreConnection } from "./use-core-connection.ts";
 import { useRenderGovernor } from "./use-render-governor.ts";
 import { useClickThrough } from "./use-click-through.ts";
 import { useInitialCostume } from "./use-initial-costume.ts";
+import { useCostumeSwitchEvent } from "./use-costume-switch-event.ts";
 
 export function PetStage() {
   const hostRef = useRef<HTMLDivElement>(null);
   const { scene, error: sceneError } = usePetScene(hostRef);
   const avatarState = useAvatarStore((s) => s.state);
-  const panelOpen = useInteractionStore((s) => s.panelOpen);
-  const setPanelOpen = useInteractionStore((s) => s.setPanelOpen);
   const wheelOpen = useInteractionStore((s) => s.wheelOpen);
   const wheelPoint = useInteractionStore((s) => s.wheelPoint);
   const openWheel = useInteractionStore((s) => s.openWheel);
@@ -40,6 +38,7 @@ export function PetStage() {
   const clickThrough = useClickThrough(scene);
   useCoreConnection(scene);
   useInitialCostume(scene);
+  useCostumeSwitchEvent(scene);
 
   useEffect(() => {
     scene?.setAvatarState(avatarState);
@@ -63,10 +62,7 @@ export function PetStage() {
         </div>
       )}
       <ChatBubble />
-      {wheelOpen && (
-        <OperationWheel point={wheelPoint} onClose={closeWheel} onOpenCostume={() => setPanelOpen(true)} />
-      )}
-      {panelOpen && <CharacterPanel scene={scene} onClose={() => setPanelOpen(false)} />}
+      {wheelOpen && <OperationWheel point={wheelPoint} onClose={closeWheel} />}
       <ToastHost />
     </div>
   );

@@ -10,6 +10,7 @@
 - media-clear.ts — media.clear (operator-only): purge retained attachment bytes on demand (the description-memory is untouched)
 - media-usage.ts — media.usage (operator-only): attachment + memory-text byte footprint; RESERVED for the M5 settings UI (D27)
 - memory-tidy.ts — memory.tidy (operator-only): run the store-maintenance tidy pass NOW; responds with per-class defect counts, edits, steps and the utility slot's cumulative spend — never memory content
+- memory-status.ts — memory.status (operator-only): the settings panel's maintenance counters — window calibration per slot, compaction summary coverage + LENGTH, auto-write/tidy watermarks; counts only
 - perception-methods.ts — the perception surface's registration seam: one call registers pauseGet/pauseSet/card so the composition root never grows per method
 - perception-pause-get.ts — perception.pauseGet (operator-only): the Privacy Pause snapshot (a lapsed deadline self-resumes on this read)
 - perception-pause-set.ts — perception.pauseSet (operator-only): pause until resumed / until a caller-supplied epoch-ms deadline / resume; the ONLY production writer of the pause state (the agent has no path — swept by privacy-pause-writer.test.ts)

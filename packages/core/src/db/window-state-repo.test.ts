@@ -33,4 +33,17 @@ describe("createWindowStateRepo", () => {
     r.set("main", { effectiveWindow: 100, factor: 1 });
     expect(r.get("vision")).toBeNull();
   });
+
+  it("lists every calibrated slot slot-ordered, and nothing before the first calibration", () => {
+    const r = repo();
+    expect(r.list()).toEqual([]);
+
+    r.set("vision", { effectiveWindow: 200, factor: 1.1 });
+    r.set("main", { effectiveWindow: 100, factor: 0.9 });
+
+    const rows = r.list();
+    expect(rows.map((row) => row.slot)).toEqual(["main", "vision"]);
+    expect(rows[0]).toMatchObject({ effectiveWindow: 100, factor: 0.9 });
+    expect(typeof rows[0]?.updatedAt).toBe("string");
+  });
 });

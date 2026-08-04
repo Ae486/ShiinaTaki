@@ -20,7 +20,7 @@ const { KEEP_INTERACTIVE_ATTR, KEEP_INTERACTIVE_SELECTOR, shouldIgnoreCursor } =
 
 function markup() {
   return renderToStaticMarkup(
-    <OperationWheel point={{ x: 120, y: 90 }} onClose={() => undefined} onOpenCostume={() => undefined} />,
+    <OperationWheel point={{ x: 120, y: 90 }} onClose={() => undefined} />,
   );
 }
 

@@ -1,0 +1,45 @@
+/**
+ * INPUT:  the home shell's WsClient + a refresh callback to run once the purge settles.
+ * OUTPUT: useMediaClear(client, onSettled) -> { phase, notice, error, onEvent } — the two-step attachment purge.
+ * POS:    ui/windows/home/pages/operations — the destructive action, split out of use-operations so the guard (a purge
+ *         is issued ONLY from the confirming step) sits alone with the call it protects.
+ */
+
+import { useCallback, useState } from "react";
+import type { WsClient } from "@/lib/ws-client.js";
+import { clearPhaseAfter, type ClearEvent, type ClearPhase } from "./operations-state.ts";
+
+export interface MediaClearControl {
+  phase: ClearPhase;
+  notice: string | null;
+  error: string | null;
+  onEvent: (event: ClearEvent) => void;
+}
+
+export function useMediaClear(client: WsClient | null, onSettled: () => void): MediaClearControl {
+  const [phase, setPhase] = useState<ClearPhase>("idle");
+  const [notice, setNotice] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const onEvent = useCallback(
+    (event: ClearEvent) => {
+      setPhase((current) => {
+        const next = clearPhaseAfter(current, event);
+        if (next !== "clearing" || !client) return next;
+        setError(null);
+        void client
+          .mediaClear()
+          .then((result) => setNotice(`已清除 ${result.removedCount} 个附件，释放 ${result.freedBytes} 字节`))
+          .catch((cause: unknown) => setError(cause instanceof Error ? cause.message : String(cause)))
+          .finally(() => {
+            setPhase("idle");
+            onSettled();
+          });
+        return next;
+      });
+    },
+    [client, onSettled],
+  );
+
+  return { phase, notice, error, onEvent };
+}

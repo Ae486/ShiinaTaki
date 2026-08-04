@@ -34,10 +34,9 @@ function viewportSize(): { width: number; height: number } {
 export interface OperationWheelProps {
   point: WheelPoint;
   onClose: () => void;
-  onOpenCostume: () => void;
 }
 
-export function OperationWheel({ point, onClose, onOpenCostume }: OperationWheelProps) {
+export function OperationWheel({ point, onClose }: OperationWheelProps) {
   const container = useRef<HTMLDivElement>(null);
   useWheelDismiss(container, onClose);
   const position = placeWheel(point, viewportSize());
@@ -64,7 +63,7 @@ export function OperationWheel({ point, onClose, onOpenCostume }: OperationWheel
           style={chipStyle(index, WHEEL_ITEMS.length)}
           onClick={() => {
             onClose();
-            item.run({ openCostume: onOpenCostume });
+            item.run();
           }}
           className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/95 px-3 py-1.5 text-xs text-slate-700 shadow-lg ring-1 ring-black/5 transition-colors hover:bg-rose-50 hover:text-rose-600"
         >

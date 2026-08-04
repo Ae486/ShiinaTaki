@@ -41,4 +41,19 @@ describe("createSummaryRepo (T5-R3 rolling summary record)", () => {
     expect(summaries.get("yui")).toBeNull();
     expect(summaries.get("taki")?.text).toBe("taki 的记录");
   });
+
+  it("getMeta reports the length and NEVER the text (the operator status read)", () => {
+    const summaries = repo();
+    summaries.upsert({ characterId: "taki", throughSeq: 42, text: "十个字的摘要内容" });
+
+    const meta = summaries.getMeta("taki");
+
+    expect(Object.keys(meta ?? {})).toEqual(["throughSeq", "textChars", "updatedAt"]);
+    expect(meta?.textChars).toBe(8);
+    expect(JSON.stringify(meta)).not.toContain("摘要");
+  });
+
+  it("getMeta returns null for a never-compacted character", () => {
+    expect(repo().getMeta("taki")).toBeNull();
+  });
 });

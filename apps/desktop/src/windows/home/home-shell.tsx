@@ -1,13 +1,16 @@
 /**
  * INPUT:  the page registry + the home store's current page.
- * OUTPUT: <HomeShell> — the two-pane home layout: left menu (one entry per registry row) + the current page's body.
+ * OUTPUT: <HomeShell> — the two-pane home layout: left menu (one entry per registry row) + the current page's body,
+ *         with the window's operator WS provided to every page through HomeClientContext.
  * POS:    ui/windows/home — the window root. Presentational shell only: pages own their data; the shell owns the
- *         nav switch and the one ToastHost (visual polish lands in the batch-5 style pass).
+ *         nav switch, the shared connection and the one ToastHost (visual polish lands in the batch-5 style pass).
  */
 
 import { ToastHost } from "@/components/toast/toast-host.js";
 import { useHomeStore } from "./home-store.ts";
 import { useHomeNavigateEvent } from "./use-home-navigate-event.ts";
+import { useHomeConnection } from "./use-home-connection.ts";
+import { HomeClientContext } from "./home-client-context.ts";
 import { HOME_PAGES, type PageId } from "./pages.ts";
 
 function MenuItem({ id, label, active }: { id: PageId; label: string; active: boolean }) {
@@ -27,21 +30,24 @@ function MenuItem({ id, label, active }: { id: PageId; label: string; active: bo
 
 export function HomeShell() {
   useHomeNavigateEvent();
+  const connection = useHomeConnection();
   const currentPage = useHomeStore((state) => state.currentPage);
   const page = HOME_PAGES.find((entry) => entry.id === currentPage) ?? HOME_PAGES[0];
   const PageBody = page.component;
 
   return (
-    <div className="flex h-full bg-slate-50">
-      <nav className="flex w-40 shrink-0 flex-col gap-1 border-r border-slate-200 bg-slate-100 p-2">
-        {HOME_PAGES.map((entry) => (
-          <MenuItem key={entry.id} id={entry.id} label={entry.label} active={entry.id === currentPage} />
-        ))}
-      </nav>
-      <main className="min-w-0 flex-1">
-        <PageBody />
-      </main>
-      <ToastHost />
-    </div>
+    <HomeClientContext.Provider value={connection}>
+      <div className="flex h-full bg-slate-50">
+        <nav className="flex w-40 shrink-0 flex-col gap-1 border-r border-slate-200 bg-slate-100 p-2">
+          {HOME_PAGES.map((entry) => (
+            <MenuItem key={entry.id} id={entry.id} label={entry.label} active={entry.id === currentPage} />
+          ))}
+        </nav>
+        <main className="min-w-0 flex-1">
+          <PageBody />
+        </main>
+        <ToastHost />
+      </div>
+    </HomeClientContext.Provider>
   );
 }

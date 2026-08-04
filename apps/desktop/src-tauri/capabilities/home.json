@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "home",
-  "description": "Home window: left menu + pages (chat today; settings/operations/costume land with batch 4). Talks to the Core over its own operator WS (browser WebSocket, web-platform file input); events only for home:navigate",
+  "description": "Home window: left menu + pages (chat / settings / operations / perception / costume). Talks to the Core over its own operator WS (browser WebSocket, web-platform file input); events only for home:navigate inbound and pet:costume-switch outbound",
   "windows": ["home"],
   "permissions": ["core:event:default"]
 }

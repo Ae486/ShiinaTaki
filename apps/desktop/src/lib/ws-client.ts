@@ -2,7 +2,8 @@
  * INPUT:  a WsTransport (browser WebSocket by default) + inbound JSON-RPC frames from the Core (parsed in ws-client-routes).
  * OUTPUT: createWsClient({transport}) -> WsClient: connect()/chat()/subscribeAvatar()/reportAvatar() +
  *         timelineHistory()/subscribeTimeline()/mediaGet() (chat page) + importCharacter()/listCharacters()/
- *         characterCostumes()/costumeResolution() (#18) + configList()/configSet()/subscribeConfig() + push handlers.
+ *         characterCostumes()/costumeResolution() (#18) + configList()/configSet()/subscribeConfig() +
+ *         memoryTidy()/memoryStatus()/mediaUsage()/mediaClear()/perception* (settings pages) + push handlers.
  * POS:    ui/lib — the Pet UI's operator transport to the Agent Core (mirrors apps/cli chat-client, browser WS). The
  *         composition root over ws-client-routes (inbound) and ws-client-methods (outbound). No React/Tauri imports.
  */
@@ -23,7 +24,14 @@ import type {
   ConfigSetParams,
   ConfigSetResult,
   ConnectParams,
+  MediaClearResult,
   MediaGetResult,
+  MediaUsageResult,
+  MemoryStatusResult,
+  MemoryTidyResult,
+  PerceptionCard,
+  PerceptionPauseSetParams,
+  PerceptionPauseState,
   TimelineEntry,
   TimelineHistoryParams,
   TimelineHistoryResult,
@@ -62,6 +70,20 @@ export interface WsClient {
   configSet(params: ConfigSetParams): Promise<ConfigSetResult>;
   /** Subscribes this socket to config.changed pushes (another operator surface edited a knob). */
   subscribeConfig(): Promise<void>;
+  /** Runs the memory tidy pass NOW and reports its per-class defect counts (operations page). */
+  memoryTidy(characterId: string): Promise<MemoryTidyResult>;
+  /** Reads the memory maintenance counters (window calibration / summary coverage / watermarks); never content. */
+  memoryStatus(characterId: string): Promise<MemoryStatusResult>;
+  /** Reads retained attachment + memory-text byte usage (the storage card). */
+  mediaUsage(): Promise<MediaUsageResult>;
+  /** Purges every retained attachment byte — destructive, so the page confirms before calling it. */
+  mediaClear(): Promise<MediaClearResult>;
+  /** Reads the Privacy Pause snapshot (a lapsed deadline self-resumes on this read). */
+  perceptionPauseGet(): Promise<PerceptionPauseState>;
+  /** Pauses (optionally until an epoch-ms deadline) or resumes ambient sampling; echoes the resulting state. */
+  perceptionPauseSet(params: PerceptionPauseSetParams): Promise<PerceptionPauseState>;
+  /** Reads the activity card: current + recent foreground stretches, sampling status, pause state. */
+  perceptionCard(): Promise<PerceptionCard>;
   /** Registers the fire-and-forget avatar command sink (core -> operator push). Replaces any prior handler. */
   onAvatarCommand(handler: (command: AvatarCommand) => void): void;
   /** Registers the optional live-timeline sink (shared with the chat page server-side). */

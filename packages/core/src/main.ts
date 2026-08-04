@@ -30,6 +30,7 @@ import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
 import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
 import { bootstrapCore } from "./boot/core-bootstrap.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
+import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
 import { createSummaryRepo } from "./db/summary-repo.ts";
 import { createTimelineRepo } from "./db/timeline-repo.ts";
 import { createWindowStateRepo } from "./db/window-state-repo.ts";
@@ -64,6 +65,7 @@ import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
 import { mediaUsageMethod } from "./server/methods/media-usage.ts";
 import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
+import { memoryStatusMethod } from "./server/methods/memory-status.ts";
 import { registerPerceptionMethods } from "./server/methods/perception-methods.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
@@ -85,7 +87,8 @@ const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
 const timelineRepo = createTimelineRepo(db);
 // R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
 // their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).
-const windowCalibrator = createWindowCalibrator({ repo: createWindowStateRepo(db), slot: "main", declared: contextConfig.contextTokens.main });
+const windowStateRepo = createWindowStateRepo(db);
+const windowCalibrator = createWindowCalibrator({ repo: windowStateRepo, slot: "main", declared: contextConfig.contextTokens.main });
 const timelineSubscriptions = createTimelineSubscriptions();
 const chatLog = logger.child({ mod: "chat" });
 // History replays historyRatio × the calibrated window; the remainder covers instructions + tools + the response.
@@ -345,6 +348,11 @@ registerPerceptionMethods(registry, perception);
 // Memory maintenance (T5 batch 4b): run the tidy pass on demand. Operator-only, NO Rust mirror; the write-count
 // trigger rides autoMemory internally — this surface exists for the settings panel/CLI (#26).
 registry.register(memoryTidyMethod(tidy));
+// The panel's operations page reads the maintenance counters (calibration / compaction / auto-write watermarks).
+// Counts only — the rolling summary's LENGTH crosses, never its text.
+registry.register(
+  memoryStatusMethod({ windowState: windowStateRepo, summaries: summaryRepo, autoState: createMemoryAutoRepo(db) }),
+);
 // Settings store (#26 batch 1): read every knob with its provenance, store operator values, push config.changed.
 // Operator-only, NO Rust mirror; secrets are reported as set/not-set and refused on write (invariant 5).
 registerConfigMethods(registry, { ...boot.config, logger });

@@ -7,6 +7,10 @@
 
 import type { ComponentType } from "react";
 import { ChatPage } from "./pages/chat/chat-page.tsx";
+import { SettingsPage } from "./pages/settings/settings-page.tsx";
+import { OperationsPage } from "./pages/operations/operations-page.tsx";
+import { PerceptionPage } from "./pages/perception/perception-page.tsx";
+import { CostumePage } from "./pages/costume/costume-page.tsx";
 
 export interface HomePage {
   id: string;
@@ -14,7 +18,13 @@ export interface HomePage {
   component: ComponentType;
 }
 
-export const HOME_PAGES = [{ id: "chat", label: "聊天", component: ChatPage }] as const satisfies readonly HomePage[];
+export const HOME_PAGES = [
+  { id: "chat", label: "聊天", component: ChatPage },
+  { id: "settings", label: "设置", component: SettingsPage },
+  { id: "operations", label: "运维", component: OperationsPage },
+  { id: "perception", label: "感知", component: PerceptionPage },
+  { id: "costume", label: "换装", component: CostumePage },
+] as const satisfies readonly HomePage[];
 
 /** The registered ids as a closed union — an unregistered page id cannot be navigated to at the type level. */
 export type PageId = (typeof HOME_PAGES)[number]["id"];

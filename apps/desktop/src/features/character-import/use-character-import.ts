@@ -1,14 +1,15 @@
 /**
- * INPUT:  a model archive (.zip/.zst) chosen from a hidden <input type="file">; the operator WsClient (connection store).
- * OUTPUT: useCharacterImport() -> { isImporting, result, warnings, error, importFile }; importFile reads bytes → base64
- *         → character.import and surfaces the returned costumes + warnings (#18).
- * POS:    ui/features/character-import — the ONLY import touchpoint between the panel UI and ws-client (hook-guidelines).
- *         Reuses #17's file-pick→base64 seam (web-platform APIs; no Tauri plugin). Components never call ws-client.
+ * INPUT:  a model archive (.zip/.zst) chosen from a hidden <input type="file">; the caller's operator WsClient.
+ * OUTPUT: useCharacterImport(client) -> { isImporting, result, warnings, error, importFile }; importFile reads bytes →
+ *         base64 → character.import and surfaces the returned costumes + warnings (#18).
+ * POS:    ui/features/character-import — the ONLY import touchpoint between a costume surface and ws-client
+ *         (hook-guidelines). The client is passed in because the importer now lives in the home window, which holds its
+ *         own socket. Reuses #17's file-pick→base64 seam (web-platform APIs; no Tauri plugin).
  */
 
 import { useCallback, useState } from "react";
 import type { CharacterImportResult, CharacterSource } from "@taki/shared";
-import { useConnectionStore } from "@/stores/connection-store.js";
+import type { WsClient } from "@/lib/ws-client.js";
 
 // The Core path handles zip + zst (a folder is delivered as a zip of the folder). Anything else is an unsupported pick.
 function sourceKindFor(fileName: string): CharacterSource | null {
@@ -37,8 +38,7 @@ export interface CharacterImport {
   importFile: (file: File) => Promise<void>;
 }
 
-export function useCharacterImport(): CharacterImport {
-  const client = useConnectionStore((s) => s.client);
+export function useCharacterImport(client: WsClient | null): CharacterImport {
   const [isImporting, setImporting] = useState(false);
   const [result, setResult] = useState<CharacterImportResult | null>(null);
   const [error, setError] = useState<string | null>(null);

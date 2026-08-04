@@ -11,6 +11,11 @@ import { pageFromSearch } from "./boot-page.ts";
 import { useHomeStore } from "./home-store.ts";
 
 describe("home page registry", () => {
+  it("registers the five v1 pages in menu order, chat first", () => {
+    expect(HOME_PAGES.map((page) => page.id)).toEqual(["chat", "settings", "operations", "perception", "costume"]);
+    expect(DEFAULT_PAGE_ID).toBe("chat");
+  });
+
   it("exposes ordered rows with unique ids, labels and components", () => {
     const ids = HOME_PAGES.map((page) => page.id);
     expect(ids.length).toBe(new Set(ids).size);

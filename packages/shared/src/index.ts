@@ -94,11 +94,25 @@ export type {
 
 export {
   MEMORY_METHODS,
+  MemoryAutoStatusSchema,
+  MemoryStatusParamsSchema,
+  MemoryStatusResultSchema,
+  MemorySummaryStatusSchema,
   MemoryTidyDefectsSchema,
   MemoryTidyParamsSchema,
   MemoryTidyResultSchema,
+  MemoryWindowSlotSchema,
 } from "./memory-schema.ts";
-export type { MemoryTidyDefects, MemoryTidyParams, MemoryTidyResult } from "./memory-schema.ts";
+export type {
+  MemoryAutoStatus,
+  MemoryStatusParams,
+  MemoryStatusResult,
+  MemorySummaryStatus,
+  MemoryTidyDefects,
+  MemoryTidyParams,
+  MemoryTidyResult,
+  MemoryWindowSlot,
+} from "./memory-schema.ts";
 
 export {
   CONFIG_METHODS,

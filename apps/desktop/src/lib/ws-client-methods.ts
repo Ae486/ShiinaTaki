@@ -1,6 +1,7 @@
 /**
  * INPUT:  a JSON-RPC client bound to the operator socket + call params from the UI hooks.
- * OUTPUT: handshake() (connect outcome) + requestMethods() — the plain request/response half of the WsClient.
+ * OUTPUT: handshake() (connect outcome) + requestMethods() — the plain request/response half of the WsClient
+ *         (chat/timeline/media/character/config/memory/perception).
  * POS:    ui/lib — the outbound half of ws-client (no turn/stream state lives here). Every result is parsed through a
  *         @taki/shared schema: the zod boundary holds for every inbound frame.
  */
@@ -23,7 +24,15 @@ import {
   ConnectResultSchema,
   ErrorCodeSchema,
   MEDIA_METHODS,
+  MEMORY_METHODS,
+  MediaClearResultSchema,
   MediaGetResultSchema,
+  MediaUsageResultSchema,
+  MemoryStatusResultSchema,
+  MemoryTidyResultSchema,
+  PERCEPTION_METHODS,
+  PerceptionCardSchema,
+  PerceptionPauseStateSchema,
   TIMELINE_METHODS,
   TimelineHistoryResultSchema,
   type AvatarReportParams,
@@ -31,6 +40,7 @@ import {
   type ConfigSetParams,
   type ConnectParams,
   type ErrorCode,
+  type PerceptionPauseSetParams,
   type TimelineHistoryParams,
 } from "@taki/shared";
 
@@ -84,5 +94,16 @@ export function requestMethods(rpc: JSONRPCServerAndClient) {
       ConfigSetResultSchema.parse(await rpc.request(CONFIG_METHODS.set, params)),
     subscribeConfig: async () =>
       void ConfigSubscribeResultSchema.parse(await rpc.request(CONFIG_METHODS.subscribe, {})),
+    memoryTidy: async (characterId: string) =>
+      MemoryTidyResultSchema.parse(await rpc.request(MEMORY_METHODS.tidy, { characterId })),
+    memoryStatus: async (characterId: string) =>
+      MemoryStatusResultSchema.parse(await rpc.request(MEMORY_METHODS.status, { characterId })),
+    mediaUsage: async () => MediaUsageResultSchema.parse(await rpc.request(MEDIA_METHODS.usage, {})),
+    mediaClear: async () => MediaClearResultSchema.parse(await rpc.request(MEDIA_METHODS.clear, {})),
+    perceptionPauseGet: async () =>
+      PerceptionPauseStateSchema.parse(await rpc.request(PERCEPTION_METHODS.pauseGet, {})),
+    perceptionPauseSet: async (params: PerceptionPauseSetParams) =>
+      PerceptionPauseStateSchema.parse(await rpc.request(PERCEPTION_METHODS.pauseSet, params)),
+    perceptionCard: async () => PerceptionCardSchema.parse(await rpc.request(PERCEPTION_METHODS.card, {})),
   };
 }
