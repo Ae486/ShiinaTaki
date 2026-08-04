@@ -5,6 +5,7 @@
  *         shape or ordering client-side (the core's registry is the single source).
  */
 
+import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { useConfig } from "./use-config.ts";
 import { KnobField } from "./knob-field.tsx";
 
@@ -12,18 +13,24 @@ export function SettingsPage() {
   const { entries, error, notices, save } = useConfig();
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <header className="border-b border-slate-200 bg-white px-4 py-2.5">
-        <h1 className="text-sm font-semibold text-slate-700">设置</h1>
-        <p className="text-[11px] text-slate-500">值优先级：环境变量 &gt; 面板存储 &gt; 内置默认；每项都注明生效方式。</p>
-      </header>
-      {error && <p className="bg-rose-50 px-4 py-2 text-xs text-rose-700">读取配置失败：{error}</p>}
-      <div className="min-h-0 flex-1 overflow-y-auto bg-white">
-        {entries.length === 0 && !error && <p className="px-4 py-6 text-xs text-slate-400">载入中…</p>}
-        {entries.map((entry) => (
-          <KnobField key={entry.key} entry={entry} notice={notices[entry.key]} onSave={(key, value) => void save(key, value)} />
-        ))}
-      </div>
-    </div>
+    <>
+      <PageHeader title="设置" hint="值优先级：环境变量 > 面板存储 > 内置默认；每项都注明生效方式。" />
+      <PageBody>
+        {error && <PageAlert>读取配置失败：{error}</PageAlert>}
+        {entries.length === 0 && !error && <p className="text-xs text-slate-400">载入中…</p>}
+        {entries.length > 0 && (
+          <div className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            {entries.map((entry) => (
+              <KnobField
+                key={entry.key}
+                entry={entry}
+                notice={notices[entry.key]}
+                onSave={(key, value) => void save(key, value)}
+              />
+            ))}
+          </div>
+        )}
+      </PageBody>
+    </>
   );
 }

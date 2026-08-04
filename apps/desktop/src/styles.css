@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+/* The wheel's one-shot appear (no JS timer — the overlay must stay at ~0% idle CPU). */
+@theme {
+  --animate-wheel-appear: wheel-appear 120ms ease-out;
+
+  @keyframes wheel-appear {
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+  }
+}

@@ -1,8 +1,8 @@
 /**
  * INPUT:  the wheel rendered to static markup at a summon point (no DOM: static rendering only).
- * OUTPUT: assertions that every registry row renders as a labelled control, that the container carries the REAL
- *         keep-interactive attribute the click-through toggle honours, and that such an element keeps the window
- *         interactive (shouldIgnoreCursor === false) while the wheel is open over transparent pixels.
+ * OUTPUT: assertions that every registry row renders as a labelled control WITH its glyph, that the container carries
+ *         the REAL keep-interactive attribute the click-through toggle honours, and that such an element keeps the
+ *         window interactive (shouldIgnoreCursor === false) while the wheel is open over transparent pixels.
  * POS:    unit test for features/operation-wheel/operation-wheel (node-safe via renderToStaticMarkup). Exempt from
  *         size caps.
  */
@@ -28,6 +28,10 @@ describe("OperationWheel", () => {
   it("renders one control per registry row", () => {
     const html = markup();
     for (const item of WHEEL_ITEMS) expect(html).toContain(item.label);
+  });
+
+  it("draws every row's registry glyph next to its label", () => {
+    expect(markup().match(/<svg/g) ?? []).toHaveLength(WHEEL_ITEMS.length);
   });
 
   it("carries the keep-interactive attribute the click-through poll hit-tests for", () => {

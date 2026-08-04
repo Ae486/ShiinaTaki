@@ -7,6 +7,7 @@
 
 import { useEffect, useState } from "react";
 import type { ConfigEntry, ConfigValue } from "@taki/shared";
+import { Badge, type BadgeTone } from "../../badge.tsx";
 import { editorFor, parseKnobInput } from "./knob-editor.ts";
 import { KnobInput } from "./knob-input.tsx";
 
@@ -16,22 +17,14 @@ export interface KnobFieldProps {
   onSave: (key: string, value: ConfigValue | null) => void;
 }
 
-function Badges({ entry }: { entry: ConfigEntry }) {
-  const badges: string[] = [];
-  if (entry.envLocked) badges.push("env 锁定");
-  if (entry.apply === "restart") badges.push("重启生效");
-  if (entry.apply === "env-only") badges.push("仅环境变量");
-  if (entry.secret) badges.push("密钥");
-  if (entry.stored) badges.push("已自定义");
-  return (
-    <span className="flex flex-wrap gap-1">
-      {badges.map((badge) => (
-        <span key={badge} className="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] text-slate-500">
-          {badge}
-        </span>
-      ))}
-    </span>
-  );
+function badgesFor(entry: ConfigEntry): Array<{ label: string; tone: BadgeTone }> {
+  const badges: Array<{ label: string; tone: BadgeTone }> = [];
+  if (entry.envLocked) badges.push({ label: "env 锁定", tone: "neutral" });
+  if (entry.apply === "restart") badges.push({ label: "重启生效", tone: "warn" });
+  if (entry.apply === "env-only") badges.push({ label: "仅环境变量", tone: "neutral" });
+  if (entry.secret) badges.push({ label: "密钥", tone: "neutral" });
+  if (entry.stored) badges.push({ label: "已自定义", tone: "ok" });
+  return badges;
 }
 
 export function KnobField({ entry, notice, onSave }: KnobFieldProps) {
@@ -49,10 +42,16 @@ export function KnobField({ entry, notice, onSave }: KnobFieldProps) {
   };
 
   return (
-    <div className="flex flex-col gap-1 border-b border-slate-100 px-4 py-3">
+    <div className="flex flex-col gap-1.5 px-5 py-3.5 transition-colors hover:bg-slate-50/60">
       <div className="flex items-baseline justify-between gap-3">
-        <code className="text-xs font-medium text-slate-700">{entry.key}</code>
-        <Badges entry={entry} />
+        <code className="text-xs font-semibold text-slate-700">{entry.key}</code>
+        <span className="flex flex-wrap justify-end gap-1">
+          {badgesFor(entry).map((badge) => (
+            <Badge key={badge.label} tone={badge.tone}>
+              {badge.label}
+            </Badge>
+          ))}
+        </span>
       </div>
       <p className="text-[11px] leading-snug text-slate-500">{entry.description}</p>
       <KnobInput entry={entry} editor={editor} draft={draft} onDraft={setDraft} onCommit={commit} />

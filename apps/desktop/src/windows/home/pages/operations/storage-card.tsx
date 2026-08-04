@@ -6,6 +6,7 @@
  */
 
 import type { MediaUsageResult } from "@taki/shared";
+import { ActionButton } from "../../action-button.tsx";
 import { LabeledRows, PageCard } from "../../page-card.tsx";
 import { formatBytes } from "./operations-state.ts";
 import type { MediaClearControl } from "./use-media-clear.ts";
@@ -23,34 +24,23 @@ export function StorageCard({ usage, clear }: { usage: MediaUsageResult | null; 
       ) : (
         <p className="text-xs text-slate-400">载入中…</p>
       )}
-      <div className="mt-3 flex items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         {clear.phase === "idle" ? (
-          <button
-            type="button"
-            onClick={() => clear.onEvent("request")}
-            className="rounded-md border border-rose-200 px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50"
-          >
+          <ActionButton tone="danger-soft" onClick={() => clear.onEvent("request")}>
             清除全部附件字节
-          </button>
+          </ActionButton>
         ) : (
           <>
-            <span className="text-xs text-rose-600">确认清除？此操作不可撤销（记忆中的图片描述会保留）。</span>
-            <button
-              type="button"
-              onClick={() => clear.onEvent("confirm")}
-              disabled={clear.phase === "clearing"}
-              className="rounded-md bg-rose-600 px-3 py-1.5 text-xs text-white disabled:opacity-40"
-            >
+            <span className="text-xs text-rose-700">确认清除？此操作不可撤销（记忆中的图片描述会保留）。</span>
+            <ActionButton tone="danger" onClick={() => clear.onEvent("confirm")} disabled={clear.phase === "clearing"}>
               {clear.phase === "clearing" ? "清除中…" : "确认清除"}
-            </button>
-            <button type="button" onClick={() => clear.onEvent("cancel")} className="px-2 text-xs text-slate-500">
-              取消
-            </button>
+            </ActionButton>
+            <ActionButton onClick={() => clear.onEvent("cancel")}>取消</ActionButton>
           </>
         )}
       </div>
-      {clear.notice && <p className="mt-1 text-xs text-emerald-700">{clear.notice}</p>}
-      {clear.error && <p className="mt-1 text-xs text-rose-600">{clear.error}</p>}
+      {clear.notice && <p className="mt-2 text-xs text-emerald-700">{clear.notice}</p>}
+      {clear.error && <p className="mt-2 text-xs text-rose-600">{clear.error}</p>}
     </PageCard>
   );
 }

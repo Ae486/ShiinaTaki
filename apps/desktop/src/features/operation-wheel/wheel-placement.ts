@@ -16,7 +16,7 @@ export interface WheelWindowSize {
 }
 
 /** Box edge of the whole wheel (the radial ring plus its chips) — the component's layout box is exactly this square. */
-export const WHEEL_SIZE_PX = 176;
+export const WHEEL_SIZE_PX = 208;
 
 function clamp(value: number, max: number): number {
   return Math.min(Math.max(value, 0), Math.max(max, 0));

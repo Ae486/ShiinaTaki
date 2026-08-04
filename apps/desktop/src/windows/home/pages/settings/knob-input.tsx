@@ -7,9 +7,12 @@
  */
 
 import type { ConfigEntry } from "@taki/shared";
+import { Badge } from "../../badge.tsx";
 import type { KnobEditor } from "./knob-editor.ts";
 
-const FIELD_CLASS = "w-56 rounded border border-slate-200 px-2 py-1 text-xs disabled:bg-slate-50 disabled:text-slate-400";
+const FIELD_CLASS =
+  "w-56 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none transition" +
+  " focus:border-rose-300 focus:ring-2 focus:ring-rose-100 disabled:bg-slate-50 disabled:text-slate-400";
 
 export interface KnobInputProps {
   entry: ConfigEntry;
@@ -19,16 +22,32 @@ export interface KnobInputProps {
   onCommit: (raw: string | boolean) => void;
 }
 
+function BooleanField({ on, disabled, onCommit }: { on: boolean; disabled: boolean; onCommit: (raw: boolean) => void }) {
+  return (
+    <label className="flex w-fit items-center gap-2 text-xs text-slate-600">
+      <input
+        type="checkbox"
+        checked={on}
+        disabled={disabled}
+        onChange={(e) => onCommit(e.target.checked)}
+        className="h-3.5 w-3.5 accent-rose-500"
+      />
+      {on ? "开启" : "关闭"}
+    </label>
+  );
+}
+
 export function KnobInput({ entry, editor, draft, onDraft, onCommit }: KnobInputProps) {
-  if (editor.kind === "secret") return <span className="text-xs text-slate-500">{editor.display}</span>;
+  if (editor.kind === "secret") {
+    return (
+      <span className="flex">
+        <Badge tone={entry.secretSet ? "ok" : "muted"}>{editor.display}</Badge>
+      </span>
+    );
+  }
 
   if (editor.kind === "boolean") {
-    return (
-      <label className="flex items-center gap-2 text-xs text-slate-600">
-        <input type="checkbox" checked={draft === "true"} disabled={editor.disabled} onChange={(e) => onCommit(e.target.checked)} />
-        {draft === "true" ? "开启" : "关闭"}
-      </label>
-    );
+    return <BooleanField on={draft === "true"} disabled={editor.disabled} onCommit={onCommit} />;
   }
 
   if (editor.kind === "enum") {

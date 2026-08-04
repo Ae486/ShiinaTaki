@@ -1,11 +1,17 @@
 /**
- * INPUT:  the page components of the home window.
+ * INPUT:  the page components of the home window + their menu glyphs.
  * OUTPUT: HOME_PAGES (ordered registry rows) + PageId + DEFAULT_PAGE_ID + isPageId().
  * POS:    ui/windows/home — THE page registry (invariant 7): adding a page is one row here, and the left menu, the
  *         page host and every openHome() caller pick it up from the derived PageId union. No other page list exists.
  */
 
 import type { ComponentType } from "react";
+import type { IconComponent } from "@/lib/icons/glyph.js";
+import { ChatIcon } from "@/lib/icons/chat-icon.js";
+import { SettingsIcon } from "@/lib/icons/settings-icon.js";
+import { OperationsIcon } from "@/lib/icons/operations-icon.js";
+import { PerceptionIcon } from "@/lib/icons/perception-icon.js";
+import { CostumeIcon } from "@/lib/icons/costume-icon.js";
 import { ChatPage } from "./pages/chat/chat-page.tsx";
 import { SettingsPage } from "./pages/settings/settings-page.tsx";
 import { OperationsPage } from "./pages/operations/operations-page.tsx";
@@ -15,15 +21,16 @@ import { CostumePage } from "./pages/costume/costume-page.tsx";
 export interface HomePage {
   id: string;
   label: string;
+  icon: IconComponent;
   component: ComponentType;
 }
 
 export const HOME_PAGES = [
-  { id: "chat", label: "聊天", component: ChatPage },
-  { id: "settings", label: "设置", component: SettingsPage },
-  { id: "operations", label: "运维", component: OperationsPage },
-  { id: "perception", label: "感知", component: PerceptionPage },
-  { id: "costume", label: "换装", component: CostumePage },
+  { id: "chat", label: "聊天", icon: ChatIcon, component: ChatPage },
+  { id: "settings", label: "设置", icon: SettingsIcon, component: SettingsPage },
+  { id: "operations", label: "运维", icon: OperationsIcon, component: OperationsPage },
+  { id: "perception", label: "感知", icon: PerceptionIcon, component: PerceptionPage },
+  { id: "costume", label: "换装", icon: CostumeIcon, component: CostumePage },
 ] as const satisfies readonly HomePage[];
 
 /** The registered ids as a closed union — an unregistered page id cannot be navigated to at the type level. */
