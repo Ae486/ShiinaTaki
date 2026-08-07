@@ -86,11 +86,27 @@ describe("createWindowCalibrator (R1 tier 2 + R2 storage)", () => {
     expect(second.effectiveWindow()).toBe(first.effectiveWindow());
   });
 
-  it("a lowered declaration clamps a larger persisted window down (config is the operator's authority)", () => {
+  it("persists a lowered declaration so runtime and operator status agree after restart", () => {
     const repo = makeRepo();
-    repo.set("main", { effectiveWindow: 32768, factor: 1 });
-    const calibrator = createWindowCalibrator({ repo, slot: "main", declared: 8192 });
-    expect(calibrator.effectiveWindow()).toBe(8192);
+    repo.set("main", { effectiveWindow: 131072, factor: 1 });
+
+    const calibrator = createWindowCalibrator({ repo, slot: "main", declared: 131000 });
+
+    expect(calibrator.effectiveWindow()).toBe(131000);
+    expect(repo.get("main")).toEqual({ effectiveWindow: 131000, factor: 1 });
+    expect(repo.list()).toEqual([
+      expect.objectContaining({ slot: "main", effectiveWindow: 131000, factor: 1 }),
+    ]);
+  });
+
+  it("preserves the learned correction factor when persisting a lowered declaration", () => {
+    const repo = makeRepo();
+    repo.set("main", { effectiveWindow: 131072, factor: 1.25 });
+
+    const calibrator = createWindowCalibrator({ repo, slot: "main", declared: 131000 });
+
+    expect(calibrator.effectiveWindow()).toBe(Math.floor(131000 / 1.25));
+    expect(repo.get("main")).toEqual({ effectiveWindow: 131000, factor: 1.25 });
   });
 
   it("keeps slots independent through the repo key", () => {

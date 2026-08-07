@@ -43,6 +43,9 @@ export function createWindowCalibrator(deps: WindowCalibratorDeps): WindowCalibr
   // a persisted overflow-shrink below it survives the restart (that is the point of persisting, R2).
   let effective = persisted ? Math.min(persisted.effectiveWindow, declared) : declared;
   let factor = persisted ? clampFactor(persisted.factor) : 1;
+  if (persisted && persisted.effectiveWindow > declared) {
+    repo.set(slot, { effectiveWindow: effective, factor });
+  }
 
   return {
     effectiveWindow: () => Math.max(1, Math.floor(effective / factor)),
