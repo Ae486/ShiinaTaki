@@ -1,1 +1,11 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/config-store.md","reason":"Check the database, resolver, writer, protocol, secrecy, refusal, and apply-state contracts as one flow."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Check migration and repository behavior against the Core single-writer database rules."}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Check operator authorization and disconnect cleanup for request/push methods."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Backend size, typing, test, and quality gates."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Check window topology, page/wheel registries, capability boundaries, and costume result lifecycle."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Check UI ownership and the privacy allow-list for persistent SWR snapshots."}
+{"file":".trellis/spec/frontend/packaged-build.md","reason":"Check runtime window creation and per-window Tauri ACL behavior beyond compile-time validation."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Frontend performance, size, test, and disposable-client quality rules."}
+{"file":".trellis/tasks/08-03-settings-panel/research/rs-panel-scoping.md","reason":"Acceptance evidence for the original task-wide boundaries and active wheel-trigger degrade."}
+{"file":".trellis/tasks/08-03-settings-panel/research/rs-costume-defect.md","reason":"Evidence for batch 6 regressions, recovery semantics, and intentionally deferred failure modes."}
+{"file":".trellis/tasks/08-03-settings-panel/research/rs-mcp-and-llm-config.md","reason":"Evidence for shipped versus deferred MCP/model/settings surfaces."}

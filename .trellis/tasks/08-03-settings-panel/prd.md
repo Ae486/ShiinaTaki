@@ -97,10 +97,11 @@ RESOLVED 2026-08-03 — full facts in `research/rs-panel-scoping.md`; verdicts:
 - **Legacy `main` window** (pairing panel, broadest capability file) sits confusingly beside home —
   NOT touched this task; consolidation registered as a deferred decision at close.
 
-## Batch plan (proposed 2026-08-03, owner ratification pending)
+## Batch plan (owner-ratified 2026-08-03; executed as six batches)
 
 1. **Config store (core-only, headless-testable)**: migration (config table) + config-repo + knob
-   metadata registry (30 knobs: name/zod/default/restart-vs-live/secret) + env-seed & env-locked
+   metadata registry (the initial inventory found 30; implementation reconciled the real loaders to 34) + sparse
+   `env > stored > default` resolution (batch-1 D1 refined the proposed seed pass) + env-locked
    precedence + `@taki/shared` schemas + server methods config.list/get/set + config.changed push.
    Verification bonus: the new CLI `--call config.list` exercises it end to end.
 2. **Home window + chat migration (frontend)**: home entry + capability + shell (left menu registry,
@@ -115,3 +116,6 @@ RESOLVED 2026-08-03 — full facts in `research/rs-panel-scoping.md`; verdicts:
    entry (elastic — defer LAST with trigger if schedule demands).
 5. **Visual pass + close**: BANDORI-referenced layout/style polish (clean-room), placeholder icons
    (clean-licensed), manual checks, docs, deferred registrations.
+6. **Owner-reported defect follow-up**: restore result-bearing costume switching (#74/#75), add cancellation and a
+   home-side deadline, preserve last-good lists, and introduce privacy-classified SWR page snapshots. Register the
+   pre-existing reconnect and pet-side deadline gaps rather than hiding them in the UI fix.

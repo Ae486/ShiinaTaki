@@ -1,1 +1,11 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/index.md","reason":"Backend invariants and the index for the Core/shared parts of the settings plane."}
+{"file":".trellis/spec/backend/config-store.md","reason":"Executable contract for the sparse config table, precedence, config.* methods, masking, and refusals."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Core-only SQLite writer and migration/repository rules used by the config store."}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Operator-only WS method and subscriber fan-out conventions used by config.changed and memory.status."}
+{"file":".trellis/spec/frontend/index.md","reason":"Pet/home window boundaries, disposable-client rule, and frontend implementation entrypoint."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Current home topology, page/wheel registries, cross-window costume lifecycle, and presentation contract."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Zustand ownership and guarded stale-while-revalidate cache contract for home pages."}
+{"file":".trellis/spec/frontend/packaged-build.md","reason":"Per-window ACL and packaged WebView2 failure modes relevant to the new runtime-created home window."}
+{"file":".trellis/tasks/08-03-settings-panel/research/rs-panel-scoping.md","reason":"Task-wide code map and scoping evidence for window topology, wheel input, config knobs, and WS seams."}
+{"file":".trellis/tasks/08-03-settings-panel/research/rs-costume-defect.md","reason":"Batch 6 root-cause chain, recovery boundary, cache/privacy inventory, and D59/D61 evidence."}
+{"file":".trellis/tasks/08-03-settings-panel/research/rs-mcp-and-llm-config.md","reason":"MCP/config capability inventory and the boundary between shipped pages and deferred integration work."}

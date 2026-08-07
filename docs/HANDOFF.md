@@ -2,7 +2,7 @@
 
 **You are the incoming session. Read this document fully, then the required docs in §2, then act as the Leader (主脑) of a trellis master/worker development flow.** This file is your bootstrap program — what exists, what to read, how to behave, how to drive implementation.
 
-> **Updated 2026-08-02 (fourth pass, T5 close)**. M1–M4 shipped and pushed. M5 is **mid-flight with T1/T2/T3a/T3b + time-awareness + T5 DONE** (see §1). **T5 (memory redesign + context management) is COMPLETE and archived** — 7 batches, all owner-approved and committed; `t5-decisions.md` (R0–R22) served as the binding contract and is now historical record. Next work, owner-sequenced: the settings-panel task (owner plan B, 2026-08-02 — see §4) and **T4 proactivity** (`t4-decisions.md` R1–R12 ready). Everything below is verified fact, not plan.
+> **Updated 2026-08-07 (fifth pass, settings-panel close)**. M1–M4 shipped and pushed. M5 has **T1/T2/T3a/T3b + time-awareness + T5 + the settings-panel task DONE** (see §1). The owner-approved next Trellis task is `mcp-tool-schema-compatibility`: provider-neutral normalization, validation, and per-tool isolation for discovered MCP schemas, required before D60's native web-search work. T4 remains design-ready (`t4-decisions.md` R1–R12); no ordering beyond the named next task and its before-D60 constraint is implied. Everything below distinguishes verified fact from plan.
 
 ---
 
@@ -53,17 +53,18 @@ Three trellis tasks (archived under `.trellis/tasks/archive/2026-07/`) + a confi
 ### M4 — Pet UI & Live2D (6/6 closed)
 Renderer locked by spike (#13: `untitled-pixi-live2d-engine` + pixi 8); transparent always-on pet overlay with render governor + drag (#14); element-level click-through (#15); bubble + LLM-driven avatar — expression/motion tools + reported vocabulary, gaze/click reactions (#16); full chat window — streaming timeline, default-safe markdown, image attachments + VLM describe, abort entry, floating toasts, cancel-before-reply retract (#17); generic character import (Cubism 2/3 + `.zst` clean-room) + costume switching with degrade-and-badge availability + last-costume persistence (#18). Four packaged B-test rounds hardened the packaged-only defect classes (CSP, per-window ACL, WebView2 quirks, boot races) → `.trellis/spec/frontend/packaged-build.md`. See `docs/devlog/m4.md`.
 
-### M5 — mid-flight (T1/T2/T3a/T3b + time-awareness + T5 DONE; next = settings-panel task + T4, then T6)
+### M5 — mid-flight (T1/T2/T3a/T3b + time-awareness + T5 + settings-panel DONE)
 - The blueprint (`devlog/m5.md`, signed off) remains the plan of record; the task table's T4/T5 ORDER was swapped by owner ruling 2026-07-27 (T5 first). Do not re-litigate settled rulings.
 - **T1 avatar presentation** — DONE, archived (`.trellis/tasks/archive/2026-07/`). Same-step expression/motion discipline (1c), costume-change notice (1f), presentation-tail stop.
 - **T2 governance** — DONE, archived. Permission Level projection (strict/standard/relaxed over per-cell postures), `describePrompt` seam (T2b §3.6: caller focus APPENDED to base guardrails), approval etiquette.
 - **T3a perception activity layer** — DONE, archived. Foreground-window capability (Rust) → activity sampler → coalescing `ActivityState` → fenced activity block via `instructionsExtra`. The A1 minimal fence (`agents/untrusted-fence.ts`) ships here.
 - **Time awareness** — DONE, archived (e10adec). Day-date line early + current-time line last in `composeInstructions` (stable-early/volatile-late), `get_current_time` tool, code-computed memory ages.
-- **T3b perception privacy** — DONE (commit 0133874, task dir committed, NOT yet archived — see §4). `packages/core/src/perception/`: ambient screenshot sampling (own `screenshot-ambient` cell, DEFAULT OFF, silent off-state), TWO privacy layers (deterministic transmission-blocking: sensitive-skip + `seal()` + pre-capture fresh foreground screen; semantic retention-blocking: `SENSITIVE_SCREEN` VLM verdict, fail-closed), PII scrub (scrub-then-fence at the sense seam), Privacy Pause (DB-persisted, single production writer RED-proved), frame retention GC, operator-only `perception.*` WS methods, D44 closed on the tool path. Manual checks 76–83 owner-verified 2026-07-27 (79 deferred to #26, 83 ongoing material collection).
+- **T3b perception privacy** — DONE, archived (`.trellis/tasks/archive/2026-07/07-21-perception-privacy`, commit 0133874). `packages/core/src/perception/`: ambient screenshot sampling (own `screenshot-ambient` cell, DEFAULT OFF, silent off-state), TWO privacy layers (deterministic transmission-blocking: sensitive-skip + `seal()` + pre-capture fresh foreground screen; semantic retention-blocking: `SENSITIVE_SCREEN` VLM verdict, fail-closed), PII scrub (scrub-then-fence at the sense seam), Privacy Pause (DB-persisted, single production writer RED-proved), frame retention GC, operator-only `perception.*` WS methods, D44 closed on the tool path. Manual checks 76–83 were owner-reviewed; #79's restart persistence is now verified, while its real-time `until` expiry path remains manually open.
 - **Prompt guidance pass** — DONE (commit 9f41646). BASE_SYSTEM_PROMPT teaches the fence contract, the two time lines, anti-recitation; behavior norms in `prompt/system/assistant-layer.md`.
 - **T5 memory redesign + context management** — DONE, archived (`.trellis/tasks/archive/2026-08/07-28-memory-context`), 7 batches each committed as a feat(core)+docs(trellis) pair (last: b944263/c925e59). What shipped: (1) three-tier memory — user-authored identity card (read-only to the agent, wins conflicts) / tidy-maintained blocks (user-model, memory-index) / searchable rows behind a write gate (R15 behaviour-change test, restricted auto writer, R9 dedupe→reinforce, R10 first-person voice, origin fencing); (2) CJK retrieval — unicode61 + `Intl.Segmenter` search_terms column (D53 seam), re-derived bm25 weights, disclosure as a recall channel not an AND gate; (3) R6 removal — no per-turn retrieved block, pull via `memory_search` only, memory prompt procedures (R12/R16–R19); (4) maintenance — model-led tidy pass, retention sweeper, Utility Slot (background LLM calls routable to a cheap model via `TAKI_UTILITY_*`); (5) replay view (ADR 0008) — volatile context in a `<turn-context>` in-flight tail (system prompt day-stable), token-measured window (declared → EMA-calibrated by real usage → estimator fallback; overflow self-heal, migration 011), conversation compaction (rolling per-character summary, migration 012, external async compactor on the utility slot, retire-all-but-newest-40, NO summary truncation, date-anchored summary prompt). Detail: notes.md closure blocks in the archived task dir; manual checks 84–95 queued for owner; research banks rd-prompt-philosophy.md + re-compaction-prompts.md feed T4.
+- **Settings panel / home surface** — DONE, archived at `.trellis/tasks/archive/2026-08/08-03-settings-panel` after six batches. Shipped: Core-owned sparse config store (migration 013, 34 registry knobs, `env > stored > default`, operator-only `config.*`, secret presence only); runtime-created single-instance `home` window with registry-driven pages and the former chat window migrated into it; model-area right-click operation wheel and left-button-only pet reactions; settings/operations/perception/costume pages; `memory.status`; the existing attachment `media.usage/clear` surface (D46's on-demand screenshot debt remains open); result-bearing costume switching with Cancel/45s recovery; guarded SWR snapshots; and the clean-room BANDORI-referenced visual pass. The owner accepted manual #74/#75. Closeout fix `6e6f263` writes a lowered declared context window back to calibration state so `memory.status` matches settings after restart. D38/D46/D54 remain intentionally open; D58-B is an owner-development deferral with a hard pre-non-owner gate; D59/D61 track WS/recovery debt; D62 tracks the legacy `main` pairing window.
 - **Research banks (committed, e5a0c49)**: `t4-decisions.md` (R1–R12, T4 立项-ready), 4 T4 research docs, **`t5-decisions.md` (R0–R22, BINDING for T5)**, `t5-context-management-survey.md`, `t5-memory-systems-survey.md` (§11 covers promotion/archived-tier/write-restraint + the Nocturne system prompt read in full). Earlier banks: `m5-proactivity-survey.md`, `hermes-memory-analysis.md`. Local references: `references/hermes-agent-main` (MIT), `references/nocturne_memory-main` (MIT — its `docs/system_prompt_en.md` is the closest prior art for T5's R12 prompt; clean-room only).
-- **Deferred-decisions register**: D44 CLOSED; D47 (memory-path fence → T5/A1), D48 (residual one-round-trip blind window), D49/D50 (audit volume / dwell fallback — unruled tuning), OPEN; D51 DONE. T5 also owns: D4 (context compaction, SCHEDULED(T5)), D9 (emotion capsule).
+- **Deferred-decisions register**: read the live table, not this summary, before scoping. Settings close added/updated D58 (skip-list deferred by owner), D59 (window-level WS reconnect), D60 (temporary Tavily plus the approved schema-compatibility prerequisite), D61 (pet-side costume guard deadline), and D62 (legacy `main` consolidation).
 
 ### Environment
 - Node 24, pnpm 10, Rust 1.88 msvc, WebView2 present. `gh` authed as `Ae486`, git user `PLeiA`, remote → github.com/Ae486/ShiinaTaki. A real OpenAI-compatible key is in `.env.local` (L2 tests + integration).
@@ -107,10 +108,20 @@ You are the orchestrator, not the primary typist. Sequence issues, spawn trellis
 2. **Write `prd.md`** from the issue body + acceptance criteria.
 3. **Configure context**: curate `implement.jsonl` / `check.jsonl` with the relevant `.trellis/spec/*` + research files.
 4. **Implement**: spawn `trellis-implement` (do NOT write feature code in the main thread — sub-agents get spec injection you don't).
-5. **Check**: spawn `trellis-check` — reviews vs spec + acceptance, self-fixes, verifies gates. **Never skip this.** For a real-agent surface, make it **verify假绿 + prove any red→green claim** (revert the fix, watch the test go red).
+5. **Check**: for a formal batch whose risk/size warrants it, run one `trellis-check` at final convergence — review vs
+   spec + acceptance, self-fix, and verify proportional gates. Do not spend another full check on a small follow-up,
+   documentation-only closeout, or an already checked batch; use focused tests/typecheck/lint instead. For a
+   real-agent surface, make the formal check **verify假绿 + prove any red→green claim** (revert the fix, watch the test
+   go red).
 6. **Verify** acceptance yourself; drive the real flow when there's a runtime surface (for Pet UI that means `pnpm desktop:dev` and *looking* — see §5 manual items).
 7. **Update spec** (`trellis-update-spec`) if the work produced a reusable convention or hard-won lesson.
 8. Report; on the user's go-ahead they (or you, if asked) commit. Then `task.py finish` + `archive`; pick the next issue.
+
+**Leader-owned truth artifacts (owner directive 2026-08-07):** the Leader personally writes and reviews the PRD,
+batch designs, task-wide decision records, deferred-decision rows, HANDOFF updates, archive/session summary, and
+project memory. These artifacts compress the whole task and exist for later debugging, optimization, and takeover;
+a worker's narrower context is not enough. Workers may produce research evidence and implementation/check reports,
+but the Leader must synthesize the durable documentation rather than delegating that synthesis.
 
 Model routing: pick the sub-agent model by task complexity; research/implement/check on hard backend-shaped work benefit from a stronger tier. L2 real-LLM tests are allowed (key in `.env.local`) — they catch model-side failures (hallucination) that deterministic L1 cannot.
 
@@ -142,14 +153,29 @@ AI SDK 7, Tauri 2, zod 4, PixiJS 8, the Live2D runtime all move fast. **Never co
 
 ---
 
-## 4. Recommended first moves (post-T5 Leader)
+## 4. Recommended first moves after settings-panel
 
-1. Read §2, then: `t4-decisions.md` (R1–R12, 立项-ready), the T5 outcome pointers (archived task `notes.md` closure blocks — the batch 5/6/7 blocks carry the T4 handoff items), `docs/MEMORY-DESIGN.md` (current), ADR 0008.
-2. Confirm the base is green: `pnpm -r typecheck && pnpm -w lint && pnpm -r test`, cargo test. Expected: **core 1101 / shared 199 / desktop 143 / cli 18+ / cargo 141**, e2e 26 (real key), boot migrations `[1..12]`.
-3. **Owner plan B (2026-08-02) — settings panel advanced, runs BEFORE T4 (owner-ruled same day)**: step 1 = a generic operator WS invoker in `apps/cli` (`/call` REPL command + `--call` one-shot; the permanent scriptable surface, NOT a throwaway — owner constraint) shipped in the T5 close-out window (task `08-02-cli-operator-call`); step 2 = the panel task (trimmed #22+#26 core: config store + settings window + R13 knob surfaces + operator triggers + perception surfaces). Entry design (owner 2026-08-02): right-click on the Live2D character summons an **operation wheel** (icons: chat / settings / costume / home — home opens the full page nav, the others are shortcuts to specific pages); costume switching MIGRATES from the current raw right-click into the wheel; the wheel ships WITH the panel task and must be registry-driven (add a page/action = one entry) so later pages slot in without rework. Panel UI style may reference BANDORI (`references/BANDORI-PET-REV`) — **GPLv3: patterns/style only, never copy code; clean-room applies**.
-4. **T4 立项 notes from T5**: `main.ts` is at 298/300 counted lines — extraction REQUIRED before any next touch; truthfulness bullet cross-surface drift, observation-tool non-triggers, skills decision procedure, prompt snapshot tests (batch-5 closure); owner signal 2026-08-02: **time-sense is an important part of this agent** — keep time information consistent across prompt surfaces (day line, turn-context, memory ages, summary date anchor); compaction cost note: reasoning models burn ~15k thinking tokens per pass — a cheap non-reasoning `TAKI_UTILITY_*` model is worth configuring; D56/D57 triggers live in `docs/deferred-decisions.md`.
-5. After the panel task + T4 → **T6 settings suite remainder** (#22→#26 — whatever the panel task did not consume; #26 still owns manual check 79).
-6. Push cadence unchanged: push at milestone close or on owner request.
+1. Start the owner-approved `mcp-tool-schema-compatibility` Trellis task. Its root symptom is provider dialect
+   mismatch, not image routing: DeepSeek accepts and calls the discovered Tavily tool, while Gemini rejects the turn
+   before generation because `parameters.time_range` is a nullable union without the top-level `type` its
+   FunctionDeclaration dialect requires.
+2. Reuse the installed framework seams: `MCPClient.listTools()` definitions -> schema normalization and compatibility
+   validation -> skip one incompatible tool with a warning -> official `toolsFromDefinitions()` registration. Preserve
+   the original tool name for execution and do not rewrite MCP transport/call handling. Start from
+   `references/hermes-agent-main/tools/schema_sanitizer.py`, `references/hermes-agent-main/agent/gemini_schema.py`,
+   the archived `07-10-mcp-and-skills/research/ai-sdk-mcp-client.md`, and current AI SDK types/docs.
+3. Acceptance must pin the real Tavily `time_range` shape, nullable optional unions, unchanged ordinary schemas,
+   same-server tool isolation, original execute names, and DeepSeek/Gemini fixtures. This task is prerequisite
+   preparation for full MCP integration and must land before D60; it is not D60's native web-search implementation.
+4. Confirm only the gates proportional to that batch. The settings-panel formal check already passed and is not a
+   reason to rerun a full check. Its closeout record is: core full tests 1168/1168, focused calibrator 12/12,
+   `pnpm -r typecheck`, `pnpm lint`, and `git diff --check` green.
+5. **T4 setup remains ready after the named next task**: read `t4-decisions.md` (R1-R12), the T5 archived closure
+   blocks, `docs/MEMORY-DESIGN.md`, and ADR 0008. Preserve time information across day line, turn-context, memory
+   ages, and summary date anchor. D56/D57 carry the relevant prompt/context triggers.
+6. T6 still owns settings-suite surfaces not consumed here (permission, character, MCP/skills management, and the
+   remaining perception/proactivity controls). #79 is only partially closed: restart persistence passed; real-live
+   `until` expiry remains unchecked. Push cadence remains milestone-close or explicit owner request.
 
 ---
 
@@ -161,15 +187,20 @@ AI SDK 7, Tauri 2, zod 4, PixiJS 8, the Live2D runtime all move fast. **Never co
 
 **Coupling point 3 — A2 before any Heartbeat write (unchanged, now T4).** The turn-origin tag (`primary|heartbeat|flush|subagent`) ships IN T4's heartbeat wiring; `autoMemory.onTurnCompleted` currently does not discriminate turn kinds (t4-decisions "newly discovered problems").
 
-**Coupling point 4 — conversation-configured anything must surface in the settings panel (T6/panel task).** Dual entry, single store. Owner plan B (2026-08-02): the `apps/cli` generic invoker is the PERMANENT scriptable surface — the panel is the GUI surface over the SAME operator WS methods; neither replaces the other, and R13 knobs stay env-based until the panel task ships the config store (every exposed value keeps validation + a fail-closed default in Core — T5 delivered that exposure).
+**Coupling point 4 — conversation-configured anything must surface in the home settings family.** Dual entry, single
+Core store. The `apps/cli` generic invoker is the permanent scriptable surface; home is the GUI over the same
+operator WS methods. The config store now exists: adding a knob means one `knob-registry.ts` row, Core validation,
+an honest apply class, and a settings-page rendering path. Do not create UI-owned configuration state.
 
 **Other open threads:**
 - **R15's skip log is mandatory** — once "write nothing" is the write gate's normal outcome, an unlogged skip is indistinguishable from a broken writer (mem0 issue #3009 precedent; recorded in t5-decisions).
 - **VLM-failure has no backoff in the ambient sampler** (leader-found during manual testing, unregistered): describe failures don't count toward backoff — under `keep` retention this accumulates undescribed frames at the refresh cadence. Low urgency (default is drop + ambient default-off); register a D-number if ambient goes always-on.
 - **croner is still NOT installed** despite the CLAUDE.md stack table (t4-decisions); it is a pattern evaluator, not a scheduler — the tick loop/persistence/catch-up are ours (T4).
-- **D29** (ws-client mid-turn disconnect never settles) comes DUE in #22 — first touch of `ws-client.ts`.
+- **D29 is DONE**: the settings-panel ws-client split now settles a mid-turn disconnect. Do not reopen it when working
+  on D59; D59 is the broader reconnect + resubscribe + window-level status problem.
 - **D48 residual**: the ambient pre-capture screen narrows the blind window to one WS round-trip but is NOT atomic; true closure = Shell-side same-instant sampling, trigger recorded in the register.
-- **Roaming C3 costume-switch wedge**: root cause unknown, fully mitigated; grab Network-pending evidence if it recurs.
+- **Costume recovery is split deliberately**: home is result-bearing and recoverable (#74/#75 passed); D61 tracks the
+  pet-side unbounded awaits/guard wedge and should be handled with D59's per-request deadline work.
 - **The trellis flow is mandatory** (implement → check → update-spec). Manual-only checks → `docs/devlog/manual-checks.md`.
 
 ---
@@ -201,4 +232,7 @@ gh issue list -R Ae486/ShiinaTaki --label ready-for-agent
 
 ---
 
-*Handoff updated 2026-08-02 at the close of T5. M1–M4 shipped; M5's T1/T2/T3a/T3b + time-awareness + T5 are done, committed, archived. Next order (owner-ruled): the settings-panel task (plan B step 2, BEFORE T4; right-click operation-wheel entry) → T4 proactivity (`t4-decisions.md` binding, R1–R12) → T6 remainder. Verify base green first (core 1101 / shared 199 / desktop 143 / cli 32 / cargo 141 / e2e 26 / boot [1..12]).*
+*Handoff updated 2026-08-07 at settings-panel close. M1-M4 shipped; M5's T1/T2/T3a/T3b + time-awareness + T5 +
+settings-panel are done and archived. Next: `mcp-tool-schema-compatibility`, required before D60 and serving as
+provider-neutral MCP integration groundwork. T4 remains design-ready; this handoff does not invent a later order the
+owner has not ruled.*
