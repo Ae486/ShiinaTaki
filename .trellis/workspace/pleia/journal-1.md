@@ -19,7 +19,16 @@ Grill sessions Q1-Q11 complete: product definition, layered memory registry, act
 
 ### Main Changes
 
-(Add details)
+- Six shipped batches: sparse config store and `config.*`; home/chat migration and D29 close; operation wheel;
+  settings/operations/perception/costume pages; clean-room visual pass; result-bearing costume recovery and guarded
+  SWR snapshots.
+- Closeout fix: a lowered declared context window is persisted to `window_state`, keeping runtime calibration and
+  `memory.status` aligned after restart while preserving overflow shrink and correction factor semantics.
+- Owner rulings recorded: D58-B deferral with the non-owner hard gate; #79 restart persistence passed but real-live
+  `until` expiry remains open; MCP schema compatibility approved as a separate task before D60.
+- Durable documentation: backend config-store executable spec, task closeout map, real implement/check context,
+  D60/D62 updates, and the fifth-pass HANDOFF. Task archived at
+  `.trellis/tasks/archive/2026-08/08-03-settings-panel`.
 
 ### Git Commits
 
@@ -394,3 +403,42 @@ Post-B-test polish round, three features shipped. (1) Abort entry: the send butt
 ### Next Steps
 
 - After user verification passes: close #18 (task.py finish), push M4
+
+
+## Session 12: Settings panel: home surface, config store, and closeout
+
+**Date**: 2026-08-07
+**Task**: Settings panel: home surface, config store, and closeout
+**Branch**: `main`
+
+### Summary
+
+Closed the six-batch settings-panel task, fixed persisted window calibration status, recorded owner manual rulings and deferred boundaries, and added the executable config-store spec.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `6e6f263` | fix(core): persist lowered window calibration |
+| `dbc158b` | docs(trellis): close settings-panel task |
+
+### Testing
+
+- [OK] Formal closeout evidence: Core full tests 1168/1168, focused calibrator tests 12/12, `pnpm -r typecheck`,
+  `pnpm lint`, and `git diff --check`.
+- [OK] Owner manual checks #74/#75; Privacy Pause persisted through a real Core restart.
+- [PARTIAL] Manual #79 `until` expiry was not observed live and remains unchecked.
+- [OK] Documentation validation: both JSONL files parse, all 22 context paths exist, registry count is 34, all commit
+  anchors resolve, and D62 is unique.
+
+### Status
+
+[OK] **Completed and archived**
+
+### Next Steps
+
+- Start the owner-approved `mcp-tool-schema-compatibility` Trellis task before D60. No remote push was performed.

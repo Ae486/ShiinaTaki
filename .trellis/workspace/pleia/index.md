@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 11
-- **Last Active**: 2026-07-11
+- **Total Sessions**: 12
+- **Last Active**: 2026-08-07
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~360 | Active |
+| `journal-1.md` | ~430 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 12 | 2026-08-07 | Settings panel: home surface, config store, and closeout | `6e6f263`, `dbc158b` | `main` |
 | 11 | 2026-07-11 | Observability: Shell tracing + readable core logs + capability-flow trace | - | `main` |
 | 10 | 2026-07-11 | M3 #12: exec capability + full governance pipeline (M3 FINAL) | - | `main` |
 | 9 | 2026-07-11 | M3 #11: typed capabilities (process-list/clipboard/shell-open/workspace-files) | - | `main` |
