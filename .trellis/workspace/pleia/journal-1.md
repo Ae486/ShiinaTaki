@@ -442,3 +442,38 @@ Closed the six-batch settings-panel task, fixed persisted window calibration sta
 ### Next Steps
 
 - Start the owner-approved `mcp-tool-schema-compatibility` Trellis task before D60. No remote push was performed.
+
+
+## Session 13: MCP tool schema compatibility and D60 decision reopening
+
+**Date**: 2026-08-07
+**Task**: MCP tool schema compatibility and D60 decision reopening
+**Branch**: `main`
+
+### Summary
+
+Shipped definition-stage MCP schema normalization and per-tool isolation, passed one formal check plus 29 focused MCP tests, documented the compatibility contract and reopened D60 native search for owner-led comparative review.
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f7a406a` | (see git log) |
+| `445114d` | (see git log) |
+| `91df680` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete

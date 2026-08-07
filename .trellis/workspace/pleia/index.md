@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 12
+- **Total Sessions**: 13
 - **Last Active**: 2026-08-07
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~430 | Active |
+| `journal-1.md` | ~479 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 13 | 2026-08-07 | MCP tool schema compatibility and D60 decision reopening | `f7a406a`, `445114d`, `91df680` | `main` |
 | 12 | 2026-08-07 | Settings panel: home surface, config store, and closeout | `6e6f263`, `dbc158b` | `main` |
 | 11 | 2026-07-11 | Observability: Shell tracing + readable core logs + capability-flow trace | - | `main` |
 | 10 | 2026-07-11 | M3 #12: exec capability + full governance pipeline (M3 FINAL) | - | `main` |
