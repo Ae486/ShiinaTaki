@@ -1,59 +1,69 @@
 /**
  * INPUT:  the home shell's WsClient (perception.card / perception.pauseGet / perception.pauseSet).
- * OUTPUT: usePerception() -> { card, pause, error, setPause, refresh } — the perception page's data seam.
+ * OUTPUT: usePerception() -> { card, pause, error, refreshing, setPause, refresh } — the perception page's data seam.
  * POS:    ui/windows/home/pages/perception — the ONLY ws touchpoint of the page (hook-guidelines). Every write echoes
  *         the resulting server state; nothing is optimistically assumed (a lapsed deadline self-resumes core-side).
+ *         The card is cached in MEMORY ONLY (its activity rows are foreground-window titles) and the pause state is not
+ *         cached at all: a stale "not paused" is a privacy claim this page must never make.
  */
 
-import { useCallback, useEffect, useState } from "react";
-import type { PerceptionCard, PerceptionPauseSetParams, PerceptionPauseState } from "@taki/shared";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { PerceptionCardSchema, type PerceptionCard, type PerceptionPauseSetParams, type PerceptionPauseState } from "@taki/shared";
+import { useCachedFetch } from "@/lib/use-cached-fetch.js";
 import { useHomeClient } from "../../home-client-context.ts";
 
 export interface PerceptionView {
   card: PerceptionCard | null;
   pause: PerceptionPauseState | null;
   error: string | null;
+  /** A background re-read of the card is running over the one on screen. */
+  refreshing: boolean;
   setPause: (params: PerceptionPauseSetParams) => Promise<void>;
   refresh: () => Promise<void>;
 }
 
 export function usePerception(): PerceptionView {
   const { client, status } = useHomeClient();
-  const connected = status.kind === "connected";
-  const [card, setCard] = useState<PerceptionCard | null>(null);
+  const ready = client && status.kind === "connected" ? client : null;
   const [pause, setPauseState] = useState<PerceptionPauseState | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fail = useCallback((cause: unknown) => setError(cause instanceof Error ? cause.message : String(cause)), []);
 
-  const refresh = useCallback(async () => {
-    if (!client) return;
+  const cardLoad = useMemo(() => (ready ? () => ready.perceptionCard() : null), [ready]);
+  const card = useCachedFetch("perception-card", cardLoad, { schema: PerceptionCardSchema });
+  const refreshCard = card.refresh;
+
+  const refreshPause = useCallback(async () => {
+    if (!ready) return;
     try {
-      const [nextCard, nextPause] = await Promise.all([client.perceptionCard(), client.perceptionPauseGet()]);
-      setCard(nextCard);
-      setPauseState(nextPause);
+      setPauseState(await ready.perceptionPauseGet());
     } catch (cause) {
       fail(cause);
     }
-  }, [client, fail]);
+  }, [ready, fail]);
+
+  const refresh = useCallback(async () => {
+    await Promise.all([refreshCard(), refreshPause()]);
+  }, [refreshCard, refreshPause]);
 
   useEffect(() => {
-    if (connected) void refresh();
-  }, [connected, refresh]);
+    void refreshPause();
+  }, [refreshPause]);
 
   const setPause = useCallback(
     async (params: PerceptionPauseSetParams) => {
-      if (!client) return;
+      if (!ready) return;
       setError(null);
       try {
-        setPauseState(await client.perceptionPauseSet(params));
-        await refresh(); // the card's samplingStatus follows the pause — re-read rather than infer it
+        setPauseState(await ready.perceptionPauseSet(params));
+        await refreshCard(); // the card's samplingStatus follows the pause — re-read rather than infer it
       } catch (cause) {
         fail(cause);
       }
     },
-    [client, refresh, fail],
+    [ready, refreshCard, fail],
   );
 
-  return { card, pause, error, setPause, refresh };
+  return { card: card.data, pause, error: error ?? card.error, refreshing: card.refreshing, setPause, refresh };
 }

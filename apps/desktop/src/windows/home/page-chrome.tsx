@@ -1,5 +1,5 @@
 /**
- * INPUT:  a page's title (+ an optional hint line), its body content, or one failure message.
+ * INPUT:  a page's title (+ an optional hint line and a background-refresh flag), its body content, or one failure message.
  * OUTPUT: <PageHeader>, <PageBody> and <PageAlert> — the frame every home page renders inside: one header bar, one
  *         scrolling width-capped content column, and one look for "this page could not read/do something".
  * POS:    ui/windows/home — shared page frame, declared once so pages differ in content only. Purely presentational;
@@ -8,10 +8,14 @@
 
 import type { ReactNode } from "react";
 
-export function PageHeader({ title, hint }: { title: string; hint?: string }) {
+export function PageHeader({ title, hint, busy }: { title: string; hint?: string; busy?: boolean }) {
   return (
     <header className="shrink-0 border-b border-slate-200 bg-white px-6 py-3">
-      <h1 className="text-[15px] font-semibold text-slate-800">{title}</h1>
+      <div className="flex items-baseline gap-2">
+        <h1 className="text-[15px] font-semibold text-slate-800">{title}</h1>
+        {/* Cached content is shown immediately, so the operator must be able to see that a fresher answer is coming. */}
+        {busy && <span className="text-[11px] text-slate-400">刷新中…</span>}
+      </div>
       {hint && <p className="mt-0.5 text-[11px] leading-snug text-slate-500">{hint}</p>}
     </header>
   );

@@ -1,5 +1,5 @@
 /**
- * INPUT:  a card title + children, or a list of label/value rows.
+ * INPUT:  a card title (+ an optional header control) and children, or a list of label/value rows.
  * OUTPUT: <PageCard> and <LabeledRows> — the two layout primitives the settings-family pages share.
  * POS:    ui/windows/home — shared page chrome, so a page component stays its own content and nothing re-declares the
  *         card/definition-list markup. Purely presentational: restyling every card is an edit here, not in the pages.
@@ -12,10 +12,13 @@ export interface LabeledRow {
   value: string;
 }
 
-export function PageCard({ title, children }: { title: string; children: ReactNode }) {
+export function PageCard({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="mb-3 text-[13px] font-semibold text-slate-800">{title}</h2>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="text-[13px] font-semibold text-slate-800">{title}</h2>
+        {action}
+      </div>
       {children}
     </section>
   );

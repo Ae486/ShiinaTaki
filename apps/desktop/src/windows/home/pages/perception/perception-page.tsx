@@ -39,7 +39,7 @@ export function PerceptionPage() {
 
   return (
     <>
-      <PageHeader title="感知与隐私" hint="暂停观察、查看采样与活动记录，以及留存策略的去处。" />
+      <PageHeader title="感知与隐私" hint="暂停观察、查看采样与活动记录，以及留存策略的去处。" busy={perception.refreshing} />
       <PageBody>
         {perception.error && <PageAlert>{perception.error}</PageAlert>}
         <PauseControls pause={perception.pause} onSet={(params) => void perception.setPause(params)} />

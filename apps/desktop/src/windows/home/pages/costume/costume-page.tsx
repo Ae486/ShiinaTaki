@@ -1,20 +1,20 @@
 /**
  * INPUT:  none (page root); reads the costume list and drives import + switching through its hooks.
  * OUTPUT: <CostumePage> — the costume surface migrated out of the retired pet-side CharacterPanel: import a model
- *         archive, then pick a costume (degraded rows badge their missing motions; unrenderable rows sit disabled
- *         under the import notice).
- * POS:    ui/windows/home/pages/costume — presentational; a pick is COMMANDED to the pet window, which owns the scene.
+ *         archive, then pick a costume. The row being switched shows its own indicator + Cancel, a failed switch says
+ *         why and leaves the highlight where it was, and a failed list refresh keeps the last good list on screen.
+ * POS:    ui/windows/home/pages/costume — presentational; a pick is COMMANDED to the pet window, which owns the scene
+ *         and reports back what actually happened.
  */
 
 import { useRef } from "react";
 import { useCharacterImport } from "@/features/character-import/use-character-import.js";
 import { ActionButton } from "../../action-button.tsx";
-import { Badge } from "../../badge.tsx";
 import { PageCard } from "../../page-card.tsx";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { useHomeClient } from "../../home-client-context.ts";
-import { useCostumePage } from "./use-costume-page.ts";
-import type { CostumeRowView } from "./costume-view.ts";
+import { CostumeRow } from "./costume-row.tsx";
+import { useCostumePage, type CostumePageView } from "./use-costume-page.ts";
 
 function ImportRow({ onPick, isImporting }: { onPick: (file: File) => void; isImporting: boolean }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,19 +38,22 @@ function ImportRow({ onPick, isImporting }: { onPick: (file: File) => void; isIm
   );
 }
 
-function CostumeRow({ row, current, onSelect }: { row: CostumeRowView; current: boolean; onSelect: () => void }) {
-  const tone = current ? "bg-rose-50 text-rose-700 ring-1 ring-rose-200/70" : "text-slate-600 hover:bg-slate-50";
+function CostumeList({ costume }: { costume: CostumePageView }) {
+  if (costume.loading) return <p className="text-xs text-slate-400">载入中…</p>;
+  if (costume.view.rows.length === 0) return <p className="text-xs text-slate-400">尚未导入角色（开发环境使用内置模型）</p>;
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      disabled={!row.renderable}
-      aria-current={current ? "true" : undefined}
-      className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors ${tone} disabled:opacity-40`}
-    >
-      <span className="truncate font-medium">{row.id}</span>
-      {row.badge && <Badge tone="warn">{row.badge}</Badge>}
-    </button>
+    <div className="flex flex-col gap-0.5">
+      {costume.view.rows.map((row) => (
+        <CostumeRow
+          key={row.id}
+          row={row}
+          current={row.id === costume.selected}
+          pending={row.id === costume.pending}
+          onSelect={() => void costume.select(row.id)}
+          onCancel={costume.cancel}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -58,14 +61,18 @@ export function CostumePage() {
   const { client } = useHomeClient();
   const costume = useCostumePage();
   const importState = useCharacterImport(client);
-  const current = costume.selected ?? costume.view.current;
   const error = costume.error ?? importState.error;
 
   return (
     <>
-      <PageHeader title="换装" hint="导入模型包后挑选服装；切换在宠物窗口执行，关闭宠物窗口时无法切换。" />
+      <PageHeader
+        title="换装"
+        hint="导入模型包后挑选服装；切换在宠物窗口执行，关闭宠物窗口时无法切换。"
+        busy={costume.refreshing}
+      />
       <PageBody>
         {error && <PageAlert>{error}</PageAlert>}
+        {costume.listError && <PageAlert>服装列表读取失败（下方为上次结果）：{costume.listError}</PageAlert>}
 
         <PageCard title="导入模型">
           <ImportRow onPick={(file) => void importState.importFile(file).then(costume.refresh)} isImporting={importState.isImporting} />
@@ -79,16 +86,8 @@ export function CostumePage() {
           )}
         </PageCard>
 
-        <PageCard title="服装">
-          {costume.view.rows.length === 0 ? (
-            <p className="text-xs text-slate-400">尚未导入角色（开发环境使用内置模型）</p>
-          ) : (
-            <div className="flex flex-col gap-0.5">
-              {costume.view.rows.map((row) => (
-                <CostumeRow key={row.id} row={row} current={row.id === current} onSelect={() => void costume.select(row.id)} />
-              ))}
-            </div>
-          )}
+        <PageCard title="服装" action={<ActionButton onClick={() => void costume.refresh()}>刷新列表</ActionButton>}>
+          <CostumeList costume={costume} />
           {costume.view.missingPacks.length > 0 && (
             <p className="mt-3 text-[11px] leading-snug text-amber-600">
               ⚠ 需导入其他角色包可解锁/补全动作：{costume.view.missingPacks.join("、")}

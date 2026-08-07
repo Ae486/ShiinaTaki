@@ -1,12 +1,14 @@
 /**
  * INPUT:  the home shell's WsClient (config.list / config.set / config.subscribe + config.changed pushes).
- * OUTPUT: useConfig() -> { entries, error, save(key, value), savedNotice, refusal } — the knobs page's data seam.
+ * OUTPUT: useConfig() -> { entries, error, refreshing, notices, save(key, value) } — the knobs page's data seam.
  * POS:    ui/windows/home/pages/settings — the ONLY config touchpoint between the page and ws-client (hook-guidelines).
- *         Glue only: every state transition is a pure function in config-state.ts.
+ *         Glue only: every state transition is a pure function in config-state.ts and the list itself is the shared
+ *         cached-fetch seam (its persisted copy is stripped of secret-flagged knobs, see cache-persist).
  */
 
-import { useCallback, useEffect, useState } from "react";
-import type { ConfigEntry, ConfigValue } from "@taki/shared";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ConfigListResultSchema, type ConfigEntry, type ConfigValue } from "@taki/shared";
+import { useCachedFetch } from "@/lib/use-cached-fetch.js";
 import { useHomeClient } from "../../home-client-context.ts";
 import { applyChanged, applyStored, applyVerdict, refusalMessage, refusalOf } from "./config-state.ts";
 
@@ -14,6 +16,8 @@ export interface ConfigView {
   entries: ConfigEntry[];
   /** A load failure (the page shows it instead of an empty knob list). */
   error: string | null;
+  /** A background re-read is running over the knobs already on screen. */
+  refreshing: boolean;
   /** Per-key outcome of the last save: the apply verdict, or the refusal explanation. */
   notices: Record<string, { ok: boolean; message: string }>;
   save: (key: string, value: ConfigValue | null) => Promise<void>;
@@ -21,30 +25,25 @@ export interface ConfigView {
 
 export function useConfig(): ConfigView {
   const { client, status } = useHomeClient();
-  const connected = status.kind === "connected";
-  const [entries, setEntries] = useState<ConfigEntry[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const ready = client && status.kind === "connected" ? client : null;
   const [notices, setNotices] = useState<ConfigView["notices"]>({});
+  const load = useMemo(() => (ready ? () => ready.configList() : null), [ready]);
+  const list = useCachedFetch("config-list", load, { schema: ConfigListResultSchema, persist: true });
+  const { mutate } = list;
 
   useEffect(() => {
-    if (!client || !connected) return;
-    let cancelled = false;
+    if (!ready) return;
     // Another operator surface (CLI, a second window) may edit a knob — the push keeps this list honest.
-    client.onConfigChanged((changed) => setEntries((prev) => applyChanged(prev, changed)));
-    void Promise.all([client.configList(), client.subscribeConfig()])
-      .then(([list]) => cancelled || setEntries(list.entries))
-      .catch((cause: unknown) => cancelled || setError(cause instanceof Error ? cause.message : String(cause)));
-    return () => {
-      cancelled = true;
-    };
-  }, [client, connected]);
+    ready.onConfigChanged((changed) => mutate((prev) => ({ ...prev, entries: applyChanged(prev.entries, changed) })));
+    void ready.subscribeConfig().catch((cause: unknown) => console.warn("[home] config subscribe failed", cause));
+  }, [ready, mutate]);
 
   const save = useCallback(
     async (key: string, value: ConfigValue | null) => {
-      if (!client) return;
+      if (!ready) return;
       try {
-        const result = await client.configSet({ key, value });
-        setEntries((prev) => applyStored(prev, result));
+        const result = await ready.configSet({ key, value });
+        mutate((prev) => ({ ...prev, entries: applyStored(prev.entries, result) }));
         setNotices((prev) => ({ ...prev, [key]: { ok: true, message: applyVerdict(result.apply) } }));
       } catch (cause) {
         const reason = refusalOf(cause);
@@ -52,8 +51,8 @@ export function useConfig(): ConfigView {
         setNotices((prev) => ({ ...prev, [key]: { ok: false, message } }));
       }
     },
-    [client],
+    [ready, mutate],
   );
 
-  return { entries, error, notices, save };
+  return { entries: list.data?.entries ?? [], error: list.error, refreshing: list.refreshing, notices, save };
 }

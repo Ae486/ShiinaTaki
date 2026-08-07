@@ -1,59 +1,112 @@
 /**
- * INPUT:  the home shell's WsClient (character.costumes) + the remembered costume in localStorage.
- * OUTPUT: useCostumePage() -> { view, error, selected, select(costumeId), refresh } — the costume page's data seam.
- * POS:    ui/windows/home/pages/costume — the ONLY ws/event touchpoint of the page. A pick COMMANDS the pet window
- *         (the live PetScene lives there); the pet's existing switch path stays the single executor and persister.
+ * INPUT:  the home shell's WsClient (character.costumes), the remembered costume in localStorage, and the pet window's
+ *         pet:costume-result reports.
+ * OUTPUT: useCostumePage() -> { view, listError, loading, refreshing, error, selected, pending, select, cancel, refresh }.
+ * POS:    ui/windows/home/pages/costume — the ONLY ws/event touchpoint of the page. A pick COMMANDS the pet window (the
+ *         live PetScene lives there) and the pet's REPORT drives every state move; the deadline here is the page's own
+ *         guarantee that a pet which never answers cannot wedge it.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, type Dispatch } from "react";
+import { CharacterCostumesResultSchema } from "@taki/shared";
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
-import { requestCostumeSwitch } from "@/lib/costume-switch-event.js";
+import {
+  COSTUME_RESULT_EVENT,
+  handleCostumeResult,
+  requestCostumeCancel,
+  requestCostumeSwitch,
+} from "@/lib/costume-switch-event.js";
 import { loadLastCostume } from "@/lib/last-costume.js";
+import { useCachedFetch } from "@/lib/use-cached-fetch.js";
+import { useTauriEvent } from "@/lib/use-tauri-event.js";
 import { useHomeClient } from "../../home-client-context.ts";
 import { costumeListView, type CostumeListView } from "./costume-view.ts";
+import { IDLE, reduceCostumeSelect, type CostumeSelectAction } from "./costume-select-state.ts";
 
 const EMPTY: CostumeListView = { rows: [], missingPacks: [], current: null };
 
+// Longer than the pet's own 30s renderer-load timeout so a slow-but-working switch always settles on its own first.
+// This only catches a pet that never answers at all (closed window, dead webview) — the last way the page could hang.
+const RESULT_DEADLINE_MS = 45_000;
+
 export interface CostumePageView {
   view: CostumeListView;
+  /** The list could not be re-read; the previous list stays on screen behind this message. */
+  listError: string | null;
+  loading: boolean;
+  refreshing: boolean;
+  /** The last switch failure (or the deadline), named for the operator. */
   error: string | null;
-  /** The costume this page last commanded — the pet window owns what is actually worn. */
+  /** The costume the pet is confirmed to wear — never the one just clicked. */
   selected: string | null;
+  /** The costume mid-switch: that row alone shows the indicator + Cancel. */
+  pending: string | null;
   select: (costumeId: string) => Promise<void>;
+  cancel: () => void;
   refresh: () => Promise<void>;
+}
+
+/** The page's own guarantee: a pet that never answers still releases the pending row (nothing else bounds that wait). */
+function useResultDeadline(pending: string | null, dispatch: Dispatch<CostumeSelectAction>): void {
+  useEffect(() => {
+    if (pending === null) return;
+    const timer = setTimeout(() => dispatch({ kind: "timeout", costumeId: pending }), RESULT_DEADLINE_MS);
+    return () => clearTimeout(timer);
+  }, [pending, dispatch]);
 }
 
 export function useCostumePage(): CostumePageView {
   const { client, status } = useHomeClient();
   const connected = status.kind === "connected";
-  const [view, setView] = useState<CostumeListView>(EMPTY);
-  const [selected, setSelected] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const load = useMemo(() => (client && connected ? () => client.characterCostumes(ACTIVE_CHARACTER_ID) : null), [client, connected]);
+  const costumes = useCachedFetch("costume-list", load, { schema: CharacterCostumesResultSchema, persist: true });
+  const [state, dispatch] = useReducer(reduceCostumeSelect, IDLE);
+  const { pending } = state;
 
-  const refresh = useCallback(async () => {
-    if (!client) return;
-    try {
-      const result = await client.characterCostumes(ACTIVE_CHARACTER_ID);
-      setView(costumeListView(result, loadLastCostume(ACTIVE_CHARACTER_ID, localStorage)));
-    } catch {
-      setView(EMPTY); // no imported character yet (dev route) — an empty switcher, not an error banner
-    }
-  }, [client]);
+  const view = useMemo(
+    () => (costumes.data ? costumeListView(costumes.data, loadLastCostume(ACTIVE_CHARACTER_ID, localStorage)) : EMPTY),
+    [costumes.data],
+  );
 
-  useEffect(() => {
-    if (connected) void refresh();
-  }, [connected, refresh]);
+  useTauriEvent(COSTUME_RESULT_EVENT, (payload) =>
+    handleCostumeResult(payload, {
+      apply: (result) => dispatch({ kind: "result", result }),
+      warn: (message, dropped) => console.warn(message, dropped),
+    }),
+  );
 
-  const select = useCallback(async (costumeId: string) => {
-    setError(null);
-    try {
-      await requestCostumeSwitch(costumeId);
-      setSelected(costumeId);
-    } catch (cause) {
-      // The pet window may be closed or the event undeliverable — say so instead of leaving a dead click.
-      setError(`无法通知宠物窗口换装：${cause instanceof Error ? cause.message : String(cause)}`);
-    }
-  }, []);
+  useResultDeadline(pending, dispatch);
 
-  return { view, error, selected, select, refresh };
+  const select = useCallback(
+    async (costumeId: string) => {
+      dispatch({ kind: "request", costumeId });
+      if (pending !== null) return; // the reducer explains the busy click; the wire stays quiet
+      try {
+        await requestCostumeSwitch(costumeId);
+      } catch (cause) {
+        dispatch({ kind: "undeliverable", costumeId, reason: cause instanceof Error ? cause.message : String(cause) });
+      }
+    },
+    [pending],
+  );
+
+  // Cancel releases this page FIRST and tells the pet second: an undeliverable cancel must still un-wedge the UI (#75).
+  const cancel = useCallback(() => {
+    if (pending === null) return;
+    dispatch({ kind: "cancel" });
+    void requestCostumeCancel(pending).catch((cause: unknown) => console.warn("[home] costume cancel undeliverable", cause));
+  }, [pending]);
+
+  return {
+    view,
+    listError: costumes.error,
+    loading: costumes.loading,
+    refreshing: costumes.refreshing,
+    error: state.error,
+    selected: state.selected ?? view.current,
+    pending,
+    select,
+    cancel,
+    refresh: costumes.refresh,
+  };
 }

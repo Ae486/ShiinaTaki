@@ -10,11 +10,11 @@ import { useConfig } from "./use-config.ts";
 import { KnobField } from "./knob-field.tsx";
 
 export function SettingsPage() {
-  const { entries, error, notices, save } = useConfig();
+  const { entries, error, refreshing, notices, save } = useConfig();
 
   return (
     <>
-      <PageHeader title="设置" hint="值优先级：环境变量 > 面板存储 > 内置默认；每项都注明生效方式。" />
+      <PageHeader title="设置" hint="值优先级：环境变量 > 面板存储 > 内置默认；每项都注明生效方式。" busy={refreshing} />
       <PageBody>
         {error && <PageAlert>读取配置失败：{error}</PageAlert>}
         {entries.length === 0 && !error && <p className="text-xs text-slate-400">载入中…</p>}

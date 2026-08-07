@@ -7,4 +7,4 @@ states truthfully when a change takes effect.
 - knob-input.tsx — the editor itself: checkbox / select / text / number per input.kind, or a secret's set-not-set readout
 - knob-editor.ts — pure metadata→editor mapping (kind, disabled + reason, bounds, secret set/not-set) + input parsing
 - config-state.ts — pure knob-list transitions (config.changed / accepted set) + the five refusal messages + the apply verdict
-- use-config.ts — the page's ONLY ws touchpoint: config.list on mount, config.subscribe pushes, config.set per row
+- use-config.ts — the page's ONLY ws touchpoint: the cached config.list read (secret-flagged knobs are stripped before anything is persisted), config.subscribe pushes, config.set per row

@@ -5,9 +5,8 @@
  *         a breadcrumb (never a throw inside an event callback).
  */
 
-import { useEffect } from "react";
-import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { HOME_NAVIGATE_EVENT } from "@/lib/open-home-window.js";
+import { useTauriEvent } from "@/lib/use-tauri-event.js";
 import { useHomeStore } from "./home-store.ts";
 import { isPageId } from "./pages.ts";
 
@@ -18,22 +17,9 @@ function requestedPage(payload: unknown): string | null {
 }
 
 export function useHomeNavigateEvent(): void {
-  useEffect(() => {
-    let unlisten: UnlistenFn | null = null;
-    let cancelled = false;
-    void listen(HOME_NAVIGATE_EVENT, (event) => {
-      const page = requestedPage(event.payload);
-      if (isPageId(page)) useHomeStore.getState().navigate(page);
-      else console.warn(`[home] ignored navigate to unregistered page: ${String(page)}`);
-    })
-      .then((stop) => {
-        if (cancelled) stop();
-        else unlisten = stop;
-      })
-      .catch((error: unknown) => console.error("[home] navigate listener failed", error));
-    return () => {
-      cancelled = true;
-      unlisten?.();
-    };
-  }, []);
+  useTauriEvent(HOME_NAVIGATE_EVENT, (payload) => {
+    const page = requestedPage(payload);
+    if (isPageId(page)) useHomeStore.getState().navigate(page);
+    else console.warn(`[home] ignored navigate to unregistered page: ${String(page)}`);
+  });
 }

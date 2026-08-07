@@ -1,6 +1,6 @@
 # lib/
 Cross-cutting Pet UI clients + seams (talk to the Agent Core / hold window-shared services). Framework-free apart from
-icons/, which is the shared glyph set every window renders.
+icons/ (the shared glyph set) and the two window-shared React hooks below.
 - ws-client.ts — operator WS JSON-RPC client to the Core (browser WebSocket): the public WsClient surface + turn/handshake wiring
 - ws-client-routes.ts — inbound half: the zod boundary (frame parse + chat-stream/avatar/timeline/config push routing) and the D29 mid-turn-close abort
 - ws-client-methods.ts — outbound half: the handshake + every plain request/response method (timeline, media, character, config, memory, perception)
@@ -13,5 +13,9 @@ icons/, which is the shared glyph set every window renders.
 - character-asset-url.ts — costume settings + per-sub-resource asset: URLs (convertFileSrc per file) with external-ref resolution; unresolvable/`..` refs resolve to null and get stripped before the engine (#18)
 - resolve-switch-report.ts — the shared costume switch+report dance (resolution → asset source → timeout-guarded switchCostume → avatar.report with the worn costume id); aborts the switch on timeout/failure so a late model self-discards (1f Fix 1); used by boot promotion and manual switch (1b)
 - open-home-window.ts — pet→home window opener: creates home.html at the requested page or navigates the open one (single instance by label); also owns the home:navigate event name
-- costume-switch-event.ts — the home→pet costume seam: the pet-scoped event name, the emit helper and the pet-side payload gate (the live PetScene exists only in the pet window)
+- costume-switch-event.ts — the BIDIRECTIONAL home↔pet costume seam: the three pet-scoped event names (switch / cancel / result), their emit helpers and the payload gates each side reads through (the live PetScene exists only in the pet window, so the page commands and the pet reports back)
+- use-tauri-event.ts — the shared window-event plumbing: one stable listener per event name, handler read through a ref, unlisten on unmount
+- use-cached-fetch.ts — the stale-while-revalidate seam every settings-family page loads through: last-good value first, background refresh, manual refresh, local mutate
+- cached-fetch-state.ts — pure core of that seam: the load lifecycle, and the rule that a REJECTED load keeps the last good value on screen behind an error line
+- cache-persist.ts — what the page cache may keep on disk: the persist allow-list (perception/chat payloads excluded by construction), the secret-knob scrub, and the schema-checked read that drops a drifted entry
 - icons/ — self-drawn inline-SVG glyphs (no icon package, no imported asset): the shared Glyph frame + one file per glyph

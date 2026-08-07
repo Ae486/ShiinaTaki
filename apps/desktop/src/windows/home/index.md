@@ -9,8 +9,8 @@ in pages.ts. Holds no state of record (invariant 4); every page talks to the Cor
 - use-home-navigate-event.ts — listens for the home:navigate Tauri event (openHome on an already-open window)
 - use-home-connection.ts — the window's own operator WS (shared device identity; concurrent with the pet's socket)
 - home-client-context.ts — React context exposing that client + status to the settings pages (chat keeps its own socket)
-- page-chrome.tsx — shared page frame: <PageHeader> + <PageBody> (scrolling, width-capped column) + <PageAlert>
-- page-card.tsx — shared page chrome: <PageCard> + <LabeledRows> (the label/value list the settings-family pages render)
+- page-chrome.tsx — shared page frame: <PageHeader> (title, hint, background-refresh marker) + <PageBody> (scrolling, width-capped column) + <PageAlert>
+- page-card.tsx — shared page chrome: <PageCard> (title + optional header control) + <LabeledRows> (the label/value list the settings-family pages render)
 - badge.tsx — the one status-chip look, in four tones (warn / ok / neutral / muted)
 - action-button.tsx — the one button look, in four tones (primary / secondary / danger-soft / danger)
 - pages/ — one directory per page (see each page's own index.md)

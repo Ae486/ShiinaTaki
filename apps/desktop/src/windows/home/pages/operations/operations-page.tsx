@@ -17,7 +17,7 @@ export function OperationsPage() {
 
   return (
     <>
-      <PageHeader title="运维" hint="手动整理记忆、查看压缩与校准状态、管理附件占用。" />
+      <PageHeader title="运维" hint="手动整理记忆、查看压缩与校准状态、管理附件占用。" busy={ops.refreshing} />
       <PageBody>
         {ops.error && <PageAlert>{ops.error}</PageAlert>}
 
