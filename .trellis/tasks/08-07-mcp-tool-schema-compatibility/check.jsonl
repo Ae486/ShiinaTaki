@@ -1,0 +1,8 @@
+{"file":".trellis/spec/backend/index.md","reason":"Backend quality gate and architecture invariants."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Verify per-tool failure isolation and structured diagnostics."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Verify source layout, headers, size caps, tests, and index update."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Verify warning usefulness without schema or secret leakage."}
+{"file":".trellis/spec/backend/tool-design.md","reason":"Verify schema portability and tool execution contracts."}
+{"file":".trellis/tasks/08-07-mcp-tool-schema-compatibility/research/ai-sdk-mcp-schema-api.md","reason":"Check implementation against the installed public API and conversion behavior."}
+{"file":".trellis/tasks/08-07-mcp-tool-schema-compatibility/research/provider-schema-compatibility.md","reason":"Check normalization safety and provider fixture claims."}
+{"file":".trellis/tasks/08-07-mcp-tool-schema-compatibility/research/repo-mcp-integration-map.md","reason":"Check the intended integration seam and frozen boundaries."}

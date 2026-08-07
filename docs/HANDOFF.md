@@ -2,7 +2,7 @@
 
 **You are the incoming session. Read this document fully, then the required docs in §2, then act as the Leader (主脑) of a trellis master/worker development flow.** This file is your bootstrap program — what exists, what to read, how to behave, how to drive implementation.
 
-> **Updated 2026-08-07 (fifth pass, settings-panel close)**. M1–M4 shipped and pushed. M5 has **T1/T2/T3a/T3b + time-awareness + T5 + the settings-panel task DONE** (see §1). The owner-approved next Trellis task is `mcp-tool-schema-compatibility`: provider-neutral normalization, validation, and per-tool isolation for discovered MCP schemas, required before D60's native web-search work. T4 remains design-ready (`t4-decisions.md` R1–R12); no ordering beyond the named next task and its before-D60 constraint is implied. Everything below distinguishes verified fact from plan.
+> **Updated 2026-08-07 (sixth pass, MCP schema compatibility close)**. M1–M4 shipped and pushed. M5 has **T1/T2/T3a/T3b + time-awareness + T5 + settings-panel + MCP schema compatibility DONE** (see §1). The compatibility prerequisite landed as `f7a406a`; D60's earlier native-search direction is now explicitly reopened for owner review and is not an implementation mandate. T4 remains design-ready (`t4-decisions.md` R1–R12); no ordering beyond the named decision review is implied. Everything below distinguishes verified fact from plan.
 
 ---
 
@@ -117,11 +117,12 @@ You are the orchestrator, not the primary typist. Sequence issues, spawn trellis
 7. **Update spec** (`trellis-update-spec`) if the work produced a reusable convention or hard-won lesson.
 8. Report; on the user's go-ahead they (or you, if asked) commit. Then `task.py finish` + `archive`; pick the next issue.
 
-**Leader-owned truth artifacts (owner directive 2026-08-07):** the Leader personally writes and reviews the PRD,
+**Leader-owned task-wide synthesis (owner directive 2026-08-07):** the Leader personally owns and reviews the PRD,
 batch designs, task-wide decision records, deferred-decision rows, HANDOFF updates, archive/session summary, and
-project memory. These artifacts compress the whole task and exist for later debugging, optimization, and takeover;
-a worker's narrower context is not enough. Workers may produce research evidence and implementation/check reports,
-but the Leader must synthesize the durable documentation rather than delegating that synthesis.
+project memory. These artifacts compress the whole task and exist for later debugging, optimization, and takeover.
+Research workers should persist their evidence, and implement/check workers may update module-specific documentation
+within their owned scope. Do not dispatch a context-thin worker solely to write final task-wide documentation; the
+Leader synthesizes and reviews that durable record.
 
 Model routing: pick the sub-agent model by task complexity; research/implement/check on hard backend-shaped work benefit from a stronger tier. L2 real-LLM tests are allowed (key in `.env.local`) — they catch model-side failures (hallucination) that deterministic L1 cannot.
 
@@ -145,6 +146,15 @@ TS file ≤ 300 lines, function ≤ 50, params ≤ 3; Rust fn ≤ 100. Do NOT ap
 AI SDK 7, Tauri 2, zod 4, PixiJS 8, the Live2D runtime all move fast. **Never code an external-library API from memory** — verify against installed types (`node_modules`) or current docs (context7/deepwiki/web) first.
 
 ### 3.7 Sub-agent operations (hard rules, owner-directed)
+- **Use English for every message sent to a sub-agent** — initial dispatches, status requests, corrections, follow-up
+  tasks, and review feedback. The Leader translates the resulting evidence into Simplified Chinese for the owner.
+- **Dispatch quality is a Leader responsibility.** Every prompt names the exact goal, ownership and frozen scope,
+  authoritative sources, acceptance criteria, verification commands, prohibited actions, and report format. Require an
+  honest split between completed, incomplete, failed, unverified, extra work, and residual risk; never accept a bare
+  "done" or "tests pass" claim.
+- **Review requirements before extras.** First prove the requested task against PRD/code/diff/tests. Then classify any
+  out-of-request implementation as necessary support, useful optional improvement, or scope/design violation. Keep,
+  revise, remove, or escalate it based on evidence rather than accepting the worker's framing wholesale.
 - **Web research tools**: you and every sub-agent use `mcp__exa__*` / `mcp__tavily-remote__*` ONLY — native WebSearch/WebFetch are **forbidden** for research (owner directive 2026-07-18). Sub-agents do not inherit this preference: NAME the allowed tools verbatim in every dispatch prompt.
 - **Model routing**: pass `model` EXPLICITLY on every Agent dispatch — never let it silently inherit the session default (a default switch once sent work to an unavailable tier). Route by complexity: heavier tier for research/implement on hard slices; the check tier per the owner's current directive.
 - **Never TaskStop a running sub-agent** unless the owner explicitly says so — killing it burns its context and tokens.
@@ -153,23 +163,19 @@ AI SDK 7, Tauri 2, zod 4, PixiJS 8, the Live2D runtime all move fast. **Never co
 
 ---
 
-## 4. Recommended first moves after settings-panel
+## 4. Recommended first moves after MCP schema compatibility
 
-1. Start the owner-approved `mcp-tool-schema-compatibility` Trellis task. Its root symptom is provider dialect
-   mismatch, not image routing: DeepSeek accepts and calls the discovered Tavily tool, while Gemini rejects the turn
-   before generation because `parameters.time_range` is a nullable union without the top-level `type` its
-   FunctionDeclaration dialect requires.
-2. Reuse the installed framework seams: `MCPClient.listTools()` definitions -> schema normalization and compatibility
-   validation -> skip one incompatible tool with a warning -> official `toolsFromDefinitions()` registration. Preserve
-   the original tool name for execution and do not rewrite MCP transport/call handling. Start from
-   `references/hermes-agent-main/tools/schema_sanitizer.py`, `references/hermes-agent-main/agent/gemini_schema.py`,
-   the archived `07-10-mcp-and-skills/research/ai-sdk-mcp-client.md`, and current AI SDK types/docs.
-3. Acceptance must pin the real Tavily `time_range` shape, nullable optional unions, unchanged ordinary schemas,
-   same-server tool isolation, original execute names, and DeepSeek/Gemini fixtures. This task is prerequisite
-   preparation for full MCP integration and must land before D60; it is not D60's native web-search implementation.
-4. Confirm only the gates proportional to that batch. The settings-panel formal check already passed and is not a
-   reason to rerun a full check. Its closeout record is: core full tests 1168/1168, focused calibrator 12/12,
-   `pnpm -r typecheck`, `pnpm lint`, and `git diff --check` green.
+1. Treat `mcp-tool-schema-compatibility` as shipped at `f7a406a`. Its durable contract is
+   `.trellis/spec/backend/mcp-tool-schema-compatibility.md`; do not rediscover or move normalization into provider
+   request rewriting.
+2. Reopen D60 as a decision review, not an approved native-search implementation. The owner did not request a native
+   tool and explicitly permits rejecting the prior Leader's proposal.
+3. Compare at least: keep Tavily Remote MCP; build a thin Core-owned policy/projection wrapper over a professional
+   search provider; or adopt an established multi-provider/search-and-fetch framework. Separate search-provider
+   quality from host-side policy, result shaping, security, observability, and credential ownership.
+4. Read local Hermes/OpenClaw references first, then use approved external MCP research for current framework/API
+   evidence. Record what each project actually implements for search, fetch, extraction, crawling, and SSRF defenses.
+   Do not write code until the owner rules on the comparative design.
 5. **T4 setup remains ready after the named next task**: read `t4-decisions.md` (R1-R12), the T5 archived closure
    blocks, `docs/MEMORY-DESIGN.md`, and ADR 0008. Preserve time information across day line, turn-context, memory
    ages, and summary date anchor. D56/D57 carry the relevant prompt/context triggers.
@@ -232,7 +238,7 @@ gh issue list -R Ae486/ShiinaTaki --label ready-for-agent
 
 ---
 
-*Handoff updated 2026-08-07 at settings-panel close. M1-M4 shipped; M5's T1/T2/T3a/T3b + time-awareness + T5 +
-settings-panel are done and archived. Next: `mcp-tool-schema-compatibility`, required before D60 and serving as
-provider-neutral MCP integration groundwork. T4 remains design-ready; this handoff does not invent a later order the
-owner has not ruled.*
+*Handoff updated 2026-08-07 at MCP schema compatibility close. M1-M4 shipped; M5's T1/T2/T3a/T3b + time-awareness +
+T5 + settings-panel + MCP schema compatibility are done. Next: owner review of D60's native-search rationale versus
+retaining or wrapping professional MCP/provider capability. The prior native-tool direction is not binding. T4 remains
+design-ready; this handoff does not invent a later order the owner has not ruled.*

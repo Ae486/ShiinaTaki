@@ -1,0 +1,8 @@
+{"file":".trellis/spec/backend/index.md","reason":"Backend pre-development checklist and package-wide invariants."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Per-tool degradation and structured error boundary."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Module placement, size caps, tests, headers, and folder index requirements."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Structured warning fields and secret-safe logging rules."}
+{"file":".trellis/spec/backend/tool-design.md","reason":"Provider-portable tool schema and result/error conventions."}
+{"file":".trellis/tasks/08-07-mcp-tool-schema-compatibility/research/ai-sdk-mcp-schema-api.md","reason":"Installed MCP definition API and execution-name preservation evidence."}
+{"file":".trellis/tasks/08-07-mcp-tool-schema-compatibility/research/provider-schema-compatibility.md","reason":"Conservative nullable normalization and provider compatibility boundary."}
+{"file":".trellis/tasks/08-07-mcp-tool-schema-compatibility/research/repo-mcp-integration-map.md","reason":"Repository integration seam, frozen files, logging, and test anchors."}

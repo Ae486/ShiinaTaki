@@ -27,6 +27,7 @@ Before writing backend code:
 | [Operator Config Store](./config-store.md) | Sparse Core-owned settings overlay; env > stored > default; config.* operator protocol, secret masking, typed refusals, apply-state truthfulness |
 | [Agent Runtime](./agent-runtime.md) | Persist full turn (tool-call/result) or hallucinate; base-prompt truthfulness floor; test the deterministic root cause; presentation vs informational tool taxonomy (stopWhen, not result shape); untrusted external content enters prompts only through the A1 fence (scrub-then-fence at the sense seam); ambient observation = two independent privacy layers + fail-closed + silent-when-off + swept retention; time enters prompts from core/time only, stable-early/volatile-late |
 | [Tool Design Standard](./tool-design.md) | The governance contract every new `*-tool.ts` follows: naming / description / schema / result-error / idempotency / birth-checklist rules, each sourced (Anthropic/OpenAI/MCP/OpenClaw/Hermes); strict-ready authoring |
+| [MCP Tool Schema Compatibility](./mcp-tool-schema-compatibility.md) | Definition-stage nullable normalization, per-tool isolation, warning privacy, and provider-boundary tests |
 
 ## Quality Check (run before handing off)
 
