@@ -16,11 +16,11 @@
 | [Directory Structure](./directory-structure.md) | Feature folders, window entries, renderer isolation |
 | [Component Guidelines](./component-guidelines.md) | Component patterns, props, composition |
 | [Hook Guidelines](./hook-guidelines.md) | Custom hooks, WS subscription patterns |
-| [State Management](./state-management.md) | Zustand stores, what state lives where |
+| [State Management](./state-management.md) | Zustand stores, state ownership, guarded SWR page snapshots |
 | [Type Safety](./type-safety.md) | zod boundaries, no-any policy |
 | [Quality Guidelines](./quality-guidelines.md) | Size caps, perf rules (this window is always-on), tests |
 | [Live2D Renderer Contract](./live2d-renderer.md) | Locked renderer stack, load order, generation-split param API, BanG Dream model facts |
-| [Home Window, Pages & Streaming Timeline](./home-window.md) | Window topology, runtime-created windows + per-window capability, the page registry, cross-window commands, page presentation primitives, in-flight row lifecycle, media.get render path, markdown default-safe |
+| [Home Window, Pages & Streaming Timeline](./home-window.md) | Window topology, runtime-created windows + per-window capability, result-bearing cross-window commands, page registry/presentation, in-flight row lifecycle, media.get render path, markdown default-safe |
 | [Packaged-Build Defect Classes](./packaged-build.md) | CSP packaged-only, WebView2 silent quirks (dialogs/glyphs), boot-silence invariants, CDP debugging recipe |
 
 ## Quality Check (run before handing off)

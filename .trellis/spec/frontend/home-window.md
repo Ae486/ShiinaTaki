@@ -42,6 +42,91 @@ A page that needs something only the pet window can do COMMANDS it and does not 
 - The reverse direction is `openHome(page)` + `home:navigate`.
 - Anything the Core can mediate SHOULD go through the Core instead (a WS method + its push), not through a window-to-window event.
 
+## Scenario: Result-bearing cross-window commands
+
+### 1. Scope / Trigger
+
+Use this contract when one window commands work that only another window can execute and the initiating UI must remain
+truthful about the outcome. A resolved Tauri `emitTo` proves delivery only; it does not prove execution, so a command
+that can fail, be refused, be cancelled, or stall requires a typed return event and a local deadline.
+
+### 2. Signatures
+
+```typescript
+type CostumePhase = "started" | "succeeded" | "failed" | "cancelled";
+interface CostumeSwitchPayload { costumeId: string }
+interface CostumeResultPayload {
+  costumeId: string;
+  phase: CostumePhase;
+  reason?: string;
+}
+
+requestCostumeSwitch(costumeId: string): Promise<void>; // delivery only
+requestCostumeCancel(costumeId: string): Promise<void>; // delivery only
+publishCostumeResult(result: CostumeResultPayload): Promise<void>;
+```
+
+The event names are `pet:costume-switch` (home -> pet), `pet:costume-cancel` (home -> pet), and
+`pet:costume-result` (pet -> home). The home reducer accepts `request`, `undeliverable`, `result`, `cancel`, and
+`timeout` actions. Its local result deadline is 45 seconds, deliberately longer than the pet renderer's 30-second
+load timeout.
+
+### 3. Contracts
+
+- The command owner validates every inbound payload before acting. Empty/non-string `costumeId` and unknown result
+  phases are dropped with a warning breadcrumb; event callbacks do not throw.
+- The executor reports every accepted lifecycle: `started` followed by exactly one of `succeeded`, `failed(reason)`,
+  or `cancelled`. A guard rejection reports `failed` with a closed reason (`busy`, `no-scene`, `unknown-costume`, or
+  `not-renderable`) instead of returning silently.
+- The initiating page marks only the commanded row pending. Selection follows `succeeded`, never the click. Failure,
+  cancellation, undeliverable emit, and deadline all release pending so another command can be attempted.
+- Cancel releases the initiating UI before emitting the cancel command. A missing/dead executor therefore cannot wedge
+  the page. The executor cancels only when `costumeId` matches its active switch.
+- A late `succeeded` result is still authoritative presentation truth: follow the costume the pet now wears and clear a
+  stale deadline error. Durable costume identity remains Core/pet-owned, not home-page-owned.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required behavior |
+|-----------|-------------------|
+| Invalid command/result payload | Drop it, warn with event name + payload, preserve current state |
+| Executor guard refuses command | Emit `failed` with a named refusal reason |
+| Command emit rejects | Clear pending and render an undeliverable error |
+| Executor switch throws or hits its renderer timeout | Emit `failed(reason)`; keep the previous selection |
+| Operator cancels | Clear home pending immediately; executor reports `cancelled` when its hook settles |
+| Executor never answers | Home's 45-second deadline clears pending and shows a retryable error |
+| Result belongs to another costume | Ignore non-success endings; an observed `succeeded` follows the pet's actual state |
+| Cancel id does not match active switch | Warn and do not cancel another command |
+
+### 5. Good/Base/Bad Cases
+
+- Good: click -> pending row -> `started` -> `succeeded`; only then does the highlight move.
+- Base: a refusal, renderer failure, Cancel, or deadline clears pending, leaves the old highlight, and permits retry.
+- Bad: fire-and-forget command + optimistic highlight + unbounded spinner. Delivery is not completion and the UI will
+  lie or wedge when the other window is absent or half-alive.
+
+### 6. Tests Required
+
+- `lib/costume-switch-event.test.ts`: all three event names, valid phase round-trips, malformed payload drop + warning.
+- `windows/pet/costume-report.test.ts`: started/succeeded ordering, failed reason, cancelled settle, every guard refusal.
+- `windows/home/pages/costume/costume-select-state.test.ts`: selection moves only on success; failure, Cancel, deadline,
+  and undeliverable emit release pending; stale/foreign results cannot corrupt the active row.
+- Component/manual: one row alone renders pending + Cancel, other rows remain clickable, and manual checks #74/#75 pass
+  against the real pet renderer and Tauri event bridge.
+
+### 7. Wrong vs Correct
+
+```typescript
+// Wrong: delivery is treated as success and the UI can wait forever.
+setSelected(costumeId);
+await emitTo("pet", "pet:costume-switch", { costumeId });
+
+// Correct: the request creates pending state; only the executor's result moves selection.
+dispatch({ kind: "request", costumeId });
+await requestCostumeSwitch(costumeId);
+// Later: dispatch({ kind: "result", result }); with a local deadline running.
+```
+
 ## Page presentation contract
 
 - The shell (`home-shell.tsx`) owns the nav column and a `<main>` flex column; a page renders `<PageHeader>` + `<PageBody>` from `page-chrome.tsx` — except a page that owns its own scroll (chat: header, banner, timeline, composer).

@@ -41,7 +41,8 @@ Every production source file (`.ts`/`.tsx`) opens with a 3-6 line module-contrac
 - React imports inside `renderer/` (framework-free zone).
 - Direct `ws-client`/`invoke` calls from components (must go through hooks).
 - Whole-store subscriptions; `useStore()` without selector.
-- localStorage/sessionStorage for durable state (state of record lives in the Agent Core).
+- localStorage/sessionStorage for durable or authoritative state (state of record lives in the Agent Core); the only
+  localStorage exception is the allow-listed, schema-validated, privacy-reviewed SWR cache in `state-management.md`.
 - Opaque backgrounds on the pet overlay root (breaks transparency/click-through).
 
 ## Testing
