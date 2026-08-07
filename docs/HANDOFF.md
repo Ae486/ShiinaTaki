@@ -2,7 +2,7 @@
 
 **You are the incoming session. Read this document fully, then the required docs in §2, then act as the Leader (主脑) of a trellis master/worker development flow.** This file is your bootstrap program — what exists, what to read, how to behave, how to drive implementation.
 
-> **Updated 2026-08-07 (sixth pass, MCP schema compatibility close)**. M1–M4 shipped and pushed. M5 has **T1/T2/T3a/T3b + time-awareness + T5 + settings-panel + MCP schema compatibility DONE** (see §1). The compatibility prerequisite landed as `f7a406a`; D60's earlier native-search direction is now explicitly reopened for owner review and is not an implementation mandate. T4 remains design-ready (`t4-decisions.md` R1–R12); no ordering beyond the named decision review is implied. Everything below distinguishes verified fact from plan.
+> **Updated 2026-08-07 (seventh pass, web-search decision close)**. M1–M4 shipped and pushed. M5 has **T1/T2/T3a/T3b + time-awareness + T5 + settings-panel + MCP schema compatibility DONE** (see §1). The owner selected D60 option A: keep Tavily Remote MCP until a concrete promotion signal; the review is archived and no native-search implementation is scheduled. D59/D61 are the recommended reliability batch before T4 because proactive delivery requires reconnecting windows and bounded requests. T4 remains design-ready (`t4-decisions.md` T4-R1–T4-R12). Everything below distinguishes verified fact from plan.
 
 ---
 
@@ -64,7 +64,7 @@ Renderer locked by spike (#13: `untitled-pixi-live2d-engine` + pixi 8); transpar
 - **T5 memory redesign + context management** — DONE, archived (`.trellis/tasks/archive/2026-08/07-28-memory-context`), 7 batches each committed as a feat(core)+docs(trellis) pair (last: b944263/c925e59). What shipped: (1) three-tier memory — user-authored identity card (read-only to the agent, wins conflicts) / tidy-maintained blocks (user-model, memory-index) / searchable rows behind a write gate (R15 behaviour-change test, restricted auto writer, R9 dedupe→reinforce, R10 first-person voice, origin fencing); (2) CJK retrieval — unicode61 + `Intl.Segmenter` search_terms column (D53 seam), re-derived bm25 weights, disclosure as a recall channel not an AND gate; (3) R6 removal — no per-turn retrieved block, pull via `memory_search` only, memory prompt procedures (R12/R16–R19); (4) maintenance — model-led tidy pass, retention sweeper, Utility Slot (background LLM calls routable to a cheap model via `TAKI_UTILITY_*`); (5) replay view (ADR 0008) — volatile context in a `<turn-context>` in-flight tail (system prompt day-stable), token-measured window (declared → EMA-calibrated by real usage → estimator fallback; overflow self-heal, migration 011), conversation compaction (rolling per-character summary, migration 012, external async compactor on the utility slot, retire-all-but-newest-40, NO summary truncation, date-anchored summary prompt). Detail: notes.md closure blocks in the archived task dir; manual checks 84–95 queued for owner; research banks rd-prompt-philosophy.md + re-compaction-prompts.md feed T4.
 - **Settings panel / home surface** — DONE, archived at `.trellis/tasks/archive/2026-08/08-03-settings-panel` after six batches. Shipped: Core-owned sparse config store (migration 013, 34 registry knobs, `env > stored > default`, operator-only `config.*`, secret presence only); runtime-created single-instance `home` window with registry-driven pages and the former chat window migrated into it; model-area right-click operation wheel and left-button-only pet reactions; settings/operations/perception/costume pages; `memory.status`; the existing attachment `media.usage/clear` surface (D46's on-demand screenshot debt remains open); result-bearing costume switching with Cancel/45s recovery; guarded SWR snapshots; and the clean-room BANDORI-referenced visual pass. The owner accepted manual #74/#75. Closeout fix `6e6f263` writes a lowered declared context window back to calibration state so `memory.status` matches settings after restart. D38/D46/D54 remain intentionally open; D58-B is an owner-development deferral with a hard pre-non-owner gate; D59/D61 track WS/recovery debt; D62 tracks the legacy `main` pairing window.
 - **Research banks (committed, e5a0c49)**: `t4-decisions.md` (R1–R12, T4 立项-ready), 4 T4 research docs, **`t5-decisions.md` (R0–R22, BINDING for T5)**, `t5-context-management-survey.md`, `t5-memory-systems-survey.md` (§11 covers promotion/archived-tier/write-restraint + the Nocturne system prompt read in full). Earlier banks: `m5-proactivity-survey.md`, `hermes-memory-analysis.md`. Local references: `references/hermes-agent-main` (MIT), `references/nocturne_memory-main` (MIT — its `docs/system_prompt_en.md` is the closest prior art for T5's R12 prompt; clean-room only).
-- **Deferred-decisions register**: read the live table, not this summary, before scoping. Settings close added/updated D58 (skip-list deferred by owner), D59 (window-level WS reconnect), D60 (temporary Tavily plus the approved schema-compatibility prerequisite), D61 (pet-side costume guard deadline), and D62 (legacy `main` consolidation).
+- **Deferred-decisions register**: read the live table, not this summary, before scoping. Settings close added/updated D58 (skip-list deferred by owner), D59 (window-level WS reconnect), D60 (DONE: keep Tavily MCP until a named promotion signal), D61 (pet-side costume guard deadline), and D62 (legacy `main` consolidation).
 
 ### Environment
 - Node 24, pnpm 10, Rust 1.88 msvc, WebView2 present. `gh` authed as `Ae486`, git user `PLeiA`, remote → github.com/Ae486/ShiinaTaki. A real OpenAI-compatible key is in `.env.local` (L2 tests + integration).
@@ -163,23 +163,22 @@ AI SDK 7, Tauri 2, zod 4, PixiJS 8, the Live2D runtime all move fast. **Never co
 
 ---
 
-## 4. Recommended first moves after MCP schema compatibility
+## 4. Recommended first moves after the web-search decision review
 
-1. Treat `mcp-tool-schema-compatibility` as shipped at `f7a406a`. Its durable contract is
-   `.trellis/spec/backend/mcp-tool-schema-compatibility.md`; do not rediscover or move normalization into provider
-   request rewriting.
-2. Reopen D60 as a decision review, not an approved native-search implementation. The owner did not request a native
-   tool and explicitly permits rejecting the prior Leader's proposal.
-3. Compare at least: keep Tavily Remote MCP; build a thin Core-owned policy/projection wrapper over a professional
-   search provider; or adopt an established multi-provider/search-and-fetch framework. Separate search-provider
-   quality from host-side policy, result shaping, security, observability, and credential ownership.
-4. Read local Hermes/OpenClaw references first, then use approved external MCP research for current framework/API
-   evidence. Record what each project actually implements for search, fetch, extraction, crawling, and SSRF defenses.
-   Do not write code until the owner rules on the comparative design.
-5. **T4 setup remains ready after the named next task**: read `t4-decisions.md` (R1-R12), the T5 archived closure
+1. Treat D60 option A as final for the current trigger set. The review is archived at
+   `.trellis/tasks/archive/2026-08/08-07-web-search-decision-review/`; Tavily Remote MCP remains the experimental
+   surface, and no Core wrapper, search framework, fetch tool, or live provider benchmark is scheduled.
+2. **Recommended next batch: D59 + D61 reliability.** Add window-level connection state and reconnect/resubscribe for
+   the pet, home, and chat sockets; settle old pending RPCs; add initiator-owned request deadlines; and ensure the
+   pet-side costume switch guard always releases while preserving `abortSwitch()` for late renderer completions.
+   This batch is not active until the owner approves its PRD.
+3. Do not reduce D59 to one button error. A dead Core disables every page action; the honest boundary is shared
+   connection status plus recovery. Reconnect must restore avatar, timeline, and config subscriptions and must not
+   duplicate handlers or leak the replaced client.
+4. **T4 setup remains ready after the reliability batch**: read `t4-decisions.md` (T4-R1–T4-R12), the T5 archived closure
    blocks, `docs/MEMORY-DESIGN.md`, and ADR 0008. Preserve time information across day line, turn-context, memory
    ages, and summary date anchor. D56/D57 carry the relevant prompt/context triggers.
-6. T6 still owns settings-suite surfaces not consumed here (permission, character, MCP/skills management, and the
+5. T6 still owns settings-suite surfaces not consumed here (permission, character, MCP/skills management, and the
    remaining perception/proactivity controls). #79 is only partially closed: restart persistence passed; real-live
    `until` expiry remains unchecked. Push cadence remains milestone-close or explicit owner request.
 
@@ -238,7 +237,7 @@ gh issue list -R Ae486/ShiinaTaki --label ready-for-agent
 
 ---
 
-*Handoff updated 2026-08-07 at MCP schema compatibility close. M1-M4 shipped; M5's T1/T2/T3a/T3b + time-awareness +
-T5 + settings-panel + MCP schema compatibility are done. Next: owner review of D60's native-search rationale versus
-retaining or wrapping professional MCP/provider capability. The prior native-tool direction is not binding. T4 remains
-design-ready; this handoff does not invent a later order the owner has not ruled.*
+*Handoff updated 2026-08-07 at the D60 decision close. M1-M4 shipped; M5's T1/T2/T3a/T3b + time-awareness +
+T5 + settings-panel + MCP schema compatibility are done. D60 option A keeps Tavily Remote MCP and schedules no native
+search implementation. Recommended next: owner approval and PRD for the D59/D61 reliability batch; T4 remains
+design-ready behind that reliability work.*
