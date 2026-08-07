@@ -2,6 +2,8 @@ import { execPath } from "node:process";
 import { fileURLToPath } from "node:url";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { Experimental_StdioMCPTransport } from "@ai-sdk/mcp/mcp-stdio";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText, type ToolSet } from "ai";
 import { afterEach, describe, expect, it } from "vitest";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import type { McpServerEntry } from "./mcp-config.ts";
@@ -68,6 +70,25 @@ const ECHO_TOOL = {
   description: "Echoes text",
   inputSchema: { type: "object", properties: { text: { type: "string" } }, required: ["text"] },
 };
+const TAVILY_TOOL = {
+  name: "search",
+  description: "Search the web for current information on any topic.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      query: { type: "string", description: "Search query." },
+      time_range: {
+        anyOf: [
+          { type: "string", enum: ["day", "week", "month", "year"] },
+          { type: "null" },
+        ],
+        description: "Optional recency range.",
+        default: null,
+      },
+    },
+    required: ["query"],
+  },
+};
 const echoOk: CallHandler = (msg) => ({
   jsonrpc: "2.0",
   id: msg.id,
@@ -80,6 +101,27 @@ function memConnect(transports: Map<string, InMemoryTransport>): McpConnect {
     if (!transport) throw new Error(`no transport for ${entry.key}`);
     return createMCPClient({ transport });
   };
+}
+
+async function captureProviderTools(tools: ToolSet): Promise<unknown[]> {
+  let requestBody: string | undefined;
+  const provider = createOpenAICompatible({
+    name: "mcp-schema-fixture",
+    baseURL: "https://provider.invalid/v1",
+    fetch: async (_input, init) => {
+      requestBody = String(init?.body);
+      return new Response(
+        JSON.stringify({
+          choices: [{ message: { role: "assistant", content: "ok" }, finish_reason: "stop" }],
+          usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    },
+  });
+  await generateText({ model: provider("fixture-model"), prompt: "Inspect available tools.", tools });
+  const parsed = JSON.parse(requestBody ?? "{}") as { tools?: unknown[] };
+  return parsed.tools ?? [];
 }
 
 describe("createMcpManager", () => {
@@ -135,6 +177,100 @@ describe("createMcpManager", () => {
     await manager.close();
     await manager.close();
     expect(transport.closedCount).toBe(1); // second close is a no-op
+  });
+
+  it("isolates one incompatible definition while preserving model schemas and raw call names", async () => {
+    const called: string[] = [];
+    const call: CallHandler = (msg) => {
+      called.push(msg.params.name);
+      return { jsonrpc: "2.0", id: msg.id, result: { content: [{ type: "text", text: msg.params.name }] } };
+    };
+    const bad = {
+      name: "unsafe",
+      description: "TOP_SECRET_SCHEMA_TEXT",
+      inputSchema: {
+        type: "object",
+        properties: { value: { anyOf: [{ type: "string" }, { type: "null" }] } },
+        required: ["value"],
+      },
+    };
+    const transport = new InMemoryTransport([TAVILY_TOOL, bad, ECHO_TOOL], call);
+    const manager = (await makeManager(
+      [{ key: "tavily", config: { command: "x" } }],
+      memConnect(new Map([["tavily", transport]])),
+    )) as McpManager & { records: Array<{ level: string; obj: unknown; msg: string | undefined }> };
+
+    expect(Object.keys(manager.tools())).toEqual(["tavily_search", "tavily_echo"]);
+    const search = manager.tools().tavily_search;
+    const echo = manager.tools().tavily_echo;
+    await search?.execute?.({ query: "current" }, { toolCallId: "c1", messages: [] } as never);
+    await echo?.execute?.({ text: "hello" }, { toolCallId: "c2", messages: [] } as never);
+    expect(called).toEqual(["search", "echo"]);
+
+    const searchSchema = await (
+      search?.inputSchema as unknown as { jsonSchema: Promise<Record<string, unknown>> }
+    ).jsonSchema;
+    const echoSchema = await (
+      echo?.inputSchema as unknown as { jsonSchema: Promise<Record<string, unknown>> }
+    ).jsonSchema;
+    expect((searchSchema.properties as Record<string, unknown>).time_range).toEqual({
+      type: "string",
+      enum: ["day", "week", "month", "year"],
+      description: "Optional recency range.",
+    });
+    expect((echoSchema.properties as Record<string, unknown>).text).toEqual({ type: "string" });
+
+    const providerTools = await captureProviderTools(manager.tools());
+    expect(providerTools).toEqual([
+      {
+        type: "function",
+        function: {
+          name: "tavily_search",
+          description: TAVILY_TOOL.description,
+          parameters: {
+            type: "object",
+            properties: {
+              query: { type: "string", description: "Search query." },
+              time_range: {
+                type: "string",
+                enum: ["day", "week", "month", "year"],
+                description: "Optional recency range.",
+              },
+            },
+            required: ["query"],
+            additionalProperties: false,
+          },
+        },
+      },
+      {
+        type: "function",
+        function: {
+          name: "tavily_echo",
+          description: ECHO_TOOL.description,
+          parameters: {
+            type: "object",
+            properties: { text: { type: "string" } },
+            required: ["text"],
+            additionalProperties: false,
+          },
+        },
+      },
+    ]);
+
+    const warnings = manager.records.filter((record) => record.level === "warn");
+    expect(warnings).toEqual([
+      {
+        level: "warn",
+        obj: {
+          server: "tavily",
+          toolName: "unsafe",
+          code: "REQUIRED_NULLABLE_UNSUPPORTED",
+          path: "$.properties.value",
+        },
+        msg: "mcp tool schema incompatible; skipped",
+      },
+    ]);
+    expect(JSON.stringify(warnings)).not.toContain("TOP_SECRET_SCHEMA_TEXT");
   });
 
   it("connects a real stdio child, lists and calls a tool end-to-end (T6)", async () => {

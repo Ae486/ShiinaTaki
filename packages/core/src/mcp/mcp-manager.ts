@@ -1,12 +1,13 @@
 /**
  * INPUT:  McpServerEntry[] (from mcp-config) + a logger + an optional connect override (tests)
  * OUTPUT: createMcpManager(deps) -> Promise<McpManager> { tools(), describe(name), close() }
- * POS:    core/mcp — connects operator MCP servers at boot, namespaces + error-wraps their tools into one ToolSet
+ * POS:    core/mcp — list/prepare/convert orchestration; namespaces + error-wraps operator MCP tools into one ToolSet
  */
 import type { Tool, ToolSet } from "ai";
 import type { Logger } from "../logging/logger.ts";
 import type { McpServerEntry } from "./mcp-config.ts";
 import { defaultConnect, type McpClient, type McpConnect } from "./mcp-connect.ts";
+import { prepareMcpToolDefinitions } from "./mcp-schema-compat.ts";
 
 /** The raw MCP identity behind a namespaced ToolSet key — what the approval gate + CLI display use. */
 export interface McpToolRef {
@@ -40,7 +41,7 @@ export async function createMcpManager(deps: McpManagerDeps): Promise<McpManager
   const tools: ToolSet = {};
   const refs = new Map<string, McpToolRef>();
 
-  const results = await Promise.allSettled(deps.entries.map((entry) => discover(entry, connect)));
+  const results = await Promise.allSettled(deps.entries.map((entry) => discover(entry, connect, log)));
   results.forEach((result, index) => {
     const entry = deps.entries[index];
     if (!entry) return;
@@ -66,12 +67,21 @@ export async function createMcpManager(deps: McpManagerDeps): Promise<McpManager
   };
 }
 
-async function discover(entry: McpServerEntry, connect: McpConnect): Promise<{ client: McpClient; tools: ToolSet }> {
+async function discover(
+  entry: McpServerEntry,
+  connect: McpConnect,
+  log: Logger,
+): Promise<{ client: McpClient; tools: ToolSet }> {
   const client = await connect(entry);
   try {
-    // client.tools() returns McpToolSet (dynamic tools, input typed unknown); ToolSet's variance is stricter, so
-    // widen through unknown — the tools are called only via their own closed-over execute, never structurally.
-    return { client, tools: (await client.tools()) as unknown as ToolSet };
+    const listed = await client.listTools();
+    const prepared = prepareMcpToolDefinitions(listed);
+    for (const skipped of prepared.skipped) {
+      log.warn({ server: entry.key, ...skipped }, "mcp tool schema incompatible; skipped");
+    }
+    // Dynamic MCP inputs are unknown while ToolSet is invariant. Execution stays in the SDK's raw-name closure.
+    const tools = client.toolsFromDefinitions(prepared.definitions) as unknown as ToolSet;
+    return { client, tools };
   } catch (error) {
     await client.close().catch(() => undefined); // no zombie transport if listing fails post-discovery
     throw error;
