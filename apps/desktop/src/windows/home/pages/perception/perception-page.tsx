@@ -42,7 +42,11 @@ export function PerceptionPage() {
       <PageHeader title="感知与隐私" hint="暂停观察、查看采样与活动记录，以及留存策略的去处。" busy={perception.refreshing} />
       <PageBody>
         {perception.error && <PageAlert>{perception.error}</PageAlert>}
-        <PauseControls pause={perception.pause} onSet={(params) => void perception.setPause(params)} />
+        <PauseControls
+          pause={perception.pause}
+          connectionReady={perception.connectionReady}
+          onSet={(params) => void perception.setPause(params)}
+        />
         <PageCard title="采样状态">
           {perception.card ? <LabeledRows rows={samplingRows(perception.card)} /> : <p className="text-xs text-slate-400">读取中…</p>}
         </PageCard>

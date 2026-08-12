@@ -34,6 +34,11 @@ A secondary window is created at runtime, not declared in `tauri.conf.json`:
 
 Each window opens its OWN operator socket via `lib/ws-client.ts` (concurrent same-device sockets are allowed by the Core's connection registry — verified). A window does NOT share JS memory or a socket with another window; cross-window liveness is the Core's `timeline.appended` / event fan-out, never shared memory (matches state-management.md). Loopback operators auto-trust (P3) — no pairing UI. Inside home there are exactly TWO sockets: `use-home-connection.ts` (shared with every settings-family page through `HomeClientContext`) and the chat page's own (`use-chat-connection.ts`) — the streaming turn state must not share a client with request/response pages.
 
+Every owner replaces whole authenticated client generations after an observed close/failure; it never reuses a closed
+client, buffers offline commands, or replays mutations. Connected status is published only after that owner's required
+restoration. The complete lifecycle, deadline, timing-policy, timeline-reconciliation, and readiness contract lives in
+[`operator-connection-recovery.md`](./operator-connection-recovery.md).
+
 ## Cross-window commands (the pet owns the scene, the pages own the surface)
 
 A page that needs something only the pet window can do COMMANDS it and does not reach into it:
@@ -68,8 +73,9 @@ publishCostumeResult(result: CostumeResultPayload): Promise<void>;
 
 The event names are `pet:costume-switch` (home -> pet), `pet:costume-cancel` (home -> pet), and
 `pet:costume-result` (pet -> home). The home reducer accepts `request`, `undeliverable`, `result`, `cancel`, and
-`timeout` actions. Its local result deadline is 45 seconds, deliberately longer than the pet renderer's 30-second
-load timeout.
+`timeout` actions. Each pending row captures `currentTimingPolicy().homeResultMs` once; a Home client replacement must
+not restart that timer. The validated relationship is `rendererLoadMs < petCostumeTotalMs < homeResultMs` (development
+profile: 30s < 40s < 45s). See [`costume-operation-lifecycle.md`](./costume-operation-lifecycle.md).
 
 ### 3. Contracts
 
@@ -80,6 +86,8 @@ load timeout.
   `not-renderable`) instead of returning silently.
 - The initiating page marks only the commanded row pending. Selection follows `succeeded`, never the click. Failure,
   cancellation, undeliverable emit, and deadline all release pending so another command can be attempted.
+- Renderer attachment is the executor's success boundary. A later `avatar.report` failure is synchronization debt,
+  not permission to report the visibly committed costume as failed.
 - Cancel releases the initiating UI before emitting the cancel command. A missing/dead executor therefore cannot wedge
   the page. The executor cancels only when `costumeId` matches its active switch.
 - A late `succeeded` result is still authoritative presentation truth: follow the costume the pet now wears and clear a
@@ -92,9 +100,10 @@ load timeout.
 | Invalid command/result payload | Drop it, warn with event name + payload, preserve current state |
 | Executor guard refuses command | Emit `failed` with a named refusal reason |
 | Command emit rejects | Clear pending and render an undeliverable error |
-| Executor switch throws or hits its renderer timeout | Emit `failed(reason)`; keep the previous selection |
+| Executor switch throws or hits its renderer/total timeout before attachment | Emit `failed(reason)`; keep the previous selection |
+| Renderer attaches, then `avatar.report` fails or times out | Keep/publish `succeeded`; mark report recovery-needed and re-report the live snapshot on reconnect |
 | Operator cancels | Clear home pending immediately; executor reports `cancelled` when its hook settles |
-| Executor never answers | Home's 45-second deadline clears pending and shows a retryable error |
+| Executor never answers | Home's captured `homeResultMs` deadline clears pending and shows a retryable error |
 | Result belongs to another costume | Ignore non-success endings; an observed `succeeded` follows the pet's actual state |
 | Cancel id does not match active switch | Warn and do not cancel another command |
 
@@ -108,6 +117,8 @@ load timeout.
 ### 6. Tests Required
 
 - `lib/costume-switch-event.test.ts`: all three event names, valid phase round-trips, malformed payload drop + warning.
+- `lib/costume-switch-attempt.test.ts` + `lib/costume-report-sync.test.ts`: total budget, stage cancellation, attachment
+  commit, report recovery, exact-boundary races, and stale report tickets.
 - `windows/pet/costume-report.test.ts`: started/succeeded ordering, failed reason, cancelled settle, every guard refusal.
 - `windows/home/pages/costume/costume-select-state.test.ts`: selection moves only on success; failure, Cancel, deadline,
   and undeliverable emit release pending; stale/foreign results cannot corrupt the active row.

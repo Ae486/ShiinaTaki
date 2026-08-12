@@ -10,6 +10,10 @@ Use this contract when adding an operator-visible Core knob, changing how a stor
 adding a `config.*` consumer. The load order and provenance are part of the product contract: an explicit process
 environment value wins, an operator value applies when the environment is silent, and the built-in default is last.
 
+The D59/D61 timing family is the first fully live cross-layer consumer: Shared owns its complete schema, Core validates
+both individual values and policy relationships, and every desktop connection owner keeps only an in-memory last-good
+projection.
+
 This is infrastructure and a cross-layer protocol. Changes must keep the database, Core resolver/writer, shared zod
 schemas, operator methods, and UI apply-state wording aligned.
 
@@ -47,6 +51,19 @@ type ConfigSetResult = {
 };
 
 type ConfigChanged = { key: string; value: ConfigValue | null };
+
+type TimingPolicy = {
+  reconnectBaseMs: number;
+  reconnectCapMs: number;
+  reconnectStabilityResetMs: number;
+  openAuthMs: number;
+  interactiveRpcMs: number;
+  longRpcMs: number;
+  chatAckMs: number;
+  petCostumeTotalMs: number;
+  rendererLoadMs: number;
+  homeResultMs: number;
+};
 ```
 
 All three request methods are operator-only and Core-local. There is no Rust mirror because the Shell does not
@@ -67,6 +84,14 @@ participate.
   close removes the subscriber through `ctx.onClose`.
 - `apply` is truthful operator guidance. `restart` means the row is durable now and loaders consume it on the next
   Core boot. Mark a knob `live` only after its production consumption site re-reads per use.
+- The ten D59/D61 timing rows come from `TIMING_CONFIG_KEYS` and `TIMING_POLICY_DEVELOPMENT_DEFAULTS` in
+  `@taki/shared`; Core and Desktop must not hand-declare duplicate keys/defaults. They are `live` because authenticated
+  desktop clients observe `config.changed`, reread the full effective policy, and apply it to later operations.
+- A timing write/reset is validated prospectively against the complete effective policy before store mutation. Required
+  relationships are `reconnectBaseMs <= reconnectCapMs` and
+  `rendererLoadMs < petCostumeTotalMs < homeResultMs`.
+- A desktop timing refresh is atomic and last-good: one invalid/missing field rejects the whole candidate. The Core
+  store remains authoritative; the desktop fallback exists only so open/auth/reconnect can operate while Core is down.
 - Values never enter config log lines. Logging may include only the key, refusal reason, reset flag, and apply class.
 
 ## 4. Validation & Error Matrix
@@ -82,6 +107,7 @@ Every refusal uses app error code `CONFIG_REFUSED` and a machine-readable `error
 | Row is classified `env-only` | `env-only` | unchanged; no push |
 | Params contain an object/array or an empty key | shared schema rejects before the handler | unchanged; no push |
 | Stored TEXT is not JSON or decodes to a composite | repository throws at the DB boundary | boot/read fails visibly |
+| One timing value is valid alone but makes the full policy inconsistent | `invalid-value` with the cross-field issue | unchanged; no push |
 | Valid primitive or reset | return `status: "ok"` with apply class | upsert/delete; one push |
 
 ## 5. Good / Base / Bad Cases
@@ -92,6 +118,8 @@ Every refusal uses app error code `CONFIG_REFUSED` and a machine-readable `error
   refused without writing a shadow row.
 - Base: reset sends `value: null`; the row is deleted, subscribers receive `{ key, value: null }`, and resolution
   falls back to environment/default.
+- Base: lowering `homeResultMs` to or below `petCostumeTotalMs` is refused atomically even though the submitted value is
+  a positive integer; no inconsistent transient policy is published.
 - Bad: copy all environment/default values into the table on first boot. Removing an environment override can then
   reveal a stale seed that the operator never chose.
 - Bad: store API keys in `config`. This surface reports presence only; moving secret input from bootstrap env to the
@@ -104,7 +132,10 @@ Every refusal uses app error code `CONFIG_REFUSED` and a machine-readable `error
 - `knob-registry.test.ts`: exact unique key set, defaults validate, input metadata validates, secrets/env-only pinned.
 - `config-source.test.ts`: all precedence orders, empty env handling, env-only/secret exclusions, full masked list.
 - `config-writer.test.ts`: success, reset, all five refusal reasons, no mutation/no push on refusal.
+- `config-writer.test.ts` and `config-source.test.ts`: timing cross-field write/reset validation over effective
+  env/stored/default precedence.
 - `config-methods.test.ts`: operator-only methods, masked list, successful changed pushes, close cleanup, app-error data.
+- `timing-policy-schema.test.ts`: exact timing key set, development defaults, projection, and all three relationships.
 - A boot-path test must prove at least one stored restart knob reaches its real loader when the environment is absent.
 
 ## 7. Wrong vs Correct

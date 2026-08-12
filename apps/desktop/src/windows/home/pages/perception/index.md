@@ -4,5 +4,5 @@ card. It surfaces ONLY what perception.* already exposes — retention/screensho
 points at the settings page instead of inventing a control.
 - perception-page.tsx — page root: pause card, sampling + activity cards, retention knob pointer
 - pause-controls.tsx — the Privacy Pause card: current wording + pause / 暂停到明天 / resume
-- use-perception.ts — the page's ONLY ws touchpoint: perception.card / pauseGet / pauseSet (every write echoes server state). The card is cached in MEMORY ONLY — its activity rows are window titles — and the pause state is never cached
+- use-perception.ts — the page's ONLY ws touchpoint: perception.card / pauseGet / pauseSet; a successful replacement pause read clears stale transport error, while failed reads retain it. The card is MEMORY-ONLY and pause is never cached
 - perception-view.ts — pure view models (pause wording, sampling + activity rows) + the local-midnight deadline

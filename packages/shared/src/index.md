@@ -7,6 +7,7 @@
 - chat-schema.ts — CHAT_METHODS + chat.send/cancel/delta/complete/error param & event schemas; +ImageAttachment/IMAGE_MEDIA_TYPES (in-flight image input, #17)
 - timeline-schema.ts — TIMELINE_METHODS + timeline entry/part/history/subscribe/appended/removed schemas (ADR 0005); parts = structured tool-call/result + image fidelity; removed = cancel-retract push
 - config-schema.ts — CONFIG_METHODS + knob entry/list/set/subscribe/changed schemas + ConfigRefusalReason (settings store); operator-only, NO Rust mirror
+- timing-policy-schema.ts — single D59/D61 timing-key vocabulary + cross-field policy schema + owner-approved development defaults; shared by Core registry and Desktop consumers
 - media-schema.ts — MEDIA_METHODS + media.get/clear/usage param & result schemas (attachment byte serving + lifecycle); operator-only, NO Rust mirror
 - avatar-schema.ts — AVATAR_METHODS + avatar.subscribe/report/command schemas (LLM-driven expression/motion push); report carries the worn costume id (1f change-detection); operator-only, NO Rust mirror
 - character-schema.ts — CHARACTER_METHODS + character.import/list/costumes/costumeResolution schemas + CostumeAvailability + CharacterId slug + import-error vocabulary (#18); operator-only, NO Rust mirror

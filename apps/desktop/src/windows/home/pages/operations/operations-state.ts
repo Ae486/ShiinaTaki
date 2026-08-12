@@ -58,7 +58,8 @@ export type ClearPhase = "idle" | "confirming" | "clearing";
 export type ClearEvent = "request" | "cancel" | "confirm" | "settled";
 
 export function clearPhaseAfter(phase: ClearPhase, event: ClearEvent): ClearPhase {
-  if (event === "cancel" || event === "settled") return "idle";
+  if (event === "settled") return "idle";
+  if (event === "cancel") return phase === "clearing" ? phase : "idle";
   if (event === "request") return phase === "idle" ? "confirming" : phase;
   return phase === "confirming" ? "clearing" : phase; // confirm outside the confirm step is a no-op, never a purge
 }

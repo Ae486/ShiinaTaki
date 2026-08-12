@@ -4,9 +4,10 @@ per-character timeline the bubble glances at. Markdown text, tool cards, image t
 attachments. One continuous timeline, NO session list.
 - chat-page.tsx — page root: own WS connection + layout (character header + status banner + timeline + composer); provides the client via context
 - chat-client-context.ts — React context exposing the WsClient to deep image parts (no prop-drilling)
-- use-chat-connection.ts — the page's own operator WS (shared device identity; concurrent with the pet's socket)
-- use-chat-timeline.ts — wires the WS to the store: initial history page, live appends + removals (retract), streamed deltas, older paging; hands a retracted draft back to the composer
-- chat-timeline-store.ts — timeline entries by seq (+removeEntry for retract) + in-flight streaming row (zustand); errors toast via components/toast (D34)
+- use-chat-connection.ts — the page's independent fresh-generation owner; authentication plus timeline restoration completes before connected
+- restore-chat-timeline.ts — guarded handlers → subscribe → authoritative newest-page reconciliation; removes stale covered cache rows without dropping older pages or raced live rows
+- use-chat-timeline.ts — connected-client actions and store selectors: streamed sends/cancel, older paging, grouped rows, retracted-draft hand-back
+- chat-timeline-store.ts — seq-keyed timeline + reconnect reconciliation/tombstones + in-flight streaming row (zustand); errors toast via components/toast (D34)
 - date-group.ts — pure: chronological entries → consecutive local-date groups (date dividers)
 - timeline-view.tsx — the scrollable conversation: date dividers, rows, streaming bubble; sticks to bottom, loads older on top-reach
 - use-timeline-scroll.ts — scroll behavior: stick-to-bottom, top-reach load-older, position hold on prepend
@@ -15,6 +16,6 @@ attachments. One continuous timeline, NO session list.
 - tool-card.tsx — a compact tool-call/tool-result card (name + status label)
 - image-attachment.tsx — image part renderer (presentational): shimmer / "图片已过期" / resolved thumbnail
 - use-attachment-image.ts — lazy media.get + module ref→dataURL cache (the ws touchpoint for image parts)
-- composer.tsx — textarea + attach button + thumbnails + dual-state action (发送 while idle / 中断 aborting the in-flight turn via chat.cancel); restores a retracted draft (or toasts it when a new draft exists)
+- composer.tsx — draft/attachments remain editable during reconnect; send is readiness-gated; in-flight state still owns chat.cancel and retracted-draft recovery
 - use-image-attach.ts — file-pick → normalize (downscale/JPEG) → { mediaType, raw base64, preview }, capped at 4
 - image-attach-decode.ts — pure size-gate verdict + data-URL split (the node-testable core of use-image-attach)

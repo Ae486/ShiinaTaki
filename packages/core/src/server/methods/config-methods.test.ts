@@ -72,6 +72,20 @@ describe("config methods", () => {
     expect(entries.length).toBeGreaterThan(30);
     expect(entries.find((row) => row.key === "TAKI_WS_PORT")).toMatchObject({ value: 9100, envLocked: true });
     expect(entries.find((row) => row.key === "TAKI_MAX_STEPS")).toMatchObject({ value: 10, apply: "restart" });
+    expect(entries.find((row) => row.key === "TAKI_RPC_INTERACTIVE_TIMEOUT_MS")).toMatchObject({
+      value: 15_000,
+      apply: "live",
+      input: { kind: "int", min: 1 },
+    });
+  });
+
+  it("config.set rejects a cross-field-invalid timing update", async () => {
+    const response = (await call(build(), {
+      method: CONFIG_METHODS.set,
+      params: { key: "TAKI_RECONNECT_CAP_MS", value: 400 },
+    })) as { error: { data: { reason: string }; message: string } };
+    expect(response.error.data.reason).toBe("invalid-value");
+    expect(response.error.message).toContain("timing policy is inconsistent");
   });
 
   it("config.list masks secrets: presence only, never the value", async () => {

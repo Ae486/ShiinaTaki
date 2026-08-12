@@ -24,6 +24,8 @@ type ChatTimelineStore = {
   inflight: InflightRow | null;
   /** Initial newest-first page: reversed to chronological, merged with any live rows that raced in. */
   mergeHistory: (page: TimelineHistoryResult) => void;
+  /** Reconnect newest page: replace its covered pre-restore cache while preserving older pages and raced live rows. */
+  reconcileLatest: (input: TimelineReconciliation) => void;
   /** An older page (scroll-to-top): merged in; the cursor moves further back. */
   prependOlder: (page: TimelineHistoryResult) => void;
   /** A committed row (user/assistant/tool). An assistant row hands off the in-flight row (drops it). */
@@ -35,11 +37,38 @@ type ChatTimelineStore = {
   reset: () => void;
 };
 
+export interface TimelineRestoreBaseline {
+  seqs: ReadonlySet<number>;
+  nextBefore: number | null;
+  loaded: boolean;
+}
+
+export interface TimelineReconciliation {
+  page: TimelineHistoryResult;
+  baseline: TimelineRestoreBaseline;
+  removedDuringRestore: ReadonlySet<number>;
+}
+
 // Dedup by seq (a live row can also arrive in a history page) and keep ascending — the single ordering invariant.
 function mergeBySeq(existing: TimelineEntry[], incoming: TimelineEntry[]): TimelineEntry[] {
   const bySeq = new Map<number, TimelineEntry>();
   for (const entry of [...existing, ...incoming]) bySeq.set(entry.seq, entry);
   return [...bySeq.values()].sort((a, b) => a.seq - b.seq);
+}
+
+function reconcileLatestEntries(state: ChatTimelineStore, input: TimelineReconciliation): TimelineEntry[] {
+  const { page, baseline, removedDuringRestore } = input;
+  const pageSeqs = new Set(page.entries.map((entry) => entry.seq));
+  const coverageFloor = page.entries.at(-1)?.seq ?? null;
+  const retained = state.entries.filter((entry) => {
+    if (removedDuringRestore.has(entry.seq)) return false;
+    if (!baseline.seqs.has(entry.seq)) return true;
+    if (pageSeqs.has(entry.seq)) return false;
+    if (page.nextBefore === null) return false;
+    return coverageFloor !== null && entry.seq < coverageFloor;
+  });
+  const incoming = page.entries.filter((entry) => !removedDuringRestore.has(entry.seq));
+  return mergeBySeq(retained, incoming);
 }
 
 export const useChatTimelineStore = create<ChatTimelineStore>()((set) => ({
@@ -49,6 +78,12 @@ export const useChatTimelineStore = create<ChatTimelineStore>()((set) => ({
   inflight: null,
   mergeHistory: (page) =>
     set((state) => ({ entries: mergeBySeq(state.entries, page.entries), nextBefore: page.nextBefore, loaded: true })),
+  reconcileLatest: (input) =>
+    set((state) => ({
+      entries: reconcileLatestEntries(state, input),
+      nextBefore: input.baseline.loaded ? input.baseline.nextBefore : input.page.nextBefore,
+      loaded: true,
+    })),
   prependOlder: (page) =>
     set((state) => ({ entries: mergeBySeq(state.entries, page.entries), nextBefore: page.nextBefore })),
   appendLive: (entry) =>

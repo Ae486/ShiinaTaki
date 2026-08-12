@@ -105,4 +105,40 @@ describe("chat timeline store", () => {
     expect(useChatTimelineStore.getState().entries.map((e) => e.seq)).toEqual([1]);
   });
 
+  it("replaces only covered baseline rows while preserving older pages and post-subscribe live rows", () => {
+    const store = useChatTimelineStore.getState();
+    store.mergeHistory({ entries: [entry(30, "user", "stale"), entry(20, "assistant", "kept"), entry(10, "user", "older")], nextBefore: 10 });
+    const cached = useChatTimelineStore.getState();
+    const baseline = {
+      seqs: new Set(cached.entries.map((value) => value.seq)),
+      nextBefore: cached.nextBefore,
+      loaded: cached.loaded,
+    };
+    store.appendLive(entry(50, "assistant", "raced live"));
+
+    store.reconcileLatest({
+      page: { entries: [entry(40, "user", "new"), entry(20, "assistant", "refreshed")], nextBefore: 20 },
+      baseline,
+      removedDuringRestore: new Set(),
+    });
+
+    const state = useChatTimelineStore.getState();
+    expect(state.entries.map((value) => value.seq)).toEqual([10, 20, 40, 50]);
+    expect(state.nextBefore).toBe(10);
+  });
+
+  it("does not re-add a row removed while the replacement history request was in flight", () => {
+    const store = useChatTimelineStore.getState();
+    store.mergeHistory({ entries: [entry(1, "user", "older")], nextBefore: null });
+    const baseline = { seqs: new Set([1]), nextBefore: null, loaded: true };
+
+    store.reconcileLatest({
+      page: { entries: [entry(4, "user", "already retracted"), entry(1, "user", "older")], nextBefore: null },
+      baseline,
+      removedDuringRestore: new Set([4]),
+    });
+
+    expect(useChatTimelineStore.getState().entries.map((value) => value.seq)).toEqual([1]);
+  });
+
 });

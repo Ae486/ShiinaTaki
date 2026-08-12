@@ -477,3 +477,60 @@ Shipped definition-stage MCP schema normalization and per-tool isolation, passed
 ### Next Steps
 
 - None - task complete
+
+
+## Session 14: D59/D61 reconnect, request deadlines, and costume lifecycle
+
+**Date**: 2026-08-08
+**Task**: `.trellis/tasks/08-07-ws-reconnect-request-deadlines`
+**Branch**: `main`
+
+### Summary
+
+Converged the owner-approved D59/D61 implementation through three implementation batches and one formal Trellis check.
+Pet, shared Home, and Chat now own independent authenticated/restored WebSocket generations; ordinary JSON-RPC work is
+bounded by the installed library's native timeout requester; timing policy is Core-configured and live-applied from one
+Shared schema; and costume switching has one total budget with renderer attachment as the truthful commit boundary.
+
+### Main Changes
+
+- Added fresh transport/client generations, full-jitter capped retry, stability reset, exact-once retirement, and
+  window-level connection/readiness presentation for Pet, Home, and Chat.
+- Restored avatar report/subscribe, timeline subscribe/history reconciliation, and config consumers per generation
+  without replaying mutations.
+- Added native request deadline classes, total open/auth budget, last-good window timing stores, ten live config rows,
+  and cross-field timing validation.
+- Replaced the old costume report seam with stage-aware cancellation/deadline control, attachment-time commit,
+  report-recovery tracking, truthful live-scene reconnect reports, and retryable pre-commit initial promotion.
+- Formal check repaired Home disconnected actions, reconnect timeline authority/tombstones, timing capture across client
+  replacement, Pet bubble draft readiness, perception stale errors, exact-once media clear, and a function-cap finding.
+- Updated executable specs and task-wide closeout documents. D59/D61 remain OPEN pending owner manual checks and commit.
+
+### Git Commits
+
+None yet. No stage, commit, finish/archive, or push was performed in this session.
+
+### Testing
+
+- [OK] `pnpm -r test`: 238 files / 1,793 tests (Shared 217, CLI 32, Desktop 353, Core 1,191).
+- [OK] Desktop and full-workspace typecheck.
+- [OK] Root `pnpm lint`.
+- [OK] Desktop production build.
+- [OK] Real Core boot smoke (`ws server listening`).
+- [OK] `git diff --check` and production header/index/size audit.
+- [PENDING] Owner manual checks 96–105: real three-window stop/start, recovery fan-out, cache/draft/readiness, Pet
+  transparency, long-idle avatar path, packaged Tauri ACL, D61 #74/#75 reruns, report recovery, timing live apply, and
+  sleep/resume when practical.
+
+### Status
+
+[IN PROGRESS] **Implementation + formal check + spec update complete; owner manual acceptance and commit pending**
+
+### Next Steps
+
+- Present manual checks 96–105 to the owner and record only observed results.
+- After owner approval, create the scoped commit while excluding unrelated `CONTEXT.md`, `docs/MEMORY-DESIGN.md`, and
+  `docs/adr/0009-single-memory-authority-with-local-replica.md` changes.
+- Finish/archive only after the task commit; push requires separate owner authorization.
+- Then proceed to T4 pre-implementation research consolidation and the owner discussion checklist, without implementing
+  T4 prematurely.

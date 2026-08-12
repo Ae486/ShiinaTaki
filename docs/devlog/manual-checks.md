@@ -121,7 +121,7 @@ node --env-file-if-exists=../../.env.local src/main.ts
 - [ ] **48. 气泡↔时间线共享**（依赖前置信任）：气泡发一句 → 另一终端 CLI 对同一 character 拉 history（或直接看 core 时间线）应含这条 user 消息 + assistant 回复（服务端 `timeline.appended` 扇出，气泡不自持久化）。
 - [ ] **49. LLM 表情/动作真机可见**（依赖前置信任，配合后端 46）：聊带情绪的话 → 模型应**真的切表情/播动作**（core 日志 published 的名字应在模型上生效）；报错的名字（词表外）应**静默 no-op 不崩**（Option A 第三层）。
 - [ ] **50. 表情+气泡同框（presentation gate）**（依赖前置信任）：一次带表情的回复里，表情切换与气泡文字应**一起出现**（v1 就绪=立即）。这验证的是 D21 预留槽的接线；#31 接 TTS 后会变成「音频就绪才一起出」。
-- [ ] **51. 断连表现**：Ctrl+C 杀 core → Pet UI 连接状态应转 `disconnected`（v1 **不自动重连** operator，重开 pet 窗口即可；已知限制，非缺陷）。
+- [ ] **51. 断连表现（历史项，已被 D59 取代）**：原验收只要求 Pet 转为 `disconnected`，并把“不自动重连、重开窗口恢复”视为限制。该产品合同已由 D59 废止；不要再按此项判定当前版本。现行断连/自动恢复验收见 **96–105**。
 - [ ] **52. 首次 PAIRING_REQUIRED 不崩**：全新（清 localStorage）启动、core 未信任本设备 → Pet UI 应停在 `pairing-required` 状态而**不崩、不卡死**（气泡发送会优雅报「未连接」）。这验证前置阻塞下的降级。
 - [ ] **53. 注视跟随（纯前端，无需 WS）**：鼠标在屏幕上移动 → taki 头/眼应**平滑转向光标**；光标移到很远处头部**不应被拉到边缘**（600px 夹取）；静止时不抖（去抖门）。注视复用 #15 的同一次光标轮询，**零额外 IPC**——顺带看待机 CPU 是否仍明显低于 #13 的约 1 核基线。
 - [ ] **54. 点击分区反应（纯前端，无需 WS）**：戳 taki **头部**应出 tsundere 反应（哈？/angry/别过头），**不开气泡**；戳身体各区应各有反应（pui/shame/serious/sigh）。反应名字对不上时静默（arbeit 词表里有 angry/pui/shame/serious/sigh/smile）。
@@ -207,3 +207,17 @@ node --env-file-if-exists=../../.env.local src/main.ts
 - [ ] **94. 摘要质量目测（batch 7 探针后续）**：真实长聊触发几次压缩后直接查表读摘要——六类优先信息（承诺及履行状态 / 悬而未决的问题 / 现状 / 决定 / 情绪节点 / 原话引用）是否存活；是否第一人称、事实密度是否够（探针里文风偏"办事员"、自造分节标题，可接受，恶化再报）。**盯日期**：探针实锤素材缺年份时模型会编造年份（写了"2025"）——已按所有者裁定（2026-08-02"加入时间信息"，并强调时间感是这个 agent 的重要组成）在摘要输入加入当天日期锚（`Today is {周几}, {YYYY-MM-DD}.`，与 base-prompt 同一渲染源），生产摘要仍应抽查日期正确性，发现具体错年记一行报我。第二次压缩起看滚动合并：旧摘要里已兑现的承诺该消掉、未兑现的该原样保留。
 - [ ] **95. 撞墙告警应缺席（batch 7 wall-hit）**：压缩正常工作时，紧急裁切永远不该裁到摘要水位之后的活行——core 日志**不应出现** wall-hit warn。若出现：要么压缩没跟上（触发比例/保留条数配置异常），要么单回合塞入超大内容（截图描述/exec 洪流），记下那行 counts 报我。顺带的成本观察：主模型（推理型）做一次压缩约花 1.5 万思考 tokens，若嫌贵，配 `TAKI_UTILITY_*` 三件套把压缩分流到便宜非思考模型（探针 usage 证据在 implement 报告）。
 
+## 来自 D59/D61（窗口级 WS 自动恢复 / 请求截止时间 / 换装总预算）
+
+> 自动化与构建证据已全绿：全仓 **238 files / 1,793 tests**（Shared 217、CLI 32、Desktop 353、Core 1,191）、全工作区 typecheck、root lint、Desktop production build、Core 真实启动 smoke、`git diff --check`、production header/index/size 审计。以下验证真实 WebView2、三条独立 socket、Tauri ACL、Live2D 晚到加载与长闲置环境；必须由所有者观察后才能把 D59/D61 标 DONE。启动：裸 node 起 Core + `pnpm --filter @taki/desktop tauri dev`，同时打开 Pet、Home 非聊天页和 Home Chat。
+
+- [ ] **96. 三窗口独立断连状态 + 自动恢复（D59 核心）**：Pet、Home 非聊天页、Home Chat 都已连接时 Ctrl+C 停 Core → 三处各显示**自己 socket**的持续断连/重连状态，无需重载 WebView；重新启动 Core → 三处自动恢复，且只在各自完成认证/恢复后隐藏状态。Home Chat 仍健康时，不得据此误判 Pet 已恢复。
+- [ ] **97. 每代恢复一次且不重放 mutation**：重连后分别验证一次已知表情、一次已知动作、一次流式并落库的聊天、一次 timeline append、一次 config push 和当前页面重读；每个 push/动作只出现一次。断连前正在进行的 chat/RPC 应结算而非永久 pending，断连期间点过的 chat send、config set、清理、暂停、导入、换装不得在恢复后自动补发。
+- [ ] **98. 缓存、草稿与按钮诚实**：Core 停止期间，设置/运维/感知/服装页保留 last-good 内容；设置保存、整理、附件清除、Privacy Pause、服装导入/刷新等 Core 动作明确禁用。Home Chat 与 Pet 气泡里已输入但未发送的草稿保持；Pet 气泡不能清空一个已知处于重连状态的草稿。Core 恢复后按钮和发送能力自动恢复。
+- [ ] **99. Pet 气泡独立结算 + 恢复**：Pet socket 断开时，在气泡中保留一段未发送草稿；发送按钮应不可用且草稿不清空。若恰有一轮进行中，必须进入错误/结束态而非永久转圈。Pet 恢复后用气泡完成一轮真实对话，证明该 socket 的双向 chat 路径也恢复；Home Chat 正常不能替代此项。
+- [ ] **100. 长闲置远程动作恢复（原始具名症状）**：Pet 长时间闲置后调用一项已知 expression 与一项已知 motion，均应作用于当前模型一次。若复现“Home Chat 正常、工具返回成功、Pet 不变化”，先看 **99 的 Pet 气泡**：Pet 气泡失败说明 Pet socket 路径；Pet 气泡成功则按 subscriber count → Core notify → browser frame → route callback → vocabulary validation → model call 顺序留证，不先加 heartbeat/renderer reset。
+- [ ] **101. Pet 透明状态层**：连接/重连提示不得让 Pet 根窗口出现不透明底色，不得遮住气泡/操作轮或制造新的交互死区；恢复 connected 后提示完全消失，透明点击穿透手感与 D59 前一致。
+- [ ] **102. Packaged/Tauri 路径 ACL**：至少在真实 Tauri Pet 窗口执行一次导入服装换装，确认 `homeDir`/`join`/资源 URL 组合无 `not allowed on window "pet"`；条件允许时在 packaged build 再复验。TypeScript/build 通过不能替代此项。
+- [ ] **103. #74 在 D61 新路径复验（提交前超时）**：制造 renderer 在 attachment **之前**超时/晚到 → 总预算结算，旧模型继续显示；晚到模型自弃，不改变 Home 高亮、live scene snapshot、Core 词表或 `last-costume`。这是历史 #74 的 D61 回归，不得直接沿用 2026-08-07 的旧通过记录。
+- [ ] **104. #75 在 D61 新路径复验（Cancel / retry / 单飞释放）**：分别在解析/路径组合/renderer 阶段可行处 Cancel 或等 deadline → Home 先释放 pending，可立即重试，不持续 `busy`；每次尝试只有一个 terminal result，普通重连不会重复加载已 attach 的服装。这是历史 #75 的 D61 回归。Attachment 后的 report 失败/恢复语义已由精确边界自动化覆盖，不要求人工制造该故障。
+- [ ] **105. 时序面板 live apply + sleep/resume 环境证据**：确认十个 D59/D61 时长都在设置面板可见；修改一个便于观察的值后，**新**操作使用新值，已经开始的 retry/request/换装/Home result timer 不被重启。若条件允许，让 Windows sleep/resume 后观察三窗口能否自行恢复；无法稳定触发时如实记为未验证，不阻塞对已观察 close/reconnect 的判断。

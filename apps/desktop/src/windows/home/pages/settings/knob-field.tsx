@@ -13,6 +13,7 @@ import { KnobInput } from "./knob-input.tsx";
 
 export interface KnobFieldProps {
   entry: ConfigEntry;
+  connectionReady: boolean;
   notice: { ok: boolean; message: string } | undefined;
   onSave: (key: string, value: ConfigValue | null) => void;
 }
@@ -27,8 +28,9 @@ function badgesFor(entry: ConfigEntry): Array<{ label: string; tone: BadgeTone }
   return badges;
 }
 
-export function KnobField({ entry, notice, onSave }: KnobFieldProps) {
+export function KnobField({ entry, connectionReady, notice, onSave }: KnobFieldProps) {
   const editor = editorFor(entry);
+  const availableEditor = connectionReady || editor.disabled ? editor : { ...editor, disabled: true };
   const [draft, setDraft] = useState(editor.display);
   const [localError, setLocalError] = useState<string | null>(null);
   // A config.changed push (or an accepted save) rewrites the effective value — the field follows the server, not the
@@ -54,7 +56,7 @@ export function KnobField({ entry, notice, onSave }: KnobFieldProps) {
         </span>
       </div>
       <p className="text-[11px] leading-snug text-slate-500">{entry.description}</p>
-      <KnobInput entry={entry} editor={editor} draft={draft} onDraft={setDraft} onCommit={commit} />
+      <KnobInput entry={entry} editor={availableEditor} draft={draft} onDraft={setDraft} onCommit={commit} />
       {editor.disabledReason && <p className="text-[11px] text-slate-400">{editor.disabledReason}</p>}
       {localError && <p className="text-[11px] text-rose-600">{localError}</p>}
       {notice && <p className={`text-[11px] ${notice.ok ? "text-emerald-700" : "text-rose-600"}`}>{notice.message}</p>}

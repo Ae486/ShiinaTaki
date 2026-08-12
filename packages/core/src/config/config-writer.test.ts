@@ -78,4 +78,31 @@ describe("createConfigWriter", () => {
     const { writer } = build({ TAKI_MAX_STEPS: "" });
     expect(writer.set({ key: "TAKI_MAX_STEPS", value: 22 }).ok).toBe(true);
   });
+
+  it("refuses cross-field-invalid timing changes without mutation or push", () => {
+    const { repo, writer, changes } = build();
+
+    expect(writer.set({ key: "TAKI_RECONNECT_CAP_MS", value: 400 })).toMatchObject({
+      ok: false,
+      reason: "invalid-value",
+    });
+    expect(writer.set({ key: "TAKI_RENDERER_LOAD_TIMEOUT_MS", value: 40_000 })).toMatchObject({
+      ok: false,
+      reason: "invalid-value",
+    });
+    expect(writer.set({ key: "TAKI_HOME_RESULT_TIMEOUT_MS", value: 40_000 })).toMatchObject({
+      ok: false,
+      reason: "invalid-value",
+    });
+    expect(repo.all().size).toBe(0);
+    expect(changes).toEqual([]);
+  });
+
+  it("accepts a consistent timing override and reset returns to the shared default", () => {
+    const { repo, writer } = build();
+    expect(writer.set({ key: "TAKI_RENDERER_LOAD_TIMEOUT_MS", value: 35_000 }).ok).toBe(true);
+    expect(repo.get("TAKI_RENDERER_LOAD_TIMEOUT_MS")).toBe(35_000);
+    expect(writer.set({ key: "TAKI_RENDERER_LOAD_TIMEOUT_MS", value: null }).ok).toBe(true);
+    expect(repo.get("TAKI_RENDERER_LOAD_TIMEOUT_MS")).toBeNull();
+  });
 });

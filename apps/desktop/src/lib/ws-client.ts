@@ -36,9 +36,21 @@ import type {
   TimelineHistoryParams,
   TimelineHistoryResult,
   TimelineRemoved,
+  TimingPolicy,
 } from "@taki/shared";
+import { requestWithDeadline } from "./rpc-deadline.ts";
+import { createTimingPolicyStore, type TimingPolicyStore } from "./timing-policy.ts";
+import { createTimingPolicySync, type TimingPolicySync } from "./timing-policy-sync.ts";
 import { handshake, requestMethods, type ConnectOutcome } from "./ws-client-methods.ts";
-import { bindTransport, createRoutes, installRoutes, CONNECTION_LOST_MESSAGE, type ChatHandlers } from "./ws-client-routes.ts";
+import {
+  addConfigChangedHandler,
+  bindTransport,
+  createRoutes,
+  installRoutes,
+  CONNECTION_LOST_MESSAGE,
+  WsOpenDeadlineExceededError,
+  type ChatHandlers,
+} from "./ws-client-routes.ts";
 import type { WsTransport } from "./ws-transport.ts";
 
 export type { ChatHandlers, ConnectOutcome };
@@ -91,25 +103,75 @@ export interface WsClient {
   /** Registers the optional retract sink: a row was deleted (cancel-before-reply); the store drops it by seq. */
   onTimelineRemoved(handler: (ref: TimelineRemoved) => void): void;
   /** Registers the optional config.changed sink (the settings pages re-render the knob). */
-  onConfigChanged(handler: (changed: ConfigChanged) => void): void;
+  onConfigChanged(handler: (changed: ConfigChanged) => void): () => void;
+  /** Current last-good policy; each operation captures the relevant duration when it begins. */
+  currentTimingPolicy(): TimingPolicy;
   onClose(handler: () => void): void;
   close(): void;
 }
 
-export function createWsClient(deps: { transport: WsTransport }): WsClient {
+export interface WsClientDeps {
+  transport: WsTransport;
+  /** Window-owned so a later connection generation can retain the last-good policy without localStorage. */
+  timingPolicy?: TimingPolicyStore;
+  onTimingPolicyDiagnostic?: (message: string) => void;
+}
+
+interface TimingSyncInput {
+  deps: WsClientDeps;
+  store: TimingPolicyStore;
+  state: ReturnType<typeof createRoutes>;
+  methods: ReturnType<typeof requestMethods>;
+}
+
+function createClientTimingSync(input: TimingSyncInput): TimingPolicySync | null {
+  if (!input.deps.timingPolicy) return null;
+  return createTimingPolicySync({
+    store: input.store,
+    list: input.methods.configList,
+    subscribe: input.methods.subscribeConfig,
+    onConfigChanged: (handler) => addConfigChangedHandler(input.state, handler),
+    onDiagnostic: input.deps.onTimingPolicyDiagnostic ?? ((message) => console.warn(`[timing-policy] ${message}`)),
+  });
+}
+
+function closeClient(sync: TimingPolicySync | null, retire: () => void, transport: WsTransport): void {
+  sync?.dispose();
+  retire();
+  transport.close();
+}
+
+function remainingOpenAuthBudget(deadlineAt: number, totalMs: number): number {
+  const remainingMs = deadlineAt - Date.now();
+  if (remainingMs <= 0) throw new WsOpenDeadlineExceededError(totalMs);
+  return remainingMs;
+}
+
+export function createWsClient(deps: WsClientDeps): WsClient {
   const { transport } = deps;
+  const timingPolicy = deps.timingPolicy ?? createTimingPolicyStore();
+  const timing = () => timingPolicy.current();
   const rpc = new JSONRPCServerAndClient(
     new JSONRPCServer(),
     new JSONRPCClient((payload) => transport.send(JSON.stringify(payload))),
   );
   const state = createRoutes();
   installRoutes(rpc, state);
-  const { whenOpen, isClosed } = bindTransport(transport, rpc, state);
+  const { whenOpen, isClosed, retire } = bindTransport(transport, rpc, state);
+  const methods = requestMethods(rpc, timing);
+  const timingSync = createClientTimingSync({ deps, store: timingPolicy, state, methods });
+  transport.onClose(() => timingSync?.dispose());
 
   return {
     async connect(params) {
-      await whenOpen();
-      return handshake(rpc, params);
+      const openAuthMs = timing().openAuthMs;
+      const deadlineAt = Date.now() + openAuthMs;
+      await whenOpen(openAuthMs);
+      const handshakeOpenAuthMs = remainingOpenAuthBudget(deadlineAt, openAuthMs);
+      const handshakeTiming = () => ({ ...timing(), openAuthMs: handshakeOpenAuthMs });
+      const outcome = await handshake(rpc, handshakeTiming, params);
+      if (outcome.ok) timingSync?.start();
+      return outcome;
     },
     async chat(params, handlers) {
       // A turn started on a dead socket can never be answered — reject now instead of leaving the caller pending (D29).
@@ -118,19 +180,20 @@ export function createWsClient(deps: { transport: WsTransport }): WsClient {
         state.current = { handlers, finish: resolve };
       });
       try {
-        await rpc.request(CHAT_METHODS.send, params);
+        await requestWithDeadline({ rpc, timing, method: CHAT_METHODS.send, params });
       } catch (error) {
         state.current = null; // the turn never started — drop the stale handlers
         throw error;
       }
       await done;
     },
-    ...requestMethods(rpc),
+    ...methods,
     onAvatarCommand: (handler) => (state.push.avatar = handler),
     onTimelineAppended: (handler) => (state.push.timeline = handler),
     onTimelineRemoved: (handler) => (state.push.timelineRemoved = handler),
-    onConfigChanged: (handler) => (state.push.config = handler),
+    onConfigChanged: (handler) => addConfigChangedHandler(state, handler),
+    currentTimingPolicy: timing,
     onClose: (handler) => transport.onClose(handler),
-    close: () => transport.close(),
+    close: () => closeClient(timingSync, retire, transport),
   };
 }

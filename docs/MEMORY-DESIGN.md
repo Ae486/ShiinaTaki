@@ -1,6 +1,8 @@
 # Memory Design (v1)
 
-Native TS module in `packages/core/src/memory/`. No external service, no network dependency — memory is the Companion's most intimate data and must survive offline, forever, in a form the user can read. Sources of ideas: OpenClaw (production-proven markdown memory), nocturne (disclosure/priority fields), ATRI (intentions, reason-gated proactivity — vibe-coded reference, ideas only, zero authority), SillyTavern (keyword-triggered injection), generative-agents (deferred scoring). All mechanisms independently authored.
+> Implementation baseline: this document describes the current file-first memory module. The planned provider architecture and authority handoff are governed by ADR 0009; until that migration is implemented, the Markdown substrate below remains the runtime behavior. The target design replaces Markdown as the runtime source of truth with structured Canonical Memory Records aligned to Hindsight's public logical model. Markdown remains an import/export format and migration snapshot only.
+
+The current v1 implementation is a native TS module in `packages/core/src/memory/` with no external service or network dependency. That remains the Local Memory Provider and degraded fallback; ADR 0009 adds Hindsight as an optional external Memory Authority while preserving a structured local replica. Sources of the original module's ideas include OpenClaw (production-proven markdown memory), nocturne (disclosure/priority fields), ATRI (intentions, reason-gated proactivity — vibe-coded reference, ideas only, zero authority), SillyTavern (keyword-triggered injection), and generative-agents (deferred scoring). All original mechanisms were independently authored.
 
 v1 ships a single Character: Shiina Taki (椎名立希). Multi-character-on-screen is out of scope for v1; the layer model below keeps it open.
 
@@ -15,7 +17,7 @@ The engine (store, indexer, retriever, assembler) is **generic over layers** —
   retention: "permanent" | { rollingDays } | "expiring" }
 ```
 
-Adding/removing/reshaping a layer = editing one registry entry + a directory; the engine never changes (open-closed principle). Because files are the truth and SQLite is a rebuildable index, layer changes require **no DB migration** — just re-index. Guardrail: the registry is a config file edited in code, NOT a runtime plugin system or layer-management UI (over-engineering until proven needed). Critical guarantees are layer policy fields, not hard-coded special cases (e.g. promises = `recallPolicy: pinned, truncatable: false`).
+In the current file-first implementation, adding/removing/reshaping a layer means editing one registry entry plus a directory; the engine remains generic and the derived SQLite index can be rebuilt without a source-data migration. In the target provider architecture, the same registry remains the policy source while Canonical Memory Records carry its labels across Local and Hindsight adapters. Guardrail: the registry is a config file edited in code, not a runtime plugin system or layer-management UI. Critical guarantees are layer policy fields, not hard-coded special cases (e.g. promises = `recallPolicy: pinned, truncatable: false`).
 
 ## v1 layer registry
 
@@ -104,18 +106,24 @@ turn (blocks are read fresh, never cached). Symmetrically, **deleting a block fi
 
 ## Context assembly (deterministic order, per-section token budgets)
 
+Current file-first runtime:
+
 1. Character persona prompt (static)
 2. Emotion capsule (from companion state module — adjacent, not memory)
 3. Memory Blocks in registry order, each under its header and budget number (§Blocks above)
 4. Pinned block: all `promise`/`rule` + facts with importance >= 9 (budget ~800 tokens; overflow = oldest-milestone truncation, promises never truncated)
 5. At most one `intention` when the emotion gate passes (never listed as a checklist)
 
-No per-turn retrieved section (T5-R6): search-policy rows reach the model only through her own `memory_search` call.
+The current runtime has no per-turn retrieved section (T5-R6): search-policy rows reach the model only through her own `memory_search` call.
+
+The provider migration deliberately supersedes T5-R6 with **Automatic Memory Recall**. Before every foreground user response, the current user input queries the Global Memory Bank and active Character Memory Bank in parallel through the active provider. Results are merged, deduplicated against each other and already-visible Memory Blocks or pinned rows, filtered through Taki visibility policy, and rendered as one ephemeral retrieved-memory section under a shared configurable result and token cap; the initial default is 1024 tokens total, not 1024 per bank. Other Character banks are never queried by default.
+
+The retrieved section is attached only to that run inside the existing ephemeral `<turn-context>` suffix of the outgoing user projection, after the day-stable system instructions. This preserves the stable prompt-cache prefix and keeps recall out of persisted replay. It is not stored as a timeline message, fed back into the Write Gate or Retain, copied into a Memory Block, or treated as authoritative state. Local authority uses the local FTS5/BM25 retriever plus optional vectors; healthy Hindsight authority recalls directly from Hindsight; degraded Hindsight mode recalls from the last verified Memory Replica and may add clearly marked Pending Memory. One bank failing does not discard usable results from the other, and total recall failure records provider-health diagnostics but never blocks the response. The canonical `recall` and `reflect` tools remain available for deliberate, higher-budget investigation rather than acting as prerequisites for ordinary continuity.
 
 ## Write paths
 
-1. **Explicit tools** (LLM-invoked): `memory_write(type, content, importance, disclosure?)`, `memory_search(query)`, `memory_archive(id)`. "记住这个约定" → `promise` write, importance 10.
-2. **Auto episodic**: a background pass reviews the stretch of conversation and writes only what passes the behaviour-change test (T5-R15) — no quota, silence is the normal outcome, every skip logged.
+1. **Explicit tools** (LLM-invoked, current implementation): `memory_write(type, content, importance, disclosure?)`, `memory_search(query)`, `memory_archive(id)`. The Hindsight-provider migration replaces these model-facing names with the canonical Hindsight-aligned Memory Tool Contract; the old names survive only as non-advertised migration aliases until executable legacy callers are gone.
+2. **Auto episodic**: a background pass reviews the stretch of conversation and writes only what passes the behaviour-change test (T5-R15) — no quota, silence is the normal outcome, every skip logged. In the Hindsight target, this pass becomes an eligibility-and-bank-routing stage: the same decision selects Global, active Character, or both, then sends the original eligible span to Hindsight Retain while extraction, summarization, within-bank classification and deduplication remain Hindsight responsibilities.
 3. **Pre-compaction flush** (OpenClaw pattern): before a compaction pass advances its watermark, the background flush writer saves anything important that exists only in the retiring span (shared writer instance with the auto-memory chain).
 4. **Nightly consolidation** (croner, v1.5): distill the day's episodes → diary entry + promote/merge/archive suggestions. Ships after the core loop is stable; the schema carries `status` from day one so consolidation is additive.
 
@@ -133,13 +141,14 @@ FTS5's default unicode61 tokenizer does not segment Chinese. v1 (since T5 batch 
 
 ## Upgrade path (interfaces over engines)
 
-`Retriever` is an interface. v1 = FTS5 (plus agentic compensation: `memory_search` is LLM-invoked, so the model reformulates queries itself — partial coverage of the paraphrase gap). v2 adds embedding recall behind the same interface — the one thing lexical search cannot do is paraphrase association ("那家我们去过的拉面店" → stored "吃了豚骨拉面"), which is the "she suddenly remembers" magic; therefore v2 is committed, not optional. v2 shape, following the industry-wide pattern (every serious implementation is hybrid, none is vector-only, all degrade gracefully):
+`Retriever` is an interface shared by Automatic Memory Recall and the canonical explicit recall tool. FTS5/BM25 is the always-available baseline; the model can still reformulate a difficult query through the explicit tool when the baseline automatic query is insufficient. Optional embedding recall can be enabled behind the same interface to cover the paraphrase gap ("那家我们去过的拉面店" → stored "吃了豚骨拉面"). It is an enhancement rather than a prerequisite: users without an embedding model retain the complete sparse-retrieval path.
 
-- Hybrid **weighted union** (not intersection), OpenClaw-style ~0.7 vector / 0.3 bm25
-- Embeddings via the user's OpenAI-compatible `/v1/embeddings` (no new privacy surface — memories already flow to the same provider as chat context); vectors stored in `sqlite-vec`
-- Degradation chain baked in: embedding call fails → FTS5 still works → pinned block and files always present
+- When enabled, use a hybrid **weighted union** rather than an intersection, with the exact weighting calibrated from retrieval evidence rather than frozen upfront.
+- Embeddings use a user-configured compatible endpoint and a rebuildable local vector index; configuration is optional.
+- Initial and catch-up vector indexing run asynchronously. New or changed records may remain sparse-only until their vectors are ready, without blocking chat, synchronization, or memory mutation.
+- Degradation is structural: missing embedding configuration, an embedding call failure, or vector-index failure → FTS5/BM25 still works → pinned context remains available.
 
-Deferred beyond v2, not designed-in: recency×importance×relevance scoring (generative-agents), forgetting curves (MemoryBank), graph edges (Zep). Optional later: external MCP memory service (e.g. nocturne on VPS) as a cross-device *archive* behind the local store — never the primary.
+Deferred beyond the legacy v2 plan: recency×importance×relevance scoring and forgetting-curve experiments. The earlier assumption that any external memory service could only be a secondary archive is superseded by ADR 0009: Hindsight may become the single Memory Authority, while the Local provider becomes its complete logical replica and fallback.
 
 ## Module layout
 
@@ -159,4 +168,4 @@ packages/core/src/memory/
 | --- | --- |
 | v1 | Store + index + FTS5 retriever + assembler + explicit tools + auto episodic + pre-compaction flush + rolling summary compaction |
 | v1.5 | Nightly consolidation + diary as Pet UI panel + intention surfacing gate |
-| v2 | Embedding retriever behind `Retriever`, emotion-memory coupling refinements, optional MCP archive |
+| v2 | Optional embedding retriever behind `Retriever`, emotion-memory coupling refinements, optional external archive |

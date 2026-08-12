@@ -1,0 +1,7 @@
+# Autonomous runs have separate history and project receipts into the conversation surface
+
+Taki persists Heartbeat and Scheduled Agent execution in a Core-owned Autonomous Run History rather than hiding those runs inside the Character's relationship timeline. Only actual Companion utterances join that timeline and its default Replay View; user-expected background work may instead project a durable Run Receipt into the Home conversation surface, linked by `runId` and queryable on demand, while silent and avatar-only Heartbeats remain visually silent.
+
+This isolation is internal and does not create a user-visible session list. `characterId` owns the continuous relationship timeline, `taskId` owns a persisted Scheduled Task definition, `runId` owns one isolated execution and acts as its resume/query key, and `attemptId` distinguishes retries inside that run. Each recurring fire receives a fresh `runId`; an interrupted run resumes under the same `runId`. An SDK-facing `sessionId`, if one is required, is only an adapter mapping to an existing relationship or run identity and never a second history authority.
+
+This deliberately rejects hidden conversation rows, which would pollute the relationship and model context; logs-only execution, which would lose durable evidence and leave users unable to tell whether expected background work completed; and a generic parallel session store, which would duplicate the Core-owned timeline and run ledger without adding a product capability.

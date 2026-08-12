@@ -12,4 +12,5 @@
 - knob-registry.ts — CONFIG_KNOBS: one declarative row per operator-visible env knob (key/value schema/default/apply class/secret/input hint/description) + findKnob; the SINGLE source config.list renders from (#26 batch 1)
 - config-source.ts — createConfigSource({env, repo}) → { env(), resolve(key), effectiveAll() }; the ONE place precedence lives: env (explicitly set) > stored > built-in default; secrets masked to presence only
 - config-writer.ts — createConfigWriter({env, repo, onChanged}) → { set }; the store's only write path, with five distinct fail-closed refusals (unknown key / invalid value / env-locked / secret / env-only)
+- timing-config-validation.ts — validates a proposed timing-row set/reset against the shared full-policy relationships before config-writer mutates the sparse store
 - config-subscriptions.ts — createConfigSubscriptions() → { subscribe, unsubscribe, publish, count }; the config.changed fan-out registry (global, not character-scoped)

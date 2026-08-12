@@ -48,7 +48,7 @@ interface PushSlots {
   avatar: ((command: AvatarCommand) => void) | null;
   timeline: ((entry: TimelineEntry) => void) | null;
   timelineRemoved: ((ref: TimelineRemoved) => void) | null;
-  config: ((changed: ConfigChanged) => void) | null;
+  config: Set<(changed: ConfigChanged) => void>;
 }
 
 export interface Routes {
@@ -57,7 +57,20 @@ export interface Routes {
 }
 
 export function createRoutes(): Routes {
-  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: null } };
+  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set() } };
+}
+
+export function addConfigChangedHandler(state: Routes, handler: (changed: ConfigChanged) => void): () => void {
+  state.push.config.add(handler);
+  return () => state.push.config.delete(handler);
+}
+
+/** Retires every connection-scoped push sink before queued notifications can dispatch on a closed transport. */
+function clearPushHandlers(state: Routes): void {
+  state.push.avatar = null;
+  state.push.timeline = null;
+  state.push.timelineRemoved = null;
+  state.push.config.clear();
 }
 
 /** Routes the Core's notifications (chat stream + avatar/timeline/config pushes) to their handlers; each zod-validated. */
@@ -96,7 +109,14 @@ export function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void 
     state.push.timelineRemoved?.(TimelineRemovedSchema.parse(params));
   });
   rpc.addMethod(CONFIG_METHODS.changed, (params: unknown) => {
-    state.push.config?.(ConfigChangedSchema.parse(params));
+    const changed = ConfigChangedSchema.parse(params);
+    for (const handler of [...state.push.config]) {
+      try {
+        handler(changed);
+      } catch (cause) {
+        console.warn("[ws-client] config.changed handler failed", cause);
+      }
+    }
   });
 }
 
@@ -129,31 +149,86 @@ export function parseFrame(text: string): JsonRpcClientFrame | null {
 
 export interface TransportBinding {
   /** Resolves once the socket is open (requests must not be sent before the handshake can travel). */
-  whenOpen: () => Promise<void>;
+  whenOpen: (timeoutMs: number) => Promise<void>;
   /** True once the socket died: a new turn on a dead socket is rejected instead of left pending (D29). */
   isClosed: () => boolean;
+  /** Synchronously retires connection-scoped work before an asynchronous browser close event can arrive. */
+  retire: () => void;
+}
+
+export class WsOpenDeadlineExceededError extends Error {
+  readonly timeoutMs: number;
+
+  constructor(timeoutMs: number) {
+    super(`WebSocket did not open within ${timeoutMs}ms`);
+    this.name = "WsOpenDeadlineExceededError";
+    this.timeoutMs = timeoutMs;
+  }
+}
+
+interface OpenWaiter {
+  resolve: () => void;
+  reject: (cause: Error) => void;
+  timer: ReturnType<typeof setTimeout>;
+}
+
+function settleOpenWaiters(waiters: OpenWaiter[], cause?: Error): void {
+  for (const waiter of waiters.splice(0)) {
+    clearTimeout(waiter.timer);
+    if (cause) waiter.reject(cause);
+    else waiter.resolve();
+  }
+}
+
+function waitForOpen(transport: WsTransport, waiters: OpenWaiter[], timeoutMs: number): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const waiter: OpenWaiter = {
+      resolve,
+      reject,
+      timer: setTimeout(() => {
+        const index = waiters.indexOf(waiter);
+        if (index >= 0) waiters.splice(index, 1);
+        transport.close();
+        reject(new WsOpenDeadlineExceededError(timeoutMs));
+      }, timeoutMs),
+    };
+    waiters.push(waiter);
+  });
 }
 
 /** Wires a transport's open/message/close events into the routes + rpc pair, including the D29 close settlement. */
 export function bindTransport(transport: WsTransport, rpc: JSONRPCServerAndClient, state: Routes): TransportBinding {
   let opened = false;
   let closed = false;
-  const openWaiters: Array<() => void> = [];
+  const openWaiters: OpenWaiter[] = [];
+  const retire = (): void => {
+    if (closed) return;
+    closed = true;
+    const error = new Error(CONNECTION_LOST_MESSAGE);
+    settleOpenWaiters(openWaiters, error);
+    clearPushHandlers(state);
+    rpc.rejectAllPendingRequests("connection closed");
+    abortTurn(state, CONNECTION_LOST_MESSAGE);
+  };
   transport.onOpen(() => {
+    if (closed || opened) return;
     opened = true;
-    for (const wake of openWaiters.splice(0)) wake();
+    settleOpenWaiters(openWaiters);
   });
   transport.onMessage((data) => {
+    if (closed) return;
     const frame = parseFrame(data);
     if (frame) void rpc.receiveAndSend(frame);
   });
-  transport.onClose(() => {
-    closed = true;
-    rpc.rejectAllPendingRequests("connection closed");
-    abortTurn(state, CONNECTION_LOST_MESSAGE);
-  });
+  transport.onClose(retire);
   return {
-    whenOpen: () => (opened ? Promise.resolve() : new Promise<void>((resolve) => openWaiters.push(resolve))),
+    whenOpen: (timeoutMs) =>
+      opened
+        ? Promise.resolve()
+        : closed
+          ? Promise.reject(new Error(CONNECTION_LOST_MESSAGE))
+          : waitForOpen(transport, openWaiters, timeoutMs),
     isClosed: () => closed,
+    retire,
   };
 }

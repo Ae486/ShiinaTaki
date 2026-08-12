@@ -63,8 +63,9 @@ describe("media.clear confirm guard", () => {
     expect(clearPhaseAfter("clearing", "confirm")).toBe("clearing");
   });
 
-  it("cancels back to idle and settles back to idle after the call", () => {
+  it("cancels only before execution and settles back to idle after the call", () => {
     expect(clearPhaseAfter("confirming", "cancel")).toBe("idle");
+    expect(clearPhaseAfter("clearing", "cancel")).toBe("clearing");
     expect(clearPhaseAfter("clearing", "settled")).toBe("idle");
   });
 

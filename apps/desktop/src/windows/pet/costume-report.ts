@@ -22,7 +22,7 @@ export interface CostumeCommandView {
   switchingId: string | null;
   costumes: string[];
   availability: Record<string, CostumeAvailability>;
-  /** false = no live PetScene yet, so the switch path would drop the command. */
+  /** false = the scene or authenticated Pet client is unavailable; the locked no-scene refusal covers both. */
   ready: boolean;
 }
 

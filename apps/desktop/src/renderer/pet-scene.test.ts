@@ -66,10 +66,16 @@ describe("createPetScene idle scheduler lifecycle", () => {
 
   it("disposes the previous scheduler and creates a new one on a costume switch", async () => {
     const scene = await createPetScene(host, { renderThrottling: false });
-    await scene.switchCostume({ settingsUrl: "asset://x", resolve: () => null });
+    await scene.switchCostume({ settingsUrl: "asset://x", resolve: () => null, costumeId: "arbeit" });
     expect(idleDisposers).toHaveLength(2);
     expect(idleDisposers[0]).toHaveBeenCalledTimes(1); // outgoing scheduler torn down
     expect(idleDisposers[1]).not.toHaveBeenCalled(); // incoming scheduler still live
+    expect(scene.reportSnapshot()).toEqual({ motions: [], expressions: [], costume: "arbeit" });
+  });
+
+  it("does not invent a formal costume identity for the dev fallback scene", async () => {
+    const scene = await createPetScene(host, { renderThrottling: false });
+    expect(scene.reportSnapshot()).toEqual({ motions: [], expressions: [] });
   });
 
   it("disposes the live scheduler on scene dispose", async () => {

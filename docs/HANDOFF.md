@@ -2,7 +2,7 @@
 
 **You are the incoming session. Read this document fully, then the required docs in §2, then act as the Leader (主脑) of a trellis master/worker development flow.** This file is your bootstrap program — what exists, what to read, how to behave, how to drive implementation.
 
-> **Updated 2026-08-07 (seventh pass, web-search decision close)**. M1–M4 shipped and pushed. M5 has **T1/T2/T3a/T3b + time-awareness + T5 + settings-panel + MCP schema compatibility DONE** (see §1). The owner selected D60 option A: keep Tavily Remote MCP until a concrete promotion signal; the review is archived and no native-search implementation is scheduled. D59/D61 are the recommended reliability batch before T4 because proactive delivery requires reconnecting windows and bounded requests. T4 remains design-ready (`t4-decisions.md` T4-R1–T4-R12). Everything below distinguishes verified fact from plan.
+> **Updated 2026-08-08 (eighth pass, D59/D61 implementation/check closeout)**. M1–M4 shipped and pushed. M5 has **T1/T2/T3a/T3b + time-awareness + T5 + settings-panel + MCP schema compatibility DONE** (see §1). D60 option A remains final for the current trigger set. The active D59/D61 reliability task has converged production code and passed its one formal check; owner manual acceptance, commit, finish/archive, and push have NOT occurred. T4 remains design-ready (`t4-decisions.md` T4-R1–T4-R12) behind that closeout. Everything below distinguishes verified fact from plan.
 
 ---
 
@@ -63,8 +63,9 @@ Renderer locked by spike (#13: `untitled-pixi-live2d-engine` + pixi 8); transpar
 - **Prompt guidance pass** — DONE (commit 9f41646). BASE_SYSTEM_PROMPT teaches the fence contract, the two time lines, anti-recitation; behavior norms in `prompt/system/assistant-layer.md`.
 - **T5 memory redesign + context management** — DONE, archived (`.trellis/tasks/archive/2026-08/07-28-memory-context`), 7 batches each committed as a feat(core)+docs(trellis) pair (last: b944263/c925e59). What shipped: (1) three-tier memory — user-authored identity card (read-only to the agent, wins conflicts) / tidy-maintained blocks (user-model, memory-index) / searchable rows behind a write gate (R15 behaviour-change test, restricted auto writer, R9 dedupe→reinforce, R10 first-person voice, origin fencing); (2) CJK retrieval — unicode61 + `Intl.Segmenter` search_terms column (D53 seam), re-derived bm25 weights, disclosure as a recall channel not an AND gate; (3) R6 removal — no per-turn retrieved block, pull via `memory_search` only, memory prompt procedures (R12/R16–R19); (4) maintenance — model-led tidy pass, retention sweeper, Utility Slot (background LLM calls routable to a cheap model via `TAKI_UTILITY_*`); (5) replay view (ADR 0008) — volatile context in a `<turn-context>` in-flight tail (system prompt day-stable), token-measured window (declared → EMA-calibrated by real usage → estimator fallback; overflow self-heal, migration 011), conversation compaction (rolling per-character summary, migration 012, external async compactor on the utility slot, retire-all-but-newest-40, NO summary truncation, date-anchored summary prompt). Detail: notes.md closure blocks in the archived task dir; manual checks 84–95 queued for owner; research banks rd-prompt-philosophy.md + re-compaction-prompts.md feed T4.
 - **Settings panel / home surface** — DONE, archived at `.trellis/tasks/archive/2026-08/08-03-settings-panel` after six batches. Shipped: Core-owned sparse config store (migration 013, 34 registry knobs, `env > stored > default`, operator-only `config.*`, secret presence only); runtime-created single-instance `home` window with registry-driven pages and the former chat window migrated into it; model-area right-click operation wheel and left-button-only pet reactions; settings/operations/perception/costume pages; `memory.status`; the existing attachment `media.usage/clear` surface (D46's on-demand screenshot debt remains open); result-bearing costume switching with Cancel/45s recovery; guarded SWR snapshots; and the clean-room BANDORI-referenced visual pass. The owner accepted manual #74/#75. Closeout fix `6e6f263` writes a lowered declared context window back to calibration state so `memory.status` matches settings after restart. D38/D46/D54 remain intentionally open; D58-B is an owner-development deferral with a hard pre-non-owner gate; D59/D61 track WS/recovery debt; D62 tracks the legacy `main` pairing window.
+- **D59/D61 reliability — IMPLEMENTED + FORMALLY CHECKED, active task not yet closed** at `.trellis/tasks/08-07-ws-reconnect-request-deadlines`. The worktree now has independent Pet/Home/Chat WebSocket generations with authentication, full-jitter retry, per-generation restoration, window-level status/readiness, native JSON-RPC request deadlines, and ten panel-visible live timing rows (44 registry rows in the current worktree). Pet reconnect re-reports the live scene and re-subscribes avatar commands, covering the source-proven permanent-disconnect path behind the owner-reported long-idle symptom. D61 now owns one total costume budget through Core/Tauri/renderer/report, commits at renderer attachment, tracks report recovery separately, and retries only interrupted pre-commit initial promotion. One formal check passed 238 files / 1,793 tests, full typecheck/lint, Desktop build, Core boot smoke, diff check, and production audits. D59/D61 stay OPEN until owner manual checks 96–105 and a commit; passive half-open heartbeat remains T4.
 - **Research banks (committed, e5a0c49)**: `t4-decisions.md` (R1–R12, T4 立项-ready), 4 T4 research docs, **`t5-decisions.md` (R0–R22, BINDING for T5)**, `t5-context-management-survey.md`, `t5-memory-systems-survey.md` (§11 covers promotion/archived-tier/write-restraint + the Nocturne system prompt read in full). Earlier banks: `m5-proactivity-survey.md`, `hermes-memory-analysis.md`. Local references: `references/hermes-agent-main` (MIT), `references/nocturne_memory-main` (MIT — its `docs/system_prompt_en.md` is the closest prior art for T5's R12 prompt; clean-room only).
-- **Deferred-decisions register**: read the live table, not this summary, before scoping. Settings close added/updated D58 (skip-list deferred by owner), D59 (window-level WS reconnect), D60 (DONE: keep Tavily MCP until a named promotion signal), D61 (pet-side costume guard deadline), and D62 (legacy `main` consolidation).
+- **Deferred-decisions register**: read the live table, not this summary, before scoping. D58 remains owner-deferred; D59/D61 are implemented/check-green but OPEN for manual+commit; D60 is DONE (keep Tavily MCP until a named promotion signal); D62 tracks legacy `main` consolidation.
 
 ### Environment
 - Node 24, pnpm 10, Rust 1.88 msvc, WebView2 present. `gh` authed as `Ae486`, git user `PLeiA`, remote → github.com/Ae486/ShiinaTaki. A real OpenAI-compatible key is in `.env.local` (L2 tests + integration).
@@ -83,7 +84,7 @@ Renderer locked by spike (#13: `untitled-pixi-live2d-engine` + pixi 8); transpar
 6. **The target issue**: `gh issue view <n> -R Ae486/ShiinaTaki` — its acceptance criteria are the definition of done.
 
 **Frontend-specific (read before touching Pet UI):**
-7. **`.trellis/spec/frontend/index.md`** + its guides (directory-structure, component, hook, state-management, type-safety, quality). Auto-injected into sub-agents, but read them yourself. Key stances: **Pet UI is a disposable WS client (invariant 4)** — it owns rendering, never state-of-record; talk to Core via `@taki/shared` types, to Shell via `@tauri-apps/api` only; two windows (pet overlay + settings) have **separate Tauri capability files**.
+7. **`.trellis/spec/frontend/index.md`** + its guides (especially `operator-connection-recovery.md`, `costume-operation-lifecycle.md`, state-management, home-window, and live2d-renderer). Auto-injected into sub-agents, but read them yourself. Key stances: **Pet UI is a disposable WS client (invariant 4)** — it owns rendering, never state-of-record; talk to Core via `@taki/shared` types, to Shell via `@tauri-apps/api` only; Pet, Home, and legacy Main have separate window/capability boundaries.
 8. **`docs/TECH-STACK.md`** — renderer decision tree (the #13 spike writes back here), PixiJS/Live2D choices.
 9. **ADR 0005** (continuous timeline) — the model behind #17's chat window.
 10. **`docs/MEMORY-DESIGN.md`** — read when a UI surfaces memory/activity.
@@ -148,6 +149,9 @@ AI SDK 7, Tauri 2, zod 4, PixiJS 8, the Live2D runtime all move fast. **Never co
 ### 3.7 Sub-agent operations (hard rules, owner-directed)
 - **Use English for every message sent to a sub-agent** — initial dispatches, status requests, corrections, follow-up
   tasks, and review feedback. The Leader translates the resulting evidence into Simplified Chinese for the owner.
+- **YCE is forbidden for every sub-agent.** State this verbatim in each dispatch: `YCE is forbidden. Do not invoke it
+  or any fallback mode.` When code location is unknown, use one English `jbcontext search` query, read at least one hit,
+  then at most one narrowed `jbcontext search -p <path>` retry. Known files/symbols use direct reads or `rg`.
 - **Dispatch quality is a Leader responsibility.** Every prompt names the exact goal, ownership and frozen scope,
   authoritative sources, acceptance criteria, verification commands, prohibited actions, and report format. Require an
   honest split between completed, incomplete, failed, unverified, extra work, and residual risk; never accept a bare
@@ -163,24 +167,26 @@ AI SDK 7, Tauri 2, zod 4, PixiJS 8, the Live2D runtime all move fast. **Never co
 
 ---
 
-## 4. Recommended first moves after the web-search decision review
+## 4. Current first moves after D59/D61 formal check
 
-1. Treat D60 option A as final for the current trigger set. The review is archived at
-   `.trellis/tasks/archive/2026-08/08-07-web-search-decision-review/`; Tavily Remote MCP remains the experimental
-   surface, and no Core wrapper, search framework, fetch tool, or live provider benchmark is scheduled.
-2. **Recommended next batch: D59 + D61 reliability.** Add window-level connection state and reconnect/resubscribe for
-   the pet, home, and chat sockets; settle old pending RPCs; add initiator-owned request deadlines; and ensure the
-   pet-side costume switch guard always releases while preserving `abortSwitch()` for late renderer completions.
-   This batch is not active until the owner approves its PRD.
-3. Do not reduce D59 to one button error. A dead Core disables every page action; the honest boundary is shared
-   connection status plus recovery. Reconnect must restore avatar, timeline, and config subscriptions and must not
-   duplicate handlers or leak the replaced client.
-4. **T4 setup remains ready after the reliability batch**: read `t4-decisions.md` (T4-R1–T4-R12), the T5 archived closure
+1. Complete owner manual checks 96–105 in `docs/devlog/manual-checks.md`. The required core is real three-window
+   stop/start, independent status/restoration, cache/draft/readiness truth, Pet transparency, long-idle avatar commands,
+   packaged Pet path ACL, D61 reruns of #74/#75, and attachment-success/report-recovery truth. Sleep/resume is useful
+   environment evidence when practical, not a substitute for the observed-close path.
+2. Keep D59/D61 OPEN until that evidence and a commit exist. Do not run another formal `trellis-check` for documentation
+   closeout; only proportional document/schema/diff validation is warranted. Do not finish/archive/push without the
+   owner's corresponding authorization.
+3. Preserve the locked boundaries: no offline mutation replay, no shared cross-window socket, no UI timing persistence,
+   no report-failure rollback fiction, and no speculative heartbeat/periodic avatar resubscription. Passive half-open
+   detection belongs to T4.
+4. **T4 setup remains ready after the reliability task closes**: read `t4-decisions.md` (T4-R1–T4-R12), the T5 archived closure
    blocks, `docs/MEMORY-DESIGN.md`, and ADR 0008. Preserve time information across day line, turn-context, memory
    ages, and summary date anchor. D56/D57 carry the relevant prompt/context triggers.
-5. T6 still owns settings-suite surfaces not consumed here (permission, character, MCP/skills management, and the
-   remaining perception/proactivity controls). #79 is only partially closed: restart persistence passed; real-live
-   `until` expiry remains unchecked. Push cadence remains milestone-close or explicit owner request.
+5. D60 option A remains final for the current trigger set: Tavily Remote MCP stays the experimental search surface and
+   no Core wrapper, search framework, fetch tool, or live provider benchmark is scheduled. T6 still owns settings-suite
+   surfaces not consumed here (permission, character, MCP/skills management, and the remaining perception/proactivity
+   controls). #79 is only partially closed: restart persistence passed; real-live `until` expiry remains unchecked.
+   Push cadence remains milestone-close or explicit owner request.
 
 ---
 
@@ -201,11 +207,12 @@ an honest apply class, and a settings-page rendering path. Do not create UI-owne
 - **R15's skip log is mandatory** — once "write nothing" is the write gate's normal outcome, an unlogged skip is indistinguishable from a broken writer (mem0 issue #3009 precedent; recorded in t5-decisions).
 - **VLM-failure has no backoff in the ambient sampler** (leader-found during manual testing, unregistered): describe failures don't count toward backoff — under `keep` retention this accumulates undescribed frames at the refresh cadence. Low urgency (default is drop + ambient default-off); register a D-number if ambient goes always-on.
 - **croner is still NOT installed** despite the CLAUDE.md stack table (t4-decisions); it is a pattern evaluator, not a scheduler — the tick loop/persistence/catch-up are ours (T4).
-- **D29 is DONE**: the settings-panel ws-client split now settles a mid-turn disconnect. Do not reopen it when working
-  on D59; D59 is the broader reconnect + resubscribe + window-level status problem.
+- **D29 is DONE and now composed into D59 retirement**: a retired generation settles the mid-turn chat exactly once.
+  Do not reopen D29 as a separate fix.
 - **D48 residual**: the ambient pre-capture screen narrows the blind window to one WS round-trip but is NOT atomic; true closure = Shell-side same-instant sampling, trigger recorded in the register.
-- **Costume recovery is split deliberately**: home is result-bearing and recoverable (#74/#75 passed); D61 tracks the
-  pet-side unbounded awaits/guard wedge and should be handled with D59's per-request deadline work.
+- **Costume recovery is now one explicit lifecycle**: Home remains result-bearing, while D61 owns the Pet total budget,
+  pre-attachment cancellation, attachment commit, report recovery, and retryable initial promotion. Historical #74/#75
+  passed on Batch 6 but must be rerun as checks 103/104 against the new D61 path.
 - **The trellis flow is mandatory** (implement → check → update-spec). Manual-only checks → `docs/devlog/manual-checks.md`.
 
 ---
@@ -237,7 +244,7 @@ gh issue list -R Ae486/ShiinaTaki --label ready-for-agent
 
 ---
 
-*Handoff updated 2026-08-07 at the D60 decision close. M1-M4 shipped; M5's T1/T2/T3a/T3b + time-awareness +
-T5 + settings-panel + MCP schema compatibility are done. D60 option A keeps Tavily Remote MCP and schedules no native
-search implementation. Recommended next: owner approval and PRD for the D59/D61 reliability batch; T4 remains
-design-ready behind that reliability work.*
+*Handoff updated 2026-08-08 after D59/D61 implementation and the single formal check. M1-M4 shipped; M5's
+T1/T2/T3a/T3b + time-awareness + T5 + settings-panel + MCP schema compatibility are done. D59/D61 production code and
+automated verification are green but the task remains active for owner manual checks 96–105 and commit. D60 option A
+still keeps Tavily Remote MCP. T4 remains design-ready behind D59/D61 closeout.*

@@ -72,6 +72,17 @@ describe("the pet's result", () => {
     expect(busy.error).not.toContain("busy");
   });
 
+  it("keeps the no-scene refusal truthful while the renderer starts or the Pet connection recovers", () => {
+    const unavailable = result(click(worn, "taki-summer"), {
+      costumeId: "taki-summer",
+      phase: "failed",
+      reason: "no-scene",
+    });
+
+    expect(unavailable.error).toContain("宠物窗口尚未就绪");
+    expect(unavailable.error).not.toContain("渲染器");
+  });
+
   it("accepts the very next click after a failure — the wedge is gone (#75)", () => {
     const failed = result(click(worn, "taki-summer"), { costumeId: "taki-summer", phase: "failed", reason: "busy" });
 

@@ -12,20 +12,30 @@ import { midnightAfter, pauseLabel } from "./perception-view.ts";
 
 export interface PauseControlsProps {
   pause: PerceptionPauseState | null;
+  connectionReady: boolean;
   onSet: (params: PerceptionPauseSetParams) => void;
 }
 
-export function PauseControls({ pause, onSet }: PauseControlsProps) {
+export function PauseControls({ pause, connectionReady, onSet }: PauseControlsProps) {
   const paused = pause?.paused ?? false;
   return (
     <PageCard title="隐私暂停">
       <p className="mb-3 text-xs text-slate-600">{pause ? pauseLabel(pause) : "读取中…"}</p>
       <div className="flex flex-wrap gap-2">
-        <ActionButton tone="primary" onClick={() => onSet({ paused: true })} disabled={paused}>
+        <ActionButton
+          tone="primary"
+          onClick={() => onSet({ paused: true })}
+          disabled={!connectionReady || paused}
+        >
           暂停观察
         </ActionButton>
-        <ActionButton onClick={() => onSet({ paused: true, until: midnightAfter(new Date()) })}>暂停到明天</ActionButton>
-        <ActionButton onClick={() => onSet({ paused: false })} disabled={!paused}>
+        <ActionButton
+          onClick={() => onSet({ paused: true, until: midnightAfter(new Date()) })}
+          disabled={!connectionReady}
+        >
+          暂停到明天
+        </ActionButton>
+        <ActionButton onClick={() => onSet({ paused: false })} disabled={!connectionReady || !paused}>
           恢复观察
         </ActionButton>
       </div>

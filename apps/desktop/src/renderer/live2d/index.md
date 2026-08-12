@@ -1,6 +1,6 @@
 # renderer/live2d/
 Live2D model loading, Idle Motion + proximity reflexes, and the avatar behavior surface using untitled-pixi-live2d-engine (locked #13). Framework-free.
-- load-character-model.ts — loads + centers a model from a settings URL or CostumeSource (settings fetched → pruned → every kept sub-resource rewritten to its own absolute asset: URL) on the governed ticker (#18)
+- load-character-model.ts — loads + centers a model from a settings URL or CostumeSource; imported sources carry an optional attached-costume identity for scene restoration truth
 - settings-prune.ts — pure settings-JSON pruning (both generations): strips motion/expression entries with unresolvable refs so `..` never reaches the asset protocol; sound-only misses just lose the sound (#18)
 - costume-switch.ts — load-before-teardown model reload for a new costume source; returns the re-read vocabulary the caller re-reports (#18)
 - idle-motion.ts — Idle Motion scheduler: random idle-pool one-shots + prompt return-to-idle after any one-shot (motion-finish reflex); costume-switch-safe via isStale; dormant with no idle-named motions (1a)

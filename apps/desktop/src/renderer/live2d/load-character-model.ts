@@ -1,6 +1,6 @@
 /**
  * INPUT:  an initialized PixiJS Application + a costume source: either the dev settings URL (DEV_MODEL_SOURCE) or a
- *         CostumeSource {settingsUrl, resolve} for an imported costume; the vendored Cubism runtimes (pet.html globals).
+ *         CostumeSource {settingsUrl, resolve, costumeId?} for an imported costume; vendored Cubism runtimes.
  * OUTPUT: loadCharacterModel(app, source) -> a loaded, centered Live2DModel on the governed ticker (eye-blink+breath).
  * POS:    ui/renderer/live2d — framework-free (ZERO React/Tauri imports). For an imported costume the caller passes a
  *         `resolve` fn (built in lib/character-asset-url): unresolvable refs are PRUNED from the settings before the
@@ -21,6 +21,8 @@ export const DEV_MODEL_SOURCE = "/spike-assets/arbeit/model.json";
 export interface CostumeSource {
   settingsUrl: string;
   resolve: (relPath: string) => string | null;
+  /** Stable identity of this imported costume; absent for the dev fallback or another unlabelled source. */
+  costumeId?: string;
 }
 
 export async function loadCharacterModel(app: Application, source: string | CostumeSource): Promise<Live2DModel> {

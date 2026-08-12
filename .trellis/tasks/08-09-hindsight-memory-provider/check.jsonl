@@ -1,0 +1,26 @@
+{"file":".trellis/spec/backend/index.md","reason":"Review the complete memory-provider diff against the backend quality gate and Core ownership rules."}
+{"file":".trellis/spec/backend/directory-structure.md","reason":"Reject OS/deployment logic in Core, protocol duplication, or misplaced provider responsibilities."}
+{"file":".trellis/spec/backend/agent-runtime.md","reason":"Verify recall is ephemeral and bounded, writes remain detached, and provider failure never corrupts the foreground turn."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Audit every schema, migration, transaction, checkpoint, ledger, outbox, and single-writer guarantee."}
+{"file":".trellis/spec/backend/config-store.md","reason":"Verify ordinary config never becomes a secret store and all effective configuration remains truthful."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Check retryability, superseded mutations, cursor reset, partial operations, and authority-safe failure outcomes."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Audit logs and diagnostics for memory, prompt, credential, provider payload, and migration-source leakage."}
+{"file":".trellis/spec/backend/permission-authorization.md","reason":"Verify operator-only secret, setup, backup, cutover, switch-back, takeover, and destructive actions."}
+{"file":".trellis/spec/backend/tool-design.md","reason":"Verify canonical tool names, bounded fenced results, structured capability/error metadata, and invisible legacy aliases."}
+{"file":".trellis/spec/backend/mcp-tool-schema-compatibility.md","reason":"Reject simultaneous native Hindsight/Taki tool exposure and REST/MCP default drift."}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Verify setup/sync progress has a real producer, reconnect restoration, and authenticated operator boundaries."}
+{"file":".trellis/spec/backend/e2e-harness.md","reason":"Require representative cross-process setup, outage, recovery, migration, and authority transition coverage."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Enforce production structure, file caps, headers/indexes, source-grounded comments, and test obligations."}
+{"file":".trellis/spec/frontend/index.md","reason":"Review the Home/operator UI diff against frontend architecture and window boundaries."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Reject frontend authority, unsafe persistence, secret caching, or loss of operation state on window closure."}
+{"file":".trellis/spec/frontend/hook-guidelines.md","reason":"Verify subscriptions, requests, retries, and progress effects are isolated from presentation."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"Check setup and operations states, confirmations, diagnostics, accessibility, and component reuse."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Verify memory operations integrate through the existing Home client without owning Core lifetime or durable state."}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"Verify exhaustive provider, authority, health, migration, sync, and failure-state handling."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Enforce frontend caps, indexes, deterministic tests, and no hidden polling or duplicated policy."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Trace every authority mutation, revision, checkpoint, secret, and UI projection across all layers."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Reject unsupported Hindsight API, deployment, SDK, auth, or version assumptions."}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Reject duplicate engines, status stores, secret paths, or tool suites where existing seams should be extended."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/taki-memory-integration-seams.md","reason":"Check the implementation covers every live Taki seam and does not report target behavior as already shipped."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/hindsight-api-deployment-contracts.md","reason":"Contract-review all Hindsight 0.9.0 endpoints, defaults, auth, deployment, and completion assumptions."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/hindsight-integration-gaps-and-sync.md","reason":"Verify the six compatibility extensions, deterministic migration, replica correctness, degraded recovery, and upgrade gates are all proven."}

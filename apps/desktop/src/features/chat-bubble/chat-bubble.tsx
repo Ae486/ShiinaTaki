@@ -1,5 +1,5 @@
 /**
- * INPUT:  the useChatBubble hook (open state, streamed reply, send/close) + local input draft.
+ * INPUT:  the useChatBubble hook (open/readiness state, streamed reply, send/close) + local input draft.
  * OUTPUT: <ChatBubble> — the small on-pet input + streaming reply bubble; opens on a body click (see use-pet-drag).
  * POS:    ui/features/chat-bubble — presentational; reaches ws-client/stores ONLY through useChatBubble. Sits over the
  *         transparent overlay (the window stays interactive while open via the interaction store's bubbleOpen flag).
@@ -62,16 +62,32 @@ function OpenChatButton() {
   );
 }
 
+export function bubbleSubmission(
+  draft: string,
+  isPending: boolean,
+  connectionReady: boolean,
+): string | null {
+  const message = draft.trim();
+  return message.length > 0 && !isPending && connectionReady ? message : null;
+}
+
+interface BubbleFormProps {
+  isPending: boolean;
+  connectionReady: boolean;
+  send: (message: string) => Promise<void>;
+  close: () => void;
+}
+
 // The input + action row (its own draft state); split out so ChatBubble stays a thin open-gate + layout shell.
-function BubbleForm({ isPending, send, close }: { isPending: boolean; send: (message: string) => Promise<void>; close: () => void }) {
+function BubbleForm({ isPending, connectionReady, send, close }: BubbleFormProps) {
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => inputRef.current?.focus(), []);
 
   const onSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const message = draft.trim();
-    if (message.length === 0 || isPending) return;
+    const message = bubbleSubmission(draft, isPending, connectionReady);
+    if (message === null) return;
     setDraft("");
     void send(message);
   };
@@ -91,7 +107,7 @@ function BubbleForm({ isPending, send, close }: { isPending: boolean; send: (mes
       />
       <button
         type="submit"
-        disabled={draft.trim().length === 0 || isPending}
+        disabled={bubbleSubmission(draft, isPending, connectionReady) === null}
         className="rounded-full bg-rose-400 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-rose-500 disabled:opacity-40"
       >
         {isPending ? "…" : "发送"}
@@ -105,7 +121,7 @@ function BubbleForm({ isPending, send, close }: { isPending: boolean; send: (mes
 }
 
 export function ChatBubble() {
-  const { isOpen, reply, isPending, send, close } = useChatBubble();
+  const { isOpen, reply, isPending, connectionReady, send, close } = useChatBubble();
   if (!isOpen) return null;
 
   return (
@@ -120,7 +136,7 @@ export function ChatBubble() {
       onPointerMove={(event) => event.stopPropagation()}
     >
       <BubbleReplyView reply={reply} />
-      <BubbleForm isPending={isPending} send={send} close={close} />
+      <BubbleForm isPending={isPending} connectionReady={connectionReady} send={send} close={close} />
     </div>
   );
 }

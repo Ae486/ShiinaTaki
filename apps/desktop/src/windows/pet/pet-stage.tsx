@@ -2,8 +2,8 @@
  * INPUT:  avatar state from the Zustand store; the pet canvas host DOM node; wheel open state (interaction store).
  * OUTPUT: <PetStage> — the PixiJS canvas host that mounts the Live2D renderer scene, drives its render tier from
  *         avatar state, wires the render governor + window drag + per-pixel click-through + initial imported costume,
- *         reveals the window after first paint, summons the operation wheel on right-click, and executes costume
- *         switches commanded by the home window's costume page.
+ *         reveals the window, renders the compact connection notice, summons the operation wheel, and executes
+ *         costume switches commanded by the home window.
  * POS:    ui/renderer bridge — the ONLY component allowed to touch renderer/ APIs. Root remains transparent
  *         (no opaque background) so the overlay stays a per-pixel cut-out.
  */
@@ -15,6 +15,8 @@ import { ChatBubble } from "@/features/chat-bubble/chat-bubble.js";
 import { OperationWheel } from "@/features/operation-wheel/operation-wheel.js";
 import { summonWheel } from "@/features/operation-wheel/wheel-summon.js";
 import { ToastHost } from "@/components/toast/toast-host.js";
+import { PetConnectionStatusNotice } from "@/components/connection-status/connection-status.js";
+import { useConnectionStore } from "@/stores/connection-store.js";
 import { usePetScene } from "./use-pet-scene.ts";
 import { usePetDrag } from "./use-pet-drag.ts";
 import { usePetClick } from "./use-pet-click.ts";
@@ -29,6 +31,7 @@ export function PetStage() {
   const { scene, error: sceneError } = usePetScene(hostRef);
   const avatarState = useAvatarStore((s) => s.state);
   const wheelOpen = useInteractionStore((s) => s.wheelOpen);
+  const connectionStatus = useConnectionStore((s) => s.status);
   const wheelPoint = useInteractionStore((s) => s.wheelPoint);
   const openWheel = useInteractionStore((s) => s.openWheel);
   const closeWheel = useInteractionStore((s) => s.closeWheel);
@@ -53,8 +56,9 @@ export function PetStage() {
       {...drag}
     >
       {/* Stage/poll failures were previously console-only — an invisible pet with no visible reason (defect 0/B6). */}
-      {(sceneError ?? clickThrough.error) && (
+      {(sceneError ?? clickThrough.error ?? (connectionStatus.kind === "connected" ? null : connectionStatus.kind)) && (
         <div className="absolute left-2 top-2 z-10 flex max-w-[90%] flex-col gap-1">
+          <PetConnectionStatusNotice status={connectionStatus} />
           {sceneError && <div className="rounded bg-red-900/80 px-2 py-1 text-xs text-red-100">渲染初始化失败: {sceneError}</div>}
           {clickThrough.error && (
             <div className="rounded bg-amber-900/80 px-2 py-1 text-xs text-amber-100">穿透轮询错误: {clickThrough.error}</div>

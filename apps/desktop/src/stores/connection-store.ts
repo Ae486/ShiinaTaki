@@ -6,17 +6,10 @@
  */
 
 import { create } from "zustand";
-import type { ErrorCode } from "@taki/shared";
+import type { ConnectionStatus } from "@/lib/connection-status.js";
 import type { WsClient } from "@/lib/ws-client.js";
 
-// Discriminated union (no boolean-flag combos, type-safety spec). `pairing-required` is surfaced when the core has
-// not yet trusted this operator device — localhost auto-trust (P3) is a backend concern; see the hook for the flag.
-export type ConnectionStatus =
-  | { kind: "connecting" }
-  | { kind: "connected" }
-  | { kind: "pairing-required" }
-  | { kind: "disconnected" }
-  | { kind: "error"; code: ErrorCode | null; message: string };
+export type { ConnectionStatus } from "@/lib/connection-status.js";
 
 type ConnectionStore = {
   status: ConnectionStatus;

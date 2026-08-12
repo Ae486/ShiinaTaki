@@ -7,7 +7,9 @@
  */
 import type { ConfigChanged, ConfigRefusalReason, ConfigValue } from "@taki/shared";
 import type { ConfigRepo } from "../db/config-repo.ts";
+import { createConfigSource } from "./config-source.ts";
 import { findKnob, type KnobApply } from "./knob-registry.ts";
+import { validateTimingConfigChange } from "./timing-config-validation.ts";
 
 export interface ConfigWriteInput {
   key: string;
@@ -31,6 +33,7 @@ function refuse(reason: ConfigRefusalReason, message: string): ConfigWriteOutcom
 }
 
 export function createConfigWriter(deps: ConfigWriterDeps) {
+  const source = createConfigSource({ env: deps.env, repo: deps.repo });
   return {
     set({ key, value }: ConfigWriteInput): ConfigWriteOutcome {
       const knob = findKnob(key);
@@ -44,15 +47,22 @@ export function createConfigWriter(deps: ConfigWriterDeps) {
         return refuse("env-locked", `${key} is set in the environment, which shadows any stored value`);
       }
 
-      if (value === null) {
-        deps.repo.delete(key);
-      } else {
+      let accepted = value;
+      if (value !== null) {
         const parsed = knob.schema.safeParse(value);
         if (!parsed.success) return refuse("invalid-value", `${key}: ${parsed.error.issues[0]?.message ?? "invalid value"}`);
-        deps.repo.upsert(key, parsed.data);
+        accepted = parsed.data;
       }
-      deps.onChanged?.({ key, value });
-      return { ok: true, key, value, apply: knob.apply };
+      const timingIssue = validateTimingConfigChange(source, { key, value: accepted });
+      if (timingIssue) return refuse("invalid-value", `${key}: timing policy is inconsistent (${timingIssue})`);
+
+      if (accepted === null) {
+        deps.repo.delete(key);
+      } else {
+        deps.repo.upsert(key, accepted);
+      }
+      deps.onChanged?.({ key, value: accepted });
+      return { ok: true, key, value: accepted, apply: knob.apply };
     },
   };
 }

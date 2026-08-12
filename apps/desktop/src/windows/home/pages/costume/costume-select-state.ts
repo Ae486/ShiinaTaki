@@ -28,7 +28,7 @@ export type CostumeSelectAction =
 
 const REFUSALS: Record<string, string> = {
   busy: "宠物窗口正在切换另一套服装，可先取消",
-  "no-scene": "宠物窗口的渲染器尚未就绪",
+  "no-scene": "宠物窗口尚未就绪，请稍后重试",
   "unknown-costume": "宠物窗口不认识这套服装，请刷新列表",
   "not-renderable": "这套服装缺少必要资源，无法渲染",
 };

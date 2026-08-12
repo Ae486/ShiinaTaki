@@ -7,7 +7,7 @@
  */
 
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
-import type { ConnectionStatus } from "@/stores/connection-store.js";
+import { ConnectionStatusBanner } from "@/components/connection-status/connection-status.js";
 import { PageHeader } from "../../page-chrome.tsx";
 import { ChatClientContext } from "./chat-client-context.ts";
 import { useChatConnection } from "./use-chat-connection.ts";
@@ -15,35 +15,15 @@ import { useChatTimeline } from "./use-chat-timeline.ts";
 import { TimelineView } from "./timeline-view.tsx";
 import { Composer } from "./composer.tsx";
 
-function statusText(status: ConnectionStatus): string | null {
-  switch (status.kind) {
-    case "connected":
-      return null;
-    case "connecting":
-      return "连接中…";
-    case "pairing-required":
-      return "尚未配对：请先在宠物窗口完成配对";
-    case "disconnected":
-      return "连接已断开";
-    case "error":
-      return status.message;
-  }
-}
-
-function StatusBanner({ status }: { status: ConnectionStatus }) {
-  const text = statusText(status);
-  if (!text) return null;
-  return <div className="bg-amber-50 px-4 py-1.5 text-center text-xs text-amber-700">{text}</div>;
-}
-
 export function ChatPage() {
   const { client, status } = useChatConnection();
-  const timeline = useChatTimeline(client, status.kind === "connected");
+  const timeline = useChatTimeline(client);
+  const connected = status.kind === "connected";
 
   return (
     <ChatClientContext.Provider value={client}>
       <PageHeader title="聊天" hint={`当前角色：${ACTIVE_CHARACTER_ID}`} />
-      <StatusBanner status={status} />
+      <ConnectionStatusBanner status={status} />
       <TimelineView timeline={timeline} />
       <Composer
         onSend={timeline.send}
@@ -51,6 +31,7 @@ export function ChatPage() {
         isSending={timeline.isSending}
         retractedDraft={timeline.retractedDraft}
         consumeRetractedDraft={timeline.consumeRetractedDraft}
+        connectionReady={connected}
       />
     </ChatClientContext.Provider>
   );

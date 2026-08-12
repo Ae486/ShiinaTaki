@@ -2,8 +2,8 @@
  * INPUT:  pet:costume-switch / pet:costume-cancel Tauri events from the home costume page + the live PetScene.
  * OUTPUT: useCostumeSwitchEvent(scene) — runs the EXISTING switch path and publishes pet:costume-result for every phase
  *         it goes through, refusals included.
- * POS:    ui/windows/pet — the pet half of the bidirectional costume seam. The switch path itself is untouched (its
- *         guard, timeout and cancel stay the single executor); what is new is that none of its outcomes stays silent.
+ * POS:    ui/windows/pet — the pet half of the bidirectional costume seam. D61's attempt controller remains the single
+ *         guard/deadline/cancel/commit owner; this adapter ensures none of its command outcomes stays silent to Home.
  */
 
 import { useEffect, useRef } from "react";
@@ -18,6 +18,7 @@ import {
 import { useTauriEvent } from "@/lib/use-tauri-event.js";
 import { useCostumeSwitch } from "@/features/character-import/use-costume-switch.js";
 import type { PetScene } from "@/renderer/pet-scene.js";
+import { useConnectionStore } from "@/stores/connection-store.js";
 import {
   costumeTransitions,
   refusalFor,
@@ -58,7 +59,8 @@ function commandCancel(bridge: CostumeBridge, costumeId: string): void {
 
 export function useCostumeSwitchEvent(scene: PetScene | null): void {
   const { switchTo, cancelSwitch, switchingId, error, current, costumes, availability } = useCostumeSwitch(scene);
-  const view: CostumeCommandView = { switchingId, costumes, availability, ready: scene !== null };
+  const connected = useConnectionStore((state) => state.status.kind === "connected");
+  const view: CostumeCommandView = { switchingId, costumes, availability, ready: scene !== null && connected };
   // Listener callbacks outlive the render that registered them, so they reach the hook through a ref, never a closure.
   const bridge = useRef<CostumeBridge>({ view, switchTo, cancelSwitch });
   const observed = useRef<CostumeObservation>(IDLE_OBSERVATION);

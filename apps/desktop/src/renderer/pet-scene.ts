@@ -2,7 +2,8 @@
  * INPUT:  a DOM host + a local renderThrottling flag + an initial model source (asset: URL, or the dev route default).
  * OUTPUT: a PetScene controller — governor, setAvatarState, isOpaqueAt, the avatar surface (applyAvatarCommand with an
  *         optional drift sink, handleClick, focusAt, handleProximity), switchCostume (teardown+reload a new costume,
- *         returns its re-read vocabulary), abortSwitch (mark an in-flight switch stale so a late model self-discards),
+ *         returns its re-read vocabulary), reportSnapshot (truthful live vocabulary/costume identity),
+ *         abortSwitch (mark an in-flight switch stale so a late model self-discards),
  *         and dispose. The scene may boot MODEL-LESS (initial source unreachable —
  *         normal in a packaged build, where the dev route does not exist): the stage runs empty, avatar methods no-op,
  *         and the first switchCostume (initial-costume promotion) attaches a model.
@@ -40,8 +41,11 @@ export type PetScene = {
   // window's click-through hook queries this per cursor poll; the mask tracks the live silhouette per frame.
   isOpaqueAt: (x: number, y: number) => boolean;
   // The loaded model's motion/expression names — reported to the Core (avatar.report) for Option A prompt injection.
-  // Empty while the scene is model-less; the promotion path re-reports the real vocabulary after attach.
+ // Empty while the scene is model-less; the promotion path re-reports the real vocabulary after attach.
   reportVocabulary: () => AvatarVocabulary;
+  // Truthful live-scene snapshot for generation restoration. The optional costume comes from the source that actually
+  // attached; it is never inferred from last-costume persistence or a click intent.
+  reportSnapshot: () => AvatarVocabulary & { costume?: string };
   // Applies an LLM-driven avatar command (validated vs the vocabulary); an unknown name fires onVocabularyDrift so the
   // caller re-reports the live inventory (self-heal, 1b). F3.
   applyAvatarCommand: (command: AvatarCommand, onVocabularyDrift?: () => void) => void;
@@ -57,7 +61,7 @@ export type PetScene = {
   switchCostume: (source: CostumeSource) => Promise<AvatarVocabulary>;
   // Marks any in-flight switchCostume stale (bumps the switch ticket) so its late-resolving model self-discards
   // instead of attaching a costume the identity stores never advanced to. Called on a switch timeout/failure and on
-  // an operator Cancel; idempotent + model-less safe. See resolve-switch-report / use-costume-switch (1f Fix 1).
+  // an operator Cancel; idempotent + model-less safe. See costume-switch-attempt / use-costume-switch (1f Fix 1).
   abortSwitch: () => void;
   dispose: () => void;
 };
@@ -66,6 +70,7 @@ interface SceneModel {
   model: Live2DModel;
   avatar: AvatarController;
   idle: IdleMotionScheduler;
+  costume: string | null;
 }
 
 interface SwitchContext {
@@ -92,7 +97,7 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
   // fetch failure must not kill the stage. A model-less scene stays alive; the initial-costume promotion (or a
   // manual panel switch) attaches the model through the SAME switchCostume path.
   try {
-    attachModel(ctx, await loadCharacterModel(app, options.modelSource ?? DEV_MODEL_SOURCE));
+    attachModel(ctx, await loadCharacterModel(app, options.modelSource ?? DEV_MODEL_SOURCE), null);
   } catch (error) {
     console.warn("[pet-scene] initial model unavailable; stage runs model-less until a costume attaches", error);
   }
@@ -108,6 +113,12 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
     setAvatarState: (state) => governor.setActivity(renderActivityFor(state)),
     isOpaqueAt: (x, y) => mask.isOpaque(x, y),
     reportVocabulary: () => slot.current?.avatar.vocabulary ?? { motions: [], expressions: [] },
+    reportSnapshot: () => {
+      const current = slot.current;
+      if (!current) return { motions: [], expressions: [] };
+      const vocabulary = current.avatar.vocabulary;
+      return current.costume === null ? vocabulary : { ...vocabulary, costume: current.costume };
+    },
     applyAvatarCommand: (command, onVocabularyDrift) => slot.current?.avatar.applyCommand(command, onVocabularyDrift),
     handleClick: (x, y) => slot.current?.avatar.reactToClick(x, y) ?? null,
     focusAt: (x, y) => slot.current?.avatar.focusAt(x, y),
@@ -132,7 +143,7 @@ async function switchCostume(ctx: SwitchContext, source: CostumeSource): Promise
     ctx.slot.current?.model ?? null,
     source,
   );
-  attachModel(ctx, model);
+  attachModel(ctx, model, source.costumeId ?? null);
   return vocabulary;
 }
 
@@ -146,12 +157,13 @@ function abortSwitch(ctx: SwitchContext): void {
 
 // One attach site for both the initial best-effort load and every costume swap: dispose the outgoing scheduler, then
 // rebuild the controller + idle scheduler. The scheduler goes stale (and self-disposes) once a newer switch bumps seq.
-function attachModel(ctx: SwitchContext, model: Live2DModel): void {
+function attachModel(ctx: SwitchContext, model: Live2DModel, costume: string | null): void {
   ctx.slot.current?.idle.dispose();
   const ticket = ctx.seq.current;
   ctx.slot.current = {
     model,
     avatar: createAvatarController({ model, center: ctx.center, characterId: ctx.characterId }),
     idle: createIdleMotionScheduler({ model, isStale: () => ctx.seq.current !== ticket }),
+    costume,
   };
 }

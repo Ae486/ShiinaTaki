@@ -1,0 +1,18 @@
+{"file":".trellis/spec/frontend/index.md","reason":"Review desktop boundaries and window topology across the complete diff."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Reject UI config authority, unsafe persistence, stale generation writes, or cache regressions."}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"Verify exhaustive connection states and schema-validated policy/config boundaries."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Enforce caps, headers/indexes, deterministic tests, transparency, and no React polling."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Verify independent sockets, truthful status surfaces, and preserved costume result contract."}
+{"file":".trellis/spec/frontend/live2d-renderer.md","reason":"Verify abortSwitch, staleness, attachment commit, and no speculative renderer workaround."}
+{"file":".trellis/spec/frontend/operator-connection-recovery.md","reason":"Verify D59 generation replacement, native deadlines, restoration ordering, timing sync, and honest readiness UX."}
+{"file":".trellis/spec/frontend/costume-operation-lifecycle.md","reason":"Verify D61 stage cancellation, attachment commit, report recovery, Home deadline, and initial promotion."}
+{"file":".trellis/spec/backend/config-store.md","reason":"Verify registry validation, effective precedence, live apply truth, and no duplicate config authority."}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Verify auth-before-restore and exact-once per-generation subscription behavior."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Review timeout mapping, unknown mutation outcomes, and observable restore failures."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Review Core/shared structure, caps, headers/indexes, and verification gates."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Trace timing data and lifecycle state end to end across every layer."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Reject library behavior assumptions not proven against installed source or tests."}
+{"file":".trellis/tasks/08-07-ws-reconnect-request-deadlines/research/ws-reconnect-current-state.md","reason":"Check every window, subscription, pending-work, and D29 obligation."}
+{"file":".trellis/tasks/08-07-ws-reconnect-request-deadlines/research/ws-library-and-deadline-options.md","reason":"Check native timeout cleanup and lifecycle design against verified package behavior."}
+{"file":".trellis/tasks/08-07-ws-reconnect-request-deadlines/research/ws-recovery-ux-and-costume-contract.md","reason":"Check connection UX, costume cancellation, attachment truth, and manual boundaries."}
+{"file":".trellis/tasks/08-07-ws-reconnect-request-deadlines/research/avatar-command-idle-disconnect.md","reason":"Check the reported long-idle avatar failure is covered without speculative heartbeat/renderer work."}

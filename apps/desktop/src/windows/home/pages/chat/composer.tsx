@@ -1,6 +1,5 @@
 /**
- * INPUT:  the user's typed draft + picked image attachments (useImageAttach); an isSending flag + onCancel from the
- *         hook; a retractedDraft (cancel-before-reply) to restore, with a consume callback.
+ * INPUT:  typed draft/attachments, connection readiness, current send/cancel state, and a retracted draft hand-back.
  * OUTPUT: <Composer> — textarea (Enter=send, Shift+Enter=newline), attach button, thumbnail previews, and a dual-state
  *         action button: 发送 while idle, 中断 (abort the in-flight turn) while sending. Attach-pick problems toast (D34).
  * POS:    ui/windows/home/pages/chat — presentational; owns the image-attach hook. The attach button stays enabled even without a
@@ -18,6 +17,7 @@ interface ComposerProps {
   isSending: boolean;
   retractedDraft: string | null;
   consumeRetractedDraft: () => void;
+  connectionReady: boolean;
 }
 
 // Owns the hidden file input + its ref (the ref belongs with the input, and keeps Composer's render lean).
@@ -99,10 +99,10 @@ function ActionButton({ isSending, canSend, onSubmit, onCancel }: { isSending: b
   );
 }
 
-export function Composer({ onSend, onCancel, isSending, retractedDraft, consumeRetractedDraft }: ComposerProps) {
+export function Composer({ onSend, onCancel, isSending, retractedDraft, consumeRetractedDraft, connectionReady }: ComposerProps) {
   const [draft, setDraft] = useState("");
   const { attachments, pick, remove, clear, notice, dismissNotice } = useImageAttach();
-  const canSend = !isSending && (draft.trim().length > 0 || attachments.length > 0);
+  const canSend = connectionReady && !isSending && (draft.trim().length > 0 || attachments.length > 0);
 
   // Attach-pick problems (unsupported type, decode failure) surface as toasts (D34) — no layout-height notice bar.
   useEffect(() => {

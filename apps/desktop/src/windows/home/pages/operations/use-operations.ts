@@ -16,6 +16,7 @@ import { useMediaClear, type MediaClearControl } from "./use-media-clear.ts";
 export interface OperationsView {
   status: MemoryStatusResult | null;
   usage: MediaUsageResult | null;
+  connectionReady: boolean;
   tidy: MemoryTidyResult | null;
   tidying: boolean;
   refreshing: boolean;
@@ -56,13 +57,14 @@ export function useOperations(): OperationsView {
     }
   }, [ready, tidying, refresh]);
 
-  // The purge keeps the raw client: gated on `ready` a disconnected click would stick on the "clearing" phase forever,
-  // whereas a rejected mediaClear() surfaces a reason and releases it.
-  const clear = useMediaClear(client, () => void refresh());
+  // The purge accepts only the authenticated client. Its immediate ref guard starts one destructive request, while
+  // a close/deadline rejection releases the phase and leaves an explicit retry to the operator.
+  const clear = useMediaClear(ready, () => void refresh());
 
   return {
     status: status.data,
     usage: usage.data,
+    connectionReady: ready !== null,
     tidy,
     tidying,
     refreshing: status.refreshing || usage.refreshing,

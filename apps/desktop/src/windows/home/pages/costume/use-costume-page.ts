@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useReducer, type Dispatch } from "react";
-import { CharacterCostumesResultSchema } from "@taki/shared";
+import { CharacterCostumesResultSchema, type TimingPolicy } from "@taki/shared";
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
 import {
   COSTUME_RESULT_EVENT,
@@ -22,15 +22,13 @@ import { useTauriEvent } from "@/lib/use-tauri-event.js";
 import { useHomeClient } from "../../home-client-context.ts";
 import { costumeListView, type CostumeListView } from "./costume-view.ts";
 import { IDLE, reduceCostumeSelect, type CostumeSelectAction } from "./costume-select-state.ts";
+import { startCostumeResultDeadline } from "./costume-result-deadline.ts";
 
 const EMPTY: CostumeListView = { rows: [], missingPacks: [], current: null };
 
-// Longer than the pet's own 30s renderer-load timeout so a slow-but-working switch always settles on its own first.
-// This only catches a pet that never answers at all (closed window, dead webview) — the last way the page could hang.
-const RESULT_DEADLINE_MS = 45_000;
-
 export interface CostumePageView {
   view: CostumeListView;
+  connectionReady: boolean;
   /** The list could not be re-read; the previous list stays on screen behind this message. */
   listError: string | null;
   loading: boolean;
@@ -47,16 +45,21 @@ export interface CostumePageView {
 }
 
 /** The page's own guarantee: a pet that never answers still releases the pending row (nothing else bounds that wait). */
-function useResultDeadline(pending: string | null, dispatch: Dispatch<CostumeSelectAction>): void {
+function useResultDeadline(
+  pending: string | null,
+  dispatch: Dispatch<CostumeSelectAction>,
+  currentTimingPolicy: () => TimingPolicy,
+): void {
   useEffect(() => {
     if (pending === null) return;
-    const timer = setTimeout(() => dispatch({ kind: "timeout", costumeId: pending }), RESULT_DEADLINE_MS);
-    return () => clearTimeout(timer);
-  }, [pending, dispatch]);
+    return startCostumeResultDeadline(pending, currentTimingPolicy, (costumeId) =>
+      dispatch({ kind: "timeout", costumeId }),
+    );
+  }, [pending, dispatch, currentTimingPolicy]);
 }
 
 export function useCostumePage(): CostumePageView {
-  const { client, status } = useHomeClient();
+  const { client, status, currentTimingPolicy } = useHomeClient();
   const connected = status.kind === "connected";
   const load = useMemo(() => (client && connected ? () => client.characterCostumes(ACTIVE_CHARACTER_ID) : null), [client, connected]);
   const costumes = useCachedFetch("costume-list", load, { schema: CharacterCostumesResultSchema, persist: true });
@@ -75,7 +78,7 @@ export function useCostumePage(): CostumePageView {
     }),
   );
 
-  useResultDeadline(pending, dispatch);
+  useResultDeadline(pending, dispatch, currentTimingPolicy);
 
   const select = useCallback(
     async (costumeId: string) => {
@@ -99,6 +102,7 @@ export function useCostumePage(): CostumePageView {
 
   return {
     view,
+    connectionReady: client !== null && connected,
     listError: costumes.error,
     loading: costumes.loading,
     refreshing: costumes.refreshing,

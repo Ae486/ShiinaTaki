@@ -4,14 +4,21 @@ icons/ (the shared glyph set) and the two window-shared React hooks below.
 - ws-client.ts — operator WS JSON-RPC client to the Core (browser WebSocket): the public WsClient surface + turn/handshake wiring
 - ws-client-routes.ts — inbound half: the zod boundary (frame parse + chat-stream/avatar/timeline/config push routing) and the D29 mid-turn-close abort
 - ws-client-methods.ts — outbound half: the handshake + every plain request/response method (timeline, media, character, config, memory, perception)
+- rpc-deadline.ts — method-class timing table + typed deadline error + json-rpc-2.0 native timeout requester seam
+- timing-policy.ts — window-owned bootstrap/last-good timing policy store; validates full Core config refreshes without persistence
+- timing-policy-sync.ts — exact-once config subscription and serialized full-policy refresh for an authenticated client
+- connection-status.ts — discriminated operator connection states plus the one semantic notice-copy mapping shared by every surface
+- connection-generation-controller.ts — framework-free fresh-client generation lifecycle: auth/restore promotion, full-jitter retry, stability reset, stale guards, disposal
+- operator-auth.ts — shared Pet/Home/Chat authentication using the newest same-origin operator credential per generation
 - ws-transport.ts — browser-WebSocket wrapper behind a small transport interface (keeps ws-client node-testable)
 - device-identity.ts — the operator device identity (deviceId + reconnect token) persisted in localStorage
 - presentation-gate.ts — the ONE presentation gate (D21/TTS seam): reply text + avatar command surface together
 - active-character.ts — the pet window's active character id (data; M5 #24 makes it selectable)
 - last-costume.ts — the last-worn costume per character (localStorage) so restarts re-wear it, not the default (M5 #24 moves this into real config)
+- costume-report-sync.ts — window-local synchronization health for committed costume reports; newer tickets prevent stale report outcomes from overwriting the current costume
+- costume-switch-attempt.ts — D61's cancellable whole-attempt controller: resolution/Tauri stage admission, renderer attachment commit, and bounded recoverable avatar.report
 - promise-timeout.ts — withTimeout(promise, ms, label): labeled rejection for loads that can wedge (costume switches / boot promotion)
-- character-asset-url.ts — costume settings + per-sub-resource asset: URLs (convertFileSrc per file) with external-ref resolution; unresolvable/`..` refs resolve to null and get stripped before the engine (#18)
-- resolve-switch-report.ts — the shared costume switch+report dance (resolution → asset source → timeout-guarded switchCostume → avatar.report with the worn costume id); aborts the switch on timeout/failure so a late model self-discards (1f Fix 1); used by boot promotion and manual switch (1b)
+- character-asset-url.ts — costume identity + settings/per-resource asset URLs (convertFileSrc per file); unresolvable/`..` refs are stripped before the engine (#18)
 - open-home-window.ts — pet→home window opener: creates home.html at the requested page or navigates the open one (single instance by label); also owns the home:navigate event name
 - costume-switch-event.ts — the BIDIRECTIONAL home↔pet costume seam: the three pet-scoped event names (switch / cancel / result), their emit helpers and the payload gates each side reads through (the live PetScene exists only in the pet window, so the page commands and the pet reports back)
 - use-tauri-event.ts — the shared window-event plumbing: one stable listener per event name, handler read through a ref, unlisten on unmount

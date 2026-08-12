@@ -20,6 +20,10 @@
 - Each window (pet, settings) instantiates its own stores; cross-window sync goes through the Agent Core (WS events) or Tauri events — never assume shared JS memory between windows.
 - No persistence middleware: durable state belongs to the Agent Core, not localStorage. The only disk-backed UI cache is
   the guarded SWR snapshot seam below; it is never writable state of record.
+- A connection owner publishes `{ client, status }` atomically per authenticated/restored generation. Consumers rerun
+  idempotent reads when client identity changes; they never retain a closed client or replay a mutation.
+- D59/D61 timing policy is window-owned, in-memory, and last-good across client generations. Core config is the only
+  persisted authority; see `operator-connection-recovery.md`.
 
 ## Scenario: Guarded stale-while-revalidate page snapshots
 

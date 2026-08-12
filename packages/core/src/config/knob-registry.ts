@@ -8,7 +8,17 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { z, type ZodType } from "zod";
-import { DEFAULT_WS_HOST, DEFAULT_WS_PORT, type ConfigApply, type ConfigInput, type ConfigValue } from "@taki/shared";
+import {
+  DEFAULT_WS_HOST,
+  DEFAULT_WS_PORT,
+  TIMING_CONFIG_KEYS,
+  TIMING_POLICY_DEVELOPMENT_DEFAULTS,
+  TimingDurationMsSchema,
+  type ConfigApply,
+  type ConfigInput,
+  type ConfigValue,
+  type TimingPolicyField,
+} from "@taki/shared";
 import { DEFAULT_MAX_STEPS } from "./agent-config.ts";
 import { DEFAULT_TTL_DAYS } from "./attachment-config.ts";
 import { DEFAULT_COMPACT_KEEP_MESSAGES, DEFAULT_COMPACT_TRIGGER_RATIO, DEFAULT_CONTEXT_TOKENS, DEFAULT_HISTORY_RATIO } from "./context-config.ts";
@@ -70,6 +80,17 @@ function choice(options: readonly [string, ...string[]]): Pick<Knob, "schema" | 
   return { schema: z.enum(options), input: { kind: "enum", options: [...options] } };
 }
 
+function timing(field: TimingPolicyField, apply: KnobApply, description: string): Knob {
+  return {
+    key: TIMING_CONFIG_KEYS[field],
+    schema: TimingDurationMsSchema,
+    input: { kind: "int", min: 1 },
+    default: TIMING_POLICY_DEVELOPMENT_DEFAULTS[field],
+    apply,
+    description,
+  };
+}
+
 /** A free-form string knob whose grammar the loader also enforces; the panel gets the same fail-closed check. */
 function pattern(spec: { regex: RegExp; message: string }): Pick<Knob, "schema" | "input"> {
   return { schema: z.string().regex(spec.regex, spec.message), input: { kind: "string" } };
@@ -97,6 +118,18 @@ export const CONFIG_KNOBS: Knob[] = [
   },
   { key: "TAKI_PROMPT_DIR", ...str(), default: null, apply: "restart", description: "Prompt-card library root; unset uses the bundled prompt/ tree." },
   { key: "TAKI_TRUST_LOOPBACK_OPERATOR", ...bool(), default: DEFAULT_TRUST_LOOPBACK, apply: "restart", description: "Auto-trust loopback operators (off forces pairing)." },
+
+  // --- desktop connection and cross-window operation timing (development-tunable; final defaults need runtime data) ---
+  timing("reconnectBaseMs", "live", "Initial reconnect backoff delay in milliseconds."),
+  timing("reconnectCapMs", "live", "Maximum reconnect backoff delay in milliseconds."),
+  timing("reconnectStabilityResetMs", "live", "Authenticated stability period before reconnect backoff resets."),
+  timing("openAuthMs", "live", "Combined WebSocket open and authentication deadline in milliseconds."),
+  timing("interactiveRpcMs", "live", "Deadline for interactive/read JSON-RPC requests in milliseconds."),
+  timing("longRpcMs", "live", "Deadline for import and maintenance JSON-RPC work in milliseconds."),
+  timing("chatAckMs", "live", "Deadline for chat.send acknowledgement in milliseconds; stream completion is separate."),
+  timing("petCostumeTotalMs", "live", "Whole pet costume-attempt budget captured when each D61 switch begins."),
+  timing("rendererLoadMs", "live", "Live2D renderer load deadline in milliseconds."),
+  timing("homeResultMs", "live", "Home wait for the pet costume result in milliseconds."),
 
   // --- model slots (the three API keys are credential-manager material, never stored here) ---
   { key: "TAKI_PROVIDER_BASE_URL", ...str(), default: null, apply: "restart", description: "Main chat provider base URL." },

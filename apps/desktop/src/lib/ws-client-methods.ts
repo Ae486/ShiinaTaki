@@ -6,7 +6,7 @@
  *         @taki/shared schema: the zod boundary holds for every inbound frame.
  */
 
-import { JSONRPCErrorException, type JSONRPCServerAndClient } from "json-rpc-2.0";
+import { JSONRPCErrorException, type JSONRPCParams, type JSONRPCServerAndClient } from "json-rpc-2.0";
 import {
   AVATAR_METHODS,
   CHARACTER_METHODS,
@@ -42,7 +42,9 @@ import {
   type ErrorCode,
   type PerceptionPauseSetParams,
   type TimelineHistoryParams,
+  type TimingPolicy,
 } from "@taki/shared";
+import { requestWithDeadline } from "./rpc-deadline.ts";
 
 /** The handshake outcome: authenticated, or refused with the app ErrorCode (PAIRING_REQUIRED / AUTH_FAILED / ...). */
 export type ConnectOutcome = { ok: true; token?: string } | { ok: false; code: ErrorCode | null; message: string };
@@ -53,9 +55,13 @@ function appErrorCode(data: unknown): ErrorCode | null {
   return parsed.success ? parsed.data : null;
 }
 
-export async function handshake(rpc: JSONRPCServerAndClient, params: ConnectParams): Promise<ConnectOutcome> {
+export async function handshake(
+  rpc: JSONRPCServerAndClient,
+  timing: () => TimingPolicy,
+  params: ConnectParams,
+): Promise<ConnectOutcome> {
   try {
-    const result = ConnectResultSchema.parse(await rpc.request(CONNECT_METHOD, params));
+    const result = ConnectResultSchema.parse(await requestWithDeadline({ rpc, timing, method: CONNECT_METHOD, params }));
     return { ok: true, token: result.token };
   } catch (error) {
     if (error instanceof JSONRPCErrorException) {
@@ -65,45 +71,51 @@ export async function handshake(rpc: JSONRPCServerAndClient, params: ConnectPara
   }
 }
 
-export function requestMethods(rpc: JSONRPCServerAndClient) {
+export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => TimingPolicy) {
+  const request = <T>(method: string, params: JSONRPCParams): Promise<T> => requestWithDeadline({ rpc, timing, method, params });
+  let configSubscription: Promise<void> | null = null;
   return {
-    subscribeAvatar: async (characterId: string) => void (await rpc.request(AVATAR_METHODS.subscribe, { characterId })),
+    subscribeAvatar: async (characterId: string) => void (await request(AVATAR_METHODS.subscribe, { characterId })),
     reportAvatar: async (params: AvatarReportParams) => {
       // One centralized trace for EVERY re-report (boot / costume promotion / manual switch / drift self-heal): the
       // provable-re-report the acceptance needs. A dead-names regression shows here as a count mismatch (1b).
       console.info(`[avatar] reported vocab motions=${params.motions.length} expressions=${params.expressions.length}`);
-      await rpc.request(AVATAR_METHODS.report, params);
+      await request(AVATAR_METHODS.report, params);
     },
     chatCancel: async (characterId: string) =>
-      ChatCancelResultSchema.parse(await rpc.request(CHAT_METHODS.cancel, { characterId })).cancelled,
+      ChatCancelResultSchema.parse(await request(CHAT_METHODS.cancel, { characterId })).cancelled,
     timelineHistory: async (params: TimelineHistoryParams) =>
-      TimelineHistoryResultSchema.parse(await rpc.request(TIMELINE_METHODS.history, params)),
-    subscribeTimeline: async (characterId: string) => void (await rpc.request(TIMELINE_METHODS.subscribe, { characterId })),
-    mediaGet: async (ref: string) => MediaGetResultSchema.parse(await rpc.request(MEDIA_METHODS.get, { ref })),
+      TimelineHistoryResultSchema.parse(await request(TIMELINE_METHODS.history, params)),
+    subscribeTimeline: async (characterId: string) => void (await request(TIMELINE_METHODS.subscribe, { characterId })),
+    mediaGet: async (ref: string) => MediaGetResultSchema.parse(await request(MEDIA_METHODS.get, { ref })),
     importCharacter: async (params: CharacterImportParams) =>
-      CharacterImportResultSchema.parse(await rpc.request(CHARACTER_METHODS.import, params)),
-    listCharacters: async () => CharacterListResultSchema.parse(await rpc.request(CHARACTER_METHODS.list, {})),
+      CharacterImportResultSchema.parse(await request(CHARACTER_METHODS.import, params)),
+    listCharacters: async () => CharacterListResultSchema.parse(await request(CHARACTER_METHODS.list, {})),
     characterCostumes: async (characterId: string) =>
-      CharacterCostumesResultSchema.parse(await rpc.request(CHARACTER_METHODS.costumes, { characterId })),
+      CharacterCostumesResultSchema.parse(await request(CHARACTER_METHODS.costumes, { characterId })),
     costumeResolution: async (characterId: string, costume: string) =>
       CharacterCostumeResolutionResultSchema.parse(
-        await rpc.request(CHARACTER_METHODS.costumeResolution, { characterId, costume }),
+        await request(CHARACTER_METHODS.costumeResolution, { characterId, costume }),
       ),
-    configList: async () => ConfigListResultSchema.parse(await rpc.request(CONFIG_METHODS.list, {})),
+    configList: async () => ConfigListResultSchema.parse(await request(CONFIG_METHODS.list, {})),
     configSet: async (params: ConfigSetParams) =>
-      ConfigSetResultSchema.parse(await rpc.request(CONFIG_METHODS.set, params)),
-    subscribeConfig: async () =>
-      void ConfigSubscribeResultSchema.parse(await rpc.request(CONFIG_METHODS.subscribe, {})),
+      ConfigSetResultSchema.parse(await request(CONFIG_METHODS.set, params)),
+    subscribeConfig: () => {
+      configSubscription ??= request<unknown>(CONFIG_METHODS.subscribe, {}).then((result) => {
+        ConfigSubscribeResultSchema.parse(result);
+      });
+      return configSubscription;
+    },
     memoryTidy: async (characterId: string) =>
-      MemoryTidyResultSchema.parse(await rpc.request(MEMORY_METHODS.tidy, { characterId })),
+      MemoryTidyResultSchema.parse(await request(MEMORY_METHODS.tidy, { characterId })),
     memoryStatus: async (characterId: string) =>
-      MemoryStatusResultSchema.parse(await rpc.request(MEMORY_METHODS.status, { characterId })),
-    mediaUsage: async () => MediaUsageResultSchema.parse(await rpc.request(MEDIA_METHODS.usage, {})),
-    mediaClear: async () => MediaClearResultSchema.parse(await rpc.request(MEDIA_METHODS.clear, {})),
+      MemoryStatusResultSchema.parse(await request(MEMORY_METHODS.status, { characterId })),
+    mediaUsage: async () => MediaUsageResultSchema.parse(await request(MEDIA_METHODS.usage, {})),
+    mediaClear: async () => MediaClearResultSchema.parse(await request(MEDIA_METHODS.clear, {})),
     perceptionPauseGet: async () =>
-      PerceptionPauseStateSchema.parse(await rpc.request(PERCEPTION_METHODS.pauseGet, {})),
+      PerceptionPauseStateSchema.parse(await request(PERCEPTION_METHODS.pauseGet, {})),
     perceptionPauseSet: async (params: PerceptionPauseSetParams) =>
-      PerceptionPauseStateSchema.parse(await rpc.request(PERCEPTION_METHODS.pauseSet, params)),
-    perceptionCard: async () => PerceptionCardSchema.parse(await rpc.request(PERCEPTION_METHODS.card, {})),
+      PerceptionPauseStateSchema.parse(await request(PERCEPTION_METHODS.pauseSet, params)),
+    perceptionCard: async () => PerceptionCardSchema.parse(await request(PERCEPTION_METHODS.card, {})),
   };
 }

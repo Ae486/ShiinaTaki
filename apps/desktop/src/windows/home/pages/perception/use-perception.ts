@@ -10,16 +10,28 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PerceptionCardSchema, type PerceptionCard, type PerceptionPauseSetParams, type PerceptionPauseState } from "@taki/shared";
 import { useCachedFetch } from "@/lib/use-cached-fetch.js";
+import type { WsClient } from "@/lib/ws-client.js";
 import { useHomeClient } from "../../home-client-context.ts";
 
 export interface PerceptionView {
   card: PerceptionCard | null;
   pause: PerceptionPauseState | null;
+  connectionReady: boolean;
   error: string | null;
   /** A background re-read of the card is running over the one on screen. */
   refreshing: boolean;
   setPause: (params: PerceptionPauseSetParams) => Promise<void>;
   refresh: () => Promise<void>;
+}
+
+export async function readPauseReplacement(
+  client: Pick<WsClient, "perceptionPauseGet">,
+  apply: (pause: PerceptionPauseState) => void,
+  clearError: () => void,
+): Promise<void> {
+  const replacement = await client.perceptionPauseGet();
+  apply(replacement);
+  clearError();
 }
 
 export function usePerception(): PerceptionView {
@@ -37,7 +49,7 @@ export function usePerception(): PerceptionView {
   const refreshPause = useCallback(async () => {
     if (!ready) return;
     try {
-      setPauseState(await ready.perceptionPauseGet());
+      await readPauseReplacement(ready, setPauseState, () => setError(null));
     } catch (cause) {
       fail(cause);
     }
@@ -65,5 +77,13 @@ export function usePerception(): PerceptionView {
     [ready, refreshCard, fail],
   );
 
-  return { card: card.data, pause, error: error ?? card.error, refreshing: card.refreshing, setPause, refresh };
+  return {
+    card: card.data,
+    pause,
+    connectionReady: ready !== null,
+    error: error ?? card.error,
+    refreshing: card.refreshing,
+    setPause,
+    refresh,
+  };
 }

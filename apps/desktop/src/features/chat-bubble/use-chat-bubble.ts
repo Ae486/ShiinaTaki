@@ -31,6 +31,7 @@ export interface ChatBubble {
   isOpen: boolean;
   reply: BubbleReply;
   isPending: boolean;
+  connectionReady: boolean;
   error: string | null;
   open: () => void;
   close: () => void;
@@ -65,5 +66,14 @@ export function useChatBubble(): ChatBubble {
     [client],
   );
 
-  return { isOpen, reply, isPending, error: reply.kind === "error" ? reply.message : null, open, close, send };
+  return {
+    isOpen,
+    reply,
+    isPending,
+    connectionReady: client !== null,
+    error: reply.kind === "error" ? reply.message : null,
+    open,
+    close,
+    send,
+  };
 }

@@ -1,12 +1,13 @@
 /**
  * INPUT:  the page registry + the home store's current page.
  * OUTPUT: <HomeShell> — the two-pane home layout: left menu (one icon+label entry per registry row) + the current
- *         page's body, with the window's operator WS provided to every page through HomeClientContext.
+ *         page's body, shared client context, and the shared Home status banner on non-chat pages.
  * POS:    ui/windows/home — the window root. Presentational shell only: pages own their data and their own header
  *         (page-chrome.tsx), the shell owns the nav switch, the shared connection and the one ToastHost.
  */
 
 import { ToastHost } from "@/components/toast/toast-host.js";
+import { ConnectionStatusBanner } from "@/components/connection-status/connection-status.js";
 import { useHomeStore } from "./home-store.ts";
 import { useHomeNavigateEvent } from "./use-home-navigate-event.ts";
 import { useHomeConnection } from "./use-home-connection.ts";
@@ -65,6 +66,7 @@ export function HomeShell() {
           ))}
         </nav>
         <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
+          {page.id !== "chat" && <ConnectionStatusBanner status={connection.status} />}
           <CurrentPage />
         </main>
         <ToastHost />

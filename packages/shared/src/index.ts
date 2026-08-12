@@ -145,6 +145,16 @@ export type {
 } from "./config-schema.ts";
 
 export {
+  TIMING_CONFIG_KEYS,
+  TIMING_POLICY_DEVELOPMENT_DEFAULTS,
+  TimingDurationMsSchema,
+  TimingPolicySchema,
+  isTimingConfigKey,
+  timingPolicyCandidate,
+} from "./timing-policy-schema.ts";
+export type { TimingConfigKey, TimingPolicy, TimingPolicyField } from "./timing-policy-schema.ts";
+
+export {
   MEDIA_METHODS,
   MediaClearParamsSchema,
   MediaClearResultSchema,

@@ -1,0 +1,25 @@
+{"file":".trellis/spec/backend/index.md","reason":"Backend entry point and pre-development checklist for the Core-owned memory provider work."}
+{"file":".trellis/spec/backend/directory-structure.md","reason":"Keep provider-neutral Core code, OS-specific Shell work, and shared protocol ownership in the correct packages."}
+{"file":".trellis/spec/backend/agent-runtime.md","reason":"Preserve foreground latency, volatile turn-context injection, detached post-turn work, and truthful tool-loop behavior."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Canonical records, authority epochs, ledgers, checkpoints, replicas, and outbox state require explicit Core-only migrations and transactions."}
+{"file":".trellis/spec/backend/config-store.md","reason":"Separate non-secret provider settings from the provider-neutral secret backend and preserve effective-value precedence."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Provider, migration, synchronization, degraded, and recovery failures need typed retryable and terminal outcomes."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Diagnostics must remain useful without logging memory content, credentials, prompts, or unsafe provider payloads."}
+{"file":".trellis/spec/backend/permission-authorization.md","reason":"Setup, secret, backup, cutover, and destructive authority operations remain operator-only and explicitly gated."}
+{"file":".trellis/spec/backend/tool-design.md","reason":"Define one bounded canonical Memory Tool Contract with fenced results and no duplicate advertised tool suites."}
+{"file":".trellis/spec/backend/mcp-tool-schema-compatibility.md","reason":"Keep Hindsight MCP optional and prevent transport-specific schemas or defaults from leaking into canonical agent tools."}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Provider status and long-running operation progress need producer-backed restoration rather than snapshot-only pseudo channels."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Apply Core/shared size, ownership, index, comment, and deterministic-test requirements across the large implementation."}
+{"file":".trellis/spec/frontend/index.md","reason":"Frontend entry point for Home/settings/operations integration and disposable-client invariants."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Authority, migration, sync, and setup state stay Core-owned; frontend cache remains non-authoritative and secret-free."}
+{"file":".trellis/spec/frontend/hook-guidelines.md","reason":"Protocol subscriptions and long-running setup/sync effects belong in hooks rather than presentation components."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"Build guided setup, diagnostics, confirmations, loading, error, and empty states from established components."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Integrate memory setup and operations into the existing operator Home window without changing window authority boundaries."}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"Use discriminated provider/authority/operation states and schema-validated cross-layer payloads."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Preserve frontend file caps, indexes, deterministic tests, and separation of stateful hooks from views."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Trace authority, revisions, checkpoints, secrets, and progress end to end across Hindsight, Core, shared schemas, Shell, and UI."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Pin Hindsight and runtime claims to the evaluated 0.9.0 source/OpenAPI and contract tests rather than prose assumptions."}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Evolve existing memory/config/operator seams without duplicating storage, tool, or status frameworks."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/taki-memory-integration-seams.md","reason":"Authoritative map of the shipped Taki memory, prompt, maintenance, secret, deployment, and operator seams."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/hindsight-api-deployment-contracts.md","reason":"Exact Hindsight 0.9.0 REST, authentication, model, deployment, health, lifecycle, and operations contracts."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/hindsight-integration-gaps-and-sync.md","reason":"Frozen native-versus-adapter ownership and required journal, revision, snapshot, prompt, tag, recovery, and upgrade extensions."}

@@ -5,9 +5,22 @@
  * POS:    unit test for the operator WS client (F1). Node-safe via the injected transport. Exempt from size caps.
  */
 
-import { describe, expect, it } from "vitest";
-import { AVATAR_METHODS, CHARACTER_METHODS, CHAT_METHODS, CONFIG_METHODS, CONNECT_METHOD, JSON_RPC_APP_ERROR, MEDIA_METHODS, TIMELINE_METHODS } from "@taki/shared";
+import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
+import { describe, expect, it, vi } from "vitest";
+import {
+  AVATAR_METHODS,
+  CHARACTER_METHODS,
+  CHAT_METHODS,
+  CONFIG_METHODS,
+  CONNECT_METHOD,
+  JSON_RPC_APP_ERROR,
+  MEDIA_METHODS,
+  TIMELINE_METHODS,
+  TIMING_POLICY_DEVELOPMENT_DEFAULTS,
+} from "@taki/shared";
+import { createTimingPolicyStore } from "./timing-policy.ts";
 import { createWsClient } from "./ws-client.ts";
+import { addConfigChangedHandler, bindTransport, createRoutes, installRoutes } from "./ws-client-routes.ts";
 import type { WsTransport } from "./ws-transport.ts";
 
 interface Harness {
@@ -171,6 +184,21 @@ describe("createWsClient inbound routing", () => {
     expect(received).toEqual([{ characterId: "taki", kind: "expression", name: "smile01" }]);
   });
 
+  it("ignores a queued old-generation push after the transport has closed", () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    const received: unknown[] = [];
+    client.onAvatarCommand((command) => received.push(command));
+    h.open();
+    h.closeSocket();
+    h.deliver({
+      jsonrpc: "2.0",
+      method: AVATAR_METHODS.command,
+      params: { characterId: "taki", kind: "expression", name: "late" },
+    });
+    expect(received).toEqual([]);
+  });
+
   it("routes a timeline.removed push to the registered handler (cancel-retract, zod-validated)", () => {
     const h = harness();
     const client = createWsClient({ transport: h.transport });
@@ -248,6 +276,69 @@ describe("createWsClient inbound routing", () => {
 });
 
 describe("createWsClient disconnect handling (D29)", () => {
+  it("rejects connect when the socket closes before open", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    const connecting = client.connect({ deviceId: "d", deviceName: "pet", role: "operator", capabilities: [] });
+    h.closeSocket();
+    await expect(connecting).rejects.toThrow("连接已断开");
+    expect(h.sent).toEqual([]);
+  });
+
+  it("bounds a socket that never opens with the bootstrap open/auth policy", async () => {
+    vi.useFakeTimers();
+    try {
+      const h = harness();
+      const timingPolicy = createTimingPolicyStore({ ...TIMING_POLICY_DEVELOPMENT_DEFAULTS, openAuthMs: 10 });
+      const client = createWsClient({ transport: h.transport, timingPolicy });
+      const connecting = client.connect({ deviceId: "d", deviceName: "pet", role: "operator", capabilities: [] });
+      const rejection = expect(connecting).rejects.toMatchObject({ name: "WsOpenDeadlineExceededError", timeoutMs: 10 });
+      await vi.advanceTimersByTimeAsync(10);
+      await rejection;
+      expect(h.sent).toEqual([]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("shares one open/auth budget instead of restarting the deadline after open", async () => {
+    vi.useFakeTimers();
+    try {
+      const h = harness();
+      const timingPolicy = createTimingPolicyStore({ ...TIMING_POLICY_DEVELOPMENT_DEFAULTS, openAuthMs: 10 });
+      const client = createWsClient({ transport: h.transport, timingPolicy });
+      const connecting = client.connect({ deviceId: "d", deviceName: "pet", role: "operator", capabilities: [] });
+      await vi.advanceTimersByTimeAsync(6);
+      h.open();
+      await Promise.resolve();
+      const rejection = expect(connecting).rejects.toMatchObject({ name: "RpcDeadlineExceededError", timeoutMs: 4 });
+      await vi.advanceTimersByTimeAsync(4);
+      await rejection;
+      expect(JSON.parse(h.sent[0] ?? "{}").method).toBe(CONNECT_METHOD);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not start authentication when a delayed open callback resumes after the total budget", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date(0));
+      const h = harness();
+      const timingPolicy = createTimingPolicyStore({ ...TIMING_POLICY_DEVELOPMENT_DEFAULTS, openAuthMs: 10 });
+      const client = createWsClient({ transport: h.transport, timingPolicy });
+      const connecting = client.connect({ deviceId: "d", deviceName: "pet", role: "operator", capabilities: [] });
+      vi.setSystemTime(new Date(11));
+      h.open();
+      const rejection = expect(connecting).rejects.toMatchObject({ name: "WsOpenDeadlineExceededError", timeoutMs: 10 });
+      await vi.advanceTimersByTimeAsync(1);
+      await rejection;
+      expect(h.sent).toEqual([]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("settles an in-flight turn with a structured error when the socket dies mid-turn", async () => {
     const h = harness();
     const client = createWsClient({ transport: h.transport });
@@ -282,6 +373,53 @@ describe("createWsClient disconnect handling (D29)", () => {
     await flush();
     expect(() => h.closeSocket()).not.toThrow();
     await expect(page).rejects.toThrow();
+  });
+
+  it("retires one generation idempotently when close is delivered more than once", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    let errors = 0;
+    const turn = client.chat(
+      { characterId: "taki", message: "hi" },
+      { onDelta: () => undefined, onError: () => errors++ },
+    );
+    await flush();
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "m1" } });
+    h.closeSocket();
+    h.closeSocket();
+    await turn;
+    expect(errors).toBe(1);
+  });
+
+  it("retires synchronously on caller close while preserving the real transport close callback", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    const configChanges: unknown[] = [];
+    let closeEvents = 0;
+    let turnErrors = 0;
+    client.onConfigChanged((changed) => configChanges.push(changed));
+    client.onClose(() => closeEvents++);
+    h.open();
+    const pendingPage = client.timelineHistory({ characterId: "taki", limit: 50 });
+    const turn = client.chat(
+      { characterId: "taki", message: "hi" },
+      { onDelta: () => undefined, onError: () => turnErrors++ },
+    );
+    await flush();
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "m1" } });
+
+    client.close();
+    h.deliver({ jsonrpc: "2.0", method: CONFIG_METHODS.changed, params: { key: "TAKI_LOG_LEVEL", value: "debug" } });
+
+    await expect(pendingPage).rejects.toThrow("connection closed");
+    await turn;
+    expect(turnErrors).toBe(1);
+    expect(configChanges).toEqual([]);
+    expect(closeEvents).toBe(0);
+
+    h.closeSocket();
+    expect(closeEvents).toBe(1);
   });
 });
 
@@ -326,13 +464,54 @@ describe("createWsClient config methods", () => {
     expect(await done).toEqual({ status: "ok", key: "TAKI_LOG_LEVEL", value: "debug", apply: "restart" });
   });
 
-  it("routes a config.changed push to the registered handler (zod-validated)", () => {
+  it("fans out config.changed to independent handlers and supports per-consumer cleanup", () => {
     const h = harness();
     const client = createWsClient({ transport: h.transport });
-    const received: unknown[] = [];
-    client.onConfigChanged((changed) => received.push(changed));
+    const first: unknown[] = [];
+    const second: unknown[] = [];
+    const unsubscribe = client.onConfigChanged((changed) => first.push(changed));
+    client.onConfigChanged((changed) => second.push(changed));
     h.open();
     h.deliver({ jsonrpc: "2.0", method: CONFIG_METHODS.changed, params: { key: "TAKI_LOG_LEVEL", value: "debug" } });
-    expect(received).toEqual([{ key: "TAKI_LOG_LEVEL", value: "debug" }]);
+    unsubscribe();
+    h.deliver({ jsonrpc: "2.0", method: CONFIG_METHODS.changed, params: { key: "TAKI_LOG_LEVEL", value: "info" } });
+    expect(first).toEqual([{ key: "TAKI_LOG_LEVEL", value: "debug" }]);
+    expect(second).toEqual([
+      { key: "TAKI_LOG_LEVEL", value: "debug" },
+      { key: "TAKI_LOG_LEVEL", value: "info" },
+    ]);
+  });
+
+  it("does not deliver a queued config.changed push after route retirement", async () => {
+    const h = harness();
+    const rpc = new JSONRPCServerAndClient(
+      new JSONRPCServer(),
+      new JSONRPCClient(() => undefined),
+    );
+    const state = createRoutes();
+    installRoutes(rpc, state);
+    const binding = bindTransport(h.transport, rpc, state);
+    const received: unknown[] = [];
+    addConfigChangedHandler(state, (changed) => received.push(changed));
+    h.open();
+    binding.retire();
+    await rpc.receiveAndSend({
+      jsonrpc: "2.0",
+      method: CONFIG_METHODS.changed,
+      params: { key: "TAKI_LOG_LEVEL", value: "debug" },
+    });
+    expect(received).toEqual([]);
+  });
+
+  it("sends at most one config.subscribe request per client generation", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const first = client.subscribeConfig();
+    const second = client.subscribeConfig();
+    await flush();
+    expect(h.sent.map((payload) => JSON.parse(payload).method)).toEqual([CONFIG_METHODS.subscribe]);
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "ok" } });
+    await expect(Promise.all([first, second])).resolves.toEqual([undefined, undefined]);
   });
 });

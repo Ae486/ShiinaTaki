@@ -2,7 +2,7 @@
  * INPUT:  a characterId + costume + settings-file basename + the costume's external-ref resolution map
  *         (character.costumes / character.costumeResolution results).
  * OUTPUT: costumeSettingsSegments / resolveSettingsFile / resolveResourcePath (pure) + characterCostumeUrl +
- *         costumeAssetResolver (settings URL + a per-sub-resource resolve(relPath) → asset: URL | null fn).
+ *         costumeAssetResolver (settings URL + attached costume identity + per-resource asset URL resolver).
  * POS:    ui/lib — the Tauri seam turning a Workspace model path into fetchable asset URLs. Keeps convertFileSrc OUT
  *         of renderer/ (framework-free). A null resolve = the caller STRIPS the ref: `..` never reaches convertFileSrc.
  */
@@ -52,6 +52,8 @@ export function resolveResourcePath(ref: string, resolution: Record<string, stri
 export interface CostumeAssetResolver {
   /** The costume settings-file asset: URL — passed as ModelSettings.url. */
   settingsUrl: string;
+  /** Stable identity carried into the scene only after this source actually attaches. */
+  costumeId: string;
   /**
    * Maps a settings-relative resource ref to its OWN absolute asset: URL, or null when the ref is unresolvable
    * (external ref no imported character supplies, or any `..`-bearing path) — the caller strips null entries BEFORE
@@ -76,7 +78,7 @@ export async function costumeAssetResolver(deps: {
     if (resolved === null) return null;
     return convertFileSrc(joinResolved(resolved.kind === "characters" ? charactersDir : costumeDir, resolved.segments));
   };
-  return { settingsUrl, resolve };
+  return { settingsUrl, costumeId: deps.costume, resolve };
 }
 
 // convertFileSrc needs a device path; the OS separator only has to round-trip through it, and the asset protocol

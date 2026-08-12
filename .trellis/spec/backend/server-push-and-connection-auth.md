@@ -12,6 +12,24 @@ When the Core must push events to a subscribed client mid-turn (timeline entries
 - Reference impls: `server/timeline-subscriptions.ts` + `server/methods/timeline-subscribe.ts`; `avatar/avatar-subscriptions.ts` + `server/methods/avatar-subscribe.ts`.
 - **A snapshot with no producer is a READ, not a channel.** The perception/activity card shipped as the operator-only one-shot `perception.card` (T3b) because nothing PUBLISHES a perception change — the state is polled in the background and read on demand. Clone the fan-out when a producer exists and the client must learn mid-turn; otherwise a `media.usage`-shaped read method is the honest surface (a subscription with no publisher is dead wiring).
 
+### Per-generation reconnect restoration (D59)
+
+- Subscription membership is connection-scoped and is deliberately removed by `ctx.onClose`. A replacement browser
+  socket therefore MUST authenticate and issue fresh subscriptions; Core never transfers membership to a new
+  connection or treats a prior device identity as an active sink.
+- Restoration is client-owned and observed before the surface claims healthy: Pet installs its guarded handler,
+  reports the live scene, then awaits one `avatar.subscribe`; Chat installs append/remove handlers, awaits one
+  `timeline.subscribe`, then reconciles history. A failure closes/replaces that generation rather than leaving a
+  connected UI with a dead channel.
+- `config.subscribe` is idempotent per connection. The desktop `WsClient` memoizes the request and fans one
+  `config.changed` notification to multiple local consumers, so timing sync and the Settings page cannot create
+  duplicate Core memberships.
+- Producers remain fire-and-forget with respect to subscriber count. Zero subscribers is valid Core behavior; window
+  recovery and honest connection status, not a fabricated tool failure, repair the owner-reported long-idle avatar
+  symptom.
+- Never replay operator mutations during restoration. Only subscriptions, truthful reports, and idempotent reads may
+  run automatically. See `../frontend/operator-connection-recovery.md` for the desktop generation contract.
+
 **No Rust serde mirror for operator-only channels.** Invariant 3 mirrors only shapes the Rust Shell (a *node*) actually handles — connect/capability/approval. `chat.*`, `timeline.*`, `avatar.*` are operator↔core direct (the Pet UI webview + CLI open their own loopback WS as operators); the Rust Shell never sees these frames, so they live in `@taki/shared` zod only. Test their round-trips in a standalone `<x>-schema.test.ts`, NOT `protocol-fixtures.test.ts` (that sweep asserts a Rust serde struct per prefix — adding an unmirrored prefix reds the cargo side).
 
 ## Connection auth ≠ capability authorization (two distinct gates)

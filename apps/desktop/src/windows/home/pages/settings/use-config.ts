@@ -14,6 +14,7 @@ import { applyChanged, applyStored, applyVerdict, refusalMessage, refusalOf } fr
 
 export interface ConfigView {
   entries: ConfigEntry[];
+  connectionReady: boolean;
   /** A load failure (the page shows it instead of an empty knob list). */
   error: string | null;
   /** A background re-read is running over the knobs already on screen. */
@@ -34,8 +35,11 @@ export function useConfig(): ConfigView {
   useEffect(() => {
     if (!ready) return;
     // Another operator surface (CLI, a second window) may edit a knob — the push keeps this list honest.
-    ready.onConfigChanged((changed) => mutate((prev) => ({ ...prev, entries: applyChanged(prev.entries, changed) })));
+    const unsubscribe = ready.onConfigChanged((changed) =>
+      mutate((prev) => ({ ...prev, entries: applyChanged(prev.entries, changed) })),
+    );
     void ready.subscribeConfig().catch((cause: unknown) => console.warn("[home] config subscribe failed", cause));
+    return unsubscribe;
   }, [ready, mutate]);
 
   const save = useCallback(
@@ -54,5 +58,12 @@ export function useConfig(): ConfigView {
     [ready, mutate],
   );
 
-  return { entries: list.data?.entries ?? [], error: list.error, refreshing: list.refreshing, notices, save };
+  return {
+    entries: list.data?.entries ?? [],
+    connectionReady: ready !== null,
+    error: list.error,
+    refreshing: list.refreshing,
+    notices,
+    save,
+  };
 }

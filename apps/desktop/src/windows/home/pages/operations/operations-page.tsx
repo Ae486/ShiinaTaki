@@ -22,7 +22,11 @@ export function OperationsPage() {
         {ops.error && <PageAlert>{ops.error}</PageAlert>}
 
         <PageCard title="记忆整理">
-          <ActionButton tone="primary" onClick={() => void ops.runTidy()} disabled={ops.tidying}>
+          <ActionButton
+            tone="primary"
+            onClick={() => void ops.runTidy()}
+            disabled={!ops.connectionReady || ops.tidying}
+          >
             {ops.tidying ? "整理中…" : "立即整理"}
           </ActionButton>
           {ops.tidy && (
@@ -39,7 +43,7 @@ export function OperationsPage() {
           {ops.status ? <LabeledRows rows={statusRows(ops.status)} /> : <p className="text-xs text-slate-400">载入中…</p>}
         </PageCard>
 
-        <StorageCard usage={ops.usage} clear={ops.clear} />
+        <StorageCard usage={ops.usage} clear={ops.clear} connectionReady={ops.connectionReady} />
       </PageBody>
     </>
   );

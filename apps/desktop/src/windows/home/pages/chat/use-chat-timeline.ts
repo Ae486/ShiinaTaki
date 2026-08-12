@@ -1,26 +1,18 @@
 /**
- * INPUT:  the chat page's WsClient + a `ready` (authenticated) flag; live chat.* + timeline.appended/removed events.
+ * INPUT:  the chat page's currently connected/restored WsClient; live chat.* events and the restored timeline store.
  * OUTPUT: useChatTimeline(client, ready) -> ChatTimeline: date-grouped rows + in-flight row + send/cancel/loadOlder +
  *         retractedDraft/consumeRetractedDraft (cancel-before-reply hand-back). Errors toast via components/toast (D34).
  * POS:    ui/windows/home/pages/chat — the ONLY touchpoint between the page and ws-client/store (hook-guidelines). Wires the WS
  *         to the timeline store: initial history page, live appends + removals, streamed deltas, older-page paging.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { TIMELINE_HISTORY_LIMIT_DEFAULT, type ImageAttachment } from "@taki/shared";
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
 import { pushToast } from "@/components/toast/toast-store.js";
 import type { WsClient } from "@/lib/ws-client.js";
 import { useChatTimelineStore, type InflightRow } from "./chat-timeline-store.ts";
 import { groupByLocalDate, type DateGroup } from "./date-group.ts";
-
-// Subscribe FIRST (live appends buffer into the store via the registered handler), then load the newest page and
-// merge — an entry that races in between is deduped by seq, never lost or double-shown.
-async function subscribeAndLoad(client: WsClient): Promise<void> {
-  await client.subscribeTimeline(ACTIVE_CHARACTER_ID);
-  const page = await client.timelineHistory({ characterId: ACTIVE_CHARACTER_ID, limit: TIMELINE_HISTORY_LIMIT_DEFAULT });
-  useChatTimelineStore.getState().mergeHistory(page);
-}
 
 // One send: deltas grow the in-flight row (keyed by messageId); complete drops it (the persisted entry already
 // arrived via timeline.appended); a plain error drops the in-flight row and surfaces as a toast (D34). A
@@ -63,7 +55,7 @@ export interface ChatTimeline {
   consumeRetractedDraft: () => void;
 }
 
-export function useChatTimeline(client: WsClient | null, ready: boolean): ChatTimeline {
+export function useChatTimeline(client: WsClient | null): ChatTimeline {
   const entries = useChatTimelineStore((s) => s.entries);
   const inflight = useChatTimelineStore((s) => s.inflight);
   const loaded = useChatTimelineStore((s) => s.loaded);
@@ -72,20 +64,6 @@ export function useChatTimeline(client: WsClient | null, ready: boolean): ChatTi
   // A cancel-before-reply hands the retracted text back here; the composer restores it (or toasts it) then consumes.
   const [retractedDraft, setRetractedDraft] = useState<string | null>(null);
   const loadingOlder = useRef(false);
-
-  useEffect(() => {
-    if (!client || !ready) return;
-    useChatTimelineStore.getState().reset();
-    client.onTimelineAppended((entry) => useChatTimelineStore.getState().appendLive(entry));
-    client.onTimelineRemoved((ref) => useChatTimelineStore.getState().removeEntry(ref.seq));
-    let cancelled = false;
-    void subscribeAndLoad(client).catch((error: unknown) => {
-      if (!cancelled) pushToast(`加载历史失败：${String(error)}`);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [client, ready]);
 
   const send = useCallback(
     (message: string, attachments: ImageAttachment[]) => {

@@ -1,0 +1,21 @@
+{"file":".trellis/spec/frontend/index.md","reason":"Desktop package boundaries and frontend invariant index for all D59/D61 work."}
+{"file":".trellis/spec/frontend/hook-guidelines.md","reason":"Hooks own WebSocket/Tauri effects and components consume typed state rather than clients."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Window-local connection state, Core-owned config, and guarded cache behavior during reconnect."}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"Discriminated connection states and validated cross-layer data boundaries."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"File/function caps, framework-free seams, headers/index updates, and deterministic tests."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"Status and settings presentation must reuse established primitives and preserve pet transparency."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Independent pet/home/chat sockets, settings page ownership, and locked result-bearing costume contract."}
+{"file":".trellis/spec/frontend/live2d-renderer.md","reason":"Renderer ticket, abortSwitch, load-before-teardown, governor, and Live2D reference-first constraints."}
+{"file":".trellis/spec/frontend/operator-connection-recovery.md","reason":"Executable D59 generation, request-deadline, restoration, timing-policy, and reconnect UX contract produced by this task."}
+{"file":".trellis/spec/frontend/costume-operation-lifecycle.md","reason":"Executable D61 total-budget, attachment-commit, report-recovery, and Home result contract produced by this task."}
+{"file":".trellis/spec/backend/index.md","reason":"Core package boundaries and backend invariant index for config and subscription changes."}
+{"file":".trellis/spec/backend/config-store.md","reason":"Core registry is the sole panel-visible timing authority with truthful apply semantics and validation."}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Per-connection subscription cleanup, authentication ordering, and reconnect restoration semantics."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Deadline, restoration, and mutation-outcome failures must remain actionable and typed."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Core/shared production structure, headers, size caps, and test obligations."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Timing policy spans shared schema, Core registry, WebSocket client, hooks, and settings UI."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Installed json-rpc behavior and library choices must remain source-grounded."}
+{"file":".trellis/tasks/08-07-ws-reconnect-request-deadlines/research/ws-reconnect-current-state.md","reason":"Authoritative current pet/home/chat generation, subscription, D29, and restoration map."}
+{"file":".trellis/tasks/08-07-ws-reconnect-request-deadlines/research/ws-library-and-deadline-options.md","reason":"Installed json-rpc timeout proof, reconnect options, policy gaps, and deterministic test design."}
+{"file":".trellis/tasks/08-07-ws-reconnect-request-deadlines/research/ws-recovery-ux-and-costume-contract.md","reason":"D59 window UX and D61 stage-aware cancellation/commit contract."}
+{"file":".trellis/tasks/08-07-ws-reconnect-request-deadlines/research/avatar-command-idle-disconnect.md","reason":"Owner-reported avatar failure path and required pet reconnect/resubscribe regression."}

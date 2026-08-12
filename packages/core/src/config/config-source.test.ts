@@ -53,6 +53,18 @@ describe("createConfigSource", () => {
     expect(build({ TAKI_WS_PORT: "nope" }).source.resolve("TAKI_WS_PORT")?.value).toBe("nope");
   });
 
+  it("applies environment precedence to timing rows and exposes their panel metadata", () => {
+    const { repo, source } = build({ TAKI_RPC_INTERACTIVE_TIMEOUT_MS: "17000" });
+    repo.upsert("TAKI_RPC_INTERACTIVE_TIMEOUT_MS", 16_000);
+    expect(source.resolve("TAKI_RPC_INTERACTIVE_TIMEOUT_MS")).toEqual({ value: 17_000, origin: "env" });
+    expect(entry(source, "TAKI_RPC_INTERACTIVE_TIMEOUT_MS")).toMatchObject({
+      value: 17_000,
+      envLocked: true,
+      apply: "live",
+      input: { kind: "int", min: 1 },
+    });
+  });
+
   it("ignores a stored row for an env-only knob", () => {
     const { repo, source } = build();
     repo.upsert("TAKI_DATA_DIR", "C:/somewhere-else");

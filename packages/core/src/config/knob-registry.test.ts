@@ -12,6 +12,16 @@ const EXPECTED_KEYS = [
   "TAKI_DATA_DIR",
   "TAKI_PROMPT_DIR",
   "TAKI_TRUST_LOOPBACK_OPERATOR",
+  "TAKI_RECONNECT_BASE_MS",
+  "TAKI_RECONNECT_CAP_MS",
+  "TAKI_RECONNECT_STABILITY_RESET_MS",
+  "TAKI_WS_OPEN_AUTH_TIMEOUT_MS",
+  "TAKI_RPC_INTERACTIVE_TIMEOUT_MS",
+  "TAKI_RPC_LONG_TIMEOUT_MS",
+  "TAKI_CHAT_ACK_TIMEOUT_MS",
+  "TAKI_PET_COSTUME_TOTAL_TIMEOUT_MS",
+  "TAKI_RENDERER_LOAD_TIMEOUT_MS",
+  "TAKI_HOME_RESULT_TIMEOUT_MS",
   "TAKI_PROVIDER_BASE_URL",
   "TAKI_PROVIDER_API_KEY",
   "TAKI_PROVIDER_MODEL",
@@ -47,7 +57,7 @@ describe("CONFIG_KNOBS", () => {
     const keys = CONFIG_KNOBS.map((knob) => knob.key);
     expect(new Set(keys).size).toBe(keys.length);
     expect([...keys].sort()).toEqual([...EXPECTED_KEYS].sort());
-    expect(CONFIG_KNOBS).toHaveLength(34);
+    expect(CONFIG_KNOBS).toHaveLength(44);
   });
 
   it("flags exactly the three API keys as secrets", () => {
@@ -58,9 +68,20 @@ describe("CONFIG_KNOBS", () => {
     ]);
   });
 
-  it("marks the data root env-only and every other knob restart (no live knob in v1)", () => {
+  it("keeps apply metadata truthful for timing rows with and without current production consumers", () => {
     expect(CONFIG_KNOBS.filter((knob) => knob.apply === "env-only").map((knob) => knob.key)).toEqual(["TAKI_DATA_DIR"]);
-    expect(CONFIG_KNOBS.filter((knob) => knob.apply === "live")).toEqual([]);
+    expect(CONFIG_KNOBS.filter((knob) => knob.apply === "live").map((knob) => knob.key)).toEqual([
+      "TAKI_RECONNECT_BASE_MS",
+      "TAKI_RECONNECT_CAP_MS",
+      "TAKI_RECONNECT_STABILITY_RESET_MS",
+      "TAKI_WS_OPEN_AUTH_TIMEOUT_MS",
+      "TAKI_RPC_INTERACTIVE_TIMEOUT_MS",
+      "TAKI_RPC_LONG_TIMEOUT_MS",
+      "TAKI_CHAT_ACK_TIMEOUT_MS",
+      "TAKI_PET_COSTUME_TOTAL_TIMEOUT_MS",
+      "TAKI_RENDERER_LOAD_TIMEOUT_MS",
+      "TAKI_HOME_RESULT_TIMEOUT_MS",
+    ]);
   });
 
   it("every non-null default passes its own schema", () => {
@@ -85,6 +106,7 @@ describe("CONFIG_KNOBS", () => {
     expect(findKnob("TAKI_AMBIENT_SCREENSHOT_RETENTION")?.schema.safeParse("sometimes").success).toBe(false);
     expect(findKnob("TAKI_MEMORY_BM25_WEIGHTS")?.schema.safeParse("2,1").success).toBe(false);
     expect(findKnob("TAKI_MEMORY_STOPLIST")?.schema.safeParse("maybe").success).toBe(false);
+    expect(findKnob("TAKI_RPC_INTERACTIVE_TIMEOUT_MS")?.schema.safeParse(0).success).toBe(false);
   });
 
   it("accepts the shapes the loaders accept", () => {

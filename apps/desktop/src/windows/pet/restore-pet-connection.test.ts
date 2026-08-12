@@ -1,0 +1,227 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  TIMING_POLICY_DEVELOPMENT_DEFAULTS,
+  type AvatarCommand,
+  type AvatarReportParams,
+} from "@taki/shared";
+import {
+  createConnectionGenerationController,
+  type ConnectionGenerationClient,
+  type ConnectionGenerationContext,
+  type ConnectionScheduler,
+} from "@/lib/connection-generation-controller.js";
+import { createCostumeReportSyncTracker } from "@/lib/costume-report-sync.js";
+import { createTimingPolicyStore } from "@/lib/timing-policy.js";
+import type { WsTransport } from "@/lib/ws-transport.js";
+import { restorePetConnection } from "./restore-pet-connection.ts";
+
+const EXPRESSION: AvatarCommand = { characterId: "taki", kind: "expression", name: "smile" };
+const MOTION: AvatarCommand = { characterId: "taki", kind: "motion", name: "wave", priority: "normal" };
+
+class AvatarClient implements ConnectionGenerationClient {
+  readonly order: string[] = [];
+  readonly reports: AvatarReportParams[] = [];
+  subscribeCalls = 0;
+  closeCalls = 0;
+  failAt: "report" | "subscribe" | null = null;
+  private avatarHandler: ((command: AvatarCommand) => void) | null = null;
+  private readonly closeHandlers: Array<() => void> = [];
+
+  onClose(handler: () => void): void {
+    this.closeHandlers.push(handler);
+  }
+
+  close(): void {
+    this.closeCalls += 1;
+    this.emitClose();
+  }
+
+  emitClose(): void {
+    for (const handler of [...this.closeHandlers]) handler();
+  }
+
+  onAvatarCommand(handler: (command: AvatarCommand) => void): void {
+    this.order.push("handler");
+    this.avatarHandler = handler;
+  }
+
+  async reportAvatar(params: AvatarReportParams): Promise<void> {
+    this.order.push("report");
+    this.reports.push(params);
+    if (this.failAt === "report") throw new Error("report failed");
+  }
+
+  async subscribeAvatar(): Promise<void> {
+    this.order.push("subscribe");
+    this.subscribeCalls += 1;
+    if (this.failAt === "subscribe") throw new Error("subscribe failed");
+  }
+
+  deliver(command: AvatarCommand): void {
+    this.avatarHandler?.(command);
+  }
+}
+
+function context(isCurrent: () => boolean): ConnectionGenerationContext {
+  return { generation: 1, isCurrent };
+}
+
+async function flush(): Promise<void> {
+  for (let index = 0; index < 5; index += 1) await Promise.resolve();
+}
+
+describe("restorePetConnection", () => {
+  it("keeps the Pet socket restorable while the renderer scene is unavailable", async () => {
+    const client = new AvatarClient();
+    await restorePetConnection({ client, scene: null, context: context(() => true) });
+
+    expect(client.order).toEqual(["handler", "report", "subscribe"]);
+    expect(client.reports).toEqual([{ characterId: "taki", motions: [], expressions: [] }]);
+    expect(client.subscribeCalls).toBe(1);
+  });
+
+  it("installs the guarded callback before a truthful report and one observed subscription", async () => {
+    const client = new AvatarClient();
+    const reportSync = createCostumeReportSyncTracker();
+    const applied: AvatarCommand[] = [];
+    const scene = {
+      reportSnapshot: () => ({ motions: ["wave"], expressions: ["smile"], costume: "arbeit" }),
+      applyAvatarCommand: (command: AvatarCommand) => applied.push(command),
+    };
+    await restorePetConnection({ client, scene, context: context(() => true), reportSync });
+    client.deliver(EXPRESSION);
+    client.deliver(MOTION);
+
+    expect(client.order).toEqual(["handler", "report", "subscribe"]);
+    expect(client.reports).toEqual([
+      { characterId: "taki", motions: ["wave"], expressions: ["smile"], costume: "arbeit" },
+    ]);
+    expect(client.subscribeCalls).toBe(1);
+    expect(applied).toEqual([EXPRESSION, MOTION]);
+    expect(reportSync.snapshot()).toEqual({ kind: "synced", costumeId: "arbeit", source: "reconnect" });
+  });
+
+  it.each(["report", "subscribe"] as const)("propagates an observed %s failure", async (failAt) => {
+    const client = new AvatarClient();
+    client.failAt = failAt;
+    const restoring = restorePetConnection({
+      client,
+      scene: { reportSnapshot: () => ({ motions: [], expressions: [] }), applyAvatarCommand: vi.fn() },
+      context: context(() => true),
+    });
+    await expect(restoring).rejects.toThrow(`${failAt} failed`);
+  });
+
+  it("re-reports the committed in-memory snapshot and clears a prior report recovery need", async () => {
+    const reportSync = createCostumeReportSyncTracker();
+    const failedSwitch = reportSync.begin("arbeit", "switch");
+    reportSync.recoveryNeeded(failedSwitch, new Error("outcome unknown"));
+    const client = new AvatarClient();
+
+    await restorePetConnection({
+      client,
+      reportSync,
+      scene: {
+        reportSnapshot: () => ({ motions: ["wave"], expressions: ["smile"], costume: "arbeit" }),
+        applyAvatarCommand: vi.fn(),
+      },
+      context: context(() => true),
+    });
+
+    expect(client.reports.at(-1)).toEqual({
+      characterId: "taki",
+      motions: ["wave"],
+      expressions: ["smile"],
+      costume: "arbeit",
+    });
+    expect(reportSync.snapshot()).toEqual({ kind: "synced", costumeId: "arbeit", source: "reconnect" });
+  });
+
+  it("ignores commands from a retired generation", async () => {
+    let current = true;
+    const client = new AvatarClient();
+    const applyAvatarCommand = vi.fn();
+    await restorePetConnection({
+      client,
+      scene: { reportSnapshot: () => ({ motions: [], expressions: [] }), applyAvatarCommand },
+      context: context(() => current),
+    });
+    current = false;
+    client.deliver(EXPRESSION);
+    expect(applyAvatarCommand).not.toHaveBeenCalled();
+  });
+});
+
+describe("accelerated long-idle avatar recovery", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("reconnects only Pet, restores once, delivers once, and leaves independent Home Chat usable", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(0);
+    const clients: AvatarClient[] = [];
+    const applied: AvatarCommand[] = [];
+    const homeChat = { sends: 0, send: () => (homeChat.sends += 1) };
+    const timingPolicy = createTimingPolicyStore({
+      ...TIMING_POLICY_DEVELOPMENT_DEFAULTS,
+      reconnectBaseMs: 100,
+      reconnectCapMs: 100,
+    });
+    const scheduler: ConnectionScheduler = {
+      schedule(delayMs, handler) {
+        const timer = setTimeout(handler, delayMs);
+        return { cancel: () => clearTimeout(timer) };
+      },
+    };
+    const controller = createConnectionGenerationController<AvatarClient>({
+      timingPolicy,
+      transportFactory: () => ({
+        send: () => undefined,
+        close: () => undefined,
+        onMessage: () => undefined,
+        onOpen: () => undefined,
+        onClose: () => undefined,
+      }) satisfies WsTransport,
+      clientFactory: () => {
+        const client = new AvatarClient();
+        clients.push(client);
+        return client;
+      },
+      authenticate: async () => ({ ok: true }),
+      restore: (client, generation) =>
+        restorePetConnection({
+          client,
+          context: generation,
+          scene: {
+            reportSnapshot: () => ({ motions: ["wave"], expressions: ["smile"], costume: "arbeit" }),
+            applyAvatarCommand: (command) => applied.push(command),
+          },
+        }),
+      scheduler,
+      clock: { now: () => Date.now() },
+      rng: () => 1,
+    });
+
+    controller.start();
+    await flush();
+    clients[0]?.deliver(EXPRESSION);
+    clients[0]?.deliver(MOTION);
+    homeChat.send();
+    clients[0]?.emitClose();
+    homeChat.send();
+    await vi.advanceTimersByTimeAsync(100);
+    await flush();
+    clients[1]?.deliver(EXPRESSION);
+    clients[1]?.deliver(MOTION);
+    clients[0]?.deliver(EXPRESSION);
+
+    expect(homeChat.sends).toBe(2);
+    expect(clients).toHaveLength(2);
+    expect(clients.map((client) => client.order)).toEqual([
+      ["handler", "report", "subscribe"],
+      ["handler", "report", "subscribe"],
+    ]);
+    expect(clients.map((client) => client.subscribeCalls)).toEqual([1, 1]);
+    expect(applied).toEqual([EXPRESSION, MOTION, EXPRESSION, MOTION]);
+    expect(controller.snapshot().status.kind).toBe("connected");
+  });
+});

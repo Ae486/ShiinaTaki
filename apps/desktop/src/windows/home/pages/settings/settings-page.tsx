@@ -10,7 +10,7 @@ import { useConfig } from "./use-config.ts";
 import { KnobField } from "./knob-field.tsx";
 
 export function SettingsPage() {
-  const { entries, error, refreshing, notices, save } = useConfig();
+  const { entries, connectionReady, error, refreshing, notices, save } = useConfig();
 
   return (
     <>
@@ -24,6 +24,7 @@ export function SettingsPage() {
               <KnobField
                 key={entry.key}
                 entry={entry}
+                connectionReady={connectionReady}
                 notice={notices[entry.key]}
                 onSave={(key, value) => void save(key, value)}
               />

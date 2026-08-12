@@ -13,6 +13,15 @@ A failing Capability or tool call must degrade into a **structured error the LLM
   The LLM sees the code + message and can retry, ask the user, or give up gracefully.
 - Error codes are a closed union in `@taki/shared` (zod enum) — shared with Rust. Add codes there, not inline strings.
 - WS/JSON-RPC errors follow JSON-RPC 2.0 error objects; map protocol errors to the same code union.
+- Desktop ordinary requests are bounded at the `json-rpc-2.0` native timeout requester. An outer `Promise.race` is
+  forbidden because it does not remove the library's pending request ID. A native timeout becomes the typed
+  `RpcDeadlineExceededError`; non-timeout JSON-RPC application errors pass through unchanged for existing refusal
+  handling.
+- Deadline messaging must distinguish outcome class. Read-only timeout means an explicit reread is safe; mutation or
+  chat-ack timeout means the remote outcome is unknown and the operation was not replayed. Retiring a whole connection
+  may reject every pending request, but one request timeout must not reject concurrent requests.
+- WebSocket open plus `connect` authentication share one captured total budget. If opening consumes it, no late
+  handshake frame may be sent. A successful open does not reset the budget.
 - Never `catch {}` (empty). Never log-and-rethrow at multiple layers — handle once at the boundary that can act.
 - Config/startup validation errors are fatal-fast with a precise message (zod `.parse`, let it throw at boot).
 - Streamed WS methods (ack response + event notifications): the ack MUST be sent before the first event — defer the stream pump to a **macrotask** (`setImmediate`); microtask deferral is insufficient because the response path itself crosses several `await`s. Pin the ordering with a test (see `server/methods/chat-send.ts`).
