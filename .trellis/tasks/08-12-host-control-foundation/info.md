@@ -16,8 +16,9 @@
 
 ## 2. Generations and versions
 
-- Core assigns `connectionGeneration` after an authenticated Node handshake. It is a monotonic positive integer within
-  the current Core process lineage for that stable `hostId`. A replacement generation retires the prior live one.
+- Core assigns `connectionGeneration` after an authenticated Node handshake. It is a monotonic positive integer per
+  stable `hostId` within the current Core process lineage. A replacement generation retires the prior live one; it is
+  not client-supplied and is not persisted across a Core restart.
 - Host publishes a monotonic `catalogGeneration` bound to exactly one connection generation. Reconnect publishes a
   complete catalog; no catalog delta protocol is required in this child.
 - `policyGeneration` and `approvalGeneration` are Core revisions captured for later authorization integration. This
@@ -74,8 +75,9 @@ the same tuple. Every Node-to-Core method validates `MethodContext.connection` a
 ## 5. Router and broker behavior
 
 - Replace first-advertising-Node selection with explicit resolution by `targetHostId` and current catalog.
-- Preserve existing single-node tool behavior by resolving the current primary Host explicitly at the caller seam;
-  do not keep an implicit first-match branch inside the router.
+- Preserve existing single-node tool behavior at the caller seam only when exactly one currently routable Host advertises
+  the capability. Zero routable Hosts returns unavailable; more than one returns an explicit target-required/ambiguous
+  result. The router never selects by insertion order or first match.
 - Pending entries are indexed and retired by `(hostId, connectionGeneration)`. One Node disconnect cannot settle another
   Host's requests.
 - A wrong-Host, wrong-generation, duplicate, unknown, or late response returns `accepted: false` and logs metadata only.
@@ -83,7 +85,13 @@ the same tuple. Every Node-to-Core method validates `MethodContext.connection` a
   replay. A cancellable read may fail/cancel; an already-dispatched side effect without a trusted terminal response
   settles `outcome_unknown`.
 - Node keeps a bounded in-memory terminal-attempt cache for the live generation so duplicate request/resume delivery
-  returns the previous terminal envelope instead of executing twice. This cache is not restart replay state.
+  returns the previous terminal envelope instead of executing twice. The MVP bound is 256 terminal entries with
+  insertion-order eviction; retirement/reconnect discards the cache. This cache is not restart replay state.
+
+For this child, `host.catalogPublish` and `capability.respond` are Node-to-Core RPC methods returning structured
+`{accepted, reason?}` metadata. `capability.request` and `capability.cancel` are Core-to-Host delivery frames. Challenge
+and resume remain schema reservations only. Core computes lowercase SHA-256 `inputDigest` over deterministic canonical
+JSON of the validated capability identity and exact input; Core mints opaque UUID `attemptId` and `idempotencyKey`.
 
 ## 6. Host Context seam
 

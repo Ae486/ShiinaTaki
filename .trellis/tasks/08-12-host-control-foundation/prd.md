@@ -34,6 +34,16 @@ response settlement truthful before common governance or extension lifecycle wor
 - Every Node-to-Core method validates `MethodContext.connection`; payload identity is only cross-checked and cannot
   self-prove Host or connection provenance.
 - Hosts publish only local readiness. Core derives connected/authenticated/revoked state and last-seen metadata.
+- For legacy callers without an explicit target, resolve only when exactly one currently routable Host advertises the
+  capability; zero Hosts is unavailable and multiple Hosts produce an explicit target-required/ambiguous failure. Never
+  restore first-advertising-Node selection under another name.
+- `connectionGeneration` is monotonic per stable `hostId` within the current Core process lineage and is neither
+  client-supplied nor persisted across Core restart. The Rust terminal-attempt cache is in-memory, capped at 256 entries
+  per live generation, and discarded on retirement/reconnect.
+- In this child, `host.catalogPublish` and `capability.respond` are Node-to-Core RPCs with structured `{accepted,
+  reason?}` results; `capability.request` and `capability.cancel` are Core-to-Host frames. Challenge/resume are schema
+  reservations only. Core computes lowercase SHA-256 canonical-input digests and mints opaque UUID attempt/idempotency
+  identifiers.
 - The same exact identity tuple binds request, optional challenge/resume, cancel, and response.
 - Disconnect of Host A cannot settle Host B work.
 - A response with only a valid `requestId` but the wrong Host/generation is rejected.
