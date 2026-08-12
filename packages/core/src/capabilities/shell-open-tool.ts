@@ -23,7 +23,7 @@ export function createShellOpenTool(deps: ShellOpenToolDeps): ToolSet {
       execute: async ({ kind, target }) => {
         try {
           // The target is content (may reveal what the user is browsing) — the node shows it in the dialog, never logged here.
-          const routed = await routeCapability(deps, CAPABILITY, { kind, target });
+          const routed = await routeCapability(deps, { capabilityId: CAPABILITY, input: { kind, target } });
           if (!routed.ok) return routed;
           const output = ShellOpenOutputSchema.parse(routed.output);
           log.info({ kind }, "shell-open launched");

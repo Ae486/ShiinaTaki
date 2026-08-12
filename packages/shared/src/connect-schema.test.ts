@@ -42,8 +42,23 @@ describe("ConnectParamsSchema", () => {
   });
 
   it("accepts a node declaring capabilities", () => {
-    const parsed = ConnectParamsSchema.parse({ ...base, role: "node", capabilities: ["screenshot"] });
+    const parsed = ConnectParamsSchema.parse({
+      ...base,
+      role: "node",
+      capabilities: ["screenshot"],
+      host: { protocol: { min: 1, max: 1 }, catalogSchemaVersions: [1] },
+    });
     expect(parsed.capabilities).toEqual(["screenshot"]);
+  });
+
+  it("requires Host negotiation from nodes and forbids it on operators", () => {
+    expect(ConnectParamsSchema.safeParse({ ...base, role: "node", capabilities: ["screenshot"] }).success).toBe(false);
+    expect(
+      ConnectParamsSchema.safeParse({
+        ...base,
+        host: { protocol: { min: 1, max: 1 }, catalogSchemaVersions: [1] },
+      }).success,
+    ).toBe(false);
   });
 
   it("accepts an optional reconnect token", () => {
@@ -62,6 +77,15 @@ describe("ConnectResultSchema", () => {
 
   it("accepts ok carrying a token (pairing just completed)", () => {
     expect(ConnectResultSchema.safeParse({ status: "ok", token: "tok" }).success).toBe(true);
+  });
+
+  it("accepts the selected Host versions and Core-assigned generation", () => {
+    expect(
+      ConnectResultSchema.safeParse({
+        status: "ok",
+        host: { hostId: VALID_UUID, protocolVersion: 1, catalogSchemaVersion: 1, connectionGeneration: 1 },
+      }).success,
+    ).toBe(true);
   });
 
   it("rejects a non-ok status", () => {

@@ -82,6 +82,23 @@ describe("createMethodRegistry dispatch", () => {
     expect(data.issues.length).toBeGreaterThan(0);
   });
 
+  it("returns INTERNAL_ERROR when method-specific fail-closed cleanup throws", async () => {
+    const registry = createMethodRegistry();
+    registry.register({
+      method: "candidate.publish",
+      roles: ["node"],
+      paramsSchema: z.object({ value: z.string() }),
+      onInvalidParams: () => {
+        throw new Error("cleanup failed");
+      },
+      handler: () => ({}),
+    });
+
+    const res = await registry.dispatch(request("candidate.publish", { value: 1 }), ctxFor(authed("node")));
+
+    expect(res).toMatchObject({ id: "1", error: { code: JSON_RPC_ERROR_CODES.INTERNAL_ERROR, message: "cleanup failed" } });
+  });
+
   it("degrades a throwing handler into an INTERNAL_ERROR response instead of rejecting", async () => {
     const registry = createMethodRegistry();
     registry.register({

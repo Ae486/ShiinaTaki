@@ -1,0 +1,52 @@
+/**
+ * INPUT:  canonical schemas and types from host-control-schema.ts
+ * OUTPUT: the named public @taki/shared Host-control API
+ * POS:    shared — focused export surface used by the package entry to stay within source size limits
+ */
+export {
+  HOST_CATALOG_SCHEMA_VERSION,
+  HOST_CONTROL_METHODS,
+  HOST_CONTROL_PROTOCOL_VERSION,
+  CapabilityCancellationSchema,
+  CapabilityCancelReasonSchema,
+  CapabilityCancelSchema,
+  CapabilityChallengeSchema,
+  CapabilityExecutionKindSchema,
+  CapabilityResumeSchema,
+  CapabilitySettlementStateSchema,
+  HostCapabilityDescriptorSchema,
+  HostCatalogPublishParamsSchema,
+  HostDeclarationSchema,
+  HostFrameAckSchema,
+  HostFrameRejectReasonSchema,
+  HostLocalReadinessSchema,
+  HostMcpDescriptorSchema,
+  HostNegotiationSchema,
+  HostOperationControlSchema,
+  HostProtocolRangeSchema,
+  HostSkillDescriptorSchema,
+  HostWorkspaceDescriptorSchema,
+  PositiveGenerationSchema,
+  Sha256HexSchema,
+} from "./host-control-schema.ts";
+export type {
+  CapabilityCancellation,
+  CapabilityCancel,
+  CapabilityCancelReason,
+  CapabilityChallenge,
+  CapabilityExecutionKind,
+  CapabilityResume,
+  CapabilitySettlementState,
+  HostCapabilityDescriptor,
+  HostCatalogPublishParams,
+  HostDeclaration,
+  HostFrameAck,
+  HostFrameRejectReason,
+  HostLocalReadiness,
+  HostMcpDescriptor,
+  HostNegotiation,
+  HostOperationControl,
+  HostProtocolRange,
+  HostSkillDescriptor,
+  HostWorkspaceDescriptor,
+} from "./host-control-schema.ts";

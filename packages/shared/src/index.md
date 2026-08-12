@@ -3,6 +3,8 @@
 - ping-schema.ts — scaffold ping/pong smoke schema (desktop IPC smoke; untouched this slice)
 - json-rpc-schema.ts — JSON-RPC 2.0 envelope schemas + JSON_RPC_ERROR_CODES + JSON_RPC_APP_ERROR + client-frame union
 - error-code-schema.ts — closed cross-process ErrorCode union
+- host-control-schema.ts — canonical Execution Host negotiation/catalog/control/cancel/settlement schemas, exact acknowledgement union, and frozen method names
+- host-control-api.ts — focused named public export surface for Host-control schemas and types
 - connect-schema.ts — CONNECT_METHOD + RoleSchema + connect handshake param/result schemas (ADR 0004)
 - chat-schema.ts — CHAT_METHODS + chat.send/cancel/delta/complete/error param & event schemas; +ImageAttachment/IMAGE_MEDIA_TYPES (in-flight image input, #17)
 - timeline-schema.ts — TIMELINE_METHODS + timeline entry/part/history/subscribe/appended/removed schemas (ADR 0005); parts = structured tool-call/result + image fidelity; removed = cancel-retract push
@@ -14,6 +16,6 @@
 - approval-schema.ts — APPROVAL_METHODS + tool-approval request/respond schemas (MCP gate; M3 Permission Gate reuse)
 - permission-level-schema.ts — PERMISSION_METHODS (operator-role, mirrors approval.respond) + PermissionLevel/Posture/CellKey/Cell schemas + secondConfirm floor-change marker (T2b; leaf shapes serde-mirrored — the Shell gate enforces the same vocabulary)
 - perception-schema.ts — PERCEPTION_METHODS + Privacy Pause state/set + activity-card schemas (current/recent/samplingStatus/pauseState) (T3b; panel UI at #26); operator-only, NO Rust mirror
-- capability-schema.ts — CAPABILITY_METHODS + core↔node capability request/respond/error schemas; respond output is opaque (Option A)
+- capability-schema.ts — compatibility entry re-exporting the canonical Host-bound capability channel schemas
 - capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec/ForegroundWindow); mirrored in Rust serde
 - ws-defaults.ts — default loopback WS host/port constants

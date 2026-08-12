@@ -3,7 +3,9 @@
 - lib.rs — Tauri composition root: dirs/approver/status-sink resolution, TauriStatusEmitter, node::build_node call, commands
 - node.rs — tauri-FREE node assembly: NodeConfig + build_node (gate/audit/capabilities/WsClient) + init_tracing; shared by lib.rs and bin/taki-node
 - status.rs — StatusEmitter trait (status sink seam) + TracingStatusEmitter (headless log-only impl)
-- protocol.rs — serde mirrors of @taki/shared (connect, app-error, client frames, capability channel, permission-level config) + golden-fixture sweep
+- protocol.rs — stable crate-internal protocol import surface, non-Host serde mirrors, and the golden-fixture parity sweep
+- host_control_protocol.rs — strict Host negotiation/catalog/control/request/cancel/response serde mirrors re-exported by protocol.rs
+- host_session.rs — one live Host generation's exact binding, cancellation, and 256-entry terminal-attempt cache
 - ws_client.rs — the reconnecting node client: handshake, token persist, capability.request → gate → respond; tauri-free
 - gate.rs — the Permission Gate policy core (name-keyed evaluate + command-keyed evaluate_exec + Level-engine evaluate_by_class/evaluate_class behind the ArgClass mount-point, fail-closed) + gate/ submodules
 - gate/ — decisions store + approver trait/dialog impl/scripted (debug-only) impl + governance registry (Level projection) + level loader

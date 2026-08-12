@@ -1,62 +1,58 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createConnectionRegistry } from "./connection-registry.ts";
 
+const HOST = "11111111-1111-4111-8111-111111111111";
+const hostSelection = { protocolVersion: 1, catalogSchemaVersion: 1 };
+
 describe("createConnectionRegistry", () => {
-  it("creates connections in the awaiting state and tracks them", () => {
+  it("keeps operators legacy-compatible without Host negotiation", () => {
     const registry = createConnectionRegistry();
     const connection = registry.create();
-    expect(connection.state.status).toBe("awaiting");
-    expect(registry.list()).toContain(connection);
+    expect(registry.authenticate(connection, { deviceId: HOST, role: "operator", capabilities: [] })).toBeUndefined();
+    expect(connection.state).toMatchObject({ status: "authenticated", role: "operator" });
   });
 
-  it("authenticate records deviceId, role and a defensive copy of capabilities", () => {
+  it("assigns monotonically increasing generations per stable Host and retires the prior socket", () => {
     const registry = createConnectionRegistry();
-    const connection = registry.create();
-    const capabilities = ["screenshot"];
-    registry.authenticate(connection, { deviceId: "d1", role: "node", capabilities });
-    capabilities.push("exec"); // mutating the caller's array must not leak into the connection
-
-    expect(connection.state).toEqual({
-      status: "authenticated",
-      deviceId: "d1",
-      role: "node",
-      capabilities: ["screenshot"],
+    const closeFirst = vi.fn();
+    const retired: number[] = [];
+    registry.onRemove((connection) => {
+      if (connection.state.status === "authenticated") retired.push(connection.state.host?.connectionGeneration ?? 0);
     });
+    const first = registry.create(undefined, undefined, closeFirst);
+    expect(
+      registry.authenticate(first, { deviceId: HOST, role: "node", capabilities: ["screenshot"], host: hostSelection }),
+    ).toMatchObject({ hostId: HOST, connectionGeneration: 1 });
+    const second = registry.create();
+    expect(
+      registry.authenticate(second, { deviceId: HOST, role: "node", capabilities: ["screenshot"], host: hostSelection }),
+    ).toMatchObject({ hostId: HOST, connectionGeneration: 2 });
+    expect(closeFirst).toHaveBeenCalledOnce();
+    expect(retired).toEqual([1]);
+    expect(registry.isCurrentHost(first)).toBe(false);
+    expect(registry.isCurrentHost(second)).toBe(true);
+    expect(registry.findHost(HOST)).toBe(second);
   });
 
-  it("remove drops the connection from the tracked set", () => {
+  it("removing a retired old socket cannot remove the replacement Host", () => {
     const registry = createConnectionRegistry();
-    const connection = registry.create();
-    registry.remove(connection);
-    expect(registry.list()).not.toContain(connection);
+    const first = registry.create();
+    registry.authenticate(first, { deviceId: HOST, role: "node", capabilities: [], host: hostSelection });
+    const second = registry.create();
+    registry.authenticate(second, { deviceId: HOST, role: "node", capabilities: [], host: hostSelection });
+    registry.remove(first);
+    expect(registry.findHost(HOST)).toBe(second);
   });
 
-  it("findNodeForCapability returns the first authenticated node declaring the capability", () => {
+  it("fires retirement listeners only once when replacement precedes the old close event", () => {
     const registry = createConnectionRegistry();
-    const operator = registry.create();
-    registry.authenticate(operator, { deviceId: "op", role: "operator", capabilities: [] });
-    const other = registry.create();
-    registry.authenticate(other, { deviceId: "n0", role: "node", capabilities: ["clipboard"] });
-    const node = registry.create();
-    registry.authenticate(node, { deviceId: "n1", role: "node", capabilities: ["screenshot"] });
-
-    expect(registry.findNodeForCapability("screenshot")).toBe(node);
-    expect(registry.findNodeForCapability("exec")).toBeUndefined();
-  });
-
-  it("ignores an awaiting (unauthenticated) connection when routing a capability", () => {
-    const registry = createConnectionRegistry();
-    const awaiting = registry.create();
-    void awaiting;
-    expect(registry.findNodeForCapability("screenshot")).toBeUndefined();
-  });
-
-  it("notifies onRemove listeners with the removed connection", () => {
-    const registry = createConnectionRegistry();
-    const removed: unknown[] = [];
-    registry.onRemove((connection) => removed.push(connection));
-    const connection = registry.create();
-    registry.remove(connection);
-    expect(removed).toEqual([connection]);
+    const retired: unknown[] = [];
+    registry.onRemove((connection) => retired.push(connection));
+    const first = registry.create();
+    registry.authenticate(first, { deviceId: HOST, role: "node", capabilities: [], host: hostSelection });
+    const second = registry.create();
+    registry.authenticate(second, { deviceId: HOST, role: "node", capabilities: [], host: hostSelection });
+    registry.remove(first);
+    expect(retired).toEqual([first]);
   });
 });

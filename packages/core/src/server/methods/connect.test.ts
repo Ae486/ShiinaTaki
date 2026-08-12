@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -59,6 +59,7 @@ interface ConnectInput {
   capabilities?: string[];
   token?: string;
   pairingCode?: string;
+  host?: ConnectParams["host"];
 }
 
 interface Attempt {
@@ -79,6 +80,9 @@ function callConnect(h: Harness, input: ConnectInput, remoteAddress: string | un
     capabilities: input.capabilities ?? [],
     token: input.token,
     pairingCode: input.pairingCode,
+    host: input.host ?? (input.role === "node"
+      ? { protocol: { min: 1, max: 1 }, catalogSchemaVersions: [1] }
+      : undefined),
   };
   try {
     return { result: h.def.handler(params, ctx), error: undefined, connection, closed };
@@ -168,6 +172,22 @@ describe("connect loopback auto-trust (P3)", () => {
 });
 
 describe("connect existing credential paths (regression — unchanged by auto-trust)", () => {
+  it("rejects unsupported Host negotiation before pairing can persist a credential", () => {
+    const h = boot(false);
+    callConnect(h, { deviceId: NODE_ID, role: "node" }, "127.0.0.1");
+    const code = h.codes.at(-1)?.code ?? "";
+    const attempt = callConnect(h, {
+      deviceId: NODE_ID,
+      role: "node",
+      pairingCode: code,
+      host: { protocol: { min: 2, max: 2 }, catalogSchemaVersions: [1] },
+    }, "127.0.0.1");
+
+    expect(appErrorCode(attempt.error)).toBe("AUTH_FAILED");
+    expect(attempt.connection.state.status).toBe("awaiting");
+    expect(existsSync(h.path)).toBe(false);
+  });
+
   it("a presented WRONG token fails closed with AUTH_FAILED — never auto-trusted despite loopback+flag", () => {
     const h = boot(true);
     const attempt = callConnect(h, { deviceId: OPERATOR_ID, role: "operator", token: "not-the-real-token" }, "127.0.0.1");

@@ -33,6 +33,8 @@ export interface MethodDefinition<P> {
   /** Roles allowed to call this method once authenticated (dispatch returns FORBIDDEN otherwise). */
   roles: Role[];
   paramsSchema: ZodType<P>;
+  /** Optional fail-closed cleanup for a method whose invalid candidate must retire prior live state. */
+  onInvalidParams?: (params: unknown, ctx: MethodContext) => void;
   handler: (params: P, ctx: MethodContext) => Promise<unknown> | unknown;
 }
 
@@ -46,6 +48,7 @@ export interface MethodRegistry {
 interface RegisteredMethod {
   roles: Role[];
   paramsSchema: ZodType;
+  onInvalidParams?: (params: unknown, ctx: MethodContext) => void;
   run: (params: unknown, ctx: MethodContext) => Promise<unknown> | unknown;
 }
 
@@ -62,52 +65,57 @@ export function createMethodRegistry(): MethodRegistry {
       // params is validated against paramsSchema in dispatch before run is called.
       const run = (params: unknown, ctx: MethodContext): Promise<unknown> | unknown =>
         def.handler(params as P, ctx);
-      methods.set(def.method, { roles: def.roles, paramsSchema: def.paramsSchema, run });
+      methods.set(def.method, {
+        roles: def.roles,
+        paramsSchema: def.paramsSchema,
+        onInvalidParams: def.onInvalidParams,
+        run,
+      });
     },
 
-    async dispatch(request: JsonRpcRequest, ctx: MethodContext): Promise<JsonRpcResponse> {
-      const method = methods.get(request.method);
-      if (!method) {
-        return createJSONRPCErrorResponse(
-          request.id,
-          JSON_RPC_ERROR_CODES.METHOD_NOT_FOUND,
-          `Method not found: ${request.method}`,
-        );
-      }
-
-      const parsed = method.paramsSchema.safeParse(request.params);
-      if (!parsed.success) {
-        return createJSONRPCErrorResponse(
-          request.id,
-          JSON_RPC_ERROR_CODES.INVALID_PARAMS,
-          "Invalid params",
-          { issues: parsed.error.issues },
-        );
-      }
-
-      // Role gate applies once authenticated; the ws-server pre-auth gate guarantees a
-      // still-awaiting connection can only reach the connect method (which any role may call).
-      const connection = ctx.connection.state;
-      if (connection.status === "authenticated" && !method.roles.includes(connection.role)) {
-        return appErrorResponse(
-          request.id,
-          ErrorCodeSchema.enum.FORBIDDEN,
-          `role ${connection.role} may not call ${request.method}`,
-        );
-      }
-
-      try {
-        const result = await method.run(parsed.data, ctx);
-        return createJSONRPCSuccessResponse(request.id, result);
-      } catch (error) {
-        // A throwing handler must degrade into a response — never an unhandled rejection that
-        // kills the process. A JSONRPCErrorException carries its own coded envelope (app errors).
-        if (error instanceof JSONRPCErrorException) {
-          return createJSONRPCErrorResponse(request.id, error.code, error.message, error.data);
-        }
-        const message = error instanceof Error ? error.message : String(error);
-        return createJSONRPCErrorResponse(request.id, JSON_RPC_ERROR_CODES.INTERNAL_ERROR, message);
-      }
-    },
+    dispatch: (request, ctx) => dispatch(methods, request, ctx),
   };
+}
+
+async function dispatch(
+  methods: Map<string, RegisteredMethod>,
+  request: JsonRpcRequest,
+  ctx: MethodContext,
+): Promise<JsonRpcResponse> {
+  const method = methods.get(request.method);
+  if (!method) {
+    return createJSONRPCErrorResponse(request.id, JSON_RPC_ERROR_CODES.METHOD_NOT_FOUND, `Method not found: ${request.method}`);
+  }
+  const parsed = method.paramsSchema.safeParse(request.params);
+  if (!parsed.success) return invalidParams({ method, request, ctx, issues: parsed.error.issues });
+  const connection = ctx.connection.state;
+  if (connection.status === "authenticated" && !method.roles.includes(connection.role)) {
+    return appErrorResponse(request.id, ErrorCodeSchema.enum.FORBIDDEN, `role ${connection.role} may not call ${request.method}`);
+  }
+  try {
+    return createJSONRPCSuccessResponse(request.id, await method.run(parsed.data, ctx));
+  } catch (error) {
+    if (error instanceof JSONRPCErrorException) {
+      return createJSONRPCErrorResponse(request.id, error.code, error.message, error.data);
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    return createJSONRPCErrorResponse(request.id, JSON_RPC_ERROR_CODES.INTERNAL_ERROR, message);
+  }
+}
+
+interface InvalidParamsInput {
+  method: RegisteredMethod;
+  request: JsonRpcRequest;
+  ctx: MethodContext;
+  issues: unknown;
+}
+
+function invalidParams({ method, request, ctx, issues }: InvalidParamsInput): JsonRpcResponse {
+  try {
+    method.onInvalidParams?.(request.params, ctx);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return createJSONRPCErrorResponse(request.id, JSON_RPC_ERROR_CODES.INTERNAL_ERROR, message);
+  }
+  return createJSONRPCErrorResponse(request.id, JSON_RPC_ERROR_CODES.INVALID_PARAMS, "Invalid params", { issues });
 }

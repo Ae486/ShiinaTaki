@@ -53,7 +53,7 @@ export function createScreenshotTool(deps: ScreenshotToolDeps): ToolSet {
       // Every failure degrades into a structured result the model can read; this execute never throws (error-handling spec).
       execute: async ({ describePrompt }) => {
         try {
-          const routed = await routeCapability(deps, CAPABILITY, {});
+          const routed = await routeCapability(deps, { capabilityId: CAPABILITY, input: {} });
           if (!routed.ok) return routed;
 
           // The channel output is opaque (Option A); the screenshot tool owns and parses its own payload shape.

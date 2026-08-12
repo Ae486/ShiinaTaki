@@ -8,6 +8,7 @@
 pub mod audit;
 mod capabilities_impl;
 pub mod gate;
+mod host_session;
 pub mod node;
 mod protocol;
 pub mod secrets;
@@ -37,7 +38,10 @@ struct Pong {
 // Scaffold IPC command proving the frontend↔Rust link (kept as the reference command).
 #[tauri::command]
 fn ping(nonce: String) -> String {
-    let pong = Pong { kind: "pong", nonce };
+    let pong = Pong {
+        kind: "pong",
+        nonce,
+    };
     format!("IPC ok: {} / {}", pong.kind, pong.nonce)
 }
 
@@ -55,7 +59,11 @@ pub struct StatusHandle(pub Arc<Mutex<String>>);
 // The Pet UI reads the current status on mount to close the emit-before-listener race.
 #[tauri::command]
 fn get_status(state: State<'_, StatusHandle>) -> String {
-    state.0.lock().map(|status| status.clone()).unwrap_or_else(|_| "connecting".into())
+    state
+        .0
+        .lock()
+        .map(|status| status.clone())
+        .unwrap_or_else(|_| "connecting".into())
 }
 
 // The Pet UI calls this after the user reads the pairing code from the core console (prd ruling 13).
@@ -91,7 +99,11 @@ pub fn run() {
             tauri::async_runtime::spawn(async move { client.run(rx).await });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![ping, submit_pairing_code, get_status])
+        .invoke_handler(tauri::generate_handler![
+            ping,
+            submit_pairing_code,
+            get_status
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -118,10 +130,16 @@ impl StatusEmitter for TauriStatusEmitter {
 }
 
 // Resolves the Tauri-app-specific pieces (dirs, status sink, approver, keyring) and hands assembly to node::build_node.
-fn build_client(handle: tauri::AppHandle, status: StatusHandle) -> Result<WsClient, Box<dyn std::error::Error>> {
+fn build_client(
+    handle: tauri::AppHandle,
+    status: StatusHandle,
+) -> Result<WsClient, Box<dyn std::error::Error>> {
     let data_dir = handle.path().app_data_dir()?; // Shell-owned, outside the Workspace by construction (D7)
     let exec_cwd = resolve_exec_cwd(&handle, &data_dir);
-    let emitter: Arc<dyn StatusEmitter> = Arc::new(TauriStatusEmitter { app: handle.clone(), status: status.0 });
+    let emitter: Arc<dyn StatusEmitter> = Arc::new(TauriStatusEmitter {
+        app: handle.clone(),
+        status: status.0,
+    });
     node::build_node(node::NodeConfig {
         data_dir,
         exec_cwd,

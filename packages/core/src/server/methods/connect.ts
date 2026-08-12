@@ -5,6 +5,8 @@
  */
 import {
   CONNECT_METHOD,
+  HOST_CATALOG_SCHEMA_VERSION,
+  HOST_CONTROL_PROTOCOL_VERSION,
   ConnectParamsSchema,
   ErrorCodeSchema,
   RoleSchema,
@@ -72,19 +74,21 @@ function handleConnect(deps: ConnectMethodDeps, params: ConnectParams, ctx: Meth
     throw appException(ErrorCodeSchema.enum.ALREADY_CONNECTED, "already connected: re-handshake is not allowed");
   }
 
+  // Host compatibility is validated before pairing can mint durable credentials. A protocol mismatch is not
+  // allowed to leave a newly trusted device record behind and then fail later during connection registration.
+  const identity = authenticatedIdentity(params);
+
   if (token !== undefined) {
     if (!deviceRegistry.verifyToken(deviceId, token, role)) {
       ctx.close(); // fail-closed: a wrong token or role mismatch is not a retryable state
       throw appException(ErrorCodeSchema.enum.AUTH_FAILED, "authentication failed");
     }
-    connectionRegistry.authenticate(ctx.connection, { deviceId, role, capabilities });
-    return { status: "ok" };
+    return connectedResult(params, connectionRegistry.authenticate(ctx.connection, identity));
   }
 
   if (pairingCode !== undefined) {
     const issued = completePairing(deviceRegistry, deviceId, { pairingCode, deviceName, role });
-    connectionRegistry.authenticate(ctx.connection, { deviceId, role, capabilities });
-    return { status: "ok", token: issued };
+    return connectedResult(params, connectionRegistry.authenticate(ctx.connection, identity), issued);
   }
 
   // Loopback auto-trust (P3): no token, no pairing code, but a local operator on the trusted machine boundary.
@@ -101,6 +105,34 @@ function handleConnect(deps: ConnectMethodDeps, params: ConnectParams, ctx: Meth
   const code = deviceRegistry.beginPairing(deviceId);
   onPairingCode({ deviceId, deviceName, code });
   throw appException(ErrorCodeSchema.enum.PAIRING_REQUIRED, "pairing required");
+}
+
+function authenticatedIdentity(params: ConnectParams) {
+  const host = params.host ? negotiateHost(params.host) : undefined;
+  return { deviceId: params.deviceId, role: params.role, capabilities: params.capabilities, host };
+}
+
+function negotiateHost(host: NonNullable<ConnectParams["host"]>) {
+  const protocolVersion = selectVersion(host.protocol.min, host.protocol.max, HOST_CONTROL_PROTOCOL_VERSION);
+  const catalogSchemaVersion = host.catalogSchemaVersions.includes(HOST_CATALOG_SCHEMA_VERSION)
+    ? HOST_CATALOG_SCHEMA_VERSION
+    : undefined;
+  if (!protocolVersion || !catalogSchemaVersion) {
+    throw appException(ErrorCodeSchema.enum.AUTH_FAILED, "Host protocol versions are not supported");
+  }
+  return { protocolVersion, catalogSchemaVersion };
+}
+
+function selectVersion(min: number, max: number, supported: number): number | undefined {
+  return supported >= min && supported <= max ? supported : undefined;
+}
+
+function connectedResult(
+  params: ConnectParams,
+  host: ReturnType<ConnectionRegistry["authenticate"]>,
+  token?: string,
+): ConnectResult {
+  return { status: "ok", token, host: params.role === "node" ? host : undefined };
 }
 
 interface PairingInput {

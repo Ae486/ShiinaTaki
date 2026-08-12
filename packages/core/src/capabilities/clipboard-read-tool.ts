@@ -23,7 +23,7 @@ export function createClipboardReadTool(deps: ClipboardReadToolDeps): ToolSet {
       inputSchema: z.object({}),
       execute: async () => {
         try {
-          const routed = await routeCapability(deps, CAPABILITY, {});
+          const routed = await routeCapability(deps, { capabilityId: CAPABILITY, input: {} });
           if (!routed.ok) return routed;
           const output = ClipboardReadOutputSchema.parse(routed.output);
           // The clipboard text is content — log only that a read happened, never the text itself.

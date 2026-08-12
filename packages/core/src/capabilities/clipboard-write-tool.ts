@@ -22,7 +22,7 @@ export function createClipboardWriteTool(deps: ClipboardWriteToolDeps): ToolSet 
       execute: async ({ text }) => {
         try {
           // The text is content — it rides to the node as input but never enters a core log.
-          const routed = await routeCapability(deps, CAPABILITY, { text });
+          const routed = await routeCapability(deps, { capabilityId: CAPABILITY, input: { text } });
           if (!routed.ok) return routed;
           ClipboardWriteOutputSchema.parse(routed.output);
           log.info({ bytes: Buffer.byteLength(text, "utf8") }, "clipboard written");

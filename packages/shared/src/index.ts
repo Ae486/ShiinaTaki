@@ -33,11 +33,23 @@ export { ErrorCodeSchema } from "./error-code-schema.ts";
 export type { ErrorCode } from "./error-code-schema.ts";
 
 export {
-  CONNECT_METHOD,
-  ConnectParamsSchema,
-  ConnectResultSchema,
-  RoleSchema,
-} from "./connect-schema.ts";
+  HOST_CATALOG_SCHEMA_VERSION, HOST_CONTROL_METHODS, HOST_CONTROL_PROTOCOL_VERSION,
+  CapabilityCancellationSchema, CapabilityCancelReasonSchema, CapabilityCancelSchema,
+  CapabilityChallengeSchema, CapabilityExecutionKindSchema, CapabilityResumeSchema,
+  CapabilitySettlementStateSchema, HostCapabilityDescriptorSchema, HostCatalogPublishParamsSchema,
+  HostDeclarationSchema, HostFrameAckSchema, HostFrameRejectReasonSchema, HostLocalReadinessSchema,
+  HostMcpDescriptorSchema, HostNegotiationSchema, HostOperationControlSchema, HostProtocolRangeSchema,
+  HostSkillDescriptorSchema, HostWorkspaceDescriptorSchema, PositiveGenerationSchema, Sha256HexSchema,
+} from "./host-control-api.ts";
+export type {
+  CapabilityCancellation, CapabilityCancel, CapabilityCancelReason, CapabilityChallenge,
+  CapabilityExecutionKind, CapabilityResume, CapabilitySettlementState, HostCapabilityDescriptor,
+  HostCatalogPublishParams, HostDeclaration, HostFrameAck, HostFrameRejectReason, HostLocalReadiness,
+  HostMcpDescriptor, HostNegotiation, HostOperationControl, HostProtocolRange, HostSkillDescriptor,
+  HostWorkspaceDescriptor,
+} from "./host-control-api.ts";
+
+export { CONNECT_METHOD, ConnectParamsSchema, ConnectResultSchema, RoleSchema } from "./connect-schema.ts";
 export type { ConnectParams, ConnectResult, Role } from "./connect-schema.ts";
 
 export {
@@ -221,11 +233,8 @@ export type {
 } from "./avatar-schema.ts";
 
 export {
-  APPROVAL_METHODS,
-  ApprovalRequestSchema,
-  ApprovalRespondParamsSchema,
-  ApprovalRespondResultSchema,
-  ApprovalScopeSchema,
+  APPROVAL_METHODS, ApprovalRequestSchema, ApprovalRespondParamsSchema,
+  ApprovalRespondResultSchema, ApprovalScopeSchema,
 } from "./approval-schema.ts";
 export type {
   ApprovalRequest,
@@ -285,11 +294,8 @@ export {
   CapabilityRespondResultSchema,
 } from "./capability-schema.ts";
 export type {
-  CapabilityError,
-  CapabilityErrorCode,
-  CapabilityRequest,
-  CapabilityRespondParams,
-  CapabilityRespondResult,
+  CapabilityError, CapabilityErrorCode, CapabilityRequest,
+  CapabilityRespondParams, CapabilityRespondResult,
 } from "./capability-schema.ts";
 
 export {

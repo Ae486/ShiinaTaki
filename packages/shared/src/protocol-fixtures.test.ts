@@ -12,6 +12,7 @@ import { ErrorCodeSchema } from "./error-code-schema.ts";
 import { JsonRpcClientFrameSchema, JsonRpcIdSchema } from "./json-rpc-schema.ts";
 import { ConnectParamsSchema, ConnectResultSchema } from "./connect-schema.ts";
 import { CapabilityRequestSchema, CapabilityRespondParamsSchema } from "./capability-schema.ts";
+import { CapabilityCancelSchema, HostCatalogPublishParamsSchema, HostFrameAckSchema } from "./host-control-schema.ts";
 import {
   PermissionCellSetParamsSchema,
   PermissionCellStateSchema,
@@ -48,7 +49,10 @@ const SCHEMA_BY_PREFIX: Record<string, ZodType> = {
   "app-error": AppErrorFrameSchema,
   "client-frame": JsonRpcClientFrameSchema,
   "capability-request": CapabilityRequestSchema,
+  "capability-cancel": CapabilityCancelSchema,
   "capability-respond": CapabilityRespondParamsSchema,
+  "host-catalog-publish": HostCatalogPublishParamsSchema,
+  "host-frame-ack": HostFrameAckSchema,
   // Per-capability output payloads (Option A): the channel treats `output` as opaque, so each capability's own
   // output schema owns its fixtures — the SAME files the cargo serde structs re-parse (anti-drift, invariant 3).
   "screenshot-output": ScreenshotOutputSchema,

@@ -1,7 +1,8 @@
 # core/capabilities/
-- capability-broker.ts — core→node ask/await broker; correlate by requestId; 90s backstop + denyAll on disconnect; logs requested/responded
+- capability-broker.ts — sealed Host-bound request/cancel/respond broker; per-generation settlement, deadline/unknown-outcome, and bounded duplicate/late acknowledgement history
+- canonical-input.ts — deterministic JSON canonicalization + lowercase SHA-256 input digest for sealed dispatch identity
 - capture-stamp.ts — captureStamp(): the Q5 state-snapshot capture moment (ISO, stamped once at execute, persists byte-stable into replay); shared by the screenshot/process-list/clipboard-read results
-- route-capability.ts — shared route→broker step (findNode → request → normalize); reused by every Shell-backed tool; logs invoked/routing-failed
+- route-capability.ts — explicit Host-qualified route→broker step; legacy fallback only for exactly one routable Host
 - screenshot-store.ts — the sanctioned Workspace write site: base64 PNG → screenshots/<ts>.png (invariant 2)
 - screenshot-describe.ts — the OPTIONAL screenshot→VLM bridge (vision slot): bytes (+ optional caller focus appended to the base framing) → textual description; null on failure
 - screenshot-tool.ts — the agent tool: route → broker.request → persist(→describe, optional describePrompt focus → PII scrub → A1 fence, D44) → { ok, path, width, height, bytes, capturedAt, description? }

@@ -1,15 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { JSON_RPC_APP_ERROR, type ScreenshotOutput, type JsonRpcRequest, type Role } from "@taki/shared";
+import type { CapabilityRequest, JsonRpcRequest } from "@taki/shared";
 import { createCaptureLogger } from "../../testing/capture-logger.ts";
-import { createCapabilityBroker, type CapabilityBroker, type CapabilityNotify } from "../../capabilities/capability-broker.ts";
-import type { Connection } from "../connection-registry.ts";
+import { createCapabilityBroker, type CapabilityBroker } from "../../capabilities/capability-broker.ts";
+import { createConnectionRegistry, type Connection, type ConnectionRegistry } from "../connection-registry.ts";
 import { createMethodRegistry, type MethodContext } from "../method-registry.ts";
 import { capabilityRespondMethod } from "./capability-respond.ts";
 
-const OUTPUT: ScreenshotOutput = { mediaType: "image/png", dataBase64: "AAAA", width: 1, height: 1 };
-
-function ctxFor(role: Role): MethodContext {
-  const connection: Connection = { state: { status: "authenticated", deviceId: "d", role, capabilities: [] } };
+const HOST = "11111111-1111-4111-8111-111111111111";
+function ctxFor(connection: Connection): MethodContext {
   return { notify: () => undefined, connection, close: () => undefined, onClose: () => undefined };
 }
 function request(params: unknown): JsonRpcRequest {
@@ -19,37 +17,79 @@ function makeBroker(): CapabilityBroker {
   const { logger } = createCaptureLogger();
   return createCapabilityBroker({ logger });
 }
-function registryFor(broker: CapabilityBroker) {
+function registryFor(broker: CapabilityBroker, connections: ConnectionRegistry) {
   const registry = createMethodRegistry();
-  registry.register(capabilityRespondMethod(broker));
+  registry.register(capabilityRespondMethod(broker, connections));
   return registry;
 }
 
-describe("capabilityRespondMethod (T6)", () => {
-  it("forbids an operator role (node-only)", async () => {
-    const res = await registryFor(makeBroker()).dispatch(
-      request({ requestId: "22222222-2222-4222-8222-222222222222", ok: true, output: OUTPUT }),
-      ctxFor("operator"),
-    );
-    expect(res).toMatchObject({ error: { code: JSON_RPC_APP_ERROR, data: { code: "FORBIDDEN" } } });
+describe("capabilityRespondMethod", () => {
+  it("forbids an operator role", async () => {
+    const connections = createConnectionRegistry();
+    const operator = connections.create();
+    connections.authenticate(operator, { deviceId: HOST, role: "operator", capabilities: [] });
+    const res = await registryFor(makeBroker(), connections).dispatch(request({}), ctxFor(operator));
+    expect(res).toMatchObject({ error: { code: -32602 } });
   });
 
-  it("settles a pending request for a node", async () => {
+  it("accepts a response from the current owning Host generation", async () => {
+    const connections = createConnectionRegistry();
+    const current = connections.create();
+    connections.authenticate(current, {
+      deviceId: HOST,
+      role: "node",
+      capabilities: [],
+      host: { protocolVersion: 1, catalogSchemaVersion: 1 },
+    });
     const broker = makeBroker();
-    let sentId = "";
-    const notify: CapabilityNotify = (_m, params) => (sentId = (params as { requestId: string }).requestId);
-    const pending = broker.request("screenshot", {}, notify);
-
-    const res = await registryFor(broker).dispatch(request({ requestId: sentId, ok: true, output: OUTPUT }), ctxFor("node"));
-    expect(res).toMatchObject({ result: { accepted: true } });
-    await expect(pending).resolves.toEqual({ ok: true, output: OUTPUT });
+    let sent: CapabilityRequest | undefined;
+    const pending = broker.request({
+      hostId: HOST, connectionGeneration: 1, catalogGeneration: 1,
+      descriptor: { capabilityId: "screenshot", execution: "read", cancellation: "cooperative" },
+      notify: (_m, p) => (sent = p as CapabilityRequest),
+    }, {});
+    const params = { requestId: sent!.requestId, control: sent!.control, state: "completed", output: {} };
+    expect(await registryFor(broker, connections).dispatch(request(params), ctxFor(current))).toMatchObject({
+      result: { accepted: true },
+    });
+    await expect(pending).resolves.toEqual({ ok: true, output: {} });
   });
 
-  it("answers accepted:false for an unknown/late requestId", async () => {
-    const res = await registryFor(makeBroker()).dispatch(
-      request({ requestId: "33333333-3333-4333-8333-333333333333", ok: false, error: { code: "DENIED", message: "x" } }),
-      ctxFor("node"),
-    );
-    expect(res).toMatchObject({ result: { accepted: false } });
+  it("rejects an old generation response immediately after replacement authentication", async () => {
+    const connections = createConnectionRegistry();
+    const broker = makeBroker();
+    connections.onRemove((connection) => {
+      const state = connection.state;
+      if (state.status === "authenticated" && state.host) {
+        broker.cancelGeneration(state.host.hostId, state.host.connectionGeneration, "Host replaced");
+      }
+    });
+    const old = connections.create();
+    connections.authenticate(old, {
+      deviceId: HOST,
+      role: "node",
+      capabilities: [],
+      host: { protocolVersion: 1, catalogSchemaVersion: 1 },
+    });
+    let sent: CapabilityRequest | undefined;
+    const pending = broker.request({
+      hostId: HOST,
+      connectionGeneration: 1,
+      catalogGeneration: 1,
+      descriptor: { capabilityId: "screenshot", execution: "read", cancellation: "cooperative" },
+      notify: (_method, params) => (sent = params as CapabilityRequest),
+    }, {});
+    const replacement = connections.create();
+    connections.authenticate(replacement, {
+      deviceId: HOST,
+      role: "node",
+      capabilities: [],
+      host: { protocolVersion: 1, catalogSchemaVersion: 1 },
+    });
+    const params = { requestId: sent!.requestId, control: sent!.control, state: "completed", output: {} };
+    expect(await registryFor(broker, connections).dispatch(request(params), ctxFor(old))).toMatchObject({
+      result: { accepted: false, reason: "stale_generation" },
+    });
+    await expect(pending).resolves.toMatchObject({ ok: false, code: "NODE_DISCONNECTED" });
   });
 });

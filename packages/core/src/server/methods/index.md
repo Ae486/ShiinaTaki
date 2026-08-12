@@ -1,5 +1,6 @@
 # core/server/methods/
 - connect.ts — connect: the ONLY pre-auth method; token verify, pairing handshake, or loopback operator auto-trust (P3), then authenticate the socket
+- host-catalog-publish.ts — host.catalogPublish (node-only): provenance-bound complete publication with fail-closed retirement for rejected current-generation candidates
 - chat-send.ts — chat.send (operator-only): ack { messageId }, then stream agent tokens as chat.delta/.complete/.error; turns serialized per characterId (queue) + cancellable (registry); a cancel-before-reply closes with chat.error { retracted:true } (draft restore) instead of complete
 - chat-cancel.ts — chat.cancel (operator-only): abort the character's in-flight turn via the TurnRegistry; idempotent ({cancelled:false} when idle)
 - timeline-history.ts — timeline.history (operator-only): newest-first cursor page of the conversation timeline
@@ -20,7 +21,7 @@
 - character-costumes.ts — character.costumes (operator-only): one character's costumes + settings filenames + on-demand availability (renderable / missing motions+packs)
 - character-costume-resolution.ts — character.costumeResolution (operator-only): one costume's external-ref → characters-root rel-path map, on demand (#18)
 - approval-respond.ts — approval.respond (operator-only): resolve a pending MCP tool-approval ask; unknown id -> {accepted:false}
-- capability-respond.ts — capability.respond (node-only): settle a pending capability request; unknown id -> {accepted:false}
+- capability-respond.ts — capability.respond (node-only): Host/generation/control-bound terminal settlement
 - capability-trigger.ts — capability.trigger (operator-only, DEV-ONLY via TAKI_DEV_TRIGGER=1): drive a real capability tool's execute without the LLM (node-side gate still authorizes); + devTriggerEnabled(env)
 - config-methods.ts — the settings surface's single registration seam: config.list / config.set / config.subscribe
 - config-list.ts — config.list (operator-only): every knob with effective value + provenance (stored/env-locked/apply class); secrets as set/not-set

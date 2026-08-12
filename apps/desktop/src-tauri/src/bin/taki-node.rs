@@ -56,10 +56,12 @@ fn main() {
 #[cfg(debug_assertions)]
 fn config_from_env() -> Result<NodeConfig, String> {
     let data_dir = PathBuf::from(
-        std::env::var("TAKI_DATA_DIR").map_err(|_| "TAKI_DATA_DIR is required (the node's private state root)")?,
+        std::env::var("TAKI_DATA_DIR")
+            .map_err(|_| "TAKI_DATA_DIR is required (the node's private state root)")?,
     );
-    let spec = std::env::var("TAKI_GATE_AUTOAPPROVE")
-        .map_err(|_| "TAKI_GATE_AUTOAPPROVE is required (scripted-approver directives, e.g. `allow-once`)")?;
+    let spec = std::env::var("TAKI_GATE_AUTOAPPROVE").map_err(|_| {
+        "TAKI_GATE_AUTOAPPROVE is required (scripted-approver directives, e.g. `allow-once`)"
+    })?;
     let approver = ScriptedApprover::parse(&spec)?;
 
     let exec_cwd = data_dir.join("exec-cwd");
@@ -72,7 +74,7 @@ fn config_from_env() -> Result<NodeConfig, String> {
         capabilities: capabilities_from_env(),
         approver: Arc::new(approver),
         // File-backed, keyed under the node's own data dir: hermetic per-run identity/token, never the Shell keyring.
-        secrets: Arc::new(FileSecretStore::load(data_dir.join("secrets.json"))),
+        secrets: Arc::new(FileSecretStore::load(data_dir.join("secrets.json"))?),
         status: Arc::new(TracingStatusEmitter),
         data_dir,
     })
@@ -81,7 +83,12 @@ fn config_from_env() -> Result<NodeConfig, String> {
 #[cfg(debug_assertions)]
 fn capabilities_from_env() -> Vec<String> {
     match std::env::var("TAKI_CAPABILITIES") {
-        Ok(list) => list.split(',').map(str::trim).filter(|name| !name.is_empty()).map(str::to_string).collect(),
+        Ok(list) => list
+            .split(',')
+            .map(str::trim)
+            .filter(|name| !name.is_empty())
+            .map(str::to_string)
+            .collect(),
         Err(_) => node::default_capabilities(),
     }
 }
@@ -117,12 +124,23 @@ struct FileSecretStore {
 
 #[cfg(debug_assertions)]
 impl FileSecretStore {
-    fn load(path: PathBuf) -> Self {
-        let map = std::fs::read_to_string(&path)
-            .ok()
-            .and_then(|raw| serde_json::from_str(&raw).ok())
-            .unwrap_or_default();
-        Self { path, map: Mutex::new(map) }
+    fn load(path: PathBuf) -> Result<Self, String> {
+        let map = match std::fs::read_to_string(&path) {
+            Ok(raw) => serde_json::from_str(&raw).map_err(|error| {
+                format!("node secret store {} is malformed: {error}", path.display())
+            })?,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => HashMap::new(),
+            Err(error) => {
+                return Err(format!(
+                    "node secret store {} is unreadable: {error}",
+                    path.display()
+                ))
+            }
+        };
+        Ok(Self {
+            path,
+            map: Mutex::new(map),
+        })
     }
 
     fn persist(&self, map: &HashMap<String, String>) -> Result<(), String> {
@@ -137,7 +155,12 @@ impl FileSecretStore {
 #[cfg(debug_assertions)]
 impl SecretStore for FileSecretStore {
     fn get(&self, key: &str) -> Result<Option<String>, String> {
-        Ok(self.map.lock().map_err(|error| error.to_string())?.get(key).cloned())
+        Ok(self
+            .map
+            .lock()
+            .map_err(|error| error.to_string())?
+            .get(key)
+            .cloned())
     }
 
     fn set(&self, key: &str, secret: &str) -> Result<(), String> {

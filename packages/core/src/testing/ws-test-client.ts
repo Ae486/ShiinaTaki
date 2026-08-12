@@ -11,6 +11,7 @@ import {
   JSON_RPC_APP_ERROR,
   JsonRpcErrorResponseSchema,
   JsonRpcNotificationSchema,
+  type Role,
 } from "@taki/shared";
 
 export interface TestClient {
@@ -61,8 +62,15 @@ export async function openClient(url: string): Promise<TestClient> {
   return makeClient(ws);
 }
 
-export function sendConnect(client: TestClient, params: Record<string, unknown>, id = "c1"): void {
-  client.send({ jsonrpc: "2.0", id, method: CONNECT_METHOD, params });
+export function sendConnect(
+  client: TestClient,
+  params: Record<string, unknown> & { role?: Role },
+  id = "c1",
+): void {
+  const host = params.role === "node"
+    ? { protocol: { min: 1, max: 1 }, catalogSchemaVersions: [1] }
+    : undefined;
+  client.send({ jsonrpc: "2.0", id, method: CONNECT_METHOD, params: { host, ...params } });
 }
 
 /** Asserts the frame is an app-error envelope and returns its machine-readable ErrorCode. */

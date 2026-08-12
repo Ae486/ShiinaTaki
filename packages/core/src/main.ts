@@ -36,6 +36,9 @@ import { createTimelineRepo } from "./db/timeline-repo.ts";
 import { createWindowStateRepo } from "./db/window-state-repo.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
 import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
+import { createHostCatalogStore } from "./hosts/host-catalog.ts";
+import { bindHostGenerationRetirement } from "./hosts/host-generation-retirement.ts";
+import { loadOrCreateHostIdentity } from "./hosts/host-identity.ts";
 import { loadMcpConfig } from "./mcp/mcp-config.ts";
 import { createMcpManager } from "./mcp/mcp-manager.ts";
 import { createCharacterImporter } from "./characters/character-import.ts";
@@ -61,6 +64,7 @@ import { characterImportMethod } from "./server/methods/character-import.ts";
 import { characterListMethod } from "./server/methods/character-list.ts";
 import { registerConfigMethods } from "./server/methods/config-methods.ts";
 import { connectMethod } from "./server/methods/connect.ts";
+import { hostCatalogPublishMethod } from "./server/methods/host-catalog-publish.ts";
 import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
 import { mediaUsageMethod } from "./server/methods/media-usage.ts";
@@ -84,6 +88,8 @@ import { createWriteFileTool } from "./workspace/write-file-tool.ts";
 // resolved as env > stored > built-in default — so a value the settings panel stored takes effect at THIS boot.
 const boot = bootstrapCore(process.env);
 const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
+loadOrCreateHostIdentity(join(serverConfig.dataDir, "host-identity.json"));
+logger.info("Core Host identity loaded");
 const timelineRepo = createTimelineRepo(db);
 // R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
 // their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).
@@ -157,6 +163,7 @@ const deviceRegistry = createDeviceRegistry({
   store: createPairedDeviceStore(join(serverConfig.dataDir, "devices.json")),
 });
 const connectionRegistry = createConnectionRegistry();
+const hostCatalogs = createHostCatalogStore();
 
 // Skills (#9): discover SKILL.md folders, honor persisted enable/disable, expose the list + the load_skill tool.
 const skillsLog = logger.child({ mod: "skills" });
@@ -188,16 +195,13 @@ const approvalGate = createApprovalGate({
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
 // requests immediately (fail-closed); the 90s backstop covers a node that never answers. The Shell gate authorizes.
 const capabilityBroker = createCapabilityBroker({ logger });
-connectionRegistry.onRemove((connection) => {
-  if (connection.state.status === "authenticated" && connection.state.role === "node") {
-    capabilityBroker.denyAll("node disconnected");
-  }
-});
+bindHostGenerationRetirement({ connections: connectionRegistry, catalogs: hostCatalogs, broker: capabilityBroker });
 // Screenshot→VLM bridge: reuses the OPTIONAL vision slot; without it a result stays path+dims (no pixels to the text
 // model) and ambient sampling never starts. ONE bridge, shared by the on-demand tool and the ambient sampler.
 const describeScreenshot = visionModel ? createScreenshotDescriber({ model: visionModel, logger }).describe : undefined;
 const screenshotTool = createScreenshotTool({
   registry: connectionRegistry,
+  catalogs: hostCatalogs,
   broker: capabilityBroker,
   // The core is the single sanctioned Workspace writer (invariant 2); the Shell only returns base64 over the wire.
   store: createScreenshotStore({ screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots") }),
@@ -206,7 +210,12 @@ const screenshotTool = createScreenshotTool({
 });
 // The other Shell-backed capabilities (#11, and exec #12) share the route→broker path; each is gate-authorized on
 // the Shell, which parses, governs, spawns and audits.
-const shellCapabilityDeps = { registry: connectionRegistry, broker: capabilityBroker, logger };
+const shellCapabilityDeps = {
+  registry: connectionRegistry,
+  catalogs: hostCatalogs,
+  broker: capabilityBroker,
+  logger,
+};
 
 // The six Shell-routed capability tools as one bag (invariant 7): the chat agent's extraTools spreads it AND the
 // dev capability.trigger reuses these exact objects — never a second execute path to the same capabilities.
@@ -225,8 +234,8 @@ const capabilityTools: ToolSet = {
 // sensitive-process skip + the PII scrub — that gate every ambient sampler. On-demand chat captures stay ungated
 // (explicit consent through the Gate); the pause/skip/retention operator surfaces land with the settings panel (#26).
 const perception = createPerceptionLayer({
-  route: (capability, input) => routeCapability(shellCapabilityDeps, capability, input),
-  hasNode: (capability) => connectionRegistry.findNodeForCapability(capability) !== undefined,
+  route: (capability, input) => routeCapability(shellCapabilityDeps, { capabilityId: capability, input }),
+  hasNode: (capability) => hostCatalogs.hostsForCapability(capability).length > 0,
   describe: describeScreenshot,
   ambient: boot.ambientConfig,
   ambientShotsDir: join(serverConfig.dataDir, "workspace", "ambient-screenshots"),
@@ -325,7 +334,8 @@ registry.register(
 );
 registry.register(chatCancelMethod(turnControls.turns));
 registry.register(approvalRespondMethod(approvalBroker));
-registry.register(capabilityRespondMethod(capabilityBroker));
+registry.register(hostCatalogPublishMethod(hostCatalogs, connectionRegistry));
+registry.register(capabilityRespondMethod(capabilityBroker, connectionRegistry));
 registry.register(timelineHistoryMethod(timelineRepo));
 registry.register(timelineSubscribeMethod(timelineSubscriptions));
 registry.register(avatarSubscribeMethod(avatarSubscriptions));
