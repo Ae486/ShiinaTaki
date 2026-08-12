@@ -3,7 +3,7 @@
   "name": "host-control-foundation",
   "title": "Host-control protocol and generation-safe capability routing",
   "description": "Define and implement stable Execution Host identity, protocol/catalog generation negotiation, explicit host-qualified routing, origin-bound responses, per-generation disconnect settlement, cancellation, and unknown-outcome semantics across shared/Core/Rust.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "shared-core-rust-host-control-foundation",
   "package": null,
