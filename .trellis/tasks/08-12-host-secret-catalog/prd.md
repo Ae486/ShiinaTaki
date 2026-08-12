@@ -30,4 +30,3 @@ ordinary Core/Host/UI surfaces.
 
 - OpenBao provider implementation; it remains an optional later profile.
 - MCP lifecycle UI beyond the secret service seam.
-

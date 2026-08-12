@@ -27,4 +27,3 @@ surface across Core, Nodes, Agent discovery, and Home.
 ## Out of Scope
 
 - Autonomous Run, Run Receipt, Scheduled Task, Heartbeat, Experience Review, or Learning Proposal activation.
-

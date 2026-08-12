@@ -28,4 +28,3 @@ confined support resources, and one Home operator surface.
 ## Out of Scope
 
 - Hub/marketplace, automatic updates, signing ecosystem, agent self-editing, or Learning Proposal activation.
-

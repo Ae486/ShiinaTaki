@@ -29,4 +29,3 @@ capability identity, exact input binding, versioned decisions, and truthful oper
 
 - Credential storage and extension CRUD.
 - Scheduled/Heartbeat receipt/resume implementation.
-

@@ -29,4 +29,3 @@ final enforcement through one registry-driven effective-policy calculation.
 
 - Approval dialog/list/revoke and background-consent migration.
 - MCP/Skill lifecycle or secret storage.
-

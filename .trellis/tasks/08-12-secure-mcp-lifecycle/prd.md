@@ -30,4 +30,3 @@ candidate validation, last-good publication, immutable Run snapshots, and genera
 
 - Automatic `tools/list_changed` until SDK/adapter support is proven.
 - MCP marketplace, prompts/resources/Apps product surfaces, or provider-specific servers.
-

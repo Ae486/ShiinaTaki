@@ -36,4 +36,3 @@ implementation child consumes, without changing production code.
 - Proving a concrete `libsodium-wrappers` version or Windows helper packaging.
 - Writing migrations, schemas, adapters, or UI.
 - Reopening already resolved product decisions.
-
