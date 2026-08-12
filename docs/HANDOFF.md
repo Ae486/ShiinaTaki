@@ -1,250 +1,294 @@
-# TakiAgent — Development Handoff (Leader Bootstrap)
+# TakiAgent T4 Leader Handoff — Skills/MCP First
 
-**You are the incoming session. Read this document fully, then the required docs in §2, then act as the Leader (主脑) of a trellis master/worker development flow.** This file is your bootstrap program — what exists, what to read, how to behave, how to drive implementation.
+> Updated 2026-08-12. This is the bootstrap document for the incoming T4 Leader. The dedicated worktree is prepared,
+> but no T4 or Skills/MCP production implementation has started in it. Read the live repository before trusting any
+> recorded status.
 
-> **Updated 2026-08-08 (eighth pass, D59/D61 implementation/check closeout)**. M1–M4 shipped and pushed. M5 has **T1/T2/T3a/T3b + time-awareness + T5 + settings-panel + MCP schema compatibility DONE** (see §1). D60 option A remains final for the current trigger set. The active D59/D61 reliability task has converged production code and passed its one formal check; owner manual acceptance, commit, finish/archive, and push have NOT occurred. T4 remains design-ready (`t4-decisions.md` T4-R1–T4-R12) behind that closeout. Everything below distinguishes verified fact from plan.
+## 1. Mission and boundary
 
----
+The incoming session owns the T4 program from the dedicated worktree. Its first initiative is the end-to-end
+productization of Skills and MCP because Scheduled Tasks, Heartbeat, unattended governance, and Procedural Knowledge
+must depend on a truthful extension surface rather than the current boot-only developer configuration.
 
-## 0. What TakiAgent is (one paragraph)
+This handoff session performed only repository isolation and documentation. It did not implement Skills, MCP,
+Scheduled Tasks, Heartbeat, Autonomous Runs, Run Receipts, or Memory adapters.
 
-A Windows-native desktop companion whose core is a headless local LLM agent runtime. Three processes (ADR 0001): a TypeScript **Agent Core** (Node 24, AI SDK 7, headless, single DB owner, WS JSON-RPC hub), a Rust **Shell** (Tauri 2 — window, system Capabilities, Permission Gate), and a WebView **Pet UI** (React 19 + PixiJS 8 + Live2D). Agent first, pet shell second. The v1 Character is Shiina Taki (taki). Converse with the user in 简体中文; all code/comments/commits/docs in English.
+The immediate job is therefore:
 
----
+1. finish the remaining Skills/MCP planning contracts;
+2. explain the concrete implementation decision to the owner before implementation;
+3. decompose the initiative into evidence-driven Trellis child tasks;
+4. execute those children through implement, proportional check, spec update, and closeout; and
+5. only then create and execute the formal T4 Autonomous Run/Scheduler/Heartbeat task family.
 
-## 0.5 THIS handoff — M5 phase (read carefully)
+Do not restart the completed product Grill and do not repeat the three existing Skills/MCP research studies.
 
-This is not a cold start. M1–M4 are shipped: Agent Core (memory engine, skills, MCP), WS protocol, Rust Permission Gate + capabilities, pet overlay with Live2D + click-through + bubble avatar, full chat window (streaming timeline, attachments, cancel-retract), character import + costume switching.
+## 2. Repository and worktree topology
 
-- **You (incoming session) = the M5 Leader, owning the full stack.** M5's tasks span core (scheduler, heartbeat, memory redesign), shell (sampling capabilities, permission tiers), and UI (avatar polish, settings suite). Route work through the trellis flow; sub-agents implement, you verify.
-- **Deep-invariant areas demand extra care (not a different owner — extra care):**
-  - The **D1-frozen turn runtime** (`chat-agent.ts` stream loop / persistTurn / abort / toolApproval): byte-frozen bodies, NAMED ADDITIVE seams only — see `.trellis/spec/backend/agent-runtime.md`, including the v7 abort double-ending law (cover BOTH stream endings; transport-faithful mocks).
-  - **`@taki/shared` protocol schemas**: additive evolution only; check whether `src-tauri/src/protocol.rs` mirrors a shape before touching it (invariant 3).
-  - **Rust Permission Gate**: fail-closed forever; the safest option owns every default slot; an advisory LLM classifier may add a deny, never a fail-open allow.
-  - **Memory engine**: D28 modularity — every new mechanism is a single-file deletable module; the `layer-registry` declarative pattern survives all redesigns.
+| Purpose | Path | Branch / state | Rule |
+| --- | --- | --- | --- |
+| T4 Leader work | `H:/TakiAgent-worktrees/t4` | `task/t4-skills-mcp-productization` | Run every T4 command here. |
+| Main TakiAgent work | `H:/TakiAgent` | `main` | Memory/Hindsight coordination and other mainline work continue here. Do not edit it from a T4 session. |
+| Hindsight upstream patch | `H:/hindsight` | local `main`, dirty compatibility patch | Separate Git repository. T4 must not edit, stage, commit, or clean it. |
+| Legacy Claude scratch worktree | `H:/TakiAgent/.claude/worktrees/agent-a0b3d2f31101f184a` | dirty legacy branch | Do not use or remove it without a separate ownership review. |
 
----
+Shared TakiAgent checkpoint: `3d8a320c5a3aea72ed3ee504c910adee10a5e2b1`
+(`chore: checkpoint parallel T4 development baseline`). Both `main` and the T4 branch were created from this commit.
+The commit is a mergeable parallel-work baseline; it is not a declaration that every included task passed manual
+acceptance.
 
-## 1. What is already done (do NOT redo)
+At preparation time:
 
-### Design + scaffold — COMPLETE, committed
-- 7 ADRs (`docs/adr/0001`–`0007`), `CONTEXT.md` glossary, `PRODUCT.md`, `TECH-STACK.md`, `MEMORY-DESIGN.md`, `TTS-INTERFACE.md`.
-- pnpm-workspaces monorepo (issue #2): `@taki/shared` (zod protocol), `@taki/core`, `@taki/desktop` (React+Vite+Tauri), `@taki/cli`, `@taki/e2e`. TS 6 strict, ESLint size caps + kebab lint, vitest, cross-platform CI.
-- Backend + frontend `.trellis/spec/*` layer guides — auto-injected into implement/check sub-agents.
+- `main` was clean, at the checkpoint, and `74` commits ahead of `origin/main`; nothing was pushed;
+- the T4 branch started at the same checkpoint;
+- `.trellis/.current-task` is intentionally ignored by Git and is independently bound in each worktree;
+- the main worktree remains bound to `08-09-hindsight-compatibility-extensions`;
+- the T4 worktree is bound to `08-10-skills-mcp-productization`, whose status remains `planning`; and
+- no dependency installation or build was run in the T4 worktree.
 
-### M1 — Agent Core skeleton (4/4 closed)
-Walking skeleton: Core streams OpenAI-compatible chat over WS to a CLI; device identity + pairing (mobile-ready, ADR 0004); the **continuous timeline** persisted per character (ADR 0005, one stream, no sessions). See `docs/devlog/m1.md`.
+Ignored local resources are intentionally handled as follows:
 
-### M2 — Memory & extensibility (4/4 closed)
-Layered memory engine: declarative layer registry (add a layer = one row), files-as-truth markdown + SQLite FTS5 index, context assembler, auto-memory (episodic + flush writers), skills loader, MCP client. See `docs/devlog/m2.md` + `MEMORY-DESIGN.md`.
+- `references/` is a read-only-intent junction to `H:/TakiAgent/references` so the existing Hermes and other reference
+  checkouts are available without duplication. Do not edit reference repositories from the T4 worktree.
+- `node_modules/` is not shared. Before the first build/test, install the locked workspace dependencies inside the T4
+  worktree so concurrent package state cannot leak between branches.
+- `.env.local` is not copied or linked. Add only the minimum local secret configuration when an approved integration
+  test actually requires it; never commit or expose it.
 
-### M3 — Shell & Permission Gate (3/3 closed)
-Rust Shell capabilities (screenshot / process-list / clipboard / shell-open / exec), the **Permission Gate** (name-keyed once/session/always for fixed-risk caps; exec classified by command; shell-open by target class; full audit trail), WS capability protocol (core↔node request/respond). See `docs/devlog/m3.md`.
+Always refresh these facts with Git and Trellis commands. They are expected to change while the two workstreams run.
 
-### Agent-runtime hardening — COMPLETE (roadmap-adjacent, pre-M4 close-out)
-Three trellis tasks (archived under `.trellis/tasks/archive/2026-07/`) + a config task, all committed:
-- **`e2e-manual-checks-port`** — a headless e2e regression net (`e2e/`, `withStack` fixture): **L1** deterministic (dev-gated `capability.trigger`, no model) + **L2** real-agent (`agentSay`, key-gated). ~16 L1 + L2 per key capability. This net is what verifies backend changes.
-- **`shell-open-persist-fix` (defect A1)** — shell-open now authorizes on `(capability, targetClass)`: `url-safe` may persist/silent, `local-exec` is a bypass-immune always-ask floor, `blocked` denied. Principle → `.trellis/spec/backend/permission-authorization.md`.
-- **`agent-harness-improve` (D1 — the big one)** — fixed the tool-call **hallucination root cause**: the timeline now persists the **full turn** (assistant tool-call parts + tool-result messages), not text-only, so across turns the agent can't fabricate that it acted. Also: a base system prompt with a truthfulness floor, per-character turn **serialization**, `chat.cancel` **cancellation**, and partial-text persistence on interrupt. Proven by a multi-turn hallucination-reproduction L2 (red pre-fix → green post-fix). Principle → `.trellis/spec/backend/agent-runtime.md`.
-- **`TAKI_MAX_STEPS`** — the per-turn tool-loop cap is now config (`config/agent-config.ts`, default 10), not hardcoded.
+## 3. Current parallel work
 
-**Net result — the agent runtime is: multi-turn consistent, tool-truthful (records persisted), cancellable, and configurable.** The timeline stores structured `parts` (tool-call `input` / tool-result `output`) — this is already the data M4 #17's tool-card rendering needs.
+### 3.1 D59/D61 reliability
 
-### M4 — Pet UI & Live2D (6/6 closed)
-Renderer locked by spike (#13: `untitled-pixi-live2d-engine` + pixi 8); transparent always-on pet overlay with render governor + drag (#14); element-level click-through (#15); bubble + LLM-driven avatar — expression/motion tools + reported vocabulary, gaze/click reactions (#16); full chat window — streaming timeline, default-safe markdown, image attachments + VLM describe, abort entry, floating toasts, cancel-before-reply retract (#17); generic character import (Cubism 2/3 + `.zst` clean-room) + costume switching with degrade-and-badge availability + last-costume persistence (#18). Four packaged B-test rounds hardened the packaged-only defect classes (CSP, per-window ACL, WebView2 quirks, boot races) → `.trellis/spec/frontend/packaged-build.md`. See `docs/devlog/m4.md`.
+The shared checkpoint contains the D59/D61 WebSocket recovery and request-deadline implementation. Its one formal
+Trellis check passed the recorded automated gate: 238 files / 1,793 tests, workspace type-check, lint, Desktop build,
+Core boot smoke, and diff/size/header audits.
 
-### M5 — mid-flight (T1/T2/T3a/T3b + time-awareness + T5 + settings-panel DONE)
-- The blueprint (`devlog/m5.md`, signed off) remains the plan of record; the task table's T4/T5 ORDER was swapped by owner ruling 2026-07-27 (T5 first). Do not re-litigate settled rulings.
-- **T1 avatar presentation** — DONE, archived (`.trellis/tasks/archive/2026-07/`). Same-step expression/motion discipline (1c), costume-change notice (1f), presentation-tail stop.
-- **T2 governance** — DONE, archived. Permission Level projection (strict/standard/relaxed over per-cell postures), `describePrompt` seam (T2b §3.6: caller focus APPENDED to base guardrails), approval etiquette.
-- **T3a perception activity layer** — DONE, archived. Foreground-window capability (Rust) → activity sampler → coalescing `ActivityState` → fenced activity block via `instructionsExtra`. The A1 minimal fence (`agents/untrusted-fence.ts`) ships here.
-- **Time awareness** — DONE, archived (e10adec). Day-date line early + current-time line last in `composeInstructions` (stable-early/volatile-late), `get_current_time` tool, code-computed memory ages.
-- **T3b perception privacy** — DONE, archived (`.trellis/tasks/archive/2026-07/07-21-perception-privacy`, commit 0133874). `packages/core/src/perception/`: ambient screenshot sampling (own `screenshot-ambient` cell, DEFAULT OFF, silent off-state), TWO privacy layers (deterministic transmission-blocking: sensitive-skip + `seal()` + pre-capture fresh foreground screen; semantic retention-blocking: `SENSITIVE_SCREEN` VLM verdict, fail-closed), PII scrub (scrub-then-fence at the sense seam), Privacy Pause (DB-persisted, single production writer RED-proved), frame retention GC, operator-only `perception.*` WS methods, D44 closed on the tool path. Manual checks 76–83 were owner-reviewed; #79's restart persistence is now verified, while its real-time `until` expiry path remains manually open.
-- **Prompt guidance pass** — DONE (commit 9f41646). BASE_SYSTEM_PROMPT teaches the fence contract, the two time lines, anti-recitation; behavior norms in `prompt/system/assistant-layer.md`.
-- **T5 memory redesign + context management** — DONE, archived (`.trellis/tasks/archive/2026-08/07-28-memory-context`), 7 batches each committed as a feat(core)+docs(trellis) pair (last: b944263/c925e59). What shipped: (1) three-tier memory — user-authored identity card (read-only to the agent, wins conflicts) / tidy-maintained blocks (user-model, memory-index) / searchable rows behind a write gate (R15 behaviour-change test, restricted auto writer, R9 dedupe→reinforce, R10 first-person voice, origin fencing); (2) CJK retrieval — unicode61 + `Intl.Segmenter` search_terms column (D53 seam), re-derived bm25 weights, disclosure as a recall channel not an AND gate; (3) R6 removal — no per-turn retrieved block, pull via `memory_search` only, memory prompt procedures (R12/R16–R19); (4) maintenance — model-led tidy pass, retention sweeper, Utility Slot (background LLM calls routable to a cheap model via `TAKI_UTILITY_*`); (5) replay view (ADR 0008) — volatile context in a `<turn-context>` in-flight tail (system prompt day-stable), token-measured window (declared → EMA-calibrated by real usage → estimator fallback; overflow self-heal, migration 011), conversation compaction (rolling per-character summary, migration 012, external async compactor on the utility slot, retire-all-but-newest-40, NO summary truncation, date-anchored summary prompt). Detail: notes.md closure blocks in the archived task dir; manual checks 84–95 queued for owner; research banks rd-prompt-philosophy.md + re-compaction-prompts.md feed T4.
-- **Settings panel / home surface** — DONE, archived at `.trellis/tasks/archive/2026-08/08-03-settings-panel` after six batches. Shipped: Core-owned sparse config store (migration 013, 34 registry knobs, `env > stored > default`, operator-only `config.*`, secret presence only); runtime-created single-instance `home` window with registry-driven pages and the former chat window migrated into it; model-area right-click operation wheel and left-button-only pet reactions; settings/operations/perception/costume pages; `memory.status`; the existing attachment `media.usage/clear` surface (D46's on-demand screenshot debt remains open); result-bearing costume switching with Cancel/45s recovery; guarded SWR snapshots; and the clean-room BANDORI-referenced visual pass. The owner accepted manual #74/#75. Closeout fix `6e6f263` writes a lowered declared context window back to calibration state so `memory.status` matches settings after restart. D38/D46/D54 remain intentionally open; D58-B is an owner-development deferral with a hard pre-non-owner gate; D59/D61 track WS/recovery debt; D62 tracks the legacy `main` pairing window.
-- **D59/D61 reliability — IMPLEMENTED + FORMALLY CHECKED, active task not yet closed** at `.trellis/tasks/08-07-ws-reconnect-request-deadlines`. The worktree now has independent Pet/Home/Chat WebSocket generations with authentication, full-jitter retry, per-generation restoration, window-level status/readiness, native JSON-RPC request deadlines, and ten panel-visible live timing rows (44 registry rows in the current worktree). Pet reconnect re-reports the live scene and re-subscribes avatar commands, covering the source-proven permanent-disconnect path behind the owner-reported long-idle symptom. D61 now owns one total costume budget through Core/Tauri/renderer/report, commits at renderer attachment, tracks report recovery separately, and retries only interrupted pre-commit initial promotion. One formal check passed 238 files / 1,793 tests, full typecheck/lint, Desktop build, Core boot smoke, diff check, and production audits. D59/D61 stay OPEN until owner manual checks 96–105 and a commit; passive half-open heartbeat remains T4.
-- **Research banks (committed, e5a0c49)**: `t4-decisions.md` (R1–R12, T4 立项-ready), 4 T4 research docs, **`t5-decisions.md` (R0–R22, BINDING for T5)**, `t5-context-management-survey.md`, `t5-memory-systems-survey.md` (§11 covers promotion/archived-tier/write-restraint + the Nocturne system prompt read in full). Earlier banks: `m5-proactivity-survey.md`, `hermes-memory-analysis.md`. Local references: `references/hermes-agent-main` (MIT), `references/nocturne_memory-main` (MIT — its `docs/system_prompt_en.md` is the closest prior art for T5's R12 prompt; clean-room only).
-- **Deferred-decisions register**: read the live table, not this summary, before scoping. D58 remains owner-deferred; D59/D61 are implemented/check-green but OPEN for manual+commit; D60 is DONE (keep Tavily MCP until a named promotion signal); D62 tracks legacy `main` consolidation.
+It is still an open task because owner manual checks 96-105 have not all been recorded. Do not mark it complete,
+archive it, or reinterpret the checkpoint as manual acceptance. T4 inherits only its established connection-generation
+foundation and the bounded G2-12 residual: passive half-open and sleep/resume liveness must retire the existing
+generation and restore through D59, never create a second reconnect system.
 
-### Environment
-- Node 24, pnpm 10, Rust 1.88 msvc, WebView2 present. `gh` authed as `Ae486`, git user `PLeiA`, remote → github.com/Ae486/ShiinaTaki. A real OpenAI-compatible key is in `.env.local` (L2 tests + integration).
-- `apps/desktop/src-tauri/target` was slimmed to ~13 GiB (deleted stale `incremental/` + `release/`); a `cargo clean` needs one `cargo build --bin taki-node` rebuild before e2e (the fixture hard-depends on `target/debug/taki-node.exe`).
+### 3.2 Memory/Hindsight program
 
----
+The active main-worktree task is `.trellis/tasks/08-09-hindsight-compatibility-extensions`. In the separate Hindsight
+repository, Slice 0A and PostgreSQL Slice 0B have Leader acceptance; Slice 0C and the final combined gate remain the
+recorded next work. Treat that statement as a handoff clue and verify the live task and repository.
 
-## 2. Required reading before you write any code (in order)
+The Hindsight production patch has no T4 production-file overlap because it lives under `H:/hindsight`. Later
+TakiAgent Memory provider children can overlap T4 integration seams. The main merge hotspots are expected to be:
 
-**Universal (every session):**
-1. **`CLAUDE.md`** (root) — the law. Toolchain (pinned), architecture invariants 1–8, naming, anti-sprawl caps, git rules.
-2. **`CONTEXT.md`** — domain glossary. Use these exact terms; drift is a review-blocker.
-3. **`docs/index.md`** — doc map + ADR table.
-4. **`docs/PRODUCT.md`** — v1 scope, **settings-panel scope**, roadmap.
-5. **`.trellis/workflow.md`** — the trellis phase model + skill routing.
-6. **The target issue**: `gh issue view <n> -R Ae486/ShiinaTaki` — its acceptance criteria are the definition of done.
+- `packages/core/src/main.ts`;
+- `packages/core/src/agents/chat-agent.ts`;
+- shared schema exports and indexes under `packages/shared/src/`;
+- Home/operator WS routes under `apps/desktop/src/lib/ws-client*.ts`;
+- Home page registration and shared operator UI;
+- `CONTEXT.md`, `.trellis/spec/**`, `docs/HANDOFF.md`, and the developer journal.
 
-**Frontend-specific (read before touching Pet UI):**
-7. **`.trellis/spec/frontend/index.md`** + its guides (especially `operator-connection-recovery.md`, `costume-operation-lifecycle.md`, state-management, home-window, and live2d-renderer). Auto-injected into sub-agents, but read them yourself. Key stances: **Pet UI is a disposable WS client (invariant 4)** — it owns rendering, never state-of-record; talk to Core via `@taki/shared` types, to Shell via `@tauri-apps/api` only; Pet, Home, and legacy Main have separate window/capability boundaries.
-8. **`docs/TECH-STACK.md`** — renderer decision tree (the #13 spike writes back here), PixiJS/Live2D choices.
-9. **ADR 0005** (continuous timeline) — the model behind #17's chat window.
-10. **`docs/MEMORY-DESIGN.md`** — read when a UI surfaces memory/activity.
+Treat those as coordination points. Do not assume that worktree isolation eliminates semantic conflicts.
 
-**The backend contracts you CONSUME (know their shape, don't redefine them):**
-11. **`packages/shared/src/chat-schema.ts`** — `chat.send/delta/complete/error/cancel`. **`packages/shared/src/timeline-schema.ts`** — `TimelineEntry` incl. structured `parts` (tool-call/tool-result), `timeline.history/subscribe/appended`. These are how the Pet UI drives conversation and renders the timeline.
-12. **`docs/deferred-decisions.md`** — the debt register; §5 below names the entries that come due in M5 (D9, D29).
+## 4. Required reading order
 
----
+Read these files before changing the Skills/MCP plan:
 
-## 3. Leader (主脑) rules
+1. `AGENTS.md` and `.trellis/workflow.md` — current operating law and Trellis phase rules.
+2. `CONTEXT.md` — canonical project language, including Core Authority, Execution Host, Primary Host, Skill,
+   Procedural Knowledge, Autonomous Run, and Run Receipt.
+3. `.trellis/tasks/08-10-skills-mcp-productization/prd.md` — owner-confirmed scope and remaining engineering questions.
+4. `.trellis/tasks/08-10-skills-mcp-productization/research/current-gap-and-dependency-map.md` — live shipped gaps and
+   cross-layer anchors.
+5. `.trellis/tasks/08-10-skills-mcp-productization/research/standards-and-reference-prior-art.md` — Agent Skills/MCP
+   standards plus Hermes/OpenClaw evidence.
+6. `.trellis/tasks/08-10-skills-mcp-productization/research/vps-secret-backend-options.md` — selected host-local secret
+   architecture and spike gates.
+7. `.trellis/spec/backend/host-operation-lifecycle.md` — common offline/in-flight/resume/receipt lifecycle.
+8. `.trellis/spec/backend/permission-authorization.md`, `tool-design.md`,
+   `mcp-tool-schema-compatibility.md`, `server-push-and-connection-auth.md`, and `config-store.md`.
+9. `.trellis/spec/frontend/home-window.md`, `state-management.md`, and `type-safety.md`.
+10. `.trellis/workspace/pleia/t4-second-grill-prep.md` and
+    `docs/adr/0010-separate-autonomous-run-history-from-relationship-timeline.md` for the post-Skills/MCP T4 program.
+11. `docs/adr/0009-single-memory-authority-with-local-replica.md` and `docs/MEMORY-DESIGN.md` only where T4 crosses the
+    provider-neutral Memory boundary.
 
-You are the orchestrator, not the primary typist. Sequence issues, spawn trellis sub-agents, verify their output against specs + acceptance criteria, keep the DAG honest, report to the user.
+Local reference source exists under `references/`, including Hermes. Prefer its documents before source inspection,
+and prefer local references before external search. External research must use available MCP search/documentation
+tools; do not invent framework behavior.
 
-### 3.1 Interaction contract
-- Converse with the user in **简体中文**; code/comments/commits/docs in **English**; tools/models in English; **ultrathink in English**.
-- The user is the product owner. Surface trade-offs, push back on wrong approaches, never silently pick between interpretations. Proceed on reversible in-scope work; stop only for destructive actions or genuine scope/user-only decisions.
-- **Never commit or push unless the user explicitly asks.** (Hard rule.) You may stage and propose a commit plan.
+## 5. Frozen product decisions — do not reopen without new evidence
 
-### 3.2 The trellis master/worker loop (per issue)
-1. **Create a trellis task**: `python ./.trellis/scripts/task.py create "<title>" --slug <name>` → `task.py start <dir>`. One task ↔ one GitHub issue; put the issue number in the prd.
-2. **Write `prd.md`** from the issue body + acceptance criteria.
-3. **Configure context**: curate `implement.jsonl` / `check.jsonl` with the relevant `.trellis/spec/*` + research files.
-4. **Implement**: spawn `trellis-implement` (do NOT write feature code in the main thread — sub-agents get spec injection you don't).
-5. **Check**: for a formal batch whose risk/size warrants it, run one `trellis-check` at final convergence — review vs
-   spec + acceptance, self-fix, and verify proportional gates. Do not spend another full check on a small follow-up,
-   documentation-only closeout, or an already checked batch; use focused tests/typecheck/lint instead. For a
-   real-agent surface, make the formal check **verify假绿 + prove any red→green claim** (revert the fix, watch the test
-   go red).
-6. **Verify** acceptance yourself; drive the real flow when there's a runtime surface (for Pet UI that means `pnpm desktop:dev` and *looking* — see §5 manual items).
-7. **Update spec** (`trellis-update-spec`) if the work produced a reusable convention or hard-won lesson.
-8. Report; on the user's go-ahead they (or you, if asked) commit. Then `task.py finish` + `archive`; pick the next issue.
+### Skills, MCP, governance, and hosts
 
-**Leader-owned task-wide synthesis (owner directive 2026-08-07):** the Leader personally owns and reviews the PRD,
-batch designs, task-wide decision records, deferred-decision rows, HANDOFF updates, archive/session summary, and
-project memory. These artifacts compress the whole task and exist for later debugging, optimization, and takeover.
-Research workers should persist their evidence, and implement/check workers may update module-specific documentation
-within their owned scope. Do not dispatch a context-thin worker solely to write final task-wide documentation; the
-Leader synthesizes and reviews that durable record.
+- Preserve open-standard `SKILL.md` packages. Do not create a Taki-only Task Archetype or replacement Skill format.
+- A Skill provides procedure and suggested tools; it never grants permission.
+- Use progressive discovery: cheap bounded metadata first, Skill detail and permitted tools only when relevant.
+- Use one registry-driven governance calculation for MCP, effectful Core tools, Skills-related capability use, and
+  Shell/exec. Avoid independent permission products for each tool class.
+- The ordinary operator model is one global `strict | standard | relaxed` control plus an advanced capability view.
+- Core owns the global ceiling and durable decisions. An Execution Host may impose a stricter floor and performs final
+  local enforcement, but it cannot widen Core authorization or open a second approval dialog.
+- One user profile has one active Core Authority. Local and VPS Core are explicitly rebound, never active-active,
+  automatically failed over, or implicitly merged.
+- Every Run has one `primaryHostId`; a cross-host operation names its target Host explicitly. Paths and display labels
+  never select or cross a Host implicitly.
+- Skill packages, MCP clients, credentials, Workspace, and OS capabilities belong to their Execution Host.
+- Host availability is not permission. A disconnected Host receives no new side effect, is never silently replaced,
+  and does not receive an automatic replay after reconnect.
+- All Host-bound operations reuse the common lifecycle and generic receipt projection. A feature must not add its own
+  offline state machine, retry queue, or disconnected card.
+- MCP/Skill secrets stay in the owning Host's encrypted credential catalog. Core stores sanitized metadata and opaque
+  references, not ordinary secret values.
+- The selected MVP direction uses libsodium secretstream, Windows Credential Manager for the versioned host key, and
+  `systemd LoadCredentialEncrypted=` on Linux/VPS. Exact packages and helper packaging remain implementation spikes;
+  adding a dependency still requires owner approval.
 
-Model routing: pick the sub-agent model by task complexity; research/implement/check on hard backend-shaped work benefit from a stronger tier. L2 real-LLM tests are allowed (key in `.env.local`) — they catch model-side failures (hallucination) that deterministic L1 cannot.
+### Later T4 behavior
 
-### 3.3 TDD (test-first for feature work)
-Use the `tdd` skill's red-green-refactor. Test **external behavior at the highest seam**, never implementation details. Frontend seams: the WS JSON-RPC client, `@taki/shared` round-trips, Zustand store behaviour, the renderer state machine (framework-free). For the always-on overlay, **idle CPU ~0%** is an acceptance criterion, not a nicety.
+- Autonomous Runs use a separate Core-owned history. Only actual Companion utterances enter the continuous relationship
+  timeline; user-expected background work may project a linked Run Receipt into Home.
+- This internal isolation does not create a user-visible session list.
+- Every Scheduled Task fire starts a restricted Agent run. There is no literal reminder-delivery bypass.
+- Scheduled Task definitions may reference Skills and guidance but do not rigidly lock the Agent to a tool list.
+- Privacy Pause makes sampling-backed Heartbeat sources naturally ineligible by stopping acquisition; it is not a
+  global speech mute.
+- The Core owns one IANA User Timezone in fixed or designated-authority-device mode; VPS local time is not user time.
+- Use the one global Main Model for Companion reasoning across normal and autonomous contexts.
+- Procedural Knowledge belongs with the applicable Skill/task/capability guidance, is loaded on demand, and is separate
+  from relationship Memory. Experience Review and Learning Proposal activation are later, evidence-gated work.
 
-### 3.4 Non-negotiable invariants (enforce on every sub-agent's output)
-1. Agent Core never touches the OS on the agent's initiative (only sanctioned spawn: MCP stdio in `packages/core/src/mcp/`). Everything else crosses WS → Rust Permission Gate.
-2. DB has one writer (Agent Core); others query/subscribe over WS.
-3. **Protocol types defined once in `@taki/shared` (zod), mirrored in Rust via serde. Never hand-declare a message shape elsewhere.** ← the frontend consumes these; a new shape is a backend-owner change.
-4. **Pet UI is a disposable client — closing it must not affect agent sessions, cron, or memory.**
-5. Secrets → Windows Credential Manager (keyring), never config/env files.
-6. Features are pluggable modules wired through a registry (add = new module + one registry entry).
-7. `characterId` threaded through every layer; v1 UI is single-character but **nothing may hardcode a single character** (multi-char is reserved #33, not excluded).
-8. `packages/core` + `packages/shared` stay OS-neutral (CI-enforced); Windows-only code lives only in `apps/desktop`.
+## 6. Remaining Skills/MCP planning gates
 
-### 3.5 Anti-sprawl (AI's default failure mode)
-TS file ≤ 300 lines, function ≤ 50, params ≤ 3; Rust fn ≤ 100. Do NOT append to an existing file by default — a distinct concern gets its own colocated file. No barrel files inside packages. No god-bucket `utils.ts`/`types.ts`. Every production file opens with a 3–6 line INPUT/OUTPUT/POS header; every touched dir updates its `index.md`.
+The Product Owner has resolved the product behavior. The following are engineering contracts, not a new broad Grill:
 
-### 3.6 Library API discipline
-AI SDK 7, Tauri 2, zod 4, PixiJS 8, the Live2D runtime all move fast. **Never code an external-library API from memory** — verify against installed types (`node_modules`) or current docs (context7/deepwiki/web) first.
+1. **Host-control shared wire schema**
+   - stable Host and Run identity;
+   - authenticated connection and catalog generations;
+   - host-qualified capability/Skill/MCP ownership;
+   - request/response binding to `(hostId, connectionGeneration)`;
+   - policy/approval generation, exact input identity, deadlines, expiry, operation/idempotency identity;
+   - disconnect, stale-response, cancellation, and `outcome_unknown` settlement; and
+   - protocol/catalog version negotiation.
+2. **MCP reload ownership**
+   - candidate connection and validation;
+   - last-good publication;
+   - future-run generation replacement;
+   - leases/draining for calls already in flight;
+   - close responsibility and crash recovery; and
+   - the persistence boundary between desired configuration and observed runtime state.
+3. **Child-task boundaries and gates**
+   - freeze an authority/credential design gate;
+   - common governance/catalog vertical;
+   - Approval vertical;
+   - secure MCP lifecycle;
+   - standard Skill lifecycle; and
+   - converged discovery/integration.
+4. **Trellis context**
+   - replace the seed-only `implement.jsonl` and `check.jsonl` with curated spec/research entries before dispatching an
+     implementer.
 
-### 3.7 Sub-agent operations (hard rules, owner-directed)
-- **Use English for every message sent to a sub-agent** — initial dispatches, status requests, corrections, follow-up
-  tasks, and review feedback. The Leader translates the resulting evidence into Simplified Chinese for the owner.
-- **YCE is forbidden for every sub-agent.** State this verbatim in each dispatch: `YCE is forbidden. Do not invoke it
-  or any fallback mode.` When code location is unknown, use one English `jbcontext search` query, read at least one hit,
-  then at most one narrowed `jbcontext search -p <path>` retry. Known files/symbols use direct reads or `rg`.
-- **Dispatch quality is a Leader responsibility.** Every prompt names the exact goal, ownership and frozen scope,
-  authoritative sources, acceptance criteria, verification commands, prohibited actions, and report format. Require an
-  honest split between completed, incomplete, failed, unverified, extra work, and residual risk; never accept a bare
-  "done" or "tests pass" claim.
-- **Review requirements before extras.** First prove the requested task against PRD/code/diff/tests. Then classify any
-  out-of-request implementation as necessary support, useful optional improvement, or scope/design violation. Keep,
-  revise, remove, or escalate it based on evidence rather than accepting the worker's framing wholesale.
-- **Web research tools**: you and every sub-agent use `mcp__exa__*` / `mcp__tavily-remote__*` ONLY — native WebSearch/WebFetch are **forbidden** for research (owner directive 2026-07-18). Sub-agents do not inherit this preference: NAME the allowed tools verbatim in every dispatch prompt.
-- **Model routing**: pass `model` EXPLICITLY on every Agent dispatch — never let it silently inherit the session default (a default switch once sent work to an unavailable tier). Route by complexity: heavier tier for research/implement on hard slices; the check tier per the owner's current directive.
-- **Never TaskStop a running sub-agent** unless the owner explicitly says so — killing it burns its context and tokens.
-- **Idle without a report = demand it.** Agents sometimes go idle without delivering their final report (happened twice in M4). SendMessage: "Reply now with the report per your original instructions", and meanwhile verify their work independently (git status/diff + re-run gates yourself). Trust but verify — one M4 impl agent's "never throws" claim was mock-derived and wrong; leader verification against SDK source caught it.
-- Agents interrupted before delivering die with their session — re-dispatch fresh from the persisted brief; never wait on them.
+The current code audit also identifies P0 multi-host gaps that the shared schema must close before multi-host claims:
 
----
+- `route-capability.ts` chooses the first advertising Node instead of an explicit Host;
+- disconnect currently has global pending-request effects instead of per-Host/per-generation settlement;
+- `capability.respond` is not yet bound to the originating Host and generation;
+- the shared capability schema lacks Host/generation/deadline fields; and
+- the Rust Node execution path cannot yet prove cancellation of every approval wait or local side effect, so unknown
+  outcomes need an explicit contract.
 
-## 4. Current first moves after D59/D61 formal check
+Verify these anchors against live code before writing the final schema. They are planning findings, not permission to
+perform an unrelated transport refactor.
 
-1. Complete owner manual checks 96–105 in `docs/devlog/manual-checks.md`. The required core is real three-window
-   stop/start, independent status/restoration, cache/draft/readiness truth, Pet transparency, long-idle avatar commands,
-   packaged Pet path ACL, D61 reruns of #74/#75, and attachment-success/report-recovery truth. Sleep/resume is useful
-   environment evidence when practical, not a substitute for the observed-close path.
-2. Keep D59/D61 OPEN until that evidence and a commit exist. Do not run another formal `trellis-check` for documentation
-   closeout; only proportional document/schema/diff validation is warranted. Do not finish/archive/push without the
-   owner's corresponding authorization.
-3. Preserve the locked boundaries: no offline mutation replay, no shared cross-window socket, no UI timing persistence,
-   no report-failure rollback fiction, and no speculative heartbeat/periodic avatar resubscription. Passive half-open
-   detection belongs to T4.
-4. **T4 setup remains ready after the reliability task closes**: read `t4-decisions.md` (T4-R1–T4-R12), the T5 archived closure
-   blocks, `docs/MEMORY-DESIGN.md`, and ADR 0008. Preserve time information across day line, turn-context, memory
-   ages, and summary date anchor. D56/D57 carry the relevant prompt/context triggers.
-5. D60 option A remains final for the current trigger set: Tavily Remote MCP stays the experimental search surface and
-   no Core wrapper, search framework, fetch tool, or live provider benchmark is scheduled. T6 still owns settings-suite
-   surfaces not consumed here (permission, character, MCP/skills management, and the remaining perception/proactivity
-   controls). #79 is only partially closed: restart persistence passed; real-live `until` expiry remains unchecked.
-   Push cadence remains milestone-close or explicit owner request.
+## 7. Intended program order
 
----
+### Phase A — Skills/MCP prerequisite
 
-## 5. Watch-list / coupling points (T5 and after)
+1. Freeze the remaining contracts above and obtain owner acknowledgement of the concrete implementation decision.
+2. Create evidence-driven Trellis children and curate each child's context.
+3. Implement common governance and Approval foundations before parallel MCP/Skill lifecycle children.
+4. Converge discovery, Host behavior, Home management, restart/reconnect, migration, and security evidence.
+5. Run one proportional formal check for each substantial child or converged batch; do not spend a formal check on
+   discussion-only or documentation-only work.
+6. Update reusable specs and close the parent only after end-to-end operator acceptance.
 
-**Coupling point 1 — T5's R6 SHIPPED; T4 designs against the new shape.** The per-turn retrieved block is GONE (batch 5): memory reaches the model via deterministic push (identity card + blocks + pinned) or the agent's own `memory_search` call. A T4 heartbeat turn has NO user input and NO `<turn-context>` tail (that rides the outgoing user message) — T4 picks its own injection point for both memory and volatile context.
+### Phase B — formal T4 program
 
-**Coupling point 2 — RESOLVED (T5 batch 6).** The flush boundary is no longer coupled to the 200-message constant: flush and the token-measured window read the SAME select closure (`conversation-store.ts`), and batch 7's compaction watermark rides the same discipline (`through_seq <= lastFlushSeq` asserted). Nothing to re-couple.
+After Skills/MCP is productized:
 
-**Coupling point 3 — A2 before any Heartbeat write (unchanged, now T4).** The turn-origin tag (`primary|heartbeat|flush|subagent`) ships IN T4's heartbeat wiring; `autoMemory.onTurnCompleted` currently does not discriminate turn kinds (t4-decisions "newly discovered problems").
+1. create the formal T4 PRD from the resolved G2 decisions and ADR 0010;
+2. freeze provider-neutral T4/Memory contracts without waiting for every Memory UI child;
+3. implement Autonomous Run and Run Receipt foundations;
+4. implement Scheduled Task;
+5. implement Heartbeat;
+6. add delivery, transport-liveness, and Procedural Knowledge integration; and
+7. run manual calibration before treating development timing/noise defaults as final product constants.
 
-**Coupling point 4 — conversation-configured anything must surface in the home settings family.** Dual entry, single
-Core store. The `apps/cli` generic invoker is the permanent scriptable surface; home is the GUI over the same
-operator WS methods. The config store now exists: adding a knob means one `knob-registry.ts` row, Core validation,
-an honest apply class, and a settings-page rendering path. Do not create UI-owned configuration state.
+## 8. Worktree and merge protocol
 
-**Other open threads:**
-- **R15's skip log is mandatory** — once "write nothing" is the write gate's normal outcome, an unlogged skip is indistinguishable from a broken writer (mem0 issue #3009 precedent; recorded in t5-decisions).
-- **VLM-failure has no backoff in the ambient sampler** (leader-found during manual testing, unregistered): describe failures don't count toward backoff — under `keep` retention this accumulates undescribed frames at the refresh cadence. Low urgency (default is drop + ambient default-off); register a D-number if ambient goes always-on.
-- **croner is still NOT installed** despite the CLAUDE.md stack table (t4-decisions); it is a pattern evaluator, not a scheduler — the tick loop/persistence/catch-up are ours (T4).
-- **D29 is DONE and now composed into D59 retirement**: a retired generation settles the mid-turn chat exactly once.
-  Do not reopen D29 as a separate fix.
-- **D48 residual**: the ambient pre-capture screen narrows the blind window to one WS round-trip but is NOT atomic; true closure = Shell-side same-instant sampling, trigger recorded in the register.
-- **Costume recovery is now one explicit lifecycle**: Home remains result-bearing, while D61 owns the Pet total budget,
-  pre-attachment cancellation, attachment commit, report recovery, and retryable initial promotion. Historical #74/#75
-  passed on Batch 6 but must be rerun as checks 103/104 against the new D61 path.
-- **The trellis flow is mandatory** (implement → check → update-spec). Manual-only checks → `docs/devlog/manual-checks.md`.
+### Start of every T4 session
 
----
-
-## 6. Quick command reference
-
-```bash
-# Verify base green
-pnpm -r typecheck && pnpm -w lint && pnpm -r test
-cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml
-pnpm --filter @taki/e2e test:e2e          # backend regression net (L2 needs .env.local key)
-
-# Run the app (manual visual verification — the M4 loop)
-pnpm desktop:dev                          # Tauri pet window + Vite
-pnpm core:dev                             # Agent Core (reads .env.local)
-pnpm cli:dev                              # operator chat entry
-node scripts/reset-manual-test.mjs        # step-through reset of core/Shell state before a manual test
-
-# Trellis
-python ./.trellis/scripts/task.py create "<title>" --slug <name>
-python ./.trellis/scripts/task.py start <dir>
-python ./.trellis/scripts/task.py finish
-python ./.trellis/scripts/task.py archive <name>
-
-# GitHub roadmap (M5)
-gh issue view <n> -R Ae486/ShiinaTaki
-gh issue list -R Ae486/ShiinaTaki --label ready-for-agent
+```powershell
+Set-Location 'H:\TakiAgent-worktrees\t4'
+git status --short --branch
+Get-Content -Raw '.trellis\.current-task'
+python ./.trellis/scripts/get_context.py
+git log -3 --oneline --decorate
 ```
 
----
+Expected task pointer: `.trellis/tasks/08-10-skills-mcp-productization`.
 
-*Handoff updated 2026-08-08 after D59/D61 implementation and the single formal check. M1-M4 shipped; M5's
-T1/T2/T3a/T3b + time-awareness + T5 + settings-panel + MCP schema compatibility are done. D59/D61 production code and
-automated verification are green but the task remains active for owner manual checks 96–105 and commit. D60 option A
-still keeps Tavily Remote MCP. T4 remains design-ready behind D59/D61 closeout.*
+If the worktree is dirty for an unknown reason, stop and identify ownership before editing. Never run T4 commands from
+`H:/TakiAgent` merely because it is the familiar path.
+
+### Synchronizing mainline work
+
+Before each implementation child or any edit to a known merge hotspot:
+
+1. finish or commit the current T4 documentation/code slice so the worktree is clean;
+2. inspect `git log --left-right main...HEAD` and the live main-worktree status;
+3. if `main` advanced, merge `main` into the T4 branch from this worktree;
+4. resolve conflicts by preserving both task contracts, not by choosing a whole-file side; and
+5. rerun focused tests for every conflicted integration seam.
+
+Do not use `reset`, force operations, or rebase without explicit owner authorization. Do not copy patches manually
+between worktrees; use Git history.
+
+### Final integration
+
+When the T4 branch has completed its required Trellis gates and owner manual acceptance:
+
+1. ensure both worktrees are clean;
+2. merge the latest `main` into the T4 branch and verify the converged result;
+3. from `H:/TakiAgent`, merge `task/t4-skills-mcp-productization` into `main`;
+4. run the integration gates appropriate to the resulting cross-module diff; and
+5. remove the worktree only after the merge is recorded and no uncommitted files remain.
+
+Push remains a separate owner-authorized action.
+
+## 9. Leader operating rules
+
+- User-facing communication is Simplified Chinese. Code, comments, commits, and engineering documents are English.
+- The Leader owns task-wide PRDs, decision synthesis, HANDOFF, cross-layer docs, and final status truth.
+- Delegate Trellis implementation/check work with complete English prompts and require honest completion reports.
+- Judge sub-agent output first against the assigned requirements, then separately assess unrequested additions.
+- Use `jbcontext` with English queries for unknown code; YCE is prohibited. Read known files directly.
+- Prefer local `references/` before external research. Use available Tavily/Exa/Context7 MCP tools for external facts.
+- Do not repeat existing research unless a live version/source change invalidates it.
+- Do not mark manual acceptance passed without the owner's observation.
+- Use formal `trellis-check` for substantial implementation convergence, not routine planning or small documentation.
+- Do not push, reset, rebase, force, finish/archive, or perform destructive cleanup without the applicable owner
+  authorization. Ordinary scoped commits are allowed when they are needed to preserve the requested worktree history.
+
+## 10. First incoming-session checklist
+
+The incoming Leader should report the live state to the owner, then do the following without writing production code:
+
+1. verify this worktree, task pointer, branch, checkpoint, main divergence, and Hindsight separation;
+2. read the required files in Section 4;
+3. turn the two remaining engineering questions into concrete shared-schema and generation-ownership decisions;
+4. update the Skills/MCP PRD and child decomposition with those decisions;
+5. curate `implement.jsonl` and `check.jsonl` for the first child only after its boundary is frozen; and
+6. explain the exact first implementation slice, affected files, tests, dependencies, and merge risks to the owner
+   before dispatching `trellis-implement`.
+
+No new product Grill is currently required. Ask the owner only if live code/research exposes a genuine product choice
+that would materially change behavior, security, scope, or delivery.

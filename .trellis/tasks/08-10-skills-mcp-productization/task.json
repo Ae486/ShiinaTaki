@@ -12,15 +12,15 @@
   "assignee": "pleia",
   "createdAt": "2026-08-10",
   "completedAt": null,
-  "branch": null,
+  "branch": "task/t4-skills-mcp-productization",
   "base_branch": "main",
-  "worktree_path": null,
+  "worktree_path": "H:/TakiAgent-worktrees/t4",
   "commit": null,
   "pr_url": null,
   "subtasks": [],
   "children": [],
   "parent": null,
   "relatedFiles": [],
-  "notes": "",
+  "notes": "Dedicated T4 worktree prepared from checkpoint 3d8a320. Keep this task in planning until the host-control wire schema, MCP reload generation boundary, child slices, and implement/check context are frozen.",
   "meta": {}
 }

@@ -681,13 +681,14 @@ shared governance, secure credentials, Home operator UX, and verification; it is
 loader/client. This moves the corresponding management surfaces forward from the former T6 placeholder. Experience
 Review remains later because it depends on Autonomous Run evidence, and D60 remains unchanged.
 
-Execution order:
+Execution order, updated after the owner approved worktree isolation on 2026-08-12:
 
-1. Complete the currently bound Hindsight compatibility task through its remaining implementation, formal check,
-   spec update, and finish steps. Close or explicitly isolate the outstanding D59/D61 worktree before another
-   implementation task is activated.
+1. Keep Memory/Hindsight work on `main` plus the separate `H:/hindsight` repository. T4 work is isolated on
+   `task/t4-skills-mcp-productization` at `H:/TakiAgent-worktrees/t4`; neither side edits through the other worktree.
+   D59/D61 remains open for owner manual acceptance but its checked implementation is part of the shared checkpoint.
 2. Converge and owner-confirm the Skills/MCP productization PRD, research, acceptance matrix, child-task boundaries,
-   and implementation/check context. Do not start this planning task while the Hindsight child remains current.
+   and implementation/check context in the dedicated T4 worktree. This planning work may proceed while the Hindsight
+   child remains current in the main worktree; implementation begins only after the remaining contracts are frozen.
 3. Implement Skills/MCP productization as vertical, independently checked children: shared governance/discovery;
    secure MCP lifecycle; standard Skill package lifecycle; Approval and Home operator UX; then a converged integration
    check. Exact child boundaries remain evidence-driven during planning.

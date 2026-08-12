@@ -42,8 +42,10 @@ working runtime instead of replacing it.
   state. A desktop/phone Node may remain an Execution Host for the selected Core.
 - This task is the first implementation prerequisite for T4 proactivity. It must not implement Heartbeat, Scheduled
   Task execution, Autonomous Run History, or Run Receipts itself.
-- The active `hindsight-compatibility-extensions` task remains bound as the current Trellis task. This planning task
-  must not be started or implemented until the leader explicitly transitions work.
+- `hindsight-compatibility-extensions` remains bound in the main worktree and its production patch lives in the
+  separate `H:/hindsight` repository. On 2026-08-12 the owner approved a dedicated T4 worktree, so this planning task is
+  bound only at `H:/TakiAgent-worktrees/t4` while Memory/Hindsight work continues independently. Implementation still
+  must not start until the remaining host-control/reload contracts, child slices, and context files are frozen.
 
 ## Requirements (Evolving)
 
