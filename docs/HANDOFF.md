@@ -1,8 +1,8 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
-> Updated 2026-08-12. This is the bootstrap document for the incoming T4 Leader. The dedicated worktree is prepared,
-> but no T4 or Skills/MCP production implementation has started in it. Read the live repository before trusting any
-> recorded status.
+> Updated 2026-08-12 after the first production child. T4 remains isolated in its dedicated worktree. The
+> Host-control foundation is committed and verified; the broader Skills/MCP program is still in progress. Read the live
+> repository before trusting any recorded status.
 
 ## 1. Mission and boundary
 
@@ -10,16 +10,17 @@ The incoming session owns the T4 program from the dedicated worktree. Its first 
 productization of Skills and MCP because Scheduled Tasks, Heartbeat, unattended governance, and Procedural Knowledge
 must depend on a truthful extension surface rather than the current boot-only developer configuration.
 
-This handoff session performed only repository isolation and documentation. It did not implement Skills, MCP,
-Scheduled Tasks, Heartbeat, Autonomous Runs, Run Receipts, or Memory adapters.
+The first production child now implements the shared/Core/Rust Host-control foundation. It does not yet implement
+governance persistence, Approval productization, secret storage, MCP CRUD/reload, Skill lifecycle, Scheduled Tasks,
+Heartbeat, Autonomous Runs, Run Receipts, or Memory adapters.
 
 The immediate job is therefore:
 
-1. finish the remaining Skills/MCP planning contracts;
-2. explain the concrete implementation decision to the owner before implementation;
-3. decompose the initiative into evidence-driven Trellis child tasks;
-4. execute those children through implement, proportional check, spec update, and closeout; and
-5. only then create and execute the formal T4 Autonomous Run/Scheduler/Heartbeat task family.
+1. preserve and extend the committed Host-control contracts;
+2. execute the remaining evidence-driven Trellis children through implement, proportional check, spec update, and
+   closeout;
+3. converge secure MCP and standard Skill lifecycle work through the final integration child; and
+4. only then create and execute the formal T4 Autonomous Run/Scheduler/Heartbeat task family.
 
 Do not restart the completed product Grill and do not repeat the three existing Skills/MCP research studies.
 
@@ -37,14 +38,15 @@ Shared TakiAgent checkpoint: `3d8a320c5a3aea72ed3ee504c910adee10a5e2b1`
 The commit is a mergeable parallel-work baseline; it is not a declaration that every included task passed manual
 acceptance.
 
-At preparation time:
+Current live status:
 
-- `main` was clean, at the checkpoint, and `74` commits ahead of `origin/main`; nothing was pushed;
-- the T4 branch started at the same checkpoint;
+- `main` remains at `5dd6dd2` and is not ahead of the T4 branch; nothing was pushed;
+- the T4 branch contains the frozen planning commits and Host-control production commit `7427edf`;
 - `.trellis/.current-task` is intentionally ignored by Git and is independently bound in each worktree;
 - the main worktree remains bound to `08-09-hindsight-compatibility-extensions`;
-- the T4 worktree is bound to `08-10-skills-mcp-productization`, whose status remains `planning`; and
-- no dependency installation or build was run in the T4 worktree.
+- the T4 worktree is bound to child task `08-12-host-control-foundation`, which remains `in_progress`; its parent
+  `08-10-skills-mcp-productization` remains `planning` while children execute; and
+- locked workspace dependencies are installed only inside the T4 worktree; `.env.local` remains absent.
 
 Ignored local resources are intentionally handled as follows:
 
@@ -87,6 +89,39 @@ TakiAgent Memory provider children can overlap T4 integration seams. The main me
 - `CONTEXT.md`, `.trellis/spec/**`, `docs/HANDOFF.md`, and the developer journal.
 
 Treat those as coordination points. Do not assume that worktree isolation eliminates semantic conflicts.
+
+### 3.3 T4 Skills/MCP program
+
+The owner approved implementation after the planning report. The program is decomposed into eight slices:
+
+1. authority/credential design gate;
+2. Host-control foundation;
+3. governance authority;
+4. Approval productization;
+5. Host secret catalog;
+6. secure MCP lifecycle;
+7. standard Skill lifecycle; and
+8. extension discovery/integration convergence.
+
+Slice 2 is committed as `7427edf` (`feat: add generation-safe host control`). It adds the canonical Host-control wire,
+strict TypeScript/Rust golden fixtures, stable Core/Node Host identity, Core-assigned connection generations, complete
+catalog publication, explicit Host routing, generation-owned broker settlement, cancellation/unknown-outcome behavior,
+and bounded duplicate/late caches. The reusable executable contract is in
+`.trellis/spec/backend/host-operation-lifecycle.md`.
+
+Recorded gates for this commit:
+
+- workspace typecheck and root lint passed;
+- Shared passed 19 files / 232 tests;
+- Core passed 173 files / 1,215 tests, with 1 existing skip;
+- Rust passed 148 tests plus Clippy `-D warnings` and scoped rustfmt;
+- `git diff --check` passed; and
+- the real `withStack` reconnect and `process-list` scenarios passed, covering Core boot, identity creation, Host
+  negotiation/catalog publication, same-Host reconnect, and one live capability request/response.
+
+Do not overstate coverage: the existing fixture starts one Node, so a real two-Node process test for simultaneous
+same-capability routing remains unverified. Core unit tests cover explicit two-Host routing and cross-Host provenance.
+Rust cooperative cancellation suppresses accepted late settlement but cannot forcibly abort arbitrary blocking OS work.
 
 ## 4. Required reading order
 
@@ -156,11 +191,11 @@ tools; do not invent framework behavior.
 - Procedural Knowledge belongs with the applicable Skill/task/capability guidance, is loaded on demand, and is separate
   from relationship Memory. Experience Review and Learning Proposal activation are later, evidence-gated work.
 
-## 6. Remaining Skills/MCP planning gates
+## 6. Skills/MCP engineering gates
 
 The Product Owner has resolved the product behavior. The following are engineering contracts, not a new broad Grill:
 
-1. **Host-control shared wire schema**
+1. **Host-control shared wire schema — implemented in `7427edf`**
    - stable Host and Run identity;
    - authenticated connection and catalog generations;
    - host-qualified capability/Skill/MCP ownership;
@@ -186,17 +221,10 @@ The Product Owner has resolved the product behavior. The following are engineeri
    - replace the seed-only `implement.jsonl` and `check.jsonl` with curated spec/research entries before dispatching an
      implementer.
 
-The current code audit also identifies P0 multi-host gaps that the shared schema must close before multi-host claims:
-
-- `route-capability.ts` chooses the first advertising Node instead of an explicit Host;
-- disconnect currently has global pending-request effects instead of per-Host/per-generation settlement;
-- `capability.respond` is not yet bound to the originating Host and generation;
-- the shared capability schema lacks Host/generation/deadline fields; and
-- the Rust Node execution path cannot yet prove cancellation of every approval wait or local side effect, so unknown
-  outcomes need an explicit contract.
-
-Verify these anchors against live code before writing the final schema. They are planning findings, not permission to
-perform an unrelated transport refactor.
+The four former P0 multi-Host gaps are closed at the unit/wire level: routing is explicit or single-Host-only,
+disconnect settlement is generation-scoped, responses require authenticated connection provenance, and the shared
+control tuple carries Host/generation/deadline identity. The remaining process-level evidence gap is the dedicated
+two-Node harness described above.
 
 ## 7. Intended program order
 
@@ -234,7 +262,9 @@ python ./.trellis/scripts/get_context.py
 git log -3 --oneline --decorate
 ```
 
-Expected task pointer: `.trellis/tasks/08-10-skills-mcp-productization`.
+Expected task pointer while the first child remains open: `.trellis/tasks/08-12-host-control-foundation`. Rebind to the
+next approved child only after recording this child's closeout; the parent remains `planning` until the full program
+converges.
 
 If the worktree is dirty for an unknown reason, stop and identify ownership before editing. Never run T4 commands from
 `H:/TakiAgent` merely because it is the familiar path.
@@ -278,17 +308,18 @@ Push remains a separate owner-authorized action.
 - Do not push, reset, rebase, force, finish/archive, or perform destructive cleanup without the applicable owner
   authorization. Ordinary scoped commits are allowed when they are needed to preserve the requested worktree history.
 
-## 10. First incoming-session checklist
+## 10. Next-session checklist
 
-The incoming Leader should report the live state to the owner, then do the following without writing production code:
+The incoming Leader should report the live state to the owner, then:
 
-1. verify this worktree, task pointer, branch, checkpoint, main divergence, and Hindsight separation;
-2. read the required files in Section 4;
-3. turn the two remaining engineering questions into concrete shared-schema and generation-ownership decisions;
-4. update the Skills/MCP PRD and child decomposition with those decisions;
-5. curate `implement.jsonl` and `check.jsonl` for the first child only after its boundary is frozen; and
-6. explain the exact first implementation slice, affected files, tests, dependencies, and merge risks to the owner
-   before dispatching `trellis-implement`.
+1. verify this worktree, current child, branch, `main...HEAD`, and Hindsight separation;
+2. confirm `7427edf` and the recorded gates before treating Host-control as the dependency baseline;
+3. decide whether to add the missing two-Node process harness in this child or retain it as an explicit convergence
+   gate, without weakening the existing unit/wire evidence;
+4. do not mark the current child complete or archive it without the applicable owner closeout direction;
+5. refresh `main...HEAD` before the next child, then curate that child's implementation/check contexts; and
+6. proceed in the recorded slice order, keeping secure MCP and standard Skill lifecycle behind the common governance,
+   Approval, and secret foundations.
 
 No new product Grill is currently required. Ask the owner only if live code/research exposes a genuine product choice
 that would materially change behavior, security, scope, or delivery.
