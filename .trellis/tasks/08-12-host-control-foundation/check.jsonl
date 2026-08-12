@@ -1,0 +1,11 @@
+{"file":".trellis/spec/backend/index.md","reason":"Check shared-first protocol placement, Core/Rust boundary, full quality gate, and architecture invariants."}
+{"file":".trellis/spec/backend/host-operation-lifecycle.md","reason":"Verify every disconnect, cancellation, stale response, unknown-outcome, resume, and no-replay behavior against the common contract."}
+{"file":".trellis/spec/backend/permission-authorization.md","reason":"Verify Host-local classification/floors remain stricter-only and unknown identities fail closed."}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Verify connection-scoped generations, role/auth binding, cleanup, and no authentication/authorization conflation."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Verify structured terminal outcomes and absence of blind retry or swallowed cancellation."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Audit logs for input/output/secret leakage and metadata-only diagnostics."}
+{"file":".trellis/spec/backend/e2e-harness.md","reason":"Review the two-Host deterministic stack fixture and real boundary smoke expectations."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Run proportional TypeScript/Rust lint, typecheck, tests, diff, and size audits."}
+{"file":".trellis/spec/frontend/operator-connection-recovery.md","reason":"Ensure the new Core-to-Host generation does not regress or incorrectly reuse the existing browser-window generation contract."}
+{"file":".trellis/tasks/08-10-skills-mcp-productization/research/current-gap-and-dependency-map.md","reason":"Check closure of the exact first-node routing, global disconnect, unbound response, schema, and unknown-outcome gaps."}
+{"file":".trellis/tasks/08-10-skills-mcp-productization/research/standards-and-reference-prior-art.md","reason":"Check protocol negotiation, timeout/cancellation, and Host ownership claims remain evidence-grounded."}

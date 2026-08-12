@@ -180,27 +180,28 @@ must not add another offline state machine, retry queue, or one-off disconnected
   cannot silently gain background scope.
 - Home management surfaces must include loading, empty, partial-failure, reconnecting, success, and validation states.
 
-## Draft Child Order
+## Frozen Child Order
 
-This order is evidence-driven but remains planning-only until the remaining package-resource and reload boundaries are
-frozen:
+The remaining engineering contracts are recorded in [`info.md`](info.md), and the independently implementable Trellis
+children now exist:
 
-1. Authority and credential design gate: freeze secret locality/backends, canonical capability identity, Core/Node
-   stricter-wins choreography, and legacy decision migration without production code.
-2. Common governance and catalog vertical: shared schemas, Core authority/effective-policy evaluator, Node ceiling and
-   local floors, and the minimal Home global/advanced permission surface.
-3. Approval vertical: common capability identity, versioned durable decisions, operator-session scope, Desktop dialog,
-   list/revoke, background disclosure, and legacy reconfirmation.
-4. Secure MCP lifecycle vertical: Core status/config/secret references, CRUD/test/reconnect, last-good candidate
-   publication, generation leases/draining, per-tool selection, and Home MCP management.
-5. Standard Skill lifecycle vertical: safe staged import, standard validation, provenance/hash/trust/quarantine,
-   enable/remove/reconcile, confined support-resource access, and Home Skills management.
-6. Converged discovery and integration vertical: bounded progressive discovery, collision rejection, Core/Home/Node
-   convergence, restart/reconnect/upgrade evidence, full relevant gates, and owner manual acceptance.
+1. `08-12-authority-credential-design` — planning-only authority/credential/identity/migration gate; no production code.
+2. `08-12-host-control-foundation` — shared/Core/Rust Host protocol, catalog generations, explicit routing, disconnect,
+   cancellation, stale response, and unknown-outcome foundation. This is the first production batch.
+3. `08-12-governance-authority` — Core global policy/effective evaluator, Host ceiling/local floors, migration, and
+   minimal Home permission surface.
+4. `08-12-approval-productization` — common Approval identity, exact challenge/resume, operator-session scope,
+   Desktop/CLI dialog, list/revoke, disclosure, and legacy reconfirmation.
+5. `08-12-host-secret-catalog` — encrypted Host-local catalog and Windows/Linux bootstrap adapters; dependency addition
+   still requires explicit owner approval.
+6. `08-12-secure-mcp-lifecycle` — desired/runtime separation, secure CRUD/test/reconnect, last-good publication,
+   immutable Run snapshots, generation leases/draining, and Home MCP management.
+7. `08-12-standard-skill-lifecycle` — staged open-standard package lifecycle, sidecars, confined resources, atomic
+   catalog publication, and Home Skills management. It may run in parallel with MCP after common foundations.
+8. `08-12-extension-discovery-integration` — bounded discovery, collision rejection, cross-surface convergence,
+   restart/reconnect/migration evidence, final gates, and owner manual acceptance.
 
-The MCP and Skill lifecycle children may proceed in parallel only after the common governance and Approval contracts
-they consume are frozen. Experience Review remains outside this task because it depends on later Autonomous Run
-evidence.
+Experience Review remains outside this task because it depends on later Autonomous Run evidence.
 
 ## Acceptance Criteria (Evolving)
 
@@ -249,11 +250,14 @@ evidence.
 
 ## Open Questions
 
-- The host-control protocol still needs concrete wire schemas for catalog publication, host-qualified Skill reads,
-  MCP tool-call routing, disconnect/reconnect generations, and explicit cross-host artifact transfer. These are
-  implementation contracts under the 4A decision, not a choice between single-host and multi-host execution.
-- The runtime generation and persistence boundary for MCP reload must be proven against the current turn and approval
-  lifecycle before implementation is split into batches.
+No product question remains. The Host-control wire contract, MCP desired/runtime/generation boundary, child DAG, and
+first-child context are frozen in [`info.md`](info.md) for owner acknowledgement. Implementation-specific spike results
+that may still require owner authority are deliberately isolated:
+
+- adding an exact `libsodium-wrappers` dependency/version after Node 24, TypeScript, packaging, tamper, and crash proof;
+- choosing the final Windows Core-host helper packaging after verifying the actual service/user account model; and
+- any live code finding that would materially change product behavior, security, scope, or delivery rather than merely
+  choosing an internal implementation detail.
 
 ## Research References
 
@@ -275,3 +279,4 @@ evidence.
 - Permission contracts: `.trellis/spec/backend/permission-authorization.md` and related shared/Rust protocol mirrors.
 - Existing architectural constraints: ADR 0006, Core single-writer authority, disposable clients, and provider-neutral
   tool/runtime design.
+- Frozen engineering design and batch boundaries: [`info.md`](info.md).

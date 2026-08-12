@@ -5,7 +5,7 @@
   "description": "Productize the existing Skills and MCP foundations end to end across Core lifecycle, unified governance, secure credentials, Home operator UX, and verification.",
   "status": "planning",
   "dev_type": null,
-  "scope": null,
+  "scope": "full-stack-extension-productization",
   "package": null,
   "priority": "P1",
   "creator": "pleia",
@@ -18,9 +18,18 @@
   "commit": null,
   "pr_url": null,
   "subtasks": [],
-  "children": [],
+  "children": [
+    "08-12-authority-credential-design",
+    "08-12-host-control-foundation",
+    "08-12-governance-authority",
+    "08-12-approval-productization",
+    "08-12-host-secret-catalog",
+    "08-12-secure-mcp-lifecycle",
+    "08-12-standard-skill-lifecycle",
+    "08-12-extension-discovery-integration"
+  ],
   "parent": null,
   "relatedFiles": [],
-  "notes": "Dedicated T4 worktree prepared from checkpoint 3d8a320. Keep this task in planning until the host-control wire schema, MCP reload generation boundary, child slices, and implement/check context are frozen.",
+  "notes": "Dedicated T4 worktree prepared from checkpoint 3d8a320. Host-control and MCP generation contracts, child slices, and first-child context are frozen for owner review. Keep this parent in planning and do not dispatch implementation until the owner approves the first batch.",
   "meta": {}
 }
