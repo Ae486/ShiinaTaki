@@ -154,9 +154,12 @@ Slice 4 has an approved PRD, technical design, live lifecycle research, and cura
 - immutable Host control plus a nested, single-use post-decision authorization for exact challenge/resume; and
 - a strict memory-only raw-input boundary with versioned redacted presentation.
 
-Its execution order is Batch A schemas/state, Batch B Core-local/MCP interaction, Batch C Host challenge/resume,
-Batch D Desktop/CLI surfaces, and Batch E legacy/privacy/process convergence. Batch A is now implemented and formally
-checked: canonical Shared schemas and digests, migration `015`, the sole Approval repository, the durable decision
+Its technical boundaries remain Batch A schemas/state, Batch B Core-local/MCP interaction, Batch C Host
+challenge/resume, Batch D Desktop/CLI surfaces, and Batch E legacy/privacy/process convergence. Execution is now
+proportional to complexity: verified Batch A remains the foundation; B+D form one interactive implementation wave;
+C+E form one Host/convergence wave; the complete Slice receives one final xhigh formal check rather than one check per
+internal boundary. Batch A is implemented and formally checked: canonical Shared schemas and digests, migration `015`,
+the sole Approval repository, the durable decision
 service, historical-row inert classification, optimistic generation semantics, and compatibility-only legacy type
 renames are present. Production `ask` remains fail-closed; no canonical prompt, method registration, governed raw
 closure, Host protocol, Rust, Desktop, or `main.ts` Approval lifecycle was activated.
@@ -165,9 +168,9 @@ Batch A verification passed workspace typecheck, root lint, full tests (Shared 2
 skip, CLI 32, Desktop 370), focused Approval regressions, `git diff --check`, header/index/size audits, and a real Core
 boot applying migrations `1..15`. The formal check repaired candidate digest spoofing, stored-digest reconciliation,
 historical stored grammar, and digest mismatch/collision separation. Rust, packaged WebView, and Batch B-E behavior
-remain unverified by design. Batch B is the next boundary: exact physical-`Connection` pending/session ownership,
-targeted request/closed notifications, same-connection responses, timeout/cancel/invalidation, governed Core-local/MCP
-closure release, and canonical list/revoke methods.
+remain unverified by design. The active B+D interactive wave owns exact physical-`Connection` pending/session
+ownership, targeted request/closed notifications, same-connection responses, timeout/cancel/invalidation, governed
+Core-local/MCP closure release, canonical list/revoke methods, and the Desktop/CLI operator surfaces.
 
 ## 4. Required reading order
 
@@ -363,6 +366,8 @@ Push remains a separate owner-authorized action.
 - Do not repeat existing research unless a live version/source change invalidates it.
 - Do not mark manual acceptance passed without the owner's observation.
 - Use formal `trellis-check` for substantial implementation convergence, not routine planning or small documentation.
+- Size implementation/check investment to real complexity: simple slices should go through one implement pass and one
+  final check; complex slices may use internal fail-closed waves, but do not repeat formal checks per wave by default.
 - Do not push, reset, rebase, force, finish/archive, or perform destructive cleanup without the applicable owner
   authorization. Ordinary scoped commits are allowed when they are needed to preserve the requested worktree history.
 

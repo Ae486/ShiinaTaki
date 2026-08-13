@@ -152,7 +152,17 @@ single-use authorization.
   canonical durable allow using current identity, revisions, generation, and background disclosure.
 - Ambiguous or corrupt legacy state fails closed and surfaces a repairable diagnostic; no adapter guesses identity.
 
-## Implementation Batches
+## Implementation Waves
+
+The five boundaries below describe independently fail-closed technical concerns, not five mandatory agent/check
+cycles. To keep verification proportional, implementation after the verified Batch A foundation is consolidated into
+two engineering waves, and the complete Slice receives one formal Trellis check:
+
+- **Interactive wave**: Batch B Core-local/MCP lifecycle plus Batch D Desktop/CLI operator surfaces.
+- **Host/convergence wave**: Batch C Host challenge/resume plus Batch E legacy/privacy/process convergence.
+
+Focused tests run throughout each wave. Do not dispatch a formal check between internal boundaries unless a newly
+discovered defect forces a genuine rollback; use the one final xhigh check after all Slice 4 behavior converges.
 
 1. **Batch A — canonical schemas and state**: Shared operator schemas/exports plus migration `015`, Approval
    repository/service, digest and reconciliation rules, tests, module headers, and directory indexes. Production
@@ -192,8 +202,9 @@ or release the parent initiative with only part of the Approval lifecycle active
 
 ## Definition of Done
 
-- All five batches are implemented through high-effort `trellis-implement` dispatches and proportionate checks; the
-  substantial authority/protocol convergence receives xhigh `trellis-check` review.
+- The verified Batch A foundation plus the two remaining engineering waves use high-effort implementation. Run one
+  xhigh `trellis-check` only after the complete authority/protocol/operator convergence, with focused verification
+  inside each wave.
 - Every touched production file has the required English `INPUT`/`OUTPUT`/`POS` header, and every touched production
   directory has an accurate English `index.md` entry.
 - Current-runtime contracts are reflected in executable specs, `CONTEXT.md`, relevant ADRs, task docs, HANDOFF, and the

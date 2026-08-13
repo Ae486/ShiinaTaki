@@ -746,8 +746,14 @@ process epoch. No prompt or execution closure was activated; effective `ask` sti
 
 ### Next Steps
 
-- Recheck live `main...HEAD` and the append-only migration registry before Batch B starts.
-- Resume the existing high-effort implement agent for Batch B only: physical-Connection pending/session ownership,
-  targeted notifications, same-connection response, governed Core-local/MCP closure release, and list/revoke methods.
-- Review the Batch B diff against the one-authority/no-raw-input contract and use an xhigh formal check if the
-  cross-cutting production diff remains substantial.
+- Recheck live `main...HEAD` and the append-only migration registry before the interactive wave starts.
+- Resume the existing high-effort implement agent for one B+D wave: physical-Connection lifecycle, Core/MCP gating,
+  canonical methods, then Desktop/CLI operator surfaces without an intermediate formal check.
+- Continue with one C+E Host/convergence wave, then run the complete Slice gate and its sole final xhigh formal check.
+
+### Process Calibration
+
+The owner clarified that internal batches are implementation boundaries, not mandatory agent/check units. Allocate
+resources by actual complexity: a simple Slice should complete through one implementation pass and one final check;
+a complex Slice may retain fail-closed internal waves, but receives one formal check only after Slice convergence unless
+a discovered defect forces a real rollback. Engineering scope and acceptance evidence remain unchanged.

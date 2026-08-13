@@ -414,16 +414,22 @@ collision, validated stored digests before revision reconciliation, and separate
 strict current grant grammar. Rust, packaged WebView, and Host challenge/resume verification remain intentionally
 unverified because Batch A did not modify or activate those layers.
 
-## 11. Remaining batches and checks
+## 11. Remaining boundaries and proportional checks
 
-- **Batch B** adds connection-owned Core-local/MCP prompting and common methods. It receives high-effort implementation
-  and focused Core/CLI protocol tests; formal check is used if the cross-cutting diff is substantial.
-- **Batch C** changes Shared/Rust Host protocol and at-most-once enforcement. It always receives an xhigh formal check,
-  golden fixtures, Rust test/Clippy/rustfmt, and adversarial replay/tamper proof.
-- **Batch D** adds Desktop/CLI surfaces with connection-retirement and no-cache tests, production build, and truthful
-  manual-verification status.
-- **Batch E** converges legacy/privacy/process E2E, updates executable specs/ADRs/HANDOFF/journal, and runs the complete
-  release-quality task gate.
+The Batch B-E labels remain useful technical boundaries, but they are not separate formal-check cycles. The remaining
+work is executed as two coherent waves: B+D for the interactive Core/MCP and operator-client vertical, then C+E for
+Host authorization plus legacy/privacy/process convergence. The full Slice receives one xhigh formal check after both
+waves; focused tests and Leader review remain continuous.
+
+- **Batch B** adds connection-owned Core-local/MCP prompting and common methods. It is implemented in the same
+  interactive wave as Batch D, with focused Core/CLI protocol tests and no intermediate formal check.
+- **Batch C** changes Shared/Rust Host protocol and at-most-once enforcement. The Host/convergence wave requires golden
+  fixtures, Rust test/Clippy/rustfmt, and adversarial replay/tamper proof; its findings are reviewed by the Slice's one
+  final xhigh formal check.
+- **Batch D** completes the interactive wave with Desktop/CLI surfaces, connection-retirement and no-cache tests,
+  production build, and truthful manual-verification status.
+- **Batch E** completes the Host/convergence wave with legacy/privacy/process E2E and documentation convergence, then
+  runs the complete release-quality task gate and the Slice's sole final xhigh formal check.
 
 ## 12. Merge and release risks
 
