@@ -648,3 +648,55 @@ not independently releasable because `ask` intentionally requires Slice 4. It re
 - Implement the one Core-owned Approval request/respond/decision/challenge-resume/list/revoke lifecycle; do not revive
   Shell-local prompts or import legacy allows as authority.
 - Keep Host-control and Governance Authority in `review` until the approved convergence/closeout point.
+
+## Session 17: T4 Approval Productization planning convergence
+
+**Date**: 2026-08-13
+**Task**: `.trellis/tasks/08-12-approval-productization`
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Recovered the interrupted T4 session, resumed the existing research agents, and converged the fourth Skills/MCP slice
+to an executable five-batch contract. The design keeps one Core-owned Approval authority over the existing canonical
+governance identity, binds session state to the physical Core WebSocket `Connection`, adds durable versioned
+always-allows with explicit future-background disclosure and global `approvalGeneration`, and preserves immutable
+Host control through a nested single-use challenge/resume authorization.
+
+### Main Changes
+
+- Added a live Approval lifecycle map covering dormant/current paths, session ownership, durable state/generation,
+  Host transition, privacy, affected files, implementation batches, evidence, and merge hotspots.
+- Replaced the seed PRD with the owner-approved common authority, one-dialog, scope/disclosure, legacy, privacy, and
+  Batch A-E acceptance contract.
+- Added a self-contained technical design that reuses `CanonicalCapabilityIdentity`, corrects the research sketch's
+  missing `ownerHostId` and string subject revision, versions the binding encoding, and freezes migration/repository/
+  service responsibilities.
+- Curated 23-entry `implement.jsonl` and `check.jsonl` contexts for high-effort implementation and xhigh formal review.
+- Updated the parent/child task notes and HANDOFF to record committed Governance Authority and the active Approval
+  child. Batch A is strictly Shared schemas plus migration/repository/service; production `ask` remains fail-closed.
+- Rechecked that `main` remains at `5dd6dd2`, T4 is 0 behind / 7 ahead at `46a8487`, and migration `015` is currently
+  free. Both facts must be checked again immediately before implementation.
+
+### Git Commits
+
+Planning commit pending validation. No push, reset, rebase, force, finish/archive, or destructive cleanup was
+performed.
+
+### Testing
+
+- [PENDING] Trellis task validation, JSONL/path validation, UTF-8/read-back, `git diff --check`, and planning-only diff
+  review.
+- [NOT RUN] Production tests, builds, lint, typecheck, Rust, E2E, or formal Trellis check; no Slice 4 production code
+  has been written in this planning batch.
+
+### Status
+
+[IN PROGRESS] **Slice 4 planning is converged; validate and preserve the planning batch before implementation.**
+
+### Next Steps
+
+- Validate and commit the planning/research/docs slice so the T4 worktree is clean.
+- Recheck both worktrees, `main...HEAD`, and migration numbering; merge `main` into T4 only if it advanced.
+- Dispatch a high-effort `trellis-implement` for Batch A only, require an honest completed/incomplete/unverified/extra/
+  residual-risk report, then Leader-review the diff before an xhigh formal check.

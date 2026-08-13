@@ -30,6 +30,6 @@
   ],
   "parent": null,
   "relatedFiles": [],
-  "notes": "Dedicated T4 worktree prepared from checkpoint 3d8a320. Host-control and MCP generation contracts, child slices, and first-child context are frozen for owner review. Keep this parent in planning and do not dispatch implementation until the owner approves the first batch.",
+  "notes": "Dedicated T4 worktree prepared from checkpoint 3d8a320. The owner approved the eight-slice program. Host-control and Governance Authority are committed, formally checked, and retained in review; Approval Productization is the active in-progress child with Batches A-E frozen. Keep this parent in planning until all extension slices converge. Do not push, reset, rebase, force, finish/archive, or claim manual acceptance without owner authorization.",
   "meta": {}
 }

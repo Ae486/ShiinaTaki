@@ -1,9 +1,9 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
-> Updated 2026-08-13 after Slice 3 implementation, formal checks, real-process governance evidence, and authority-spec
-> convergence. T4 remains isolated in its dedicated worktree. Host-control is committed; Governance Authority is
-> verified uncommitted work in `review`. The branch must not be released between Slice 3 and Slice 4. Read the live
-> repository before trusting any recorded status.
+> Updated 2026-08-13 after Slice 3 commit and Slice 4 planning convergence. T4 remains isolated in its dedicated
+> worktree. Host-control and Governance Authority are committed and retained in `review`; Approval Productization is
+> the active `in_progress` child with five independently fail-closed batches. The branch must not be released between
+> Slice 3 and Slice 4. Read the live repository before trusting any recorded status.
 
 ## 1. Mission and boundary
 
@@ -46,9 +46,9 @@ Current live status:
 - the T4 branch contains the frozen planning commits and Host-control production commit `7427edf`;
 - `.trellis/.current-task` is intentionally ignored by Git and is independently bound in each worktree;
 - the main worktree remains bound to `08-09-hindsight-compatibility-extensions`;
-- the T4 worktree is bound to child task `08-12-governance-authority`, which is in `review` after verified Slice 3
-  convergence; `08-12-host-control-foundation` also remains in `review`, and the parent remains
-  `planning` while children execute; and
+- the T4 worktree is bound to child task `08-12-approval-productization`, which is `in_progress` after its approved
+  planning convergence; `08-12-governance-authority` and `08-12-host-control-foundation` remain in `review`, and the
+  parent remains `planning` while children execute; and
 - locked workspace dependencies are installed only inside the T4 worktree; `.env.local` remains absent.
 
 Ignored local resources are intentionally handled as follows:
@@ -135,12 +135,26 @@ Slice 3 has a live reconnaissance, owner-review PRD, implemented technical desig
 - standard MCP over `@ai-sdk/mcp` and portable `SKILL.md` are explicit non-replacement requirements; and
 - `implement.jsonl` and `check.jsonl` are curated for a high-effort implement agent and xhigh-effort check agent.
 
-Slice 3 production code is verified across Shared, Core, Rust, Desktop Home, and the process harness. It is still
-uncommitted shared work. The final automated gates passed: workspace typecheck/lint/tests (Shared 251, CLI 32, Desktop
-370, Core 1,255 + 1 skip), Rust 155 tests, Clippy `-D warnings`, locked `taki-node` build, full E2E 23 passed / 6 skipped
+Slice 3 production code is verified across Shared, Core, Rust, Desktop Home, and the process harness and committed as
+`46a8487` (`feat: add unified governance authority`). The final automated gates passed: workspace typecheck/lint/tests
+(Shared 251, CLI 32, Desktop 370, Core 1,255 + 1 skip), Rust 155 tests, Clippy `-D warnings`, locked `taki-node` build,
+full E2E 23 passed / 6 skipped
 / 0 todo, and `git diff --check`. The test-only bounded WS relay proves stale-generation and same-generation
 valid-digest projection tampering rejection, no execution/replay, bounded Core `NODE_DISCONNECTED` settlement, and
 cleanup. No push, finish, or archive has been performed.
+
+Slice 4 now has an approved PRD, technical design, live lifecycle research, and curated implement/check context:
+
+- one Core-owned canonical Approval authority over the existing `CanonicalCapabilityIdentity`;
+- physical Core `Connection` ownership for pending requests and session grants, never `deviceId` sharing;
+- durable always-allows, explicit future-background disclosure, global `approvalGeneration`, list/revoke, and inert
+  legacy reconfirmation;
+- immutable Host control plus a nested, single-use post-decision authorization for exact challenge/resume; and
+- a strict memory-only raw-input boundary with versioned redacted presentation.
+
+Its execution order is Batch A schemas/state, Batch B Core-local/MCP interaction, Batch C Host challenge/resume,
+Batch D Desktop/CLI surfaces, and Batch E legacy/privacy/process convergence. Batch A must keep production `ask`
+fail-closed and must not touch prompt, Desktop, CLI, Host-control, Rust, or `main.ts` execution wiring.
 
 ## 4. Required reading order
 
@@ -292,10 +306,10 @@ python ./.trellis/scripts/get_context.py
 git log -3 --oneline --decorate
 ```
 
-Expected task pointer before the next implementation dispatch: `.trellis/tasks/08-12-approval-productization` after
-the Leader verifies its PRD/context and starts it. Host-control stays in `review` until the deferred real two-Node
-evidence and owner closeout; Governance Authority stays in `review` because Slice 3 cannot release without Slice 4;
-the parent remains `planning` until the full program converges.
+Expected task pointer: `.trellis/tasks/08-12-approval-productization`. Its PRD/design/research/context are curated and
+the task is `in_progress`; revalidate them plus live Git/migration state before each Batch A-E dispatch. Host-control
+stays in `review` until the deferred real two-Node evidence and owner closeout; Governance Authority stays in `review`
+because Slice 3 cannot release without Slice 4; the parent remains `planning` until the full program converges.
 
 If the worktree is dirty for an unknown reason, stop and identify ownership before editing. Never run T4 commands from
 `H:/TakiAgent` merely because it is the familiar path.
@@ -347,8 +361,8 @@ The incoming Leader should report the live state to the owner, then:
 2. confirm `7427edf` and the recorded gates before treating Host-control as the dependency baseline;
 3. treat the missing two-Node process harness as the owner-approved mandatory Slice 8 convergence gate without
    weakening the existing unit/wire evidence;
-4. verify/start `08-12-approval-productization`, refresh `main...HEAD` and the migration registry, and curate any missing
-   implement/check context before its high-effort implementation dispatch;
+4. verify `08-12-approval-productization`, refresh `main...HEAD` and the migration registry, and dispatch only its
+   independently fail-closed Batch A after the planning slice is committed and the worktree is clean;
 5. keep the one Approval lifecycle Core-owned and generation-bound; do not revive Shell-local prompts or legacy allow
    writers;
 6. do not mark either reviewed child complete or archive it without the applicable owner closeout direction; and

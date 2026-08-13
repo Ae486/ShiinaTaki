@@ -3,7 +3,7 @@
   "name": "approval-productization",
   "title": "Unified Approval lifecycle and operator surfaces",
   "description": "Generalize Approval to common capability identity, one Core-mediated dialog, session ownership, versioned durable decisions, list/revoke, background disclosure, challenge/resume, and legacy reconfirmation.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "shared-core-desktop-rust-approval-lifecycle",
   "package": null,
@@ -21,6 +21,6 @@
   "children": [],
   "parent": "08-10-skills-mcp-productization",
   "relatedFiles": [],
-  "notes": "Depends on Core governance authority. Pending exact inputs remain memory-only and require privacy/source sweeps.",
+  "notes": "Owner approved Slice 4 execution. The PRD/design/research freeze one Core-owned canonical Approval authority, physical-Connection session ownership, versioned durable allows and disclosure, global approvalGeneration, immutable Host control plus nested single-use resume authorization, and memory-only pending input. Execute as independent fail-closed Batches A-E. Batch A is Shared schemas plus migration/repository/service only; production ask remains fail-closed. Use high-effort implement and xhigh formal check where risk is substantial. No push, reset, rebase, force, finish/archive, or manual acceptance claim is authorized.",
   "meta": {}
 }
