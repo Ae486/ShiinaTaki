@@ -11,3 +11,13 @@ Rules:
 - Keyboard/mouse simulation and kill-process are not capabilities in v1 (deferred, not reserved).
 
 Known limitation, accepted: no sandbox on Windows in v1 (Docker requires WSL2, conflicting with the low-footprint goal). Blast-radius control relies entirely on the rules above plus the audit log. Adding a sandbox later is an enhancement, not a rework.
+
+---
+
+**Amendment 2026-08-13 — Core projection and no local prompt:** every exec request now carries the real Core
+`policyGeneration` plus the complete canonical exec-cell projection. Rust remains the trusted command classifier,
+recomputes the sealed input digest, applies legacy/local/managed/hard constraints stricter-only, executes only an
+effective `auto`, and returns bounded governance evidence for Core verification. The former Shell-local approval path
+is no longer a production authorization source: `ask` is fail-closed as `APPROVAL_REQUIRED` until the single
+Core-mediated Approval lifecycle supplies challenge/resume authorization. The catastrophic classifier remains a hard
+final boundary and no TypeScript copy of the exec parser was introduced.

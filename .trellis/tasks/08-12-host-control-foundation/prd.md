@@ -89,5 +89,13 @@ The implementer must confirm the live code before editing. Expected seams includ
 2. Core unit tests for strict Host identity persistence, routing, connection/catalog generations, settlement,
    deadlines, authenticated method provenance, and Host Context.
 3. Rust unit tests for serde, binding, duplicate/cancel behavior.
-4. Two-Node Core integration harness with reconnect and interrupted operations.
+4. Single-Node real-process reconnect and capability execution smoke in this child.
 5. Workspace typecheck/lint, relevant TS tests, `cargo test`/`cargo clippy`, then one formal `trellis-check`.
+
+## Deferred Convergence Evidence
+
+The owner approved deferring the real simultaneous two-Node process harness to
+`08-12-extension-discovery-integration`. That final integration child must exercise two Hosts advertising the same
+capability, explicit target routing, same-Host reconnect to a new generation, cross-Host isolation, and interrupted
+read/side-effect settlement before this child can receive final closeout. Unit and wire coverage in this child remains
+binding and must not be represented as process-level two-Node evidence.

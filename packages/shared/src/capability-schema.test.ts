@@ -16,6 +16,7 @@ const CONTROL = {
   connectionGeneration: 1,
   catalogGeneration: 1,
   policyGeneration: 1,
+  governanceProjection: { registryRevision: 1, descriptorRevision: 1, classifierRevision: 1, cells: [{ key: "screenshot", posture: "auto" as const }], digest: "a".repeat(64) },
   approvalGeneration: 1,
   capabilityId: "screenshot",
   inputDigest: "a".repeat(64),
@@ -38,7 +39,7 @@ describe("capability schema", () => {
 
   it("parses completed and failed terminal arms", () => {
     expect(
-      CapabilityRespondParamsSchema.safeParse({ requestId: UUID, control: CONTROL, state: "completed", output: {} }).success,
+      CapabilityRespondParamsSchema.safeParse({ requestId: UUID, control: CONTROL, state: "completed", output: {}, governance: { descriptorRevision: 1, classifierRevision: 1, cellKey: "screenshot", effectivePosture: "auto", constraint: "none" } }).success,
     ).toBe(true);
     expect(
       CapabilityRespondParamsSchema.safeParse({
@@ -46,12 +47,13 @@ describe("capability schema", () => {
         control: CONTROL,
         state: "failed",
         error: { code: "DENIED", message: "user denied" },
+        governance: { descriptorRevision: 1, classifierRevision: 1, cellKey: "screenshot", effectivePosture: "deny", constraint: "local" },
       }).success,
     ).toBe(true);
   });
 
   it("keeps the execution-error wire union closed", () => {
-    expect(CapabilityErrorCodeSchema.options).toEqual(["DENIED", "EXEC_FAILED", "UNSUPPORTED_CAPABILITY"]);
+    expect(CapabilityErrorCodeSchema.options).toEqual(["DENIED", "APPROVAL_REQUIRED", "EXEC_FAILED", "UNSUPPORTED_CAPABILITY"]);
   });
 
   it("parses structured accepted and rejected acknowledgements", () => {

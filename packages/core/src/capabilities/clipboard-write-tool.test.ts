@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
+import { testGovernance } from "../testing/capability-tool-harness.ts";
 import {
   TEST_HOST_ID,
   brokerCapturing,
@@ -16,7 +17,7 @@ const EXEC_OPTS = { toolCallId: "c1", messages: [] } as never;
 
 function toolWith(registry: ConnectionRegistry, broker: CapabilityBroker) {
   const { logger } = createCaptureLogger();
-  return createClipboardWriteTool({ registry, catalogs: catalogsReturning("clipboard-write", { execution: "effect", cancellation: "non-cooperative" }), broker, logger });
+  return createClipboardWriteTool({ registry, catalogs: catalogsReturning("clipboard-write", { execution: "effect", cancellation: "non-cooperative" }), broker, logger, governance: testGovernance() });
 }
 
 describe("createClipboardWriteTool (T5)", () => {

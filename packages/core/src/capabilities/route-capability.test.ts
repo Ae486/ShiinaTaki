@@ -4,6 +4,7 @@ import { createHostCatalogStore } from "../hosts/host-catalog.ts";
 import { createConnectionRegistry } from "../server/connection-registry.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { routeCapability } from "./route-capability.ts";
+import { testGovernance } from "../testing/capability-tool-harness.ts";
 
 const HOST_A = "11111111-1111-4111-8111-111111111111";
 const HOST_B = "22222222-2222-4222-8222-222222222222";
@@ -51,18 +52,18 @@ function setup(hostIds: string[]) {
       deviceId: hostId,
       role: "node",
       capabilities: ["screenshot"],
-      host: { protocolVersion: 1, catalogSchemaVersion: 1 },
+      host: { protocolVersion: 2, catalogSchemaVersion: 2 },
     });
     catalogs.publish({
       hostId,
       label: "Test Host",
-      protocolVersion: 1,
-      catalogSchemaVersion: 1,
+    protocolVersion: 2,
+    catalogSchemaVersion: 2,
       connectionGeneration: 1,
       catalogGeneration: 1,
       publishedAt: "2026-08-12T00:00:00.000Z",
       readiness: "ready",
-      capabilities: [{ capabilityId: "screenshot", execution: "read", cancellation: "cooperative" }],
+      capabilities: [{ capabilityId: "screenshot", execution: "read", cancellation: "cooperative", governance: { descriptorRevision: 1, classifierId: "fixed-risk", classifierRevision: 1 } }],
       workspaces: [],
       skills: [],
       mcpServers: [],
@@ -75,5 +76,5 @@ function setup(hostIds: string[]) {
     cancelGeneration: () => undefined,
   };
   const { logger } = createCaptureLogger();
-  return { request, deps: { registry, catalogs, broker, logger } };
+  return { request, deps: { registry, catalogs, broker, logger, governance: testGovernance() } };
 }

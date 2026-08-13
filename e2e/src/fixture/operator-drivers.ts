@@ -18,6 +18,7 @@ import {
   JsonRpcErrorResponseSchema,
   JsonRpcSuccessResponseSchema,
   TimelineHistoryResultSchema,
+  PermissionLevelStateSchema,
   type TimelineEntry,
 } from "@taki/shared";
 import type { RpcNotification, RpcSocket } from "./rpc-socket.ts";
@@ -93,6 +94,17 @@ export async function triggerCapability(
     spec.timeoutMs,
   );
   return JsonRpcSuccessResponseSchema.parse(frame).result;
+}
+
+/** Sets the Core Permission Level using the current durable generation; used by post-Slice-3 process scenarios. */
+export async function setPermissionLevel(socket: RpcSocket, level: "strict" | "standard" | "relaxed"): Promise<void> {
+  const currentFrame = await socket.request("permission.levelGet", {});
+  const current = PermissionLevelStateSchema.parse(JsonRpcSuccessResponseSchema.parse(currentFrame).result);
+  const setFrame = await socket.request("permission.levelSet", {
+    level,
+    expectedPolicyGeneration: current.policyGeneration,
+  });
+  PermissionLevelStateSchema.parse(JsonRpcSuccessResponseSchema.parse(setFrame).result);
 }
 
 /**

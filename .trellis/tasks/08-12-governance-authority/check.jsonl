@@ -1,1 +1,23 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/index.md","reason":"Verify shared-first protocol placement, Core/Host authority split, production architecture invariants, and complete backend gates."}
+{"file":".trellis/spec/backend/permission-authorization.md","reason":"Verify classifier semantics, posture ordering, unknown-cell failure, exact decision keys, deny floors, and explicit superseding authority wording."}
+{"file":".trellis/spec/backend/tool-design.md","reason":"Audit every Core/MCP/Skill/Host adapter for canonical identity, annotations-as-hints, truthful errors, and absence of untracked bypasses."}
+{"file":".trellis/spec/backend/host-operation-lifecycle.md","reason":"Verify policy projection remains Host/generation-bound and preserves cancellation, stale response, unknown-outcome, and no-replay behavior."}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Verify operator-only policy mutation, authenticated Host provenance, generation cleanup, and no authentication/authorization conflation."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Review migration numbering, schema constraints, atomic compare-and-increment, restart behavior, and Core-only writer compliance."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Check closed error unions, fail-closed ask/stale/unknown behavior, and no blind retry of effects."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Sweep logs, audits, diagnostics, and Host evidence for arguments, policy payloads, decisions, outputs, and secret leakage."}
+{"file":".trellis/spec/backend/mcp-tool-schema-compatibility.md","reason":"Prove governance did not replace or regress standard @ai-sdk/mcp discovery, schema preparation, raw tool execution, or isolation."}
+{"file":".trellis/spec/backend/e2e-harness.md","reason":"Review deterministic and real-process coverage for Core/Host posture composition and policy-generation replacement."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Run proportional tests, typecheck, root lint, Rust test/Clippy/rustfmt, size/header audits, and diff checks."}
+{"file":".trellis/spec/frontend/index.md","reason":"Verify Home remains a disposable shared-schema client with no authority or oversized Tauri capability changes."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Review Settings registration, shared component reuse, loading/error/conflict states, and own-connection behavior."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Confirm policy snapshots are never persisted to localStorage/page cache and reconnect reads Core truth."}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"Check every inbound governance payload is parsed at @taki/shared boundaries and no local duplicate types or any-casts appear."}
+{"file":".trellis/spec/frontend/operator-connection-recovery.md","reason":"Verify retired-client results cannot overwrite new policy state and mutation deadlines/conflicts surface truthfully."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Run Desktop-focused tests/build checks and review component/hook sizes and render behavior."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Audit full data flow from operator mutation through SQLite/evaluator/Host enforcement and back to Home evidence."}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Find duplicate registries, evaluators, policy stores, adapters, method tables, or UI state machines introduced by the slice."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Reject unsupported MCP/AI SDK/Skill behavior claims and verify the installed integration remains the execution source."}
+{"file":".trellis/tasks/08-12-governance-authority/research/live-governance-migration-map.md","reason":"Check closure of every verified live authority, migration, adapter, Slice 3/4, Home, and residual-risk item."}
+{"file":".trellis/tasks/08-10-skills-mcp-productization/research/current-gap-and-dependency-map.md","reason":"Confirm the implementation closes the intended governance gaps without stealing Approval or lifecycle scope."}
+{"file":".trellis/tasks/08-10-skills-mcp-productization/research/standards-and-reference-prior-art.md","reason":"Verify standards preservation, stable identity, stricter-wins, and no Taki-only MCP or Skill format."}

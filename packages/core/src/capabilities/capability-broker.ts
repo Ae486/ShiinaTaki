@@ -15,12 +15,14 @@ import {
   type HostCapabilityDescriptor,
   type HostFrameRejectReason,
   type HostOperationControl,
+  type HostGovernanceProjection,
 } from "@taki/shared";
 import type { Logger } from "../logging/logger.ts";
 import { capabilityInputDigest } from "./canonical-input.ts";
 
 export type CapabilityFailureCode =
   | "DENIED"
+  | "APPROVAL_REQUIRED"
   | "EXEC_FAILED"
   | "UNSUPPORTED_CAPABILITY"
   | "CAPABILITY_TIMEOUT"
@@ -40,12 +42,13 @@ export interface CapabilityDispatchTarget {
   catalogGeneration: number;
   descriptor: HostCapabilityDescriptor;
   notify: CapabilityNotify;
+  policyGeneration: number;
+  governanceProjection: HostGovernanceProjection;
 }
 
 export interface CapabilityRequestIdentity {
   runId?: string;
   operationId?: string;
-  policyGeneration?: number;
   approvalGeneration?: number;
 }
 
@@ -199,7 +202,8 @@ function makeControl({ target, input, identity, dispatchedMs, timeoutMs }: Contr
     targetHostId: target.hostId,
     connectionGeneration: target.connectionGeneration,
     catalogGeneration: target.catalogGeneration,
-    policyGeneration: identity.policyGeneration ?? 1,
+    policyGeneration: target.policyGeneration,
+    governanceProjection: target.governanceProjection,
     approvalGeneration: identity.approvalGeneration ?? 1,
     capabilityId: target.descriptor.capabilityId,
     inputDigest: capabilityInputDigest(target.descriptor.capabilityId, input),
@@ -222,12 +226,44 @@ function interruptedOutcome(execution: CapabilityExecutionKind, message: string)
 }
 
 function responseOutcome(params: CapabilityRespondParams): CapabilityOutcome {
+  if (params.state === "completed" || params.state === "failed") {
+    const failure = governanceEvidenceFailure(params);
+    if (failure) return { ok: false, code: "DENIED", message: failure };
+  }
   switch (params.state) {
     case "completed": return { ok: true, output: params.output };
     case "failed": return { ok: false, code: params.error.code, message: params.error.message };
     case "cancelled": return { ok: false, code: "CANCELLED", message: "capability request cancelled", state: "cancelled" };
     case "outcome_unknown": return { ok: false, code: "OUTCOME_UNKNOWN", message: "capability outcome is unknown", state: "outcome_unknown" };
   }
+}
+
+function governanceEvidenceFailure(
+  params: Extract<CapabilityRespondParams, { state: "completed" | "failed" }>,
+): string | undefined {
+  const projection = params.control.governanceProjection;
+  const evidence = params.governance;
+  if (
+    evidence.descriptorRevision !== projection.descriptorRevision
+    || evidence.classifierRevision !== projection.classifierRevision
+  ) {
+    return "Host governance evidence revision mismatch";
+  }
+  const projected = projection.cells.find((cell) => cell.key === evidence.cellKey)?.posture;
+  if (!projected || postureRank(evidence.effectivePosture) < postureRank(projected)) {
+    return "Host governance evidence failed stricter-only verification";
+  }
+  if (evidence.constraint === "none" && evidence.effectivePosture !== projected) {
+    return "Host governance evidence omitted its stricter constraint";
+  }
+  if (params.state === "completed" && evidence.effectivePosture !== "auto") {
+    return "Host reported execution under a non-auto governance posture";
+  }
+  return undefined;
+}
+
+function postureRank(posture: "auto" | "ask" | "deny"): number {
+  return { auto: 0, ask: 1, deny: 2 }[posture];
 }
 
 function sameControl(left: HostOperationControl, right: HostOperationControl): boolean {

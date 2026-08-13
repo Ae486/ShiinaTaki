@@ -20,3 +20,12 @@ Considered and rejected:
 Consequence, phased (so v1 ships without rework):
 - **v1 (single-machine):** file read/write remains Core-side TS as built in #11 — Core and host share one disk, so Core-side `node:fs` and a Node-routed file capability are indistinguishable. exec (#12) runs Node-side with cwd defaulting to the Workspace. Nothing about Stance A is observable yet; no #11 rework.
 - **v1.5 (split-machine, when built):** file read/write **migrates from Core-side to a Node-routed Capability** so it lands on the host, exactly like exec/screenshot already do. This is a localized change to the file-capability placement decision recorded in #11's devlog, not a redesign — the gate, broker, and routing spine already carry it. Network transport hardening (routable bind + `wss`/TLS + pairing over the network) is the other v1.5 work item; the protocol and auth (ADR 0004) already exist, so it is configuration + hardening, not new architecture.
+
+---
+
+**Amendment 2026-08-13 — locality and authority are orthogonal:** an Execution Host owns where a capability, Workspace,
+Skill resource, MCP instance, credential, or OS effect executes; Core Authority owns the profile's durable global
+Permission Level and common policy. Core sends a complete versioned projection to the selected Host, bound to the
+explicit Host plus connection/catalog generations. The Host classifies its local arguments and may tighten the result,
+but availability, path labels, display names, or a different Host's legacy allow can never widen policy or select a
+replacement execution location implicitly.

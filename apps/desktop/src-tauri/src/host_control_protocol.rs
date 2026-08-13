@@ -6,8 +6,8 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-pub const HOST_CONTROL_PROTOCOL_VERSION: u64 = 1;
-pub const HOST_CATALOG_SCHEMA_VERSION: u64 = 1;
+pub const HOST_CONTROL_PROTOCOL_VERSION: u64 = 2;
+pub const HOST_CATALOG_SCHEMA_VERSION: u64 = 2;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
@@ -65,6 +65,18 @@ pub struct HostCapabilityDescriptor {
     pub capability_id: String,
     pub execution: CapabilityExecutionKind,
     pub cancellation: CapabilityCancellation,
+    pub governance: HostCapabilityGovernanceSupport,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct HostCapabilityGovernanceSupport {
+    #[serde(rename = "descriptorRevision")]
+    pub descriptor_revision: u64,
+    #[serde(rename = "classifierId")]
+    pub classifier_id: String,
+    #[serde(rename = "classifierRevision")]
+    pub classifier_revision: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -215,6 +227,8 @@ pub struct HostOperationControl {
     pub catalog_generation: u64,
     #[serde(rename = "policyGeneration")]
     pub policy_generation: u64,
+    #[serde(rename = "governanceProjection")]
+    pub governance_projection: HostGovernanceProjection,
     #[serde(rename = "approvalGeneration")]
     pub approval_generation: u64,
     #[serde(rename = "capabilityId")]
@@ -229,6 +243,89 @@ pub struct HostOperationControl {
     pub deadline_at: String,
     #[serde(rename = "expiresAt", skip_serializing_if = "Option::is_none")]
     pub expires_at: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct HostGovernanceProjection {
+    #[serde(rename = "registryRevision")]
+    pub registry_revision: u64,
+    #[serde(rename = "descriptorRevision")]
+    pub descriptor_revision: u64,
+    #[serde(rename = "classifierRevision")]
+    pub classifier_revision: u64,
+    pub cells: Vec<HostGovernanceCell>,
+    pub digest: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct HostGovernanceCell {
+    pub key: String,
+    pub posture: HostGovernancePosture,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum HostGovernancePosture {
+    Auto,
+    Ask,
+    Deny,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct HostGovernanceEvidence {
+    #[serde(rename = "descriptorRevision")]
+    pub descriptor_revision: u64,
+    #[serde(rename = "classifierRevision")]
+    pub classifier_revision: u64,
+    #[serde(rename = "cellKey")]
+    pub cell_key: String,
+    #[serde(rename = "effectivePosture")]
+    pub effective_posture: HostGovernancePosture,
+    pub constraint: HostGovernanceConstraint,
+}
+
+impl HostGovernanceEvidence {
+    fn default_for(control: &HostOperationControl) -> Self {
+        // Early failures (for example, an input-digest mismatch) happen before
+        // trusted argument classification. Bind their hard-deny evidence to a
+        // real projected cell so Core can still verify the terminal frame.
+        let blocked_key = format!("{}:blocked", control.capability_id);
+        let cell_key = control
+            .governance_projection
+            .cells
+            .iter()
+            .find(|cell| cell.key == blocked_key)
+            .or_else(|| {
+                control
+                    .governance_projection
+                    .cells
+                    .iter()
+                    .find(|cell| cell.key == control.capability_id)
+            })
+            .or_else(|| control.governance_projection.cells.first())
+            .map(|cell| cell.key.clone())
+            .unwrap_or_else(|| control.capability_id.clone());
+        Self {
+            descriptor_revision: control.governance_projection.descriptor_revision,
+            classifier_revision: control.governance_projection.classifier_revision,
+            cell_key,
+            effective_posture: HostGovernancePosture::Deny,
+            constraint: HostGovernanceConstraint::Hard,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "kebab-case")]
+pub enum HostGovernanceConstraint {
+    None,
+    LegacyDeny,
+    Local,
+    Managed,
+    Hard,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -262,6 +359,7 @@ pub struct CapabilityCancel {
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum CapabilityErrorCode {
     Denied,
+    ApprovalRequired,
     ExecFailed,
     UnsupportedCapability,
 }
@@ -281,12 +379,14 @@ pub enum CapabilityRespond {
         request_id: String,
         control: HostOperationControl,
         output: Value,
+        governance: HostGovernanceEvidence,
     },
     Failed {
         #[serde(rename = "requestId")]
         request_id: String,
         control: HostOperationControl,
         error: CapabilityError,
+        governance: HostGovernanceEvidence,
     },
     Cancelled {
         #[serde(rename = "requestId")]
@@ -302,10 +402,12 @@ pub enum CapabilityRespond {
 
 impl CapabilityRespond {
     pub fn ok(request_id: String, control: HostOperationControl, output: Value) -> Self {
+        let governance = HostGovernanceEvidence::default_for(&control);
         Self::Completed {
             request_id,
             control,
             output,
+            governance,
         }
     }
 
@@ -315,11 +417,23 @@ impl CapabilityRespond {
         code: CapabilityErrorCode,
         message: String,
     ) -> Self {
+        let governance = HostGovernanceEvidence::default_for(&control);
         Self::Failed {
             request_id,
             control,
             error: CapabilityError { code, message },
+            governance,
         }
+    }
+
+    pub fn with_governance(mut self, evidence: HostGovernanceEvidence) -> Self {
+        match &mut self {
+            Self::Completed { governance, .. } | Self::Failed { governance, .. } => {
+                *governance = evidence
+            }
+            Self::Cancelled { .. } | Self::OutcomeUnknown { .. } => {}
+        }
+        self
     }
 
     pub fn cancelled(request_id: String, control: HostOperationControl) -> Self {

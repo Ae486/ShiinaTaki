@@ -5,23 +5,40 @@ import { Experimental_StdioMCPTransport } from "@ai-sdk/mcp/mcp-stdio";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { generateText, type ToolSet } from "ai";
 import { afterEach, describe, expect, it } from "vitest";
+import { MIGRATIONS } from "../db/migrations/index-list.ts";
+import { openDatabase, type Database } from "../db/sqlite.ts";
+import { createGovernancePolicyRepo } from "../governance/governance-policy-repo.ts";
+import { createGovernancePolicyService, type GovernancePolicyService } from "../governance/governance-policy-service.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import type { McpServerEntry } from "./mcp-config.ts";
 import { createMcpManager, type McpManager } from "./mcp-manager.ts";
 import type { McpConnect } from "./mcp-connect.ts";
 
 const FIXTURE = fileURLToPath(new URL("../testing/mcp-fixture.mjs", import.meta.url));
+const OWNER_HOST_ID = "11111111-1111-4111-8111-111111111111";
 
 const managers: McpManager[] = [];
-async function makeManager(entries: McpServerEntry[], connect: McpConnect): Promise<McpManager> {
+const dbs: Database[] = [];
+async function makeManager(
+  entries: McpServerEntry[],
+  connect: McpConnect,
+  governance?: { service: GovernancePolicyService; ownerHostId: string; legacyDeny?: (server: string, tool: string) => boolean },
+): Promise<McpManager> {
   const { logger, records } = createCaptureLogger();
-  const manager = await createMcpManager({ entries, logger, connect });
+  const manager = await createMcpManager({ entries, logger, connect, governance });
   managers.push(manager);
   return Object.assign(manager, { records });
 }
 afterEach(async () => {
   await Promise.allSettled(managers.splice(0).map((m) => m.close()));
+  for (const db of dbs.splice(0)) db.close();
 });
+
+function policy(): GovernancePolicyService {
+  const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+  dbs.push(db);
+  return createGovernancePolicyService(createGovernancePolicyRepo(db));
+}
 
 // A duck-typed in-memory MCPTransport (copy of the shipped mock pattern, research §4c) — never imported from dist.
 interface CallHandler {
@@ -130,7 +147,7 @@ describe("createMcpManager", () => {
     const manager = await makeManager([{ key: "files", config: { command: "x" } }], memConnect(transports));
 
     expect(Object.keys(manager.tools())).toEqual(["files_echo"]);
-    expect(manager.describe("files_echo")).toEqual({ serverName: "files", toolName: "echo" });
+    expect(manager.describe("files_echo")).toMatchObject({ serverName: "files", toolName: "echo" });
     expect(manager.describe("nope")).toBeUndefined();
   });
 
@@ -150,6 +167,138 @@ describe("createMcpManager", () => {
     };
     expect(result.ok).toBe(false);
     expect(result.code).toBe(-32601);
+  });
+
+  it("removes both identities when sanitized MCP tool keys collide", async () => {
+    const firstCalled: string[] = [];
+    const secondCalled: string[] = [];
+    const first = new InMemoryTransport([ECHO_TOOL], (msg) => {
+      firstCalled.push(msg.params.name);
+      return echoOk(msg);
+    });
+    const second = new InMemoryTransport([ECHO_TOOL], (msg) => {
+      secondCalled.push(msg.params.name);
+      return echoOk(msg);
+    });
+    const manager = await makeManager(
+      [
+        { key: "files.prod", config: { command: "first" } },
+        { key: "files_prod", config: { command: "second" } },
+      ],
+      memConnect(new Map([["files.prod", first], ["files_prod", second]])),
+    );
+
+    expect(Object.keys(manager.tools())).not.toContain("files_prod_echo");
+    expect(manager.describe("files_prod_echo")).toBeUndefined();
+    expect(firstCalled).toEqual([]);
+    expect(secondCalled).toEqual([]);
+  });
+
+  it("fails the default ask posture closed without calling the raw SDK closure", async () => {
+    const called: string[] = [];
+    const transport = new InMemoryTransport([ECHO_TOOL], (msg) => {
+      called.push(msg.params.name);
+      return echoOk(msg);
+    });
+    const manager = await makeManager(
+      [{ key: "files", config: { command: "x" } }],
+      memConnect(new Map([["files", transport]])),
+      { service: policy(), ownerHostId: OWNER_HOST_ID },
+    );
+
+    expect(await manager.tools().files_echo?.execute?.(
+      { text: "blocked" }, { toolCallId: "c1", messages: [] } as never,
+    )).toMatchObject({ ok: false, code: "APPROVAL_REQUIRED" });
+    expect(called).toEqual([]);
+  });
+
+  it("calls the existing SDK closure with the raw MCP name after an operator auto override", async () => {
+    const called: string[] = [];
+    const service = policy();
+    service.setCell({
+      key: "mcp-tool-call", level: "standard", posture: "auto", expectedPolicyGeneration: 1,
+    });
+    const transport = new InMemoryTransport([ECHO_TOOL], (msg) => {
+      called.push(msg.params.name);
+      return echoOk(msg);
+    });
+    const manager = await makeManager(
+      [{ key: "files", config: { command: "x" } }],
+      memConnect(new Map([["files", transport]])),
+      { service, ownerHostId: OWNER_HOST_ID },
+    );
+
+    await manager.tools().files_echo?.execute?.({ text: "allowed" }, { toolCallId: "c1", messages: [] } as never);
+    expect(called).toEqual(["echo"]);
+  });
+
+  it("uses raw server/tool sidecars as authority instead of the model-facing key", async () => {
+    const base = policy();
+    base.setCell({ key: "mcp-tool-call", level: "standard", posture: "auto", expectedPolicyGeneration: 1 });
+    const seen: Parameters<GovernancePolicyService["authorize"]>[0][] = [];
+    const service: GovernancePolicyService = {
+      ...base,
+      authorize(input) {
+        seen.push(input);
+        return base.authorize(input);
+      },
+    };
+    const transport = new InMemoryTransport([ECHO_TOOL], echoOk);
+    const manager = await makeManager(
+      [{ key: "files.prod", config: { command: "x" } }],
+      memConnect(new Map([["files.prod", transport]])),
+      { service, ownerHostId: OWNER_HOST_ID },
+    );
+
+    await manager.tools().files_prod_echo?.execute?.({ text: "ok" }, { toolCallId: "c1", messages: [] } as never);
+    const ref = manager.describe("files_prod_echo");
+    expect(ref).toMatchObject({ serverName: "files.prod", toolName: "echo" });
+    expect(seen[0]).toMatchObject({
+      identity: {
+        capabilityId: "mcp.tool.call",
+        ownerHostId: OWNER_HOST_ID,
+        subject: { subjectId: ref?.subjectId, revision: ref?.subjectRevision },
+      },
+      cellKey: "mcp-tool-call",
+    });
+    expect(ref?.subjectId).not.toContain("files_prod_echo");
+  });
+
+  it("changes the transitional subject revision when public server configuration changes", async () => {
+    const transports = new Map([
+      ["first", new InMemoryTransport([ECHO_TOOL], echoOk)],
+      ["second", new InMemoryTransport([ECHO_TOOL], echoOk)],
+    ]);
+    const first = await makeManager(
+      [{ key: "first", config: { command: "node", args: ["one.mjs"] } }],
+      memConnect(transports),
+    );
+    const second = await makeManager(
+      [{ key: "second", config: { command: "node", args: ["two.mjs"] } }],
+      memConnect(transports),
+    );
+
+    expect(first.describe("first_echo")?.subjectRevision).not.toBe(second.describe("second_echo")?.subjectRevision);
+  });
+
+  it("intersects legacy deny-only compatibility before the raw call", async () => {
+    const called: string[] = [];
+    const service = policy();
+    service.setCell({ key: "mcp-tool-call", level: "standard", posture: "auto", expectedPolicyGeneration: 1 });
+    const transport = new InMemoryTransport([ECHO_TOOL], (msg) => {
+      called.push(msg.params.name);
+      return echoOk(msg);
+    });
+    const manager = await makeManager(
+      [{ key: "files", config: { command: "x" } }],
+      memConnect(new Map([["files", transport]])),
+      { service, ownerHostId: OWNER_HOST_ID, legacyDeny: () => true },
+    );
+
+    expect(await manager.tools().files_echo?.execute?.(
+      { text: "denied" }, { toolCallId: "c1", messages: [] } as never,
+    )).toMatchObject({ ok: false, code: "GOVERNANCE_DENIED" });
+    expect(called).toEqual([]);
   });
 
   it("skips a server that fails to connect and keeps the others live (T5)", async () => {

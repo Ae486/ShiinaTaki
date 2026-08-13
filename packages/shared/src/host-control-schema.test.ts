@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   HOST_CONTROL_METHODS,
+  CapabilityErrorCodeSchema,
   CapabilityCancelSchema,
   CapabilityRespondParamsSchema,
   HostCatalogPublishParamsSchema,
@@ -17,6 +18,7 @@ const CONTROL = {
   connectionGeneration: 2,
   catalogGeneration: 3,
   policyGeneration: 1,
+  governanceProjection: { registryRevision: 1, descriptorRevision: 1, classifierRevision: 1, cells: [{ key: "screenshot", posture: "auto" as const }], digest: "a".repeat(64) },
   approvalGeneration: 1,
   capabilityId: "screenshot",
   inputDigest: "a".repeat(64),
@@ -37,6 +39,15 @@ describe("Host-control schemas", () => {
     });
   });
 
+  it("distinguishes fail-closed ask from an outright Host denial", () => {
+    expect(CapabilityErrorCodeSchema.options).toEqual([
+      "DENIED",
+      "APPROVAL_REQUIRED",
+      "EXEC_FAILED",
+      "UNSUPPORTED_CAPABILITY",
+    ]);
+  });
+
   it("accepts only ordered positive protocol ranges", () => {
     expect(HostProtocolRangeSchema.safeParse({ min: 1, max: 2 }).success).toBe(true);
     expect(HostProtocolRangeSchema.safeParse({ min: 2, max: 1 }).success).toBe(false);
@@ -47,13 +58,13 @@ describe("Host-control schemas", () => {
     const catalog = {
       hostId: HOST_ID,
       label: "Desktop",
-      protocolVersion: 1,
-      catalogSchemaVersion: 1,
+      protocolVersion: 2,
+      catalogSchemaVersion: 2,
       connectionGeneration: 2,
       catalogGeneration: 3,
       publishedAt: "2026-08-12T00:00:00.000Z",
       readiness: "ready",
-      capabilities: [{ capabilityId: "screenshot", execution: "read", cancellation: "cooperative" }],
+      capabilities: [{ capabilityId: "screenshot", execution: "read", cancellation: "cooperative", governance: { descriptorRevision: 1, classifierId: "fixed-risk", classifierRevision: 1 } }],
       workspaces: [],
       skills: [],
       mcpServers: [],
@@ -70,7 +81,7 @@ describe("Host-control schemas", () => {
   it("binds cancel and every terminal response to the full control tuple", () => {
     expect(CapabilityCancelSchema.safeParse({ requestId: HOST_ID, control: CONTROL, reason: "deadline_exceeded" }).success).toBe(true);
     expect(
-      CapabilityRespondParamsSchema.safeParse({ requestId: HOST_ID, control: CONTROL, state: "completed", output: {} })
+      CapabilityRespondParamsSchema.safeParse({ requestId: HOST_ID, control: CONTROL, state: "completed", output: {}, governance: { descriptorRevision: 1, classifierRevision: 1, cellKey: "screenshot", effectivePosture: "auto", constraint: "none" } })
         .success,
     ).toBe(true);
     expect(CapabilityRespondParamsSchema.safeParse({ requestId: HOST_ID, state: "cancelled" }).success).toBe(false);
@@ -81,5 +92,11 @@ describe("Host-control schemas", () => {
     expect(HostFrameAckSchema.safeParse({ accepted: true }).success).toBe(true);
     expect(HostFrameAckSchema.safeParse({ accepted: true, reason: "late" }).success).toBe(false);
     expect(HostFrameAckSchema.safeParse({ accepted: false }).success).toBe(false);
+  });
+
+  it("pins the canonical projection digest shared with Rust", async () => {
+    const projection = { registryRevision: 1, descriptorRevision: 1, classifierRevision: 1, cells: [{ key: "screenshot", posture: "auto" }] };
+    const { createHash } = await import("node:crypto");
+    expect(createHash("sha256").update(JSON.stringify(projection)).digest("hex")).toBe("f30ef0476cc356181b289cb892004ef9e1250257b9a2fd60bddefddf9b171210");
   });
 });

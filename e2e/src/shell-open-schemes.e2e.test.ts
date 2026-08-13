@@ -12,8 +12,8 @@ describe("shell-open rejects dangerous url schemes", () => {
         expect(result).toMatchObject({ ok: false, code: "DENIED" });
       }
       expect(stack.audit().map((line) => [line.capability, line.decision])).toEqual([
-        ["shell-open:blocked", "auto-denied"],
-        ["shell-open:blocked", "auto-denied"],
+        ["shell-open", "auto-denied"],
+        ["shell-open", "auto-denied"],
       ]);
     });
   });

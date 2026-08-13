@@ -3,7 +3,7 @@
   "name": "host-control-foundation",
   "title": "Host-control protocol and generation-safe capability routing",
   "description": "Define and implement stable Execution Host identity, protocol/catalog generation negotiation, explicit host-qualified routing, origin-bound responses, per-generation disconnect settlement, cancellation, and unknown-outcome semantics across shared/Core/Rust.",
-  "status": "in_progress",
+  "status": "review",
   "dev_type": null,
   "scope": "shared-core-rust-host-control-foundation",
   "package": null,
@@ -21,6 +21,6 @@
   "children": [],
   "parent": "08-10-skills-mcp-productization",
   "relatedFiles": [],
-  "notes": "First production batch. Keep planning until owner approval; before start, refresh main divergence and install only locked workspace dependencies in the T4 worktree if verification requires them.",
+  "notes": "Implementation, formal check, executable spec update, scoped commit, and single-Node process smoke are complete. The owner approved deferring the real simultaneous two-Node process harness to 08-12-extension-discovery-integration as a mandatory convergence gate. Keep this child in review; do not finish or archive it before that evidence and owner closeout.",
   "meta": {}
 }

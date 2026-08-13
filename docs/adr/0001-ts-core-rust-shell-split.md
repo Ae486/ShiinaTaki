@@ -9,3 +9,12 @@ Considered and rejected:
 - Embedding OpenClaw as backend: Windows support is second-class (WSL2 recommended), it carries 18+ channel adapters we do not need, and its Node process holds full user privileges — our design requires system actions to pass a native permission boundary.
 
 Consequence: we accept a Node sidecar's baseline memory (~60-100MB) in exchange for ecosystem velocity. Overall target stays 150-250MB with rendering active.
+
+---
+
+**Amendment 2026-08-13 — governance authority split:** the process split does not make the Rust Shell the global
+policy authority. Core now owns the durable global Permission Level, common capability descriptors, sparse operator
+overrides, and `policyGeneration`. A Shell/Execution Host still owns trusted argument classification, the final OS
+execution boundary, local/managed hard constraints, and audit, and it may only preserve or tighten the complete Core
+projection bound to the current Host/connection/catalog generation. Core-local, MCP, Skill-mediated, and Host actions
+therefore consume one canonical governance model without moving OS execution into TypeScript.

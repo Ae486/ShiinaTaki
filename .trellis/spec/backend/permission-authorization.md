@@ -1,140 +1,323 @@
-# Permission Authorization Granularity
+# Canonical Capability Governance and Permission Authorization
 
-How the Rust Permission Gate keys an authorization decision. Get this wrong and a persisted "Always" silently
-escalates into actions the user never saw — the A1 defect (task `shell-open-persist-fix`).
+Core owns the profile-wide durable policy. An Execution Host owns trusted local classification, final Host-side
+execution, stricter local or managed constraints, and audit. These are two parts of one governance path, not competing
+permission systems.
 
-## The rule: authorize on what determines risk, never on the capability name alone
+Posture ordering is `auto < ask < deny`. A Host may preserve or increase that ordering; it may never reduce it.
+Standard MCP and portable `SKILL.md` packages remain ecosystem formats. Their adapters resolve canonical identity but
+do not create extension-specific authority.
 
-Split every capability into two kinds by asking *"does the argument change the risk?"*
+## Scenario: Global policy, Host projection, and final enforcement
 
-| Kind | Example | Authorization key | Memory |
-|------|---------|-------------------|--------|
-| **Fixed-risk** — the action is the same every call | `screenshot`, `process-list`, `clipboard-read`, `clipboard-write` | capability **name** | once / session / always (name-keyed) **+ Level-projected** (T2b batch D: bare name is its cell key, ridden through `evaluate_by_class`) |
-| **Arg-determined risk** — the argument sets the danger | `exec` (command), `shell-open` (target) | `(capability, argClass)` | per class; a safe class may persist, a risky one never does |
+### 1. Scope / Trigger
 
-Only add name-keyed persistence to a fixed-risk capability. A capability whose argument can move it from "open a
-url" to "run cmd.exe" MUST authorize on a derived class, not its name.
+Apply this contract when changing any of the following:
 
-## Constraints for arg-determined capabilities
+- capability identity, descriptor registry, factory posture, override mode, or classifier revision;
+- `permission.levelGet`, `permission.levelSet`, `permission.cellsGet`, or `permission.cellSet`;
+- governance SQLite migrations, registry reconciliation, or `policyGeneration`;
+- Core/MCP/Skill/Host tool assembly or execution wrappers;
+- Host catalog governance metadata, operation control, projection digest, classification, terminal evidence, or audit;
+- legacy `permission-level.json`, `gate-decisions.json`, or `mcp-approvals.json` compatibility;
+- the Home Permission Level or advanced-cell surface; or
+- the later canonical Approval challenge/resume lifecycle.
 
-- **Classify in the Rust Gate, fail-closed.** The class is derived from the argument (ADR 0002), never trusted from
-  the wire; a malformed/ambiguous argument resolves to the *riskier* class, never a silent one. Control chars or any
-  input that could make the executed target diverge from the rendered one → hard-blocked before classification. A
-  class key with no governance cell registered is a wiring bug → deny + warn, never ask/allow (same fail-closed
-  stance, `Gate::evaluate_by_class`).
-- **A persisted allow on one class NEVER authorizes another.** `shell-open:url-safe = Always` must not permit a
-  `shell-open:local-exec` open. Decision memory keys on `(capability, argClass)` so cross-class leakage is
-  structurally impossible.
-- **Risky classes are never-persisted and store-immune.** No `Always` record is ever written for them (any human
-  allow is once-only), and a seeded/tampered store entry under their key is ignored — no stored grant, legacy
-  name-keyed or class-keyed, can ever silence them. Their ask floor holds in `strict`/`standard`; the
-  owner-ratified `relaxed` (yolo) tier auto-runs them — still audited, still never persisted (T2b prd 2026-07-20,
-  superseding the earlier "always ≥ ask in every mode" wording). The tier-immovable region is the deny-by-default
-  floor below (§ Permission Level). The dialog always shows the concrete argument (never audited).
-- **Safe class → silent after Always; risky class → always-ask below relaxed.** That is the whole point — routine
-  safe actions don't nag, dangerous ones can't be rubber-stamped once and forgotten.
+Never add a built-in-only, MCP-only, Skill-only, or Shell-only policy store. Loading a Skill, listing an MCP tool, or
+authenticating a Host does not authorize an action.
 
-Grounding: unanimous across Claude Code (`WebFetch(domain:x)`), Codex sandbox roots, Cline command-globs, OpenClaw
-binary allowlist, Hermes bypass-immune rules. This is industry consensus, not a local invention.
+### 2. Signatures
 
-> Citation keys below ([OC-*] OpenClaw, [CC-*] Claude Code, [CX-*] Codex, [H-*] Hermes) resolve in the T2b
-> research bank: task `07-20-capability-governance/research/ra-permission-capability-governance.md` §0.
+#### Shared canonical identity and descriptor
 
-## Permission Level: a three-tier registry-driven projection
+```typescript
+interface CanonicalCapabilityIdentity {
+  capabilityId: string;
+  ownerHostId: string; // UUID
+  subject?: { subjectId: string; revision: string };
+}
 
-`PermissionLevel = strict | standard | relaxed` (zod enum in `@taki/shared`, serde-mirrored; CONTEXT.md owns the
-naming — the mechanism is the unanimous ordered-preset pattern [OC-PM][CC-PM][CX-SEC]). Default `standard`.
+interface CapabilityGovernanceDescriptor {
+  capabilityId: string;
+  descriptorRevision: number;
+  subjectRequired: boolean;
+  classifier: {
+    authority: "core" | "host";
+    classifierId: string;
+    classifierRevision: number;
+  };
+  cells: Array<{
+    key: string;
+    levels: { strict: Posture; standard: Posture; relaxed: Posture };
+    approvalMemory: "rememberable" | "once-only";
+    overrideMode: "ordinary" | "second-confirm" | "immutable";
+  }>;
+}
 
-- **A Level is a PROJECTION over per-cell postures (auto/ask/deny), never a second enforcement path or a stored
-  authority.** Every request still crosses the one Gate; the Level only selects each cell's baseline posture.
-  Source: OpenClaw "approvals can only tighten… never loosen" [OC-EA]; Claude Code "Modes set the baseline. Layer
-  permission rules on top." [CC-PM].
-- **The projection is registry-driven, never a hard-coded per-capability switch.** Each capability declares a
-  `CapabilityGovernance` descriptor (its cells' per-Level postures + its floor set); `project_level` folds over
-  the registry (`gate/governance.rs`). Adding a capability = one descriptor + one `factory()` entry; adding a
-  Level = one enum member + a posture per cell. Source: research §5.1/§5.3 [OC-POL][OC-PM].
-- **Stricter-wins composition.** Effective decision = the stricter of (Level projection, the user's explicit
-  stored verdict, the floor). Concretely: a stored `Never` denies even an auto tier; a Level `deny` consults no
-  store (a stored `Always` cannot lift it); the floor precedes everything. Source: [OC-EA] tighten-only;
-  [CC-PM] deny/ask rules survive every mode.
-- **`relaxed` = yolo, not `full`.** Everything outside the deny-by-default floor runs with no prompt — but every
-  tier still writes the audit log, and `relaxed` cannot touch the floor. Source: Hermes hardline-below-yolo
-  [H-APR:333-357]; Claude Code keeps a circuit breaker even in bypass [CC-PM]. We deliberately reject the
-  OpenClaw `full` / Codex `danger-full-access` no-floor shape because Windows v1 has no sandbox blast-radius
-  backstop (ADR 0002; research §Caveats).
-- **The Level is frozen out of the agent's reach.** Read once from `permission-level.json` (node data dir) at
-  `build_node`; missing/corrupt/unknown → `standard` (fail-SAFE, never `relaxed`); the file shape is the wire
-  shape (`PermissionLevelState`). Only the operator surface (`permission.levelSet`, panel #23) writes it — the
-  agent has no path. Source: Hermes yolo-frozen-at-import [H-APR:32-35].
+type Posture = "auto" | "ask" | "deny";
+```
 
-## Level × scope × allowlist are ORTHOGONAL (do not conflate)
+`CANONICAL_GOVERNANCE_REGISTRY` in `@taki/shared` is code-owned descriptor truth. SQLite stores operator choices, not
+copies of descriptors. `capabilityId`, `ownerHostId`, and the optional stable subject binding are authority; display
+names, paths, sanitized model keys, MCP annotations, and Skill metadata are not.
 
-Three layers, composed stricter-wins; the existing once/session/always store and the exec allowlist are UNCHANGED
-(T2b prd, owner-ratified):
+#### Operator API
 
-1. **Classification** (allowlist / scheme / path-root) → which `(capability, argClass)` cell this request is.
-2. **Level projection** → that cell's baseline posture (auto/ask/deny) in the active tier.
-3. **once/session/always** → the memory scope of the human's answer, ONLY when layer 2 says ask.
+```typescript
+permission.levelGet({})
+  -> { level, policyGeneration, registryRevision }
 
-A Level is not a scope and a scope is not a Level: switching tiers never edits the store, and answering a dialog
-never moves the tier. Never-persisted cells produce no `always` record in any tier, so no "old always vs new
-floor" conflict can exist. Source: [CC-PM] modes-baseline + rules-on-top layering; the scope store is D7.
+permission.levelSet({ level, expectedPolicyGeneration })
+  -> { level, policyGeneration, registryRevision }
 
-## The deny-by-default floor
+permission.cellsGet({})
+  -> { level, policyGeneration, registryRevision, cells[] }
 
-- **The floor is SET MEMBERSHIP, not a code path** (research §5.4): a class key listed in a descriptor's
-  `floor_classes` is denied in EVERY tier, checked before any store consult (a seeded `Always` under a floor key
-  is inert). No per-capability branching in the gate. Source: Hermes hardline-as-a-list [H-APR:417-454]; Claude
-  Code circuit-breaker set [CC-PM].
-- **The factory floor rows** (prd table): sensitive sub-targets (`.env*`, `id_rsa`/private keys, `.git`, `.ssh`)
-  [CX-PERM deny-wins-over-write; H-EDIT:45-48,192-197]; the self-escalation surface (gate/policy/Level/permission
-  files) [H-APR:262-275 "config IS policy"]; catastrophic commands (`rm -rf /`, `mkfs`, `format`) [CC-PM
-  circuit breaker even in bypass]. Registered on the same seam (all landed): `shell-open:blocked` (A),
-  `exec:blocked` (B), `fs-write:sensitive` + `fs-write:self-escalation` (C).
-- **User-configurable via the panel ONLY; agent-immovable.** A deny-by-default cell may be changed over the
-  operator surface (`permission.cellSet` carrying the `secondConfirm` marker — a prominent re-ask, not a plain
-  toggle); the agent has NO code path that writes a decision, flips a Level, or edits the floor. Immovability is
-  against the agent (anti-injection / anti-model-error), not against the user (prd, owner-ratified 2026-07-20).
-- **Managed-floor seam reserved.** A future managed deployment may pin a maximum Level or freeze floor cells so
-  the user cannot cross them either; v1 personal builds do not enable it — the shapes must not preclude it.
-  Source: Claude Code `disableBypassPermissionsMode` [CC-SET]; Codex managed `requirements.toml` [CX-CFG].
+permission.cellSet({
+  key,
+  level,
+  posture: "auto" | "ask" | "deny" | null,
+  expectedPolicyGeneration,
+  secondConfirm?: boolean,
+}) -> { policyGeneration, registryRevision, cell }
+```
 
-## NL-authorization red line (conversational grants)
+All four methods are operator-only. `null` clears a sparse override. Reads are idempotent/read-only deadline calls;
+writes are side-effecting calls whose timeout has an unknown outcome and must not be replayed automatically.
 
-1. **A grant expressed in conversation is inert until it passes the ordinary Approval flow.** "Yes, always allow
-   screenshots" is a *signal to raise the Approval dialog*, never itself a grant — decision memory is written
-   ONLY by the gate's human-answer arm, keyed `(capability[, argClass])`, exactly as a dialog answer. Source:
-   [CC-PM] deny/ask apply in every mode; Hermes permanent allowlist written only inside the human-answer branch
-   [H-APR:2846-2851].
-2. **The agent has no tool that writes a decision, flips a Level, edits the policy file, or lifts a Privacy Pause.**
-   The policy/Level store is operator-role only (mirror of `approval.respond` being an operator method), and so is
-   the whole `perception.*` surface (T3b): `perception.pauseSet` is the ONE production writer of the pause state
-   (source-swept by `privacy-pause-writer.test.ts`) — an agent that could resume its own observation would be
-   self-escalating exactly as one that could flip a Level. Source: Hermes "config IS policy… agent could flip
-   approvals.mode=off and bypass" — both file-write and shell paths denied [H-APR:262-275]; yolo frozen at import
-   [H-APR:32-35].
-3. **Level / bypass state is frozen out of the agent's reach** — read at load, never from a value the agent can
-   influence within a turn. Source: [H-APR:32-35].
-4. **Injection-amplification is assumed.** A conversational grant is untrusted: it cannot widen scope beyond what
-   the dialog shows, and a denied action tells the model not to retry/rephrase/re-route. Source: Hermes
-   smart-review XML-delimiting + "do NOT rephrase… via a different path" [H-APR:2585-2602, 2791-2802].
+#### Core persistence
 
-Pinned by two RED-proof tests in `gate.rs`: `a_conversational_grant_is_inert_without_an_approver_allow` (an
-agent-injected "always allow" detail with a human Deny writes nothing and allows nothing) and
-`decision_memory_has_exactly_one_production_writer` (a source sweep: `.remember(` has exactly one production call
-site — the gate's human-answer arm). Both verified red under a flipped guard before landing.
+Migration `014-governance-policy` creates:
 
-## Registered cells & the batch B/C/D contracts
+```sql
+governance_policy(
+  singleton_id = 1,
+  level,
+  policy_generation,
+  registry_revision,
+  updated_at
+)
 
-The authoritative per-cell factory postures live in `gate/governance.rs::factory()` (defaults; #23 overrides them per prd — do not duplicate the table here, it drifts). Registered capabilities:
+governance_cell_overrides(
+  cell_key,
+  level,
+  posture,
+  descriptor_revision,
+  updated_at,
+  PRIMARY KEY(cell_key, level)
+)
+```
 
-- **shell-open** (A): `url-safe` (persist), `local-file` / `local-exec` (never-persist, ask below `relaxed`); floor `blocked`.
-- **exec** (B): `simple-allowlisted` (auto below `relaxed`; `strict:ask`), `compound` / `shell-reentry` / `allowlist-miss` (ask below `relaxed`); floor `blocked` (the catastrophic blocklist). **exec keeps its OWN gate front door `evaluate_exec`** — it is the ONLY capability whose command rides the AUDIT line (ruling 9); `evaluate_by_class` audits `command:None`, so exec routes through the governance registry (`is_floor`→`cell`→`posture`) while keeping `audited_exec(Some(command))` on every arm and NEVER touching decision memory (ruling 8: exec ask is always once-only). Operator `Mode::Deny` → `ExecClass::Disabled` → direct deny.
-- **fs-write** (C — FOUNDATION, no live out-of-Workspace handler yet, marked "not in production path"): `in-workspace` (auto), `outside-root` / `skill-hook` (never-persist, ask below `relaxed`), the DYNAMIC `dir-root:<root>`; floors `sensitive` (`.env*` / private keys / `.git` / `.ssh` — ANY path component) + `self-escalation` (permission-surface files: gate-decisions / exec-policy / permission-level.json). Classifier precedence is floors-FIRST — a `.env` inside an authorized root is still the sensitive floor (stricter-wins).
-- **fixed-risk** (D + T3a + T3b): `screenshot` / `screenshot-ambient` / `process-list` / `clipboard-read` / `clipboard-write` / `foreground-window` — name-keyed cells, Level-projected by riding `evaluate_by_class` with the bare capability name as the cell key. Factory default `{strict:ask, standard:ask, relaxed:auto}`, `persist:true`. **`standard:ask` DEVIATES from the prd table's `auto`** (owner-ratified 2026-07-21): a gated/sensitive capture or read must not auto-run at the default tier; `relaxed`=yolo still runs them with no prompt — closing the gap where fixed-risk previously prompted even under yolo. User-editable via #23. **`foreground-window` (T3a) is POLLED — ask-over-poll etiquette**: the Core sampler raises at most ONE approval dialog per session (first tick under an ask posture); a session/always answer silences later ticks via the ordinary DecisionStore, a deny (explicit or dialog-timeout) stops the sampler for the rest of the session (quiet — no per-tick re-prompt, Recall off-is-silent stance), and its `detail()` line must keep disclosing that window TITLES are sampled (informed grant). **`screenshot-ambient` (T3b) is a SEPARATE cell from `screenshot` on purpose** (prd ruling 1): identical postures, but a grant on the on-demand cell must never authorize perpetual background capture — the A1-class escalation this spec exists to prevent. Same ask-over-poll etiquette, plus its `detail()` must disclose that capture REPEATS in the background. "Default OFF" is NOT expressed as a posture (a posture decides how a request is authorized, never whether one is made): the Core owns the off state and does not schedule the sampler at all, so the cell is simply never reached. **Ask-over-poll binds every POLLED capability, present and future** — it is a rule, not a per-cell exception: what triggers it is that a Core LOOP drives the request instead of a model turn, and any such cell must also disclose in `detail()` what the loop keeps observing (a name-only dialog understates a standing grant). The bound is per LOOP, not per cell — a deny is never remembered (`remembered_or_ask` writes only on allow), so when two loops share a cell (T3b's ambient sampler re-screens `foreground-window` immediately before each capture) a denying user can see one dialog from each, after which BOTH loops have stopped themselves for the session.
+The repository owns compare/validate/write/generation increment inside one synchronous SQLite transaction.
 
-**Dynamic per-target keys (dir-root).** A key may carry a free-form third segment (`fs-write:dir-root:C:\A`). Its PROJECTION cell is the two-segment FAMILY (`fs-write:dir-root`): `GovernanceRegistry::cell()` tries an exact match FIRST, then falls back to the family for a three-segment key (static keys unaffected; a two-segment miss stays `None`). Its DECISION MEMORY keys on the FULL three-segment key, so an `Always` on one root NEVER authorizes another (**R1**, structural). `dir-root` is `persist:true` (a specific root may be granted `always`); capping the offered scope to `session` is a #23 dialog concern (D41), not a Core cap.
+#### Host projection and evidence
 
-**`relaxed` overrides exec `Mode::Full` (not `Mode::Deny`).** The exec-policy `Mode` (deny / allowlist / full) sets the CLASS; the Level sets the POSTURE. At `relaxed`, a `Mode::Full` command projects to auto (the escalate family is `relaxed:auto`) — yolo runs everything outside the deny floor, and `Mode::Full`'s "always ask" is not a floor (owner-ratified 2026-07-21). `Mode::Full` still asks at `strict`/`standard`. `Mode::Deny` is the separate operator-off (`ExecClass::Disabled`, deny in every tier).
+```typescript
+interface HostOperationControl {
+  runId: string;
+  operationId: string;
+  attemptId: string;
+  targetHostId: string;
+  connectionGeneration: number;
+  catalogGeneration: number;
+  policyGeneration: number;
+  governanceProjection: {
+    registryRevision: number;
+    descriptorRevision: number;
+    classifierRevision: number;
+    cells: Array<{ key: string; posture: Posture }>;
+    digest: string; // lowercase SHA-256 of canonical JSON payload
+  };
+  approvalGeneration: number;
+  capabilityId: string;
+  inputDigest: string;
+  idempotencyKey: string;
+  dispatchedAt: string;
+  deadlineAt: string;
+  expiresAt?: string;
+}
 
-**D3 argv[0] resolution — accurate threat model.** Rust `std::process::Command` ALREADY excludes the child cwd for a bare name (rust#87704 / CVE-2021-3013), so the classic bare-name cwd hijack is std-mitigated. The D3 fix (`capabilities_impl/exec/resolve.rs`) closes the LIVE residuals: a **relative** `argv[0]` (`./git`) whose basename matches the allowlist, plus defense-in-depth — spawn the cwd-EXCLUDED-PATH-resolved ABSOLUTE path so classify and spawn refer to the same binary. See the `resolve.rs` header; research §1.4/§4 carry the corrected framing (the earlier "`CreateProcess` searches cwd before PATH for `Command::new`" premise was inaccurate for our spawn path).
+interface HostGovernanceEvidence {
+  descriptorRevision: number;
+  classifierRevision: number;
+  cellKey: string;
+  effectivePosture: Posture;
+  constraint: "none" | "legacy-deny" | "local" | "managed" | "hard";
+}
+```
+
+Canonical projection JSON contains exactly `registryRevision`, `descriptorRevision`, `classifierRevision`, and the
+complete lexically sorted `cells` array. TypeScript and Rust both compute SHA-256 over the same UTF-8 bytes.
+
+### 3. Contracts
+
+#### Core policy authority
+
+- The default durable level is `standard`; `policyGeneration` and `registryRevision` are positive integers.
+- A material level or cell mutation increments `policyGeneration` exactly once in the same transaction. A validated
+  no-op returns the current snapshot without incrementing.
+- A registry revision upgrade reconciles stored overrides and increments generation before new execution is accepted.
+  A database registry revision newer than the running binary fails startup rather than downgrading semantics.
+- The pure evaluator validates canonical identity, subject binding, registry/descriptor/classifier revisions, cell,
+  active level, override identity, and deny constraints. Unknown or mismatched input resolves fail-closed.
+- Built-in Core tools have explicit bindings. An unregistered Core tool with an executable closure is wrapped as
+  `GOVERNANCE_DENIED`, not left as an invisible bypass.
+
+#### Classification and Host enforcement
+
+- A descriptor declares who classifies. Core classifies fixed/Core-local families. Rust remains the trusted classifier
+  for `exec`, `shell-open`, and other Host-owned argument-sensitive actions; do not duplicate those security parsers in
+  TypeScript.
+- Core sends every registered cell for the selected Host capability. The Host rejects missing, extra, duplicate,
+  unsorted, unknown, or revision-incompatible projections.
+- The Host binds acceptance to Host identity, connection generation, catalog generation, capability, policy
+  generation, projection digest, and sealed input digest. It tracks `(policyGeneration, digest)` per capability in a
+  live connection lineage. A lower generation or different same-generation content for that capability is rejected.
+- Host effective posture is the stricter of the projected cell and current legacy/local/managed/hard constraints.
+  Execution occurs only for effective `auto`. Effective `ask` returns structured `APPROVAL_REQUIRED`; effective
+  `deny` returns a denial. Neither executes.
+- Terminal evidence names a projected cell and matching descriptor/classifier revisions. Core rejects evidence that is
+  looser than the projection, omits a claimed stricter constraint, or reports successful execution under non-`auto`.
+- Arguments, commands, decision keys, full projections, and tool output are sensitive control data. Ordinary logs and
+  bounded evidence must not contain them. Exec command audit remains the dedicated Shell audit exception.
+
+#### Adapter convergence
+
+- **Core tools:** trusted construction binds the model-facing tool key to one canonical identity and cell.
+- **MCP:** `@ai-sdk/mcp` still owns standard transport, discovery, schema conversion, and the raw-name execution
+  closure. A sidecar maps it to `mcp.tool.call` plus a stable Host-qualified subject. A sanitized-key collision removes
+  the ambiguous tools fail-closed.
+- **Skills:** `load_skill` is a confined explicit-auto capability for reading a validated standard package. The returned
+  Markdown is untrusted procedure. It cannot transfer posture or grant an underlying Core, MCP, or Host action.
+- **Host capabilities:** catalog descriptors publish classifier compatibility only. The Host never publishes an
+  authoritative posture to Core.
+
+#### Legacy compatibility
+
+- Missing legacy state contributes no extra constraint.
+- Existing Node `permission-level.json` is read-only compatibility input. `strict` or `standard` may tighten the Core
+  level; `relaxed` never widens it. Malformed/unreadable input fails the affected Host closed.
+- Existing Shell `never` decisions remain exact Host-scoped deny constraints. Shell `always`, session decisions, local
+  prompts, and decision writes are not production authority.
+- Existing MCP exact `never` may tighten only an unambiguous exact server/tool binding. MCP `always` is inert pending
+  explicit reconfirmation by the later canonical Approval lifecycle.
+- Do not delete legacy files until deny mapping, restart behavior, rollback evidence, and later retirement criteria are
+  verified.
+
+#### Home operator surface
+
+- Settings renders the Core Permission Level before generic config knobs and a collapsed-by-default advanced cell list
+  grouped by Core-returned `capabilityId`.
+- Home parses every response through `@taki/shared`, refetches for every authenticated `WsClient` generation, and
+  ignores late reads or mutation completions from retired clients.
+- At most one permission mutation is in flight. Mutations are never replayed after timeout/reconnect. A conflict
+  refetches Core truth.
+- Permission snapshots stay in component/controller memory. They never enter `localStorage`, Zustand persistence,
+  `useCachedFetch`, or the page-cache allow-list.
+- Home renders factory, override, effective posture, override mode, generation, loading/reconnecting/read/validation
+  failure, saved, conflict, second-confirm, reset, and immutable states. It may state globally that Hosts can tighten;
+  it must not invent a per-row Host constraint that Core did not return.
+
+#### Slice 3 / canonical Approval seam
+
+- Slice 3 contains no durable canonical Approval decision and no second prompt/writer. `ask` is intentionally
+  fail-closed.
+- Slice 4 owns the one request/respond, once/session/always, durable decision, `approvalGeneration`, list/revoke,
+  challenge/resume, and background disclosure lifecycle.
+- Slice 3 and Slice 4 may be reviewed separately but are not separate release milestones.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required behavior |
+| --- | --- |
+| Unknown capability, subject, revision, classifier, cell, or duplicate registry identity | Fail closed; never execute |
+| Stale `expectedPolicyGeneration` | JSON-RPC `POLICY_CONFLICT` with current generation; Home refetches |
+| Material immutable-cell override | JSON-RPC `GOVERNANCE_REFUSED` reason `immutable` |
+| Relaxing a `second-confirm` cell without proof | `GOVERNANCE_REFUSED` reason `second-confirm-required` |
+| Validated no-op or factory-equivalent override | Return current state; generation unchanged |
+| Host catalog descriptor revision/classifier mismatch | Refuse route as incompatible; do not dispatch |
+| Missing/extra/unsorted projection cell or invalid digest | Host rejects; no execution/audit growth |
+| Policy generation lower than accepted lineage | Host rejects as stale; no replay |
+| Same capability + generation + different valid digest | Host rejects lineage tampering; no execution |
+| Host evidence revision/cell/posture invalid or wider than projection | Core converts terminal result to denial |
+| Effective Host posture is `ask` | `APPROVAL_REQUIRED`, no local prompt, no execution |
+| Effective Host posture is `deny` | Denied, audited where applicable, no execution |
+| Legacy allow/session value | Ignore as authority |
+| Exact legacy `never` | Tighten matching action only |
+| Legacy file malformed/unreadable where a denial may exist | Affected adapter/Host fails closed with sanitized diagnostic |
+| Permission read snapshot has inconsistent level/generation/revision | Home validation failure; do not render it as authority |
+| Permission mutation timeout or client replacement | Release busy state truthfully; never replay; refetch only when safe/explicit |
+
+### 5. Good / Base / Bad Cases
+
+- Good: an operator changes `standard -> relaxed` with generation N; Core commits generation N+1 once, a later Host
+  request carries the complete N+1 projection, Rust classifies locally, executes only `auto`, and returns evidence that
+  Core verifies.
+- Good: a Host legacy `never` tightens projected `auto` to `deny`; Core receives stricter evidence and the action never
+  executes. Clearing a Core override at the next generation restores the factory posture without importing a legacy
+  allow.
+- Base: a second Home window writes from stale generation N after N+1 exists. Core returns `POLICY_CONFLICT`; the stale
+  window refetches and does not replay its mutation.
+- Base: an effective `ask` returns `APPROVAL_REQUIRED` and stops. This is secure but not independently releasable until
+  Slice 4 installs canonical Approval.
+- Bad: use `mcpServer_toolName`, a Skill path, a display label, or an annotation as the durable grant key.
+- Bad: keep the old Shell prompt/decision writer while also adding Core policy; that is a third authorization system.
+- Bad: accept a Host-provided posture, omit projection cells, default generation to `1`, cache policy in Home, or copy
+  the Rust exec/shell-open classifier into TypeScript.
+
+### 6. Tests Required
+
+- Shared: strict identity/descriptor/operator/projection/evidence schemas; registry collisions; canonical sort/digest;
+  structured `GOVERNANCE_DENIED` and `APPROVAL_REQUIRED`; TypeScript/Rust protocol fixture parity.
+- Core repository/service: migration/restart, atomic single generation increment, no-op, conflict, reset, registry
+  upgrade/downgrade, immutable/second-confirm, every factory cell/level, unknown identity/revision/cell, and stored
+  override validation.
+- Adapter tests: explicit Core bindings and unknown-tool denial; MCP raw-name closure preservation, sanitized-key
+  collision, exact legacy deny, no legacy allow; Skill load confinement and no grant transfer.
+- Host/Rust: complete projection validation, canonical digest, per-capability lineage, stale generation, same-generation
+  tampering, input digest recomputation, trusted cell classification, stricter composition, exact legacy deny,
+  malformed legacy state, `ask` fail-closed, no execution under non-`auto`, and bounded evidence.
+- Home: typed WS schema boundaries, permission reads classified read-only, writes unknown-outcome, generation
+  replacement/refetch, retired-result suppression, conflict refetch, second confirm, immutable, reset, one mutation at
+  a time, validation/read/reconnect states, and a source/cache regression proving no permission persistence.
+- Real process: Core + external `taki-node` catalog compatibility, `ask` fail-closed, relaxed auto, Core deny, Host
+  legacy deny, override reset, higher generation replacement, stale N-1 projection rejection, and same-N projection
+  tampering with a recomputed valid digest. Assert no execution/audit growth, one request, no replay, bounded caller
+  settlement, relay/process/temp cleanup, and no sensitive frame logging.
+- Full gates: `pnpm -r typecheck`, root `pnpm lint`, `pnpm -r test`, full E2E, Rust tests, Clippy `-D warnings`, locked
+  `taki-node` build, and `git diff --check`.
+
+### 7. Wrong vs Correct
+
+```typescript
+// Wrong: presentation identity becomes authority and the broker invents policy state.
+const grantKey = `${sanitizedServer}_${toolName}`;
+const control = { capabilityId, policyGeneration: 1 };
+
+// Correct: a trusted adapter resolves canonical identity; Core supplies durable policy and complete projection.
+const identity = {
+  capabilityId: "mcp.tool.call",
+  ownerHostId: coreHostId,
+  subject: { subjectId: stableServerToolId, revision: configRevision },
+};
+const dispatch = governance.hostDispatchPolicy(capabilityId);
+const control = {
+  capabilityId,
+  policyGeneration: dispatch.policyGeneration,
+  governanceProjection: dispatch.projection,
+};
+```
+
+```rust
+// Wrong: Host-local prompt or stored allow widens the Core projection.
+let execute = local_prompt(input).await == Allow;
+
+// Correct: classify locally, compose stricter-only, and execute only auto.
+let cell = classify_trusted(input)?;
+let effective = stricter(projected(cell)?, local_constraints(input)?);
+match effective {
+    Auto => execute_and_audit(input),
+    Ask => approval_required_without_execution(cell),
+    Deny => denied_without_execution(cell),
+}
+```

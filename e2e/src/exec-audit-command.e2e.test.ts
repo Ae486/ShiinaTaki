@@ -8,6 +8,7 @@ describe("audit records command for exec, absent for non-exec", () => {
     await withStack(
       { devTrigger: true, autoApprove: "allow-once", execPolicy: { mode: "allowlist", allowlist: ["hostname"] } },
       async (stack) => {
+        await stack.setPermissionLevel("relaxed");
         expect(await stack.l1("exec", { command: "hostname" })).toMatchObject({ ok: true });
         expect(await stack.l1("screenshot", {})).toMatchObject({ ok: true });
 

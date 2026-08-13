@@ -3,7 +3,7 @@
   "name": "governance-authority",
   "title": "Core governance authority and permission projection",
   "description": "Move global Permission Level, common governance cells, effective policy, and durable authority to Core while preserving stricter Host-local floors and final enforcement, with minimal Home global/advanced controls.",
-  "status": "planning",
+  "status": "review",
   "dev_type": null,
   "scope": "shared-core-rust-home-governance-authority",
   "package": null,
@@ -21,6 +21,6 @@
   "children": [],
   "parent": "08-10-skills-mcp-productization",
   "relatedFiles": [],
-  "notes": "Depends on the checked host-control foundation. Recheck main and shared/migration hotspots before implementation.",
+  "notes": "Implementation, high-effort implement reports, xhigh formal checks, executable spec/ADR/HANDOFF convergence, full workspace gates, and real Core + external taki-node governance smokes are complete. Stale generation and same-generation valid-digest tampering are proven with a test-only loopback relay. Keep this child in review: Slice 3 intentionally fails closed on ask and must not be released before 08-12-approval-productization; no finish/archive or push has been authorized.",
   "meta": {}
 }

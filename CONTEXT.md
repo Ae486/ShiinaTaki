@@ -43,15 +43,22 @@ _Avoid_: idle animation (the engine's built-in breathing/blinking), screensaver
 ### Architecture
 
 **Agent Core**:
-The headless TypeScript runtime that thinks: providers, agent loop, tools, MCP, skills, memory, heartbeat. It never touches the system directly.
+The headless TypeScript runtime that thinks and owns canonical runtime state: providers, agent loop, tools, MCP,
+Skills, memory, schedules, and the global capability-governance policy. It does not execute Host-owned OS actions;
+those are routed to the owning Execution Host. Core-local capabilities and operator-configured MCP transports remain
+inside the Core boundary under the same canonical governance model.
 _Avoid_: backend, server, brain
 
 **Core Authority**:
-The one Agent Core instance that currently owns a user's runtime state, policy, Approval authority, and active connection profile. A profile has exactly one active Core Authority at a time; switching between local and remote Core is an explicit rebind, never an automatic fallback or data merge.
+The one Agent Core instance that currently owns a user's runtime state, durable global Permission Level/common policy,
+canonical Approval authority, and active connection profile. A profile has exactly one active Core Authority at a
+time; switching between local and remote Core is an explicit rebind, never an automatic fallback or data merge.
 _Avoid_: primary host, execution host, server
 
 **Shell**:
-The Rust (Tauri) process that acts: window management, system capabilities, and the Permission Gate. The only component allowed to touch the OS.
+The Rust (Tauri) Execution Host process that acts: window management, system capabilities, trusted argument
+classification, final Host-local enforcement, and audit. It is the only desktop component allowed to execute those OS
+actions, but it is not the global policy writer and may only preserve or tighten the Core projection.
 _Avoid_: host, native layer
 
 **Pet UI**:
@@ -109,19 +116,30 @@ _Avoid_: learned memory, automatic Skill update, applied instruction
 ### Capabilities & Permissions
 
 **Capability**:
-A typed action the Agent Core can request from the Shell (screenshot, process list, clipboard, shell-open, workspace file RW, exec). Each has its own permission switch and Sensitivity Tier.
+A typed canonical action resolved before execution, whether it is Core-local, standard MCP-backed, Skill-mediated, or
+owned by an Execution Host (for example screenshot, process list, clipboard, shell-open, Workspace file RW, or exec).
+Its authority identity is not a display name, model-facing tool key, path, or extension annotation.
 _Avoid_: permission (that's the grant, not the action), feature
 
 **Permission Gate**:
-The Shell-side enforcement point every Capability request must cross: policy check, optional Approval, execution, audit log. The Agent Core has no path around it.
+The deterministic capability-governance path: Core resolves canonical identity and durable policy, and an owning
+Execution Host additionally performs trusted local classification, stricter-only enforcement, execution, and audit.
+Core-local and MCP actions use the same canonical evaluator without pretending to cross Rust; Host-owned OS actions
+must still cross the Host's final boundary. No adapter may bypass the common policy or create a second global store.
 _Avoid_: firewall, guard
 
 **Approval**:
-A user decision on a Capability request via dialog: once / this session / always / deny.
+A Core-mediated user decision on a specific governed request, with an explicit scope such as once, this session,
+always, or deny. Approval never originates from Skill metadata, MCP annotations, conversation text, or a Host-local
+second dialog. Until the canonical lifecycle is installed, an effective `ask` returns `APPROVAL_REQUIRED` and does not
+execute.
 _Avoid_: confirmation, prompt
 
 **Permission Level**:
-A global preset that bulk-sets every Capability's policy in one move (a relaxed / standard / strict spectrum); a convenience view over the per-Capability grants, never a second enforcement path — the Permission Gate stays the sole authority. The most permissive level still writes the audit log and cannot lift the hard blocklist. A grant expressed in conversation goes through the ordinary Approval flow and lands in the same store the permissions panel manages.
+A Core-owned durable preset that selects factory posture across the canonical registry (`strict | standard | relaxed`),
+combined with sparse per-cell operator overrides under one optimistic `policyGeneration`. It is a convenience view,
+not a second enforcement path. The most permissive level cannot lift immutable Core floors or stricter Host-local or
+managed constraints. Conversation text grants nothing; it can only lead to the ordinary canonical Approval flow.
 _Avoid_: permission mode (that's a per-Capability policy, e.g. Exec's), bypass (colloquial — no level bypasses audit)
 
 **Exec**:

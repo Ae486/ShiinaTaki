@@ -8,7 +8,7 @@ import { bindHostGenerationRetirement } from "./host-generation-retirement.ts";
 
 const HOST_A = "11111111-1111-4111-8111-111111111111";
 const HOST_B = "22222222-2222-4222-8222-222222222222";
-const hostSelection = { protocolVersion: 1, catalogSchemaVersion: 1 };
+const hostSelection = { protocolVersion: 2, catalogSchemaVersion: 2 };
 
 describe("bindHostGenerationRetirement", () => {
   it("retires only the replaced Host generation before the old socket closes", async () => {
@@ -42,7 +42,7 @@ describe("bindHostGenerationRetirement", () => {
       requestId: sentB!.requestId,
       control: sentB!.control,
       state: "completed",
-      output: "still-live",
+      output: "still-live", governance: { descriptorRevision: 1, classifierRevision: 1, cellKey: "screenshot", effectivePosture: "auto", constraint: "none" },
     }, { hostId: HOST_B, connectionGeneration: 1 })).toEqual({ accepted: true });
     await expect(pendingB).resolves.toEqual({ ok: true, output: "still-live" });
   });
@@ -56,13 +56,13 @@ function catalog(hostId: string): HostCatalogPublishParams {
   return {
     hostId,
     label: "Test Host",
-    protocolVersion: 1,
-    catalogSchemaVersion: 1,
+    protocolVersion: 2,
+    catalogSchemaVersion: 2,
     connectionGeneration: 1,
     catalogGeneration: 1,
     publishedAt: "2026-08-12T00:00:00.000Z",
     readiness: "ready",
-    capabilities: [{ capabilityId: "screenshot", execution: "read", cancellation: "cooperative" }],
+    capabilities: [{ capabilityId: "screenshot", execution: "read", cancellation: "cooperative", governance: { descriptorRevision: 1, classifierId: "fixed-risk", classifierRevision: 1 } }],
     workspaces: [],
     skills: [],
     mcpServers: [],
@@ -74,7 +74,9 @@ function target(hostId: string, notify: (method: string, params: unknown) => voi
     hostId,
     connectionGeneration: 1,
     catalogGeneration: 1,
-    descriptor: { capabilityId: "screenshot", execution: "read" as const, cancellation: "cooperative" as const },
+    descriptor: { capabilityId: "screenshot", execution: "read" as const, cancellation: "cooperative" as const, governance: { descriptorRevision: 1, classifierId: "fixed-risk", classifierRevision: 1 } },
+    policyGeneration: 1,
+    governanceProjection: { registryRevision: 1, descriptorRevision: 1, classifierRevision: 1, cells: [{ key: "screenshot", posture: "auto" as const }], digest: "a".repeat(64) },
     notify,
   };
 }

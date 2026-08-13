@@ -143,6 +143,7 @@ pub struct Gate {
     decisions: Arc<DecisionStore>,
     approver: Arc<dyn Approver>,
     audit: Arc<dyn AuditSink>,
+    legacy_level: level::LegacyLevelConstraint,
 }
 
 impl Gate {
@@ -152,7 +153,39 @@ impl Gate {
         approver: Arc<dyn Approver>,
         audit: Arc<dyn AuditSink>,
     ) -> Self {
-        Self { policy, decisions, approver, audit }
+        Self { policy, decisions, approver, audit, legacy_level: level::LegacyLevelConstraint::None }
+    }
+
+    pub fn with_legacy_level(mut self, constraint: level::LegacyLevelConstraint) -> Self {
+        self.legacy_level = constraint;
+        self
+    }
+
+    /// Slice-3 production compatibility reads only exact persisted Never records; allows and session state are inert.
+    pub fn legacy_denied(&self, key: &str) -> bool {
+        self.decisions.get(key) == Some(Remembered::Never)
+    }
+
+    pub fn legacy_level_allows_auto(&self, key: &str) -> bool {
+        let level = match self.legacy_level {
+            level::LegacyLevelConstraint::None => return true,
+            level::LegacyLevelConstraint::Closed => return false,
+            level::LegacyLevelConstraint::Strict => PermissionLevel::Strict,
+            level::LegacyLevelConstraint::Standard => PermissionLevel::Standard,
+        };
+        !self.policy.governance.is_floor(key)
+            && self.policy.governance.cell(key).is_some_and(|cell| cell.posture(level) == PermissionPosture::Auto)
+    }
+
+    /// Records the Host's final enforcement result without consulting the legacy approver or decision writer.
+    /// Slice 3 uses this audit-only seam because `ask` is fail-closed until Core Approval exists in Slice 4.
+    pub fn audit_enforcement(&self, request_id: &str, key: &str, allowed: bool, command: Option<&str>) {
+        let decision = if allowed { Decision::AutoAllowed } else { Decision::AutoDenied };
+        if key == "exec" {
+            self.audit.record(request_id, key, decision, command);
+        } else {
+            self.audit.record(request_id, key, decision, None);
+        }
     }
 
     /// The generic `(capability, argClass)` engine (T2b): enable switch -> deny-by-default floor -> Level

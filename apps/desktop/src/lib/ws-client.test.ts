@@ -15,6 +15,7 @@ import {
   CONNECT_METHOD,
   JSON_RPC_APP_ERROR,
   MEDIA_METHODS,
+  PERMISSION_METHODS,
   TIMELINE_METHODS,
   TIMING_POLICY_DEVELOPMENT_DEFAULTS,
 } from "@taki/shared";
@@ -110,6 +111,51 @@ describe("createWsClient inbound routing", () => {
     expect(sent.params).toEqual({ ref: "attachments/abc.png" });
     h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { mediaType: "image/png", dataBase64: "AAAA" } });
     expect(await got).toEqual({ mediaType: "image/png", dataBase64: "AAAA" });
+  });
+
+  it("parses all four permission operator method results through the shared strict schemas", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const level = { level: "standard", policyGeneration: 4, registryRevision: 1 };
+    const cell = {
+      key: "screenshot", level: "standard", capabilityId: "screenshot", descriptorRevision: 1,
+      factoryPosture: "ask", overridePosture: null, effectivePosture: "ask",
+      approvalMemory: "rememberable", overrideMode: "ordinary",
+    };
+    const cases = [
+      [() => client.permissionLevelGet(), PERMISSION_METHODS.levelGet, {}, level],
+      [() => client.permissionLevelSet({ level: "relaxed", expectedPolicyGeneration: 4 }), PERMISSION_METHODS.levelSet,
+        { level: "relaxed", expectedPolicyGeneration: 4 }, { ...level, level: "relaxed", policyGeneration: 5 }],
+      [() => client.permissionCellsGet(), PERMISSION_METHODS.cellsGet, {}, { ...level, cells: [cell] }],
+      [() => client.permissionCellSet({ key: "screenshot", level: "standard", posture: "auto", expectedPolicyGeneration: 4 }),
+        PERMISSION_METHODS.cellSet,
+        { key: "screenshot", level: "standard", posture: "auto", expectedPolicyGeneration: 4 },
+        { policyGeneration: 5, registryRevision: 1, cell: { ...cell, overridePosture: "auto", effectivePosture: "auto" } }],
+    ] as const;
+
+    for (const [start, method, params, result] of cases) {
+      const promise = start();
+      await flush();
+      const sent = JSON.parse(h.sent[h.sent.length - 1] ?? "{}");
+      expect(sent).toMatchObject({ method, params });
+      h.deliver({ jsonrpc: "2.0", id: sent.id, result });
+      await expect(promise).resolves.toEqual(result);
+    }
+  });
+
+  it("rejects malformed permission results instead of admitting drifted Core state", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const pending = client.permissionCellsGet();
+    await flush();
+    h.deliver({
+      jsonrpc: "2.0",
+      id: lastRequestId(h.sent),
+      result: { level: "standard", policyGeneration: 1, registryRevision: 1, cells: [], unexpected: true },
+    });
+    await expect(pending).rejects.toThrow();
   });
 
   it("importCharacter uploads the archive and parses the costumes + warnings result (#18)", async () => {

@@ -37,6 +37,18 @@ describe("scanSkills (T17)", () => {
     expect(skills[0]).toMatchObject({ name: "greet", description: "Does a thing. Use when asked." });
   });
 
+  it("changes contentRevision when SKILL.md content changes", () => {
+    const root = skillsRoot();
+    writeSkill(root, "greet", valid("greet"));
+    const first = scanSkills(root).skills[0]?.contentRevision;
+    writeSkill(root, "greet", `${valid("greet")}Step 2. Use the revised procedure.\n`);
+    const second = scanSkills(root).skills[0]?.contentRevision;
+
+    expect(first).toMatch(/^sha256\.[a-f0-9]{64}$/);
+    expect(second).toMatch(/^sha256\.[a-f0-9]{64}$/);
+    expect(second).not.toBe(first);
+  });
+
   it("marks name != directory as invalid", () => {
     const root = skillsRoot();
     writeSkill(root, "greet", valid("greeter")); // name mismatches dir

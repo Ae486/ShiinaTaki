@@ -36,16 +36,19 @@ export {
   HOST_CATALOG_SCHEMA_VERSION, HOST_CONTROL_METHODS, HOST_CONTROL_PROTOCOL_VERSION,
   CapabilityCancellationSchema, CapabilityCancelReasonSchema, CapabilityCancelSchema,
   CapabilityChallengeSchema, CapabilityExecutionKindSchema, CapabilityResumeSchema,
-  CapabilitySettlementStateSchema, HostCapabilityDescriptorSchema, HostCatalogPublishParamsSchema,
+  CapabilitySettlementStateSchema, HostCapabilityDescriptorSchema, HostCapabilityGovernanceSupportSchema, HostCatalogPublishParamsSchema,
   HostDeclarationSchema, HostFrameAckSchema, HostFrameRejectReasonSchema, HostLocalReadinessSchema,
-  HostMcpDescriptorSchema, HostNegotiationSchema, HostOperationControlSchema, HostProtocolRangeSchema,
+  HostMcpDescriptorSchema, HostNegotiationSchema, HostOperationControlSchema, HostGovernanceEvidenceSchema,
+  HostGovernanceCellSchema, HostGovernanceProjectionPayloadSchema, HostGovernanceProjectionSchema, HostProtocolRangeSchema,
   HostSkillDescriptorSchema, HostWorkspaceDescriptorSchema, PositiveGenerationSchema, Sha256HexSchema,
+  canonicalHostGovernanceProjection,
 } from "./host-control-api.ts";
 export type {
   CapabilityCancellation, CapabilityCancel, CapabilityCancelReason, CapabilityChallenge,
-  CapabilityExecutionKind, CapabilityResume, CapabilitySettlementState, HostCapabilityDescriptor,
+  CapabilityExecutionKind, CapabilityResume, CapabilitySettlementState, HostCapabilityDescriptor, HostCapabilityGovernanceSupport,
   HostCatalogPublishParams, HostDeclaration, HostFrameAck, HostFrameRejectReason, HostLocalReadiness,
-  HostMcpDescriptor, HostNegotiation, HostOperationControl, HostProtocolRange, HostSkillDescriptor,
+  HostMcpDescriptor, HostNegotiation, HostOperationControl, HostGovernanceProjection, HostGovernanceProjectionPayload,
+  HostGovernanceCell, HostGovernanceEvidence, HostProtocolRange, HostSkillDescriptor,
   HostWorkspaceDescriptor,
 } from "./host-control-api.ts";
 
@@ -244,26 +247,30 @@ export type {
 } from "./approval-schema.ts";
 
 export {
-  PERMISSION_METHODS,
-  PermissionCellKeySchema,
-  PermissionCellSetParamsSchema,
-  PermissionCellSetResultSchema,
-  PermissionCellsStateSchema,
-  PermissionCellStateSchema,
-  PermissionLevelSchema,
-  PermissionLevelStateSchema,
-  PermissionPostureSchema,
-} from "./permission-level-schema.ts";
+  CANONICAL_GOVERNANCE_REGISTRY, CanonicalCapabilityIdentitySchema,
+  CanonicalCapabilitySubjectSchema, CapabilityGovernanceDescriptorSchema,
+  GOVERNANCE_REGISTRY_REVISION, GovernanceApprovalMemorySchema, GovernanceCellDescriptorSchema,
+  GovernanceClassifierAuthoritySchema, GovernanceEvaluationInputSchema,
+  GovernanceEvaluationReasonSchema, GovernanceEvaluationResultSchema, GovernanceExecutionCodeSchema,
+  GovernanceOverrideModeSchema,
+  GovernanceOverrideSchema, GovernanceRegistrySchema, GovernanceRevisionSchema, GovernanceStableIdSchema,
+  LegacyPermissionCellKeySchema, LegacyPermissionCellSetParamsSchema,
+  LegacyPermissionCellStateSchema, LegacyPermissionLevelStateSchema, PERMISSION_METHODS,
+  PermissionCellKeySchema, PermissionDecisionKeySchema, PermissionCellsGetParamsSchema,
+  PermissionCellSetParamsSchema, PermissionCellSetResultSchema, PermissionCellsStateSchema,
+  PermissionCellStateSchema, PermissionLevelGetParamsSchema, PermissionLevelSchema,
+  PermissionLevelSetParamsSchema, PermissionLevelStateSchema, PermissionPostureSchema,
+  createGovernanceRegistry, evaluateGovernance, governanceCell, governanceDescriptor,
+} from "./governance-api.ts";
 export type {
-  PermissionCellKey,
-  PermissionCellSetParams,
-  PermissionCellSetResult,
-  PermissionCellsState,
-  PermissionCellState,
-  PermissionLevel,
-  PermissionLevelState,
-  PermissionPosture,
-} from "./permission-level-schema.ts";
+  CanonicalCapabilityIdentity, CanonicalCapabilitySubject, CapabilityGovernanceDescriptor,
+  GovernanceCellDescriptor, GovernanceEvaluationInput, GovernanceEvaluationResult, GovernanceExecutionCode,
+  GovernanceOverride, GovernanceRegistry, LegacyPermissionCellSetParams,
+  LegacyPermissionCellState, LegacyPermissionLevelState, PermissionCellKey, PermissionDecisionKey,
+  PermissionCellsGetParams, PermissionCellSetParams, PermissionCellSetResult, PermissionCellsState,
+  PermissionCellState, PermissionLevelGetParams, PermissionLevel, PermissionLevelSetParams,
+  PermissionLevelState, PermissionPosture,
+} from "./governance-api.ts";
 
 export {
   PERCEPTION_METHODS,
@@ -299,24 +306,13 @@ export type {
 } from "./capability-schema.ts";
 
 export {
-  ClipboardReadOutputSchema,
-  ClipboardWriteOutputSchema,
-  ExecOutputSchema,
-  ForegroundWindowOutputSchema,
-  ProcessInfoSchema,
-  ProcessListOutputSchema,
-  ScreenshotOutputSchema,
-  ShellOpenOutputSchema,
+  ClipboardReadOutputSchema, ClipboardWriteOutputSchema, ExecOutputSchema,
+  ForegroundWindowOutputSchema, ProcessInfoSchema, ProcessListOutputSchema,
+  ScreenshotOutputSchema, ShellOpenOutputSchema,
 } from "./capability-outputs.ts";
 export type {
-  ClipboardReadOutput,
-  ClipboardWriteOutput,
-  ExecOutput,
-  ForegroundWindowOutput,
-  ProcessInfo,
-  ProcessListOutput,
-  ScreenshotOutput,
-  ShellOpenOutput,
+  ClipboardReadOutput, ClipboardWriteOutput, ExecOutput, ForegroundWindowOutput,
+  ProcessInfo, ProcessListOutput, ScreenshotOutput, ShellOpenOutput,
 } from "./capability-outputs.ts";
 
 export { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "./ws-defaults.ts";

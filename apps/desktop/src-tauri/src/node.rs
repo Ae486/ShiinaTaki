@@ -17,7 +17,7 @@ use crate::capabilities_impl::shell_open::ShellOpenExec;
 use crate::capabilities_impl::CapabilityRegistry;
 use crate::gate::approver::Approver;
 use crate::gate::decisions::DecisionStore;
-use crate::gate::level::load_level;
+use crate::gate::level::{load_legacy_constraint, load_level};
 use crate::gate::{Gate, GatePolicy};
 use crate::secrets::SecretStore;
 use crate::status::StatusEmitter;
@@ -84,12 +84,13 @@ pub fn build_node(config: NodeConfig) -> Result<WsClient, Box<dyn std::error::Er
     // The active Permission Level is read exactly once here — operator-written file, frozen for the process
     // lifetime, out of the agent's reach (research §3.2 clause 3).
     let level = load_level(&data_dir.join("permission-level.json"));
+    let legacy_level = load_legacy_constraint(&data_dir.join("permission-level.json"));
     let gate = Arc::new(Gate::new(
         GatePolicy::new().with_level(level),
         decisions,
         approver,
         auditor,
-    ));
+    ).with_legacy_level(legacy_level));
 
     // The policy is load-or-degrade-safe and shared between the ExecExec handler (sandbox config) and the WS task
     // (classify) — exec's gate decision depends on the parsed command, not just the capability name (ruling 6).

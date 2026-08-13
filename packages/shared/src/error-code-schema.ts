@@ -16,5 +16,10 @@ export const ErrorCodeSchema = z.enum([
   // A config.set the store refuses on its own terms (secret / env-locked / env-only / unknown key / bad value);
   // the machine-readable ConfigRefusalReason rides error.data.reason beside this code.
   "CONFIG_REFUSED",
+  "POLICY_CONFLICT",
+  "GOVERNANCE_REFUSED",
+  // Tool execution outcomes are structured model-readable failures, not JSON-RPC envelope codes.
+  "GOVERNANCE_DENIED",
+  "APPROVAL_REQUIRED",
 ]);
 export type ErrorCode = z.infer<typeof ErrorCodeSchema>;

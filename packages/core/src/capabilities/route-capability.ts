@@ -7,12 +7,14 @@ import type { Logger } from "../logging/logger.ts";
 import type { HostCatalogStore } from "../hosts/host-catalog.ts";
 import type { ConnectionRegistry } from "../server/connection-registry.ts";
 import type { CapabilityBroker, CapabilityFailureCode } from "./capability-broker.ts";
+import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
 
 export interface CapabilityRouteDeps {
   registry: ConnectionRegistry;
   catalogs: HostCatalogStore;
   broker: CapabilityBroker;
   logger: Logger;
+  governance: GovernancePolicyService;
 }
 
 export type RouteFailureCode = CapabilityFailureCode | "NO_NODE" | "TARGET_HOST_REQUIRED" | "CAPABILITY_MISSING";
@@ -39,12 +41,27 @@ export async function routeCapability(
   }
   const { catalog, connection, descriptor } = resolved;
   if (!connection.notify) return { ok: false, code: "NO_NODE", message: `Host ${catalog.hostId} is unavailable` };
+  const dispatchPolicy = deps.governance.hostDispatchPolicy(capabilityId);
+  const expected = dispatchPolicy.compatibility;
+  if (
+    descriptor.governance.descriptorRevision !== expected.descriptorRevision
+    || descriptor.governance.classifierRevision !== expected.classifierRevision
+    || descriptor.governance.classifierId !== expected.classifierId
+  ) {
+    return {
+      ok: false,
+      code: "CAPABILITY_MISSING",
+      message: `Host ${catalog.hostId} governance metadata is incompatible with ${capabilityId}`,
+    };
+  }
   return deps.broker.request({
     hostId: catalog.hostId,
     connectionGeneration: catalog.connectionGeneration,
     catalogGeneration: catalog.catalogGeneration,
     descriptor,
     notify: connection.notify,
+    policyGeneration: dispatchPolicy.policyGeneration,
+    governanceProjection: dispatchPolicy.projection,
   }, input);
 }
 

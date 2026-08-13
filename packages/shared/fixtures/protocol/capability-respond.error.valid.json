@@ -8,6 +8,7 @@
     "connectionGeneration": 1,
     "catalogGeneration": 1,
     "policyGeneration": 1,
+    "governanceProjection": { "registryRevision": 1, "descriptorRevision": 1, "classifierRevision": 1, "cells": [{ "key": "screenshot", "posture": "auto" }], "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
     "approvalGeneration": 1,
     "capabilityId": "screenshot",
     "inputDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -16,5 +17,6 @@
     "deadlineAt": "2026-08-12T00:01:00.000Z"
   },
   "state": "failed",
-  "error": { "code": "DENIED", "message": "user denied the request" }
+  "error": { "code": "DENIED", "message": "user denied the request" },
+  "governance": { "descriptorRevision": 1, "classifierRevision": 1, "cellKey": "screenshot", "effectivePosture": "deny", "constraint": "local" }
 }

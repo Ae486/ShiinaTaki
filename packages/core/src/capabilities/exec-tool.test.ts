@@ -7,6 +7,7 @@ import {
   catalogsReturning,
   fakeHost,
   registryReturning,
+  testGovernance,
 } from "../testing/capability-tool-harness.ts";
 import type { CapabilityBroker } from "./capability-broker.ts";
 import type { ConnectionRegistry } from "../server/connection-registry.ts";
@@ -16,7 +17,7 @@ const EXEC_OPTS = { toolCallId: "c1", messages: [] } as never;
 
 function toolWith(registry: ConnectionRegistry, broker: CapabilityBroker) {
   const { logger } = createCaptureLogger();
-  return createExecTool({ registry, catalogs: catalogsReturning("exec", { execution: "effect", cancellation: "non-cooperative" }), broker, logger });
+  return createExecTool({ registry, catalogs: catalogsReturning("exec", { execution: "effect", cancellation: "non-cooperative" }), broker, logger, governance: testGovernance() });
 }
 
 const RAN = { exitCode: 0, stdout: "hi\n", stderr: "", truncated: false, timedOut: false, durationMs: 12 };

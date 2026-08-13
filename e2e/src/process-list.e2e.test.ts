@@ -5,6 +5,7 @@ import { withStack } from "./fixture/with-stack.ts";
 describe("process-list returns metadata without argv", () => {
   it("has pid/name/memoryBytes and no argv/cmd/command field", async () => {
     await withStack({ devTrigger: true, autoApprove: "process-list=allow-once" }, async (stack) => {
+      await stack.setPermissionLevel("relaxed");
       const result = (await stack.l1("process_list", {})) as {
         ok: boolean;
         count: number;

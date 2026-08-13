@@ -1,9 +1,10 @@
 /**
  * INPUT:  the skills root dir (<dataDir>/skills) with <name>/SKILL.md folders
- * OUTPUT: scanSkills(root) -> { skills: SkillMeta[]; invalid: string[] } — discover + validate (never throws)
- * POS:    core/skills — boot-time discovery mirroring #6 reconcile: valid skills listed, broken ones collected + logged
+ * OUTPUT: scanSkills(root) -> { skills: SkillMeta[]; invalid: string[] } with full-file content revisions
+ * POS:    core/skills — boot discovery; invalid packages are isolated, non-missing root IO still fails visibly
  */
 import { readFileSync, readdirSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { parseFrontmatter } from "../memory/frontmatter.ts";
 
@@ -12,6 +13,7 @@ export interface SkillMeta {
   name: string;
   description: string;
   skillPath: string;
+  contentRevision: string;
 }
 
 export interface SkillScan {
@@ -52,7 +54,7 @@ function validate(dirName: string, skillPath: string): SkillMeta | null {
   const { name, description } = data;
   if (typeof name !== "string" || !NAME_RE.test(name) || name !== dirName) return null;
   if (typeof description !== "string" || description.length === 0) return null;
-  return { name, description, skillPath };
+  return { name, description, skillPath, contentRevision: `sha256.${createHash("sha256").update(text).digest("hex")}` };
 }
 
 function listSkillDirs(root: string): string[] {

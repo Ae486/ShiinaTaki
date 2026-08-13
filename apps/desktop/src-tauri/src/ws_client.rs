@@ -8,12 +8,13 @@ use std::time::{Duration, SystemTime};
 
 use futures_util::{SinkExt, StreamExt};
 use serde_json::{json, Value};
+use sha2::{Digest, Sha256};
 use tokio::sync::mpsc::Receiver;
 use tokio::sync::Mutex;
 use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 
-use crate::capabilities_impl::exec::{classify as classify_exec, command_of, ExecPolicy};
+use crate::capabilities_impl::exec::{classify as classify_exec, ExecPolicy};
 use crate::capabilities_impl::shell_open::classify as classify_shell_open;
 use crate::capabilities_impl::CapabilityRegistry;
 use crate::gate::Gate;
@@ -385,27 +386,65 @@ async fn authorize_and_run(
         input,
     } = request;
     let capability = control.capability_id.clone();
+    if input_digest(&capability, &input) != control.input_digest {
+        return CapabilityRespond::err(request_id, control, crate::protocol::CapabilityErrorCode::Denied, "input digest mismatch".into());
+    }
     let joined = tokio::task::spawn_blocking(move || {
-        let authorized = if capability == "exec" {
+        let projection = &control.governance_projection;
+        let local_allows = if capability == "exec" {
             let class = classify_exec(&exec_policy, &input);
-            gate.evaluate_exec(&request_id, command_of(&input), class)
+            class.cell_key().is_some()
         } else if capability == "shell-open" {
             let class = classify_shell_open(&input);
-            let detail = handlers.detail(&capability, &input);
-            gate.evaluate_shell_open(&request_id, class, detail.as_deref())
+            class != crate::gate::ShellOpenClass::Blocked
         } else {
-            let detail = handlers.detail(&capability, &input);
-            gate.evaluate_by_class(&request_id, &capability, detail.as_deref())
+            true
         };
-        if authorized {
-            handlers.respond(request_id, control, &capability, &input)
+        let cell_key = if capability == "exec" {
+            classify_exec(&exec_policy, &input).cell_key().unwrap_or("exec:blocked")
+        } else if capability == "shell-open" {
+            classify_shell_open(&input).key()
+        } else { capability.as_str() };
+        let projected = projection.cells.iter().find(|cell| cell.key == cell_key).map(|cell| cell.posture);
+        let legacy_denied = gate.legacy_denied(cell_key);
+        let legacy_level_denied = !gate.legacy_level_allows_auto(cell_key);
+        let local_constraint = legacy_denied || legacy_level_denied || !local_allows;
+        let effective_posture = if local_constraint || projected.is_none() {
+            crate::protocol::HostGovernancePosture::Deny
         } else {
+            projected.unwrap_or(crate::protocol::HostGovernancePosture::Deny)
+        };
+        let authorized = effective_posture == crate::protocol::HostGovernancePosture::Auto;
+        let evidence = crate::protocol::HostGovernanceEvidence {
+            descriptor_revision: projection.descriptor_revision,
+            classifier_revision: projection.classifier_revision,
+            cell_key: cell_key.to_string(),
+            effective_posture,
+            constraint: if legacy_denied || legacy_level_denied {
+                crate::protocol::HostGovernanceConstraint::LegacyDeny
+            } else if !local_allows {
+                crate::protocol::HostGovernanceConstraint::Local
+            } else if projected.is_none() {
+                crate::protocol::HostGovernanceConstraint::Hard
+            } else {
+                crate::protocol::HostGovernanceConstraint::None
+            },
+        };
+        gate.audit_enforcement(&request_id, &capability, authorized, (capability == "exec").then(|| input.get("command").and_then(Value::as_str).unwrap_or("")));
+        if authorized {
+            handlers.respond(request_id, control, &capability, &input).with_governance(evidence)
+        } else {
+            let (code, message) = if effective_posture == crate::protocol::HostGovernancePosture::Ask {
+                (crate::protocol::CapabilityErrorCode::ApprovalRequired, "approval required")
+            } else {
+                (crate::protocol::CapabilityErrorCode::Denied, "denied")
+            };
             CapabilityRespond::err(
                 request_id,
                 control,
-                crate::protocol::CapabilityErrorCode::Denied,
-                "denied".into(),
-            )
+                code,
+                message.into(),
+            ).with_governance(evidence)
         }
     })
     .await;
@@ -417,6 +456,23 @@ async fn authorize_and_run(
             error.to_string(),
         )
     })
+}
+
+fn input_digest(capability: &str, input: &Value) -> String {
+    let canonical = canonical_json(&json!({ "capabilityId": capability, "input": input }));
+    format!("{:x}", Sha256::digest(canonical.as_bytes()))
+}
+
+fn canonical_json(value: &Value) -> String {
+    match value {
+        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => value.to_string(),
+        Value::Array(values) => format!("[{}]", values.iter().map(canonical_json).collect::<Vec<_>>().join(",")),
+        Value::Object(object) => {
+            let mut entries: Vec<_> = object.iter().collect();
+            entries.sort_by(|left, right| left.0.cmp(right.0));
+            format!("{{{}}}", entries.into_iter().map(|(key, value)| format!("{}:{}", serde_json::to_string(key).expect("json key"), canonical_json(value))).collect::<Vec<_>>().join(","))
+        }
+    }
 }
 
 async fn send_response(write: &SharedWrite, response: CapabilityRespond) {
@@ -460,6 +516,15 @@ fn capability_descriptor(capability: &str) -> Option<HostCapabilityDescriptor> {
         capability_id: capability.into(),
         execution,
         cancellation,
+        governance: crate::protocol::HostCapabilityGovernanceSupport {
+            descriptor_revision: 1,
+            classifier_id: match capability {
+                "exec" => "exec-command",
+                "shell-open" => "shell-open-target",
+                _ => "fixed-risk",
+            }.into(),
+            classifier_revision: 1,
+        },
     })
 }
 

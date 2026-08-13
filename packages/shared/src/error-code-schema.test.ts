@@ -11,6 +11,10 @@ describe("ErrorCodeSchema", () => {
     "ALREADY_CONNECTED",
     "FORBIDDEN",
     "CONFIG_REFUSED",
+    "POLICY_CONFLICT",
+    "GOVERNANCE_REFUSED",
+    "GOVERNANCE_DENIED",
+    "APPROVAL_REQUIRED",
   ])("accepts the %s code", (code) => {
     expect(ErrorCodeSchema.safeParse(code).success).toBe(true);
   });

@@ -7,20 +7,20 @@ function catalog(overrides: Partial<HostCatalogPublishParams> = {}): HostCatalog
   return {
     hostId: HOST,
     label: "Desktop",
-    protocolVersion: 1,
-    catalogSchemaVersion: 1,
+    protocolVersion: 2,
+    catalogSchemaVersion: 2,
     connectionGeneration: 1,
     catalogGeneration: 1,
     publishedAt: "2026-08-12T00:00:00.000Z",
     readiness: "ready",
-    capabilities: [{ capabilityId: "screenshot", execution: "read", cancellation: "cooperative" }],
+    capabilities: [{ capabilityId: "screenshot", execution: "read", cancellation: "cooperative", governance: { descriptorRevision: 1, classifierId: "fixed-risk", classifierRevision: 1 } }],
     workspaces: [],
     skills: [],
     mcpServers: [],
     ...overrides,
   };
 }
-const provenance = { hostId: HOST, protocolVersion: 1, catalogSchemaVersion: 1, connectionGeneration: 1 };
+const provenance = { hostId: HOST, protocolVersion: 2, catalogSchemaVersion: 2, connectionGeneration: 1 };
 
 describe("HostCatalogStore", () => {
   it("atomically publishes a complete routable snapshot", () => {
@@ -51,7 +51,7 @@ describe("HostCatalogStore", () => {
     const store = createHostCatalogStore();
     const candidate = catalog();
     store.publish(candidate, provenance);
-    candidate.capabilities.push({ capabilityId: "exec", execution: "effect", cancellation: "non-cooperative" });
+    candidate.capabilities.push({ capabilityId: "exec", execution: "effect", cancellation: "non-cooperative", governance: { descriptorRevision: 1, classifierId: "exec-command", classifierRevision: 1 } });
     expect(store.hostsForCapability("exec")).toHaveLength(0);
   });
 });

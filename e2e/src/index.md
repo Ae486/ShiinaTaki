@@ -5,14 +5,16 @@ Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pn
 
 - fixture/ — the reusable withStack harness (see fixture/index.md)
 - reconnect.e2e.test.ts — node pairs once, reconnects by persisted token (no second pairing code)
+- governance-authority.e2e.test.ts — real Core + external taki-node: compatible catalog, relaxed auto, Core deny, Host stricter deny, and higher-generation projection replacement
+- governance-stale-projection.e2e.test.ts — test-only loopback relay proves stale N-1 and same-N valid-digest projection tampering are rejected without execution/replay, then settles Core through bounded Host-generation retirement and verifies cleanup
 - screenshot-l2.e2e.test.ts — L2 agent drive: real LLM asked to screenshot (key-gated; the H2 diagnosis)
 - trigger-gating.e2e.test.ts — the dev capability.trigger is absent without TAKI_DEV_TRIGGER=1 (METHOD_NOT_FOUND), present with it
-- screenshot-always-restart.e2e.test.ts — #5 allow-always persists across a node restart (second shot auto-allowed, no ask)
-- deny-degrades.e2e.test.ts — #6/#23 scripted deny on screenshot/exec → structured DENIED, no crash/file
+- screenshot-always-restart.e2e.test.ts — Slice-3 compatibility: legacy Always stays inert before/after restart; ask remains APPROVAL_REQUIRED
+- deny-degrades.e2e.test.ts — Slice-3 ask path returns structured APPROVAL_REQUIRED with no execution and no local prompt
 - shell-open-schemes.e2e.test.ts — #11 dangerous url schemes classify as shell-open:blocked → DENIED at the gate, no dialog
-- shell-open-target-class.e2e.test.ts — 07-12 A1 fix: per (capability,targetClass); persisted url-safe memory answers via gate decision (deny polarity, never launches a real browser); url-safe Always never authorizes local-exec/local-file; local classes ask every time
-- clipboard-roundtrip.e2e.test.ts — #12 clipboard write→read returns the exact value (real arboard)
-- process-list.e2e.test.ts — #13 process-list has pid/name/memory and no argv/cmd leak
+- shell-open-target-class.e2e.test.ts — per-class legacy deny-only compatibility; legacy Always cannot authorize local classes; asks fail closed without local prompts
+- clipboard-roundtrip.e2e.test.ts — relaxed Core policy permits the real clipboard write→read round-trip (real arboard)
+- process-list.e2e.test.ts — relaxed Core policy permits process-list; output has pid/name/memory and no argv/cmd leak
 - workspace-files.e2e.test.ts — #14/#15 Workspace write+read round-trip; ../../.. escape rejected with no path leak
 - exec-allowlist-autorun.e2e.test.ts — #16 allowlisted hostname auto-runs (audited auto-allowed) despite exec=deny
 - exec-chained-escalates.e2e.test.ts — #18 `git status && del x` escalates past the allowlist → denied

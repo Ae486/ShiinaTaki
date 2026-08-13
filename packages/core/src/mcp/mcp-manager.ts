@@ -1,24 +1,30 @@
 /**
  * INPUT:  McpServerEntry[] (from mcp-config) + a logger + an optional connect override (tests)
  * OUTPUT: createMcpManager(deps) -> Promise<McpManager> { tools(), describe(name), close() }
- * POS:    core/mcp — list/prepare/convert orchestration; namespaces + error-wraps operator MCP tools into one ToolSet
+ * POS:    core/mcp — standard SDK list/prepare/convert/call path with trusted subject sidecars and pre-call governance
  */
+import { createHash } from "node:crypto";
 import type { Tool, ToolSet } from "ai";
 import type { Logger } from "../logging/logger.ts";
+import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
+import { wrapGovernedTool } from "../governance/governed-tool.ts";
 import type { McpServerEntry } from "./mcp-config.ts";
+import { mcpPublicConfig } from "./mcp-config.ts";
 import { defaultConnect, type McpClient, type McpConnect } from "./mcp-connect.ts";
 import { prepareMcpToolDefinitions } from "./mcp-schema-compat.ts";
 
-/** The raw MCP identity behind a namespaced ToolSet key — what the approval gate + CLI display use. */
+/** The raw MCP identity behind a namespaced ToolSet key; the presentation key is never an authority key. */
 export interface McpToolRef {
   serverName: string;
   toolName: string;
+  subjectId: string;
+  subjectRevision: string;
 }
 
 export interface McpManager {
   /** The aggregated, namespaced, error-wrapped ToolSet (cached; no per-turn rediscovery). */
   tools(): ToolSet;
-  /** Maps a ToolSet key back to its server+tool, or undefined for a non-MCP tool (approval scoping). */
+  /** Maps a ToolSet key back to its raw identity plus stable subject binding. */
   describe(toolKey: string): McpToolRef | undefined;
   /** Closes every connected client; idempotent (safe to call twice in the shutdown chain). */
   close(): Promise<void>;
@@ -28,6 +34,11 @@ export interface McpManagerDeps {
   entries: McpServerEntry[];
   logger: Logger;
   connect?: McpConnect;
+  governance?: {
+    service: GovernancePolicyService;
+    ownerHostId: string;
+    legacyDeny?: (serverName: string, toolName: string) => boolean;
+  };
 }
 
 // Model-facing error envelope for a failed MCP call (error-handling spec; the model reads code + message).
@@ -40,6 +51,7 @@ export async function createMcpManager(deps: McpManagerDeps): Promise<McpManager
   const clients: McpClient[] = [];
   const tools: ToolSet = {};
   const refs = new Map<string, McpToolRef>();
+  const collisions = new Set<string>();
 
   const results = await Promise.allSettled(deps.entries.map((entry) => discover(entry, connect, log)));
   results.forEach((result, index) => {
@@ -51,7 +63,7 @@ export async function createMcpManager(deps: McpManagerDeps): Promise<McpManager
       return;
     }
     clients.push(result.value.client);
-    mergeServerTools({ entry, discovered: result.value.tools, tools, refs, log });
+    mergeServerTools({ entry, discovered: result.value.tools, tools, refs, collisions, log, governance: deps.governance });
   });
   log.info({ servers: clients.length, tools: Object.keys(tools).length }, "mcp servers connected");
 
@@ -93,19 +105,48 @@ interface MergeArgs {
   discovered: ToolSet;
   tools: ToolSet;
   refs: Map<string, McpToolRef>;
+  collisions: Set<string>;
   log: Logger;
+  governance?: McpManagerDeps["governance"];
 }
 
 // Namespace each tool as `${sanitizedKey}_${toolName}` (renaming the key is safe — execute closes over the raw
-// name). Collisions after namespacing are last-wins + warn (ruling 8).
-function mergeServerTools({ entry, discovered, tools, refs, log }: MergeArgs): void {
+// name). A collision is removed from the published set entirely: choosing either server would bind a presentation
+// key to an ambiguous authority, so the only safe result is fail-closed for that key while unrelated tools remain live.
+function mergeServerTools({ entry, discovered, tools, refs, collisions, log, governance }: MergeArgs): void {
   const prefix = sanitize(entry.key);
+  const revision = publicFingerprint(entry);
   for (const [toolName, tool] of Object.entries(discovered)) {
     const key = `${prefix}_${toolName}`;
-    if (key in tools) log.warn({ key, server: entry.key }, "mcp tool name collision; last server wins");
-    tools[key] = wrapExecute(tool);
-    refs.set(key, { serverName: entry.key, toolName });
+    if (collisions.has(key)) continue;
+    if (key in tools) {
+      delete tools[key];
+      refs.delete(key);
+      collisions.add(key);
+      log.warn({ key, server: entry.key }, "mcp tool name collision; key removed from published ToolSet");
+      continue;
+    }
+    const ref = { serverName: entry.key, toolName, subjectId: stableSubject(entry.key, toolName), subjectRevision: revision };
+    const wrapped = wrapExecute(tool);
+    tools[key] = governance ? wrapGovernedTool(wrapped, governance.service, {
+      identity: {
+        capabilityId: "mcp.tool.call",
+        ownerHostId: governance.ownerHostId,
+        subject: { subjectId: ref.subjectId, revision: ref.subjectRevision },
+      },
+      cellKey: "mcp-tool-call",
+      denyConstraints: governance.legacyDeny?.(entry.key, toolName) ? ["legacy-mcp-deny"] : [],
+    }) : wrapped;
+    refs.set(key, ref);
   }
+}
+
+function stableSubject(serverKey: string, toolName: string): string {
+  return `mcp.${createHash("sha256").update(`${serverKey}\u0000${toolName}`).digest("hex")}`;
+}
+
+function publicFingerprint(entry: McpServerEntry): string {
+  return `cfg.${createHash("sha256").update(JSON.stringify(mcpPublicConfig(entry.config))).digest("hex")}`;
 }
 
 // Spread-and-replace: keep the tool's schema/metadata/toModelOutput, only guard execute so a JSON-RPC error or a

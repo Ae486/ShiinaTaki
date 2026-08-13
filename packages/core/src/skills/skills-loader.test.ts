@@ -15,7 +15,7 @@ function skillFile(name: string, body: string): SkillMeta {
   mkdirSync(dir, { recursive: true });
   const skillPath = join(dir, "SKILL.md");
   writeFileSync(skillPath, `---\nname: ${name}\ndescription: "d"\n---\n${body}`);
-  return { name, description: `${name} does things`, skillPath };
+  return { name, description: `${name} does things`, skillPath, contentRevision: `sha256.${name}` };
 }
 afterEach(() => {
   for (const root of roots.splice(0)) rmTempDir(root);

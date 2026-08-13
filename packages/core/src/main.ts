@@ -11,9 +11,6 @@ import { createConversationStore } from "./agents/conversation-store.ts";
 import { createTurnQueue } from "./agents/turn-queue.ts";
 import { createTurnRegistry } from "./agents/turn-registry.ts";
 import { createWindowCalibrator } from "./agents/window-calibrator.ts";
-import { createApprovalBroker } from "./approval/approval-broker.ts";
-import { createApprovalGate } from "./approval/approval-gate.ts";
-import { createDecisionStore } from "./approval/decision-store.ts";
 import { createAvatarSubscriptions } from "./avatar/avatar-subscriptions.ts";
 import { createAvatarTools } from "./avatar/avatar-tools.ts";
 import { createAvatarVocabulary } from "./avatar/avatar-vocabulary.ts";
@@ -30,6 +27,9 @@ import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
 import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
 import { bootstrapCore } from "./boot/core-bootstrap.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
+import { createGovernancePolicyRepo } from "./governance/governance-policy-repo.ts";
+import { createGovernancePolicyService } from "./governance/governance-policy-service.ts";
+import { createCoreToolGovernanceAdapter } from "./governance/core-tool-governance-adapter.ts";
 import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
 import { createSummaryRepo } from "./db/summary-repo.ts";
 import { createTimelineRepo } from "./db/timeline-repo.ts";
@@ -40,6 +40,7 @@ import { createHostCatalogStore } from "./hosts/host-catalog.ts";
 import { bindHostGenerationRetirement } from "./hosts/host-generation-retirement.ts";
 import { loadOrCreateHostIdentity } from "./hosts/host-identity.ts";
 import { loadMcpConfig } from "./mcp/mcp-config.ts";
+import { createLegacyMcpDenyReader } from "./mcp/legacy-mcp-deny.ts";
 import { createMcpManager } from "./mcp/mcp-manager.ts";
 import { createCharacterImporter } from "./characters/character-import.ts";
 import { createCharacterStore } from "./characters/character-store.ts";
@@ -51,7 +52,6 @@ import { createImageDescriptionWriter } from "./memory/image-description-writer.
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
 import { createConnectionRegistry } from "./server/connection-registry.ts";
 import { createMethodRegistry } from "./server/method-registry.ts";
-import { approvalRespondMethod } from "./server/methods/approval-respond.ts";
 import { avatarReportMethod } from "./server/methods/avatar-report.ts";
 import { avatarSubscribeMethod } from "./server/methods/avatar-subscribe.ts";
 import { chatCancelMethod } from "./server/methods/chat-cancel.ts";
@@ -71,6 +71,7 @@ import { mediaUsageMethod } from "./server/methods/media-usage.ts";
 import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
 import { memoryStatusMethod } from "./server/methods/memory-status.ts";
 import { registerPerceptionMethods } from "./server/methods/perception-methods.ts";
+import { registerPermissionMethods } from "./server/methods/permission-methods.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
 import { createLoadSkillTool } from "./skills/load-skill-tool.ts";
@@ -88,8 +89,10 @@ import { createWriteFileTool } from "./workspace/write-file-tool.ts";
 // resolved as env > stored > built-in default — so a value the settings panel stored takes effect at THIS boot.
 const boot = bootstrapCore(process.env);
 const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
-loadOrCreateHostIdentity(join(serverConfig.dataDir, "host-identity.json"));
+const coreHostId = loadOrCreateHostIdentity(join(serverConfig.dataDir, "host-identity.json"));
 logger.info("Core Host identity loaded");
+const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
+const coreToolGovernance = createCoreToolGovernanceAdapter(governance, coreHostId);
 const timelineRepo = createTimelineRepo(db);
 // R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
 // their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).
@@ -176,19 +179,20 @@ const skillsLoader = createSkillsLoader({
 });
 
 // MCP (#8): connect operator-configured servers at boot; a missing/malformed config or a failing server degrades
-// gracefully (never fatal — MCP is an extension). Their tools join the per-turn ToolSet behind the approval gate.
+// gracefully. Standard SDK closures are wrapped by canonical governance plus read-only legacy deny compatibility.
 const mcpLog = logger.child({ mod: "mcp" });
+const legacyMcpDeny = createLegacyMcpDenyReader({
+  filePath: join(serverConfig.dataDir, "mcp-approvals.json"),
+  logger,
+});
 const mcpManager = await createMcpManager({
   entries: loadMcpConfig(join(serverConfig.dataDir, "mcp-servers.json"), mcpLog),
   logger,
-});
-
-// Approval gate: MCP tool calls await the operator's decision over WS; always/never persist, session/once do not.
-const approvalBroker = createApprovalBroker({ logger });
-const approvalGate = createApprovalGate({
-  mcp: mcpManager,
-  broker: approvalBroker,
-  decisions: createDecisionStore({ filePath: join(serverConfig.dataDir, "mcp-approvals.json"), logger }),
+  governance: {
+    service: governance,
+    ownerHostId: coreHostId,
+    legacyDeny: (serverName, toolName) => legacyMcpDeny.denies(serverName, toolName),
+  },
 });
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
@@ -203,6 +207,7 @@ const screenshotTool = createScreenshotTool({
   registry: connectionRegistry,
   catalogs: hostCatalogs,
   broker: capabilityBroker,
+  governance,
   // The core is the single sanctioned Workspace writer (invariant 2); the Shell only returns base64 over the wire.
   store: createScreenshotStore({ screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots") }),
   describe: describeScreenshot,
@@ -215,6 +220,7 @@ const shellCapabilityDeps = {
   catalogs: hostCatalogs,
   broker: capabilityBroker,
   logger,
+  governance,
 };
 
 // The six Shell-routed capability tools as one bag (invariant 7): the chat agent's extraTools spreads it AND the
@@ -251,6 +257,7 @@ perception.start();
 const workspacePaths = createWorkspacePaths({ root: join(serverConfig.dataDir, "workspace") });
 const readFileTool = createReadFileTool({ paths: workspacePaths, logger });
 const writeFileTool = createWriteFileTool({ paths: workspacePaths, logger });
+const staticCoreTools: ToolSet = { ...createCurrentTimeTool(), ...readFileTool, ...writeFileTool };
 
 const registry = createMethodRegistry();
 // Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
@@ -290,16 +297,16 @@ registry.register(
       imageMemory: imageDescriptionWriter
         ? { onImageTurn: (input) => void imageDescriptionWriter.onImageTurn(input) }
         : undefined,
-      // Extra tools = the skills meta-tool + every capability tool (Shell-gated + core-side Workspace files) + MCP tools
-      // + the pure get_current_time tool (no Gate/broker — reads new Date(); the precision pull for the ambient time lines).
+      // Adapter-governed tools stay outside the Core adapter: Skill and MCP carry canonical subject sidecars, while
+      // Shell capabilities retain Host governance until Batch 2 installs the Core projection.
       extraTools: {
-        ...createLoadSkillTool(skillsLoader),
-        ...createCurrentTimeTool(),
+        ...createLoadSkillTool(skillsLoader, { service: governance, ownerHostId: coreHostId }),
         ...capabilityTools,
-        ...readFileTool,
-        ...writeFileTool,
         ...mcpManager.tools(),
       },
+      // Stable Core-local tools join per-turn memory/avatar tools behind the explicit Core binding table.
+      coreTools: staticCoreTools,
+      coreToolGovernance,
       // Per-character avatar tools bind their publish target (the turn's characterId) here — same lifetime as memory tools.
       // vocab makes `name` a dynamic enum of the worn costume's live names (1e), so a costume swap rejects stale names.
       characterTools: (characterId) =>
@@ -316,7 +323,6 @@ registry.register(
       // assembler; only the sanctioned entry point moved from the instructions to the tail.
       volatileContext: (now) => perception.renderContext(now),
       costumeChanged: (characterId) => avatarVocabulary.consumeCostumeChanged(characterId),
-      approval: approvalGate,
       // Batch-6 usage seam: each committed turn's real usage calibrates the main slot's window (the calibrator
       // ignores the 0 that stands in for an absent inputTokens field).
       onUsage: (report) => windowCalibrator.onUsage(report.inputTokens ?? 0, report.estimatedInput),
@@ -333,7 +339,6 @@ registry.register(
   ),
 );
 registry.register(chatCancelMethod(turnControls.turns));
-registry.register(approvalRespondMethod(approvalBroker));
 registry.register(hostCatalogPublishMethod(hostCatalogs, connectionRegistry));
 registry.register(capabilityRespondMethod(capabilityBroker, connectionRegistry));
 registry.register(timelineHistoryMethod(timelineRepo));
@@ -355,6 +360,7 @@ registry.register(characterCostumeResolutionMethod({ store: characterStore, char
 // Perception methods (T3b): Privacy Pause read/write + the activity card. Operator-only — the agent has no path to
 // un-pause its own observation (pinned by privacy-pause-writer.test.ts); the panel lands with #26.
 registerPerceptionMethods(registry, perception);
+registerPermissionMethods(registry, governance, logger);
 // Memory maintenance (T5 batch 4b): run the tidy pass on demand. Operator-only, NO Rust mirror; the write-count
 // trigger rides autoMemory internally — this surface exists for the settings panel/CLI (#26).
 registry.register(memoryTidyMethod(tidy));
@@ -376,7 +382,10 @@ startAttachmentGc({ store: attachmentStore, ttlMs: boot.attachmentConfig.ttlMs, 
 if (devTriggerEnabled(process.env)) {
   logger.warn("TAKI_DEV_TRIGGER=1 — registering the DEV capability.trigger method (L1 drive; node-side gate still authorizes)");
   registry.register(
-    capabilityTriggerMethod({ tools: { ...capabilityTools, ...readFileTool, ...writeFileTool }, logger }),
+    capabilityTriggerMethod({
+      tools: { ...capabilityTools, ...coreToolGovernance.wrap({ ...readFileTool, ...writeFileTool }) },
+      logger,
+    }),
   );
 }
 

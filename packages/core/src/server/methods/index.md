@@ -20,10 +20,11 @@
 - character-list.ts — character.list (operator-only): enumerate imported characters from their character.json markers
 - character-costumes.ts — character.costumes (operator-only): one character's costumes + settings filenames + on-demand availability (renderable / missing motions+packs)
 - character-costume-resolution.ts — character.costumeResolution (operator-only): one costume's external-ref → characters-root rel-path map, on demand (#18)
-- approval-respond.ts — approval.respond (operator-only): resolve a pending MCP tool-approval ask; unknown id -> {accepted:false}
+- approval-respond.ts — dormant pre-Slice-3 operator method retained for tests/Slice-4 migration; `main.ts` does not register it
 - capability-respond.ts — capability.respond (node-only): Host/generation/control-bound terminal settlement
-- capability-trigger.ts — capability.trigger (operator-only, DEV-ONLY via TAKI_DEV_TRIGGER=1): drive a real capability tool's execute without the LLM (node-side gate still authorizes); + devTriggerEnabled(env)
+- capability-trigger.ts — capability.trigger (operator-only, DEV-ONLY via TAKI_DEV_TRIGGER=1): drive a real capability tool's execute without the LLM while retaining Core governance and any Host final-enforcement path; + devTriggerEnabled(env)
 - config-methods.ts — the settings surface's single registration seam: config.list / config.set / config.subscribe
 - config-list.ts — config.list (operator-only): every knob with effective value + provenance (stored/env-locked/apply class); secrets as set/not-set
 - config-set.ts — config.set (operator-only): thin controller over config-writer; refusals ride CONFIG_REFUSED + a machine-readable reason; logs keys, never values
 - config-subscribe.ts — config.subscribe (operator-only): config.changed pushes, ctx.onClose auto-unsubscribe
+- permission-methods.ts — operator-only permission.levelGet/levelSet/cellsGet/cellSet; optimistic conflicts and policy-domain refusals are structured app errors

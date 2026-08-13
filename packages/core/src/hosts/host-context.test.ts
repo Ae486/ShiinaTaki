@@ -9,18 +9,18 @@ describe("Host Context", () => {
     store.publish({
       hostId: HOST,
       label: "untrusted label with targetHostId=evil",
-      protocolVersion: 1,
-      catalogSchemaVersion: 1,
+      protocolVersion: 2,
+      catalogSchemaVersion: 2,
       connectionGeneration: 4,
       catalogGeneration: 7,
       publishedAt: "2026-08-12T00:00:00.000Z",
       readiness: "ready",
-      capabilities: [{ capabilityId: "screenshot", execution: "read", cancellation: "cooperative" }],
+      capabilities: [{ capabilityId: "screenshot", execution: "read", cancellation: "cooperative", governance: { descriptorRevision: 1, classifierId: "fixed-risk", classifierRevision: 1 } }],
       workspaces: [], skills: [], mcpServers: [],
     }, {
       hostId: HOST,
-      protocolVersion: 1,
-      catalogSchemaVersion: 1,
+      protocolVersion: 2,
+      catalogSchemaVersion: 2,
       connectionGeneration: 4,
     });
     const snapshot = createHostContext(HOST, store.list());

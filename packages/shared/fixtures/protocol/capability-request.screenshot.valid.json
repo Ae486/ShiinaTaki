@@ -8,6 +8,7 @@
     "connectionGeneration": 1,
     "catalogGeneration": 1,
     "policyGeneration": 1,
+    "governanceProjection": { "registryRevision": 1, "descriptorRevision": 1, "classifierRevision": 1, "cells": [{ "key": "screenshot", "posture": "auto" }], "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
     "approvalGeneration": 1,
     "capabilityId": "screenshot",
     "inputDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",

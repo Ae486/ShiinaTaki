@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { ScreenshotOutput } from "@taki/shared";
 import { fenceUntrusted } from "../agents/untrusted-fence.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
-import { brokerReturning, catalogsReturning, fakeHost, registryReturning } from "../testing/capability-tool-harness.ts";
+import { brokerReturning, catalogsReturning, fakeHost, registryReturning, testGovernance } from "../testing/capability-tool-harness.ts";
 import { createPrivacyPause } from "../perception/privacy-pause.ts";
 import type { CapabilityBroker } from "./capability-broker.ts";
 import type { ConnectionRegistry } from "../server/connection-registry.ts";
@@ -28,7 +28,7 @@ function toolWith(deps: {
   describe?: (input: { dataBase64: string; mediaType: string; prompt?: string }) => Promise<string | null>;
 }) {
   const { logger } = createCaptureLogger();
-  return createScreenshotTool({ ...deps, catalogs: catalogsReturning("screenshot"), logger });
+  return createScreenshotTool({ ...deps, catalogs: catalogsReturning("screenshot"), logger, governance: testGovernance() });
 }
 
 describe("createScreenshotTool", () => {

@@ -3,7 +3,7 @@ Cross-cutting Pet UI clients + seams (talk to the Agent Core / hold window-share
 icons/ (the shared glyph set) and the two window-shared React hooks below.
 - ws-client.ts — operator WS JSON-RPC client to the Core (browser WebSocket): the public WsClient surface + turn/handshake wiring
 - ws-client-routes.ts — inbound half: the zod boundary (frame parse + chat-stream/avatar/timeline/config push routing) and the D29 mid-turn-close abort
-- ws-client-methods.ts — outbound half: the handshake + every plain request/response method (timeline, media, character, config, memory, perception)
+- ws-client-methods.ts — outbound half: the handshake + every plain request/response method (timeline, media, character, config, memory, perception, Core permission governance)
 - rpc-deadline.ts — method-class timing table + typed deadline error + json-rpc-2.0 native timeout requester seam
 - timing-policy.ts — window-owned bootstrap/last-good timing policy store; validates full Core config refreshes without persistence
 - timing-policy-sync.ts — exact-once config subscription and serialized full-policy refresh for an authenticated client

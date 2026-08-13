@@ -10,12 +10,16 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { TimelineEntry } from "@taki/shared";
 import { jsonLine } from "./line-buffer.ts";
-import { fetchTimelineEntries, sayToAgent, pairOperator, triggerCapability, type AgentTurn } from "./operator-drivers.ts";
+import { fetchTimelineEntries, sayToAgent, pairOperator, setPermissionLevel, triggerCapability, type AgentTurn } from "./operator-drivers.ts";
 import { childEnv, getFreePort, killTree, spawnProc, type Proc } from "./procs.ts";
 import { CORE_DIR, dummyProviderEnv, realProviderEnv, TAKI_NODE_BIN } from "./paths.ts";
 import { openRpcSocket, type RpcSocket } from "./rpc-socket.ts";
 import { seedMemoryEntries, type SeedMemoryEntry } from "./seed-memory.ts";
 import { seedTimeline, type SeedRow } from "./seed-timeline.ts";
+import {
+  startCapabilityRelay,
+  type CapabilityRelay,
+} from "./ws-relay.ts";
 
 /** taki-node.rs hardcodes this device name; pairing lines for the node are matched by it. */
 export const NODE_DEVICE_NAME = "TakiAgent Headless Node";
@@ -39,6 +43,8 @@ export interface StackOptions {
   /** Seed entry files into the workspace memory tree BEFORE the core boots — startup reconcile indexes them (files
    *  are truth); the name-recall L2's "known only in memory" setup. */
   seedMemory?: SeedMemoryEntry[];
+  /** Route only the Node connection through a test-only relay with an armable next-request mutator. */
+  nodeWsRelay?: boolean;
 }
 
 /** One node-side gate decision from <node dataDir>/audit.jsonl (names-only except exec's command). */
@@ -60,6 +66,8 @@ export interface Stack {
   auditPath: string;
   core: Proc;
   node(): Proc | null;
+  /** The test-only Node relay, when capabilityRequestTransform was configured. */
+  relay(): CapabilityRelay | null;
   /** Resolves the first parsed core pino line matching pred (scans captured lines first). */
   waitForCoreLog(pred: LogPred, timeoutMs?: number): Promise<Record<string, unknown>>;
   countCoreLog(pred: LogPred): number;
@@ -71,6 +79,8 @@ export interface Stack {
   operator(): Promise<RpcSocket>;
   /** L1 drive (dev capability.trigger): run a capability tool's execute with no LLM; returns its structured result. */
   l1(capability: string, input?: unknown, timeoutMs?: number): Promise<unknown>;
+  /** Mutates the Core global Permission Level with the current generation. */
+  setPermissionLevel(level: "strict" | "standard" | "relaxed"): Promise<void>;
   /** L2 drive: one real chat turn through the agent. */
   agentSay(text: string, timeoutMs?: number): Promise<AgentTurn>;
   /** The persisted timeline oldest-first (turn-fidelity assertions: tool rows prove tool records survived). */
@@ -86,6 +96,7 @@ interface Parts {
   nodeDataDir: string;
   core: Proc;
   node: Proc | null;
+  relay: CapabilityRelay | null;
   operatorSocket: RpcSocket | null;
 }
 
@@ -145,25 +156,31 @@ async function bootParts(options: StackOptions): Promise<Parts> {
     nodeDataDir,
     core: spawnProc({ command: process.execPath, args: ["src/main.ts"], cwd: CORE_DIR, env: childEnv(coreEnv) }),
     node: null,
+    relay: null,
     operatorSocket: null,
   };
   // B3: once the core process (or a temp dir) exists, ANY boot failure must tear the whole stack down — a leaked
   // core/node process or temp dir would poison later runs. Everything after the spawn lives inside this guard.
   try {
-    await waitCoreListening(parts);
-    // Seed node-side config BEFORE the node boots (ExecPolicy::load reads it once at startup).
-    if (options.execPolicy !== undefined) {
-      writeFileSync(join(nodeDataDir, "exec-policy.json"), JSON.stringify(options.execPolicy));
-    }
-    if (options.gateDecisions !== undefined) {
-      const decisions = options.gateDecisions.map((entry) => ({ ...entry, decidedAt: new Date().toISOString() }));
-      writeFileSync(join(nodeDataDir, "gate-decisions.json"), JSON.stringify({ decisions }));
-    }
+    await prepareNode(parts, options);
     if (options.startNode !== false) await startNodeProc(parts, true);
     return parts;
   } catch (error) {
     await teardown(parts);
     throw error;
+  }
+}
+
+async function prepareNode(parts: Parts, options: StackOptions): Promise<void> {
+  await waitCoreListening(parts);
+  if (options.nodeWsRelay) parts.relay = await startCapabilityRelay(parts.wsUrl);
+  // Seed node-side config BEFORE the node boots (ExecPolicy::load reads it once at startup).
+  if (options.execPolicy !== undefined) {
+    writeFileSync(join(parts.nodeDataDir, "exec-policy.json"), JSON.stringify(options.execPolicy));
+  }
+  if (options.gateDecisions !== undefined) {
+    const decisions = options.gateDecisions.map((entry) => ({ ...entry, decidedAt: new Date().toISOString() }));
+    writeFileSync(join(parts.nodeDataDir, "gate-decisions.json"), JSON.stringify({ decisions }));
   }
 }
 
@@ -184,7 +201,7 @@ async function startNodeProc(parts: Parts, feedPairing: boolean): Promise<void> 
     cwd: parts.nodeDataDir,
     env: childEnv({
       TAKI_DATA_DIR: parts.nodeDataDir,
-      TAKI_WS_URL: parts.wsUrl,
+      TAKI_WS_URL: parts.relay?.url ?? parts.wsUrl,
       TAKI_GATE_AUTOAPPROVE: parts.autoApprove,
     }),
   });
@@ -228,6 +245,7 @@ function makeStack(parts: Parts): Stack {
     auditPath,
     core: parts.core,
     node: () => parts.node,
+    relay: () => parts.relay,
     waitForCoreLog: async (pred, timeoutMs) => {
       const line = await parts.core.stdout.waitFor(matchJson(pred), timeoutMs);
       return jsonLine(line) ?? {};
@@ -242,6 +260,7 @@ function makeStack(parts: Parts): Stack {
     operator: () => getOperator(parts),
     l1: async (capability, input, timeoutMs) =>
       triggerCapability(await getOperator(parts), { capability, input, timeoutMs }),
+    setPermissionLevel: async (level) => setPermissionLevel(await getOperator(parts), level),
     agentSay: async (text, timeoutMs) => sayToAgent(await getOperator(parts), text, timeoutMs),
     timeline: async () => fetchTimelineEntries(await getOperator(parts), "taki"),
     screenshots: () => (existsSync(screenshotsDir) ? readdirSync(screenshotsDir) : []),
@@ -267,6 +286,7 @@ function matchJson(pred: LogPred): (raw: string) => boolean {
 async function teardown(parts: Parts): Promise<void> {
   parts.operatorSocket?.close();
   if (parts.node) killTree(parts.node);
+  await parts.relay?.close();
   killTree(parts.core);
   const exits = [parts.core.exited, ...(parts.node ? [parts.node.exited] : [])];
   await Promise.allSettled(exits);

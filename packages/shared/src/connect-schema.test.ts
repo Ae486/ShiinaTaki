@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import {
+  HOST_CATALOG_SCHEMA_VERSION,
+  HOST_CONTROL_PROTOCOL_VERSION,
+} from "./host-control-schema.ts";
 import { CONNECT_METHOD, ConnectParamsSchema, ConnectResultSchema, RoleSchema } from "./connect-schema.ts";
 
 const VALID_UUID = "550e8400-e29b-41d4-a716-446655440000";
@@ -46,7 +50,10 @@ describe("ConnectParamsSchema", () => {
       ...base,
       role: "node",
       capabilities: ["screenshot"],
-      host: { protocol: { min: 1, max: 1 }, catalogSchemaVersions: [1] },
+      host: {
+        protocol: { min: HOST_CONTROL_PROTOCOL_VERSION, max: HOST_CONTROL_PROTOCOL_VERSION },
+        catalogSchemaVersions: [HOST_CATALOG_SCHEMA_VERSION],
+      },
     });
     expect(parsed.capabilities).toEqual(["screenshot"]);
   });
@@ -56,7 +63,10 @@ describe("ConnectParamsSchema", () => {
     expect(
       ConnectParamsSchema.safeParse({
         ...base,
-        host: { protocol: { min: 1, max: 1 }, catalogSchemaVersions: [1] },
+        host: {
+          protocol: { min: HOST_CONTROL_PROTOCOL_VERSION, max: HOST_CONTROL_PROTOCOL_VERSION },
+          catalogSchemaVersions: [HOST_CATALOG_SCHEMA_VERSION],
+        },
       }).success,
     ).toBe(false);
   });
@@ -83,7 +93,12 @@ describe("ConnectResultSchema", () => {
     expect(
       ConnectResultSchema.safeParse({
         status: "ok",
-        host: { hostId: VALID_UUID, protocolVersion: 1, catalogSchemaVersion: 1, connectionGeneration: 1 },
+        host: {
+          hostId: VALID_UUID,
+          protocolVersion: HOST_CONTROL_PROTOCOL_VERSION,
+          catalogSchemaVersion: HOST_CATALOG_SCHEMA_VERSION,
+          connectionGeneration: 1,
+        },
       }).success,
     ).toBe(true);
   });

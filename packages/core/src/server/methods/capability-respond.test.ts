@@ -39,16 +39,18 @@ describe("capabilityRespondMethod", () => {
       deviceId: HOST,
       role: "node",
       capabilities: [],
-      host: { protocolVersion: 1, catalogSchemaVersion: 1 },
+      host: { protocolVersion: 2, catalogSchemaVersion: 2 },
     });
     const broker = makeBroker();
     let sent: CapabilityRequest | undefined;
     const pending = broker.request({
       hostId: HOST, connectionGeneration: 1, catalogGeneration: 1,
-      descriptor: { capabilityId: "screenshot", execution: "read", cancellation: "cooperative" },
+      descriptor: { capabilityId: "screenshot", execution: "read", cancellation: "cooperative", governance: { descriptorRevision: 1, classifierId: "fixed-risk", classifierRevision: 1 } },
+      policyGeneration: 1,
+      governanceProjection: { registryRevision: 1, descriptorRevision: 1, classifierRevision: 1, cells: [{ key: "screenshot", posture: "auto" }], digest: "a".repeat(64) },
       notify: (_m, p) => (sent = p as CapabilityRequest),
     }, {});
-    const params = { requestId: sent!.requestId, control: sent!.control, state: "completed", output: {} };
+    const params = { requestId: sent!.requestId, control: sent!.control, state: "completed", output: {}, governance: { descriptorRevision: 1, classifierRevision: 1, cellKey: "screenshot", effectivePosture: "auto", constraint: "none" } };
     expect(await registryFor(broker, connections).dispatch(request(params), ctxFor(current))).toMatchObject({
       result: { accepted: true },
     });
@@ -69,14 +71,16 @@ describe("capabilityRespondMethod", () => {
       deviceId: HOST,
       role: "node",
       capabilities: [],
-      host: { protocolVersion: 1, catalogSchemaVersion: 1 },
+      host: { protocolVersion: 2, catalogSchemaVersion: 2 },
     });
     let sent: CapabilityRequest | undefined;
     const pending = broker.request({
       hostId: HOST,
       connectionGeneration: 1,
       catalogGeneration: 1,
-      descriptor: { capabilityId: "screenshot", execution: "read", cancellation: "cooperative" },
+      descriptor: { capabilityId: "screenshot", execution: "read", cancellation: "cooperative", governance: { descriptorRevision: 1, classifierId: "fixed-risk", classifierRevision: 1 } },
+      policyGeneration: 1,
+      governanceProjection: { registryRevision: 1, descriptorRevision: 1, classifierRevision: 1, cells: [{ key: "screenshot", posture: "auto" }], digest: "a".repeat(64) },
       notify: (_method, params) => (sent = params as CapabilityRequest),
     }, {});
     const replacement = connections.create();
@@ -84,9 +88,9 @@ describe("capabilityRespondMethod", () => {
       deviceId: HOST,
       role: "node",
       capabilities: [],
-      host: { protocolVersion: 1, catalogSchemaVersion: 1 },
+      host: { protocolVersion: 2, catalogSchemaVersion: 2 },
     });
-    const params = { requestId: sent!.requestId, control: sent!.control, state: "completed", output: {} };
+    const params = { requestId: sent!.requestId, control: sent!.control, state: "completed", output: {}, governance: { descriptorRevision: 1, classifierRevision: 1, cellKey: "screenshot", effectivePosture: "auto", constraint: "none" } };
     expect(await registryFor(broker, connections).dispatch(request(params), ctxFor(old))).toMatchObject({
       result: { accepted: false, reason: "stale_generation" },
     });

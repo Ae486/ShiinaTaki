@@ -62,6 +62,11 @@ pub enum ErrorCode {
     NotAuthenticated,
     AlreadyConnected,
     Forbidden,
+    ConfigRefused,
+    PolicyConflict,
+    GovernanceRefused,
+    GovernanceDenied,
+    ApprovalRequired,
 }
 
 /// A JSON-RPC id: string or number (mirror of `z.union([z.string(), z.number()])`).

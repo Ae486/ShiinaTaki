@@ -19,6 +19,7 @@ import { renderCurrentTime, renderDayDate } from "../time/time-context.ts";
 import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
 import type { ConversationStore } from "./conversation-store.ts";
 import { isContextOverflowError, observedTokensOf } from "./overflow-error.ts";
+import { mergeToolSets } from "./tool-set-assembly.ts";
 import type { TurnMessage, UserImageInput } from "./turn-mapping.ts";
 
 /** Per-turn WS handle: notify pushes to the asking operator socket; onClose denies pending approvals on disconnect. */
@@ -57,8 +58,12 @@ export interface ChatAgentDeps {
   attachments?: { save(dataBase64: string, mediaType: ImageAttachment["mediaType"]): { ref: string; bytes: number } };
   /** Detached post-turn image-description hook (mirrors autoMemory); fired void, only when the turn carried images (D28). */
   imageMemory?: { onImageTurn(input: { characterId: string; refs: string[]; caption: string }): void };
-  /** Extra tools merged after memory tools each turn (skills load_skill + MCP tools); stable across turns. */
+  /** Adapter-governed tools merged after Core governance (Skill/MCP/Host); stable across turns. */
   extraTools?: ToolSet;
+  /** Stable Core-local tools included with memory/avatar tools before the Core adapter runs. */
+  coreTools?: ToolSet;
+  /** Wraps only the Core-local per-turn ToolSet with trusted bindings; absent in focused agent tests. */
+  coreToolGovernance?: { wrap(tools: ToolSet): ToolSet };
   /** Per-character tools built fresh each turn with the turn's characterId (avatar tools bind their publish target here). */
   characterTools?: (characterId: string) => ToolSet;
   /** Extra instructions appended after the assembled memory context (skills list + avatar vocabulary); "" contributes nothing. */
@@ -163,7 +168,7 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
 // the pre-batch-6 runTurn body, moved verbatim). The fresh per-attempt history() pull is the point: the retry's
 // window is computed under the budget the calibrator just shrank.
 async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): AsyncIterable<string> {
-  const { store, memory, approval } = deps;
+  const { store, approval } = deps;
   const { characterId, message, attachments, images, vision, userSeq, state } = attempt;
   const history = store.history(characterId);
   // ONE clock read per attempt: the instructions' day line and the tail's time line must agree (Q4).
@@ -174,11 +179,10 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   const agent = new ToolLoopAgent({
     model: vision ? vision.model : deps.model,
     instructions,
-    tools: { ...memory.createTools(characterId), ...(deps.extraTools ?? {}), ...(deps.characterTools?.(characterId) ?? {}) },
+    tools: assembleTurnTools(deps, characterId),
     stopWhen: [isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS), ...(deps.stopConditions ?? [])],
-    // MCP tool calls await the operator's decision inside the loop; internal tools return not-applicable (ruling 5).
-    // The gate is installed whenever it is configured — without a turn (no notify sink) it denies unremembered
-    // MCP tools instead of coming off (fail-closed: a turn without an operator must not bypass approval).
+    // Compatibility seam for focused tests and pre-Slice-3 callers. Production Batch 1 leaves this absent because
+    // MCP execution is already guarded by its canonical adapter and `ask` fails closed before the raw closure.
     toolApproval: approval ? ({ toolCall }) => approval.decide(toolCall, turn?.notify) : undefined,
     // A completed step disqualifies the R2 retry (see runTurn's seam comment); construction-level on purpose so the
     // frozen stream loop body below stays byte-identical (`onStepFinish` is this callback's deprecated alias).
@@ -235,6 +239,15 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   if (await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
   fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
   fireUsageReport(deps, { usage: result.usage, instructions, outgoing });
+}
+
+function assembleTurnTools(deps: ChatAgentDeps, characterId: string): ToolSet {
+  const coreTools = mergeToolSets(
+    deps.memory.createTools(characterId),
+    deps.coreTools ?? {},
+    deps.characterTools?.(characterId) ?? {},
+  );
+  return mergeToolSets(deps.coreToolGovernance?.wrap(coreTools) ?? coreTools, deps.extraTools ?? {});
 }
 
 // A disconnect mid-turn denies every pending approval immediately (fail-closed, ruling 3); so does an abort —

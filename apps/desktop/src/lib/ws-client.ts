@@ -3,7 +3,7 @@
  * OUTPUT: createWsClient({transport}) -> WsClient: connect()/chat()/subscribeAvatar()/reportAvatar() +
  *         timelineHistory()/subscribeTimeline()/mediaGet() (chat page) + importCharacter()/listCharacters()/
  *         characterCostumes()/costumeResolution() (#18) + configList()/configSet()/subscribeConfig() +
- *         memoryTidy()/memoryStatus()/mediaUsage()/mediaClear()/perception* (settings pages) + push handlers.
+ *         memoryTidy()/memoryStatus()/mediaUsage()/mediaClear() plus perception/permission methods and handlers.
  * POS:    ui/lib — the Pet UI's operator transport to the Agent Core (mirrors apps/cli chat-client, browser WS). The
  *         composition root over ws-client-routes (inbound) and ws-client-methods (outbound). No React/Tauri imports.
  */
@@ -32,6 +32,11 @@ import type {
   PerceptionCard,
   PerceptionPauseSetParams,
   PerceptionPauseState,
+  PermissionCellSetParams,
+  PermissionCellSetResult,
+  PermissionCellsState,
+  PermissionLevelSetParams,
+  PermissionLevelState,
   TimelineEntry,
   TimelineHistoryParams,
   TimelineHistoryResult,
@@ -96,6 +101,14 @@ export interface WsClient {
   perceptionPauseSet(params: PerceptionPauseSetParams): Promise<PerceptionPauseState>;
   /** Reads the activity card: current + recent foreground stretches, sampling status, pause state. */
   perceptionCard(): Promise<PerceptionCard>;
+  /** Reads the Core-authoritative global Permission Level and durable policy generation. */
+  permissionLevelGet(): Promise<PermissionLevelState>;
+  /** Mutates the global Level with optimistic generation matching; timed-out outcomes are never replayed. */
+  permissionLevelSet(params: PermissionLevelSetParams): Promise<PermissionLevelState>;
+  /** Reads the complete Core projection used by the advanced Settings cells view. */
+  permissionCellsGet(): Promise<PermissionCellsState>;
+  /** Stores or resets one Core cell override with optimistic generation matching. */
+  permissionCellSet(params: PermissionCellSetParams): Promise<PermissionCellSetResult>;
   /** Registers the fire-and-forget avatar command sink (core -> operator push). Replaces any prior handler. */
   onAvatarCommand(handler: (command: AvatarCommand) => void): void;
   /** Registers the optional live-timeline sink (shared with the chat page server-side). */

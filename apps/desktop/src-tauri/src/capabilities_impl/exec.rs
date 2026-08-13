@@ -55,6 +55,7 @@ pub fn classify(policy: &ExecPolicy, input: &Value) -> ExecClass {
 }
 
 /// The command string for the audit line + approver dialog (ruling 9); empty when the request is malformed.
+#[allow(dead_code)] // Slice-4 challenge detail seam; Slice 3 classifies locally but never prompts.
 pub fn command_of(input: &Value) -> &str {
     input.get("command").and_then(Value::as_str).unwrap_or("")
 }

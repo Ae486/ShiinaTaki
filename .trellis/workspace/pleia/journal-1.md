@@ -534,3 +534,117 @@ None yet. No stage, commit, finish/archive, or push was performed in this sessio
 - Finish/archive only after the task commit; push requires separate owner authorization.
 - Then proceed to T4 pre-implementation research consolidation and the owner discussion checklist, without implementing
   T4 prematurely.
+
+## Session 15: T4 Skills/MCP Host-control delivery and Governance Authority planning
+
+> Historical planning snapshot. Session 16 below supersedes its implementation and status statements.
+
+**Date**: 2026-08-12
+**Task**: `.trellis/tasks/08-12-governance-authority`
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Recovered the dedicated T4 worktree after the checked Host-control foundation and converged the third Skills/MCP slice
+to an owner-review implementation contract. The planning explicitly preserves standard MCP through the installed AI
+SDK and portable `SKILL.md` packages, and migrates the current Shell/MCP authority split into one extension-neutral
+Core policy model without creating a third permission store or duplicating Rust security classifiers in TypeScript.
+
+### Main Changes
+
+- Recorded Slice 2 as committed/verified but kept it in `review`; the owner-approved real simultaneous two-Node
+  process harness remains a mandatory Slice 8 integration gate.
+- Added read-only live governance research covering the three current stores (`permission-level.json`,
+  `gate-decisions.json`, `mcp-approvals.json`), two prompt paths, missing Core/Home methods, and migration hazards.
+- Froze canonical capability identity, descriptor/classifier revisions, override modes, Core SQLite and optimistic
+  `policyGeneration`, complete Host projection, stricter-only local composition, terminal enforcement evidence, and
+  deny-only legacy compatibility.
+- Froze the Slice 3/4 seam: Slice 3 owns policy/evaluator/projection/Home; Slice 4 owns the only Approval lifecycle,
+  durable decisions, challenge/resume, list/revoke, and background disclosure. Slice 3 fails closed on `ask` and is not
+  independently releasable.
+- Curated real `implement.jsonl` and `check.jsonl` contexts for later high-effort implement and xhigh-effort check
+  dispatches.
+- Updated HANDOFF for the new active child and implementation gate.
+
+### Git Commits
+
+None in this planning update. No push, rebase, reset, force, finish/archive, or destructive cleanup was performed.
+
+### Testing
+
+- [OK] Research read-back completed and its standalone `git diff --check` passed.
+- [OK] Live Git, Trellis task, migration registry, Shared/Core/Rust/Home/MCP/Skill seams, and mainline position were
+  rechecked during planning.
+- [OK] Final planning-document context validation passed: both JSONL files contain 23 valid, existing-path entries,
+  Phase 1.4 criteria load correctly, and repository `git diff --check` is clean apart from line-ending warnings.
+- [NOT RUN] Production tests, builds, lint, typecheck, Clippy, process smoke, and formal Trellis check; no Slice 3
+  production code exists yet.
+
+### Status
+
+[HISTORICAL — SUPERSEDED] **At this point Slice 3 planning was frozen and awaiting implementation-boundary approval.**
+
+### Next Steps
+
+- Report exact internal batches, expected files, verification, merge risks, and the standard MCP/Skill boundary to the
+  owner in Chinese.
+- After explicit approval, refresh `main...HEAD` and the next migration number, then dispatch the high-effort
+  `trellis-implement`; use the xhigh-effort `trellis-check` after substantive implementation.
+
+## Session 16: T4 Governance Authority implementation and convergence
+
+**Date**: 2026-08-13
+**Task**: `.trellis/tasks/08-12-governance-authority`
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Implemented and formally checked the third Skills/MCP slice. Core is now the durable global Permission Level and
+common-policy authority; Core/MCP/Skill/Host actions resolve one canonical governance registry; Rust remains the
+trusted Host classifier and final OS boundary and may only tighten the complete Core projection. Home exposes one
+generation-safe, non-persisted Level/advanced-cell operator surface. Effective `ask` is structured fail-closed until
+Slice 4 installs the only canonical Approval lifecycle.
+
+### Main Changes
+
+- Added strict Shared identity/descriptor/evaluator/operator/projection/evidence contracts and protocol/catalog v2.
+- Added migration `014-governance-policy`, Core repository/service, optimistic `policyGeneration`, operator methods,
+  registry reconciliation, and explicit Core/MCP/Skill adapters.
+- Added complete canonical Host projections/digests, per-capability policy lineage, Rust trusted classification,
+  stricter-only legacy/local/managed/hard composition, bounded evidence, and no local prompt/decision writer.
+- Preserved standard `@ai-sdk/mcp` raw-name closures and open `SKILL.md`; metadata and sanitized model keys grant no
+  authority. Legacy exact denies tighten, while legacy allows/session state are inert.
+- Added typed Desktop permission RPCs, read/write deadline classification, Home Level/advanced cells, conflict/refetch,
+  second-confirm/immutable/reset states, retired-client suppression, and source/tests proving no policy cache.
+- Added real Core + external `taki-node` governance E2E, including a loopback-only test relay proving stale N-1 and
+  same-N valid-digest projection tampering rejection without production transport changes.
+- Formal checks repaired missing production/test governance wiring, per-capability digest lineage, evidence precision,
+  protocol-v2 fixtures, structured `APPROVAL_REQUIRED`, Home snapshot validation, and stale HANDOFF language.
+- Superseded stale authority wording in `CONTEXT.md`, executable backend/frontend specs, ADR 0001/0002/0003/0006/0007,
+  HANDOFF, task PRD/design, and package/folder indexes.
+
+### Git Commits
+
+None in this Slice 3 work. No push, rebase, reset, force, finish/archive, or destructive cleanup was performed.
+
+### Testing
+
+- [OK] `pnpm -r typecheck` and root `pnpm lint`.
+- [OK] `pnpm -r test`: Shared 251, CLI 32, Desktop 370, Core 1,255 passed + 1 skipped.
+- [OK] Full E2E: 23 passed, 6 skipped, 0 todo; stale/tampered projection process proof 2/2.
+- [OK] Rust 155 tests, Clippy `--all-targets -- -D warnings`, and locked `taki-node` debug build.
+- [OK] `git diff --check`; only existing CRLF conversion notices for two Trellis task JSON files.
+- [NOT RUN] Real packaged WebView manual interaction. Automated Home component/controller/schema coverage is green;
+  no PRD manual AC was marked from inference.
+
+### Status
+
+[REVIEW] **Slice 3 implementation, formal checks, real-process evidence, and spec convergence complete.** The child is
+not independently releasable because `ask` intentionally requires Slice 4. It remains uncommitted and unarchived.
+
+### Next Steps
+
+- Recheck live `main`, migration numbering, and `08-12-approval-productization` planning/context.
+- Implement the one Core-owned Approval request/respond/decision/challenge-resume/list/revoke lifecycle; do not revive
+  Shell-local prompts or import legacy allows as authority.
+- Keep Host-control and Governance Authority in `review` until the approved convergence/closeout point.

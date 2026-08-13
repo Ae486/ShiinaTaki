@@ -39,6 +39,7 @@ pub trait CapabilityExec: Send + Sync {
     fn run(&self, input: &Value) -> Result<Value, ExecError>;
     /// An optional human-readable detail derived from the input, shown in the approval dialog (ruling 4). Default: none.
     /// It is dialog-only — NEVER logged (the target may be content, e.g. a URL the user is browsing).
+    #[allow(dead_code)] // Retained for the Slice-4 operator challenge UI; Slice 3 never prompts locally.
     fn detail(&self, _input: &Value) -> Option<String> {
         None
     }
@@ -60,6 +61,7 @@ impl CapabilityRegistry {
     }
 
     /// The dialog detail for a capability+input, or None (unknown capability / no detail) — name-only dialog.
+    #[allow(dead_code)] // Dormant until the Core-mediated Approval lifecycle consumes bounded detail.
     pub fn detail(&self, capability: &str, input: &Value) -> Option<String> {
         self.handlers
             .get(capability)
@@ -128,6 +130,7 @@ mod tests {
                 request_id,
                 control: actual,
                 output,
+                ..
             } => {
                 assert_eq!(request_id, "req-1");
                 assert_eq!(actual, control);
@@ -163,6 +166,41 @@ mod tests {
         assert_eq!(registry().detail("unknown", &Value::Null), None);
     }
 
+    #[test]
+    fn early_dynamic_failure_evidence_uses_the_projected_blocked_cell() {
+        let mut control = control("exec");
+        control.governance_projection.cells = vec![
+            crate::protocol::HostGovernanceCell {
+                key: "exec:allowlist-miss".into(),
+                posture: crate::protocol::HostGovernancePosture::Ask,
+            },
+            crate::protocol::HostGovernanceCell {
+                key: "exec:blocked".into(),
+                posture: crate::protocol::HostGovernancePosture::Deny,
+            },
+        ];
+        let response = CapabilityRespond::err(
+            "req-3".into(),
+            control,
+            CapabilityErrorCode::Denied,
+            "input digest mismatch".into(),
+        );
+        match response {
+            CapabilityRespond::Failed { governance, .. } => {
+                assert_eq!(governance.cell_key, "exec:blocked");
+                assert_eq!(
+                    governance.effective_posture,
+                    crate::protocol::HostGovernancePosture::Deny
+                );
+                assert_eq!(
+                    governance.constraint,
+                    crate::protocol::HostGovernanceConstraint::Hard
+                );
+            }
+            other => panic!("expected a failed response, got {other:?}"),
+        }
+    }
+
     fn control(capability: &str) -> HostOperationControl {
         HostOperationControl {
             run_id: "11111111-1111-4111-8111-111111111111".into(),
@@ -172,6 +210,16 @@ mod tests {
             connection_generation: 1,
             catalog_generation: 1,
             policy_generation: 1,
+            governance_projection: crate::protocol::HostGovernanceProjection {
+                registry_revision: 1,
+                descriptor_revision: 1,
+                classifier_revision: 1,
+                cells: vec![crate::protocol::HostGovernanceCell {
+                    key: capability.into(),
+                    posture: crate::protocol::HostGovernancePosture::Auto,
+                }],
+                digest: "0".repeat(64),
+            },
             approval_generation: 1,
             capability_id: capability.into(),
             input_digest: "a".repeat(64),

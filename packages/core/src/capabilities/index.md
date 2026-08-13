@@ -1,5 +1,5 @@
 # core/capabilities/
-- capability-broker.ts — sealed Host-bound request/cancel/respond broker; per-generation settlement, deadline/unknown-outcome, and bounded duplicate/late acknowledgement history
+- capability-broker.ts — sealed Host-bound request/cancel/respond broker; per-generation settlement, distinct fail-closed approval-required passthrough, deadlines, and bounded duplicate/late history
 - canonical-input.ts — deterministic JSON canonicalization + lowercase SHA-256 input digest for sealed dispatch identity
 - capture-stamp.ts — captureStamp(): the Q5 state-snapshot capture moment (ISO, stamped once at execute, persists byte-stable into replay); shared by the screenshot/process-list/clipboard-read results
 - route-capability.ts — explicit Host-qualified route→broker step; legacy fallback only for exactly one routable Host

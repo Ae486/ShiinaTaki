@@ -34,6 +34,12 @@ export interface McpServerEntry {
   config: McpServerConfig;
 }
 
+/** Public, secret-free fingerprint input used only to invalidate transitional governance subject bindings. */
+export function mcpPublicConfig(config: McpServerConfig): unknown {
+  if (isStdioConfig(config)) return { command: config.command, args: config.args ?? [], cwd: config.cwd ?? null };
+  return { url: config.url };
+}
+
 export function isStdioConfig(config: McpServerConfig): config is StdioServerConfig {
   return "command" in config;
 }

@@ -1,7 +1,7 @@
 /**
  * INPUT:  a JSON-RPC client bound to the operator socket + call params from the UI hooks.
  * OUTPUT: handshake() (connect outcome) + requestMethods() — the plain request/response half of the WsClient
- *         (chat/timeline/media/character/config/memory/perception).
+ *         (chat/timeline/media/character/config/memory/perception/permission governance).
  * POS:    ui/lib — the outbound half of ws-client (no turn/stream state lives here). Every result is parsed through a
  *         @taki/shared schema: the zod boundary holds for every inbound frame.
  */
@@ -33,6 +33,10 @@ import {
   PERCEPTION_METHODS,
   PerceptionCardSchema,
   PerceptionPauseStateSchema,
+  PERMISSION_METHODS,
+  PermissionCellSetResultSchema,
+  PermissionCellsStateSchema,
+  PermissionLevelStateSchema,
   TIMELINE_METHODS,
   TimelineHistoryResultSchema,
   type AvatarReportParams,
@@ -41,10 +45,25 @@ import {
   type ConnectParams,
   type ErrorCode,
   type PerceptionPauseSetParams,
+  type PermissionCellSetParams,
+  type PermissionLevelSetParams,
   type TimelineHistoryParams,
   type TimingPolicy,
 } from "@taki/shared";
 import { requestWithDeadline } from "./rpc-deadline.ts";
+
+function permissionMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
+  return {
+    permissionLevelGet: async () =>
+      PermissionLevelStateSchema.parse(await request(PERMISSION_METHODS.levelGet, {})),
+    permissionLevelSet: async (params: PermissionLevelSetParams) =>
+      PermissionLevelStateSchema.parse(await request(PERMISSION_METHODS.levelSet, params)),
+    permissionCellsGet: async () =>
+      PermissionCellsStateSchema.parse(await request(PERMISSION_METHODS.cellsGet, {})),
+    permissionCellSet: async (params: PermissionCellSetParams) =>
+      PermissionCellSetResultSchema.parse(await request(PERMISSION_METHODS.cellSet, params)),
+  };
+}
 
 /** The handshake outcome: authenticated, or refused with the app ErrorCode (PAIRING_REQUIRED / AUTH_FAILED / ...). */
 export type ConnectOutcome = { ok: true; token?: string } | { ok: false; code: ErrorCode | null; message: string };
@@ -117,5 +136,6 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
     perceptionPauseSet: async (params: PerceptionPauseSetParams) =>
       PerceptionPauseStateSchema.parse(await request(PERCEPTION_METHODS.pauseSet, params)),
     perceptionCard: async () => PerceptionCardSchema.parse(await request(PERCEPTION_METHODS.card, {})),
+    ...permissionMethods(request),
   };
 }

@@ -14,8 +14,8 @@ export const HOST_CONTROL_METHODS = {
   respond: "capability.respond",
 } as const;
 
-export const HOST_CONTROL_PROTOCOL_VERSION = 1;
-export const HOST_CATALOG_SCHEMA_VERSION = 1;
+export const HOST_CONTROL_PROTOCOL_VERSION = 2;
+export const HOST_CATALOG_SCHEMA_VERSION = 2;
 
 export const PositiveGenerationSchema = z.number().int().positive();
 export const Sha256HexSchema = z.string().regex(/^[0-9a-f]{64}$/);
@@ -50,10 +50,18 @@ export type CapabilityExecutionKind = z.infer<typeof CapabilityExecutionKindSche
 export const CapabilityCancellationSchema = z.enum(["cooperative", "non-cooperative"]);
 export type CapabilityCancellation = z.infer<typeof CapabilityCancellationSchema>;
 
+export const HostCapabilityGovernanceSupportSchema = z.strictObject({
+  descriptorRevision: PositiveGenerationSchema,
+  classifierId: z.string().min(1).max(240),
+  classifierRevision: PositiveGenerationSchema,
+});
+export type HostCapabilityGovernanceSupport = z.infer<typeof HostCapabilityGovernanceSupportSchema>;
+
 export const HostCapabilityDescriptorSchema = z.strictObject({
   capabilityId: z.string().min(1),
   execution: CapabilityExecutionKindSchema,
   cancellation: CapabilityCancellationSchema,
+  governance: HostCapabilityGovernanceSupportSchema,
 });
 export type HostCapabilityDescriptor = z.infer<typeof HostCapabilityDescriptorSchema>;
 
@@ -107,6 +115,51 @@ export const HostFrameAckSchema = z.discriminatedUnion("accepted", [
 ]);
 export type HostFrameAck = z.infer<typeof HostFrameAckSchema>;
 
+export const HostGovernanceCellSchema = z.strictObject({
+  key: z.string().min(1),
+  posture: z.enum(["auto", "ask", "deny"]),
+});
+export type HostGovernanceCell = z.infer<typeof HostGovernanceCellSchema>;
+
+export const HostGovernanceProjectionPayloadSchema = z.strictObject({
+  registryRevision: PositiveGenerationSchema,
+  descriptorRevision: PositiveGenerationSchema,
+  classifierRevision: PositiveGenerationSchema,
+  cells: z.array(HostGovernanceCellSchema).min(1),
+}).superRefine((projection, context) => {
+  for (let index = 1; index < projection.cells.length; index += 1) {
+    if (projection.cells[index - 1]!.key >= projection.cells[index]!.key) {
+      context.addIssue({ code: "custom", message: "governance cells must be unique and canonically sorted", path: ["cells", index, "key"] });
+    }
+  }
+});
+export type HostGovernanceProjectionPayload = z.infer<typeof HostGovernanceProjectionPayloadSchema>;
+
+export const HostGovernanceProjectionSchema = z.strictObject({
+  registryRevision: PositiveGenerationSchema,
+  descriptorRevision: PositiveGenerationSchema,
+  classifierRevision: PositiveGenerationSchema,
+  cells: z.array(HostGovernanceCellSchema).min(1),
+  digest: Sha256HexSchema,
+}).superRefine((projection, context) => {
+  for (let index = 1; index < projection.cells.length; index += 1) {
+    if (projection.cells[index - 1]!.key >= projection.cells[index]!.key) {
+      context.addIssue({ code: "custom", message: "governance cells must be unique and canonically sorted", path: ["cells", index, "key"] });
+    }
+  }
+});
+export type HostGovernanceProjection = z.infer<typeof HostGovernanceProjectionSchema>;
+
+export function canonicalHostGovernanceProjection(projection: HostGovernanceProjectionPayload): string {
+  const parsed = HostGovernanceProjectionPayloadSchema.parse(projection);
+  return JSON.stringify({
+    registryRevision: parsed.registryRevision,
+    descriptorRevision: parsed.descriptorRevision,
+    classifierRevision: parsed.classifierRevision,
+    cells: parsed.cells,
+  });
+}
+
 export const HostOperationControlSchema = z.strictObject({
   runId: z.uuid(),
   operationId: z.uuid(),
@@ -115,6 +168,7 @@ export const HostOperationControlSchema = z.strictObject({
   connectionGeneration: PositiveGenerationSchema,
   catalogGeneration: PositiveGenerationSchema,
   policyGeneration: PositiveGenerationSchema,
+  governanceProjection: HostGovernanceProjectionSchema,
   approvalGeneration: PositiveGenerationSchema,
   capabilityId: z.string().min(1),
   inputDigest: Sha256HexSchema,
@@ -124,6 +178,14 @@ export const HostOperationControlSchema = z.strictObject({
   expiresAt: TimestampSchema.optional(),
 });
 export type HostOperationControl = z.infer<typeof HostOperationControlSchema>;
+export const HostGovernanceEvidenceSchema = z.strictObject({
+  descriptorRevision: PositiveGenerationSchema,
+  classifierRevision: PositiveGenerationSchema,
+  cellKey: z.string().min(1),
+  effectivePosture: z.enum(["auto", "ask", "deny"]),
+  constraint: z.enum(["none", "legacy-deny", "local", "managed", "hard"]),
+});
+export type HostGovernanceEvidence = z.infer<typeof HostGovernanceEvidenceSchema>;
 
 export const CapabilityRequestSchema = z.strictObject({
   requestId: z.uuid(),
@@ -155,7 +217,7 @@ export const CapabilitySettlementStateSchema = z.enum([
 ]);
 export type CapabilitySettlementState = z.infer<typeof CapabilitySettlementStateSchema>;
 
-export const CapabilityErrorCodeSchema = z.enum(["DENIED", "EXEC_FAILED", "UNSUPPORTED_CAPABILITY"]);
+export const CapabilityErrorCodeSchema = z.enum(["DENIED", "APPROVAL_REQUIRED", "EXEC_FAILED", "UNSUPPORTED_CAPABILITY"]);
 export type CapabilityErrorCode = z.infer<typeof CapabilityErrorCodeSchema>;
 
 export const CapabilityErrorSchema = z.strictObject({
@@ -170,12 +232,14 @@ export const CapabilityRespondParamsSchema = z.discriminatedUnion("state", [
     control: HostOperationControlSchema,
     state: z.literal("completed"),
     output: z.unknown(),
+    governance: HostGovernanceEvidenceSchema,
   }),
   z.strictObject({
     requestId: z.uuid(),
     control: HostOperationControlSchema,
     state: z.literal("failed"),
     error: CapabilityErrorSchema,
+    governance: HostGovernanceEvidenceSchema,
   }),
   z.strictObject({ requestId: z.uuid(), control: HostOperationControlSchema, state: z.literal("cancelled") }),
   z.strictObject({ requestId: z.uuid(), control: HostOperationControlSchema, state: z.literal("outcome_unknown") }),

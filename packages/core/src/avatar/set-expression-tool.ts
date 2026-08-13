@@ -2,7 +2,9 @@
  * INPUT:  an LLM avatar_set_expression call ({ name }) + bound characterId, AvatarSubscriptions, and live vocab (name enum, 1e)
  * OUTPUT: createSetExpressionTool(deps) -> ToolSet { avatar_set_expression }; returns { ok:true } (fire-and-forget)
  * POS:    core/avatar — the agent tool; publishes an avatar.command to the Pet UI; execute NEVER throws; no OS/gate (invariant 1/4).
- *         Risk posture (MCP vocab, doc-only — the Rust Permission Gate is the sole enforcement, tool-design I1/C-5): readOnly (no OS side effect), non-destructive, idempotent, closed-world.
+ *         Risk posture (MCP vocab, doc-only — canonical Core governance is authoritative; an Execution Host may only
+ *         tighten and finally enforce Host-local actions): readOnly (no OS side effect), non-destructive, idempotent,
+ *         closed-world.
  */
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";

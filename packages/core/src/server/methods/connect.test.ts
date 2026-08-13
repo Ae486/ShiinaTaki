@@ -3,7 +3,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { JSONRPCErrorException } from "json-rpc-2.0";
-import { ConnectResultSchema, type ConnectParams, type Role } from "@taki/shared";
+import {
+  HOST_CATALOG_SCHEMA_VERSION,
+  HOST_CONTROL_PROTOCOL_VERSION,
+  ConnectResultSchema,
+  type ConnectParams,
+  type Role,
+} from "@taki/shared";
 import { createDeviceRegistry, type DeviceRegistry } from "../../devices/device-registry.ts";
 import { createPairedDeviceStore } from "../../devices/paired-device-store.ts";
 import { createConnectionRegistry, type Connection, type ConnectionRegistry } from "../connection-registry.ts";
@@ -81,7 +87,10 @@ function callConnect(h: Harness, input: ConnectInput, remoteAddress: string | un
     token: input.token,
     pairingCode: input.pairingCode,
     host: input.host ?? (input.role === "node"
-      ? { protocol: { min: 1, max: 1 }, catalogSchemaVersions: [1] }
+      ? {
+          protocol: { min: HOST_CONTROL_PROTOCOL_VERSION, max: HOST_CONTROL_PROTOCOL_VERSION },
+          catalogSchemaVersions: [HOST_CATALOG_SCHEMA_VERSION],
+        }
       : undefined),
   };
   try {
@@ -180,7 +189,10 @@ describe("connect existing credential paths (regression — unchanged by auto-tr
       deviceId: NODE_ID,
       role: "node",
       pairingCode: code,
-      host: { protocol: { min: 2, max: 2 }, catalogSchemaVersions: [1] },
+      host: {
+        protocol: { min: HOST_CONTROL_PROTOCOL_VERSION + 1, max: HOST_CONTROL_PROTOCOL_VERSION + 1 },
+        catalogSchemaVersions: [HOST_CATALOG_SCHEMA_VERSION],
+      },
     }, "127.0.0.1");
 
     expect(appErrorCode(attempt.error)).toBe("AUTH_FAILED");

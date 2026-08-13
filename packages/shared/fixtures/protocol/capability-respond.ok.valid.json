@@ -8,6 +8,7 @@
     "connectionGeneration": 1,
     "catalogGeneration": 1,
     "policyGeneration": 1,
+    "governanceProjection": { "registryRevision": 1, "descriptorRevision": 1, "classifierRevision": 1, "cells": [{ "key": "screenshot", "posture": "auto" }], "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
     "approvalGeneration": 1,
     "capabilityId": "screenshot",
     "inputDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -21,5 +22,6 @@
     "dataBase64": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
     "width": 1920,
     "height": 1080
-  }
+  },
+  "governance": { "descriptorRevision": 1, "classifierRevision": 1, "cellKey": "screenshot", "effectivePosture": "auto", "constraint": "none" }
 }
