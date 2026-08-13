@@ -13,8 +13,18 @@ single-use authorization.
   two-Node convergence gate.
 - `08-12-governance-authority` is implemented, formally checked, and committed at `46a8487`; it remains in `review`
   because effective `ask` deliberately fails closed until this child is complete.
-- The current migration baseline is `014-governance-policy`. The implementation must recheck the live registry and
-  `main...HEAD` immediately before creating the Approval migration.
+- Batch A appended `015-approval` after verifying that the live migration baseline ended at `014-governance-policy`.
+  Recheck the registry and `main...HEAD` before every later batch and after every mainline merge; renumber only through
+  an append-only semantic merge if another branch claims `015` before integration.
+
+## Execution Status
+
+- Batch A canonical schemas/state is implemented and formally checked. Production `ask` still returns structured
+  `APPROVAL_REQUIRED`; no prompt, method registration, governed execution closure, Host protocol, Rust, or Desktop
+  lifecycle was activated.
+- Batch A verification passed workspace typecheck, lint, full Shared/Core/CLI/Desktop tests, focused Approval tests,
+  `git diff --check`, production header/index/size audits, and a real Core boot through migrations `1..15`.
+- Batch B Core-local/MCP connection-owned interaction is the next implementation boundary. Batches C-E remain open.
 
 ## Productization Boundary
 
@@ -34,9 +44,10 @@ single-use authorization.
 
 - Replace the legacy MCP-shaped request with strict, versioned Shared schemas for `approval.request`,
   `approval.respond`, `approval.closed`, `approval.list`, and `approval.revoke`.
-- Bind decisions to `{ bindingRevision, identity: CanonicalCapabilityIdentity, descriptorRevision, classifierId,
-  classifierRevision, cellKey, decisionScopeDigest, disclosureRevision? }`. Core computes every digest from trusted
-  canonical data. Raw input, secret values, display labels, and sensitive classifier payloads are excluded.
+- Use a base binding `{ bindingRevision, identity: CanonicalCapabilityIdentity, descriptorRevision, classifierId,
+  classifierRevision, cellKey, decisionScopeDigest }` for exact/session authority. Durable always-allow extends it
+  with required `disclosureRevision`. Core computes domain-separated fixed-order digests from trusted canonical data.
+  Raw input, secret values, display labels, and sensitive classifier payloads are excluded.
 - Keep exact-attempt `inputDigest` separate from remembered-decision identity. An input digest proves the sealed call;
   it is not sufficient authority for a durable grant.
 - Unknown or unstable subject identity, descriptor revision, classifier revision, cell, disclosure revision, or

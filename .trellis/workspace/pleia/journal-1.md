@@ -700,3 +700,54 @@ performed.
 - Recheck both worktrees, `main...HEAD`, and migration numbering; merge `main` into T4 only if it advanced.
 - Dispatch a high-effort `trellis-implement` for Batch A only, require an honest completed/incomplete/unverified/extra/
   residual-risk report, then Leader-review the diff before an xhigh formal check.
+
+## Session 18: T4 Approval Productization Batch A
+
+**Date**: 2026-08-13
+**Task**: `.trellis/tasks/08-12-approval-productization`
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Implemented and formally checked the independently fail-closed Approval Batch A. Shared now owns strict canonical
+operator envelopes, deterministic decision-scope and durable-binding serialization, current grant grammar, and a
+bounded historical stored-row grammar. Core now owns migration `015`, the sole durable Approval repository, binding
+validation/digests, optimistic `approvalGeneration`, restart reconciliation, durable always-allow list/revoke, and a
+process epoch. No prompt or execution closure was activated; effective `ask` still returns `APPROVAL_REQUIRED`.
+
+### Main Changes
+
+- Added canonical `approval.request/respond/closed/list/revoke` schemas, bounded redacted presentation, explicit
+  once/session/always/deny choices, and future-background disclosure acknowledgement.
+- Reused `CanonicalCapabilityIdentity` and separated base exact/session binding from durable disclosure-bound authority.
+- Added migration `015-approval`, strict normalized durable rows, material/no-op generation semantics, file-backed
+  restart, current/inert list classification, and optimistic revoke.
+- Recomputed binding digests before writes, distinguished caller digest mismatch from canonical-column collision, and
+  failed reconciliation before metadata mutation when stored digests are corrupt.
+- Kept historical bindings readable under bounded stored grammar while current grants remain strict; unknown or stale
+  historical authority becomes inert rather than silently widening authority.
+- Renamed retained pre-Slice-4 protocol types to `LegacyApproval*` and updated touched module headers/indexes without
+  registering or reviving the old prompt/broker as production authority.
+
+### Testing
+
+- [OK] Workspace typecheck and root lint.
+- [OK] Full tests: Shared 254; Core 1,275 passed plus 1 existing skip; CLI 32; Desktop 370.
+- [OK] Focused Approval schema/repository/service and legacy compatibility regressions.
+- [OK] Real Core boot smoke with a temporary data directory and migrations `1..15`.
+- [OK] `git diff --check` plus production header/index/size and Batch A boundary audits.
+- [NOT RUN] Rust tests/Clippy, packaged WebView manual verification, and Batch B-E lifecycle tests; Batch A did not
+  modify or activate those layers.
+
+### Status
+
+[IN PROGRESS] **Batch A is complete and formally checked; Slice 4 remains active for Batches B-E.** The parent remains
+`planning`, Host-control and Governance Authority remain in `review`, and production `ask` remains fail-closed.
+
+### Next Steps
+
+- Recheck live `main...HEAD` and the append-only migration registry before Batch B starts.
+- Resume the existing high-effort implement agent for Batch B only: physical-Connection pending/session ownership,
+  targeted notifications, same-connection response, governed Core-local/MCP closure release, and list/revoke methods.
+- Review the Batch B diff against the one-authority/no-raw-input contract and use an xhigh formal check if the
+  cross-cutting production diff remains substantial.

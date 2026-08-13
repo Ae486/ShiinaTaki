@@ -20,7 +20,7 @@
 - character-list.ts — character.list (operator-only): enumerate imported characters from their character.json markers
 - character-costumes.ts — character.costumes (operator-only): one character's costumes + settings filenames + on-demand availability (renderable / missing motions+packs)
 - character-costume-resolution.ts — character.costumeResolution (operator-only): one costume's external-ref → characters-root rel-path map, on demand (#18)
-- approval-respond.ts — dormant pre-Slice-3 operator method retained for tests/Slice-4 migration; `main.ts` does not register it
+- approval-respond.ts — legacy compatibility handler retained for tests/migration only; `main.ts` does not register it, and canonical Approval methods begin in Batch B
 - capability-respond.ts — capability.respond (node-only): Host/generation/control-bound terminal settlement
 - capability-trigger.ts — capability.trigger (operator-only, DEV-ONLY via TAKI_DEV_TRIGGER=1): drive a real capability tool's execute without the LLM while retaining Core governance and any Host final-enforcement path; + devTriggerEnabled(env)
 - config-methods.ts — the settings surface's single registration seam: config.list / config.set / config.subscribe

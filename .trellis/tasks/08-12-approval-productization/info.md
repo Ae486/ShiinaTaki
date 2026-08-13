@@ -1,8 +1,8 @@
 # Approval Productization Technical Design
 
-> Planning record for Slice 4. This document freezes the approved engineering contracts and the independently
-> fail-closed Batch A boundary. Current production code and executable specs become authoritative only after the
-> relevant batch is implemented and checked.
+> Engineering record for Slice 4. This document freezes the approved contracts and independently fail-closed batch
+> boundaries. Batch A is implemented and formally checked; the Batch B-E sections remain the binding implementation
+> plan until their production code and executable specs land.
 
 ## 1. Architectural result
 
@@ -52,7 +52,10 @@ type ApprovalDecisionBinding = {
   classifierRevision: number;
   cellKey: PermissionCellKey;
   decisionScopeDigest: string;
-  disclosureRevision?: number;
+};
+
+type ApprovalDurableDecisionBinding = ApprovalDecisionBinding & {
+  disclosureRevision: number;
 };
 ```
 
@@ -67,15 +70,20 @@ The binding rules are:
   identity/classification data. It contains no raw input, command, path, secret, or presentation detail.
 - `inputDigest` remains the exact-attempt binding in `HostOperationControl`. It is neither persisted as a remembered
   grant key nor treated as a stable subject identity.
-- `disclosureRevision` is absent for once/session bindings and required for durable always-allow bindings.
+- `ApprovalDecisionBinding` is the base exact/session identity and has no disclosure field.
+  `ApprovalDurableDecisionBinding` adds the required current disclosure revision for always-allow authority.
 - A descriptor marked `subjectRequired` cannot receive remembered authority without the exact stable subject and
   revision. Missing/unstable identity is once-only or closed.
 - A descriptor cell marked `approvalMemory: "once-only"` cannot receive session or durable authority regardless of
   client input.
 
-Shared should expose one deterministic canonical serializer for the binding. Core hashes that serialization to a
-`bindingDigest` for deduplication and lookup. Field order is fixed and optional fields are omitted, never serialized as
-`undefined`. No locale, object insertion order, display text, or client serialization affects the digest.
+Shared exposes deterministic domain-separated serializers. The decision-scope payload is fixed-order canonical JSON
+of `{ domain: "taki.approval.decision-scope", revision: 1, identity, descriptorRevision, classifierId,
+classifierRevision, cellKey }`. The durable binding payload is fixed-order canonical JSON of
+`{ domain: "taki.approval.binding", revision: 1, identity, descriptorRevision, classifierId, classifierRevision,
+cellKey, decisionScopeDigest, disclosureRevision }`. Core hashes the durable serialization to a lowercase SHA-256
+`bindingDigest`. A future scope field requires a revision bump; locale, insertion order, display text, and client
+serialization never affect the digest.
 
 ## 3. Shared operator protocol
 
@@ -135,23 +143,27 @@ the owning socket.
 - a versioned `ApprovalPresentation` containing bounded title, capability/subject labels, risk summary, and bounded
   sections/fields of already-redacted strings.
 
-Presentation fields are strict, length/array bounded, and adapter/classifier owned. Secret-bearing data is represented
-only as presence or purpose. Arbitrary `unknown` payloads and client-side `JSON.stringify(input)` are not part of the
-new protocol.
+Presentation fields are strict, length/array bounded, and adapter/classifier owned. Detail is a bounded array of
+redacted sections and bounded label/value fields, never `unknown` or arbitrary JSON. Secret-bearing data is represented
+only as presence or purpose. Client-side `JSON.stringify(input)` is not part of the new protocol.
 
-`approval.closed` carries only `approvalId`, a closed reason, and current generation. It targets the same physical
-connection that received the request.
+`approval.closed` carries only `approvalId`, current generation, and one fixed reason: `answered`, `denied`, `expired`,
+`cancelled`, `operator_disconnected`, `host_disconnected`, `policy_changed`, `approval_generation_changed`, or
+`route_replaced`. It targets the same physical connection that received the request.
 
 ### 3.4 List and revoke
 
 `approval.list` returns the current generation/revisions plus durable canonical decisions and, in Batch E, inert legacy
 reconfirmation candidates. A decision row contains its id, binding, allow verdict, provenance category, timestamps,
-safe labels, and current usability/inert reason. It excludes raw input, challenge evidence, secret values, socket
-identity, and mutable display text as authority.
+optional bounded safe labels, and binding eligibility. Batch A does not evaluate live Governance posture. Its inert
+reason is a closed enum covering binding revision, unknown capability/cell, descriptor/classifier/subject mismatch, and
+stale disclosure. It excludes raw input, challenge evidence, secret values, socket identity, and mutable display text
+as authority.
 
-`approval.revoke` carries `decisionId` and `expectedApprovalGeneration`. A current-generation material revoke removes
-one durable row and advances once. A current-generation unknown id is a no-op with zero increments. A stale expected
-generation returns conflict before mutation.
+`approval.revoke` carries `decisionId` and `expectedApprovalGeneration` and returns `revoked` or `not_found` plus the
+current generation. A current-generation material revoke removes one durable row and advances once. A
+current-generation unknown id is a no-op with zero increments. A stale expected generation returns conflict before
+mutation, even when the requested final state would otherwise be a no-op.
 
 ## 4. SQLite and repository contract
 
@@ -170,7 +182,9 @@ CREATE TABLE approval_state (
 CREATE TABLE approval_decisions (
   decision_id           TEXT PRIMARY KEY,
   binding_revision      INTEGER NOT NULL CHECK (binding_revision > 0),
-  binding_digest        TEXT NOT NULL UNIQUE,
+  binding_digest        TEXT NOT NULL UNIQUE
+                        CHECK (length(binding_digest) = 64 AND binding_digest = lower(binding_digest)
+                               AND binding_digest NOT GLOB '*[^0-9a-f]*'),
   capability_id         TEXT NOT NULL,
   owner_host_id         TEXT NOT NULL,
   subject_id            TEXT,
@@ -200,9 +214,11 @@ The repository is the only SQL owner and exposes synchronous operations with no 
 - advance the generation once for a future material session mutation/teardown batch; and
 - read/reconcile restart state.
 
-Every write validates the expected generation inside the same SQLite transaction. Material decision create/revoke and
-generation advance commit together. Duplicate identical `bindingDigest` create is a no-op. Unknown revoke at the
-current generation is a no-op. A stale writer throws/returns a typed conflict without changing rows.
+Every write validates the expected generation inside the same SQLite transaction before no-op detection. Material
+decision create/revoke and generation advance commit together. Duplicate identical `bindingDigest` create is a no-op
+only when every recomputed canonical binding column is identical; the same digest with different columns is
+corruption/collision and fails closed. Unknown revoke at the current generation is a no-op. A stale writer
+throws/returns a typed conflict without changing rows.
 
 Migration and repository tests must inspect the real column set and prove that there is no column capable of carrying
 raw input, presentation, command, path, challenge, socket, or secret data.
@@ -216,7 +232,10 @@ epoch used only by pending/session/authorization records and never persisted or 
 - restart produces a new epoch and discards all old in-memory state without incrementing durable
   `approvalGeneration`;
 - old pending/resume authority is rejected by epoch mismatch plus retired operator/Host connection provenance;
-- a registry/disclosure reconciliation that materially changes durable authority increments once, not once per field;
+- a registry/disclosure reconciliation increments once only when it materially changes durable authority usability or
+  removes authority, not once per field;
+- an empty decision table or revision metadata change that leaves every canonical decision equally usable advances
+  zero times;
 - a database registry/disclosure revision newer than the running binary fails startup;
 - older stored revisions reconcile to the current values and make old rows dynamically inert where their binding no
   longer matches.
@@ -334,7 +353,7 @@ Review must sweep and test:
 
 Only sanitized labels, revision/generation metadata, decision ids, canonical digests, and terminal status may persist.
 
-## 10. Batch A exact boundary
+## 10. Batch A implemented boundary
 
 ### Expected production files
 
@@ -343,6 +362,8 @@ Only sanitized labels, revision/generation metadata, decision ids, canonical dig
 - `packages/shared/src/approval-decision-schema.ts` — isolate canonical binding, version constants, disclosure,
   serializer/digest payload, durable row, and list DTOs from the operator lifecycle envelope.
 - `packages/shared/src/approval-api.ts` — focused named facade so the package root remains maintainable.
+- `packages/shared/src/legacy-approval-schema.ts` — compatibility-only `LegacyApproval*` shapes used by dormant Core
+  modules and the current CLI until Batch B migrates them; canonical authority never imports this leaf.
 - `packages/shared/src/index.ts` and `packages/shared/src/index.md` — preserve all current Host/Governance exports while
   exposing the new Approval contract.
 - `packages/core/src/db/migrations/015-approval.ts`, `index-list.ts`, and migration `index.md` — append-only migration
@@ -381,6 +402,17 @@ Batch A and receives tests/index documentation.
   Host-control, Rust, audit, or E2E production wiring.
 - No prompt becomes live. Effective `ask` remains fail-closed.
 - No legacy file is deleted or written, and no new dependency is expected.
+- No Approval-specific shared global `ErrorCode` is added before Batch B freezes JSON-RPC mapping and cross-language
+  implications; Batch A uses typed Core-domain errors.
+
+### Closure evidence
+
+Batch A passed workspace typecheck, root lint, full Shared/Core/CLI/Desktop tests, focused Approval tests,
+`git diff --check`, production header/index/size audits, and a real Core boot that applied migrations `1..15`. The
+formal check additionally repaired candidate digest spoofing, distinguished digest mismatch from canonical-column
+collision, validated stored digests before revision reconciliation, and separated historical stored-row grammar from
+strict current grant grammar. Rust, packaged WebView, and Host challenge/resume verification remain intentionally
+unverified because Batch A did not modify or activate those layers.
 
 ## 11. Remaining batches and checks
 

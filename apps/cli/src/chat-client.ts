@@ -10,7 +10,7 @@ import {
   APPROVAL_METHODS,
   CHAT_METHODS,
   CONNECT_METHOD,
-  ApprovalRequestSchema,
+  LegacyApprovalRequestSchema,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
@@ -19,8 +19,8 @@ import {
   JsonRpcClientFrameSchema,
   TIMELINE_METHODS,
   TimelineHistoryResultSchema,
-  type ApprovalRequest,
-  type ApprovalScope,
+  type LegacyApprovalRequest,
+  type LegacyApprovalScope,
   type ChatSendParams,
   type ConnectParams,
   type ErrorCode,
@@ -36,8 +36,8 @@ export interface ChatHandlers {
 }
 
 /** The operator's answer to an MCP tool-approval ask (mirrors approval-prompt's ApprovalAnswer). */
-export type ApprovalDecision = { approved: boolean; scope: ApprovalScope };
-export type ApprovalRequestHandler = (request: ApprovalRequest) => Promise<ApprovalDecision>;
+export type ApprovalDecision = { approved: boolean; scope: LegacyApprovalScope };
+export type ApprovalRequestHandler = (request: LegacyApprovalRequest) => Promise<ApprovalDecision>;
 
 /** The connect handshake outcome: authenticated (ok, token present only right after pairing) or refused. */
 export type ConnectOutcome =
@@ -102,7 +102,7 @@ interface ApprovalSlot {
 // (operator role). No handler registered -> fail-closed deny-once, so the agent's turn never hangs.
 function installApprovalRoute(rpc: JSONRPCServerAndClient, slot: ApprovalSlot): void {
   rpc.addMethod(APPROVAL_METHODS.request, async (params: unknown) => {
-    const request = ApprovalRequestSchema.parse(params);
+    const request = LegacyApprovalRequestSchema.parse(params);
     const decision: ApprovalDecision = slot.handler
       ? await slot.handler(request)
       : { approved: false, scope: "once" };

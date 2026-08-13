@@ -1,8 +1,8 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
-> Updated 2026-08-13 after Slice 3 commit and Slice 4 planning convergence. T4 remains isolated in its dedicated
+> Updated 2026-08-13 after Slice 4 Batch A implementation and formal check. T4 remains isolated in its dedicated
 > worktree. Host-control and Governance Authority are committed and retained in `review`; Approval Productization is
-> the active `in_progress` child with five independently fail-closed batches. The branch must not be released between
+> the active `in_progress` child, with Batch A verified and Batch B next. The branch must not be released between
 > Slice 3 and Slice 4. Read the live repository before trusting any recorded status.
 
 ## 1. Mission and boundary
@@ -43,7 +43,9 @@ acceptance.
 Current live status:
 
 - `main` remains at `5dd6dd2` and is not ahead of the T4 branch; nothing was pushed;
-- the T4 branch contains the frozen planning commits and Host-control production commit `7427edf`;
+- the T4 branch contains the frozen planning commits, Host-control production commit `7427edf`, Governance Authority
+  production commit `46a8487`, and the verified Slice 4 Batch A baseline; verify the live HEAD before relying on a
+  recorded commit hash;
 - `.trellis/.current-task` is intentionally ignored by Git and is independently bound in each worktree;
 - the main worktree remains bound to `08-09-hindsight-compatibility-extensions`;
 - the T4 worktree is bound to child task `08-12-approval-productization`, which is `in_progress` after its approved
@@ -143,7 +145,7 @@ full E2E 23 passed / 6 skipped
 valid-digest projection tampering rejection, no execution/replay, bounded Core `NODE_DISCONNECTED` settlement, and
 cleanup. No push, finish, or archive has been performed.
 
-Slice 4 now has an approved PRD, technical design, live lifecycle research, and curated implement/check context:
+Slice 4 has an approved PRD, technical design, live lifecycle research, and curated implement/check context:
 
 - one Core-owned canonical Approval authority over the existing `CanonicalCapabilityIdentity`;
 - physical Core `Connection` ownership for pending requests and session grants, never `deviceId` sharing;
@@ -153,8 +155,19 @@ Slice 4 now has an approved PRD, technical design, live lifecycle research, and 
 - a strict memory-only raw-input boundary with versioned redacted presentation.
 
 Its execution order is Batch A schemas/state, Batch B Core-local/MCP interaction, Batch C Host challenge/resume,
-Batch D Desktop/CLI surfaces, and Batch E legacy/privacy/process convergence. Batch A must keep production `ask`
-fail-closed and must not touch prompt, Desktop, CLI, Host-control, Rust, or `main.ts` execution wiring.
+Batch D Desktop/CLI surfaces, and Batch E legacy/privacy/process convergence. Batch A is now implemented and formally
+checked: canonical Shared schemas and digests, migration `015`, the sole Approval repository, the durable decision
+service, historical-row inert classification, optimistic generation semantics, and compatibility-only legacy type
+renames are present. Production `ask` remains fail-closed; no canonical prompt, method registration, governed raw
+closure, Host protocol, Rust, Desktop, or `main.ts` Approval lifecycle was activated.
+
+Batch A verification passed workspace typecheck, root lint, full tests (Shared 254, Core 1,275 passed plus 1 existing
+skip, CLI 32, Desktop 370), focused Approval regressions, `git diff --check`, header/index/size audits, and a real Core
+boot applying migrations `1..15`. The formal check repaired candidate digest spoofing, stored-digest reconciliation,
+historical stored grammar, and digest mismatch/collision separation. Rust, packaged WebView, and Batch B-E behavior
+remain unverified by design. Batch B is the next boundary: exact physical-`Connection` pending/session ownership,
+targeted request/closed notifications, same-connection responses, timeout/cancel/invalidation, governed Core-local/MCP
+closure release, and canonical list/revoke methods.
 
 ## 4. Required reading order
 
@@ -361,8 +374,8 @@ The incoming Leader should report the live state to the owner, then:
 2. confirm `7427edf` and the recorded gates before treating Host-control as the dependency baseline;
 3. treat the missing two-Node process harness as the owner-approved mandatory Slice 8 convergence gate without
    weakening the existing unit/wire evidence;
-4. verify `08-12-approval-productization`, refresh `main...HEAD` and the migration registry, and dispatch only its
-   independently fail-closed Batch A after the planning slice is committed and the worktree is clean;
+4. treat Approval Batch A as the verified fail-closed baseline, refresh `main...HEAD` and the migration registry after
+   its checkpoint is clean, then dispatch only Batch B Core-local/MCP interaction;
 5. keep the one Approval lifecycle Core-owned and generation-bound; do not revive Shell-local prompts or legacy allow
    writers;
 6. do not mark either reviewed child complete or archive it without the applicable owner closeout direction; and

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { ApprovalRequest } from "@taki/shared";
+import type { LegacyApprovalRequest } from "@taki/shared";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { TIMEOUT_REASON, createApprovalBroker, type ApprovalNotify } from "./approval-broker.ts";
 
@@ -11,8 +11,8 @@ function broker(timeoutMs?: number) {
 describe("createApprovalBroker", () => {
   it("notifies with the correct payload and resolves when the operator approves (T9)", async () => {
     const b = broker();
-    let sent: ApprovalRequest | undefined;
-    const notify: ApprovalNotify = (_method, params) => (sent = params as ApprovalRequest);
+    let sent: LegacyApprovalRequest | undefined;
+    const notify: ApprovalNotify = (_method, params) => (sent = params as LegacyApprovalRequest);
 
     const pending = b.ask({ serverName: "files", toolName: "read", input: { path: "/x" } }, notify);
     expect(sent?.serverName).toBe("files");
@@ -38,7 +38,7 @@ describe("createApprovalBroker", () => {
   it("denies all pending on operator disconnect (T12)", async () => {
     const b = broker();
     const ids: string[] = [];
-    const notify: ApprovalNotify = (_m, params) => ids.push((params as ApprovalRequest).approvalId);
+    const notify: ApprovalNotify = (_m, params) => ids.push((params as LegacyApprovalRequest).approvalId);
     const first = b.ask({ serverName: "a", toolName: "x", input: {} }, notify);
     const second = b.ask({ serverName: "b", toolName: "y", input: {} }, notify);
 

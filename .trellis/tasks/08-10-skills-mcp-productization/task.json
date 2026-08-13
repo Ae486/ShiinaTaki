@@ -30,6 +30,6 @@
   ],
   "parent": null,
   "relatedFiles": [],
-  "notes": "Dedicated T4 worktree prepared from checkpoint 3d8a320. The owner approved the eight-slice program. Host-control and Governance Authority are committed, formally checked, and retained in review; Approval Productization is the active in-progress child with Batches A-E frozen. Keep this parent in planning until all extension slices converge. Do not push, reset, rebase, force, finish/archive, or claim manual acceptance without owner authorization.",
+  "notes": "Dedicated T4 worktree prepared from checkpoint 3d8a320. The owner approved the eight-slice program. Host-control and Governance Authority are committed, formally checked, and retained in review; Approval Productization is the active in-progress child. Its fail-closed Batch A canonical schemas/state is implemented and formally checked, and Batch B Core-local/MCP interaction is next. Keep this parent in planning until all extension slices converge. Do not push, reset, rebase, force, finish/archive, or claim manual acceptance without owner authorization.",
   "meta": {}
 }

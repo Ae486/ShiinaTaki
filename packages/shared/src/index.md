@@ -13,7 +13,10 @@
 - media-schema.ts — MEDIA_METHODS + media.get/clear/usage param & result schemas (attachment byte serving + lifecycle); operator-only, NO Rust mirror
 - avatar-schema.ts — AVATAR_METHODS + avatar.subscribe/report/command schemas (LLM-driven expression/motion push); report carries the worn costume id (1f change-detection); operator-only, NO Rust mirror
 - character-schema.ts — CHARACTER_METHODS + character.import/list/costumes/costumeResolution schemas + CostumeAvailability + CharacterId slug + import-error vocabulary (#18); operator-only, NO Rust mirror
-- approval-schema.ts — APPROVAL_METHODS + tool-approval request/respond schemas (MCP gate; M3 Permission Gate reuse)
+- approval-decision-schema.ts — canonical current/stored Approval binding revisions, fixed-order serializers, durable rows, safe labels, and list usability schemas
+- approval-schema.ts — strict canonical approval.request/respond/closed/list/revoke envelopes with bounded redacted presentation and explicit choices
+- approval-api.ts — focused named public facade for canonical Approval schemas, serializers, and types
+- legacy-approval-schema.ts — compatibility-only LegacyApproval* MCP prompt schemas used by dormant Core and CLI code
 - permission-level-schema.ts — Core-owned permission.* generation/concurrency schemas plus isolated legacy Rust-compatible leaves for pre-projection golden fixtures
 - governance-schema.ts — extension-neutral canonical identity, descriptor registry, override, and evaluation schemas
 - governance-registry.ts — validated versioned canonical descriptor registry and collision-safe lookup helpers

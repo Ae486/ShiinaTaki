@@ -14,7 +14,7 @@
 - media/ — content-addressed attachment store (chat image bytes) under the Workspace; the DB never holds bytes (#17)
 - scheduler/ — the shared sweep runner every retention arm rides (boot sweep + unref'd interval + count-only log)
 - mcp/ — MCP client: connect operator servers at boot, namespace + error-wrap their tools (ADR 0006 spawn carve-out)
-- approval/ — retained pre-Slice-3 MCP approval modules and tests; not wired by `main.ts` and not canonical authority (Slice 4 owns the replacement lifecycle)
+- approval/ — Batch-A canonical durable Approval repository/service/binding authority plus retained dormant legacy prompt modules; not wired into production `ask` yet
 - governance/ — Core-owned global policy repository/service plus trusted Core/MCP/Skill execution adapters
 - capabilities/ — core→node capability channel: ask/await broker + route helper + screenshot/process-list/clipboard/shell-open tools + sanctioned Workspace PNG write site
 - workspace/ — core-side Workspace-confined file RW tools + the path-escape confinement security core

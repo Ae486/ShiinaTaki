@@ -236,23 +236,18 @@ export type {
 } from "./avatar-schema.ts";
 
 export {
-  APPROVAL_METHODS, ApprovalRequestSchema, ApprovalRespondParamsSchema,
-  ApprovalRespondResultSchema, ApprovalScopeSchema,
-} from "./approval-schema.ts";
+  APPROVAL_BINDING_REVISION, APPROVAL_DISCLOSURE_REVISION, APPROVAL_METHODS, APPROVAL_PRESENTATION_REVISION, ApprovalChoiceSchema, ApprovalClosedReasonSchema, ApprovalClosedSchema, ApprovalDecisionBindingSchema, ApprovalDecisionInertReasonSchema, ApprovalDecisionListItemSchema, ApprovalDecisionProvenanceSchema, ApprovalDecisionScopeSchema, ApprovalDecisionUsabilitySchema, ApprovalSafeLabelsSchema, ApprovalDisclosureAckSchema, ApprovalDurableDecisionBindingSchema, ApprovalDurableDecisionSchema, ApprovalStoredDurableDecisionBindingSchema, ApprovalListParamsSchema, ApprovalListResultSchema, ApprovalPresentationSchema, ApprovalRespondStatusSchema, ApprovalRevokeParamsSchema, ApprovalRevokeResultSchema, ApprovalRevokeStatusSchema, CanonicalApprovalRequestSchema, CanonicalApprovalRespondParamsSchema, CanonicalApprovalRespondResultSchema, canonicalApprovalDecisionScope, canonicalApprovalDurableDecisionBinding, canonicalStoredApprovalDurableDecisionBinding,
+} from "./approval-api.ts";
 export type {
-  ApprovalRequest,
-  ApprovalRespondParams,
-  ApprovalRespondResult,
-  ApprovalScope,
-} from "./approval-schema.ts";
+  ApprovalChoice, ApprovalClosed, ApprovalDecisionBinding, ApprovalDecisionListItem, ApprovalDecisionProvenance, ApprovalDecisionScope, ApprovalDecisionUsability, ApprovalSafeLabels, ApprovalDisclosureAck, ApprovalDurableDecision, ApprovalDurableDecisionBinding, ApprovalListParams, ApprovalListResult, ApprovalStoredDurableDecisionBinding, ApprovalPresentation, ApprovalRevokeParams, ApprovalRevokeResult, CanonicalApprovalRequest, CanonicalApprovalRespondParams, CanonicalApprovalRespondResult,
+} from "./approval-api.ts";
+export { LegacyApprovalRequestSchema, LegacyApprovalRespondParamsSchema, LegacyApprovalRespondResultSchema, LegacyApprovalScopeSchema } from "./legacy-approval-schema.ts";
+export type { LegacyApprovalRequest, LegacyApprovalRespondParams, LegacyApprovalRespondResult, LegacyApprovalScope } from "./legacy-approval-schema.ts";
 
 export {
-  CANONICAL_GOVERNANCE_REGISTRY, CanonicalCapabilityIdentitySchema,
-  CanonicalCapabilitySubjectSchema, CapabilityGovernanceDescriptorSchema,
-  GOVERNANCE_REGISTRY_REVISION, GovernanceApprovalMemorySchema, GovernanceCellDescriptorSchema,
-  GovernanceClassifierAuthoritySchema, GovernanceEvaluationInputSchema,
-  GovernanceEvaluationReasonSchema, GovernanceEvaluationResultSchema, GovernanceExecutionCodeSchema,
-  GovernanceOverrideModeSchema,
+  CANONICAL_GOVERNANCE_REGISTRY, CanonicalCapabilityIdentitySchema, CanonicalCapabilitySubjectSchema, CapabilityGovernanceDescriptorSchema,
+  GOVERNANCE_REGISTRY_REVISION, GovernanceApprovalMemorySchema, GovernanceCellDescriptorSchema, GovernanceClassifierAuthoritySchema,
+  GovernanceEvaluationInputSchema, GovernanceEvaluationReasonSchema, GovernanceEvaluationResultSchema, GovernanceExecutionCodeSchema, GovernanceOverrideModeSchema,
   GovernanceOverrideSchema, GovernanceRegistrySchema, GovernanceRevisionSchema, GovernanceStableIdSchema,
   LegacyPermissionCellKeySchema, LegacyPermissionCellSetParamsSchema,
   LegacyPermissionCellStateSchema, LegacyPermissionLevelStateSchema, PERMISSION_METHODS,

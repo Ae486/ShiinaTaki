@@ -10,4 +10,5 @@
 - window-state-repo.ts — slot_window_state SQL: get / set / list (per-model-slot effective window + EMA factor — the window calibrator's persistence, batch 6; list feeds memory.status)
 - config-repo.ts — config SQL: get / all / upsert / delete (the sparse operator-set settings store; a row that is not a JSON primitive throws at the boundary)
 - ../governance/governance-policy-repo.ts — governance policy SQL aggregate: durable level/generation + sparse validated overrides
+- ../approval/approval-state-repo.ts — Approval SQL aggregate: durable generation/revisions + canonical always-allow decisions
 - migrations/ — numbered TS-constant migrations + their ordered registry
