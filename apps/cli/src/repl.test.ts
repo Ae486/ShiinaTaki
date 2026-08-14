@@ -68,7 +68,7 @@ describe("runRepl", () => {
 
     await runRepl(io, {
       authenticate: async (ask) => {
-        asked.push(await ask("code: "));
+        asked.push((await ask("code: ")) ?? "");
       },
       onLine: async (line) => {
         processed.push(line);

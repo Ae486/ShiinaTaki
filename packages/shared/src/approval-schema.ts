@@ -95,6 +95,7 @@ export const ApprovalClosedReasonSchema = z.enum([
   "answered", "denied", "expired", "cancelled", "operator_disconnected",
   "host_disconnected", "policy_changed", "approval_generation_changed", "route_replaced",
 ]);
+export type ApprovalClosedReason = z.infer<typeof ApprovalClosedReasonSchema>;
 export const ApprovalClosedSchema = z.strictObject({
   approvalId: z.uuid(),
   reason: ApprovalClosedReasonSchema,
@@ -116,7 +117,7 @@ export const ApprovalRevokeParamsSchema = z.strictObject({
   decisionId: z.uuid(),
   expectedApprovalGeneration: GovernanceRevisionSchema,
 });
-export const ApprovalRevokeStatusSchema = z.enum(["revoked", "not_found"]);
+export const ApprovalRevokeStatusSchema = z.enum(["revoked", "not_found", "stale_generation"]);
 export const ApprovalRevokeResultSchema = z.strictObject({
   status: ApprovalRevokeStatusSchema,
   approvalGeneration: GovernanceRevisionSchema,

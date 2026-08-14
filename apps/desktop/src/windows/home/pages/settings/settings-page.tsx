@@ -8,6 +8,7 @@ import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { useConfig } from "./use-config.ts";
 import { KnobField } from "./knob-field.tsx";
 import { PermissionSection } from "./permission-section.tsx";
+import { ApprovalDecisionsSection } from "./approval-decisions-section.tsx";
 
 export function SettingsPage() {
   const { entries, connectionReady, error, refreshing, notices, save } = useConfig();
@@ -17,6 +18,7 @@ export function SettingsPage() {
       <PageHeader title="设置" hint="值优先级：环境变量 > 面板存储 > 内置默认；每项都注明生效方式。" busy={refreshing} />
       <PageBody>
         <PermissionSection />
+        <ApprovalDecisionsSection />
         {error && <PageAlert>读取配置失败：{error}</PageAlert>}
         {entries.length === 0 && !error && <p className="text-xs text-slate-400">载入中…</p>}
         {entries.length > 0 && (

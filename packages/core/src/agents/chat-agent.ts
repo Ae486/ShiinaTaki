@@ -11,6 +11,7 @@
 import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type ToolSet } from "ai";
 import type { ChatSendParams, ImageAttachment } from "@taki/shared";
 import type { ApprovalGate } from "../approval/approval-gate.ts";
+import type { Connection } from "../server/connection-registry.ts";
 import { COSTUME_CHANGE_NOTICE } from "../avatar/costume-notice.ts";
 import type { AutoMemory } from "../memory/auto-memory.ts";
 import type { MemoryEngine } from "../memory/memory-engine.ts";
@@ -24,6 +25,8 @@ import type { TurnMessage, UserImageInput } from "./turn-mapping.ts";
 
 /** Per-turn WS handle: notify pushes to the asking operator socket; onClose denies pending approvals on disconnect. */
 export interface TurnContext {
+  /** Exact physical operator socket that initiated this turn; Approval session authority is object-identity bound. */
+  connection: Connection;
   notify: (method: string, params: unknown) => void;
   onClose: (cb: () => void) => void;
   /** Aborts the in-flight model stream (chat.cancel / connection close); absent = uncancellable turn (tests). */
@@ -60,10 +63,12 @@ export interface ChatAgentDeps {
   imageMemory?: { onImageTurn(input: { characterId: string; refs: string[]; caption: string }): void };
   /** Adapter-governed tools merged after Core governance (Skill/MCP/Host); stable across turns. */
   extraTools?: ToolSet;
+  /** Connection-bound adapter tools built per turn (MCP); preferred over static extraTools for interactive authority. */
+  turnTools?: (turn: TurnContext) => ToolSet;
   /** Stable Core-local tools included with memory/avatar tools before the Core adapter runs. */
   coreTools?: ToolSet;
   /** Wraps only the Core-local per-turn ToolSet with trusted bindings; absent in focused agent tests. */
-  coreToolGovernance?: { wrap(tools: ToolSet): ToolSet };
+  coreToolGovernance?: { wrap(tools: ToolSet, interactive?: { connection: Connection; signal?: AbortSignal }): ToolSet };
   /** Per-character tools built fresh each turn with the turn's characterId (avatar tools bind their publish target here). */
   characterTools?: (characterId: string) => ToolSet;
   /** Extra instructions appended after the assembled memory context (skills list + avatar vocabulary); "" contributes nothing. */
@@ -179,7 +184,7 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   const agent = new ToolLoopAgent({
     model: vision ? vision.model : deps.model,
     instructions,
-    tools: assembleTurnTools(deps, characterId),
+    tools: assembleTurnTools(deps, characterId, turn),
     stopWhen: [isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS), ...(deps.stopConditions ?? [])],
     // Compatibility seam for focused tests and pre-Slice-3 callers. Production Batch 1 leaves this absent because
     // MCP execution is already guarded by its canonical adapter and `ask` fails closed before the raw closure.
@@ -241,13 +246,15 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   fireUsageReport(deps, { usage: result.usage, instructions, outgoing });
 }
 
-function assembleTurnTools(deps: ChatAgentDeps, characterId: string): ToolSet {
+function assembleTurnTools(deps: ChatAgentDeps, characterId: string, turn?: TurnContext): ToolSet {
   const coreTools = mergeToolSets(
     deps.memory.createTools(characterId),
     deps.coreTools ?? {},
     deps.characterTools?.(characterId) ?? {},
   );
-  return mergeToolSets(deps.coreToolGovernance?.wrap(coreTools) ?? coreTools, deps.extraTools ?? {});
+  const interactive = turn?.connection ? { connection: turn.connection, signal: turn.signal } : undefined;
+  const extra = turn?.connection && deps.turnTools ? deps.turnTools(turn) : deps.extraTools ?? {};
+  return mergeToolSets(deps.coreToolGovernance?.wrap(coreTools, interactive) ?? coreTools, extra);
 }
 
 // A disconnect mid-turn denies every pending approval immediately (fail-closed, ruling 3); so does an abort —

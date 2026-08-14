@@ -7,7 +7,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { DEFAULT_WS_HOST, DEFAULT_WS_PORT, ErrorCodeSchema } from "@taki/shared";
-import { parseApprovalAnswer, renderApprovalAsk } from "./approval-prompt.ts";
+import { createCliApprovalController } from "./approval-controller.ts";
 import { connectChatClient, type ChatClient } from "./chat-client.ts";
 import { loadOrCreateIdentity, saveToken } from "./device-identity.ts";
 import { buildOperatorCall, parseOperatorCall, runOperatorCall, OPERATOR_CALL_USAGE } from "./operator-call.ts";
@@ -65,38 +65,42 @@ const client = await connectChatClient(url).catch((error: unknown) => {
   process.exit(1);
 });
 
-// The approval prompt reads the same stdin queue as the REPL (bound below); an ask arrives only mid-turn,
-// while the main loop is parked awaiting client.chat, so pulling a line here doesn't race the prompt loop.
-let askLine: ((query: string) => Promise<string>) | null = null;
-client.onApprovalRequest(async (request) => {
-  if (!askLine) return { approved: false, scope: "once" }; // no console bound yet -> fail-closed
-  for (;;) {
-    const parsed = parseApprovalAnswer(await askLine(renderApprovalAsk(request)));
-    if (parsed) return parsed;
-    process.stdout.write("Please answer y / s / a / d / n.\n");
-  }
+// Approval is one socket-local FIFO owner. Its ask function is rebound to the shared line queue once the REPL exists;
+// an unbound or closed input fails closed without leaving a pending stdin waiter behind.
+let askLine: ((query: string, signal?: AbortSignal) => Promise<string | null>) | null = null;
+const approvalController = createCliApprovalController({
+  ask: (query, signal) => askLine?.(query, signal) ?? Promise.resolve(null),
+  write: (message) => process.stdout.write(message),
 });
+approvalController.replace(client);
+const stopApproval = client.onApproval((event) => approvalController.receive(event));
+client.onClose(() => approvalController.replace(null));
 
 if (oneShot === null) {
   await runRepl(
     { input: process.stdin, output: process.stdout },
     { authenticate: startChatSession, onLine: handleLine, bindAsk: (ask) => (askLine = ask) },
   );
+  stopApproval();
+  approvalController.dispose();
   client.close();
   process.exit(0);
 }
 
 // One-shot mode: no REPL, no history replay — authenticate, run exactly one call, exit with its outcome.
-await authenticate(client, (query) => askOnce({ input: process.stdin, output: process.stdout }, query));
+askLine = (query, signal) => askOnce({ input: process.stdin, output: process.stdout }, query, signal);
+await authenticate(client, (query, signal) => askOnce({ input: process.stdin, output: process.stdout }, query, signal));
 const succeeded = await runOperatorCall(client, oneShot.call, process.stdout);
+stopApproval();
+approvalController.dispose();
 client.close();
 process.exit(succeeded ? 0 : 1);
 
 // Reconnect with the stored token; on first run the core demands a pairing code (shown on its console).
-async function authenticate(chatClient: ChatClient, ask: (query: string) => Promise<string>): Promise<void> {
+async function authenticate(chatClient: ChatClient, ask: (query: string, signal?: AbortSignal) => Promise<string | null>): Promise<void> {
   let outcome = await chatClient.connect({ ...baseParams, token: identity.token });
   if (!outcome.ok && outcome.code === ErrorCodeSchema.enum.PAIRING_REQUIRED) {
-    const code = await ask("pairing code (shown in the core console): ");
+    const code = (await ask("pairing code (shown in the core console): ")) ?? "";
     outcome = await chatClient.connect({ ...baseParams, pairingCode: code.trim() });
     if (outcome.ok && outcome.token) saveToken(identityPath, outcome.token);
   }
@@ -107,7 +111,7 @@ async function authenticate(chatClient: ChatClient, ask: (query: string) => Prom
   }
 }
 
-async function startChatSession(ask: (query: string) => Promise<string>): Promise<void> {
+async function startChatSession(ask: (query: string, signal?: AbortSignal) => Promise<string | null>): Promise<void> {
   await authenticate(client, ask);
   // AC-2 demo: replay the tail of the persisted timeline so a reconnect shows prior turns.
   // A history-fetch failure must not block chatting, so degrade to a warning.

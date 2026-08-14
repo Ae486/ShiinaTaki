@@ -1,7 +1,7 @@
 /**
  * INPUT:  AI SDK v7 response messages (assistant/tool) and persisted TimelineEntry rows
- * OUTPUT: toEntryInput(message) | toUserEntryInput(text, images) -> {role, content, parts?}  +  toModelMessage(entry) -> ModelMessage | null
- * POS:    core/agents — the persistence mapping for turn fidelity (D1 #1); conversation-store is its only consumer
+ * OUTPUT: names-only tool-call persistence plus safe replay messages; raw tool input is never returned or stored
+ * POS:    core/agents — the privacy boundary between live AI SDK turns and durable/replayed timeline records
  */
 import type { AssistantModelMessage, ModelMessage, ToolModelMessage, ToolResultPart } from "ai";
 import type { TimelineEntry, TimelinePart, TimelineRole, TimelineToolOutput } from "@taki/shared";
@@ -44,7 +44,7 @@ function assistantEntry(message: AssistantModelMessage): TurnEntryInput | null {
     if (part.type === "text") parts.push({ type: "text", text: part.text });
     // Reasoning/file/approval parts are dropped by design — no replay value (docs/deferred-decisions.md D14).
     else if (part.type === "tool-call") {
-      parts.push({ type: "tool-call", toolCallId: part.toolCallId, toolName: part.toolName, input: part.input });
+      parts.push({ type: "tool-call", toolCallId: part.toolCallId, toolName: part.toolName });
     }
   }
   if (parts.every((part) => part.type === "text")) {
@@ -101,7 +101,7 @@ export function toModelMessage(entry: TimelineEntry): ModelMessage | null {
       .map((part) =>
         part.type === "text"
           ? { type: "text" as const, text: part.text }
-          : { type: "tool-call" as const, toolCallId: part.toolCallId, toolName: part.toolName, input: part.input },
+          : { type: "tool-call" as const, toolCallId: part.toolCallId, toolName: part.toolName, input: {} },
       ),
   };
 }

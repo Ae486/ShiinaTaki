@@ -22,21 +22,32 @@ import type { Logger } from "../../logging/logger.ts";
 import { appException } from "../app-error.ts";
 import type { MethodDefinition, MethodRegistry } from "../method-registry.ts";
 
-export function registerPermissionMethods(registry: MethodRegistry, service: GovernancePolicyService, logger: Logger): void {
-  registry.register(levelGet(service));
-  registry.register(levelSet(service, logger));
-  registry.register(cellsGet(service));
-  registry.register(cellSet(service, logger));
+export interface PermissionMethodDeps {
+  service: GovernancePolicyService;
+  logger: Logger;
+  onChanged?: (policyGeneration: number) => void;
+}
+
+export function registerPermissionMethods(registry: MethodRegistry, deps: PermissionMethodDeps): void {
+  registry.register(levelGet(deps.service));
+  registry.register(levelSet(deps));
+  registry.register(cellsGet(deps.service));
+  registry.register(cellSet(deps));
 }
 
 function levelGet(service: GovernancePolicyService): MethodDefinition<PermissionLevelGetParams> {
   return { method: PERMISSION_METHODS.levelGet, roles: ["operator"], paramsSchema: PermissionLevelGetParamsSchema, handler: () => service.level() };
 }
 
-function levelSet(service: GovernancePolicyService, logger: Logger): MethodDefinition<PermissionLevelSetParams> {
+function levelSet(deps: PermissionMethodDeps): MethodDefinition<PermissionLevelSetParams> {
   return {
     method: PERMISSION_METHODS.levelSet, roles: ["operator"], paramsSchema: PermissionLevelSetParamsSchema,
-    handler: ({ level, expectedPolicyGeneration }) => runMutation(() => service.setLevel(level, expectedPolicyGeneration), logger, { level }),
+    handler: ({ level, expectedPolicyGeneration }) => runMutation({
+      mutate: () => deps.service.setLevel(level, expectedPolicyGeneration),
+      logger: deps.logger,
+      fields: { level },
+      onChanged: changedNotifier(deps.onChanged, expectedPolicyGeneration),
+    }),
   };
 }
 
@@ -44,17 +55,39 @@ function cellsGet(service: GovernancePolicyService): MethodDefinition<Permission
   return { method: PERMISSION_METHODS.cellsGet, roles: ["operator"], paramsSchema: PermissionCellsGetParamsSchema, handler: () => service.cells() };
 }
 
-function cellSet(service: GovernancePolicyService, logger: Logger): MethodDefinition<PermissionCellSetParams> {
+function cellSet(deps: PermissionMethodDeps): MethodDefinition<PermissionCellSetParams> {
   return {
     method: PERMISSION_METHODS.cellSet, roles: ["operator"], paramsSchema: PermissionCellSetParamsSchema,
-    handler: (params) => runMutation(() => service.setCell(params), logger, { key: params.key, level: params.level, reset: params.posture === null }),
+    handler: (params) => runMutation({
+      mutate: () => deps.service.setCell(params),
+      logger: deps.logger,
+      fields: { key: params.key, level: params.level, reset: params.posture === null },
+      onChanged: changedNotifier(deps.onChanged, params.expectedPolicyGeneration),
+    }),
   };
 }
 
-function runMutation<T>(mutate: () => T, logger: Logger, fields: Record<string, unknown>): T {
+function changedNotifier(
+  onChanged: PermissionMethodDeps["onChanged"],
+  expectedPolicyGeneration: number,
+): PermissionMethodDeps["onChanged"] {
+  return onChanged
+    ? (policyGeneration) => {
+        if (policyGeneration !== expectedPolicyGeneration) onChanged(policyGeneration);
+      }
+    : undefined;
+}
+
+function runMutation<T extends { policyGeneration: number }>(input: {
+  mutate: () => T;
+  logger: Logger;
+  fields: Record<string, unknown>;
+  onChanged?: (policyGeneration: number) => void;
+}): T {
   try {
-    const result = mutate();
-    logger.child({ mod: "governance" }).info(fields, "governance policy stored");
+    const result = input.mutate();
+    input.logger.child({ mod: "governance" }).info(input.fields, "governance policy stored");
+    input.onChanged?.(result.policyGeneration);
     return result;
   } catch (error) {
     if (error instanceof PolicyConflictError) {

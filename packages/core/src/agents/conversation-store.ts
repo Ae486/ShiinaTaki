@@ -4,7 +4,7 @@
  *         an optional SummaryReader (R3) and an optional wall-hit sink (R5)
  * OUTPUT: createConversationStore(deps) -> { appendUser, appendAssistant, appendTurn, removeEntry, history, windowStart,
  *         estimatedTokens }
- * POS:    core/agents — SQLite-backed conversation store; persists each turn (full multi-part fidelity), replays the
+ * POS:    core/agents — SQLite-backed conversation store; persists safe turn projections (tool calls are names-only), replays the
  *         Replay View (ADR 0008: summary substitution → R4 folds → emergency token cut, all inside the ONE select
  *         closure the flush boundary also rides — batch 6/7)
  */
@@ -44,7 +44,7 @@ export interface ConversationStore {
   appendUser(characterId: string, text: string, images?: UserImageInput[]): TimelineEntry;
   appendAssistant(characterId: string, text: string): void;
   /**
-   * Persists a whole turn's response tail (assistant tool-call parts + tool-result messages + final text),
+   * Persists a whole turn's response tail (names-only assistant tool-call parts + tool-result messages + final text),
    * oldest-first, as returned by `result.responseMessages` — the fix for cross-turn tool-record loss (D1 #1).
    */
   appendTurn(characterId: string, messages: TurnMessage[]): void;
@@ -112,7 +112,7 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
       repo.deleteEntry(characterId, seq);
       onRemove?.({ characterId, seq });
     },
-    // Legacy text-only rows reconstruct via content; parts-carrying rows replay their full multi-part shape.
+    // Legacy text-only rows reconstruct via content; tool calls replay with empty input placeholders, never raw args.
     history: (characterId) => {
       const view = select(characterId);
       const messages = view.entries

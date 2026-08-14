@@ -27,7 +27,7 @@ export {
   CanonicalApprovalRespondParamsSchema, CanonicalApprovalRespondResultSchema,
 } from "./approval-schema.ts";
 export type {
-  ApprovalChoice, ApprovalClosed, ApprovalDisclosureAck, ApprovalListParams, ApprovalListResult,
+  ApprovalChoice, ApprovalClosed, ApprovalClosedReason, ApprovalDisclosureAck, ApprovalListParams, ApprovalListResult,
   ApprovalPresentation, ApprovalRevokeParams, ApprovalRevokeResult, CanonicalApprovalRequest,
   CanonicalApprovalRespondParams, CanonicalApprovalRespondResult,
 } from "./approval-schema.ts";

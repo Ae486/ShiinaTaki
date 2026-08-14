@@ -7,6 +7,7 @@ import { createHash } from "node:crypto";
 import {
   APPROVAL_BINDING_REVISION,
   APPROVAL_DISCLOSURE_REVISION,
+  ApprovalDecisionBindingSchema,
   ApprovalDurableDecisionBindingSchema,
   ApprovalDecisionInertReasonSchema,
   canonicalApprovalDecisionScope,
@@ -15,6 +16,7 @@ import {
   governanceCell,
   governanceDescriptor,
   type ApprovalDecisionScope,
+  type ApprovalDecisionBinding,
   type ApprovalDurableDecisionBinding,
   type ApprovalStoredDurableDecisionBinding,
   type GovernanceRegistry,
@@ -52,6 +54,40 @@ export function validateCurrentApprovalBinding(
   const binding = ApprovalDurableDecisionBindingSchema.parse(candidate);
   const reason = approvalBindingInertReason(registry, binding, APPROVAL_DISCLOSURE_REVISION);
   if (reason) throw new ApprovalBindingValidationError(reason, `Approval binding is not usable: ${reason}`);
+  return binding;
+}
+
+export function validateCurrentApprovalDecisionBinding(
+  registry: GovernanceRegistry,
+  candidate: unknown,
+): ApprovalDecisionBinding {
+  const binding = ApprovalDecisionBindingSchema.parse(candidate);
+  const descriptor = governanceDescriptor(registry, binding.identity.capabilityId);
+  if (!descriptor) throw new ApprovalBindingValidationError("unknown_capability", "Approval binding is not usable: unknown_capability");
+  if (descriptor.subjectRequired !== (binding.identity.subject !== undefined)) {
+    throw new ApprovalBindingValidationError("subject_binding_mismatch", "Approval binding is not usable: subject_binding_mismatch");
+  }
+  if (binding.descriptorRevision !== descriptor.descriptorRevision) {
+    throw new ApprovalBindingValidationError("descriptor_revision_mismatch", "Approval binding is not usable: descriptor_revision_mismatch");
+  }
+  if (binding.classifierId !== descriptor.classifier.classifierId
+    || binding.classifierRevision !== descriptor.classifier.classifierRevision) {
+    throw new ApprovalBindingValidationError("classifier_mismatch", "Approval binding is not usable: classifier_mismatch");
+  }
+  if (!governanceCell(descriptor, binding.cellKey)) {
+    throw new ApprovalBindingValidationError("unknown_cell", "Approval binding is not usable: unknown_cell");
+  }
+  const expected = approvalDecisionScopeDigest({
+    bindingRevision: binding.bindingRevision,
+    identity: binding.identity,
+    descriptorRevision: binding.descriptorRevision,
+    classifierId: binding.classifierId,
+    classifierRevision: binding.classifierRevision,
+    cellKey: binding.cellKey,
+  });
+  if (binding.decisionScopeDigest !== expected) {
+    throw new ApprovalBindingValidationError("decision_scope_mismatch", "Approval binding is not usable: decision_scope_mismatch");
+  }
   return binding;
 }
 

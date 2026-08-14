@@ -110,7 +110,7 @@ describe("canonical Approval operator schemas", () => {
     }).decisions).toEqual([]);
     expect(ApprovalRevokeParamsSchema.parse({ decisionId: request.approvalId, expectedApprovalGeneration: 7 })).toBeDefined();
     expect(ApprovalRevokeResultSchema.parse({ status: "not_found", approvalGeneration: 7 })).toBeDefined();
-    expect(ApprovalRevokeResultSchema.safeParse({ status: "stale_generation", approvalGeneration: 7 }).success).toBe(false);
+    expect(ApprovalRevokeResultSchema.parse({ status: "stale_generation", approvalGeneration: 7 })).toBeDefined();
     expect(ApprovalRevokeResultSchema.safeParse({ status: "not_found", approvalGeneration: 7, input: "leak" }).success).toBe(false);
   });
 });

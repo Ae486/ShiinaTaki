@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { JSON_RPC_APP_ERROR, PERMISSION_METHODS } from "@taki/shared";
 import { MIGRATIONS } from "../../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../../db/sqlite.ts";
@@ -17,7 +17,7 @@ function build(role: "operator" | "node" = "operator") {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
   const registry = createMethodRegistry();
-  registerPermissionMethods(registry, createGovernancePolicyService(createGovernancePolicyRepo(db)), logger);
+  registerPermissionMethods(registry, { service: createGovernancePolicyService(createGovernancePolicyRepo(db)), logger });
   const connection: Connection = { state: { status: "authenticated", deviceId: "d1", role, capabilities: [] } };
   const ctx: MethodContext = { connection, notify: () => undefined, close: () => undefined, onClose: () => undefined };
   return { registry, ctx };
@@ -39,7 +39,7 @@ describe("permission methods", () => {
     const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
     dbs.push(db);
     const registry = createMethodRegistry();
-    registerPermissionMethods(registry, createGovernancePolicyService(createGovernancePolicyRepo(db)), logger);
+    registerPermissionMethods(registry, { service: createGovernancePolicyService(createGovernancePolicyRepo(db)), logger });
     const connection: Connection = { state: { status: "authenticated", deviceId: "d1", role: "operator", capabilities: [] } };
     const ctx: MethodContext = { connection, notify: () => undefined, close: () => undefined, onClose: () => undefined };
     const dispatch = (method: string, params: unknown) => registry.dispatch({ jsonrpc: "2.0", id: ++id, method, params }, ctx);
@@ -59,11 +59,32 @@ describe("permission methods", () => {
     });
   });
 
+  it("does not invalidate Approval state for policy no-ops", async () => {
+    const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+    dbs.push(db);
+    const registry = createMethodRegistry();
+    const onChanged = vi.fn();
+    registerPermissionMethods(registry, {
+      service: createGovernancePolicyService(createGovernancePolicyRepo(db)), logger, onChanged,
+    });
+    const connection: Connection = {
+      state: { status: "authenticated", deviceId: "d1", role: "operator", capabilities: [] },
+    };
+    const ctx: MethodContext = { connection, notify: () => undefined, close: () => undefined, onClose: () => undefined };
+
+    await registry.dispatch({
+      jsonrpc: "2.0", id: ++id, method: PERMISSION_METHODS.levelSet,
+      params: { level: "standard", expectedPolicyGeneration: 1 },
+    }, ctx);
+
+    expect(onChanged).not.toHaveBeenCalled();
+  });
+
   it("resets an existing override through null and advances exactly once", async () => {
     const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
     dbs.push(db);
     const registry = createMethodRegistry();
-    registerPermissionMethods(registry, createGovernancePolicyService(createGovernancePolicyRepo(db)), logger);
+    registerPermissionMethods(registry, { service: createGovernancePolicyService(createGovernancePolicyRepo(db)), logger });
     const connection: Connection = { state: { status: "authenticated", deviceId: "d1", role: "operator", capabilities: [] } };
     const ctx: MethodContext = { connection, notify: () => undefined, close: () => undefined, onClose: () => undefined };
     const dispatch = (params: unknown) => registry.dispatch({

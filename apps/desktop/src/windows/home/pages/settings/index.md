@@ -1,7 +1,9 @@
 # windows/home/pages/settings/
 The Settings page: Core-owned permission governance appears before generic config knobs. Permission state is fresh per
 authenticated Home client generation and window-memory-only; config remains the guarded cached metadata surface.
-- settings-page.tsx — page root: permission governance first, then the knob list in server order + load-error banner
+- settings-page.tsx — page root: permission governance, durable Approval management, then the knob list in server order
+- approval-decisions-section.tsx — fresh Core durable-allow list, optimistic revoke feedback, retry, and no-cache presentation
+- approval-decisions-controller.ts — current-Home-client-only Approval list/revoke guard with stale-result suppression
 - permission-section.tsx — permission section composition: loading/reconnecting/failure/saved/conflict/refusal truth
 - use-permissions.ts — the ONLY permission WS seam: fresh per-client reads, generation-safe mutation completion, conflict refetch, no replay/cache
 - permission-controller.ts — framework-free async guard: one mutation at a time, replacement refetch, retired-client suppression, conflict reread

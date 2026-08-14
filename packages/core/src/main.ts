@@ -27,9 +27,9 @@ import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
 import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
 import { bootstrapCore } from "./boot/core-bootstrap.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
+import { composeApprovalRuntime } from "./approval/approval-runtime.ts";
 import { createGovernancePolicyRepo } from "./governance/governance-policy-repo.ts";
 import { createGovernancePolicyService } from "./governance/governance-policy-service.ts";
-import { createCoreToolGovernanceAdapter } from "./governance/core-tool-governance-adapter.ts";
 import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
 import { createSummaryRepo } from "./db/summary-repo.ts";
 import { createTimelineRepo } from "./db/timeline-repo.ts";
@@ -71,7 +71,6 @@ import { mediaUsageMethod } from "./server/methods/media-usage.ts";
 import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
 import { memoryStatusMethod } from "./server/methods/memory-status.ts";
 import { registerPerceptionMethods } from "./server/methods/perception-methods.ts";
-import { registerPermissionMethods } from "./server/methods/permission-methods.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
 import { createLoadSkillTool } from "./skills/load-skill-tool.ts";
@@ -92,7 +91,6 @@ const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
 const coreHostId = loadOrCreateHostIdentity(join(serverConfig.dataDir, "host-identity.json"));
 logger.info("Core Host identity loaded");
 const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
-const coreToolGovernance = createCoreToolGovernanceAdapter(governance, coreHostId);
 const timelineRepo = createTimelineRepo(db);
 // R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
 // their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).
@@ -167,6 +165,8 @@ const deviceRegistry = createDeviceRegistry({
 });
 const connectionRegistry = createConnectionRegistry();
 const hostCatalogs = createHostCatalogStore();
+const registry = createMethodRegistry();
+const { approval, coreToolGovernance } = composeApprovalRuntime({ db, governance, coreHostId, registry, connections: connectionRegistry, logger });
 
 // Skills (#9): discover SKILL.md folders, honor persisted enable/disable, expose the list + the load_skill tool.
 const skillsLog = logger.child({ mod: "skills" });
@@ -191,6 +191,7 @@ const mcpManager = await createMcpManager({
   governance: {
     service: governance,
     ownerHostId: coreHostId,
+    approval,
     legacyDeny: (serverName, toolName) => legacyMcpDeny.denies(serverName, toolName),
   },
 });
@@ -259,7 +260,6 @@ const readFileTool = createReadFileTool({ paths: workspacePaths, logger });
 const writeFileTool = createWriteFileTool({ paths: workspacePaths, logger });
 const staticCoreTools: ToolSet = { ...createCurrentTimeTool(), ...readFileTool, ...writeFileTool };
 
-const registry = createMethodRegistry();
 // Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
 const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry() };
 // The pairing code is the one sanctioned secret-ish value in a log: short-lived, single-purpose,
@@ -302,8 +302,8 @@ registry.register(
       extraTools: {
         ...createLoadSkillTool(skillsLoader, { service: governance, ownerHostId: coreHostId }),
         ...capabilityTools,
-        ...mcpManager.tools(),
       },
+      turnTools: (turn) => mcpManager.tools({ connection: turn.connection, signal: turn.signal }),
       // Stable Core-local tools join per-turn memory/avatar tools behind the explicit Core binding table.
       coreTools: staticCoreTools,
       coreToolGovernance,
@@ -360,7 +360,6 @@ registry.register(characterCostumeResolutionMethod({ store: characterStore, char
 // Perception methods (T3b): Privacy Pause read/write + the activity card. Operator-only — the agent has no path to
 // un-pause its own observation (pinned by privacy-pause-writer.test.ts); the panel lands with #26.
 registerPerceptionMethods(registry, perception);
-registerPermissionMethods(registry, governance, logger);
 // Memory maintenance (T5 batch 4b): run the tidy pass on demand. Operator-only, NO Rust mirror; the write-count
 // trigger rides autoMemory internally — this surface exists for the settings panel/CLI (#26).
 registry.register(memoryTidyMethod(tidy));

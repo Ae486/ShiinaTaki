@@ -5,7 +5,8 @@
  */
 import type { ToolSet } from "ai";
 import type { GovernancePolicyService } from "./governance-policy-service.ts";
-import { wrapGovernedTool, type GovernedToolBinding } from "./governed-tool.ts";
+import type { ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
+import { wrapGovernedTool, type GovernedToolBinding, type InteractiveGovernanceContext } from "./governed-tool.ts";
 
 const CORE_TOOL_BINDINGS: Record<string, Omit<GovernedToolBinding["identity"], "ownerHostId"> & { cellKey: string }> = {
   get_current_time: { capabilityId: "core.time.read", cellKey: "get-current-time" },
@@ -19,21 +20,41 @@ const CORE_TOOL_BINDINGS: Record<string, Omit<GovernedToolBinding["identity"], "
 };
 
 export interface CoreToolGovernanceAdapter {
-  wrap(tools: ToolSet): ToolSet;
+  wrap(tools: ToolSet, interactive?: Omit<InteractiveGovernanceContext, "presentation">): ToolSet;
 }
 
-export function createCoreToolGovernanceAdapter(service: GovernancePolicyService, ownerHostId: string): CoreToolGovernanceAdapter {
+export function createCoreToolGovernanceAdapter(
+  service: GovernancePolicyService,
+  ownerHostId: string,
+  approval?: ApprovalInteractionService,
+): CoreToolGovernanceAdapter {
   return {
-    wrap(tools) {
+    wrap(tools, interactive) {
       const wrapped: ToolSet = {};
       for (const [key, tool] of Object.entries(tools)) {
         const binding = CORE_TOOL_BINDINGS[key];
         wrapped[key] = binding
-          ? wrapGovernedTool(tool, service, { identity: { capabilityId: binding.capabilityId, ownerHostId }, cellKey: binding.cellKey })
+          ? wrapGovernedTool(tool, {
+              service,
+              binding: { identity: { capabilityId: binding.capabilityId, ownerHostId }, cellKey: binding.cellKey },
+              interactive: interactive && approval
+                ? { ...interactive, approval, presentation: corePresentation(key) }
+                : undefined,
+            })
           : closeUnknownCoreTool(tool, key);
       }
       return wrapped;
     },
+  };
+}
+
+function corePresentation(key: string) {
+  return {
+    revision: 1 as const,
+    title: "Allow Core tool",
+    capabilityLabel: key,
+    riskSummary: "This Core tool requires operator approval under the active governance policy.",
+    sections: [{ title: "Action", fields: [{ label: "Tool", value: key }] }],
   };
 }
 

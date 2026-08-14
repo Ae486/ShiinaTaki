@@ -2,8 +2,8 @@
  * INPUT:  none (self-contained page root); drives its own connection + timeline hooks.
  * OUTPUT: <ChatPage> — the chat page body: shared page header (naming the active character) + status banner +
  *         scrollable timeline + composer; provides the WsClient to deep image parts via context.
- * POS:    ui/windows/home/pages/chat — the depth-view page of the home window (the bubble is the glance, #16). A
- *         disposable client (invariant 4): closing home drops its WS; the Agent Core is unaffected.
+ * POS:    ui/windows/home/pages/chat — owns the independent Chat socket and its single Approval modal. Closing Home
+ *         drops this disposable client without affecting the Agent Core (invariant 4).
  */
 
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
@@ -14,10 +14,12 @@ import { useChatConnection } from "./use-chat-connection.ts";
 import { useChatTimeline } from "./use-chat-timeline.ts";
 import { TimelineView } from "./timeline-view.tsx";
 import { Composer } from "./composer.tsx";
+import { useApprovalDialog } from "@/components/approval/use-approval-dialog.js";
 
 export function ChatPage() {
   const { client, status } = useChatConnection();
   const timeline = useChatTimeline(client);
+  const approvalDialog = useApprovalDialog(client);
   const connected = status.kind === "connected";
 
   return (
@@ -33,6 +35,7 @@ export function ChatPage() {
         consumeRetractedDraft={timeline.consumeRetractedDraft}
         connectionReady={connected}
       />
+      {approvalDialog}
     </ChatClientContext.Provider>
   );
 }

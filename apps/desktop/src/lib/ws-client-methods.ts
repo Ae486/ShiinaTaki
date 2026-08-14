@@ -1,7 +1,7 @@
 /**
  * INPUT:  a JSON-RPC client bound to the operator socket + call params from the UI hooks.
  * OUTPUT: handshake() (connect outcome) + requestMethods() — the plain request/response half of the WsClient
- *         (chat/timeline/media/character/config/memory/perception/permission governance).
+ *         (chat/timeline/media/character/config/memory/perception/permission governance/canonical Approval).
  * POS:    ui/lib — the outbound half of ws-client (no turn/stream state lives here). Every result is parsed through a
  *         @taki/shared schema: the zod boundary holds for every inbound frame.
  */
@@ -9,6 +9,10 @@
 import { JSONRPCErrorException, type JSONRPCParams, type JSONRPCServerAndClient } from "json-rpc-2.0";
 import {
   AVATAR_METHODS,
+  APPROVAL_METHODS,
+  ApprovalListResultSchema,
+  ApprovalRevokeResultSchema,
+  CanonicalApprovalRespondResultSchema,
   CHARACTER_METHODS,
   CHAT_METHODS,
   CONFIG_METHODS,
@@ -40,6 +44,8 @@ import {
   TIMELINE_METHODS,
   TimelineHistoryResultSchema,
   type AvatarReportParams,
+  type ApprovalRevokeParams,
+  type CanonicalApprovalRespondParams,
   type CharacterImportParams,
   type ConfigSetParams,
   type ConnectParams,
@@ -62,6 +68,16 @@ function permissionMethods(request: <T>(method: string, params: JSONRPCParams) =
       PermissionCellsStateSchema.parse(await request(PERMISSION_METHODS.cellsGet, {})),
     permissionCellSet: async (params: PermissionCellSetParams) =>
       PermissionCellSetResultSchema.parse(await request(PERMISSION_METHODS.cellSet, params)),
+  };
+}
+
+function approvalMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
+  return {
+    approvalRespond: async (params: CanonicalApprovalRespondParams) =>
+      CanonicalApprovalRespondResultSchema.parse(await request(APPROVAL_METHODS.respond, params)),
+    approvalList: async () => ApprovalListResultSchema.parse(await request(APPROVAL_METHODS.list, {})),
+    approvalRevoke: async (params: ApprovalRevokeParams) =>
+      ApprovalRevokeResultSchema.parse(await request(APPROVAL_METHODS.revoke, params)),
   };
 }
 
@@ -137,5 +153,6 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
       PerceptionPauseStateSchema.parse(await request(PERCEPTION_METHODS.pauseSet, params)),
     perceptionCard: async () => PerceptionCardSchema.parse(await request(PERCEPTION_METHODS.card, {})),
     ...permissionMethods(request),
+    ...approvalMethods(request),
   };
 }

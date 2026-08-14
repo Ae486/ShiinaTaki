@@ -9,6 +9,7 @@ import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2
 import { describe, expect, it, vi } from "vitest";
 import {
   AVATAR_METHODS,
+  APPROVAL_METHODS,
   CHARACTER_METHODS,
   CHAT_METHODS,
   CONFIG_METHODS,
@@ -59,6 +60,77 @@ function lastRequestId(sent: string[]): number | string {
 }
 
 describe("createWsClient inbound routing", () => {
+  it("routes canonical Approval request/closed pushes and isolates failing handlers", () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    const received: unknown[] = [];
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      client.onApproval(() => { throw new Error("SENTINEL_RAW_INPUT"); });
+      client.onApproval((event) => received.push(event));
+      h.open();
+      const approvalId = "11111111-1111-4111-8111-111111111111";
+      h.deliver({
+      jsonrpc: "2.0",
+      method: APPROVAL_METHODS.request,
+      params: {
+        approvalId,
+        expiresAt: "2026-08-14T00:01:00.000Z",
+        policyGeneration: 3,
+        approvalGeneration: 4,
+        binding: {
+          bindingRevision: 1,
+          identity: { capabilityId: "mcp.tool.call", ownerHostId: "33333333-3333-4333-8333-333333333333" },
+          descriptorRevision: 1,
+          classifierId: "mcp.tool.call.v1",
+          classifierRevision: 1,
+          cellKey: "mcp-tool-call",
+          decisionScopeDigest: "a".repeat(64),
+        },
+        allowedChoices: ["allow_once", "deny"],
+        presentation: {
+          revision: 1,
+          title: "Run MCP tool",
+          capabilityLabel: "MCP tool",
+          riskSummary: "This tool can change external state.",
+          sections: [{ title: "Target", fields: [{ label: "Tool", value: "redacted-tool" }] }],
+        },
+      },
+    });
+      h.deliver({
+      jsonrpc: "2.0",
+      method: APPROVAL_METHODS.closed,
+      params: { approvalId, reason: "expired", approvalGeneration: 4 },
+    });
+      expect(received).toMatchObject([
+        { type: "request", request: { approvalId } },
+        { type: "closed", closed: { approvalId, reason: "expired" } },
+      ]);
+      expect(warn.mock.calls.flat().join(" ")).not.toContain("SENTINEL_RAW_INPUT");
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it("retires every Approval handler before a queued old-generation push can dispatch", () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    const received: unknown[] = [];
+    client.onApproval((event) => received.push(event));
+    h.open();
+    h.closeSocket();
+    h.deliver({
+      jsonrpc: "2.0",
+      method: APPROVAL_METHODS.closed,
+      params: {
+        approvalId: "11111111-1111-4111-8111-111111111111",
+        reason: "operator_disconnected",
+        approvalGeneration: 4,
+      },
+    });
+    expect(received).toEqual([]);
+  });
+
   it("streams chat deltas (with the turn's messageId) to the active turn and settles on complete", async () => {
     const h = harness();
     const client = createWsClient({ transport: h.transport });

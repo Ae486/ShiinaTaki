@@ -1,32 +1,58 @@
 /**
- * INPUT:  a LegacyApprovalRequest (server/tool/input the dormant gate wants to run) + the operator's typed answer
- * OUTPUT: renderApprovalAsk(req) -> prompt string; parseApprovalAnswer(answer) -> {approved, scope} | null
- * POS:    cli — pure rendering/parsing for the approval prompt (unit-tested); no IO, no WS (main wires it to stdin)
+ * INPUT:  one canonical redacted Approval request plus an operator answer
+ * OUTPUT: safe prompt rendering and explicit canonical choice parsing; no raw execution input or durable deny shortcut
+ * POS:    cli — pure operator presentation/parser; main owns stdin and chat-client owns the targeted socket
  */
-import type { LegacyApprovalRequest, LegacyApprovalScope } from "@taki/shared";
+import type { ApprovalChoice, CanonicalApprovalRequest } from "@taki/shared";
 
-export interface ApprovalAnswer {
-  approved: boolean;
-  scope: LegacyApprovalScope;
-}
-
-// Single-key answers: approve (y/s/a) or deny (d/n). `n` = deny-always, which the core persists as `never`.
-const ANSWERS: Record<string, ApprovalAnswer> = {
-  y: { approved: true, scope: "once" },
-  s: { approved: true, scope: "session" },
-  a: { approved: true, scope: "always" },
-  d: { approved: false, scope: "once" },
-  n: { approved: false, scope: "always" },
+const KEYS: Record<string, ApprovalChoice> = {
+  y: "allow_once",
+  s: "allow_session",
+  a: "allow_always",
+  d: "deny",
 };
 
-const LEGEND = "[y]es once  [s]ession  [a]lways  [d]eny once  [n]ever: ";
-
-/** The input is shown so the operator can judge the ask — this is the one place a tool input surfaces (not in core logs). */
-export function renderApprovalAsk(req: LegacyApprovalRequest): string {
-  return `\n[approval] ${req.serverName}/${req.toolName} wants to run with:\n  ${JSON.stringify(req.input)}\n${LEGEND}`;
+export function renderApprovalAsk(request: CanonicalApprovalRequest): string {
+  const details = request.presentation.sections.flatMap((section) => [
+    `  ${section.title}`,
+    ...section.fields.map((field) => `    ${field.label}: ${field.value}`),
+  ]).join("\n");
+  const choices = request.allowedChoices.map(choiceLabel).join("  ");
+  return `\n[approval] ${request.presentation.title}\n  ${request.presentation.riskSummary}\n${details}\n${choices}: `;
 }
 
-/** null for an unrecognized answer — the caller re-prompts. */
-export function parseApprovalAnswer(answer: string): ApprovalAnswer | null {
-  return ANSWERS[answer.trim().toLowerCase()] ?? null;
+export function parseApprovalAnswer(answer: string, allowedChoices: readonly ApprovalChoice[]): ApprovalChoice | null {
+  const choice = KEYS[answer.trim().toLowerCase()];
+  return choice && allowedChoices.includes(choice) ? choice : null;
+}
+
+export function renderApprovalDisclosure(request: CanonicalApprovalRequest): string {
+  const revision = request.disclosureRevision;
+  return revision === undefined
+    ? "\n[approval] This request does not offer current future-background disclosure; choose another option: "
+    : `\n[approval] Confirm revision ${revision}: this grant also permits matching future background runs. Type yes to confirm, or no to deny: `;
+}
+
+export function parseApprovalDisclosure(answer: string): boolean {
+  return ["y", "yes", "confirm", "confirmed"].includes(answer.trim().toLowerCase());
+}
+
+export function approvalStatusMessage(status: string): string {
+  return {
+    late: "Approval response was late and was not applied.",
+    wrong_session: "Approval belongs to another connection.",
+    invalidated: "Approval was invalidated before the response was applied.",
+    scope_not_allowed: "That approval scope is not allowed for this capability.",
+    stale_generation: "Approval state changed before the response was applied.",
+    disclosure_required: "Current future-background disclosure was required.",
+  }[status] ?? "Approval response was rejected.";
+}
+
+function choiceLabel(choice: ApprovalChoice): string {
+  return {
+    allow_once: "[y]es once",
+    allow_session: "[s]ession",
+    allow_always: "[a]lways (future background use)",
+    deny: "[d]eny this request",
+  }[choice];
 }

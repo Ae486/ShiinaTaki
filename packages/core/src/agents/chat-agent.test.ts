@@ -2,9 +2,13 @@ import { afterEach, describe, expect, it } from "vitest";
 import { APICallError } from "ai";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
 import { abortRejectingModel, failingMockModel, midStreamErrorModel, slowStreamingModel, streamingMockModel } from "../testing/mock-language-model.ts";
+import type { Connection } from "../server/connection-registry.ts";
 import { createChatAgent, type TurnContext } from "./chat-agent.ts";
 
 const fixtures: CompanionFixture[] = [];
+const TEST_CONNECTION: Connection = {
+  state: { status: "authenticated", deviceId: "chat-agent-test", role: "operator", capabilities: [] },
+};
 function fresh(): CompanionFixture {
   const f = createCompanionFixture();
   fixtures.push(f);
@@ -132,7 +136,9 @@ describe("createChatAgent", () => {
 
   // A cancellable turn handle: records whether onRetract fired and carries the abort signal.
   function cancellableTurn(controller: AbortController, onRetract: () => void): TurnContext {
-    return { notify: () => undefined, onClose: () => undefined, signal: controller.signal, onRetract };
+    return {
+      connection: TEST_CONNECTION, notify: () => undefined, onClose: () => undefined, signal: controller.signal, onRetract,
+    };
   }
 
   // Records each characterId the detached auto-write fires for (so a test can assert it did / did not run).

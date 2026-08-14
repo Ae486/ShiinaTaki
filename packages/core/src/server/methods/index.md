@@ -21,10 +21,11 @@
 - character-costumes.ts — character.costumes (operator-only): one character's costumes + settings filenames + on-demand availability (renderable / missing motions+packs)
 - character-costume-resolution.ts — character.costumeResolution (operator-only): one costume's external-ref → characters-root rel-path map, on demand (#18)
 - approval-respond.ts — legacy compatibility handler retained for tests/migration only; `main.ts` does not register it, and canonical Approval methods begin in Batch B
+- approval-methods.ts — canonical operator-only approval.respond/list/revoke registration; response ownership is enforced by the exact MethodContext Connection
 - capability-respond.ts — capability.respond (node-only): Host/generation/control-bound terminal settlement
 - capability-trigger.ts — capability.trigger (operator-only, DEV-ONLY via TAKI_DEV_TRIGGER=1): drive a real capability tool's execute without the LLM while retaining Core governance and any Host final-enforcement path; + devTriggerEnabled(env)
 - config-methods.ts — the settings surface's single registration seam: config.list / config.set / config.subscribe
 - config-list.ts — config.list (operator-only): every knob with effective value + provenance (stored/env-locked/apply class); secrets as set/not-set
 - config-set.ts — config.set (operator-only): thin controller over config-writer; refusals ride CONFIG_REFUSED + a machine-readable reason; logs keys, never values
 - config-subscribe.ts — config.subscribe (operator-only): config.changed pushes, ctx.onClose auto-unsubscribe
-- permission-methods.ts — operator-only permission.levelGet/levelSet/cellsGet/cellSet; optimistic conflicts and policy-domain refusals are structured app errors
+- permission-methods.ts — operator-only permission.levelGet/levelSet/cellsGet/cellSet; material policy mutations notify Approval invalidation while validated no-ops do not

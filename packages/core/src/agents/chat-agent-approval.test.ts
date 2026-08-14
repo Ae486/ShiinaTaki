@@ -6,6 +6,7 @@ import type { ApprovalBroker, ApprovalOutcome } from "../approval/approval-broke
 import type { DecisionStore } from "../approval/decision-store.ts";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
 import { scriptedModel } from "../testing/mock-language-model.ts";
+import type { Connection } from "../server/connection-registry.ts";
 import { createChatAgent, type TurnContext } from "./chat-agent.ts";
 
 const fixtures: CompanionFixture[] = [];
@@ -18,7 +19,10 @@ afterEach(() => {
   for (const f of fixtures.splice(0)) f.cleanup();
 });
 
-const NOOP_TURN: TurnContext = { notify: () => undefined, onClose: () => undefined };
+const TEST_CONNECTION: Connection = {
+  state: { status: "authenticated", deviceId: "chat-agent-test", role: "operator", capabilities: [] },
+};
+const NOOP_TURN: TurnContext = { connection: TEST_CONNECTION, notify: () => undefined, onClose: () => undefined };
 
 // A gate whose broker.ask is spied, describing only `files_read` as an MCP tool.
 function spyGate(outcome: ApprovalOutcome) {

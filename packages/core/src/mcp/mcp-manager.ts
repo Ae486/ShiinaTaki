@@ -7,7 +7,7 @@ import { createHash } from "node:crypto";
 import type { Tool, ToolSet } from "ai";
 import type { Logger } from "../logging/logger.ts";
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
-import { wrapGovernedTool } from "../governance/governed-tool.ts";
+import { wrapGovernedTool, type InteractiveGovernanceContext } from "../governance/governed-tool.ts";
 import type { McpServerEntry } from "./mcp-config.ts";
 import { mcpPublicConfig } from "./mcp-config.ts";
 import { defaultConnect, type McpClient, type McpConnect } from "./mcp-connect.ts";
@@ -22,8 +22,8 @@ export interface McpToolRef {
 }
 
 export interface McpManager {
-  /** The aggregated, namespaced, error-wrapped ToolSet (cached; no per-turn rediscovery). */
-  tools(): ToolSet;
+  /** Builds the aggregated ToolSet for one turn; raw SDK closures remain cached and connection-neutral. */
+  tools(interactive?: Omit<InteractiveGovernanceContext, "presentation" | "approval">): ToolSet;
   /** Maps a ToolSet key back to its raw identity plus stable subject binding. */
   describe(toolKey: string): McpToolRef | undefined;
   /** Closes every connected client; idempotent (safe to call twice in the shutdown chain). */
@@ -37,6 +37,7 @@ export interface McpManagerDeps {
   governance?: {
     service: GovernancePolicyService;
     ownerHostId: string;
+    approval?: InteractiveGovernanceContext["approval"];
     legacyDeny?: (serverName: string, toolName: string) => boolean;
   };
 }
@@ -63,19 +64,72 @@ export async function createMcpManager(deps: McpManagerDeps): Promise<McpManager
       return;
     }
     clients.push(result.value.client);
-    mergeServerTools({ entry, discovered: result.value.tools, tools, refs, collisions, log, governance: deps.governance });
+    mergeServerTools({ entry, discovered: result.value.tools, tools, refs, collisions, log });
   });
   log.info({ servers: clients.length, tools: Object.keys(tools).length }, "mcp servers connected");
 
   let closed = false;
   return {
-    tools: () => tools,
+    tools: (interactive) => deps.governance ? wrapForTurn({ tools, refs, governance: deps.governance, interactive }) : tools,
     describe: (toolKey) => refs.get(toolKey),
     async close() {
       if (closed) return;
       closed = true;
       await Promise.allSettled(clients.map((client) => client.close()));
     },
+  };
+}
+
+interface TurnWrapInput {
+  tools: ToolSet;
+  refs: ReadonlyMap<string, McpToolRef>;
+  governance: NonNullable<McpManagerDeps["governance"]>;
+  interactive?: Omit<InteractiveGovernanceContext, "presentation" | "approval">;
+}
+
+function wrapForTurn(input: TurnWrapInput): ToolSet {
+  const { tools, refs, governance, interactive: turn } = input;
+  const wrapped: ToolSet = {};
+  for (const [key, tool] of Object.entries(tools)) {
+    const ref = refs.get(key);
+    if (!ref) continue;
+    const interactive = governance.approval && turn ? {
+      ...turn,
+      approval: governance.approval,
+      presentation: mcpPresentation(ref),
+    } : undefined;
+    wrapped[key] = wrapGovernedTool(tool, {
+      service: governance.service,
+      binding: mcpBinding(governance, ref),
+      interactive,
+    });
+  }
+  return wrapped;
+}
+
+function mcpBinding(governance: NonNullable<McpManagerDeps["governance"]>, ref: McpToolRef) {
+  return {
+    identity: {
+      capabilityId: "mcp.tool.call",
+      ownerHostId: governance.ownerHostId,
+      subject: { subjectId: ref.subjectId, revision: ref.subjectRevision },
+    },
+    cellKey: "mcp-tool-call",
+    denyConstraints: governance.legacyDeny?.(ref.serverName, ref.toolName) ? ["legacy-mcp-deny"] : [],
+  };
+}
+
+function mcpPresentation(ref: McpToolRef) {
+  return {
+    revision: 1 as const,
+    title: "Allow MCP tool",
+    capabilityLabel: ref.toolName,
+    subjectLabel: ref.serverName,
+    riskSummary: "This configured MCP tool can access its server with the supplied call.",
+    sections: [{ title: "Target", fields: [
+      { label: "Server", value: ref.serverName },
+      { label: "Tool", value: ref.toolName },
+    ] }],
   };
 }
 
@@ -107,13 +161,12 @@ interface MergeArgs {
   refs: Map<string, McpToolRef>;
   collisions: Set<string>;
   log: Logger;
-  governance?: McpManagerDeps["governance"];
 }
 
 // Namespace each tool as `${sanitizedKey}_${toolName}` (renaming the key is safe — execute closes over the raw
 // name). A collision is removed from the published set entirely: choosing either server would bind a presentation
 // key to an ambiguous authority, so the only safe result is fail-closed for that key while unrelated tools remain live.
-function mergeServerTools({ entry, discovered, tools, refs, collisions, log, governance }: MergeArgs): void {
+function mergeServerTools({ entry, discovered, tools, refs, collisions, log }: MergeArgs): void {
   const prefix = sanitize(entry.key);
   const revision = publicFingerprint(entry);
   for (const [toolName, tool] of Object.entries(discovered)) {
@@ -128,15 +181,7 @@ function mergeServerTools({ entry, discovered, tools, refs, collisions, log, gov
     }
     const ref = { serverName: entry.key, toolName, subjectId: stableSubject(entry.key, toolName), subjectRevision: revision };
     const wrapped = wrapExecute(tool);
-    tools[key] = governance ? wrapGovernedTool(wrapped, governance.service, {
-      identity: {
-        capabilityId: "mcp.tool.call",
-        ownerHostId: governance.ownerHostId,
-        subject: { subjectId: ref.subjectId, revision: ref.subjectRevision },
-      },
-      cellKey: "mcp-tool-call",
-      denyConstraints: governance.legacyDeny?.(entry.key, toolName) ? ["legacy-mcp-deny"] : [],
-    }) : wrapped;
+    tools[key] = wrapped;
     refs.set(key, ref);
   }
 }

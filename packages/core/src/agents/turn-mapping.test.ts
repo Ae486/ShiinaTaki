@@ -28,12 +28,13 @@ describe("toEntryInput", () => {
     expect(toEntryInput({ role: "assistant", content: [] })).toBeNull();
   });
 
-  it("keeps tool-call parts with a readable names-only content projection", () => {
+  it("persists tool calls as names-only parts and drops raw input", () => {
+    const sentinel = "SENTINEL_TOOL_SECRET_7f2f";
     const input = toEntryInput({
       role: "assistant",
       content: [
         { type: "text", text: "Let me check." },
-        { type: "tool-call", toolCallId: "c1", toolName: "screenshot", input: { display: 1 } },
+        { type: "tool-call", toolCallId: "c1", toolName: "screenshot", input: { token: sentinel } },
       ],
     });
     expect(input).toEqual({
@@ -41,9 +42,10 @@ describe("toEntryInput", () => {
       content: "Let me check.\n[tool-call: screenshot]",
       parts: [
         { type: "text", text: "Let me check." },
-        { type: "tool-call", toolCallId: "c1", toolName: "screenshot", input: { display: 1 } },
+        { type: "tool-call", toolCallId: "c1", toolName: "screenshot" },
       ],
     });
+    expect(JSON.stringify(input)).not.toContain(sentinel);
   });
 
   it("maps a tool message to a tool row with tool-result parts (payload stays out of content)", () => {
@@ -114,14 +116,15 @@ describe("toModelMessage", () => {
     expect(JSON.stringify(replayed)).not.toContain("attachments/abc.png");
   });
 
-  it("reconstructs a multi-part assistant message from parts", () => {
+  it("reconstructs a multi-part assistant message with an empty safe input placeholder", () => {
+    const sentinel = "SENTINEL_LEGACY_TOOL_SECRET_91ad";
     const message = toModelMessage(
       entryOf({
         role: "assistant",
         content: "summary",
         parts: [
           { type: "text", text: "Let me check." },
-          { type: "tool-call", toolCallId: "c1", toolName: "screenshot", input: { display: 1 } },
+          { type: "tool-call", toolCallId: "c1", toolName: "screenshot", input: { token: sentinel } },
         ],
       }),
     );
@@ -129,9 +132,10 @@ describe("toModelMessage", () => {
       role: "assistant",
       content: [
         { type: "text", text: "Let me check." },
-        { type: "tool-call", toolCallId: "c1", toolName: "screenshot", input: { display: 1 } },
+        { type: "tool-call", toolCallId: "c1", toolName: "screenshot", input: {} },
       ],
     });
+    expect(JSON.stringify(message)).not.toContain(sentinel);
   });
 
   it("reconstructs a tool message and returns null for an unreplayable tool row without parts", () => {
@@ -149,15 +153,21 @@ describe("toModelMessage", () => {
     expect(toModelMessage(entryOf({ role: "tool", content: "orphan" }))).toBeNull();
   });
 
-  it("round-trips a turn: toEntryInput -> entry -> toModelMessage preserves the replay shape", () => {
+  it("round-trips tool identity while replacing raw arguments with the safe empty replay placeholder", () => {
+    const sentinel = "SENTINEL_EXEC_SECRET_c043";
     const original = {
       role: "assistant" as const,
-      content: [{ type: "tool-call" as const, toolCallId: "c9", toolName: "exec", input: { command: "hostname" } }],
+      content: [{ type: "tool-call" as const, toolCallId: "c9", toolName: "exec", input: { command: sentinel } }],
     };
     const input = toEntryInput(original);
     expect(input).not.toBeNull();
     const replayed = toModelMessage(entryOf({ role: input!.role, content: input!.content, parts: input!.parts }));
-    expect(replayed).toEqual(original);
+    expect(replayed).toEqual({
+      role: "assistant",
+      content: [{ type: "tool-call", toolCallId: "c9", toolName: "exec", input: {} }],
+    });
+    expect(JSON.stringify(input)).not.toContain(sentinel);
+    expect(JSON.stringify(replayed)).not.toContain(sentinel);
   });
 
   it("round-trips a content-type tool output (value = text/file parts array), not just json/text", () => {
