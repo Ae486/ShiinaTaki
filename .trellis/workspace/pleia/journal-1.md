@@ -757,3 +757,48 @@ The owner clarified that internal batches are implementation boundaries, not man
 resources by actual complexity: a simple Slice should complete through one implementation pass and one final check;
 a complex Slice may retain fail-closed internal waves, but receives one formal check only after Slice convergence unless
 a discovered defect forces a real rollback. Engineering scope and acceptance evidence remain unchanged.
+
+## Session 19: T4 Approval Productization B+D Interactive Wave
+
+**Date**: 2026-08-14
+**Task**: `.trellis/tasks/08-12-approval-productization`
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Implemented and Leader-verified the combined B+D interactive wave at `2c1c4e5`. Core is still the only Approval
+authority. Pending/session state belongs to the exact physical WebSocket `Connection`, and a granted interaction does
+not execute until the current Governance decision, complete canonical binding, policy generation, Approval generation,
+and process/session lineage are revalidated. MCP continues to use the standard AI SDK closures.
+
+### Main Changes
+
+- Added connection-owned pending/session lifecycle, targeted request/closed notifications, canonical respond/list/
+  revoke methods, timeout/cancel/disconnect/policy invalidation, and generation-safe durable/session authority.
+- Added post-Approval Governance reauthorization and adversarial mutation coverage before closure execution.
+- Added socket-local FIFO CLI and Desktop prompt controllers, independent always-allow disclosure acknowledgement,
+  close/replacement/expiry retirement, bounded errors, and fresh Core-backed durable list/revoke surfaces.
+- Kept Approval out of localStorage, page caches, navigation, Tauri events, logs, Memory, and timeline persistence.
+- Removed raw tool-call input from new timeline rows and sanitized legacy rows before timeline API/model replay.
+- Updated all affected production headers and directory indexes.
+
+### Testing
+
+- [OK] Shared, Core, CLI, and Desktop typecheck.
+- [OK] Shared 254 tests; focused Core Approval/Governance/MCP/privacy 130; CLI 36; Desktop 386.
+- [OK] Full Core implementation-agent gate: 1,290 passed plus 1 existing skip.
+- [OK] Desktop production build, 1,290 modules; only existing Live2D non-module script warnings.
+- [OK] Changed-production-file ESLint, `git diff --check`, and 35-file INPUT/OUTPUT/POS audit.
+- [NOT RUN] Formal `trellis-check`; the Slice receives one xhigh check after C+E convergence.
+- [NOT RUN] Packaged WebView manual interaction or real Core/operator process E2E.
+
+### Residual Risk
+
+Historical raw tool-call inputs already stored in an existing SQLite database are sanitized from every current read but
+are not physically purged. Batch E must decide and prove whether a targeted scrub is required before the final privacy
+acceptance criterion can pass.
+
+### Status
+
+[IN PROGRESS] **B+D is checkpointed; C+E Host/convergence is next.** No push, reset, rebase, force, finish, archive, or
+formal task-status mutation was performed.

@@ -1,8 +1,8 @@
 # Approval Productization Technical Design
 
 > Engineering record for Slice 4. This document freezes the approved contracts and independently fail-closed batch
-> boundaries. Batch A is implemented and formally checked; the Batch B-E sections remain the binding implementation
-> plan until their production code and executable specs land.
+> boundaries. Batch A is implemented and formally checked. The combined B+D interactive wave is implemented and
+> Leader-verified at `2c1c4e5`; C+E remain the binding implementation plan before the Slice's sole final xhigh check.
 
 ## 1. Architectural result
 
@@ -430,6 +430,30 @@ waves; focused tests and Leader review remain continuous.
   production build, and truthful manual-verification status.
 - **Batch E** completes the Host/convergence wave with legacy/privacy/process E2E and documentation convergence, then
   runs the complete release-quality task gate and the Slice's sole final xhigh formal check.
+
+### B+D interactive-wave checkpoint
+
+Commit `2c1c4e5` activates the common interactive lane for Core-local and MCP tools without creating another authority
+system. Core remains the sole authority: Governance evaluates the canonical binding, one connection-owned Approval
+interaction resolves `ask`, and Governance plus the complete binding/policy lineage are revalidated immediately before
+the original closure can execute. Pending and session authority are keyed by the exact physical `Connection`; process
+epoch, policy generation, Approval generation, and the full binding must all remain current.
+
+The same checkpoint adds targeted `approval.request`/`approval.closed` routing, canonical respond/list/revoke methods,
+CLI and Desktop FIFO prompt controllers, explicit future-background disclosure acknowledgement, Core-backed durable
+decision management, connection/client retirement, expiry backstops, and no-cache tests. MCP still uses the installed
+`@ai-sdk/mcp` discovery/call closures. Raw tool-call input is removed before new timeline writes and is sanitized from
+legacy timeline reads, so it cannot enter timeline APIs or model replay.
+
+Leader verification passed Shared/Core/CLI/Desktop typecheck, 254 Shared tests, 130 focused Core Approval/Governance/
+MCP/privacy tests, 36 CLI tests, 386 Desktop tests, changed-production-file ESLint, `git diff --check`, 35 production
+header audits, and the Desktop production build (1,290 modules). The build emitted only the existing Live2D non-module
+script warnings. Full Core verification by the implementation agent passed 1,290 tests with one existing skip.
+
+Manual packaged-WebView interaction and a real Core/operator process run remain unverified. Historical timeline rows
+that predate this privacy boundary are sanitized on read but are not physically rewritten; Batch E must decide and
+prove whether a targeted maintenance scrub is required before claiming the final SQLite privacy acceptance criterion.
+No formal `trellis-check` ran for this internal wave, by design.
 
 ## 12. Merge and release risks
 

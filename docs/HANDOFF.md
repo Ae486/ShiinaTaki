@@ -1,9 +1,9 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
-> Updated 2026-08-13 after Slice 4 Batch A implementation and formal check. T4 remains isolated in its dedicated
-> worktree. Host-control and Governance Authority are committed and retained in `review`; Approval Productization is
-> the active `in_progress` child, with Batch A verified and Batch B next. The branch must not be released between
-> Slice 3 and Slice 4. Read the live repository before trusting any recorded status.
+> Updated 2026-08-14 after the Slice 4 B+D interactive-wave checkpoint. T4 remains isolated in its dedicated worktree.
+> Host-control and Governance Authority are committed and retained in `review`; Approval Productization is the active
+> `in_progress` child, with Batch A formally checked and B+D Leader-verified. C+E are next, followed by the Slice's sole
+> final xhigh check. The branch must not be released between Slice 3 and Slice 4. Verify every live status before use.
 
 ## 1. Mission and boundary
 
@@ -44,8 +44,8 @@ Current live status:
 
 - `main` remains at `5dd6dd2` and is not ahead of the T4 branch; nothing was pushed;
 - the T4 branch contains the frozen planning commits, Host-control production commit `7427edf`, Governance Authority
-  production commit `46a8487`, and the verified Slice 4 Batch A baseline; verify the live HEAD before relying on a
-  recorded commit hash;
+  production commit `46a8487`, verified Slice 4 Batch A commit `cd67ad0`, and B+D interactive checkpoint `2c1c4e5`;
+  verify the live HEAD before relying on any recorded commit hash;
 - `.trellis/.current-task` is intentionally ignored by Git and is independently bound in each worktree;
 - the main worktree remains bound to `08-09-hindsight-compatibility-extensions`;
 - the T4 worktree is bound to child task `08-12-approval-productization`, which is `in_progress` after its approved
@@ -167,10 +167,18 @@ closure, Host protocol, Rust, Desktop, or `main.ts` Approval lifecycle was activ
 Batch A verification passed workspace typecheck, root lint, full tests (Shared 254, Core 1,275 passed plus 1 existing
 skip, CLI 32, Desktop 370), focused Approval regressions, `git diff --check`, header/index/size audits, and a real Core
 boot applying migrations `1..15`. The formal check repaired candidate digest spoofing, stored-digest reconciliation,
-historical stored grammar, and digest mismatch/collision separation. Rust, packaged WebView, and Batch B-E behavior
-remain unverified by design. The active B+D interactive wave owns exact physical-`Connection` pending/session
-ownership, targeted request/closed notifications, same-connection responses, timeout/cancel/invalidation, governed
-Core-local/MCP closure release, canonical list/revoke methods, and the Desktop/CLI operator surfaces.
+historical stored grammar, and digest mismatch/collision separation.
+
+The B+D interactive wave is committed as `2c1c4e5` (`feat: add connection-owned approval interaction`). It installs
+exact physical-`Connection` pending/session ownership, targeted request/closed notifications, post-Approval Governance
+and full-lineage revalidation, generation-safe timeout/cancel/disconnect/policy invalidation, governed Core-local/MCP
+closure release, canonical list/revoke methods, FIFO Desktop/CLI operator surfaces, and explicit independent disclosure
+acknowledgement for always-allow. It also removes raw tool-call input from new timeline writes and sanitizes legacy
+timeline reads before API/model replay. The Leader gate passed all four package typechecks, Shared 254 tests, focused
+Core 130 tests, CLI 36 tests, Desktop 386 tests, Desktop production build, changed-file ESLint, diff checks, and
+production-header audits; the implement agent additionally passed full Core 1,290 plus one existing skip. Packaged
+WebView interaction and a real Core/operator process run remain unverified. Historical raw tool inputs already on disk
+are hidden on reads but not physically scrubbed; C+E must resolve this final privacy acceptance boundary.
 
 ## 4. Required reading order
 
@@ -323,7 +331,7 @@ git log -3 --oneline --decorate
 ```
 
 Expected task pointer: `.trellis/tasks/08-12-approval-productization`. Its PRD/design/research/context are curated and
-the task is `in_progress`; revalidate them plus live Git/migration state before each Batch A-E dispatch. Host-control
+the task is `in_progress`; revalidate them plus live Git/migration state before each remaining C+E dispatch. Host-control
 stays in `review` until the deferred real two-Node evidence and owner closeout; Governance Authority stays in `review`
 because Slice 3 cannot release without Slice 4; the parent remains `planning` until the full program converges.
 
@@ -379,13 +387,13 @@ The incoming Leader should report the live state to the owner, then:
 2. confirm `7427edf` and the recorded gates before treating Host-control as the dependency baseline;
 3. treat the missing two-Node process harness as the owner-approved mandatory Slice 8 convergence gate without
    weakening the existing unit/wire evidence;
-4. treat Approval Batch A as the verified fail-closed baseline, refresh `main...HEAD` and the migration registry after
-   its checkpoint is clean, then dispatch only Batch B Core-local/MCP interaction;
+4. treat Approval Batch A plus B+D checkpoint `2c1c4e5` as the verified baseline, refresh `main...HEAD`, then dispatch
+   one C+E Host/convergence wave covering challenge/resume, legacy reconfirmation, privacy, and real-process evidence;
 5. keep the one Approval lifecycle Core-owned and generation-bound; do not revive Shell-local prompts or legacy allow
    writers;
 6. do not mark either reviewed child complete or archive it without the applicable owner closeout direction; and
-7. continue in the recorded slice order, keeping secure MCP and standard Skill lifecycle behind governance, Approval,
-   and secret foundations.
+7. run the Slice's sole xhigh formal check only after C+E convergence, then continue in the recorded slice order,
+   keeping secure MCP and standard Skill lifecycle behind governance, Approval, and secret foundations.
 
 No new product Grill is currently required. Ask the owner only if live code/research exposes a genuine product choice
 that would materially change behavior, security, scope, or delivery.
