@@ -4,6 +4,12 @@
 > This is a point-in-time recovery document for ZCODE. Re-run every status and test command before acting.
 > The durable program handoff remains `docs/HANDOFF.md`; this document adds the current dirty-tree, interrupted-work,
 > and ZCODE takeover details that are not represented by committed history.
+>
+> **Status update (later on 2026-08-16):** the takeover recovery described here is complete. The dirty tree was
+> separated into its two ownership groups (tooling migration committed as `f649464`; the interrupted Approval patch
+> completed in place and committed as `ffa9fff`), the active-task resolver behavior was diagnosed as the designed
+> 0.6 session-scoped mechanism, and the Approval slice passed its single final formal check. §2's warnings are
+> resolved; keep the rest as historical context. §19 records the live owner authority rulings.
 
 ## 1. Takeover directive
 

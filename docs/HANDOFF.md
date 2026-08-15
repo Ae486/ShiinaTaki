@@ -1,9 +1,11 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
-> Updated 2026-08-14 after the Slice 4 B+D interactive-wave checkpoint. T4 remains isolated in its dedicated worktree.
-> Host-control and Governance Authority are committed and retained in `review`; Approval Productization is the active
-> `in_progress` child, with Batch A formally checked and B+D Leader-verified. C+E are next, followed by the Slice's sole
-> final xhigh check. The branch must not be released between Slice 3 and Slice 4. Verify every live status before use.
+> Updated 2026-08-16 after the Slice 4 C+E convergence. T4 remains isolated in its dedicated worktree.
+> Approval Productization is complete through its single final formal check (`pass-with-fixes`, one test-only
+> coverage fix) and is archived together with Governance Authority; Host-control remains in `review` for the deferred
+> two-Node process evidence (Slice 8). The ZCODE Leader now owns merge/checkpoint decisions (see
+> `docs/ZCODE-HANDOFF.md` §19); no push has occurred. Next work: Host Secret Catalog (Slice 5), then secure MCP
+> lifecycle. Verify every live status before use.
 
 ## 1. Mission and boundary
 
@@ -179,6 +181,25 @@ Core 130 tests, CLI 36 tests, Desktop 386 tests, Desktop production build, chang
 production-header audits; the implement agent additionally passed full Core 1,290 plus one existing skip. Packaged
 WebView interaction and a real Core/operator process run remain unverified. Historical raw tool inputs already on disk
 are hidden on reads but not physically scrubbed; C+E must resolve this final privacy acceptance boundary.
+
+The C+E Host/convergence wave is committed as `ffa9fff` (`feat: add host approval challenge/resume vertical`,
+recovering and completing an interrupted in-tree patch). It installs protocol v3 `capability.challenge` (Node → Core)
+with recomputed control/challenge/decision-scope digests and ask-only stricter-only evidence validation, bridging to
+the single `ApprovalInteractionService` against the initiating operator connection, one-use digest- and
+generation-bound `CapabilityAuthorization` minting, same-current-connection `capability.resume`, Rust memory-only
+pending challenge/input with exactly-once consumption, cross-language `completed ⟺ ask ⟺ authorization lineage`
+schema enforcement, unattended fail-closed asks, the `legacy-reconfirmation` provenance seam, migration
+`016-timeline-input-scrub` (idempotent historical raw-input scrub with `secure_delete` zeroing), and a real-process
+`withStack` e2e (allow-once full loop, deny, unattended) with sentinel absence proofs across audit/log/stdio. The
+single final formal check passed as `pass-with-fixes`: all workspace gates re-verified independently (Shared 266,
+Core 1306 + 1 skip, CLI 36, Desktop 386 + build, Rust 163 locked + Clippy `-D warnings`, e2e 5/5, `pnpm lint`,
+`git diff --check`), the ten-point mandatory matrix verified, and one test-only coverage fix committed (`a1a927e`).
+Recorded residuals: migration 016's unconditional `secure_delete = OFF` restore is exact today but wants runner-level
+pragma save/restore if a pre-enabled setting ever appears; Rust soft-cap breaches (`host_control_protocol.rs`,
+`host_session.rs`, `ws_client.rs`) should be split before the next Rust-heavy slice; Host-side cancel retirement is
+unit-proven only; dispatched-but-unchallenged generation changes settle effect-kind attempts as `outcome_unknown`;
+legacy `always` rows surface no reconfirmation candidates (fresh `allow_always` is the practice); packaged WebView
+prompt behavior remains pending owner verification.
 
 ## 4. Required reading order
 

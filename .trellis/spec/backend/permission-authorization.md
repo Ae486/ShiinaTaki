@@ -226,6 +226,26 @@ complete lexically sorted `cells` array. TypeScript and Rust both compute SHA-25
   challenge/resume, and background disclosure lifecycle.
 - Slice 3 and Slice 4 may be reviewed separately but are not separate release milestones.
 
+#### Implemented Slice 4 challenge/resume contract (commits cd67ad0, 2c1c4e5, ffa9fff; final check passed)
+
+- Host `ask` emits a strict `capability.challenge` (Node → Core) bound to the sealed control tuple. Core recomputes
+  the control/challenge/decision-scope digests from its own sealed state and the registry descriptor, and validates
+  ask-only stricter-only governance evidence, before any approval work; it never echoes frame fields as authority.
+- Core bridges to the single `ApprovalInteractionService` against the initiating operator's physical `Connection`
+  and mints a one-use `CapabilityAuthorization` (digest-bound, `approvalGeneration`-bound, deadline-bounded),
+  delivered as `capability.resume` (Core → Node) only on the same current connection after full-lineage revalidation.
+- Rust holds the pending challenge and raw input memory-only inside the per-generation `HostSession`, consumes the
+  authorization exactly once, executes at most once, and settles with authorization lineage; reconnect discards the
+  pending slot.
+- `completed ⟺ ask ⟺ authorization lineage` is enforced cross-language (Zod `superRefine` plus Rust
+  `validate_lineage`) and pinned by golden fixtures; a completed ask-class frame without valid lineage converts to a
+  denial.
+- Unattended turns construct tools without interactive context; their `ask` fails closed (`APPROVAL_REQUIRED`) with
+  a bounded reason and raises no ambient prompt on any socket.
+- Pending raw input never reaches logs, audit, timeline, caches, error payloads, or the wire. Migration
+  `016-timeline-input-scrub` idempotently removes historical tool-call `input` from timeline parts with
+  `secure_delete` zeroing; timeline writes strip input and reads re-sanitize.
+
 ### 4. Validation & Error Matrix
 
 | Condition | Required behavior |
