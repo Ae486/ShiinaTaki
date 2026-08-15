@@ -5,6 +5,164 @@ belongs to a specific Execution Host. It applies to Scheduled Tasks, MCP calls, 
 Capabilities, and future long-running host work. A task-specific module supplies intent and payload; it does not create
 its own offline state machine or one-off Home card.
 
+## Scenario: Implemented Host-control foundation
+
+### 1. Scope / Trigger
+
+Use this foundation whenever a Node-backed capability crosses the Core/Shell boundary. It covers Node connection
+negotiation, complete catalog publication, explicit Host routing, generation-owned request settlement, cancellation,
+and exact TypeScript/Rust wire parity. Run persistence, Approval challenge/resume handling, MCP runtime generations,
+and generic Run Receipts build on this foundation but are not implemented by it.
+
+### 2. Signatures
+
+The canonical wire schemas live in `packages/shared/src/host-control-schema.ts`. Rust imports the strict serde mirror
+through `crate::protocol`; the implementation may split definitions into sibling modules, but callers do not declare
+parallel local shapes.
+
+```typescript
+const HOST_CONTROL_METHODS = {
+  catalogPublish: "host.catalogPublish", // Node -> Core RPC
+  request: "capability.request",         // Core -> Node notification
+  challenge: "capability.challenge",     // reserved schema only
+  resume: "capability.resume",           // reserved schema only
+  cancel: "capability.cancel",           // Core -> Node notification
+  respond: "capability.respond",         // Node -> Core RPC
+} as const;
+
+type HostFrameAck =
+  | { accepted: true }
+  | {
+      accepted: false;
+      reason:
+        | "wrong_host"
+        | "stale_generation"
+        | "unsupported_version"
+        | "invalid_catalog"
+        | "unknown_request"
+        | "duplicate"
+        | "late";
+    };
+
+interface HostOperationControl {
+  runId: string;
+  operationId: string;
+  attemptId: string;
+  targetHostId: string;
+  connectionGeneration: number;
+  catalogGeneration: number;
+  policyGeneration: number;
+  approvalGeneration: number;
+  capabilityId: string;
+  inputDigest: string;
+  idempotencyKey: string;
+  dispatchedAt: string;
+  deadlineAt: string;
+  expiresAt?: string;
+}
+```
+
+A Node `connect` request includes `host.protocol.{min,max}` and `host.catalogSchemaVersions`. A successful Node connect
+returns the Core-selected `hostId`, protocol version, catalog schema version, and positive `connectionGeneration`.
+`host.catalogPublish` sends one complete snapshot for that connection plus a positive `catalogGeneration`.
+`capability.request`, `capability.cancel`, and `capability.respond` carry the same exact `requestId` and sealed control
+tuple. The response state union is `completed | failed | cancelled | outcome_unknown`.
+
+### 3. Contracts
+
+- Node identity is not aliased: authenticated `deviceId == hostId`. Core's own stable UUID is stored at
+  `<dataDir>/host-identity.json`. First creation fully writes and fsyncs a sibling staging file, then publishes it with
+  create-only same-directory linking. A concurrent winner is read without overwrite. Malformed, invalid, or unreadable
+  existing identity data fails boot; persistence failure never returns a minted identity.
+- Core assigns a monotonically increasing positive `connectionGeneration` per Host for the current Core process.
+  Replacing a socket retires the prior socket synchronously; frames from it are stale even if their payload is valid.
+- Catalog publication is complete and atomic. Only the current authenticated Node socket may publish for its own Host
+  and generation. A current-generation invalid, unsupported, or non-monotonic candidate makes that generation
+  non-routable. A wrong-Host, wrong-generation, operator, or stale-socket candidate cannot retire another live catalog.
+- Legacy callers without `targetHostId` resolve only when exactly one live catalog advertises the capability. Zero
+  matches is unavailable; multiple matches require an explicit target. Never replace this rule with first-match order.
+- Core owns the sealed control tuple and computes lowercase SHA-256 over deterministic canonical JSON of the validated
+  capability identity and exact input. Model text, operator-facing labels, Host labels, Skills, and MCP metadata cannot
+  provide or alter these fields.
+- The broker owns terminal settlement. Pending work is keyed by request identity and authenticated Host generation.
+  Its bounded 256-entry insertion-order terminal cache records only control/provenance and whether a repeat is
+  `duplicate` or `late`; eviction degrades to `unknown_request`. Per-request logs omit stable `hostId`.
+- A read with cooperative cancellation sends `capability.cancel`; a deadline or generation retirement suppresses late
+  settlement. A side effect whose result is unknowable settles `outcome_unknown` and is never replayed automatically.
+- The Rust `HostSession` owns one live generation and has its own 256-entry insertion-order terminal response cache.
+  An exact duplicate may reuse the cached response; a conflicting attempt/control tuple is rejected. Reconnect creates
+  a new session and discards the old cache. Cooperative cancellation cannot forcibly stop arbitrary blocking OS work;
+  it stops accepted settlement and suppresses the late response.
+- Rust serde mirrors must reject unknown object fields wherever the Zod source uses `strictObject`, including nested
+  response error objects and each discriminated response arm. Shared golden fixtures are the cross-language truth;
+  serde derive success alone does not prove Zod refinement parity.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required result |
+| --- | --- |
+| Node declaration has no compatible protocol/catalog version | Refuse connection negotiation; no Host generation becomes routable. |
+| Current socket publishes a valid newer complete catalog | `{accepted:true}`; atomically replace that Host's live snapshot. |
+| Current socket publishes unsupported or non-monotonic catalog data | `{accepted:false, reason}` and retire that generation's live catalog. |
+| Structurally invalid catalog matches the current authenticated Host/generation | Return JSON-RPC `INVALID_PARAMS` after retiring that generation; cleanup failure becomes `INTERNAL_ERROR`. |
+| Invalid candidate claims another Host/generation, comes from an operator, or arrives on a stale socket | Reject without retiring the current live catalog. |
+| Legacy route has two Hosts advertising the capability | `TARGET_HOST_REQUIRED`; do not dispatch. |
+| Response has a valid request ID but wrong authenticated Host | `{accepted:false, reason:"wrong_host"}`; pending work remains. |
+| Response has stale connection/control generation | `{accepted:false, reason:"stale_generation"}`; pending work remains. |
+| Exact response repeats after successful settlement | `{accepted:false, reason:"duplicate"}`. |
+| Exact response arrives after deadline/cancel/disconnect settlement | `{accepted:false, reason:"late"}`. |
+| Response ID was never issued or its terminal record was evicted | `{accepted:false, reason:"unknown_request"}`. |
+| Host generation disconnects during a cooperative read | Settle only that generation's reads as disconnected/cancelled; Host B work remains pending. |
+| Host generation disconnects during a side effect | Settle `outcome_unknown`; never auto-dispatch to the replacement generation. |
+| Existing Core or Node identity file is corrupt/unreadable | Fail startup with a repairable diagnostic; never mint a replacement silently. |
+
+### 5. Good / Base / Bad Cases
+
+- Good: two catalogs advertise `process-list`; the caller supplies one `targetHostId`, Core dispatches only through that
+  Host's current socket, and a response from the other Host is refused without settling the request.
+- Good: a Host reconnects with the same stable ID and a new connection generation, republishes a complete catalog, and
+  the prior socket/cache can no longer settle or route work.
+- Base: one currently routable Host advertises a legacy capability, so an existing caller without a target continues
+  to work through the single-Host compatibility seam.
+- Bad: keep the prior catalog routable after the current generation publishes an invalid or unsupported replacement.
+- Bad: treat matching `requestId` or payload `hostId` as provenance without checking `MethodContext.connection`.
+- Bad: deserialize a Rust response with extra fields that the canonical Zod `strictObject` rejects.
+
+### 6. Tests Required
+
+- Shared: `host-control-schema.test.ts`, connect/capability schema tests, and `protocol-fixtures.test.ts` assert exact
+  unions, invalid generations/IDs, and valid/invalid golden fixture classification.
+- Core identity/catalog: restart stability, corrupt/unreadable failure, create-only race/no-overwrite, failed publication
+  cleanup, current/stale socket publication, fail-closed invalid/unsupported/non-monotonic replacement, and immutable
+  Host Context snapshots.
+- Core routing/broker: explicit two-Host selection, single-Host compatibility, per-generation disconnect isolation,
+  wrong provenance, duplicate/late/unknown classification, 256-entry eviction, deadline/cancel/unknown-outcome, and
+  stable-Host-ID log exclusion.
+- Rust: shared fixture parity, exact unknown-field rejection, request/control binding, duplicate-in-flight suppression,
+  terminal response reuse, cancellation, late-output suppression, reconnect cache discard, and 256-entry eviction.
+- Process smoke: the existing `withStack` reconnect scenario must prove real Core boot, identity creation, negotiation,
+  catalog publication, and same-Host reconnect. At least one L1 capability scenario must prove real dispatch/response.
+  A dedicated two-Node process scenario remains required before claiming process-level multi-Host coverage.
+
+### 7. Wrong vs Correct
+
+```typescript
+// Wrong: payload identity and collection order decide authority and routing.
+const node = connections.find((item) => item.capabilities.includes(capabilityId));
+broker.resolve(params); // requestId alone settles work
+
+// Correct: the current authenticated socket and complete live catalog are authoritative.
+const target = resolveExplicitOrOnlyLiveHost(catalogs, capabilityId, targetHostId);
+broker.resolve(params, {
+  hostId: ctx.connection.state.host.hostId,
+  connectionGeneration: ctx.connection.state.host.connectionGeneration,
+});
+```
+
+The foundation is intentionally fail-closed. Later governance, Approval, MCP, Skill, and Run slices may add stricter
+checks or durable evidence, but they must not weaken provenance, generation ownership, exact input identity,
+non-replay, or complete-catalog publication.
+
 ## 1. Scope / Trigger
 
 Use this contract when an operation:

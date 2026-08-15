@@ -1,7 +1,7 @@
 /**
  * INPUT:  the Database wrapper + append/paging calls (characterId-scoped)
- * OUTPUT: createTimelineRepo(db) -> { append, deleteEntry, pageBefore, latestAscending, latestSeq, rangeAscending } over timeline_messages
- * POS:    core/db — the timeline aggregate's typed SQL; zod-parses rows at the boundary; no node:sqlite import
+ * OUTPUT: timeline repository with names-only tool-call rows and sanitized legacy reads over timeline_messages
+ * POS:    core/db — timeline SQL and defense-in-depth privacy boundary; raw tool-call input never crosses the repo
  */
 import { randomUUID } from "node:crypto";
 import {
@@ -70,6 +70,7 @@ export function createTimelineRepo(db: Database): TimelineRepo {
 
   return {
     append(input) {
+      const parts = sanitizeParts(input.parts);
       const row = {
         id: randomUUID(),
         characterId: input.characterId,
@@ -79,9 +80,9 @@ export function createTimelineRepo(db: Database): TimelineRepo {
       };
       const { lastInsertRowid } = insert.run({
         ...row,
-        parts: input.parts === undefined ? null : JSON.stringify(input.parts),
+        parts: parts === undefined ? null : JSON.stringify(parts),
       });
-      return TimelineEntrySchema.parse({ seq: lastInsertRowid, ...row, parts: input.parts });
+      return TimelineEntrySchema.parse({ seq: lastInsertRowid, ...row, parts });
     },
 
     deleteEntry(characterId, seq) {
@@ -122,17 +123,23 @@ function toEntry(row: SqlRow): TimelineEntry {
     characterId: row.character_id,
     role: row.role,
     content: row.content,
-    parts: parseParts(row),
+    parts: sanitizeParts(parseParts(row)),
     createdAt: row.created_at,
   });
 }
 
 // NULL = legacy text-only row. A corrupt JSON cell must fail loudly with the row's seq, not as a bare SyntaxError.
-function parseParts(row: SqlRow): unknown {
+function parseParts(row: SqlRow): TimelinePart[] | undefined {
   if (row.parts === null || row.parts === undefined) return undefined;
   try {
-    return JSON.parse(String(row.parts));
+    return TimelineEntrySchema.shape.parts.unwrap().parse(JSON.parse(String(row.parts)));
   } catch (error) {
     throw new Error(`timeline row seq=${String(row.seq)} has corrupt parts JSON`, { cause: error });
   }
+}
+
+function sanitizeParts(parts: TimelinePart[] | undefined): TimelinePart[] | undefined {
+  return parts?.map((part) => part.type === "tool-call"
+    ? { type: "tool-call", toolCallId: part.toolCallId, toolName: part.toolName }
+    : part);
 }

@@ -9,12 +9,14 @@ import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2
 import { describe, expect, it, vi } from "vitest";
 import {
   AVATAR_METHODS,
+  APPROVAL_METHODS,
   CHARACTER_METHODS,
   CHAT_METHODS,
   CONFIG_METHODS,
   CONNECT_METHOD,
   JSON_RPC_APP_ERROR,
   MEDIA_METHODS,
+  PERMISSION_METHODS,
   TIMELINE_METHODS,
   TIMING_POLICY_DEVELOPMENT_DEFAULTS,
 } from "@taki/shared";
@@ -58,6 +60,77 @@ function lastRequestId(sent: string[]): number | string {
 }
 
 describe("createWsClient inbound routing", () => {
+  it("routes canonical Approval request/closed pushes and isolates failing handlers", () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    const received: unknown[] = [];
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    try {
+      client.onApproval(() => { throw new Error("SENTINEL_RAW_INPUT"); });
+      client.onApproval((event) => received.push(event));
+      h.open();
+      const approvalId = "11111111-1111-4111-8111-111111111111";
+      h.deliver({
+      jsonrpc: "2.0",
+      method: APPROVAL_METHODS.request,
+      params: {
+        approvalId,
+        expiresAt: "2026-08-14T00:01:00.000Z",
+        policyGeneration: 3,
+        approvalGeneration: 4,
+        binding: {
+          bindingRevision: 1,
+          identity: { capabilityId: "mcp.tool.call", ownerHostId: "33333333-3333-4333-8333-333333333333" },
+          descriptorRevision: 1,
+          classifierId: "mcp.tool.call.v1",
+          classifierRevision: 1,
+          cellKey: "mcp-tool-call",
+          decisionScopeDigest: "a".repeat(64),
+        },
+        allowedChoices: ["allow_once", "deny"],
+        presentation: {
+          revision: 1,
+          title: "Run MCP tool",
+          capabilityLabel: "MCP tool",
+          riskSummary: "This tool can change external state.",
+          sections: [{ title: "Target", fields: [{ label: "Tool", value: "redacted-tool" }] }],
+        },
+      },
+    });
+      h.deliver({
+      jsonrpc: "2.0",
+      method: APPROVAL_METHODS.closed,
+      params: { approvalId, reason: "expired", approvalGeneration: 4 },
+    });
+      expect(received).toMatchObject([
+        { type: "request", request: { approvalId } },
+        { type: "closed", closed: { approvalId, reason: "expired" } },
+      ]);
+      expect(warn.mock.calls.flat().join(" ")).not.toContain("SENTINEL_RAW_INPUT");
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it("retires every Approval handler before a queued old-generation push can dispatch", () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    const received: unknown[] = [];
+    client.onApproval((event) => received.push(event));
+    h.open();
+    h.closeSocket();
+    h.deliver({
+      jsonrpc: "2.0",
+      method: APPROVAL_METHODS.closed,
+      params: {
+        approvalId: "11111111-1111-4111-8111-111111111111",
+        reason: "operator_disconnected",
+        approvalGeneration: 4,
+      },
+    });
+    expect(received).toEqual([]);
+  });
+
   it("streams chat deltas (with the turn's messageId) to the active turn and settles on complete", async () => {
     const h = harness();
     const client = createWsClient({ transport: h.transport });
@@ -110,6 +183,51 @@ describe("createWsClient inbound routing", () => {
     expect(sent.params).toEqual({ ref: "attachments/abc.png" });
     h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { mediaType: "image/png", dataBase64: "AAAA" } });
     expect(await got).toEqual({ mediaType: "image/png", dataBase64: "AAAA" });
+  });
+
+  it("parses all four permission operator method results through the shared strict schemas", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const level = { level: "standard", policyGeneration: 4, registryRevision: 1 };
+    const cell = {
+      key: "screenshot", level: "standard", capabilityId: "screenshot", descriptorRevision: 1,
+      factoryPosture: "ask", overridePosture: null, effectivePosture: "ask",
+      approvalMemory: "rememberable", overrideMode: "ordinary",
+    };
+    const cases = [
+      [() => client.permissionLevelGet(), PERMISSION_METHODS.levelGet, {}, level],
+      [() => client.permissionLevelSet({ level: "relaxed", expectedPolicyGeneration: 4 }), PERMISSION_METHODS.levelSet,
+        { level: "relaxed", expectedPolicyGeneration: 4 }, { ...level, level: "relaxed", policyGeneration: 5 }],
+      [() => client.permissionCellsGet(), PERMISSION_METHODS.cellsGet, {}, { ...level, cells: [cell] }],
+      [() => client.permissionCellSet({ key: "screenshot", level: "standard", posture: "auto", expectedPolicyGeneration: 4 }),
+        PERMISSION_METHODS.cellSet,
+        { key: "screenshot", level: "standard", posture: "auto", expectedPolicyGeneration: 4 },
+        { policyGeneration: 5, registryRevision: 1, cell: { ...cell, overridePosture: "auto", effectivePosture: "auto" } }],
+    ] as const;
+
+    for (const [start, method, params, result] of cases) {
+      const promise = start();
+      await flush();
+      const sent = JSON.parse(h.sent[h.sent.length - 1] ?? "{}");
+      expect(sent).toMatchObject({ method, params });
+      h.deliver({ jsonrpc: "2.0", id: sent.id, result });
+      await expect(promise).resolves.toEqual(result);
+    }
+  });
+
+  it("rejects malformed permission results instead of admitting drifted Core state", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const pending = client.permissionCellsGet();
+    await flush();
+    h.deliver({
+      jsonrpc: "2.0",
+      id: lastRequestId(h.sent),
+      result: { level: "standard", policyGeneration: 1, registryRevision: 1, cells: [], unexpected: true },
+    });
+    await expect(pending).rejects.toThrow();
   });
 
   it("importCharacter uploads the archive and parses the costumes + warnings result (#18)", async () => {

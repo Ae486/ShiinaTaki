@@ -34,15 +34,17 @@ describe("createTimelineRepo.append", () => {
     expect(first).toMatchObject({ characterId: "taki", role: "user", content: "hi" });
   });
 
-  it("round-trips structured parts through the JSON column and keeps legacy rows parts-less", () => {
+  it("sanitizes tool-call input before the JSON column and keeps legacy rows parts-less", () => {
+    const sentinel = "SENTINEL_REPO_TOOL_SECRET_40ff";
     const parts: TimelinePart[] = [
-      { type: "tool-call", toolCallId: "c1", toolName: "screenshot", input: { display: 1 } },
+      { type: "tool-call", toolCallId: "c1", toolName: "screenshot", input: { token: sentinel } },
     ];
     repo.append({ characterId: "taki", role: "assistant", content: "[tool-call: screenshot]", parts });
     repo.append({ characterId: "taki", role: "user", content: "legacy" });
 
     const [withParts, legacy] = repo.latestAscending("taki", 10);
-    expect(withParts?.parts).toEqual(parts);
+    expect(withParts?.parts).toEqual([{ type: "tool-call", toolCallId: "c1", toolName: "screenshot" }]);
+    expect(JSON.stringify(withParts)).not.toContain(sentinel);
     expect(legacy?.parts).toBeUndefined();
   });
 
@@ -54,6 +56,27 @@ describe("createTimelineRepo.append", () => {
 
     const page = repo.pageBefore({ characterId: "taki", limit: 10 });
     expect(page.entries[0]).toMatchObject({ role: "tool", parts });
+  });
+
+  it("strips raw input from legacy timeline JSON before returning it", () => {
+    const sentinel = "SENTINEL_LEGACY_DB_SECRET_83de";
+    db.prepare(
+      "INSERT INTO timeline_messages (id, character_id, role, content, parts, created_at) " +
+      "VALUES (:id, :characterId, :role, :content, :parts, :createdAt)",
+    ).run({
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      characterId: "taki",
+      role: "assistant",
+      content: "[tool-call: exec]",
+      parts: JSON.stringify([{
+        type: "tool-call", toolCallId: "legacy-call", toolName: "exec", input: { command: sentinel },
+      }]),
+      createdAt: "2026-08-14T00:00:00.000Z",
+    });
+
+    const row = repo.latestAscending("taki", 10)[0];
+    expect(row?.parts).toEqual([{ type: "tool-call", toolCallId: "legacy-call", toolName: "exec" }]);
+    expect(JSON.stringify(row)).not.toContain(sentinel);
   });
 });
 

@@ -1,0 +1,11 @@
+{"file":".trellis/spec/backend/index.md","reason":"Backend pre-development checklist, shared-first protocol rule, cross-language verification gate, and architecture constraints."}
+{"file":".trellis/spec/backend/host-operation-lifecycle.md","reason":"Binding Host-bound operation states, sealed runtime identity, offline/wait, reconnect, cancellation, unknown-outcome, and no-replay contract."}
+{"file":".trellis/spec/backend/permission-authorization.md","reason":"Argument-risk classification, stricter-wins, floors, decision keying, and fail-closed Node enforcement constraints; authority placement is superseded only where parent design explicitly says so."}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Connection authentication versus capability authorization, per-generation cleanup, Node/operator role boundary, and reconnect restoration rules."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Structured failures, cancellation/deadline behavior, and prohibition on blind side-effect retry."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Host-control logs must remain metadata-only and exclude exact inputs, outputs, tokens, and secret-bearing payloads."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Core-only persistence and migration conventions if stable Core Host identity needs a durable record."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Backend size, test, lint, typecheck, and Rust quality requirements for a shared/Core/Rust protocol batch."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Installed API and protocol/library claims must be verified rather than inferred while node_modules is absent initially."}
+{"file":".trellis/tasks/08-10-skills-mcp-productization/research/current-gap-and-dependency-map.md","reason":"Live P0 routing/broker/schema gaps, existing anchors, migration risks, and highest-value tests."}
+{"file":".trellis/tasks/08-10-skills-mcp-productization/research/standards-and-reference-prior-art.md","reason":"Negotiation, Host ownership, generation publication, timeout/cancellation, and standards/reference constraints."}

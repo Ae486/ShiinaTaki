@@ -11,11 +11,17 @@ import { z } from "zod";
 import { ErrorCodeSchema } from "./error-code-schema.ts";
 import { JsonRpcClientFrameSchema, JsonRpcIdSchema } from "./json-rpc-schema.ts";
 import { ConnectParamsSchema, ConnectResultSchema } from "./connect-schema.ts";
-import { CapabilityRequestSchema, CapabilityRespondParamsSchema } from "./capability-schema.ts";
 import {
-  PermissionCellSetParamsSchema,
-  PermissionCellStateSchema,
-  PermissionLevelStateSchema,
+  CapabilityChallengeSchema,
+  CapabilityRequestSchema,
+  CapabilityRespondParamsSchema,
+  CapabilityResumeSchema,
+} from "./capability-schema.ts";
+import { CapabilityCancelSchema, HostCatalogPublishParamsSchema, HostFrameAckSchema } from "./host-control-schema.ts";
+import {
+  LegacyPermissionCellSetParamsSchema,
+  LegacyPermissionCellStateSchema,
+  LegacyPermissionLevelStateSchema,
 } from "./permission-level-schema.ts";
 import {
   ClipboardReadOutputSchema,
@@ -48,7 +54,12 @@ const SCHEMA_BY_PREFIX: Record<string, ZodType> = {
   "app-error": AppErrorFrameSchema,
   "client-frame": JsonRpcClientFrameSchema,
   "capability-request": CapabilityRequestSchema,
+  "capability-challenge": CapabilityChallengeSchema,
+  "capability-resume": CapabilityResumeSchema,
+  "capability-cancel": CapabilityCancelSchema,
   "capability-respond": CapabilityRespondParamsSchema,
+  "host-catalog-publish": HostCatalogPublishParamsSchema,
+  "host-frame-ack": HostFrameAckSchema,
   // Per-capability output payloads (Option A): the channel treats `output` as opaque, so each capability's own
   // output schema owns its fixtures — the SAME files the cargo serde structs re-parse (anti-drift, invariant 3).
   "screenshot-output": ScreenshotOutputSchema,
@@ -59,9 +70,9 @@ const SCHEMA_BY_PREFIX: Record<string, ZodType> = {
   "exec-output": ExecOutputSchema,
   "foreground-window-output": ForegroundWindowOutputSchema,
   // Permission Level config surface (T2b): leaf shapes only — enforced Shell-side too, so drift is a gate bug.
-  "permission-level-state": PermissionLevelStateSchema,
-  "permission-cell-state": PermissionCellStateSchema,
-  "permission-cell-set": PermissionCellSetParamsSchema,
+  "permission-level-state": LegacyPermissionLevelStateSchema,
+  "permission-cell-state": LegacyPermissionCellStateSchema,
+  "permission-cell-set": LegacyPermissionCellSetParamsSchema,
 };
 
 const FIXTURE_DIR = fileURLToPath(new URL("../fixtures/protocol", import.meta.url));

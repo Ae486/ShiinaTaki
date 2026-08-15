@@ -2,37 +2,15 @@ import { describe, expect, it, vi } from "vitest";
 import type { ScreenshotOutput } from "@taki/shared";
 import { fenceUntrusted } from "../agents/untrusted-fence.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
+import { brokerReturning, catalogsReturning, fakeHost, registryReturning, testGovernance, testApproval } from "../testing/capability-tool-harness.ts";
 import { createPrivacyPause } from "../perception/privacy-pause.ts";
-import type { CapabilityBroker, CapabilityOutcome } from "./capability-broker.ts";
+import type { CapabilityBroker } from "./capability-broker.ts";
 import type { ConnectionRegistry } from "../server/connection-registry.ts";
 import type { SavedScreenshot, ScreenshotStore } from "./screenshot-store.ts";
 import { createScreenshotTool } from "./screenshot-tool.ts";
 
 const OUTPUT: ScreenshotOutput = { mediaType: "image/png", dataBase64: "AAAA", width: 1920, height: 1080 };
 const EXEC_OPTS = { toolCallId: "c1", messages: [] } as never;
-
-function nodeConnection() {
-  return { state: { status: "authenticated", deviceId: "n1", role: "node", capabilities: ["screenshot"] }, notify: () => undefined } as never;
-}
-
-function registryReturning(node: unknown): ConnectionRegistry {
-  return {
-    create: () => ({ state: { status: "awaiting" } }),
-    authenticate: () => undefined,
-    remove: () => undefined,
-    list: () => [],
-    findNodeForCapability: () => node as never,
-    onRemove: () => undefined,
-  };
-}
-
-function brokerReturning(outcome: CapabilityOutcome): CapabilityBroker {
-  return {
-    request: () => Promise.resolve(outcome),
-    resolve: () => ({ accepted: false }),
-    denyAll: () => undefined,
-  };
-}
 
 function store(onSave: () => SavedScreenshot): ScreenshotStore {
   return { save: onSave };
@@ -50,13 +28,13 @@ function toolWith(deps: {
   describe?: (input: { dataBase64: string; mediaType: string; prompt?: string }) => Promise<string | null>;
 }) {
   const { logger } = createCaptureLogger();
-  return createScreenshotTool({ ...deps, logger });
+  return createScreenshotTool({ ...deps, catalogs: catalogsReturning("screenshot"), logger, governance: testGovernance(), approval: testApproval() });
 }
 
 describe("createScreenshotTool", () => {
   it("routes, persists the output and returns { ok, path, width, height, bytes, capturedAt } (T8/Q5)", async () => {
     const tools = toolWith({
-      registry: registryReturning(nodeConnection()),
+      registry: registryReturning(fakeHost("screenshot")),
       broker: brokerReturning({ ok: true, output: OUTPUT }),
       store: store(() => ({ path: "C:/ws/screenshots/x.png", bytes: 42 })),
     });
@@ -69,7 +47,7 @@ describe("createScreenshotTool", () => {
     vi.useFakeTimers({ now: new Date("2026-08-01T10:00:00.000Z") });
     try {
       const tools = toolWith({
-        registry: registryReturning(nodeConnection()),
+        registry: registryReturning(fakeHost("screenshot")),
         broker: brokerReturning({ ok: true, output: OUTPUT }),
         store: store(() => ({ path: "x.png", bytes: 42 })),
         describe: () => {
@@ -96,7 +74,7 @@ describe("createScreenshotTool", () => {
 
   it("passes a shell DENIED failure through to the model (T9 denied passthrough)", async () => {
     const tools = toolWith({
-      registry: registryReturning(nodeConnection()),
+      registry: registryReturning(fakeHost("screenshot")),
       broker: brokerReturning({ ok: false, code: "DENIED", message: "user denied" }),
       store: store(() => ({ path: "x", bytes: 0 })),
     });
@@ -105,7 +83,7 @@ describe("createScreenshotTool", () => {
 
   it("never throws even when persistence fails — degrades to a structured error (T10)", async () => {
     const tools = toolWith({
-      registry: registryReturning(nodeConnection()),
+      registry: registryReturning(fakeHost("screenshot")),
       broker: brokerReturning({ ok: true, output: OUTPUT }),
       store: store(() => {
         throw new Error("disk full");
@@ -117,7 +95,7 @@ describe("createScreenshotTool", () => {
 
   it("includes the VLM description in the result when a describe bridge is wired", async () => {
     const tools = toolWith({
-      registry: registryReturning(nodeConnection()),
+      registry: registryReturning(fakeHost("screenshot")),
       broker: brokerReturning({ ok: true, output: OUTPUT }),
       store: store(() => ({ path: "x.png", bytes: 42 })),
       describe: (input) => Promise.resolve(`screen shows ${input.mediaType} of ${input.dataBase64.length} chars`),
@@ -131,7 +109,7 @@ describe("createScreenshotTool", () => {
 
   it("D44: the description reaches the model only PII-scrubbed and inside the A1 fence", async () => {
     const tools = toolWith({
-      registry: registryReturning(nodeConnection()),
+      registry: registryReturning(fakeHost("screenshot")),
       broker: brokerReturning({ ok: true, output: OUTPUT }),
       store: store(() => ({ path: "x.png", bytes: 42 })),
       // What was on screen: a credential, an address, and an attempt to break out of the fence and give orders.
@@ -156,7 +134,7 @@ describe("createScreenshotTool", () => {
 
   it("omits description (plain result) when the bridge degrades to null", async () => {
     const tools = toolWith({
-      registry: registryReturning(nodeConnection()),
+      registry: registryReturning(fakeHost("screenshot")),
       broker: brokerReturning({ ok: true, output: OUTPUT }),
       store: store(() => ({ path: "x.png", bytes: 42 })),
       describe: () => Promise.resolve(null),
@@ -169,7 +147,7 @@ describe("createScreenshotTool", () => {
   it("threads describePrompt from the tool input into the describe bridge (T2b item 6)", async () => {
     const seen: Array<{ dataBase64: string; mediaType: string; prompt?: string }> = [];
     const tools = toolWith({
-      registry: registryReturning(nodeConnection()),
+      registry: registryReturning(fakeHost("screenshot")),
       broker: brokerReturning({ ok: true, output: OUTPUT }),
       store: store(() => ({ path: "x.png", bytes: 42 })),
       describe: (input) => {
@@ -186,7 +164,7 @@ describe("createScreenshotTool", () => {
   it("calls the describe bridge with no prompt when describePrompt is absent (default path unchanged)", async () => {
     const seen: Array<{ dataBase64: string; mediaType: string; prompt?: string }> = [];
     const tools = toolWith({
-      registry: registryReturning(nodeConnection()),
+      registry: registryReturning(fakeHost("screenshot")),
       broker: brokerReturning({ ok: true, output: OUTPUT }),
       store: store(() => ({ path: "x.png", bytes: 42 })),
       describe: (input) => {
@@ -207,7 +185,7 @@ describe("createScreenshotTool", () => {
     pause.pauseUntilResumed();
     expect(pause.isPaused()).toBe(true);
     const tools = toolWith({
-      registry: registryReturning(nodeConnection()),
+      registry: registryReturning(fakeHost("screenshot")),
       broker: brokerReturning({ ok: true, output: OUTPUT }),
       store: store(() => ({ path: "x.png", bytes: 42 })),
     });

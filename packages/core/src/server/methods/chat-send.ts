@@ -85,6 +85,7 @@ async function pump(args: PumpArgs, controller: AbortController): Promise<void> 
   try {
     // The turn handle lets MCP tool approvals ride ctx.notify (approval.request) and deny-on-disconnect via ctx.onClose.
     const turn = {
+      connection: ctx.connection,
       notify: ctx.notify,
       onClose: ctx.onClose,
       signal: controller.signal,

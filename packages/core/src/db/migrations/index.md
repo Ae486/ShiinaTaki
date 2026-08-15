@@ -12,4 +12,7 @@
 - 011-slot-window-state.ts — migration 11: slot_window_state (per-model-slot effective window + EMA factor — the window calibrator's persistence, batch 6)
 - 012-conversation-summary.ts — migration 12: conversation_summary (one overwritable rolling-summary row per character + through_seq coverage, T5-R3; never a timeline row)
 - 013-config.ts — migration 13: config (the sparse operator-set settings store: key/JSON value/updated_at; a row exists only for a knob the panel actually set)
+- 014-governance-policy.ts — migration 14: Core-owned global Level/policy generation singleton + sparse validated cell overrides
+- 015-approval.ts — migration 15: Core Approval generation/revision singleton + canonical durable always-allow decisions
+- 016-timeline-input-scrub.ts — migration 16: idempotent timeline privacy scrub — persisted tool-call `input` is removed from timeline parts (secure_delete zeroes the old bytes); no schema shape change
 - index-list.ts — the explicit ordered MIGRATIONS registry (no fs/glob discovery)

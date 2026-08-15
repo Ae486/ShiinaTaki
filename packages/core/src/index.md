@@ -1,20 +1,21 @@
 # core/src/
 - index.ts — package public entry; empty until an external consumer exists (core runs as a process)
-- main.ts — process entry: wires config → logger → model(s) → db/store/subscriptions → memory subsystem (memory/bootstrap.ts) → media store + attachment GC → skills + MCP + approval gate + capability channel → perception layer (activity + ambient-screen samplers, privacy controls, frame retention) → registries → ws-server; closes MCP clients + db on SIGINT/SIGTERM
+- main.ts — process entry: wires config → logger → model(s) → db/store/subscriptions → governance authority + legacy MCP deny reader → memory/media/skills/MCP/capability/perception adapters → operator registries → ws-server; closes MCP clients + db on SIGINT/SIGTERM
 - config/ — env → validated boot config; plus the operator-facing settings store (knob registry, precedence source, writer, change fan-out)
 - boot/ — the composition root's config+storage phase: open the DB on the env-only data root, then resolve every other knob (env > stored > default) for the loaders
 - logging/ — pino root logger factory
 - server/ — WS JSON-RPC server + method table + connection auth state
 - devices/ — paired-device store + pairing/token registry (device identity security state)
 - db/ — SQLite wrapper + migrations + repos (the only node:sqlite importer; single-writer durable store)
-- agents/ — streaming chat agent + SQLite-backed conversation store
+- agents/ — streaming chat agent + SQLite-backed conversation store + collision-safe governed ToolSet assembly
 - activity/ — OS-neutral perception activity layer (#19 T3a): foreground-sample rolling state + system-initiated poll sampler + fenced prompt renderer
 - perception/ — perception composition + privacy controls (#20 T3b): Privacy Pause (db-persisted, restart-proof), sensitive-process skip, the VLM sensitive-screen verdict, deterministic PII scrub + the DEFAULT-OFF ambient screen sampler (own grant, own frame store, enforced retention) + the human-facing activity card; shared by every ambient sampler, never by on-demand captures
 - memory/ — layer-generic memory engine: files-as-truth store + FTS5 index + retriever + assembler + tools + the always-visible block tier, its boot wiring, the background utility slot and the retention sweeper
 - media/ — content-addressed attachment store (chat image bytes) under the Workspace; the DB never holds bytes (#17)
 - scheduler/ — the shared sweep runner every retention arm rides (boot sweep + unref'd interval + count-only log)
 - mcp/ — MCP client: connect operator servers at boot, namespace + error-wrap their tools (ADR 0006 spawn carve-out)
-- approval/ — MCP tool-approval gate: ask/await broker + decision memory + the v7 toolApproval decision fn
+- approval/ — canonical durable plus exact-Connection interactive Approval authority, production composition, targeted lifecycle, and retained dormant legacy compatibility modules
+- governance/ — Core-owned global policy repository/service plus trusted Core/MCP/Skill execution adapters
 - capabilities/ — core→node capability channel: ask/await broker + route helper + screenshot/process-list/clipboard/shell-open tools + sanctioned Workspace PNG write site
 - workspace/ — core-side Workspace-confined file RW tools + the path-escape confinement security core
 - skills/ — SKILL.md discovery + enable/disable state + lazy load_skill tool

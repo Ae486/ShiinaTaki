@@ -2,7 +2,10 @@
 
 Start here. Every design decision has exactly one canonical home; nothing is duplicated.
 
-> **New session picking up implementation?** Read **`HANDOFF.md`** first — it is the Leader bootstrap (what's done, what to read, how to drive the trellis master/worker flow).
+> **New session picking up implementation?** Read **`HANDOFF.md`** first - it is the durable Leader bootstrap (what
+> is done, what to read, and how to drive the Trellis leader/agent flow). For the active ZCODE takeover, start with
+> **`ZCODE-HANDOFF.md`** because its dirty-tree warning is time-sensitive, then read `HANDOFF.md` for the durable
+> program history and contracts.
 
 ## Reading order for a new agent/developer
 

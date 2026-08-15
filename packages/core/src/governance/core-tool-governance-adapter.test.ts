@@ -1,0 +1,90 @@
+import { tool, type ToolSet } from "ai";
+import { z } from "zod";
+import {
+  CANONICAL_GOVERNANCE_REGISTRY,
+  createGovernanceRegistry,
+  type GovernanceRegistry,
+} from "@taki/shared";
+import { afterEach, describe, expect, it } from "vitest";
+import { MIGRATIONS } from "../db/migrations/index-list.ts";
+import { openDatabase, type Database } from "../db/sqlite.ts";
+import { createCoreToolGovernanceAdapter } from "./core-tool-governance-adapter.ts";
+import { createGovernancePolicyRepo } from "./governance-policy-repo.ts";
+import { createGovernancePolicyService } from "./governance-policy-service.ts";
+
+const OWNER_HOST_ID = "11111111-1111-4111-8111-111111111111";
+const BUILTIN_KEYS = [
+  "get_current_time",
+  "memory_search",
+  "memory_write",
+  "memory_archive",
+  "avatar_set_expression",
+  "avatar_play_motion",
+  "read_file",
+  "write_file",
+] as const;
+
+const dbs: Database[] = [];
+afterEach(() => {
+  for (const db of dbs.splice(0)) db.close();
+});
+
+function service(registry: GovernanceRegistry = CANONICAL_GOVERNANCE_REGISTRY) {
+  const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+  dbs.push(db);
+  return createGovernancePolicyService(createGovernancePolicyRepo(db), registry);
+}
+
+function executableTools(keys: readonly string[], called: string[]): ToolSet {
+  return Object.fromEntries(keys.map((key) => [key, tool({
+    description: key,
+    inputSchema: z.object({}),
+    execute: () => {
+      called.push(key);
+      return { ok: true, key };
+    },
+  })]));
+}
+
+describe("createCoreToolGovernanceAdapter", () => {
+  it("has an explicit executable binding for every current Core built-in", async () => {
+    const called: string[] = [];
+    const wrapped = createCoreToolGovernanceAdapter(service(), OWNER_HOST_ID)
+      .wrap(executableTools(BUILTIN_KEYS, called));
+
+    for (const key of BUILTIN_KEYS) {
+      await wrapped[key]?.execute?.({}, { toolCallId: key, messages: [] } as never);
+    }
+
+    expect(called).toEqual(BUILTIN_KEYS);
+  });
+
+  it("fails an unknown Core tool key closed without calling its closure", async () => {
+    const called: string[] = [];
+    const wrapped = createCoreToolGovernanceAdapter(service(), OWNER_HOST_ID)
+      .wrap(executableTools(["unknown_core_tool"], called));
+
+    expect(await wrapped.unknown_core_tool?.execute?.(
+      {}, { toolCallId: "unknown", messages: [] } as never,
+    )).toMatchObject({ ok: false, code: "GOVERNANCE_DENIED" });
+    expect(called).toEqual([]);
+  });
+
+  it("does not execute a known closure when its descriptor cell no longer matches", async () => {
+    const registry = createGovernanceRegistry({
+      ...CANONICAL_GOVERNANCE_REGISTRY,
+      descriptors: CANONICAL_GOVERNANCE_REGISTRY.descriptors.map((descriptor) =>
+        descriptor.capabilityId === "core.time.read"
+          ? { ...descriptor, cells: [{ ...descriptor.cells[0]!, key: "time-read-revised" }] }
+          : descriptor),
+    });
+    const called: string[] = [];
+    const wrapped = createCoreToolGovernanceAdapter(service(registry), OWNER_HOST_ID)
+      .wrap(executableTools(["get_current_time"], called));
+
+    expect(await wrapped.get_current_time?.execute?.(
+      {}, { toolCallId: "time", messages: [] } as never,
+    )).toMatchObject({ ok: false, code: "GOVERNANCE_DENIED" });
+    expect(called).toEqual([]);
+  });
+});

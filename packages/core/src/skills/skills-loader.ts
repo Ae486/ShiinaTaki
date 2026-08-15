@@ -1,7 +1,7 @@
 /**
  * INPUT:  discovered SkillMeta[] + a SkillsState (enable/disable) + load(name) calls
- * OUTPUT: createSkillsLoader(deps) -> { renderList, load } — the cheap list + the lazy body loader
- * POS:    core/skills — the list enters chat-agent instructions; load() is the load_skill tool's body (levels 1-2)
+ * OUTPUT: createSkillsLoader(deps) -> { renderList, load, describe } — list, lazy body, and trusted revision lookup
+ * POS:    core/skills — standard SKILL.md content boundary; metadata/body never grant action permission
  */
 import { readFileSync } from "node:fs";
 import { parseFrontmatter } from "../memory/frontmatter.ts";
@@ -18,6 +18,7 @@ export interface SkillsLoader {
   renderList(): string;
   /** Lazy-load one enabled skill's markdown body (level 2); honors enable/disable state. */
   load(name: string): SkillLoadResult;
+  describe(name: string): { name: string; contentRevision: string } | undefined;
 }
 
 const LIST_HEADER = "Skills you can load with load_skill:";
@@ -41,6 +42,10 @@ export function createSkillsLoader(deps: { skills: SkillMeta[]; state: SkillsSta
       } catch (error) {
         return { ok: false, code: "IO_ERROR", message: error instanceof Error ? error.message : String(error) };
       }
+    },
+    describe(name) {
+      const skill = byName.get(name);
+      return skill ? { name: skill.name, contentRevision: skill.contentRevision } : undefined;
     },
   };
 }

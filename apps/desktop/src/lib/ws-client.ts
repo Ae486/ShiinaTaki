@@ -3,7 +3,7 @@
  * OUTPUT: createWsClient({transport}) -> WsClient: connect()/chat()/subscribeAvatar()/reportAvatar() +
  *         timelineHistory()/subscribeTimeline()/mediaGet() (chat page) + importCharacter()/listCharacters()/
  *         characterCostumes()/costumeResolution() (#18) + configList()/configSet()/subscribeConfig() +
- *         memoryTidy()/memoryStatus()/mediaUsage()/mediaClear()/perception* (settings pages) + push handlers.
+ *         memoryTidy()/memoryStatus()/mediaUsage()/mediaClear() plus perception/permission/Approval methods and pushes.
  * POS:    ui/lib — the Pet UI's operator transport to the Agent Core (mirrors apps/cli chat-client, browser WS). The
  *         composition root over ws-client-routes (inbound) and ws-client-methods (outbound). No React/Tauri imports.
  */
@@ -12,6 +12,9 @@ import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2
 import { CHAT_METHODS } from "@taki/shared";
 import type {
   AvatarCommand,
+  ApprovalListResult,
+  ApprovalRevokeParams,
+  ApprovalRevokeResult,
   AvatarReportParams,
   CharacterCostumeResolutionResult,
   CharacterCostumesResult,
@@ -19,6 +22,8 @@ import type {
   CharacterImportResult,
   CharacterListResult,
   ChatSendParams,
+  CanonicalApprovalRespondParams,
+  CanonicalApprovalRespondResult,
   ConfigChanged,
   ConfigListResult,
   ConfigSetParams,
@@ -32,6 +37,11 @@ import type {
   PerceptionCard,
   PerceptionPauseSetParams,
   PerceptionPauseState,
+  PermissionCellSetParams,
+  PermissionCellSetResult,
+  PermissionCellsState,
+  PermissionLevelSetParams,
+  PermissionLevelState,
   TimelineEntry,
   TimelineHistoryParams,
   TimelineHistoryResult,
@@ -44,12 +54,14 @@ import { createTimingPolicySync, type TimingPolicySync } from "./timing-policy-s
 import { handshake, requestMethods, type ConnectOutcome } from "./ws-client-methods.ts";
 import {
   addConfigChangedHandler,
+  addApprovalHandler,
   bindTransport,
   createRoutes,
   installRoutes,
   CONNECTION_LOST_MESSAGE,
   WsOpenDeadlineExceededError,
   type ChatHandlers,
+  type ApprovalPushEvent,
 } from "./ws-client-routes.ts";
 import type { WsTransport } from "./ws-transport.ts";
 
@@ -96,6 +108,18 @@ export interface WsClient {
   perceptionPauseSet(params: PerceptionPauseSetParams): Promise<PerceptionPauseState>;
   /** Reads the activity card: current + recent foreground stretches, sampling status, pause state. */
   perceptionCard(): Promise<PerceptionCard>;
+  /** Reads the Core-authoritative global Permission Level and durable policy generation. */
+  permissionLevelGet(): Promise<PermissionLevelState>;
+  /** Mutates the global Level with optimistic generation matching; timed-out outcomes are never replayed. */
+  permissionLevelSet(params: PermissionLevelSetParams): Promise<PermissionLevelState>;
+  /** Reads the complete Core projection used by the advanced Settings cells view. */
+  permissionCellsGet(): Promise<PermissionCellsState>;
+  /** Stores or resets one Core cell override with optimistic generation matching. */
+  permissionCellSet(params: PermissionCellSetParams): Promise<PermissionCellSetResult>;
+  approvalRespond(params: CanonicalApprovalRespondParams): Promise<CanonicalApprovalRespondResult>;
+  approvalList(): Promise<ApprovalListResult>;
+  approvalRevoke(params: ApprovalRevokeParams): Promise<ApprovalRevokeResult>;
+  onApproval(handler: (event: ApprovalPushEvent) => void): () => void;
   /** Registers the fire-and-forget avatar command sink (core -> operator push). Replaces any prior handler. */
   onAvatarCommand(handler: (command: AvatarCommand) => void): void;
   /** Registers the optional live-timeline sink (shared with the chat page server-side). */
@@ -192,6 +216,7 @@ export function createWsClient(deps: WsClientDeps): WsClient {
     onTimelineAppended: (handler) => (state.push.timeline = handler),
     onTimelineRemoved: (handler) => (state.push.timelineRemoved = handler),
     onConfigChanged: (handler) => addConfigChangedHandler(state, handler),
+    onApproval: (handler) => addApprovalHandler(state, handler),
     currentTimingPolicy: timing,
     onClose: (handler) => transport.onClose(handler),
     close: () => closeClient(timingSync, retire, transport),

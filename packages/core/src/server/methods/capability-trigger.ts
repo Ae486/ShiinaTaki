@@ -10,15 +10,18 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import type { ToolSet } from "ai";
 import type { Logger } from "../../logging/logger.ts";
+import type { Connection } from "../connection-registry.ts";
 import type { MethodDefinition } from "../method-registry.ts";
 
 const CAPABILITY_TRIGGER_METHOD = "capability.trigger";
 
 // The dev surface's own schema (kept out of @taki/shared on purpose): capability names the tool bag key, input is the
-// opaque per-tool payload the operator supplies. strictObject so a stray key is a clear INVALID_PARAMS in tests.
+// opaque per-tool payload the operator supplies, interactive binds the CALLING operator socket as the Approval owner
+// (drives the challenge/resume L1 without an LLM). strictObject so a stray key is a clear INVALID_PARAMS in tests.
 const CapabilityTriggerParamsSchema = z.strictObject({
   capability: z.string().min(1),
   input: z.unknown().optional(),
+  interactive: z.boolean().optional(),
 });
 type CapabilityTriggerParams = z.infer<typeof CapabilityTriggerParamsSchema>;
 
@@ -28,8 +31,8 @@ export function devTriggerEnabled(env: NodeJS.ProcessEnv): boolean {
 }
 
 export interface CapabilityTriggerDeps {
-  /** The SAME tool objects the chat agent drives (six Shell-routed + the Workspace file tools) — never a separate path. */
-  tools: ToolSet;
+  /** Builds the SAME tool bag the agent drives (six Shell-routed + the Workspace file tools) — never a separate path. */
+  tools: (interactive?: { connection: Connection }) => ToolSet;
   logger: Logger;
 }
 
@@ -40,8 +43,11 @@ export function capabilityTriggerMethod(deps: CapabilityTriggerDeps): MethodDefi
     // Operators drive; a node never asks core to run a capability (mirror of the operator-only chat/approval methods).
     roles: ["operator"],
     paramsSchema: CapabilityTriggerParamsSchema,
-    handler: async (params) => {
-      const execute = deps.tools[params.capability]?.execute;
+    handler: async (params, ctx) => {
+      // Interactive drives bind THIS operator socket as the initiating operator — the same per-turn construction the
+      // chat agent uses — so an ask-classified capability prompts the driving socket instead of failing unattended.
+      const tools = deps.tools(params.interactive ? { connection: ctx.connection } : undefined);
+      const execute = tools[params.capability]?.execute;
       if (typeof execute !== "function") {
         return {
           ok: false as const,
@@ -50,7 +56,7 @@ export function capabilityTriggerMethod(deps: CapabilityTriggerDeps): MethodDefi
         };
       }
       // Loud on every use — a dev drive that reaches a real capability tool must never be silent (mirror ScriptedApprover).
-      log.warn({ capability: params.capability }, "DEV CAPABILITY TRIGGER — running a real tool execute without the LLM");
+      log.warn({ capability: params.capability, interactive: params.interactive === true }, "DEV CAPABILITY TRIGGER — running a real tool execute without the LLM");
       // The tool's execute is typed to its own input; the trigger drives it with an opaque operator-supplied payload
       // and an empty message context. The tool's route → broker → node-side gate path is unchanged (no bypass).
       const run = execute as unknown as (

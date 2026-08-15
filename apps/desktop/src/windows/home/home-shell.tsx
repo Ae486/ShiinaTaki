@@ -2,8 +2,8 @@
  * INPUT:  the page registry + the home store's current page.
  * OUTPUT: <HomeShell> — the two-pane home layout: left menu (one icon+label entry per registry row) + the current
  *         page's body, shared client context, and the shared Home status banner on non-chat pages.
- * POS:    ui/windows/home — the window root. Presentational shell only: pages own their data and their own header
- *         (page-chrome.tsx), the shell owns the nav switch, the shared connection and the one ToastHost.
+ * POS:    ui/windows/home — the window root. Owns navigation, the shared Home connection, that socket's Approval
+ *         modal, and the one ToastHost; Chat retains an independent socket and modal.
  */
 
 import { ToastHost } from "@/components/toast/toast-host.js";
@@ -13,6 +13,7 @@ import { useHomeNavigateEvent } from "./use-home-navigate-event.ts";
 import { useHomeConnection } from "./use-home-connection.ts";
 import { HomeClientContext } from "./home-client-context.ts";
 import { HOME_PAGES } from "./pages.ts";
+import { useApprovalDialog } from "@/components/approval/use-approval-dialog.js";
 
 const ACTIVE_ROW = "bg-white text-rose-700 shadow-sm ring-1 ring-rose-200/70";
 const IDLE_ROW = "text-slate-500 ring-1 ring-transparent hover:bg-white/70 hover:text-slate-700";
@@ -54,6 +55,7 @@ export function HomeShell() {
   const connection = useHomeConnection();
   const currentPage = useHomeStore((state) => state.currentPage);
   const page = HOME_PAGES.find((entry) => entry.id === currentPage) ?? HOME_PAGES[0];
+  const approvalDialog = useApprovalDialog(connection.client);
   const CurrentPage = page.component;
 
   return (
@@ -70,6 +72,7 @@ export function HomeShell() {
           <CurrentPage />
         </main>
         <ToastHost />
+        {approvalDialog}
       </div>
     </HomeClientContext.Provider>
   );

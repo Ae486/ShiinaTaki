@@ -1,9 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
 import { abortRejectingModel, scriptedModel, slowStreamingModel, streamingMockModel } from "../testing/mock-language-model.ts";
+import type { Connection } from "../server/connection-registry.ts";
 import { createChatAgent, type TurnContext, type TurnUsageReport } from "./chat-agent.ts";
 
 const fixtures: CompanionFixture[] = [];
+const TEST_CONNECTION: Connection = {
+  state: { status: "authenticated", deviceId: "chat-agent-test", role: "operator", capabilities: [] },
+};
 function fresh(): CompanionFixture {
   const f = createCompanionFixture();
   fixtures.push(f);
@@ -26,7 +30,7 @@ async function flushDetached(): Promise<void> {
 }
 
 function cancellableTurn(controller: AbortController, onRetract?: () => void): TurnContext {
-  return { notify: () => undefined, onClose: () => undefined, signal: controller.signal, onRetract };
+  return { connection: TEST_CONNECTION, notify: () => undefined, onClose: () => undefined, signal: controller.signal, onRetract };
 }
 
 describe("chat-agent usage-capture seam (batch 6, R1 tier 2)", () => {

@@ -1,7 +1,7 @@
 # Tool Design Standard
 
 > The governance contract EVERY new agent tool (`packages/core/src/**/*-tool.ts`) follows as the tool count grows.
-> This is 固化+补, not a rewrite — our current tools already conform broadly; the rules below make the conventions
+> This consolidates and extends the existing conventions rather than rewriting them — our current tools already conform broadly; the rules below make the conventions
 > explicit and fill the gaps (schema fullness, actionable errors, description discipline, strict-readiness).
 >
 > **Owner hard constraint (2026-07-20): every rule is templated from an AUTHORITATIVE source and carries its citation
@@ -193,7 +193,8 @@ external/untrusted world?).** `[MCP-ANN]` `[MCP-SPEC]`. Defaults are deliberatel
 POS-header convention, not runtime enforcement:** each tool states its posture in prose in the `POS:` tag of its
 module-contract header (e.g. avatar tools — readOnly, non-destructive, closed-world; `screenshot` — readOnly,
 open-world VLM output, gated). Machine-readable runtime annotations → **T2b**. Annotations are documentation/UX only;
-the Rust Permission Gate stays the SOLE enforcement (see C-5).
+canonical identity plus Core policy remains authoritative, and a Host-owned action additionally crosses the Host's
+trusted classifier/final boundary (see C-5 and `permission-authorization.md`).
 
 **I2. `idempotentHint:true` ⇒ safe to retry on failure; a non-idempotent side-effecting tool must NOT be blind-retried.**
 `[MCP-ANN]`; our `./error-handling.md` states the same ("Retrying a side-effecting action without an idempotency check"
@@ -202,8 +203,9 @@ is under "What must never happen"). I1's header posture is where each tool decla
 **I3. Hints are NOT guarantees — keep real safety in deterministic controls; separate read tools from write tools for a
 clean consent model (never hide a destructive action behind an `action` param).** `[MCP-ANN]` ("keep your actual safety
 guarantees in deterministic controls") `[GOOG]` (read/write separation). — Our precedent: deterministic safety is the
-Rust Permission Gate (invariant 1); `clipboard_read`/`clipboard_write` and `screenshot`(read)/`exec`(write) are separate
-tools; the gate authorizes per capability.
+canonical Core evaluator plus the owning Execution Host's stricter final enforcement; `clipboard_read`/
+`clipboard_write` and `screenshot`(read)/`exec`(write) are separate tools, and each resolves an explicit capability
+descriptor rather than deriving authority from its hint.
 
 **I4. Retry only classed-transient failures; a deterministic failure fails fast with actionable guidance and never burns
 retries.** Hermes `error_classifier.py` — a `ClassifiedError` carries `retryable`; deterministic cases (content-policy
@@ -223,6 +225,13 @@ informational tool must NEVER enter that set (a step co-calling it last would st
 thin — it delegates to a capability client / subscription, no business logic inline.** Our `CLAUDE.md` (naming +
 anti-sprawl + "commands/tools are thin"; invariant 7); Hermes self-registers one schema+handler per tool file via
 `registry.register()` `[H-REG]`; OpenClaw one `create*Tool` per file `[OC-CAT]`.
+
+**B2a. Bind governance at birth: every executable tool must resolve a trusted canonical capability identity and one
+registered cell before the model can call it.** Core tools use the explicit Core binding table; Host tools route through
+the Host catalog plus Core projection; MCP tools retain the raw SDK closure beside a stable Host-qualified subject;
+Skill instructions never transfer their own `skill.load` posture to later actions. An unknown Core binding, duplicate
+registry identity, ambiguous MCP sanitized-key collision, or mismatched Host descriptor is fail-closed. See
+`permission-authorization.md` for signatures, precedence, errors, and tests.
 
 **B3. Progressive disclosure at scale: below a threshold keep all tool defs in context; above it, defer non-core tools
 behind a search/describe/call bridge — use a context-fraction trigger, do NOT invent a fixed N.** `[A-WTA]`
@@ -252,16 +261,18 @@ per-provider config flip (D40).
 plain JSON-Schema `enum`) → author enums as `z.enum`, never a hand-rolled union (S2).** Both camps want a plain
 `{"type":"string","enum":[…]}` on the wire; `z.enum` emits exactly that, so we inherit provider portability for free.
 
-**C-5. "Hints drive auto-approval" (`[MCP-ANN]`) vs our fail-closed gate → annotations are DOCUMENTATION/UX ONLY; the
-Rust Permission Gate is the sole enforcement (invariant 1; `./error-handling.md` fail-closed).** MCP is explicit that
-annotations are untrusted hints, not enforcement. This is why I1 is a POS-header convention in T2a, not a runtime gate.
+**C-5. "Hints drive auto-approval" (`[MCP-ANN]`) vs our fail-closed governance → annotations are DOCUMENTATION/UX
+ONLY; canonical Core policy is the global authority and a Host may only tighten at its final boundary
+(`permission-authorization.md`; `./error-handling.md` fail-closed).** MCP is explicit that annotations are untrusted
+hints, not enforcement. Neither an MCP annotation, a server description, Skill metadata, nor a model-facing tool key
+selects a looser descriptor/posture. Standard MCP transport and raw-name execution remain unchanged.
 
 ## Sourced exemptions (do not "fix" these)
 
 - **`exec`'s single opaque `command` param** vs the explicit-named-params guidance (S4/S6): defended by `[A-BEA]`'s own
   format guidance — "Keep the format close to what the model has seen naturally occurring in text … no formatting
-  overhead"; a raw shell command string is the most model-natural encoding. Decomposing `command` would also move
-  parsing/governance off the Shell, violating invariant 1. `exec`'s output already satisfies R3 (semantic result) + R4
+  overhead"; a raw shell command string is the most model-natural encoding. Decomposing `command` would also move the
+  trusted argument classifier out of the owning Host. `exec`'s output already satisfies R3 (semantic result) + R4
   (`truncated` flag) + D3 (result semantics in the description). Nothing in this standard argues to change `exec` input
   or output — leave it untouched.
 - **`shell_open`'s http/https/mailto scheme constraint** stays a description constraint enforced Shell-side, not a schema

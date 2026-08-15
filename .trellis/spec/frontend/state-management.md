@@ -6,11 +6,12 @@
 
 | State | Home |
 | --- | --- |
-| State of record (sessions, memory, config) | Agent Core DB — the UI only caches |
+| State of record (sessions, memory, config, global permission policy) | Agent Core DB — the UI only caches disposable read views |
 | Cross-component UI state (connection status, active character, pending approvals, chat transcript cache) | Zustand stores in `src/stores/` |
 | Animation state (idle/thinking/working/sleeping) | `renderer/state-machine.ts` — mirrored INTO a store for React display, driven by WS events |
 | Single-component state (input drafts, open/closed) | `useState` in the component |
 | Settings form values | Local form state; persisted via WS config API on save — never a local settings store of record |
+| Permission Level / governance cells | Fresh Core snapshot per authenticated Home client generation; component/controller memory only, never cache/localStorage |
 
 ## Rules
 
@@ -24,6 +25,10 @@
   idempotent reads when client identity changes; they never retain a closed client or replay a mutation.
 - D59/D61 timing policy is window-owned, in-memory, and last-good across client generations. Core config is the only
   persisted authority; see `operator-connection-recovery.md`.
+- Permission policy is more restrictive than an ordinary cached read: it refetches from Core for every replacement
+  Home client, ignores retired-client results, serializes mutations, and never enters `useCachedFetch`, the persistence
+  allow-list, Zustand persistence, or `localStorage`. A stale mutation refetches after `POLICY_CONFLICT`; a timeout or
+  reconnect never replays the mutation.
 
 ## Scenario: Guarded stale-while-revalidate page snapshots
 

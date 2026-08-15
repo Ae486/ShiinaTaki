@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
-import { brokerReturning, fakeNode, registryReturning } from "../testing/capability-tool-harness.ts";
+import { testGovernance, testApproval } from "../testing/capability-tool-harness.ts";
+import { brokerReturning, catalogsReturning, fakeHost, registryReturning } from "../testing/capability-tool-harness.ts";
 import { createCompanionFixture } from "../testing/companion-fixture.ts";
 import type { CapabilityBroker } from "./capability-broker.ts";
 import type { ConnectionRegistry } from "../server/connection-registry.ts";
@@ -14,7 +15,7 @@ const SNAPSHOT = {
 
 function toolWith(registry: ConnectionRegistry, broker: CapabilityBroker) {
   const { logger } = createCaptureLogger();
-  return createProcessListTool({ registry, broker, logger });
+  return createProcessListTool({ registry, catalogs: catalogsReturning("process-list"), broker, logger, governance: testGovernance(), approval: testApproval() });
 }
 
 afterEach(() => {
@@ -24,7 +25,7 @@ afterEach(() => {
 describe("createProcessListTool", () => {
   it("routes and shapes the snapshot Value into { ok, processes, count, capturedAt } (T4/Q5)", async () => {
     vi.useFakeTimers({ now: new Date("2026-08-01T10:00:00.000Z") });
-    const tools = toolWith(registryReturning(fakeNode("process-list")), brokerReturning({ ok: true, output: SNAPSHOT }));
+    const tools = toolWith(registryReturning(fakeHost("process-list")), brokerReturning({ ok: true, output: SNAPSHOT }));
     expect(await tools.process_list?.execute?.({}, EXEC_OPTS)).toEqual({
       ok: true,
       processes: SNAPSHOT.processes,
@@ -35,7 +36,7 @@ describe("createProcessListTool", () => {
 
   it("stamps capturedAt at EACH execute — two calls carry two stamps (Q5)", async () => {
     vi.useFakeTimers({ now: new Date("2026-08-01T10:00:00.000Z") });
-    const tools = toolWith(registryReturning(fakeNode("process-list")), brokerReturning({ ok: true, output: SNAPSHOT }));
+    const tools = toolWith(registryReturning(fakeHost("process-list")), brokerReturning({ ok: true, output: SNAPSHOT }));
 
     const first = (await tools.process_list?.execute?.({}, EXEC_OPTS)) as { capturedAt: string };
     vi.setSystemTime(new Date("2026-08-01T10:05:00.000Z"));
@@ -70,14 +71,14 @@ describe("createProcessListTool", () => {
 
   it("passes a Shell DENIED failure through to the model (T7)", async () => {
     const tools = toolWith(
-      registryReturning(fakeNode("process-list")),
+      registryReturning(fakeHost("process-list")),
       brokerReturning({ ok: false, code: "DENIED", message: "denied" }),
     );
     expect(await tools.process_list?.execute?.({}, EXEC_OPTS)).toEqual({ ok: false, code: "DENIED", message: "denied" });
   });
 
   it("degrades a malformed payload into a structured error — never throws (T7)", async () => {
-    const tools = toolWith(registryReturning(fakeNode("process-list")), brokerReturning({ ok: true, output: { nope: 1 } }));
+    const tools = toolWith(registryReturning(fakeHost("process-list")), brokerReturning({ ok: true, output: { nope: 1 } }));
     expect(await tools.process_list?.execute?.({}, EXEC_OPTS)).toMatchObject({ ok: false, code: "INTERNAL_ERROR" });
   });
 });

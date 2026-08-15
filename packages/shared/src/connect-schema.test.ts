@@ -1,4 +1,8 @@
 import { describe, expect, it } from "vitest";
+import {
+  HOST_CATALOG_SCHEMA_VERSION,
+  HOST_CONTROL_PROTOCOL_VERSION,
+} from "./host-control-schema.ts";
 import { CONNECT_METHOD, ConnectParamsSchema, ConnectResultSchema, RoleSchema } from "./connect-schema.ts";
 
 const VALID_UUID = "550e8400-e29b-41d4-a716-446655440000";
@@ -42,8 +46,29 @@ describe("ConnectParamsSchema", () => {
   });
 
   it("accepts a node declaring capabilities", () => {
-    const parsed = ConnectParamsSchema.parse({ ...base, role: "node", capabilities: ["screenshot"] });
+    const parsed = ConnectParamsSchema.parse({
+      ...base,
+      role: "node",
+      capabilities: ["screenshot"],
+      host: {
+        protocol: { min: HOST_CONTROL_PROTOCOL_VERSION, max: HOST_CONTROL_PROTOCOL_VERSION },
+        catalogSchemaVersions: [HOST_CATALOG_SCHEMA_VERSION],
+      },
+    });
     expect(parsed.capabilities).toEqual(["screenshot"]);
+  });
+
+  it("requires Host negotiation from nodes and forbids it on operators", () => {
+    expect(ConnectParamsSchema.safeParse({ ...base, role: "node", capabilities: ["screenshot"] }).success).toBe(false);
+    expect(
+      ConnectParamsSchema.safeParse({
+        ...base,
+        host: {
+          protocol: { min: HOST_CONTROL_PROTOCOL_VERSION, max: HOST_CONTROL_PROTOCOL_VERSION },
+          catalogSchemaVersions: [HOST_CATALOG_SCHEMA_VERSION],
+        },
+      }).success,
+    ).toBe(false);
   });
 
   it("accepts an optional reconnect token", () => {
@@ -62,6 +87,20 @@ describe("ConnectResultSchema", () => {
 
   it("accepts ok carrying a token (pairing just completed)", () => {
     expect(ConnectResultSchema.safeParse({ status: "ok", token: "tok" }).success).toBe(true);
+  });
+
+  it("accepts the selected Host versions and Core-assigned generation", () => {
+    expect(
+      ConnectResultSchema.safeParse({
+        status: "ok",
+        host: {
+          hostId: VALID_UUID,
+          protocolVersion: HOST_CONTROL_PROTOCOL_VERSION,
+          catalogSchemaVersion: HOST_CATALOG_SCHEMA_VERSION,
+          connectionGeneration: 1,
+        },
+      }).success,
+    ).toBe(true);
   });
 
   it("rejects a non-ok status", () => {

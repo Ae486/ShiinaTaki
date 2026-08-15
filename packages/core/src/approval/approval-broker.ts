@@ -1,10 +1,16 @@
 /**
- * INPUT:  ApprovalAsk {serverName, toolName, input} + a per-turn notify fn; approval.respond params
+ * INPUT:  retained LegacyApproval ask data + per-turn notify; legacy approval.respond params
  * OUTPUT: createApprovalBroker(deps) -> { ask, resolve, denyAll } — correlate operator decisions by approvalId
- * POS:    core/approval — MCP-AGNOSTIC ask/await broker (M3 Permission Gate reuses this exact surface, ruling 15)
+ * POS:    core/approval — dormant pre-Batch-B prompt broker retained for compatibility and regression tests
  */
 import { randomUUID } from "node:crypto";
-import { APPROVAL_METHODS, type ApprovalRequest, type ApprovalRespondParams, type ApprovalRespondResult, type ApprovalScope } from "@taki/shared";
+import {
+  APPROVAL_METHODS,
+  type LegacyApprovalRequest,
+  type LegacyApprovalRespondParams,
+  type LegacyApprovalRespondResult,
+  type LegacyApprovalScope,
+} from "@taki/shared";
 import type { Logger } from "../logging/logger.ts";
 
 export interface ApprovalAsk {
@@ -16,7 +22,7 @@ export interface ApprovalAsk {
 /** The operator's decision, including the scope so the caller can persist always/never (decision-store). */
 export interface ApprovalOutcome {
   approved: boolean;
-  scope: ApprovalScope;
+  scope: LegacyApprovalScope;
   reason?: string;
 }
 
@@ -26,7 +32,7 @@ export interface ApprovalBroker {
   /** Notifies the operator and resolves when they answer, they disconnect, or 60 s elapses (fail-closed deny). */
   ask(ask: ApprovalAsk, notify: ApprovalNotify): Promise<ApprovalOutcome>;
   /** Applies an operator answer to the pending ask; unknown/late id -> {accepted:false} (normal, never an error). */
-  resolve(params: ApprovalRespondParams): ApprovalRespondResult;
+  resolve(params: LegacyApprovalRespondParams): LegacyApprovalRespondResult;
   /** Denies every pending ask now (operator socket closed) — fail-closed. */
   denyAll(reason: string): void;
 }
@@ -69,7 +75,7 @@ export function createApprovalBroker(deps: { logger: Logger; timeoutMs?: number 
           serverName: ask.serverName,
           toolName: ask.toolName,
           input: ask.input,
-        } satisfies ApprovalRequest);
+        } satisfies LegacyApprovalRequest);
         log.info({ approvalId, server: ask.serverName, tool: ask.toolName }, "tool approval requested");
       });
     },

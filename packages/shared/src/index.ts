@@ -33,11 +33,26 @@ export { ErrorCodeSchema } from "./error-code-schema.ts";
 export type { ErrorCode } from "./error-code-schema.ts";
 
 export {
-  CONNECT_METHOD,
-  ConnectParamsSchema,
-  ConnectResultSchema,
-  RoleSchema,
-} from "./connect-schema.ts";
+  HOST_CATALOG_SCHEMA_VERSION, HOST_CONTROL_METHODS, HOST_CONTROL_PROTOCOL_VERSION,
+  CapabilityAuthorizationLineageSchema, CapabilityAuthorizationSchema, CapabilityCancellationSchema, CapabilityCancelReasonSchema, CapabilityCancelSchema,
+  CapabilityChallengeSchema, CapabilityExecutionKindSchema, CapabilityResumeSchema,
+  CapabilitySettlementStateSchema, HostCapabilityDescriptorSchema, HostCapabilityGovernanceSupportSchema, HostCatalogPublishParamsSchema,
+  HostDeclarationSchema, HostFrameAckSchema, HostFrameRejectReasonSchema, HostLocalReadinessSchema,
+  HostChallengePresentationSchema, HostMcpDescriptorSchema, HostNegotiationSchema, HostOperationControlSchema, HostGovernanceEvidenceSchema,
+  HostGovernanceCellSchema, HostGovernanceProjectionPayloadSchema, HostGovernanceProjectionSchema, HostProtocolRangeSchema,
+  HostSkillDescriptorSchema, HostWorkspaceDescriptorSchema, PositiveGenerationSchema, Sha256HexSchema,
+  canonicalCapabilityChallenge, canonicalHostGovernanceProjection, canonicalHostOperationControl,
+} from "./host-control-api.ts";
+export type {
+  CapabilityAuthorization, CapabilityAuthorizationLineage, CapabilityCancellation, CapabilityCancel, CapabilityCancelReason, CapabilityChallenge,
+  CapabilityExecutionKind, CapabilityResume, CapabilitySettlementState, HostCapabilityDescriptor, HostCapabilityGovernanceSupport,
+  HostCatalogPublishParams, HostChallengePresentation, HostDeclaration, HostFrameAck, HostFrameRejectReason, HostLocalReadiness,
+  HostMcpDescriptor, HostNegotiation, HostOperationControl, HostGovernanceProjection, HostGovernanceProjectionPayload,
+  HostGovernanceCell, HostGovernanceEvidence, HostProtocolRange, HostSkillDescriptor,
+  HostWorkspaceDescriptor,
+} from "./host-control-api.ts";
+
+export { CONNECT_METHOD, ConnectParamsSchema, ConnectResultSchema, RoleSchema } from "./connect-schema.ts";
 export type { ConnectParams, ConnectResult, Role } from "./connect-schema.ts";
 
 export {
@@ -221,40 +236,36 @@ export type {
 } from "./avatar-schema.ts";
 
 export {
-  APPROVAL_METHODS,
-  ApprovalRequestSchema,
-  ApprovalRespondParamsSchema,
-  ApprovalRespondResultSchema,
-  ApprovalScopeSchema,
-} from "./approval-schema.ts";
+  APPROVAL_BINDING_REVISION, APPROVAL_DISCLOSURE_REVISION, APPROVAL_METHODS, APPROVAL_PRESENTATION_REVISION, ApprovalChoiceSchema, ApprovalClosedReasonSchema, ApprovalClosedSchema, ApprovalDecisionBindingSchema, ApprovalDecisionInertReasonSchema, ApprovalDecisionListItemSchema, ApprovalDecisionProvenanceSchema, ApprovalDecisionScopeSchema, ApprovalDecisionUsabilitySchema, ApprovalSafeLabelsSchema, ApprovalDisclosureAckSchema, ApprovalDurableDecisionBindingSchema, ApprovalDurableDecisionSchema, ApprovalStoredDurableDecisionBindingSchema, ApprovalListParamsSchema, ApprovalListResultSchema, ApprovalPresentationSchema, ApprovalRespondStatusSchema, ApprovalRevokeParamsSchema, ApprovalRevokeResultSchema, ApprovalRevokeStatusSchema, CanonicalApprovalRequestSchema, CanonicalApprovalRespondParamsSchema, CanonicalApprovalRespondResultSchema, canonicalApprovalDecisionScope, canonicalApprovalDurableDecisionBinding, canonicalStoredApprovalDurableDecisionBinding,
+} from "./approval-api.ts";
 export type {
-  ApprovalRequest,
-  ApprovalRespondParams,
-  ApprovalRespondResult,
-  ApprovalScope,
-} from "./approval-schema.ts";
+  ApprovalChoice, ApprovalClosed, ApprovalClosedReason, ApprovalDecisionBinding, ApprovalDecisionListItem, ApprovalDecisionProvenance, ApprovalDecisionScope, ApprovalDecisionUsability, ApprovalSafeLabels, ApprovalDisclosureAck, ApprovalDurableDecision, ApprovalDurableDecisionBinding, ApprovalListParams, ApprovalListResult, ApprovalStoredDurableDecisionBinding, ApprovalPresentation, ApprovalRevokeParams, ApprovalRevokeResult, CanonicalApprovalRequest, CanonicalApprovalRespondParams, CanonicalApprovalRespondResult,
+} from "./approval-api.ts";
+export { LegacyApprovalRequestSchema, LegacyApprovalRespondParamsSchema, LegacyApprovalRespondResultSchema, LegacyApprovalScopeSchema } from "./legacy-approval-schema.ts";
+export type { LegacyApprovalRequest, LegacyApprovalRespondParams, LegacyApprovalRespondResult, LegacyApprovalScope } from "./legacy-approval-schema.ts";
 
 export {
-  PERMISSION_METHODS,
-  PermissionCellKeySchema,
-  PermissionCellSetParamsSchema,
-  PermissionCellSetResultSchema,
-  PermissionCellsStateSchema,
-  PermissionCellStateSchema,
-  PermissionLevelSchema,
-  PermissionLevelStateSchema,
-  PermissionPostureSchema,
-} from "./permission-level-schema.ts";
+  CANONICAL_GOVERNANCE_REGISTRY, CanonicalCapabilityIdentitySchema, CanonicalCapabilitySubjectSchema, CapabilityGovernanceDescriptorSchema,
+  GOVERNANCE_REGISTRY_REVISION, GovernanceApprovalMemorySchema, GovernanceCellDescriptorSchema, GovernanceClassifierAuthoritySchema,
+  GovernanceEvaluationInputSchema, GovernanceEvaluationReasonSchema, GovernanceEvaluationResultSchema, GovernanceExecutionCodeSchema, GovernanceOverrideModeSchema,
+  GovernanceOverrideSchema, GovernanceRegistrySchema, GovernanceRevisionSchema, GovernanceStableIdSchema,
+  LegacyPermissionCellKeySchema, LegacyPermissionCellSetParamsSchema,
+  LegacyPermissionCellStateSchema, LegacyPermissionLevelStateSchema, PERMISSION_METHODS,
+  PermissionCellKeySchema, PermissionDecisionKeySchema, PermissionCellsGetParamsSchema,
+  PermissionCellSetParamsSchema, PermissionCellSetResultSchema, PermissionCellsStateSchema,
+  PermissionCellStateSchema, PermissionLevelGetParamsSchema, PermissionLevelSchema,
+  PermissionLevelSetParamsSchema, PermissionLevelStateSchema, PermissionPostureSchema,
+  createGovernanceRegistry, evaluateGovernance, governanceCell, governanceDescriptor,
+} from "./governance-api.ts";
 export type {
-  PermissionCellKey,
-  PermissionCellSetParams,
-  PermissionCellSetResult,
-  PermissionCellsState,
-  PermissionCellState,
-  PermissionLevel,
-  PermissionLevelState,
-  PermissionPosture,
-} from "./permission-level-schema.ts";
+  CanonicalCapabilityIdentity, CanonicalCapabilitySubject, CapabilityGovernanceDescriptor,
+  GovernanceCellDescriptor, GovernanceEvaluationInput, GovernanceEvaluationResult, GovernanceExecutionCode,
+  GovernanceOverride, GovernanceRegistry, LegacyPermissionCellSetParams,
+  LegacyPermissionCellState, LegacyPermissionLevelState, PermissionCellKey, PermissionDecisionKey,
+  PermissionCellsGetParams, PermissionCellSetParams, PermissionCellSetResult, PermissionCellsState,
+  PermissionCellState, PermissionLevelGetParams, PermissionLevel, PermissionLevelSetParams,
+  PermissionLevelState, PermissionPosture,
+} from "./governance-api.ts";
 
 export {
   PERCEPTION_METHODS,
@@ -285,32 +296,18 @@ export {
   CapabilityRespondResultSchema,
 } from "./capability-schema.ts";
 export type {
-  CapabilityError,
-  CapabilityErrorCode,
-  CapabilityRequest,
-  CapabilityRespondParams,
-  CapabilityRespondResult,
+  CapabilityError, CapabilityErrorCode, CapabilityRequest,
+  CapabilityRespondParams, CapabilityRespondResult,
 } from "./capability-schema.ts";
 
 export {
-  ClipboardReadOutputSchema,
-  ClipboardWriteOutputSchema,
-  ExecOutputSchema,
-  ForegroundWindowOutputSchema,
-  ProcessInfoSchema,
-  ProcessListOutputSchema,
-  ScreenshotOutputSchema,
-  ShellOpenOutputSchema,
+  ClipboardReadOutputSchema, ClipboardWriteOutputSchema, ExecOutputSchema,
+  ForegroundWindowOutputSchema, ProcessInfoSchema, ProcessListOutputSchema,
+  ScreenshotOutputSchema, ShellOpenOutputSchema,
 } from "./capability-outputs.ts";
 export type {
-  ClipboardReadOutput,
-  ClipboardWriteOutput,
-  ExecOutput,
-  ForegroundWindowOutput,
-  ProcessInfo,
-  ProcessListOutput,
-  ScreenshotOutput,
-  ShellOpenOutput,
+  ClipboardReadOutput, ClipboardWriteOutput, ExecOutput, ForegroundWindowOutput,
+  ProcessInfo, ProcessListOutput, ScreenshotOutput, ShellOpenOutput,
 } from "./capability-outputs.ts";
 
 export { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "./ws-defaults.ts";

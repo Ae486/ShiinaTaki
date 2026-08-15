@@ -1,9 +1,15 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { JSONRPCErrorException } from "json-rpc-2.0";
-import { ConnectResultSchema, type ConnectParams, type Role } from "@taki/shared";
+import {
+  HOST_CATALOG_SCHEMA_VERSION,
+  HOST_CONTROL_PROTOCOL_VERSION,
+  ConnectResultSchema,
+  type ConnectParams,
+  type Role,
+} from "@taki/shared";
 import { createDeviceRegistry, type DeviceRegistry } from "../../devices/device-registry.ts";
 import { createPairedDeviceStore } from "../../devices/paired-device-store.ts";
 import { createConnectionRegistry, type Connection, type ConnectionRegistry } from "../connection-registry.ts";
@@ -59,6 +65,7 @@ interface ConnectInput {
   capabilities?: string[];
   token?: string;
   pairingCode?: string;
+  host?: ConnectParams["host"];
 }
 
 interface Attempt {
@@ -79,6 +86,12 @@ function callConnect(h: Harness, input: ConnectInput, remoteAddress: string | un
     capabilities: input.capabilities ?? [],
     token: input.token,
     pairingCode: input.pairingCode,
+    host: input.host ?? (input.role === "node"
+      ? {
+          protocol: { min: HOST_CONTROL_PROTOCOL_VERSION, max: HOST_CONTROL_PROTOCOL_VERSION },
+          catalogSchemaVersions: [HOST_CATALOG_SCHEMA_VERSION],
+        }
+      : undefined),
   };
   try {
     return { result: h.def.handler(params, ctx), error: undefined, connection, closed };
@@ -168,6 +181,25 @@ describe("connect loopback auto-trust (P3)", () => {
 });
 
 describe("connect existing credential paths (regression — unchanged by auto-trust)", () => {
+  it("rejects unsupported Host negotiation before pairing can persist a credential", () => {
+    const h = boot(false);
+    callConnect(h, { deviceId: NODE_ID, role: "node" }, "127.0.0.1");
+    const code = h.codes.at(-1)?.code ?? "";
+    const attempt = callConnect(h, {
+      deviceId: NODE_ID,
+      role: "node",
+      pairingCode: code,
+      host: {
+        protocol: { min: HOST_CONTROL_PROTOCOL_VERSION + 1, max: HOST_CONTROL_PROTOCOL_VERSION + 1 },
+        catalogSchemaVersions: [HOST_CATALOG_SCHEMA_VERSION],
+      },
+    }, "127.0.0.1");
+
+    expect(appErrorCode(attempt.error)).toBe("AUTH_FAILED");
+    expect(attempt.connection.state.status).toBe("awaiting");
+    expect(existsSync(h.path)).toBe(false);
+  });
+
   it("a presented WRONG token fails closed with AUTH_FAILED — never auto-trusted despite loopback+flag", () => {
     const h = boot(true);
     const attempt = callConnect(h, { deviceId: OPERATOR_ID, role: "operator", token: "not-the-real-token" }, "127.0.0.1");

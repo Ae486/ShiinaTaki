@@ -5,7 +5,7 @@
   "description": "Productize the existing Skills and MCP foundations end to end across Core lifecycle, unified governance, secure credentials, Home operator UX, and verification.",
   "status": "planning",
   "dev_type": null,
-  "scope": null,
+  "scope": "full-stack-extension-productization",
   "package": null,
   "priority": "P1",
   "creator": "pleia",
@@ -18,9 +18,18 @@
   "commit": null,
   "pr_url": null,
   "subtasks": [],
-  "children": [],
+  "children": [
+    "08-12-authority-credential-design",
+    "08-12-host-control-foundation",
+    "08-12-governance-authority",
+    "08-12-approval-productization",
+    "08-12-host-secret-catalog",
+    "08-12-secure-mcp-lifecycle",
+    "08-12-standard-skill-lifecycle",
+    "08-12-extension-discovery-integration"
+  ],
   "parent": null,
   "relatedFiles": [],
-  "notes": "Dedicated T4 worktree prepared from checkpoint 3d8a320. Keep this task in planning until the host-control wire schema, MCP reload generation boundary, child slices, and implement/check context are frozen.",
+  "notes": "Dedicated T4 worktree prepared from checkpoint 3d8a320. The owner approved the eight-slice program. Host-control and Governance Authority are committed, formally checked, and retained in review; Approval Productization is the active child. Its Batch A foundation is verified. Remaining Approval work is consolidated into an interactive B+D wave and a Host/convergence C+E wave, followed by one final formal check for the complete Slice. Apply the same proportional rule to later children: simple slices should complete in one implementation pass, while complex slices may use internal waves but only one final formal check. Keep this parent in planning until all extension slices converge. Do not push, reset, rebase, force, finish/archive, or claim manual acceptance without owner authorization.",
   "meta": {}
 }

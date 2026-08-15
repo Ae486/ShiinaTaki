@@ -39,6 +39,20 @@ client, buffers offline commands, or replays mutations. Connected status is publ
 restoration. The complete lifecycle, deadline, timing-policy, timeline-reconciliation, and readiness contract lives in
 [`operator-connection-recovery.md`](./operator-connection-recovery.md).
 
+### Settings permission governance
+
+- The Settings page renders Core permission governance before generic config knobs: one `strict | standard | relaxed`
+  selector plus a collapsed advanced cell list grouped by Core-returned `capabilityId`.
+- `use-permissions.ts` is the only permission WS seam. It parses Shared schemas, reads fresh state for each authenticated
+  Home client generation, and delegates async race handling to the framework-free permission controller.
+- Permission state is window memory only. It has no cache key, persisted allow-list entry, Zustand persistence, or
+  `localStorage` write. Home is a disposable operator view, not a policy replica.
+- Only one permission mutation may be active. Late reads/mutations from a retired client are ignored; a conflict
+  refetches; timeout/reconnect never replays a write.
+- The UI renders Core facts only: factory/override/effective posture, override mode, generation, reset, second-confirm,
+  immutable, loading/reconnecting/read/validation/saved/conflict states. It may disclose that Hosts can tighten, but it
+  must not invent a per-row Host constraint not present in the Core response.
+
 ## Cross-window commands (the pet owns the scene, the pages own the surface)
 
 A page that needs something only the pet window can do COMMANDS it and does not reach into it:

@@ -4,6 +4,7 @@
  * POS:    shared/protocol — the ONLY pre-auth handshake contract (ADR 0004); identity is deviceId, never host/IP
  */
 import { z } from "zod";
+import { HostDeclarationSchema, HostNegotiationSchema } from "./host-control-schema.ts";
 
 export const CONNECT_METHOD = "connect";
 
@@ -18,11 +19,20 @@ export const ConnectParamsSchema = z
     capabilities: z.array(z.string()).default([]),
     token: z.string().optional(),
     pairingCode: z.string().optional(),
+    host: HostDeclarationSchema.optional(),
   })
   // Operators converse/configure; they never provide capabilities (topology invariant, ADR 0004).
   .refine((params) => params.role !== "operator" || params.capabilities.length === 0, {
     message: "operators must not declare capabilities",
     path: ["capabilities"],
+  })
+  .refine((params) => params.role !== "operator" || params.host === undefined, {
+    message: "operators must not declare an execution host",
+    path: ["host"],
+  })
+  .refine((params) => params.role !== "node" || params.host !== undefined, {
+    message: "nodes must declare host protocol support",
+    path: ["host"],
   });
 export type ConnectParams = z.infer<typeof ConnectParamsSchema>;
 
@@ -30,5 +40,6 @@ export const ConnectResultSchema = z.object({
   status: z.literal("ok"),
   // Present once: in the result of a connect that just minted a token — via completed pairing OR loopback auto-trust (#16 P3).
   token: z.string().optional(),
+  host: HostNegotiationSchema.optional(),
 });
 export type ConnectResult = z.infer<typeof ConnectResultSchema>;

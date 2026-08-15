@@ -12,3 +12,12 @@ Consequence: provider coverage and loop semantics track AI SDK's release cadence
 ---
 
 **Amendment 2026-07-07**: at scaffolding time the current stable is AI SDK **7** (`ai@7.0.x` — tool approvals, durable workflows, provider-level skills). Being greenfield, we start directly on `^7`. The decision and rationale above are unchanged; API names referenced in docs (ToolLoopAgent etc.) must be verified against installed v7 types before coding.
+
+---
+
+**Amendment 2026-08-13 — framework approval is not policy authority:** AI SDK remains the agent loop and standard MCP
+integration, but its approval primitives do not define Taki's durable authorization model. Every Core, MCP,
+Skill-mediated, and Host action first resolves the shared canonical identity/descriptor and Core policy. Slice 3
+deliberately returns `APPROVAL_REQUIRED` without execution for `ask`; Slice 4 will bridge the one Core-owned Approval
+lifecycle to the loop. This avoids an AI-SDK-only approval lane beside Host or operator policy while preserving raw
+MCP tool names and SDK execution closures.

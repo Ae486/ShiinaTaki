@@ -8,9 +8,12 @@ import { expect } from "vitest";
 import { WebSocket } from "ws";
 import {
   CONNECT_METHOD,
+  HOST_CATALOG_SCHEMA_VERSION,
+  HOST_CONTROL_PROTOCOL_VERSION,
   JSON_RPC_APP_ERROR,
   JsonRpcErrorResponseSchema,
   JsonRpcNotificationSchema,
+  type Role,
 } from "@taki/shared";
 
 export interface TestClient {
@@ -61,8 +64,18 @@ export async function openClient(url: string): Promise<TestClient> {
   return makeClient(ws);
 }
 
-export function sendConnect(client: TestClient, params: Record<string, unknown>, id = "c1"): void {
-  client.send({ jsonrpc: "2.0", id, method: CONNECT_METHOD, params });
+export function sendConnect(
+  client: TestClient,
+  params: Record<string, unknown> & { role?: Role },
+  id = "c1",
+): void {
+  const host = params.role === "node"
+    ? {
+        protocol: { min: HOST_CONTROL_PROTOCOL_VERSION, max: HOST_CONTROL_PROTOCOL_VERSION },
+        catalogSchemaVersions: [HOST_CATALOG_SCHEMA_VERSION],
+      }
+    : undefined;
+  client.send({ jsonrpc: "2.0", id, method: CONNECT_METHOD, params: { host, ...params } });
 }
 
 /** Asserts the frame is an app-error envelope and returns its machine-readable ErrorCode. */

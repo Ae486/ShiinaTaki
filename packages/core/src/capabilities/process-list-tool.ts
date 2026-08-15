@@ -23,7 +23,7 @@ export function createProcessListTool(deps: ProcessListToolDeps): ToolSet {
       inputSchema: z.object({}),
       execute: async () => {
         try {
-          const routed = await routeCapability(deps, CAPABILITY, {});
+          const routed = await routeCapability(deps, { capabilityId: CAPABILITY, input: {} });
           if (!routed.ok) return routed;
           const output = ProcessListOutputSchema.parse(routed.output);
           log.info({ count: output.count }, "process list returned");

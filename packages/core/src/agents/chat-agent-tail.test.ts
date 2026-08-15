@@ -1,10 +1,14 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { COSTUME_CHANGE_NOTICE } from "../avatar/costume-notice.ts";
+import type { Connection } from "../server/connection-registry.ts";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
 import { abortRejectingModel, slowStreamingModel, streamingMockModel } from "../testing/mock-language-model.ts";
 import { createChatAgent, type TurnContext } from "./chat-agent.ts";
 
 const fixtures: CompanionFixture[] = [];
+const TEST_CONNECTION: Connection = {
+  state: { status: "authenticated", deviceId: "chat-agent-test", role: "operator", capabilities: [] },
+};
 function fresh(): CompanionFixture {
   const f = createCompanionFixture();
   fixtures.push(f);
@@ -148,6 +152,7 @@ describe("chat-agent turn-context tail (Q4)", () => {
       volatileContext: () => "VOLATILE_CARD",
     });
     const turn: TurnContext = {
+      connection: TEST_CONNECTION,
       notify: () => undefined,
       onClose: () => undefined,
       signal: controller.signal,
@@ -172,6 +177,7 @@ describe("chat-agent turn-context tail (Q4)", () => {
       volatileContext: () => "VOLATILE_CARD",
     });
     const turn: TurnContext = {
+      connection: TEST_CONNECTION,
       notify: () => undefined,
       onClose: () => undefined,
       signal: controller.signal,
@@ -202,7 +208,9 @@ describe("chat-agent turn-context tail (Q4)", () => {
       memory: f.memory,
       volatileContext: () => "VOLATILE_CARD",
     });
-    const turn: TurnContext = { notify: () => undefined, onClose: () => undefined, signal: controller.signal };
+    const turn: TurnContext = {
+      connection: TEST_CONNECTION, notify: () => undefined, onClose: () => undefined, signal: controller.signal,
+    };
 
     const deltas: string[] = [];
     for await (const delta of agent.stream({ characterId: "taki", message: "hi" }, turn)) {

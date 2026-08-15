@@ -1,8 +1,11 @@
 import { once } from "node:events";
+import { createHash } from "node:crypto";
 import { afterEach, describe, expect, it } from "vitest";
 import { WebSocketServer } from "ws";
 import {
   CHAT_METHODS,
+  APPROVAL_METHODS,
+  canonicalApprovalDecisionScope,
   ChatSendParamsSchema,
   JSON_RPC_APP_ERROR,
   JsonRpcRequestSchema,
@@ -126,6 +129,68 @@ describe("connectChatClient", () => {
     await expect(connectChatClient(server.url)).rejects.toThrow(/ECONNREFUSED/);
   });
 });
+
+describe("ChatClient Approval routing", () => {
+  it("routes request and closed notifications and sends an explicit response", async () => {
+    const received: unknown[] = [];
+    const seen: Array<{ method: string; params: unknown }> = [];
+    const client = await bootConnect(({ send, requestId, method, params }) => {
+      seen.push({ method, params });
+      const binding = approvalBinding();
+      send({
+        jsonrpc: "2.0",
+        method: APPROVAL_METHODS.request,
+        params: {
+          approvalId: "11111111-1111-4111-8111-111111111111",
+          expiresAt: new Date(Date.now() + 60_000).toISOString(),
+          policyGeneration: 3,
+          approvalGeneration: 4,
+          binding,
+          allowedChoices: ["allow_once", "deny"],
+          presentation: {
+            revision: 1,
+            title: "Run MCP tool",
+            capabilityLabel: "MCP tool",
+            riskSummary: "This tool can change external state.",
+            sections: [{ title: "Target", fields: [{ label: "Tool", value: "redacted-tool" }] }],
+          },
+        },
+      });
+      send({
+        jsonrpc: "2.0",
+        method: APPROVAL_METHODS.closed,
+        params: { approvalId: "11111111-1111-4111-8111-111111111111", reason: "cancelled", approvalGeneration: 4 },
+      });
+      send({ jsonrpc: "2.0", id: requestId, result: { status: "accepted", approvalGeneration: 4 } });
+    });
+    client.onApproval((event) => received.push(event));
+    const server = servers.at(-1);
+    expect(server).toBeDefined();
+    const result = await client.approvalRespond({
+      approvalId: "11111111-1111-4111-8111-111111111111",
+      choice: "allow_once",
+      expectedApprovalGeneration: 4,
+    });
+    expect(seen).toEqual([{ method: APPROVAL_METHODS.respond, params: expect.objectContaining({ choice: "allow_once" }) }]);
+    expect(result.status).toBe("accepted");
+    expect(received.map((event) => (event as { type: string }).type)).toEqual(["request", "closed"]);
+  });
+});
+
+function approvalBinding() {
+  const scope = {
+    bindingRevision: 1 as const,
+    identity: { capabilityId: "mcp.tool.call", ownerHostId: "33333333-3333-4333-8333-333333333333" },
+    descriptorRevision: 1,
+    classifierId: "mcp.tool.call.v1",
+    classifierRevision: 1,
+    cellKey: "mcp-tool-call",
+  };
+  return {
+    ...scope,
+    decisionScopeDigest: createHash("sha256").update(canonicalApprovalDecisionScope(scope)).digest("hex"),
+  };
+}
 
 interface ConnectApi {
   send: (frame: unknown) => void;

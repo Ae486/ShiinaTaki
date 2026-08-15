@@ -11,32 +11,30 @@ import { createConversationStore } from "./agents/conversation-store.ts";
 import { createTurnQueue } from "./agents/turn-queue.ts";
 import { createTurnRegistry } from "./agents/turn-registry.ts";
 import { createWindowCalibrator } from "./agents/window-calibrator.ts";
-import { createApprovalBroker } from "./approval/approval-broker.ts";
-import { createApprovalGate } from "./approval/approval-gate.ts";
-import { createDecisionStore } from "./approval/decision-store.ts";
 import { createAvatarSubscriptions } from "./avatar/avatar-subscriptions.ts";
 import { createAvatarTools } from "./avatar/avatar-tools.ts";
 import { createAvatarVocabulary } from "./avatar/avatar-vocabulary.ts";
 import { presentationTailStop } from "./avatar/presentation-stop.ts";
 import { createCapabilityBroker } from "./capabilities/capability-broker.ts";
-import { createClipboardReadTool } from "./capabilities/clipboard-read-tool.ts";
-import { createClipboardWriteTool } from "./capabilities/clipboard-write-tool.ts";
-import { createExecTool } from "./capabilities/exec-tool.ts";
-import { createProcessListTool } from "./capabilities/process-list-tool.ts";
+import { createCapabilityTools } from "./capabilities/capability-tools.ts";
 import { routeCapability } from "./capabilities/route-capability.ts";
 import { createScreenshotDescriber } from "./capabilities/screenshot-describe.ts";
-import { createScreenshotStore } from "./capabilities/screenshot-store.ts";
-import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
-import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
 import { bootstrapCore } from "./boot/core-bootstrap.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
+import { composeApprovalRuntime } from "./approval/approval-runtime.ts";
+import { createGovernancePolicyRepo } from "./governance/governance-policy-repo.ts";
+import { createGovernancePolicyService } from "./governance/governance-policy-service.ts";
 import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
 import { createSummaryRepo } from "./db/summary-repo.ts";
 import { createTimelineRepo } from "./db/timeline-repo.ts";
 import { createWindowStateRepo } from "./db/window-state-repo.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
 import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
+import { createHostCatalogStore } from "./hosts/host-catalog.ts";
+import { bindHostGenerationRetirement } from "./hosts/host-generation-retirement.ts";
+import { loadOrCreateHostIdentity } from "./hosts/host-identity.ts";
 import { loadMcpConfig } from "./mcp/mcp-config.ts";
+import { createLegacyMcpDenyReader } from "./mcp/legacy-mcp-deny.ts";
 import { createMcpManager } from "./mcp/mcp-manager.ts";
 import { createCharacterImporter } from "./characters/character-import.ts";
 import { createCharacterStore } from "./characters/character-store.ts";
@@ -48,11 +46,11 @@ import { createImageDescriptionWriter } from "./memory/image-description-writer.
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
 import { createConnectionRegistry } from "./server/connection-registry.ts";
 import { createMethodRegistry } from "./server/method-registry.ts";
-import { approvalRespondMethod } from "./server/methods/approval-respond.ts";
 import { avatarReportMethod } from "./server/methods/avatar-report.ts";
 import { avatarSubscribeMethod } from "./server/methods/avatar-subscribe.ts";
 import { chatCancelMethod } from "./server/methods/chat-cancel.ts";
 import { chatSendMethod } from "./server/methods/chat-send.ts";
+import { capabilityChallengeMethod } from "./server/methods/capability-challenge.ts";
 import { capabilityRespondMethod } from "./server/methods/capability-respond.ts";
 import { capabilityTriggerMethod, devTriggerEnabled } from "./server/methods/capability-trigger.ts";
 import { characterCostumeResolutionMethod } from "./server/methods/character-costume-resolution.ts";
@@ -61,6 +59,7 @@ import { characterImportMethod } from "./server/methods/character-import.ts";
 import { characterListMethod } from "./server/methods/character-list.ts";
 import { registerConfigMethods } from "./server/methods/config-methods.ts";
 import { connectMethod } from "./server/methods/connect.ts";
+import { hostCatalogPublishMethod } from "./server/methods/host-catalog-publish.ts";
 import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
 import { mediaUsageMethod } from "./server/methods/media-usage.ts";
@@ -84,6 +83,9 @@ import { createWriteFileTool } from "./workspace/write-file-tool.ts";
 // resolved as env > stored > built-in default — so a value the settings panel stored takes effect at THIS boot.
 const boot = bootstrapCore(process.env);
 const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
+const coreHostId = loadOrCreateHostIdentity(join(serverConfig.dataDir, "host-identity.json"));
+logger.info("Core Host identity loaded");
+const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
 const timelineRepo = createTimelineRepo(db);
 // R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
 // their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).
@@ -157,6 +159,9 @@ const deviceRegistry = createDeviceRegistry({
   store: createPairedDeviceStore(join(serverConfig.dataDir, "devices.json")),
 });
 const connectionRegistry = createConnectionRegistry();
+const hostCatalogs = createHostCatalogStore();
+const registry = createMethodRegistry();
+const { approval, coreToolGovernance } = composeApprovalRuntime({ db, governance, coreHostId, registry, connections: connectionRegistry, logger });
 
 // Skills (#9): discover SKILL.md folders, honor persisted enable/disable, expose the list + the load_skill tool.
 const skillsLog = logger.child({ mod: "skills" });
@@ -169,54 +174,57 @@ const skillsLoader = createSkillsLoader({
 });
 
 // MCP (#8): connect operator-configured servers at boot; a missing/malformed config or a failing server degrades
-// gracefully (never fatal — MCP is an extension). Their tools join the per-turn ToolSet behind the approval gate.
+// gracefully. Standard SDK closures are wrapped by canonical governance plus read-only legacy deny compatibility.
 const mcpLog = logger.child({ mod: "mcp" });
+const legacyMcpDeny = createLegacyMcpDenyReader({
+  filePath: join(serverConfig.dataDir, "mcp-approvals.json"),
+  logger,
+});
 const mcpManager = await createMcpManager({
   entries: loadMcpConfig(join(serverConfig.dataDir, "mcp-servers.json"), mcpLog),
   logger,
-});
-
-// Approval gate: MCP tool calls await the operator's decision over WS; always/never persist, session/once do not.
-const approvalBroker = createApprovalBroker({ logger });
-const approvalGate = createApprovalGate({
-  mcp: mcpManager,
-  broker: approvalBroker,
-  decisions: createDecisionStore({ filePath: join(serverConfig.dataDir, "mcp-approvals.json"), logger }),
+  governance: {
+    service: governance,
+    ownerHostId: coreHostId,
+    approval,
+    legacyDeny: (serverName, toolName) => legacyMcpDeny.denies(serverName, toolName),
+  },
 });
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
-// requests immediately (fail-closed); the 90s backstop covers a node that never answers. The Shell gate authorizes.
-const capabilityBroker = createCapabilityBroker({ logger });
-connectionRegistry.onRemove((connection) => {
-  if (connection.state.status === "authenticated" && connection.state.role === "node") {
-    capabilityBroker.denyAll("node disconnected");
-  }
-});
+// requests immediately (fail-closed); the 90s backstop covers a node that never answers. An ask-classified request
+// comes back as capability.challenge and the SAME canonical Approval service that governs Core/MCP tools owns the
+// operator prompt; the broker mints the single-use resume authorization after the operator answers.
+const capabilityBroker = createCapabilityBroker({ logger, approval });
+bindHostGenerationRetirement({ connections: connectionRegistry, catalogs: hostCatalogs, broker: capabilityBroker });
+registry.register(capabilityChallengeMethod(capabilityBroker, connectionRegistry));
 // Screenshot→VLM bridge: reuses the OPTIONAL vision slot; without it a result stays path+dims (no pixels to the text
 // model) and ambient sampling never starts. ONE bridge, shared by the on-demand tool and the ambient sampler.
 const describeScreenshot = visionModel ? createScreenshotDescriber({ model: visionModel, logger }).describe : undefined;
-const screenshotTool = createScreenshotTool({
+// The six Shell-routed capability tools as one factory (invariant 7): per-call construction binds the initiating
+// operator socket (the challenge prompt targets exactly that connection); the no-argument bag stays for unattended
+// turns. The chat agent's turnTools, the unattended fallback, and the dev trigger all reuse this exact factory.
+const capabilityTools = createCapabilityTools({
   registry: connectionRegistry,
+  catalogs: hostCatalogs,
   broker: capabilityBroker,
-  // The core is the single sanctioned Workspace writer (invariant 2); the Shell only returns base64 over the wire.
-  store: createScreenshotStore({ screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots") }),
-  describe: describeScreenshot,
   logger,
+  governance,
+  approval,
+  screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots"),
+  describe: describeScreenshot,
 });
-// The other Shell-backed capabilities (#11, and exec #12) share the route→broker path; each is gate-authorized on
-// the Shell, which parses, governs, spawns and audits.
-const shellCapabilityDeps = { registry: connectionRegistry, broker: capabilityBroker, logger };
 
-// The six Shell-routed capability tools as one bag (invariant 7): the chat agent's extraTools spreads it AND the
-// dev capability.trigger reuses these exact objects — never a second execute path to the same capabilities.
-const capabilityTools: ToolSet = {
-  ...screenshotTool,
-  ...createProcessListTool(shellCapabilityDeps),
-  ...createClipboardReadTool(shellCapabilityDeps),
-  ...createClipboardWriteTool(shellCapabilityDeps),
-  ...createShellOpenTool(shellCapabilityDeps),
-  ...createExecTool(shellCapabilityDeps),
+// Ambient/system-initiated routing carries NO operator by design: an unattended ask fails closed at the broker
+// with a truthful reason instead of prompting (the perception layer never owns an Approval dialog).
+const ambientCapabilityDeps = {
+  registry: connectionRegistry,
+  catalogs: hostCatalogs,
+  broker: capabilityBroker,
+  logger,
+  governance,
+  approval,
 };
 
 // Perception (#19 T3a + #20 T3b): SYSTEM-initiated polls of the foreground window (always-on, low sensitivity) and of
@@ -225,8 +233,8 @@ const capabilityTools: ToolSet = {
 // sensitive-process skip + the PII scrub — that gate every ambient sampler. On-demand chat captures stay ungated
 // (explicit consent through the Gate); the pause/skip/retention operator surfaces land with the settings panel (#26).
 const perception = createPerceptionLayer({
-  route: (capability, input) => routeCapability(shellCapabilityDeps, capability, input),
-  hasNode: (capability) => connectionRegistry.findNodeForCapability(capability) !== undefined,
+  route: (capability, input) => routeCapability(ambientCapabilityDeps, { capabilityId: capability, input }),
+  hasNode: (capability) => hostCatalogs.hostsForCapability(capability).length > 0,
   describe: describeScreenshot,
   ambient: boot.ambientConfig,
   ambientShotsDir: join(serverConfig.dataDir, "workspace", "ambient-screenshots"),
@@ -242,8 +250,8 @@ perception.start();
 const workspacePaths = createWorkspacePaths({ root: join(serverConfig.dataDir, "workspace") });
 const readFileTool = createReadFileTool({ paths: workspacePaths, logger });
 const writeFileTool = createWriteFileTool({ paths: workspacePaths, logger });
+const staticCoreTools: ToolSet = { ...createCurrentTimeTool(), ...readFileTool, ...writeFileTool };
 
-const registry = createMethodRegistry();
 // Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
 const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry() };
 // The pairing code is the one sanctioned secret-ish value in a log: short-lived, single-purpose,
@@ -281,16 +289,21 @@ registry.register(
       imageMemory: imageDescriptionWriter
         ? { onImageTurn: (input) => void imageDescriptionWriter.onImageTurn(input) }
         : undefined,
-      // Extra tools = the skills meta-tool + every capability tool (Shell-gated + core-side Workspace files) + MCP tools
-      // + the pure get_current_time tool (no Gate/broker — reads new Date(); the precision pull for the ambient time lines).
+      // Adapter-governed tools stay outside the Core adapter: Skill and MCP carry canonical subject sidecars, while
+      // Shell capabilities retain Host governance until Batch 2 installs the Core projection.
       extraTools: {
-        ...createLoadSkillTool(skillsLoader),
-        ...createCurrentTimeTool(),
-        ...capabilityTools,
-        ...readFileTool,
-        ...writeFileTool,
-        ...mcpManager.tools(),
+        ...createLoadSkillTool(skillsLoader, { service: governance, ownerHostId: coreHostId }),
+        ...capabilityTools(),
       },
+      // Per-turn bag: the capability tools bind the initiating operator socket (challenge ownership) and the MCP
+      // closures bind the same connection + abort signal — one interactive authority source for the whole turn.
+      turnTools: (turn) => ({
+        ...capabilityTools({ connection: turn.connection, signal: turn.signal }),
+        ...mcpManager.tools({ connection: turn.connection, signal: turn.signal }),
+      }),
+      // Stable Core-local tools join per-turn memory/avatar tools behind the explicit Core binding table.
+      coreTools: staticCoreTools,
+      coreToolGovernance,
       // Per-character avatar tools bind their publish target (the turn's characterId) here — same lifetime as memory tools.
       // vocab makes `name` a dynamic enum of the worn costume's live names (1e), so a costume swap rejects stale names.
       characterTools: (characterId) =>
@@ -307,7 +320,6 @@ registry.register(
       // assembler; only the sanctioned entry point moved from the instructions to the tail.
       volatileContext: (now) => perception.renderContext(now),
       costumeChanged: (characterId) => avatarVocabulary.consumeCostumeChanged(characterId),
-      approval: approvalGate,
       // Batch-6 usage seam: each committed turn's real usage calibrates the main slot's window (the calibrator
       // ignores the 0 that stands in for an absent inputTokens field).
       onUsage: (report) => windowCalibrator.onUsage(report.inputTokens ?? 0, report.estimatedInput),
@@ -324,8 +336,8 @@ registry.register(
   ),
 );
 registry.register(chatCancelMethod(turnControls.turns));
-registry.register(approvalRespondMethod(approvalBroker));
-registry.register(capabilityRespondMethod(capabilityBroker));
+registry.register(hostCatalogPublishMethod(hostCatalogs, connectionRegistry));
+registry.register(capabilityRespondMethod(capabilityBroker, connectionRegistry));
 registry.register(timelineHistoryMethod(timelineRepo));
 registry.register(timelineSubscribeMethod(timelineSubscriptions));
 registry.register(avatarSubscribeMethod(avatarSubscriptions));
@@ -366,7 +378,13 @@ startAttachmentGc({ store: attachmentStore, ttlMs: boot.attachmentConfig.ttlMs, 
 if (devTriggerEnabled(process.env)) {
   logger.warn("TAKI_DEV_TRIGGER=1 — registering the DEV capability.trigger method (L1 drive; node-side gate still authorizes)");
   registry.register(
-    capabilityTriggerMethod({ tools: { ...capabilityTools, ...readFileTool, ...writeFileTool }, logger }),
+    capabilityTriggerMethod({
+      tools: (interactive) => ({
+        ...capabilityTools(interactive),
+        ...coreToolGovernance.wrap({ ...readFileTool, ...writeFileTool }, interactive),
+      }),
+      logger,
+    }),
   );
 }
 

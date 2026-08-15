@@ -2,7 +2,7 @@
 The home window's chat page (#17, migrated out of the retired standalone chat window): the depth view of the same
 per-character timeline the bubble glances at. Markdown text, tool cards, image thumbnails; streaming replies; image
 attachments. One continuous timeline, NO session list.
-- chat-page.tsx — page root: own WS connection + layout (character header + status banner + timeline + composer); provides the client via context
+- chat-page.tsx — page root: own WS connection + layout + that socket's single Approval modal owner; provides the client via context
 - chat-client-context.ts — React context exposing the WsClient to deep image parts (no prop-drilling)
 - use-chat-connection.ts — the page's independent fresh-generation owner; authentication plus timeline restoration completes before connected
 - restore-chat-timeline.ts — guarded handlers → subscribe → authoritative newest-page reconciliation; removes stale covered cache rows without dropping older pages or raced live rows

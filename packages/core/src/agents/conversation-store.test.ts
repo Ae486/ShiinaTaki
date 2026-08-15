@@ -139,6 +139,29 @@ describe("createConversationStore", () => {
     ]);
   });
 
+  it("keeps raw tool arguments out of committed rows, SQLite, and reconstructed history", () => {
+    const sentinel = "SENTINEL_SQLITE_TOOL_SECRET_4c27";
+    const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+    dbs.push(db);
+    const emitted: TimelineEntry[] = [];
+    const store = createConversationStore({ repo: createTimelineRepo(db), onAppend: (entry) => emitted.push(entry) });
+
+    store.appendTurn("taki", [{
+      role: "assistant",
+      content: [{ type: "tool-call", toolCallId: "secret-call", toolName: "exec", input: { command: sentinel } }],
+    }]);
+
+    const persisted = db.prepare("SELECT parts FROM timeline_messages WHERE character_id = :characterId")
+      .get({ characterId: "taki" });
+    expect(JSON.stringify(emitted)).not.toContain(sentinel);
+    expect(String(persisted?.parts)).not.toContain(sentinel);
+    expect(JSON.stringify(store.history("taki"))).not.toContain(sentinel);
+    expect(store.history("taki")).toEqual([{
+      role: "assistant",
+      content: [{ type: "tool-call", toolCallId: "secret-call", toolName: "exec", input: {} }],
+    }]);
+  });
+
   it("drops leading orphan tool rows from history (window cut must not start replay with a tool message)", () => {
     const store = makeStore();
     // Simulates the replay window slicing mid-turn: the tool row's assistant tool-call fell outside the window.

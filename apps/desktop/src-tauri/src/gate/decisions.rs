@@ -1,6 +1,6 @@
 //! INPUT:  a capability + an approver Scope/allow; a gate-decisions.json path (Shell-owned app_data_dir)
-//! OUTPUT: DecisionStore { get, remember (pub(super) — gate-tree-only writer) } — persisted always/never + in-memory session decisions
-//! POS:    shell/gate — decision memory (D7); deny+always == never; corrupt file -> warn + empty; NO tauri:: types
+//! OUTPUT: read-only exact legacy Never lookup for production plus dormant pre-Slice-3 writer helpers used only by tests
+//! POS:    shell/gate — Slice-3 compatibility input; production ws_client never prompts or writes this legacy store
 
 use std::collections::HashMap;
 use std::fs;
@@ -22,6 +22,7 @@ pub enum Remembered {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct PersistedDecision {
     capability: String,
     decision: Remembered,
@@ -30,6 +31,7 @@ struct PersistedDecision {
 }
 
 #[derive(Serialize, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
 struct DecisionFile {
     decisions: Vec<PersistedDecision>,
 }
@@ -39,17 +41,19 @@ pub struct DecisionStore {
     path: PathBuf,
     persisted: Mutex<HashMap<String, Remembered>>,
     session: Mutex<HashMap<String, Remembered>>,
+    legacy_closed: bool,
 }
 
 impl DecisionStore {
     /// Loads persisted verdicts; a missing file is empty and a corrupt one is a WARNING + empty (re-askable, D7).
     pub fn load(path: PathBuf) -> Self {
-        let persisted = load_persisted(&path);
-        Self { path, persisted: Mutex::new(persisted), session: Mutex::new(HashMap::new()) }
+        let (persisted, legacy_closed) = load_persisted(&path);
+        Self { path, persisted: Mutex::new(persisted), session: Mutex::new(HashMap::new()), legacy_closed }
     }
 
     /// A remembered verdict for this capability (persisted first, then session), or None -> ask.
     pub fn get(&self, capability: &str) -> Option<Remembered> {
+        if self.legacy_closed { return Some(Remembered::Never); }
         if let Some(remembered) = self.persisted.lock().unwrap().get(capability).copied() {
             return Some(remembered);
         }
@@ -92,20 +96,30 @@ impl DecisionStore {
 }
 
 // Approvals are re-askable, not auth state: a missing file is empty, a corrupt file is a warning + empty.
-fn load_persisted(path: &PathBuf) -> HashMap<String, Remembered> {
+fn load_persisted(path: &PathBuf) -> (HashMap<String, Remembered>, bool) {
     let raw = match fs::read_to_string(path) {
         Ok(raw) => raw,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return HashMap::new(),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return (HashMap::new(), false),
         Err(error) => {
             tracing::warn!(error = %error, "gate decisions unreadable; starting empty");
-            return HashMap::new();
+            return (HashMap::new(), true);
         }
     };
     match serde_json::from_str::<DecisionFile>(&raw) {
-        Ok(file) => file.decisions.into_iter().map(|entry| (entry.capability, entry.decision)).collect(),
+        Ok(file) => {
+            let mut result = HashMap::new();
+            for entry in file.decisions {
+                if result.contains_key(&entry.capability) {
+                    tracing::warn!(code = "LEGACY_SHELL_DECISIONS_AMBIGUOUS", "legacy Shell decisions ambiguous; affected Host fails closed");
+                    return (HashMap::new(), true);
+                }
+                result.insert(entry.capability, entry.decision);
+            }
+            (result, false)
+        },
         Err(_) => {
             tracing::warn!("gate decisions file is malformed; starting empty");
-            HashMap::new()
+            (HashMap::new(), true)
         }
     }
 }
@@ -164,11 +178,11 @@ mod tests {
     }
 
     #[test]
-    fn corrupt_file_warns_and_starts_empty() {
+    fn corrupt_file_fails_closed() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("gate-decisions.json");
         fs::write(&path, b"{ not valid json").unwrap();
         let store = DecisionStore::load(path);
-        assert_eq!(store.get("screenshot"), None);
+        assert_eq!(store.get("screenshot"), Some(Remembered::Never));
     }
 }

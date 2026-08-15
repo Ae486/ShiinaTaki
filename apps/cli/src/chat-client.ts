@@ -1,6 +1,6 @@
 /**
- * INPUT:  a WS URL; inbound JSON-RPC frames (ack + chat.* notifications)
- * OUTPUT: connectChatClient(url) -> ChatClient: connect()/chat()/history()/call()/close over one WS
+ * INPUT:  a WS URL; inbound JSON-RPC frames (acks, chat stream, canonical Approval request/closed pushes)
+ * OUTPUT: connectChatClient(url) -> ChatClient with chat/read/call plus targeted Approval response/event methods
  * POS:    cli — the transport client; @taki/shared-typed, zod-validates inbound frames; never imports @taki/core
  */
 import { once } from "node:events";
@@ -10,7 +10,9 @@ import {
   APPROVAL_METHODS,
   CHAT_METHODS,
   CONNECT_METHOD,
-  ApprovalRequestSchema,
+  ApprovalClosedSchema,
+  CanonicalApprovalRequestSchema,
+  CanonicalApprovalRespondResultSchema,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
@@ -19,8 +21,10 @@ import {
   JsonRpcClientFrameSchema,
   TIMELINE_METHODS,
   TimelineHistoryResultSchema,
-  type ApprovalRequest,
-  type ApprovalScope,
+  type ApprovalClosed,
+  type CanonicalApprovalRequest,
+  type CanonicalApprovalRespondParams,
+  type CanonicalApprovalRespondResult,
   type ChatSendParams,
   type ConnectParams,
   type ErrorCode,
@@ -36,8 +40,9 @@ export interface ChatHandlers {
 }
 
 /** The operator's answer to an MCP tool-approval ask (mirrors approval-prompt's ApprovalAnswer). */
-export type ApprovalDecision = { approved: boolean; scope: ApprovalScope };
-export type ApprovalRequestHandler = (request: ApprovalRequest) => Promise<ApprovalDecision>;
+export type ApprovalPushEvent =
+  | { type: "request"; request: CanonicalApprovalRequest }
+  | { type: "closed"; closed: ApprovalClosed };
 
 /** The connect handshake outcome: authenticated (ok, token present only right after pairing) or refused. */
 export type ConnectOutcome =
@@ -53,8 +58,12 @@ export interface ChatClient {
   history(params: TimelineHistoryParams): Promise<TimelineHistoryResult>;
   /** Invokes any server method by name (operator tooling); the server registry gates roles and validates params. */
   call(method: string, params: unknown): Promise<unknown>;
-  /** Registers the handler asked to approve/deny each MCP tool call the agent proposes mid-turn. */
-  onApprovalRequest(handler: ApprovalRequestHandler): void;
+  /** Sends one canonical Approval response; the caller owns explicit disclosure UX. */
+  approvalRespond(params: CanonicalApprovalRespondParams): Promise<CanonicalApprovalRespondResult>;
+  /** Registers the socket-targeted Approval request/closed stream. */
+  onApproval(handler: (event: ApprovalPushEvent) => void): () => void;
+  /** Registers a close callback; consumers guard it against retired generations. */
+  onClose(handler: () => void): void;
   close(): void;
 }
 
@@ -93,25 +102,29 @@ function installChatRoutes(rpc: JSONRPCServerAndClient, state: TurnState): void 
   });
 }
 
-/** A mutable slot for the approval handler so the route can be registered once at construction, set later. */
 interface ApprovalSlot {
-  handler: ApprovalRequestHandler | null;
+  handlers: Set<(event: ApprovalPushEvent) => void>;
 }
 
-// approval.request arrives as a server notification mid-turn; answer with a normal approval.respond request
-// (operator role). No handler registered -> fail-closed deny-once, so the agent's turn never hangs.
 function installApprovalRoute(rpc: JSONRPCServerAndClient, slot: ApprovalSlot): void {
-  rpc.addMethod(APPROVAL_METHODS.request, async (params: unknown) => {
-    const request = ApprovalRequestSchema.parse(params);
-    const decision: ApprovalDecision = slot.handler
-      ? await slot.handler(request)
-      : { approved: false, scope: "once" };
-    await rpc.request(APPROVAL_METHODS.respond, {
-      approvalId: request.approvalId,
-      approved: decision.approved,
-      scope: decision.scope,
-    });
+  rpc.addMethod(APPROVAL_METHODS.request, (params: unknown) => {
+    const request = CanonicalApprovalRequestSchema.parse(params);
+    notifyApprovalHandlers(slot, { type: "request", request });
   });
+  rpc.addMethod(APPROVAL_METHODS.closed, (params: unknown) => {
+    const closed = ApprovalClosedSchema.parse(params);
+    notifyApprovalHandlers(slot, { type: "closed", closed });
+  });
+}
+
+function notifyApprovalHandlers(slot: ApprovalSlot, event: ApprovalPushEvent): void {
+  for (const handler of [...slot.handlers]) {
+    try {
+      handler(event);
+    } catch {
+      process.stderr.write("[approval] ignored a failed local handler\n");
+    }
+  }
 }
 
 /** null = not a valid client frame; the caller surfaces it (never a silent swallow). */
@@ -155,8 +168,9 @@ export async function connectChatClient(url: string): Promise<ChatClient> {
 
   const state: TurnState = { current: null };
   installChatRoutes(rpc, state);
-  const approvalSlot: ApprovalSlot = { handler: null };
+  const approvalSlot: ApprovalSlot = { handlers: new Set() };
   installApprovalRoute(rpc, approvalSlot);
+  const closeHandlers = new Set<() => void>();
 
   ws.on("message", (data) => {
     const frame = parseClientFrame(data.toString());
@@ -166,7 +180,10 @@ export async function connectChatClient(url: string): Promise<ChatClient> {
     }
     void rpc.receiveAndSend(frame);
   });
-  ws.on("close", () => rpc.rejectAllPendingRequests("connection closed"));
+  ws.on("close", () => {
+    rpc.rejectAllPendingRequests("connection closed");
+    for (const handler of [...closeHandlers]) handler();
+  });
 
   await once(ws, "open");
 
@@ -188,9 +205,12 @@ export async function connectChatClient(url: string): Promise<ChatClient> {
     // Deliberately unvalidated and unfiltered: the generic operator surface forwards the raw result so a new
     // server method works here the day it ships (the caller decides what to do with the shape).
     call: async (method, params) => rpc.request(method, params),
-    onApprovalRequest: (handler) => {
-      approvalSlot.handler = handler;
+    approvalRespond: async (params) => CanonicalApprovalRespondResultSchema.parse(await rpc.request(APPROVAL_METHODS.respond, params)),
+    onApproval: (handler) => {
+      approvalSlot.handlers.add(handler);
+      return () => approvalSlot.handlers.delete(handler);
     },
+    onClose: (handler) => { closeHandlers.add(handler); },
     close: () => ws.close(),
   };
 }

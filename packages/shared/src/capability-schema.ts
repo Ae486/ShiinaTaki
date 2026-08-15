@@ -1,45 +1,45 @@
 /**
- * INPUT:  candidate capability.request notification params + capability.respond request params/results
- * OUTPUT: CAPABILITY_METHODS + CapabilityRequest/Respond/Output/error schemas (+types)
- * POS:    shared/protocol — the core↔node capability channel contract (M3); mirrored in Rust via serde (invariant 3)
+ * INPUT:  Host-bound capability request/cancel/respond frames and RPC acknowledgement candidates
+ * OUTPUT: CAPABILITY_METHODS plus re-exported canonical Host-control capability schemas and types
+ * POS:    shared/protocol — compatibility entry for the core↔Node capability channel; canonical shapes live in host-control-schema
  */
-import { z } from "zod";
+import { HOST_CONTROL_METHODS } from "./host-control-schema.ts";
 
 export const CAPABILITY_METHODS = {
-  // Core -> node as a notification (no id; correlated by requestId, mirror of approval.request).
-  request: "capability.request",
-  // Node -> core as a normal request (node-role method), settling the pending request by requestId.
-  respond: "capability.respond",
+  request: HOST_CONTROL_METHODS.request,
+  cancel: HOST_CONTROL_METHODS.cancel,
+  respond: HOST_CONTROL_METHODS.respond,
 } as const;
 
-// capability is an open string (new capabilities are new modules, invariant 7); input is per-capability args.
-// strictObject so a notification carrying an unexpected key is rejected in lockstep with the serde deny_unknown_fields mirror.
-export const CapabilityRequestSchema = z.strictObject({
-  requestId: z.uuid(),
-  capability: z.string().min(1),
-  input: z.unknown(),
-});
-export type CapabilityRequest = z.infer<typeof CapabilityRequestSchema>;
-
-// Closed wire error union shared with the Rust node: a denial, a failed execution, or an unknown capability.
-export const CapabilityErrorCodeSchema = z.enum(["DENIED", "EXEC_FAILED", "UNSUPPORTED_CAPABILITY"]);
-export type CapabilityErrorCode = z.infer<typeof CapabilityErrorCodeSchema>;
-
-export const CapabilityErrorSchema = z.strictObject({
-  code: CapabilityErrorCodeSchema,
-  message: z.string(),
-});
-export type CapabilityError = z.infer<typeof CapabilityErrorSchema>;
-
-// Two arms discriminated by ok: success carries an OPAQUE output payload (Option A — each capability owns its own
-// output schema in capability-outputs.ts and .parse()s it), failure carries a closed-union error. `output` is
-// z.unknown() symmetric with `input` above, so adding a capability never touches this channel schema (invariant 7).
-export const CapabilityRespondParamsSchema = z.discriminatedUnion("ok", [
-  z.strictObject({ requestId: z.uuid(), ok: z.literal(true), output: z.unknown() }),
-  z.strictObject({ requestId: z.uuid(), ok: z.literal(false), error: CapabilityErrorSchema }),
-]);
-export type CapabilityRespondParams = z.infer<typeof CapabilityRespondParamsSchema>;
-
-// accepted:false is the normal answer to an unknown/late respond (the request already timed out) — never an error.
-export const CapabilityRespondResultSchema = z.object({ accepted: z.boolean() });
-export type CapabilityRespondResult = z.infer<typeof CapabilityRespondResultSchema>;
+export {
+  CapabilityCancelReasonSchema,
+  CapabilityCancelSchema,
+  CapabilityAuthorizationLineageSchema,
+  CapabilityErrorCodeSchema,
+  CapabilityErrorSchema,
+  CapabilityRequestSchema,
+  CapabilityRespondParamsSchema,
+  CapabilitySettlementStateSchema,
+  HostFrameAckSchema as CapabilityRespondResultSchema,
+} from "./host-control-schema.ts";
+export type {
+  CapabilityCancel,
+  CapabilityAuthorizationLineage,
+  CapabilityCancelReason,
+  CapabilityError,
+  CapabilityErrorCode,
+  CapabilityRequest,
+  CapabilityRespondParams,
+  CapabilitySettlementState,
+  HostFrameAck as CapabilityRespondResult,
+} from "./host-control-schema.ts";
+export {
+  CapabilityAuthorizationSchema,
+  CapabilityChallengeSchema,
+  CapabilityResumeSchema,
+} from "./host-approval-schema.ts";
+export type {
+  CapabilityAuthorization,
+  CapabilityChallenge,
+  CapabilityResume,
+} from "./host-approval-schema.ts";

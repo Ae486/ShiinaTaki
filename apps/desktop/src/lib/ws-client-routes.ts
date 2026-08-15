@@ -1,5 +1,5 @@
 /**
- * INPUT:  inbound JSON-RPC notification frames from the Core (chat stream + avatar/timeline/config pushes) and the
+ * INPUT:  inbound JSON-RPC notification frames from the Core (chat stream + avatar/timeline/config/Approval pushes) and the
  *         transport's open/message/close events.
  * OUTPUT: Routes state (in-flight turn + push slots), installRoutes(), parseFrame(), abortTurn(), bindTransport().
  * POS:    ui/lib — the inbound half of ws-client: THE zod boundary (past it, data is trusted typed data). No
@@ -9,6 +9,9 @@
 import type { JSONRPCServerAndClient } from "json-rpc-2.0";
 import {
   AVATAR_METHODS,
+  APPROVAL_METHODS,
+  ApprovalClosedSchema,
+  CanonicalApprovalRequestSchema,
   AvatarCommandSchema,
   CHAT_METHODS,
   CONFIG_METHODS,
@@ -21,6 +24,8 @@ import {
   TimelineAppendedSchema,
   TimelineRemovedSchema,
   type AvatarCommand,
+  type ApprovalClosed,
+  type CanonicalApprovalRequest,
   type ConfigChanged,
   type ErrorCode,
   type JsonRpcClientFrame,
@@ -49,7 +54,12 @@ interface PushSlots {
   timeline: ((entry: TimelineEntry) => void) | null;
   timelineRemoved: ((ref: TimelineRemoved) => void) | null;
   config: Set<(changed: ConfigChanged) => void>;
+  approval: Set<(event: ApprovalPushEvent) => void>;
 }
+
+export type ApprovalPushEvent =
+  | { type: "request"; request: CanonicalApprovalRequest }
+  | { type: "closed"; closed: ApprovalClosed };
 
 export interface Routes {
   current: Turn | null;
@@ -57,12 +67,17 @@ export interface Routes {
 }
 
 export function createRoutes(): Routes {
-  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set() } };
+  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(), approval: new Set() } };
 }
 
 export function addConfigChangedHandler(state: Routes, handler: (changed: ConfigChanged) => void): () => void {
   state.push.config.add(handler);
   return () => state.push.config.delete(handler);
+}
+
+export function addApprovalHandler(state: Routes, handler: (event: ApprovalPushEvent) => void): () => void {
+  state.push.approval.add(handler);
+  return () => state.push.approval.delete(handler);
 }
 
 /** Retires every connection-scoped push sink before queued notifications can dispatch on a closed transport. */
@@ -71,6 +86,7 @@ function clearPushHandlers(state: Routes): void {
   state.push.timeline = null;
   state.push.timelineRemoved = null;
   state.push.config.clear();
+  state.push.approval.clear();
 }
 
 /** Routes the Core's notifications (chat stream + avatar/timeline/config pushes) to their handlers; each zod-validated. */
@@ -118,6 +134,28 @@ export function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void 
       }
     }
   });
+  installApprovalRoutes(rpc, state);
+}
+
+function installApprovalRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
+  rpc.addMethod(APPROVAL_METHODS.request, (params: unknown) => {
+    const request = CanonicalApprovalRequestSchema.parse(params);
+    notifyApprovalHandlers(state, { type: "request", request });
+  });
+  rpc.addMethod(APPROVAL_METHODS.closed, (params: unknown) => {
+    const closed = ApprovalClosedSchema.parse(params);
+    notifyApprovalHandlers(state, { type: "closed", closed });
+  });
+}
+
+function notifyApprovalHandlers(state: Routes, event: ApprovalPushEvent): void {
+  for (const handler of [...state.push.approval]) {
+    try {
+      handler(event);
+    } catch {
+      console.warn("[ws-client] Approval handler failed");
+    }
+  }
 }
 
 /** The message a mid-turn disconnect settles the in-flight turn with (D29): callers see a real error, never a hang. */

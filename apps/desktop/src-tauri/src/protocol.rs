@@ -1,8 +1,16 @@
 //! INPUT:  JSON wire frames (parsed by serde) + the shared golden fixtures under packages/shared/fixtures/protocol
-//! OUTPUT: serde mirrors of the @taki/shared protocol (connect, app-error, client frames, capability channel, permission-level config)
-//! POS:    shell/protocol — the ONLY Rust declaration of the wire shapes (invariant 3); NO tauri:: types here
+//! OUTPUT: stable protocol import surface, non-Host serde mirrors, and shared golden-fixture parity tests
+//! POS:    shell/protocol — re-exports Host-control mirrors; NO tauri:: types here
 #![allow(dead_code)] // Wire DTOs: some fields exist purely for serde (de)serialization parity, not all are read.
 
+#[path = "host_control_protocol.rs"]
+mod host_control_protocol;
+pub use host_control_protocol::*;
+#[path = "host_approval_protocol.rs"]
+mod host_approval_protocol;
+pub use host_approval_protocol::*;
+#[path = "ws_challenge.rs"]
+pub(crate) mod ws_challenge;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -28,6 +36,7 @@ pub struct ConnectParams {
     pub token: Option<String>,
     #[serde(rename = "pairingCode", skip_serializing_if = "Option::is_none")]
     pub pairing_code: Option<String>,
+    pub host: HostDeclaration,
 }
 
 /// The single literal status of a successful connect result.
@@ -43,6 +52,8 @@ pub struct ConnectResult {
     pub status: ConnectStatus,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub token: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub host: Option<HostNegotiation>,
 }
 
 /// Mirror of the closed ErrorCode union (`error-code-schema.ts`); the node branches on PAIRING_REQUIRED vs AUTH_FAILED.
@@ -56,6 +67,11 @@ pub enum ErrorCode {
     NotAuthenticated,
     AlreadyConnected,
     Forbidden,
+    ConfigRefused,
+    PolicyConflict,
+    GovernanceRefused,
+    GovernanceDenied,
+    ApprovalRequired,
 }
 
 /// A JSON-RPC id: string or number (mirror of `z.union([z.string(), z.number()])`).
@@ -107,16 +123,6 @@ pub enum ClientFrame {
         #[serde(default, skip_serializing_if = "Value::is_null")]
         params: Value,
     },
-}
-
-/// The capability.request notification params (core→node). strictObject parity: reject unknown keys.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(deny_unknown_fields)]
-pub struct CapabilityRequest {
-    #[serde(rename = "requestId")]
-    pub request_id: String,
-    pub capability: String,
-    pub input: Value,
 }
 
 /// The screenshot capability output (mirror of ScreenshotOutputSchema; Option A: serialized to an opaque Value).
@@ -202,52 +208,6 @@ pub struct ForegroundWindowOutput {
     pub idle_seconds: Option<u64>,
 }
 
-/// The closed wire error union shared with the core (`capability-schema.ts`).
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum CapabilityErrorCode {
-    Denied,
-    ExecFailed,
-    UnsupportedCapability,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct CapabilityError {
-    pub code: CapabilityErrorCode,
-    pub message: String,
-}
-
-/// The capability.respond params (node→core). Untagged; discriminated by the presence of output vs error.
-/// `output` is an opaque Value (Option A) — each capability serializes its own output struct into it (invariant 7).
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(untagged)]
-pub enum CapabilityRespond {
-    Ok {
-        #[serde(rename = "requestId")]
-        request_id: String,
-        ok: bool,
-        output: Value,
-    },
-    Err {
-        #[serde(rename = "requestId")]
-        request_id: String,
-        ok: bool,
-        error: CapabilityError,
-    },
-}
-
-impl CapabilityRespond {
-    /// A success respond frame carrying a capability's opaque output payload.
-    pub fn ok(request_id: String, output: Value) -> Self {
-        Self::Ok { request_id, ok: true, output }
-    }
-
-    /// A failure respond frame carrying a closed-union wire code.
-    pub fn err(request_id: String, code: CapabilityErrorCode, message: String) -> Self {
-        Self::Err { request_id, ok: false, error: CapabilityError { code, message } }
-    }
-}
-
 /// The operator-selectable Permission Level (mirror of PermissionLevelSchema, T2b).
 /// A preset VIEW over per-cell postures — never a second enforcement path; the gate projects through it.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -306,31 +266,72 @@ mod tests {
 
     fn fixtures_dir() -> PathBuf {
         // The canonical golden-fixture home, read by BOTH vitest and cargo (ruling 4).
-        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../../../packages/shared/fixtures/protocol")
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../packages/shared/fixtures/protocol")
     }
 
     // Parse `text` under the type owning `prefix`; on success return the re-serialized Value (for the round-trip trap).
     fn reparse(prefix: &str, text: &str) -> Option<Value> {
         match prefix {
-            "connect-request" => serde_json::from_str::<ConnectParams>(text).ok().map(to_value),
-            "connect-result" => serde_json::from_str::<ConnectResult>(text).ok().map(to_value),
-            "app-error" => serde_json::from_str::<AppErrorFrame>(text).ok().map(to_value),
+            "connect-request" => serde_json::from_str::<ConnectParams>(text)
+                .ok()
+                .map(to_value),
+            "connect-result" => serde_json::from_str::<ConnectResult>(text)
+                .ok()
+                .map(to_value),
+            "app-error" => serde_json::from_str::<AppErrorFrame>(text)
+                .ok()
+                .map(to_value),
             "client-frame" => serde_json::from_str::<ClientFrame>(text).ok().map(to_value),
-            "capability-request" => serde_json::from_str::<CapabilityRequest>(text).ok().map(to_value),
-            "capability-respond" => serde_json::from_str::<CapabilityRespond>(text).ok().map(to_value),
+            "capability-request" => serde_json::from_str::<CapabilityRequest>(text)
+                .ok()
+                .map(to_value),
+            "capability-challenge" => serde_json::from_str::<Value>(text).ok()
+                .and_then(|value| parse_capability_challenge(value).ok()).map(to_value),
+            "capability-resume" => serde_json::from_str::<Value>(text).ok()
+                .and_then(|value| parse_capability_resume(value).ok()).map(to_value),
+            "capability-cancel" => serde_json::from_str::<CapabilityCancel>(text)
+                .ok()
+                .map(to_value),
+            "capability-respond" => serde_json::from_str::<CapabilityRespond>(text)
+                .ok()
+                .and_then(|response| response.validate_lineage().ok().map(|_| response))
+                .map(to_value),
+            "host-catalog-publish" => serde_json::from_str::<HostCatalogPublish>(text)
+                .ok()
+                .map(to_value),
+            "host-frame-ack" => serde_json::from_str::<HostFrameAck>(text)
+                .ok()
+                .map(to_value),
             // Per-capability output payloads (Option A) — the SAME golden files the vitest per-capability schemas assert.
-            "screenshot-output" => serde_json::from_str::<ScreenshotOutput>(text).ok().map(to_value),
-            "process-list-output" => serde_json::from_str::<ProcessListOutput>(text).ok().map(to_value),
-            "clipboard-read-output" => serde_json::from_str::<ClipboardReadOutput>(text).ok().map(to_value),
-            "clipboard-write-output" => serde_json::from_str::<ClipboardWriteOutput>(text).ok().map(to_value),
-            "shell-open-output" => serde_json::from_str::<ShellOpenOutput>(text).ok().map(to_value),
+            "screenshot-output" => serde_json::from_str::<ScreenshotOutput>(text)
+                .ok()
+                .map(to_value),
+            "process-list-output" => serde_json::from_str::<ProcessListOutput>(text)
+                .ok()
+                .map(to_value),
+            "clipboard-read-output" => serde_json::from_str::<ClipboardReadOutput>(text)
+                .ok()
+                .map(to_value),
+            "clipboard-write-output" => serde_json::from_str::<ClipboardWriteOutput>(text)
+                .ok()
+                .map(to_value),
+            "shell-open-output" => serde_json::from_str::<ShellOpenOutput>(text)
+                .ok()
+                .map(to_value),
             "exec-output" => serde_json::from_str::<ExecOutput>(text).ok().map(to_value),
-            "foreground-window-output" => serde_json::from_str::<ForegroundWindowOutput>(text).ok().map(to_value),
+            "foreground-window-output" => serde_json::from_str::<ForegroundWindowOutput>(text)
+                .ok()
+                .map(to_value),
             // Permission Level config surface (T2b) — leaf shapes the settings panel and the gate share.
-            "permission-level-state" => serde_json::from_str::<PermissionLevelState>(text).ok().map(to_value),
-            "permission-cell-state" => serde_json::from_str::<PermissionCellState>(text).ok().map(to_value),
-            "permission-cell-set" => serde_json::from_str::<PermissionCellSetParams>(text).ok().map(to_value),
+            "permission-level-state" => serde_json::from_str::<PermissionLevelState>(text)
+                .ok()
+                .map(to_value),
+            "permission-cell-state" => serde_json::from_str::<PermissionCellState>(text)
+                .ok()
+                .map(to_value),
+            "permission-cell-set" => serde_json::from_str::<PermissionCellSetParams>(text)
+                .ok()
+                .map(to_value),
             other => panic!("no serde type mapped for fixture prefix {other:?}"),
         }
     }
@@ -355,14 +356,24 @@ mod tests {
             let text = fs::read_to_string(&path).expect("read fixture");
 
             let reparsed = reparse(prefix, &text);
-            assert_eq!(reparsed.is_some(), valid, "{name}: parse/reject disagreed with its validity tag");
+            assert_eq!(
+                reparsed.is_some(),
+                valid,
+                "{name}: parse/reject disagreed with its validity tag"
+            );
 
             // Casing/rename drift trap: a valid frame must re-serialize to exactly what it parsed from.
             if let Some(round_tripped) = reparsed {
                 let original: Value = serde_json::from_str(&text).expect("raw json");
-                assert_eq!(round_tripped, original, "{name}: round-trip drifted (a rename/casing mismatch)");
+                assert_eq!(
+                    round_tripped, original,
+                    "{name}: round-trip drifted (a rename/casing mismatch)"
+                );
             }
         }
-        assert!(seen >= 12, "expected the full golden-fixture set, found {seen}");
+        assert!(
+            seen >= 12,
+            "expected the full golden-fixture set, found {seen}"
+        );
     }
 }

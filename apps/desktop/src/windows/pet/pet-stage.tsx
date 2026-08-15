@@ -2,8 +2,8 @@
  * INPUT:  avatar state from the Zustand store; the pet canvas host DOM node; wheel open state (interaction store).
  * OUTPUT: <PetStage> — the PixiJS canvas host that mounts the Live2D renderer scene, drives its render tier from
  *         avatar state, wires the render governor + window drag + per-pixel click-through + initial imported costume,
- *         reveals the window, renders the compact connection notice, summons the operation wheel, and executes
- *         costume switches commanded by the home window.
+ *         reveals the window, renders the compact connection notice and socket-local Approval modal, summons the
+ *         operation wheel, and executes costume switches commanded by the home window.
  * POS:    ui/renderer bridge — the ONLY component allowed to touch renderer/ APIs. Root remains transparent
  *         (no opaque background) so the overlay stays a per-pixel cut-out.
  */
@@ -16,6 +16,7 @@ import { OperationWheel } from "@/features/operation-wheel/operation-wheel.js";
 import { summonWheel } from "@/features/operation-wheel/wheel-summon.js";
 import { ToastHost } from "@/components/toast/toast-host.js";
 import { PetConnectionStatusNotice } from "@/components/connection-status/connection-status.js";
+import { useApprovalDialog } from "@/components/approval/use-approval-dialog.js";
 import { useConnectionStore } from "@/stores/connection-store.js";
 import { usePetScene } from "./use-pet-scene.ts";
 import { usePetDrag } from "./use-pet-drag.ts";
@@ -32,6 +33,7 @@ export function PetStage() {
   const avatarState = useAvatarStore((s) => s.state);
   const wheelOpen = useInteractionStore((s) => s.wheelOpen);
   const connectionStatus = useConnectionStore((s) => s.status);
+  const client = useConnectionStore((s) => s.client);
   const wheelPoint = useInteractionStore((s) => s.wheelPoint);
   const openWheel = useInteractionStore((s) => s.openWheel);
   const closeWheel = useInteractionStore((s) => s.closeWheel);
@@ -42,6 +44,7 @@ export function PetStage() {
   useCoreConnection(scene);
   useInitialCostume(scene);
   useCostumeSwitchEvent(scene);
+  const approvalDialog = useApprovalDialog(client);
 
   useEffect(() => {
     scene?.setAvatarState(avatarState);
@@ -68,6 +71,7 @@ export function PetStage() {
       <ChatBubble />
       {wheelOpen && <OperationWheel point={wheelPoint} onClose={closeWheel} />}
       <ToastHost />
+      {approvalDialog}
     </div>
   );
 }

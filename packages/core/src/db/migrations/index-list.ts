@@ -17,6 +17,9 @@ import { memoryTidyStateMigration010 } from "./010-memory-tidy-state.ts";
 import { slotWindowStateMigration011 } from "./011-slot-window-state.ts";
 import { conversationSummaryMigration012 } from "./012-conversation-summary.ts";
 import { configMigration013 } from "./013-config.ts";
+import { governancePolicyMigration014 } from "./014-governance-policy.ts";
+import { approvalMigration015 } from "./015-approval.ts";
+import { timelineInputScrubMigration016 } from "./016-timeline-input-scrub.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -32,4 +35,7 @@ export const MIGRATIONS: Migration[] = [
   slotWindowStateMigration011,
   conversationSummaryMigration012,
   configMigration013,
+  governancePolicyMigration014,
+  approvalMigration015,
+  timelineInputScrubMigration016,
 ];

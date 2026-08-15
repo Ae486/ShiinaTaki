@@ -15,6 +15,7 @@ describe("dev capability.trigger env gating", () => {
 
   it("is present with devTrigger and drives a real capability (screenshot lands a file)", async () => {
     await withStack({ devTrigger: true, autoApprove: "screenshot=allow-once" }, async (stack) => {
+      await stack.setPermissionLevel("relaxed");
       const result = await stack.l1("screenshot", {});
       expect(result).toMatchObject({ ok: true });
       expect(stack.screenshots().length).toBeGreaterThanOrEqual(1);

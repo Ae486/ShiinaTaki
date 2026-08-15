@@ -1,10 +1,14 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
 import { scriptedModel, slowStreamingModel, streamingMockModel } from "../testing/mock-language-model.ts";
+import type { Connection } from "../server/connection-registry.ts";
 import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
 import { createChatAgent, type TurnContext } from "./chat-agent.ts";
 
 const fixtures: CompanionFixture[] = [];
+const TEST_CONNECTION: Connection = {
+  state: { status: "authenticated", deviceId: "chat-agent-test", role: "operator", capabilities: [] },
+};
 function fresh(): CompanionFixture {
   const f = createCompanionFixture();
   fixtures.push(f);
@@ -64,7 +68,9 @@ describe("chat-agent turn lifecycle (D1)", () => {
     const model = slowStreamingModel(["Hel", "lo ", "you"], 40);
     const agent = createChatAgent({ model, store: f.conversation, memory: f.memory });
     const controller = new AbortController();
-    const turn: TurnContext = { notify: () => undefined, onClose: () => undefined, signal: controller.signal };
+    const turn: TurnContext = {
+      connection: TEST_CONNECTION, notify: () => undefined, onClose: () => undefined, signal: controller.signal,
+    };
 
     const seen: string[] = [];
     // No throw expected: the SDK converts the abort into a graceful stream end (an `abort` part, then close).
@@ -89,6 +95,7 @@ describe("chat-agent turn lifecycle (D1)", () => {
     controller.abort("cancelled before start");
     let retracted = false;
     const turn: TurnContext = {
+      connection: TEST_CONNECTION,
       notify: () => undefined,
       onClose: () => undefined,
       signal: controller.signal,

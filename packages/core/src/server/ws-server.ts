@@ -46,7 +46,7 @@ export async function startWsServer(options: WsServerOptions): Promise<WsServer>
       reply(socket, createJSONRPCNotification(method, params));
     // Peer address (ws passes the upgrade request as the 2nd arg) — the connect handler uses it for
     // loopback auto-trust (P3). Undefined for an unknown peer ⇒ never auto-trusted (fail-closed).
-    const connection = connectionRegistry.create(notify, request.socket.remoteAddress);
+    const connection = connectionRegistry.create(notify, request.socket.remoteAddress, () => socket.close());
     // Cleanups registered by handlers (via ctx.onClose) for THIS socket — run once on close.
     const closeListeners: Array<() => void> = [];
     log.info("client connected");

@@ -32,7 +32,7 @@ function toolsWithEcho(seen: EchoCall[]): ToolSet {
 function registryFor(tools: ToolSet) {
   const { logger } = createCaptureLogger();
   const registry = createMethodRegistry();
-  registry.register(capabilityTriggerMethod({ tools, logger }));
+  registry.register(capabilityTriggerMethod({ tools: () => tools, logger }));
   return registry;
 }
 

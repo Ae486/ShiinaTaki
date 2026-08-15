@@ -7,6 +7,7 @@ import { withStack } from "./fixture/with-stack.ts";
 describe("clipboard write→read round-trip", () => {
   it("reads back the exact value just written", async () => {
     await withStack({ devTrigger: true, autoApprove: "allow-once" }, async (stack) => {
+      await stack.setPermissionLevel("relaxed");
       const value = `taki-e2e-${randomUUID()}`;
       const write = await stack.l1("clipboard_write", { text: value });
       expect(write).toMatchObject({ ok: true });

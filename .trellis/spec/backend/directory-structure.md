@@ -6,10 +6,8 @@
 packages/core/src/
 ├── agents/                # ToolLoopAgent definitions (one agent per file)
 │   └── companion-agent.ts
-├── tools/                 # ONE tool per file, kebab-case + `-tool` suffix
-│   ├── screenshot-tool.ts # exports screenshotTool; execute() delegates to capability client
-│   └── exec-tool.ts
-├── capabilities/          # WS client stubs that forward Capability requests to the Shell
+├── capabilities/          # Host-routed capability tools, broker, canonical input binding, and routing
+├── governance/            # Core policy repo/service/evaluator adapters and explicit Core-tool bindings
 ├── mcp/                   # MCP client management (@ai-sdk/mcp)
 ├── skills/                # SKILL.md loader
 ├── memory/                # markdown files + SQLite FTS index
@@ -33,8 +31,10 @@ src-tauri/src/
 ├── lib.rs                 # run(): Builder, plugins, single generate_handler![], setup()
 ├── commands/              # one module per domain (window.rs, tray.rs) — thin controllers
 ├── capabilities_impl/     # Capability executors: screenshot.rs, processes.rs, clipboard.rs, exec.rs
-├── gate/                  # Permission Gate: policy.rs, approval.rs, audit.rs
-├── ws/                    # WS client to Agent Core (tokio-tungstenite), reconnect, node handshake
+├── gate/                  # trusted Host classifiers, legacy/local constraints, and audit helpers
+├── host_control_protocol.rs # strict v2 Host catalog/request/projection/evidence handling
+├── host_session.rs        # per-connection request + per-capability policy lineage
+├── ws_client.rs           # WS client to Agent Core: reconnect, catalog, governed request/terminal frames
 ├── services/              # shared business logic
 ├── state.rs               # managed state structs
 └── models.rs              # serde structs mirroring @taki/shared schemas
@@ -42,5 +42,6 @@ src-tauri/src/
 
 Rules:
 - Module files: `foo.rs` + `foo/` directory style; **never `mod.rs`**.
-- Every Capability executor is called ONLY from `gate/` — no direct command → executor path.
+- Every Host Capability executor is reached only after Host-session control validation, trusted classification, and
+  stricter-only posture composition. No direct command/WS branch may bypass that path.
 - Tauri window permission files (`src-tauri/capabilities/*.json`): separate files for pet window vs settings window.

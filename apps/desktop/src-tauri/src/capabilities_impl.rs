@@ -14,7 +14,7 @@ use std::sync::Arc;
 
 use serde_json::Value;
 
-use crate::protocol::{CapabilityErrorCode, CapabilityRespond};
+use crate::protocol::{CapabilityErrorCode, CapabilityRespond, HostOperationControl};
 
 /// A capability execution failure, carrying a closed wire code the core surfaces to the model.
 #[derive(Debug, Clone)]
@@ -25,7 +25,10 @@ pub struct ExecError {
 
 impl ExecError {
     pub fn failed(message: impl Into<String>) -> Self {
-        Self { code: CapabilityErrorCode::ExecFailed, message: message.into() }
+        Self {
+            code: CapabilityErrorCode::ExecFailed,
+            message: message.into(),
+        }
     }
 }
 
@@ -36,6 +39,7 @@ pub trait CapabilityExec: Send + Sync {
     fn run(&self, input: &Value) -> Result<Value, ExecError>;
     /// An optional human-readable detail derived from the input, shown in the approval dialog (ruling 4). Default: none.
     /// It is dialog-only — NEVER logged (the target may be content, e.g. a URL the user is browsing).
+    #[allow(dead_code)] // Retained for the Slice-4 operator challenge UI; Slice 3 never prompts locally.
     fn detail(&self, _input: &Value) -> Option<String> {
         None
     }
@@ -57,21 +61,33 @@ impl CapabilityRegistry {
     }
 
     /// The dialog detail for a capability+input, or None (unknown capability / no detail) — name-only dialog.
+    #[allow(dead_code)] // Dormant until the Core-mediated Approval lifecycle consumes bounded detail.
     pub fn detail(&self, capability: &str, input: &Value) -> Option<String> {
-        self.handlers.get(capability).and_then(|exec| exec.detail(input))
+        self.handlers
+            .get(capability)
+            .and_then(|exec| exec.detail(input))
     }
 
     /// Runs the capability and shapes the node's respond frame; an unknown capability is UNSUPPORTED_CAPABILITY.
-    pub fn respond(&self, request_id: String, capability: &str, input: &Value) -> CapabilityRespond {
+    pub fn respond(
+        &self,
+        request_id: String,
+        control: HostOperationControl,
+        capability: &str,
+        input: &Value,
+    ) -> CapabilityRespond {
         match self.handlers.get(capability) {
             None => CapabilityRespond::err(
                 request_id,
+                control,
                 CapabilityErrorCode::UnsupportedCapability,
                 format!("unknown capability: {capability}"),
             ),
             Some(exec) => match exec.run(input) {
-                Ok(output) => CapabilityRespond::ok(request_id, output),
-                Err(error) => CapabilityRespond::err(request_id, error.code, error.message),
+                Ok(output) => CapabilityRespond::ok(request_id, control, output),
+                Err(error) => {
+                    CapabilityRespond::err(request_id, control, error.code, error.message)
+                }
             },
         }
     }
@@ -88,7 +104,9 @@ mod tests {
             "screenshot"
         }
         fn run(&self, _input: &Value) -> Result<Value, ExecError> {
-            Ok(json!({ "mediaType": "image/png", "dataBase64": "AAAA", "width": 1920, "height": 1080 }))
+            Ok(
+                json!({ "mediaType": "image/png", "dataBase64": "AAAA", "width": 1920, "height": 1080 }),
+            )
         }
     }
 
@@ -100,13 +118,27 @@ mod tests {
 
     #[test]
     fn a_fake_exec_shapes_a_success_respond_frame() {
-        let respond = registry().respond("req-1".into(), "screenshot", &Value::Object(Default::default()));
+        let control = control("screenshot");
+        let respond = registry().respond(
+            "req-1".into(),
+            control.clone(),
+            "screenshot",
+            &Value::Object(Default::default()),
+        );
         match respond {
-            CapabilityRespond::Ok { request_id, ok, output } => {
+            CapabilityRespond::Completed {
+                request_id,
+                control: actual,
+                output,
+                ..
+            } => {
                 assert_eq!(request_id, "req-1");
-                assert!(ok);
+                assert_eq!(actual, control);
                 assert_eq!(output["mediaType"], "image/png");
-                assert_eq!((output["width"].as_u64(), output["height"].as_u64()), (Some(1920), Some(1080)));
+                assert_eq!(
+                    (output["width"].as_u64(), output["height"].as_u64()),
+                    (Some(1920), Some(1080))
+                );
             }
             other => panic!("expected an Ok respond arm, got {other:?}"),
         }
@@ -114,9 +146,14 @@ mod tests {
 
     #[test]
     fn an_unknown_capability_is_unsupported() {
-        let respond = registry().respond("req-2".into(), "clipboard", &Value::Null);
+        let respond = registry().respond(
+            "req-2".into(),
+            control("clipboard"),
+            "clipboard",
+            &Value::Null,
+        );
         match respond {
-            CapabilityRespond::Err { error, .. } => {
+            CapabilityRespond::Failed { error, .. } => {
                 assert_eq!(error.code, CapabilityErrorCode::UnsupportedCapability);
             }
             other => panic!("expected an Err respond arm, got {other:?}"),
@@ -127,5 +164,69 @@ mod tests {
     fn detail_is_none_for_a_capability_without_one() {
         assert_eq!(registry().detail("screenshot", &Value::Null), None);
         assert_eq!(registry().detail("unknown", &Value::Null), None);
+    }
+
+    #[test]
+    fn early_dynamic_failure_evidence_uses_the_projected_blocked_cell() {
+        let mut control = control("exec");
+        control.governance_projection.cells = vec![
+            crate::protocol::HostGovernanceCell {
+                key: "exec:allowlist-miss".into(),
+                posture: crate::protocol::HostGovernancePosture::Ask,
+            },
+            crate::protocol::HostGovernanceCell {
+                key: "exec:blocked".into(),
+                posture: crate::protocol::HostGovernancePosture::Deny,
+            },
+        ];
+        let response = CapabilityRespond::err(
+            "req-3".into(),
+            control,
+            CapabilityErrorCode::Denied,
+            "input digest mismatch".into(),
+        );
+        match response {
+            CapabilityRespond::Failed { governance, .. } => {
+                assert_eq!(governance.cell_key, "exec:blocked");
+                assert_eq!(
+                    governance.effective_posture,
+                    crate::protocol::HostGovernancePosture::Deny
+                );
+                assert_eq!(
+                    governance.constraint,
+                    crate::protocol::HostGovernanceConstraint::Hard
+                );
+            }
+            other => panic!("expected a failed response, got {other:?}"),
+        }
+    }
+
+    fn control(capability: &str) -> HostOperationControl {
+        HostOperationControl {
+            run_id: "11111111-1111-4111-8111-111111111111".into(),
+            operation_id: "22222222-2222-4222-8222-222222222222".into(),
+            attempt_id: "33333333-3333-4333-8333-333333333333".into(),
+            target_host_id: "44444444-4444-4444-8444-444444444444".into(),
+            connection_generation: 1,
+            catalog_generation: 1,
+            policy_generation: 1,
+            governance_projection: crate::protocol::HostGovernanceProjection {
+                registry_revision: 1,
+                descriptor_revision: 1,
+                classifier_revision: 1,
+                cells: vec![crate::protocol::HostGovernanceCell {
+                    key: capability.into(),
+                    posture: crate::protocol::HostGovernancePosture::Auto,
+                }],
+                digest: "0".repeat(64),
+            },
+            approval_generation: 1,
+            capability_id: capability.into(),
+            input_digest: "a".repeat(64),
+            idempotency_key: "55555555-5555-4555-8555-555555555555".into(),
+            dispatched_at: "2026-08-12T00:00:00.000Z".into(),
+            deadline_at: "2026-08-12T00:01:00.000Z".into(),
+            expires_at: None,
+        }
     }
 }

@@ -16,5 +16,23 @@ Every scenario is its own `e2e/src/<name>.e2e.test.ts` calling `withStack(opts, 
 
 - **Assertions read files / audit / structured results only — never logged content** (no-content-in-logs invariant). L2 `console.log` may print status/counts/booleans for diagnosis, never the capability's content.
 - **A single-turn empty-DB L2 CANNOT catch hallucination.** Empty history = nothing for the model to imitate, so the agent invokes the tool and the test is green whether the bug exists or not. Hallucination regression needs a multi-turn or polluted-timeline scenario (see `docs/deferred-decisions.md` D1). Do not treat a green single-turn L2 as proof the hallucination is gone.
-- **`capability.trigger` is dev-only and must stay so**: registered only under `TAKI_DEV_TRIGGER=1`, operator-only, and it is NOT a gate bypass — it drives the same `tool.execute` the agent does, so the node-side Permission Gate still authorizes every call. Never register it in production; its schema never enters `@taki/shared`.
+- **`capability.trigger` is dev-only and must stay so**: registered only under `TAKI_DEV_TRIGGER=1`, operator-only, and it is NOT a governance bypass — it drives the same `tool.execute` the agent does, so every call still crosses Core policy and, for Host-owned actions, the Host's sealed projection/classification/final-enforcement path. Never register it in production; its schema never enters `@taki/shared`.
 - The fixture must ALWAYS tear down (process tree + temp dirs) even on a boot failure — keep boot inside the try/finally.
+
+## Test-only Host-frame relay
+
+Use `e2e/src/fixture/ws-relay.ts` only when the behavior under test requires mutating a Core-to-Node wire frame that
+neither public operator APIs nor production code can create, such as stale governance generation or same-generation
+projection tampering.
+
+- The relay is test-only, imported only from `e2e/`, binds loopback, forwards text frames as text, and parses a
+  `capability.request` through the Shared schema before applying the requested transformer.
+- Never add a production transport injection/debug hook to make an E2E easy. Never log frames, input, projection
+  content, arguments, or outputs from the relay.
+- Establish an accepted generation before injecting the adversarial frame. For projection tampering, recompute a valid
+  canonical SHA-256 digest so the test proves lineage/content rejection rather than only malformed-digest rejection.
+- Own the bound: assert one injected request, no execution/audit growth, no replay after a bounded wait, truthful Core
+  settlement after the test retires the Host generation, zero active relay connections, closed relay, killed processes,
+  and removed temp directories.
+- A Buffer forwarded directly by `ws` becomes a binary frame; Rust intentionally ignores it. Normalize both directions
+  through `String(data)` so the relay preserves the production text-frame protocol.

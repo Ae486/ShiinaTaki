@@ -5,7 +5,9 @@
  *         description? } or { ok:false, code } — description present only when the VLM bridge produced one, and then
  *         only PII-scrubbed and wrapped in the A1 untrusted fence (D44)
  * POS:    core/capabilities — the agent tool; thin over route→broker→persist(→describe→scrub→fence); execute NEVER throws (ruling 7/8A).
- *         Risk posture (MCP vocab, doc-only — the Rust Permission Gate is the sole enforcement, tool-design I1/C-5): readOnly (does not modify the screen), open-world (VLM description is untrusted content), gated (sensitive capture, approval required).
+ *         Risk posture (MCP vocab, doc-only — canonical Core governance is authoritative; the Execution Host may only
+ *         tighten and finally enforce this Host-local capture): readOnly (does not modify the screen), open-world
+ *         (VLM description is untrusted content), gated (sensitive capture, Approval may be required).
  */
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";
@@ -53,7 +55,7 @@ export function createScreenshotTool(deps: ScreenshotToolDeps): ToolSet {
       // Every failure degrades into a structured result the model can read; this execute never throws (error-handling spec).
       execute: async ({ describePrompt }) => {
         try {
-          const routed = await routeCapability(deps, CAPABILITY, {});
+          const routed = await routeCapability(deps, { capabilityId: CAPABILITY, input: {} });
           if (!routed.ok) return routed;
 
           // The channel output is opaque (Option A); the screenshot tool owns and parses its own payload shape.

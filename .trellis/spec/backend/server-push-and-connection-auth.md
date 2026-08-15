@@ -32,14 +32,19 @@ When the Core must push events to a subscribed client mid-turn (timeline entries
 
 **No Rust serde mirror for operator-only channels.** Invariant 3 mirrors only shapes the Rust Shell (a *node*) actually handles — connect/capability/approval. `chat.*`, `timeline.*`, `avatar.*` are operator↔core direct (the Pet UI webview + CLI open their own loopback WS as operators); the Rust Shell never sees these frames, so they live in `@taki/shared` zod only. Test their round-trips in a standalone `<x>-schema.test.ts`, NOT `protocol-fixtures.test.ts` (that sweep asserts a Rust serde struct per prefix — adding an unmirrored prefix reds the cargo side).
 
-## Connection auth ≠ capability authorization (two distinct gates)
+## Connection auth ≠ Core policy ≠ Host final enforcement
 
 Do not conflate them:
 
-| Gate | Question | Where | Keyed on |
+| Layer | Question | Where | Keyed on |
 |------|----------|-------|----------|
 | **Connection auth** (`connect.ts`) | may this *device* attach, and as what role? | the one pre-auth method | token / pairing / loopback-auto-trust; role locked at issuance |
-| **Capability authorization** (Permission Gate, Rust) | may this *action* run? | per capability request | see `permission-authorization.md` |
+| **Core governance authority** | what is the profile-wide posture for this canonical action at generation N? | Core evaluator + SQLite | canonical identity, descriptor/cell, Level/override, `policyGeneration` |
+| **Host final enforcement** | may this exact Host-owned input execute now? | owning Execution Host | sealed Host/connection/catalog generations, trusted local classification, Core projection, stricter local/managed/hard constraints |
+
+Authentication and catalog presence never grant permission. Conversely, a Core `auto` posture does not compel a Host
+to execute when its local availability or stricter floor refuses. See `permission-authorization.md` for the complete
+projection/evidence contract.
 
 ### Loopback auto-trust (P3) — the local-operator connection rule
 
@@ -53,7 +58,8 @@ An operator on the trusted machine boundary needs no pairing ceremony (localhost
 Non-negotiable safety properties (all enforced + tested; a change here is a security review):
 
 - **Ordering is fail-closed**: a wrong token fails in branch 1 and NEVER reaches auto-trust, even on loopback+flag-on.
-- **Operators only**: nodes carry capabilities → the Permission Gate → must still pair. Auto-trusting a node is a real escalation.
+- **Operators only**: nodes carry capabilities and final execution boundaries, so they must still pair. Auto-trusting a
+  node would let an unauthenticated process publish Host identity/catalog/classifier metadata and is a real escalation.
 - **`isLoopback(undefined) === false`**: an unknown/absent peer address falls to pairing (fail-closed). Address comes from the WS upgrade transport peer (`request.socket.remoteAddress`), never a spoofable header; exact-set membership {127.0.0.1, ::1, ::ffff:127.0.0.1}, not a loose prefix/CIDR that could over-match.
 - **The flag is an auth kill-switch → parse it fail-closed**: default on; disabling fully restores mandatory pairing for ALL peers (the VPS/public-Core posture). Accept only strict `true/1/false/0` (case-insensitive); garbage errors at boot, never silently means on.
 - **Audit every mint**: auto-trust persists a credential → log it (deviceId/deviceName/remoteAddress; never the token), same as pairing logs its code.

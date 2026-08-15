@@ -2,7 +2,8 @@
  * INPUT:  an LLM avatar_play_motion call ({ name, priority?, loop? }) + bound characterId, AvatarSubscriptions, live vocab (name enum, 1e)
  * OUTPUT: createPlayMotionTool(deps) -> ToolSet { avatar_play_motion }; returns { ok:true } (fire-and-forget)
  * POS:    core/avatar — the agent tool; publishes an avatar.command to the Pet UI; execute NEVER throws; no OS/gate (invariant 1/4).
- *         Risk posture (MCP vocab, doc-only — the Rust Permission Gate is the sole enforcement, tool-design I1/C-5): readOnly (no OS side effect), non-destructive, closed-world.
+ *         Risk posture (MCP vocab, doc-only — canonical Core governance is authoritative; an Execution Host may only
+ *         tighten and finally enforce Host-local actions): readOnly (no OS side effect), non-destructive, closed-world.
  */
 import { tool, type ToolSet } from "ai";
 import { z } from "zod";

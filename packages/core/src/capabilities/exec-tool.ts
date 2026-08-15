@@ -24,7 +24,7 @@ export function createExecTool(deps: ExecToolDeps): ToolSet {
       execute: async ({ command }) => {
         try {
           // The command + its output are content (may carry paths/secrets) — the Shell shows/audits it; never logged here.
-          const routed = await routeCapability(deps, CAPABILITY, { command });
+          const routed = await routeCapability(deps, { capabilityId: CAPABILITY, input: { command } });
           if (!routed.ok) return routed;
           const output = ExecOutputSchema.parse(routed.output);
           log.info({ exitCode: output.exitCode, timedOut: output.timedOut, truncated: output.truncated }, "exec ran");
