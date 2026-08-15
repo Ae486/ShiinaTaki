@@ -19,7 +19,7 @@ afterEach(() => {
   for (const db of dbs.splice(0)) db.close();
 });
 
-function fixture() {
+function fixture(options: { interactive?: boolean } = {}) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
   const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
@@ -40,7 +40,9 @@ function fixture() {
       },
       cellKey: "mcp-tool-call",
     },
-    interactive: {
+    // An unattended turn constructs the same binding with NO interactive context: its ask must
+    // fail closed with a bounded reason and never raise an ambient prompt on any socket.
+    interactive: options.interactive === false ? undefined : {
       approval,
       connection,
       presentation: {
@@ -93,5 +95,16 @@ describe("wrapGovernedTool interactive authority", () => {
 
     await expect(pending).resolves.toMatchObject({ ok: false, code: "GOVERNANCE_DENIED" });
     expect(f.execute).not.toHaveBeenCalled();
+  });
+
+  it("fails a turn without an interactive context closed with no ambient prompt", async () => {
+    const f = fixture({ interactive: false });
+    await expect(f.wrapped.execute?.({}, { toolCallId: "call-3", messages: [] } as never)).resolves.toEqual({
+      ok: false,
+      code: "APPROVAL_REQUIRED",
+      message: "approval requires an active operator connection",
+    });
+    expect(f.execute).not.toHaveBeenCalled();
+    expect(f.notifications).toEqual([]);
   });
 });
