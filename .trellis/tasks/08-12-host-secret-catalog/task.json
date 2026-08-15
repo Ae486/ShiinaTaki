@@ -3,7 +3,7 @@
   "name": "host-secret-catalog",
   "title": "Host-local encrypted credential catalog and adapters",
   "description": "Prove and implement the host-local encrypted secret catalog, Windows and Linux master-key adapters, dedicated sensitive write channel, write-only operator lifecycle, migration safety, and packaging gates.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "core-rust-linux-windows-host-secret-catalog",
   "package": null,
