@@ -1,13 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import type { CapabilityCancel, CapabilityRequest, ScreenshotOutput } from "@taki/shared";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
+import { fakeHost, testApproval } from "../testing/capability-tool-harness.ts";
 import {
-  TERMINAL_RECORD_LIMIT,
   TIMEOUT_MESSAGE,
   createCapabilityBroker,
   type CapabilityDispatchTarget,
   type CapabilityNotify,
 } from "./capability-broker.ts";
+import { TERMINAL_RECORD_LIMIT } from "./capability-broker-state.ts";
 
 const HOST_A = "11111111-1111-4111-8111-111111111111";
 const HOST_B = "22222222-2222-4222-8222-222222222222";
@@ -19,6 +20,7 @@ function broker(timeoutMs?: number) {
   return {
     broker: createCapabilityBroker({
       logger: capture.logger,
+      approval: testApproval(),
       timeoutMs,
       now: () => Date.parse("2026-08-12T00:00:00.000Z"),
     }),
@@ -32,9 +34,11 @@ function target(hostId: string, notify: CapabilityNotify, execution: "read" | "e
     connectionGeneration: 1,
     catalogGeneration: 1,
     descriptor: { capabilityId: "screenshot", execution, cancellation: execution === "read" ? "cooperative" : "non-cooperative", governance: { descriptorRevision: 1, classifierId: "fixed-risk", classifierRevision: 1 } },
+    connection: fakeHost("screenshot"),
     notify,
     policyGeneration: 1,
     governanceProjection: { registryRevision: 1, descriptorRevision: 1, classifierRevision: 1, cells: [{ key: "screenshot", posture: "auto" as const }], digest: "a".repeat(64) },
+    isCurrent: () => true,
   };
 }
 

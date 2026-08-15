@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
-import { brokerReturning, catalogsReturning, fakeHost, registryReturning, testGovernance } from "../testing/capability-tool-harness.ts";
+import { brokerReturning, catalogsReturning, fakeHost, registryReturning, testGovernance, testApproval } from "../testing/capability-tool-harness.ts";
 import type { CapabilityBroker } from "./capability-broker.ts";
 import type { ConnectionRegistry } from "../server/connection-registry.ts";
 import { createClipboardReadTool } from "./clipboard-read-tool.ts";
@@ -9,7 +9,7 @@ const EXEC_OPTS = { toolCallId: "c1", messages: [] } as never;
 
 function toolWith(registry: ConnectionRegistry, broker: CapabilityBroker) {
   const { logger } = createCaptureLogger();
-  return createClipboardReadTool({ registry, catalogs: catalogsReturning("clipboard-read"), broker, logger, governance: testGovernance() });
+  return createClipboardReadTool({ registry, catalogs: catalogsReturning("clipboard-read"), broker, logger, governance: testGovernance(), approval: testApproval() });
 }
 
 describe("createClipboardReadTool (T5)", () => {

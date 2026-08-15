@@ -58,7 +58,7 @@ describe("Host-control schemas", () => {
     const catalog = {
       hostId: HOST_ID,
       label: "Desktop",
-      protocolVersion: 2,
+      protocolVersion: 3,
       catalogSchemaVersion: 2,
       connectionGeneration: 2,
       catalogGeneration: 3,

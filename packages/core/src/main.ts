@@ -16,15 +16,9 @@ import { createAvatarTools } from "./avatar/avatar-tools.ts";
 import { createAvatarVocabulary } from "./avatar/avatar-vocabulary.ts";
 import { presentationTailStop } from "./avatar/presentation-stop.ts";
 import { createCapabilityBroker } from "./capabilities/capability-broker.ts";
-import { createClipboardReadTool } from "./capabilities/clipboard-read-tool.ts";
-import { createClipboardWriteTool } from "./capabilities/clipboard-write-tool.ts";
-import { createExecTool } from "./capabilities/exec-tool.ts";
-import { createProcessListTool } from "./capabilities/process-list-tool.ts";
+import { createCapabilityTools } from "./capabilities/capability-tools.ts";
 import { routeCapability } from "./capabilities/route-capability.ts";
 import { createScreenshotDescriber } from "./capabilities/screenshot-describe.ts";
-import { createScreenshotStore } from "./capabilities/screenshot-store.ts";
-import { createScreenshotTool } from "./capabilities/screenshot-tool.ts";
-import { createShellOpenTool } from "./capabilities/shell-open-tool.ts";
 import { bootstrapCore } from "./boot/core-bootstrap.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
 import { composeApprovalRuntime } from "./approval/approval-runtime.ts";
@@ -56,6 +50,7 @@ import { avatarReportMethod } from "./server/methods/avatar-report.ts";
 import { avatarSubscribeMethod } from "./server/methods/avatar-subscribe.ts";
 import { chatCancelMethod } from "./server/methods/chat-cancel.ts";
 import { chatSendMethod } from "./server/methods/chat-send.ts";
+import { capabilityChallengeMethod } from "./server/methods/capability-challenge.ts";
 import { capabilityRespondMethod } from "./server/methods/capability-respond.ts";
 import { capabilityTriggerMethod, devTriggerEnabled } from "./server/methods/capability-trigger.ts";
 import { characterCostumeResolutionMethod } from "./server/methods/character-costume-resolution.ts";
@@ -198,41 +193,38 @@ const mcpManager = await createMcpManager({
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
-// requests immediately (fail-closed); the 90s backstop covers a node that never answers. The Shell gate authorizes.
-const capabilityBroker = createCapabilityBroker({ logger });
+// requests immediately (fail-closed); the 90s backstop covers a node that never answers. An ask-classified request
+// comes back as capability.challenge and the SAME canonical Approval service that governs Core/MCP tools owns the
+// operator prompt; the broker mints the single-use resume authorization after the operator answers.
+const capabilityBroker = createCapabilityBroker({ logger, approval });
 bindHostGenerationRetirement({ connections: connectionRegistry, catalogs: hostCatalogs, broker: capabilityBroker });
+registry.register(capabilityChallengeMethod(capabilityBroker, connectionRegistry));
 // Screenshot→VLM bridge: reuses the OPTIONAL vision slot; without it a result stays path+dims (no pixels to the text
 // model) and ambient sampling never starts. ONE bridge, shared by the on-demand tool and the ambient sampler.
 const describeScreenshot = visionModel ? createScreenshotDescriber({ model: visionModel, logger }).describe : undefined;
-const screenshotTool = createScreenshotTool({
+// The six Shell-routed capability tools as one factory (invariant 7): per-call construction binds the initiating
+// operator socket (the challenge prompt targets exactly that connection); the no-argument bag stays for unattended
+// turns. The chat agent's turnTools, the unattended fallback, and the dev trigger all reuse this exact factory.
+const capabilityTools = createCapabilityTools({
   registry: connectionRegistry,
   catalogs: hostCatalogs,
   broker: capabilityBroker,
+  logger,
   governance,
-  // The core is the single sanctioned Workspace writer (invariant 2); the Shell only returns base64 over the wire.
-  store: createScreenshotStore({ screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots") }),
+  approval,
+  screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots"),
   describe: describeScreenshot,
-  logger,
 });
-// The other Shell-backed capabilities (#11, and exec #12) share the route→broker path; each is gate-authorized on
-// the Shell, which parses, governs, spawns and audits.
-const shellCapabilityDeps = {
+
+// Ambient/system-initiated routing carries NO operator by design: an unattended ask fails closed at the broker
+// with a truthful reason instead of prompting (the perception layer never owns an Approval dialog).
+const ambientCapabilityDeps = {
   registry: connectionRegistry,
   catalogs: hostCatalogs,
   broker: capabilityBroker,
   logger,
   governance,
-};
-
-// The six Shell-routed capability tools as one bag (invariant 7): the chat agent's extraTools spreads it AND the
-// dev capability.trigger reuses these exact objects — never a second execute path to the same capabilities.
-const capabilityTools: ToolSet = {
-  ...screenshotTool,
-  ...createProcessListTool(shellCapabilityDeps),
-  ...createClipboardReadTool(shellCapabilityDeps),
-  ...createClipboardWriteTool(shellCapabilityDeps),
-  ...createShellOpenTool(shellCapabilityDeps),
-  ...createExecTool(shellCapabilityDeps),
+  approval,
 };
 
 // Perception (#19 T3a + #20 T3b): SYSTEM-initiated polls of the foreground window (always-on, low sensitivity) and of
@@ -241,7 +233,7 @@ const capabilityTools: ToolSet = {
 // sensitive-process skip + the PII scrub — that gate every ambient sampler. On-demand chat captures stay ungated
 // (explicit consent through the Gate); the pause/skip/retention operator surfaces land with the settings panel (#26).
 const perception = createPerceptionLayer({
-  route: (capability, input) => routeCapability(shellCapabilityDeps, { capabilityId: capability, input }),
+  route: (capability, input) => routeCapability(ambientCapabilityDeps, { capabilityId: capability, input }),
   hasNode: (capability) => hostCatalogs.hostsForCapability(capability).length > 0,
   describe: describeScreenshot,
   ambient: boot.ambientConfig,
@@ -301,9 +293,14 @@ registry.register(
       // Shell capabilities retain Host governance until Batch 2 installs the Core projection.
       extraTools: {
         ...createLoadSkillTool(skillsLoader, { service: governance, ownerHostId: coreHostId }),
-        ...capabilityTools,
+        ...capabilityTools(),
       },
-      turnTools: (turn) => mcpManager.tools({ connection: turn.connection, signal: turn.signal }),
+      // Per-turn bag: the capability tools bind the initiating operator socket (challenge ownership) and the MCP
+      // closures bind the same connection + abort signal — one interactive authority source for the whole turn.
+      turnTools: (turn) => ({
+        ...capabilityTools({ connection: turn.connection, signal: turn.signal }),
+        ...mcpManager.tools({ connection: turn.connection, signal: turn.signal }),
+      }),
       // Stable Core-local tools join per-turn memory/avatar tools behind the explicit Core binding table.
       coreTools: staticCoreTools,
       coreToolGovernance,
@@ -382,7 +379,10 @@ if (devTriggerEnabled(process.env)) {
   logger.warn("TAKI_DEV_TRIGGER=1 — registering the DEV capability.trigger method (L1 drive; node-side gate still authorizes)");
   registry.register(
     capabilityTriggerMethod({
-      tools: { ...capabilityTools, ...coreToolGovernance.wrap({ ...readFileTool, ...writeFileTool }) },
+      tools: (interactive) => ({
+        ...capabilityTools(interactive),
+        ...coreToolGovernance.wrap({ ...readFileTool, ...writeFileTool }, interactive),
+      }),
       logger,
     }),
   );

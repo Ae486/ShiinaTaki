@@ -4,15 +4,14 @@
  * POS:    shared — focused export surface used by the package entry to stay within source size limits
  */
 export {
+  CapabilityAuthorizationLineageSchema,
   HOST_CATALOG_SCHEMA_VERSION,
   HOST_CONTROL_METHODS,
   HOST_CONTROL_PROTOCOL_VERSION,
   CapabilityCancellationSchema,
   CapabilityCancelReasonSchema,
   CapabilityCancelSchema,
-  CapabilityChallengeSchema,
   CapabilityExecutionKindSchema,
-  CapabilityResumeSchema,
   CapabilitySettlementStateSchema,
   HostCapabilityDescriptorSchema,
   HostCapabilityGovernanceSupportSchema,
@@ -36,12 +35,11 @@ export {
   canonicalHostGovernanceProjection,
 } from "./host-control-schema.ts";
 export type {
+  CapabilityAuthorizationLineage,
   CapabilityCancellation,
   CapabilityCancel,
   CapabilityCancelReason,
-  CapabilityChallenge,
   CapabilityExecutionKind,
-  CapabilityResume,
   CapabilitySettlementState,
   HostCapabilityDescriptor,
   HostCapabilityGovernanceSupport,
@@ -61,3 +59,17 @@ export type {
   HostSkillDescriptor,
   HostWorkspaceDescriptor,
 } from "./host-control-schema.ts";
+export {
+  CapabilityAuthorizationSchema,
+  CapabilityChallengeSchema,
+  CapabilityResumeSchema,
+  HostChallengePresentationSchema,
+  canonicalCapabilityChallenge,
+  canonicalHostOperationControl,
+} from "./host-approval-schema.ts";
+export type {
+  CapabilityAuthorization,
+  CapabilityChallenge,
+  CapabilityResume,
+  HostChallengePresentation,
+} from "./host-approval-schema.ts";

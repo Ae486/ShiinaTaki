@@ -34,19 +34,19 @@ export type { ErrorCode } from "./error-code-schema.ts";
 
 export {
   HOST_CATALOG_SCHEMA_VERSION, HOST_CONTROL_METHODS, HOST_CONTROL_PROTOCOL_VERSION,
-  CapabilityCancellationSchema, CapabilityCancelReasonSchema, CapabilityCancelSchema,
+  CapabilityAuthorizationLineageSchema, CapabilityAuthorizationSchema, CapabilityCancellationSchema, CapabilityCancelReasonSchema, CapabilityCancelSchema,
   CapabilityChallengeSchema, CapabilityExecutionKindSchema, CapabilityResumeSchema,
   CapabilitySettlementStateSchema, HostCapabilityDescriptorSchema, HostCapabilityGovernanceSupportSchema, HostCatalogPublishParamsSchema,
   HostDeclarationSchema, HostFrameAckSchema, HostFrameRejectReasonSchema, HostLocalReadinessSchema,
-  HostMcpDescriptorSchema, HostNegotiationSchema, HostOperationControlSchema, HostGovernanceEvidenceSchema,
+  HostChallengePresentationSchema, HostMcpDescriptorSchema, HostNegotiationSchema, HostOperationControlSchema, HostGovernanceEvidenceSchema,
   HostGovernanceCellSchema, HostGovernanceProjectionPayloadSchema, HostGovernanceProjectionSchema, HostProtocolRangeSchema,
   HostSkillDescriptorSchema, HostWorkspaceDescriptorSchema, PositiveGenerationSchema, Sha256HexSchema,
-  canonicalHostGovernanceProjection,
+  canonicalCapabilityChallenge, canonicalHostGovernanceProjection, canonicalHostOperationControl,
 } from "./host-control-api.ts";
 export type {
-  CapabilityCancellation, CapabilityCancel, CapabilityCancelReason, CapabilityChallenge,
+  CapabilityAuthorization, CapabilityAuthorizationLineage, CapabilityCancellation, CapabilityCancel, CapabilityCancelReason, CapabilityChallenge,
   CapabilityExecutionKind, CapabilityResume, CapabilitySettlementState, HostCapabilityDescriptor, HostCapabilityGovernanceSupport,
-  HostCatalogPublishParams, HostDeclaration, HostFrameAck, HostFrameRejectReason, HostLocalReadiness,
+  HostCatalogPublishParams, HostChallengePresentation, HostDeclaration, HostFrameAck, HostFrameRejectReason, HostLocalReadiness,
   HostMcpDescriptor, HostNegotiation, HostOperationControl, HostGovernanceProjection, HostGovernanceProjectionPayload,
   HostGovernanceCell, HostGovernanceEvidence, HostProtocolRange, HostSkillDescriptor,
   HostWorkspaceDescriptor,

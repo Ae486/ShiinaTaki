@@ -257,4 +257,35 @@ describe("ApprovalInteractionService", () => {
     interactions.invalidatePolicy(2);
     await expect(handle.result).resolves.toEqual({ allowed: false, reason: "invalidated", approvalGeneration: 1 });
   });
+
+  it("keeps a legacy allow inert until canonical reconfirmation targets current identity and disclosure", async () => {
+    const { decisions, interactions } = service();
+    const owner = connection();
+    const candidate = binding("legacy.server.tool");
+
+    // No canonical row exists: the legacy allow stored elsewhere never authorizes, so the operator is prompted.
+    const first = ask(interactions, owner.value, { candidate });
+    expect(first.approvalId).not.toBeNull();
+    interactions.respond(owner.value, {
+      approvalId: first.approvalId!, choice: "deny", expectedApprovalGeneration: 1,
+    });
+    await expect(first.result).resolves.toMatchObject({ allowed: false, reason: "denied" });
+
+    // Reconfirmation is an explicit canonical durable grant against the CURRENT binding + disclosure revision.
+    const snapshot = decisions.grantAlways({
+      binding: { ...candidate, disclosureRevision: 1 },
+      expectedApprovalGeneration: decisions.snapshot().approvalGeneration,
+      provenance: "legacy-reconfirmation",
+    });
+    expect(snapshot.approvalGeneration).toBe(2);
+    const listed = interactions.list().decisions;
+    expect(listed).toHaveLength(1);
+    expect(listed[0]).toMatchObject({ provenance: "legacy-reconfirmation", usability: { usable: true } });
+    expect(listed[0]!.binding.disclosureRevision).toBe(1);
+
+    // After reconfirmation the same binding resolves as durable always authority with no second prompt.
+    const second = ask(interactions, owner.value, { candidate });
+    expect(second.approvalId).toBeNull();
+    await expect(second.result).resolves.toEqual({ allowed: true, scope: "always", approvalGeneration: 2 });
+  });
 });

@@ -4,7 +4,7 @@ import { createHostCatalogStore } from "../hosts/host-catalog.ts";
 import { createConnectionRegistry } from "../server/connection-registry.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { routeCapability } from "./route-capability.ts";
-import { testGovernance } from "../testing/capability-tool-harness.ts";
+import { testGovernance, testApproval } from "../testing/capability-tool-harness.ts";
 
 const HOST_A = "11111111-1111-4111-8111-111111111111";
 const HOST_B = "22222222-2222-4222-8222-222222222222";
@@ -72,9 +72,10 @@ function setup(hostIds: string[]) {
   const request = vi.fn((target: { hostId: string }) => Promise.resolve({ ok: true as const, output: target.hostId }));
   const broker: CapabilityBroker = {
     request,
+    challenge: () => ({ accepted: false, reason: "unknown_request" }),
     resolve: () => ({ accepted: false, reason: "unknown_request" }),
     cancelGeneration: () => undefined,
   };
   const { logger } = createCaptureLogger();
-  return { request, deps: { registry, catalogs, broker, logger, governance: testGovernance() } };
+  return { request, deps: { registry, catalogs, broker, logger, governance: testGovernance(), approval: testApproval() } };
 }

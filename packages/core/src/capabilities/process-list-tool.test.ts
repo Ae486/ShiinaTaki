@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
-import { testGovernance } from "../testing/capability-tool-harness.ts";
+import { testGovernance, testApproval } from "../testing/capability-tool-harness.ts";
 import { brokerReturning, catalogsReturning, fakeHost, registryReturning } from "../testing/capability-tool-harness.ts";
 import { createCompanionFixture } from "../testing/companion-fixture.ts";
 import type { CapabilityBroker } from "./capability-broker.ts";
@@ -15,7 +15,7 @@ const SNAPSHOT = {
 
 function toolWith(registry: ConnectionRegistry, broker: CapabilityBroker) {
   const { logger } = createCaptureLogger();
-  return createProcessListTool({ registry, catalogs: catalogsReturning("process-list"), broker, logger, governance: testGovernance() });
+  return createProcessListTool({ registry, catalogs: catalogsReturning("process-list"), broker, logger, governance: testGovernance(), approval: testApproval() });
 }
 
 afterEach(() => {

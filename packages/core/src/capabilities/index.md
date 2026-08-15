@@ -1,5 +1,9 @@
 # core/capabilities/
-- capability-broker.ts — sealed Host-bound request/cancel/respond broker; per-generation settlement, distinct fail-closed approval-required passthrough, deadlines, and bounded duplicate/late history
+- capability-broker.ts — sealed Host-bound request/challenge/respond/cancel broker; per-generation settlement, approval-generation/policy invalidation, deadlines, and bounded duplicate/late terminal lineage
+- capability-broker-state.ts — the broker's internal state owner: pending attempts (memory-only raw input), terminal records, settlement/cancellation primitives shared with the Approval bridge
+- capability-response.ts — pure terminal verifier shared by live and terminal-cache settlement: provenance, exact control, authorization lineage, and stricter-only governance evidence
+- capability-challenge.ts — the ONE Host ask bridge: capability.challenge provenance/digest validation, operator-owned Approval bridging, and single-use resume authorization minting
+- capability-tools.ts — the six Shell-routed capability tools as one per-call factory: binds the initiating operator socket for interactive turns and yields the unattended bag otherwise
 - canonical-input.ts — deterministic JSON canonicalization + lowercase SHA-256 input digest for sealed dispatch identity
 - capture-stamp.ts — captureStamp(): the Q5 state-snapshot capture moment (ISO, stamped once at execute, persists byte-stable into replay); shared by the screenshot/process-list/clipboard-read results
 - route-capability.ts — explicit Host-qualified route→broker step; legacy fallback only for exactly one routable Host
@@ -11,4 +15,4 @@
 - clipboard-write-tool.ts — the agent tool: route → broker → { ok:true } (text is content, never logged)
 - shell-open-tool.ts — the agent tool: route → broker → { ok:true, opened } (url/path launch; dialog shows target)
 - exec-tool.ts — the agent tool: route → broker → ExecOutput (opaque `{command}` pass-through; parsed/governed Shell-side)
-- (the node-role capability.respond method lives in server/methods/capability-respond.ts)
+- (the node-role capability.respond/challenge methods live in server/methods/capability-respond.ts and server/methods/capability-challenge.ts)

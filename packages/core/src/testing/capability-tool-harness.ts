@@ -6,6 +6,9 @@
 import type { HostCapabilityDescriptor } from "@taki/shared";
 import { openDatabase } from "../db/sqlite.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
+import { createApprovalDecisionService } from "../approval/approval-decision-service.ts";
+import { createApprovalInteractionService, type ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
+import { createApprovalStateRepo } from "../approval/approval-state-repo.ts";
 import { createGovernancePolicyRepo } from "../governance/governance-policy-repo.ts";
 import { createGovernancePolicyService } from "../governance/governance-policy-service.ts";
 import type { CapabilityBroker, CapabilityOutcome } from "../capabilities/capability-broker.ts";
@@ -13,10 +16,24 @@ import { createHostCatalogStore, type HostCatalogStore } from "../hosts/host-cat
 import type { Connection, ConnectionRegistry } from "../server/connection-registry.ts";
 
 export const TEST_HOST_ID = "11111111-1111-4111-8111-111111111111";
+const OPERATOR_DEVICE_ID = "99999999-9999-4999-8999-999999999999";
 
 export function testGovernance() {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   return createGovernancePolicyService(createGovernancePolicyRepo(db));
+}
+
+/** A REAL canonical Approval service over a private in-memory DB — challenge/resume tests exercise live authority. */
+export function testApproval(): ApprovalInteractionService {
+  const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+  return createApprovalInteractionService(createApprovalDecisionService(createApprovalStateRepo(db)));
+}
+
+export function fakeOperator(notify?: (method: string, params: unknown) => void): Connection {
+  return {
+    state: { status: "authenticated", deviceId: OPERATOR_DEVICE_ID, role: "operator", capabilities: [] },
+    notify,
+  };
 }
 
 export function fakeHost(capability: string): Connection {
@@ -73,6 +90,7 @@ export function catalogsReturning(capability: string, descriptor?: Partial<HostC
 export function brokerReturning(outcome: CapabilityOutcome): CapabilityBroker {
   return {
     request: () => Promise.resolve(outcome),
+    challenge: () => ({ accepted: false, reason: "unknown_request" }),
     resolve: () => ({ accepted: false, reason: "unknown_request" }),
     cancelGeneration: () => undefined,
   };
@@ -87,6 +105,7 @@ export function brokerCapturing(outcome: CapabilityOutcome) {
       sent.hostId = target.hostId;
       return Promise.resolve(outcome);
     },
+    challenge: () => ({ accepted: false, reason: "unknown_request" }),
     resolve: () => ({ accepted: false, reason: "unknown_request" }),
     cancelGeneration: () => undefined,
   };

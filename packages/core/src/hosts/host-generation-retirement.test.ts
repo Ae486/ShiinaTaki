@@ -3,6 +3,7 @@ import type { CapabilityRequest, HostCatalogPublishParams } from "@taki/shared";
 import { createCapabilityBroker } from "../capabilities/capability-broker.ts";
 import { createConnectionRegistry } from "../server/connection-registry.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
+import { fakeHost, testApproval } from "../testing/capability-tool-harness.ts";
 import { createHostCatalogStore } from "./host-catalog.ts";
 import { bindHostGenerationRetirement } from "./host-generation-retirement.ts";
 
@@ -15,7 +16,7 @@ describe("bindHostGenerationRetirement", () => {
     const connections = createConnectionRegistry();
     const catalogs = createHostCatalogStore();
     const { logger } = createCaptureLogger();
-    const broker = createCapabilityBroker({ logger });
+    const broker = createCapabilityBroker({ logger, approval: testApproval() });
     bindHostGenerationRetirement({ connections, catalogs, broker });
 
     const oldA = connections.create();
@@ -77,6 +78,8 @@ function target(hostId: string, notify: (method: string, params: unknown) => voi
     descriptor: { capabilityId: "screenshot", execution: "read" as const, cancellation: "cooperative" as const, governance: { descriptorRevision: 1, classifierId: "fixed-risk", classifierRevision: 1 } },
     policyGeneration: 1,
     governanceProjection: { registryRevision: 1, descriptorRevision: 1, classifierRevision: 1, cells: [{ key: "screenshot", posture: "auto" as const }], digest: "a".repeat(64) },
+    connection: fakeHost("screenshot"),
     notify,
+    isCurrent: () => true,
   };
 }

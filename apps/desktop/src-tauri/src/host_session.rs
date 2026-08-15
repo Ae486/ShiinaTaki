@@ -1,6 +1,7 @@
-//! INPUT:  one authenticated Host negotiation plus request/cancel/terminal frames for that live generation
-//! OUTPUT: generation-bound begin/cancel/complete decisions and a 256-entry insertion-order terminal cache
-//! POS:    shell/host_session — transport-agnostic duplicate/cancellation owner; discarded on every reconnect
+//! INPUT:  one authenticated Host negotiation plus request/cancel/resume/terminal frames for that live generation
+//! OUTPUT: generation-bound begin/cancel/complete decisions, a 256-entry terminal cache, and one-shot challenge state
+//! POS:    shell/host_session — transport-agnostic duplicate/cancellation owner; discarded on every reconnect; the
+//!         pending challenge's raw input is memory-only here and never reaches disk, logs, or audit
 
 use sha2::{Digest, Sha256};
 use std::collections::{HashMap, VecDeque};
@@ -31,6 +32,19 @@ impl AttemptBinding {
     }
 }
 
+/// One awaiting-approval challenge plus the exact raw input. Memory-only: dropped on consume,
+/// cancel, terminal settlement, and every reconnect.
+pub(crate) struct PendingChallengeRecord {
+    pub(crate) challenge: crate::protocol::CapabilityChallenge,
+    pub(crate) input: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum ChallengeSlot {
+    Stored,
+    Occupied,
+}
+
 pub(crate) struct HostSession {
     host_id: String,
     connection_generation: u64,
@@ -42,6 +56,7 @@ pub(crate) struct HostSession {
     /// capability. A single session can legitimately receive different
     /// capability projections at the same generation.
     projection_digests: HashMap<String, (u64, String)>,
+    pending_challenges: HashMap<String, PendingChallengeRecord>,
 }
 
 impl HostSession {
@@ -58,7 +73,52 @@ impl HostSession {
             terminal: TerminalAttemptCache::default(),
             highest_policy_generation: 0,
             projection_digests: HashMap::new(),
+            pending_challenges: HashMap::new(),
         }
+    }
+
+    /// Stores one awaiting-approval challenge. One slot per request id: a second store is a protocol fault.
+    pub(crate) fn store_challenge(
+        &mut self,
+        challenge: crate::protocol::CapabilityChallenge,
+        input: serde_json::Value,
+    ) -> ChallengeSlot {
+        match self.pending_challenges.entry(challenge.request_id.clone()) {
+            std::collections::hash_map::Entry::Occupied(_) => ChallengeSlot::Occupied,
+            std::collections::hash_map::Entry::Vacant(slot) => {
+                slot.insert(PendingChallengeRecord { challenge, input });
+                ChallengeSlot::Stored
+            }
+        }
+    }
+
+    /// Peeks the pending challenge for a request without consuming it (resume pre-validation).
+    pub(crate) fn pending_challenge(&self, request_id: &str) -> Option<&PendingChallengeRecord> {
+        self.pending_challenges.get(request_id)
+    }
+
+    /// Consumes the pending challenge exactly once. The raw input leaves memory with the record.
+    pub(crate) fn consume_challenge(&mut self, request_id: &str) -> Option<PendingChallengeRecord> {
+        self.pending_challenges.remove(request_id)
+    }
+
+    /// Retires a pending challenge on cancel. No effect has started, so this applies regardless of the
+    /// descriptor's cancellation kind; the settled cancelled frame enters the terminal cache.
+    pub(crate) fn retire_challenge(&mut self, cancel: &CapabilityCancel) -> Option<CapabilityRespond> {
+        if !self.accepts(&cancel.control) {
+            return None;
+        }
+        let attempt_id = &cancel.control.attempt_id;
+        let binding = self.active.get(attempt_id)?;
+        if !binding.matches(&cancel.request_id, &cancel.control) {
+            return None;
+        }
+        self.pending_challenges.remove(&cancel.request_id)?;
+        self.active.remove(attempt_id);
+        let response =
+            CapabilityRespond::cancelled(cancel.request_id.clone(), cancel.control.clone());
+        self.terminal.insert(attempt_id.clone(), response.clone());
+        Some(response)
     }
 
     pub(crate) fn begin(&mut self, request: &CapabilityRequest) -> BeginDecision {
@@ -480,5 +540,87 @@ mod tests {
         changed_first.control.governance_projection.digest =
             projection_digest(&changed_first.control.governance_projection);
         assert_eq!(session.begin(&changed_first), BeginDecision::Rejected);
+    }
+
+    fn approval_fixture(name: &str) -> serde_json::Value {
+        let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../packages/shared/fixtures/protocol")
+            .join(name);
+        serde_json::from_str(&std::fs::read_to_string(path).expect("read Host Approval fixture"))
+            .expect("parse fixture JSON")
+    }
+
+    #[test]
+    fn pending_challenge_is_consumed_exactly_once() {
+        let mut session = HostSession::new(HOST.into(), 1, 1);
+        let challenge = crate::protocol::parse_capability_challenge(
+            approval_fixture("capability-challenge.screenshot.valid.json"),
+        )
+        .expect("fixture challenge");
+        let mut control = challenge.control.clone();
+        control.target_host_id = HOST.into();
+        control.connection_generation = 1;
+        control.catalog_generation = 1;
+        let challenge = crate::protocol::CapabilityChallenge { control, ..challenge };
+        assert_eq!(
+            session.store_challenge(challenge.clone(), json!({"secret": "SENTINEL"})),
+            ChallengeSlot::Stored
+        );
+        assert_eq!(
+            session.store_challenge(challenge.clone(), Value::Null),
+            ChallengeSlot::Occupied,
+            "a second challenge for the same request never replaces the first"
+        );
+        assert!(session.pending_challenge(&challenge.request_id).is_some());
+        let consumed = session
+            .consume_challenge(&challenge.request_id)
+            .expect("first consume returns the record");
+        assert_eq!(consumed.challenge.challenge_id, challenge.challenge_id);
+        assert!(session.consume_challenge(&challenge.request_id).is_none());
+        assert!(session.pending_challenge(&challenge.request_id).is_none());
+    }
+
+    #[test]
+    fn cancel_retires_a_pending_challenge_and_settles_it_cancelled() {
+        let mut session = HostSession::new(HOST.into(), 1, 1);
+        let request = request(30, 1, 1);
+        assert_eq!(session.begin(&request), BeginDecision::Start);
+        let mut challenge = crate::protocol::parse_capability_challenge(
+            approval_fixture("capability-challenge.screenshot.valid.json"),
+        )
+        .expect("fixture challenge");
+        challenge.request_id = request.request_id.clone();
+        challenge.control = request.control.clone();
+        assert_eq!(
+            session.store_challenge(challenge, Value::Null),
+            ChallengeSlot::Stored
+        );
+        let retired = session
+            .retire_challenge(&cancel(&request))
+            .expect("pending challenge retired");
+        assert!(matches!(retired, CapabilityRespond::Cancelled { .. }));
+        assert!(session.consume_challenge(&request.request_id).is_none());
+        // A later resume for the retired attempt finds no pending challenge and never executes.
+        assert!(session.pending_challenge(&request.request_id).is_none());
+        // The retired attempt settles cancelled in the terminal cache.
+        assert!(matches!(
+            session.begin(&request),
+            BeginDecision::Cached(response) if matches!(*response, CapabilityRespond::Cancelled { .. })
+        ));
+    }
+
+    #[test]
+    fn reconnect_discards_pending_challenges_with_the_session() {
+        let mut first = HostSession::new(HOST.into(), 1, 1);
+        let challenge = crate::protocol::parse_capability_challenge(
+            approval_fixture("capability-challenge.screenshot.valid.json"),
+        )
+        .expect("fixture challenge");
+        assert_eq!(
+            first.store_challenge(challenge.clone(), Value::Null),
+            ChallengeSlot::Stored
+        );
+        let replacement = HostSession::new(HOST.into(), 2, 1);
+        assert!(replacement.pending_challenge(&challenge.request_id).is_none());
     }
 }

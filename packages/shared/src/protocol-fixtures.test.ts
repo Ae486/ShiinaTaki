@@ -11,7 +11,12 @@ import { z } from "zod";
 import { ErrorCodeSchema } from "./error-code-schema.ts";
 import { JsonRpcClientFrameSchema, JsonRpcIdSchema } from "./json-rpc-schema.ts";
 import { ConnectParamsSchema, ConnectResultSchema } from "./connect-schema.ts";
-import { CapabilityRequestSchema, CapabilityRespondParamsSchema } from "./capability-schema.ts";
+import {
+  CapabilityChallengeSchema,
+  CapabilityRequestSchema,
+  CapabilityRespondParamsSchema,
+  CapabilityResumeSchema,
+} from "./capability-schema.ts";
 import { CapabilityCancelSchema, HostCatalogPublishParamsSchema, HostFrameAckSchema } from "./host-control-schema.ts";
 import {
   LegacyPermissionCellSetParamsSchema,
@@ -49,6 +54,8 @@ const SCHEMA_BY_PREFIX: Record<string, ZodType> = {
   "app-error": AppErrorFrameSchema,
   "client-frame": JsonRpcClientFrameSchema,
   "capability-request": CapabilityRequestSchema,
+  "capability-challenge": CapabilityChallengeSchema,
+  "capability-resume": CapabilityResumeSchema,
   "capability-cancel": CapabilityCancelSchema,
   "capability-respond": CapabilityRespondParamsSchema,
   "host-catalog-publish": HostCatalogPublishParamsSchema,

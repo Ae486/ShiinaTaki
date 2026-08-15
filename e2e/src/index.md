@@ -28,6 +28,7 @@ Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pn
 L2 dual-track (real-LLM, key-gated via it.skipIf; MAY red until agent-tool-timeline — the red catches the H2/tool-call
 hallucination, do not weaken). Each asserts the agent really invoked the tool (core log) AND the end-to-end result is
 correct (exit / OS-clipboard / on-disk file):
+- approval-challenge-resume.e2e.test.ts — real-process Slice-4 vertical: ask challenge → operator allow/deny/unattended → resume or fail-closed settle, with the raw-input sentinel absent from audit/logs
 - exec-l2.e2e.test.ts — real agent asked to run `hostname` invokes exec and it exits 0
 - clipboard-l2.e2e.test.ts — real agent asked to copy a token; the OS clipboard holds it (verified via an L1 read)
 - workspace-l2.e2e.test.ts — real agent asked to write+read a file; the token lands on disk in the Workspace

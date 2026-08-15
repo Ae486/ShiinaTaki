@@ -3,6 +3,6 @@
   "deviceName": "Taki Shell",
   "role": "node",
   "capabilities": ["screenshot"],
-  "host": { "protocol": { "min": 2, "max": 2 }, "catalogSchemaVersions": [2] },
+  "host": { "protocol": { "min": 3, "max": 3 }, "catalogSchemaVersions": [2] },
   "token": "opaque-device-token"
 }

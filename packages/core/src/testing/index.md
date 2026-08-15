@@ -8,5 +8,5 @@
 - capture-logger.ts — pino-shaped logger stub that records (level, obj, msg) for assertions; test-only
 - mcp-fixture.mjs — 3-method stdio MCP server (initialize/tools/list/tools/call) spawned by the manager integration test; test-only
 - ws-test-client.ts — WS integration-test client harness (makeClient/openClient + frame helpers); test-only
-- capability-tool-harness.ts — ConnectionRegistry + CapabilityBroker doubles for the Shell-backed capability tools; test-only
+- capability-tool-harness.ts — ConnectionRegistry + CapabilityBroker doubles, a REAL in-memory Approval service, and operator/Host Connection fakes for the Shell-backed capability tools; test-only
 - seed-timeline-cli.ts — pre-boot CLI seeding timeline rows into <dataDir>/taki.db via the real migrations + repo (e2e polluted-history); test-only

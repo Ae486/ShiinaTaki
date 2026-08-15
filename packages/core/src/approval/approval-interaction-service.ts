@@ -54,6 +54,9 @@ export interface ApprovalInteractionService {
   revoke(decisionId: string, expectedApprovalGeneration: number): ApprovalRevokeResult;
   invalidatePolicy(policyGeneration: number): void;
   disconnect(connection: Connection): void;
+  approvalGeneration(): number;
+  onApprovalGenerationChanged(listener: (approvalGeneration: number) => void): void;
+  onPolicyInvalidated(listener: (policyGeneration: number) => void): void;
   isCurrentAuthority(input: {
     connection: Connection;
     decision: Extract<ApprovalInteractionDecision, { allowed: true }>;
@@ -66,15 +69,41 @@ export interface ApprovalInteractionService {
 
 export function createApprovalInteractionService(authority: ApprovalDecisionService): ApprovalInteractionService {
   const state: ApprovalInteractionState = createApprovalInteractionState();
+  const generationListeners: Array<(approvalGeneration: number) => void> = [];
+  const policyListeners: Array<(policyGeneration: number) => void> = [];
+  const notifyGeneration = (before: number): void => {
+    const after = authority.snapshot().approvalGeneration;
+    if (after !== before) for (const listener of generationListeners) listener(after);
+  };
   return {
     request: (input) => requestInteraction({ state, authority, input }),
-    respond: (connection, params) => respondInteraction({ state, authority, connection, params }),
+    respond(connection, params) {
+      const before = authority.snapshot().approvalGeneration;
+      const result = respondInteraction({ state, authority, connection, params });
+      notifyGeneration(before);
+      return result;
+    },
     list: () => list(authority),
-    revoke: (decisionId, expectedApprovalGeneration) => revokeDurableDecision({
-      state, authority, decisionId, expectedApprovalGeneration,
-    }),
-    invalidatePolicy: (policyGeneration) => invalidatePolicyGeneration({ state, authority, policyGeneration }),
-    disconnect: (connection) => disconnectConnection({ state, authority, connection }),
+    revoke(decisionId, expectedApprovalGeneration) {
+      const before = authority.snapshot().approvalGeneration;
+      const result = revokeDurableDecision({ state, authority, decisionId, expectedApprovalGeneration });
+      notifyGeneration(before);
+      return result;
+    },
+    invalidatePolicy(policyGeneration) {
+      const before = authority.snapshot().approvalGeneration;
+      invalidatePolicyGeneration({ state, authority, policyGeneration });
+      notifyGeneration(before);
+      for (const listener of policyListeners) listener(policyGeneration);
+    },
+    disconnect(connection) {
+      const before = authority.snapshot().approvalGeneration;
+      disconnectConnection({ state, authority, connection });
+      notifyGeneration(before);
+    },
+    approvalGeneration: () => authority.snapshot().approvalGeneration,
+    onApprovalGenerationChanged: (listener) => generationListeners.push(listener),
+    onPolicyInvalidated: (listener) => policyListeners.push(listener),
     isCurrentAuthority: (input) => isCurrentAuthority(state, authority, input),
   };
 }

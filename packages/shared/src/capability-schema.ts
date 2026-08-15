@@ -14,24 +14,32 @@ export const CAPABILITY_METHODS = {
 export {
   CapabilityCancelReasonSchema,
   CapabilityCancelSchema,
-  CapabilityChallengeSchema,
+  CapabilityAuthorizationLineageSchema,
   CapabilityErrorCodeSchema,
   CapabilityErrorSchema,
   CapabilityRequestSchema,
   CapabilityRespondParamsSchema,
-  CapabilityResumeSchema,
   CapabilitySettlementStateSchema,
   HostFrameAckSchema as CapabilityRespondResultSchema,
 } from "./host-control-schema.ts";
 export type {
   CapabilityCancel,
+  CapabilityAuthorizationLineage,
   CapabilityCancelReason,
-  CapabilityChallenge,
   CapabilityError,
   CapabilityErrorCode,
   CapabilityRequest,
   CapabilityRespondParams,
-  CapabilityResume,
   CapabilitySettlementState,
   HostFrameAck as CapabilityRespondResult,
 } from "./host-control-schema.ts";
+export {
+  CapabilityAuthorizationSchema,
+  CapabilityChallengeSchema,
+  CapabilityResumeSchema,
+} from "./host-approval-schema.ts";
+export type {
+  CapabilityAuthorization,
+  CapabilityChallenge,
+  CapabilityResume,
+} from "./host-approval-schema.ts";

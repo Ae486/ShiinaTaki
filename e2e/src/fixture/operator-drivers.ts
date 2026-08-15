@@ -5,11 +5,15 @@
  *         + fetchTimelineEntries() (timeline.history -> persisted entries, fidelity assertions)
  * POS:    e2e/fixture — the operator-side drivers; with-stack composes them into the Stack helpers
  */
+import type { z } from "zod";
 import {
+  APPROVAL_METHODS,
   CHAT_METHODS,
   CONNECT_METHOD,
   TIMELINE_HISTORY_LIMIT_MAX,
   TIMELINE_METHODS,
+  CanonicalApprovalRequestSchema,
+  CanonicalApprovalRespondResultSchema,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
@@ -83,17 +87,34 @@ export async function sayToAgent(socket: RpcSocket, message: string, timeoutMs =
  * Drives one capability tool's execute via the dev `capability.trigger` method (L1 — no LLM, node-side gate still
  * authorizes). Returns the tool's raw structured result (`{ ok:true, ... }` or `{ ok:false, code, message }`); a failed
  * capability is a normal result, never a thrown error. Requires the stack booted with `devTrigger: true`.
+ * `interactive` binds the CALLING operator socket as the Approval owner, so an ask-classified capability prompts
+ * exactly this socket (pair it with `awaitApprovalRequest` + `respondApproval` to drive challenge → resume).
  */
 export async function triggerCapability(
   socket: RpcSocket,
-  spec: { capability: string; input?: unknown; timeoutMs?: number },
+  spec: { capability: string; input?: unknown; timeoutMs?: number; interactive?: boolean },
 ): Promise<unknown> {
   const frame = await socket.request(
     "capability.trigger",
-    { capability: spec.capability, input: spec.input },
+    { capability: spec.capability, input: spec.input, interactive: spec.interactive },
     spec.timeoutMs,
   );
   return JsonRpcSuccessResponseSchema.parse(frame).result;
+}
+
+/** The next pending Approval prompt addressed to THIS operator socket (parsed through the shared schema). */
+export async function awaitApprovalRequest(socket: RpcSocket, timeoutMs = 20_000): Promise<z.infer<typeof CanonicalApprovalRequestSchema>> {
+  const note = await socket.waitForNotification((candidate: RpcNotification) => candidate.method === APPROVAL_METHODS.request, timeoutMs);
+  return CanonicalApprovalRequestSchema.parse(note.params);
+}
+
+/** Submits one explicit operator choice for a pending Approval on the same socket that received it. */
+export async function respondApproval(
+  socket: RpcSocket,
+  spec: { approvalId: string; choice: "allow_once" | "allow_session" | "allow_always" | "deny"; expectedApprovalGeneration: number },
+): Promise<z.infer<typeof CanonicalApprovalRespondResultSchema>> {
+  const frame = await socket.request(APPROVAL_METHODS.respond, spec);
+  return CanonicalApprovalRespondResultSchema.parse(JsonRpcSuccessResponseSchema.parse(frame).result);
 }
 
 /** Sets the Core Permission Level using the current durable generation; used by post-Slice-3 process scenarios. */

@@ -22,7 +22,8 @@
 - character-costume-resolution.ts — character.costumeResolution (operator-only): one costume's external-ref → characters-root rel-path map, on demand (#18)
 - approval-respond.ts — legacy compatibility handler retained for tests/migration only; `main.ts` does not register it, and canonical Approval methods begin in Batch B
 - approval-methods.ts — canonical operator-only approval.respond/list/revoke registration; response ownership is enforced by the exact MethodContext Connection
-- capability-respond.ts — capability.respond (node-only): Host/generation/control-bound terminal settlement
+- capability-respond.ts — capability.respond (node-only): Host/generation/control-bound terminal settlement with authorization-lineage verification
+- capability-challenge.ts — capability.challenge (node-only): the Host ask handoff — validates the sealed challenge before any Approval work bridges it to the initiating operator
 - capability-trigger.ts — capability.trigger (operator-only, DEV-ONLY via TAKI_DEV_TRIGGER=1): drive a real capability tool's execute without the LLM while retaining Core governance and any Host final-enforcement path; + devTriggerEnabled(env)
 - config-methods.ts — the settings surface's single registration seam: config.list / config.set / config.subscribe
 - config-list.ts — config.list (operator-only): every knob with effective value + provenance (stored/env-locked/apply class); secrets as set/not-set

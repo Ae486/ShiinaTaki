@@ -4,6 +4,7 @@
 - json-rpc-schema.ts — JSON-RPC 2.0 envelope schemas + JSON_RPC_ERROR_CODES + JSON_RPC_APP_ERROR + client-frame union
 - error-code-schema.ts — closed cross-process ErrorCode union
 - host-control-schema.ts — canonical Execution Host negotiation/catalog/control/cancel/settlement schemas, distinct DENIED vs APPROVAL_REQUIRED failures, exact acknowledgement union, and frozen method names
+- host-approval-schema.ts — protocol-v3 Host challenge/resume extension with redacted presentation, nested single-use authorization, and canonical digest payloads
 - host-control-api.ts — focused named public export surface for Host-control schemas and types
 - connect-schema.ts — CONNECT_METHOD + RoleSchema + connect handshake param/result schemas (ADR 0004)
 - chat-schema.ts — CHAT_METHODS + chat.send/cancel/delta/complete/error param & event schemas; +ImageAttachment/IMAGE_MEDIA_TYPES (in-flight image input, #17)

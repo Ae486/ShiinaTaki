@@ -14,7 +14,7 @@ export const HOST_CONTROL_METHODS = {
   respond: "capability.respond",
 } as const;
 
-export const HOST_CONTROL_PROTOCOL_VERSION = 2;
+export const HOST_CONTROL_PROTOCOL_VERSION = 3;
 export const HOST_CATALOG_SCHEMA_VERSION = 2;
 
 export const PositiveGenerationSchema = z.number().int().positive();
@@ -199,6 +199,8 @@ export const CapabilityCancelReasonSchema = z.enum([
   "deadline_exceeded",
   "policy_revoked",
   "generation_retired",
+  "approval_denied",
+  "approval_invalidated",
 ]);
 export type CapabilityCancelReason = z.infer<typeof CapabilityCancelReasonSchema>;
 
@@ -226,6 +228,13 @@ export const CapabilityErrorSchema = z.strictObject({
 });
 export type CapabilityError = z.infer<typeof CapabilityErrorSchema>;
 
+export const CapabilityAuthorizationLineageSchema = z.strictObject({
+  authorizationId: z.uuid(),
+  approvalGeneration: PositiveGenerationSchema,
+  challengeDigest: Sha256HexSchema,
+});
+export type CapabilityAuthorizationLineage = z.infer<typeof CapabilityAuthorizationLineageSchema>;
+
 export const CapabilityRespondParamsSchema = z.discriminatedUnion("state", [
   z.strictObject({
     requestId: z.uuid(),
@@ -233,6 +242,7 @@ export const CapabilityRespondParamsSchema = z.discriminatedUnion("state", [
     state: z.literal("completed"),
     output: z.unknown(),
     governance: HostGovernanceEvidenceSchema,
+    authorization: CapabilityAuthorizationLineageSchema.optional(),
   }),
   z.strictObject({
     requestId: z.uuid(),
@@ -240,23 +250,19 @@ export const CapabilityRespondParamsSchema = z.discriminatedUnion("state", [
     state: z.literal("failed"),
     error: CapabilityErrorSchema,
     governance: HostGovernanceEvidenceSchema,
+    authorization: CapabilityAuthorizationLineageSchema.optional(),
   }),
-  z.strictObject({ requestId: z.uuid(), control: HostOperationControlSchema, state: z.literal("cancelled") }),
-  z.strictObject({ requestId: z.uuid(), control: HostOperationControlSchema, state: z.literal("outcome_unknown") }),
-]);
+  z.strictObject({ requestId: z.uuid(), control: HostOperationControlSchema, state: z.literal("cancelled"), authorization: CapabilityAuthorizationLineageSchema.optional() }),
+  z.strictObject({ requestId: z.uuid(), control: HostOperationControlSchema, state: z.literal("outcome_unknown"), authorization: CapabilityAuthorizationLineageSchema.optional() }),
+]).superRefine((params, context) => {
+  // An ask-classified execution settles success ONLY under its Core-minted authorization lineage, and a
+  // lineage may never vouch for an execution that was not ask-classified (Batch C frozen contract).
+  if (params.state === "completed" && (params.governance.effectivePosture === "ask") !== (params.authorization !== undefined)) {
+    context.addIssue({
+      code: "custom",
+      message: "a completed ask-classified execution requires matching authorization lineage",
+      path: ["authorization"],
+    });
+  }
+});
 export type CapabilityRespondParams = z.infer<typeof CapabilityRespondParamsSchema>;
-
-export const CapabilityChallengeSchema = z.strictObject({
-  requestId: z.uuid(),
-  control: HostOperationControlSchema,
-  challengeId: z.uuid(),
-  reason: z.string().min(1).max(240),
-});
-export type CapabilityChallenge = z.infer<typeof CapabilityChallengeSchema>;
-
-export const CapabilityResumeSchema = z.strictObject({
-  requestId: z.uuid(),
-  control: HostOperationControlSchema,
-  challengeId: z.uuid(),
-});
-export type CapabilityResume = z.infer<typeof CapabilityResumeSchema>;

@@ -18,13 +18,15 @@ use crate::capabilities_impl::exec::{classify as classify_exec, ExecPolicy};
 use crate::capabilities_impl::shell_open::classify as classify_shell_open;
 use crate::capabilities_impl::CapabilityRegistry;
 use crate::gate::Gate;
-use crate::host_session::{BeginDecision, HostSession};
+use crate::host_session::{BeginDecision, ChallengeSlot, HostSession};
+use crate::protocol::ws_challenge::{build_challenge, matches_pending_authorization};
 use crate::protocol::{
-    CapabilityCancel, CapabilityCancellation, CapabilityExecutionKind, CapabilityRequest,
-    CapabilityRespond, ClientFrame, ConnectParams, ConnectResult, ErrorCode,
-    HostCapabilityDescriptor, HostCatalogPublish, HostDeclaration, HostFrameAck,
-    HostLocalReadiness, HostNegotiation, HostProtocolRange, JsonRpcId, Role,
-    HOST_CATALOG_SCHEMA_VERSION, HOST_CONTROL_PROTOCOL_VERSION,
+    CapabilityAuthorizationLineage, CapabilityCancel, CapabilityCancellation,
+    CapabilityExecutionKind, CapabilityRequest, CapabilityRespond, ClientFrame, ConnectParams,
+    ConnectResult, ErrorCode, HostCapabilityDescriptor, HostCatalogPublish, HostDeclaration,
+    HostFrameAck, HostGovernanceEvidence, HostLocalReadiness, HostNegotiation, HostProtocolRange,
+    JsonRpcId, Role, parse_capability_resume, HOST_CATALOG_SCHEMA_VERSION,
+    HOST_CONTROL_PROTOCOL_VERSION,
 };
 use crate::secrets::SecretStore;
 use crate::status::StatusEmitter;
@@ -224,11 +226,12 @@ impl WsClient {
         let Ok(ClientFrame::Notification { method, params, .. }) =
             serde_json::from_str::<ClientFrame>(text)
         else {
-            return; // capability.respond acks and other frames need no action
+            return; // capability.respond/challenge acks and other frames need no action
         };
         match method.as_str() {
             "capability.request" => self.dispatch_request(params, write, session).await,
             "capability.cancel" => self.dispatch_cancel(params, write, session).await,
+            "capability.resume" => self.dispatch_resume(params, write, session).await,
             _ => {}
         }
     }
@@ -258,11 +261,42 @@ impl WsClient {
                 let exec_policy = self.exec_policy.clone();
                 let write = write.clone();
                 let session = session.clone();
+                // The Host identity equals this device id (validated at negotiation) — reading it through the
+                // session here would re-lock a guard the match scrutinee still holds (same-task deadlock).
+                let host_id = self.device_id.clone();
                 tokio::spawn(async move {
-                    let response = authorize_and_run(gate, handlers, exec_policy, request).await;
-                    if let Some(response) = session.lock().await.complete(response) {
-                        log_terminal(&capability, &response);
-                        send_response(&write, response).await;
+                    match authorize_and_run(gate, handlers, exec_policy, request).await {
+                        Authorized::Respond(response) => {
+                            if let Some(response) = session.lock().await.complete(response) {
+                                log_terminal(&capability, &response);
+                                send_response(&write, response).await;
+                            }
+                        }
+                        Authorized::Challenge { evidence, request } => {
+                            // ask never executes and never prompts locally: emit one sealed challenge and
+                            // keep the exact raw input in memory-only session state until resume/cancel.
+                            let descriptor = capability_descriptor(&request.control.capability_id);
+                            let outcome = match descriptor {
+                                Some(descriptor) => build_challenge(&host_id, evidence, &request, &descriptor),
+                                None => Err(format!(
+                                    "capability {} has no descriptor",
+                                    request.control.capability_id
+                                )),
+                            };
+                            let challenge = match outcome {
+                                Ok(challenge) => challenge,
+                                Err(error) => {
+                                    tracing::warn!(request_id = %request.request_id, error = %error,
+                                        "capability challenge could not be sealed");
+                                    return;
+                                }
+                            };
+                            match session.lock().await.store_challenge(challenge.clone(), request.input) {
+                                ChallengeSlot::Stored => send_challenge(&write, challenge).await,
+                                slot => tracing::warn!(request_id = %challenge.request_id,
+                                    slot = ?slot, "capability challenge slot was not free"),
+                            }
+                        }
                     }
                 });
             }
@@ -274,6 +308,12 @@ impl WsClient {
             tracing::warn!("capability.cancel params failed to parse; cancel dropped");
             return;
         };
+        // A pending challenge has started no effect, so retirement applies to every cancellation kind.
+        if let Some(response) = session.lock().await.retire_challenge(&cancel) {
+            tracing::info!(request_id = %cancel.request_id, "capability challenge retired by cancel");
+            send_response(write, response).await;
+            return;
+        }
         if !capability_descriptor(&cancel.control.capability_id).is_some_and(|descriptor| {
             descriptor.cancellation == CapabilityCancellation::Cooperative
         }) {
@@ -283,6 +323,62 @@ impl WsClient {
         if let Some(response) = session.lock().await.cancel(&cancel) {
             send_response(write, response).await;
         }
+    }
+
+    // Core -> Node resume for an authorized ask: revalidate the one-shot authorization against the
+    // stored challenge, consume it, execute at most once, and settle with the authorization lineage.
+    async fn dispatch_resume(&self, params: Value, write: &SharedWrite, session: &SharedSession) {
+        let Ok(resume) = parse_capability_resume(params) else {
+            tracing::warn!("capability.resume params failed to parse; resume dropped");
+            return;
+        };
+        let request_id = resume.request_id.clone();
+        let authorized = {
+            let mut guard = session.lock().await;
+            let Some(pending) = guard.pending_challenge(&resume.request_id) else {
+                tracing::warn!(request_id = %request_id, "capability resume matched no pending challenge");
+                return;
+            };
+            match matches_pending_authorization(pending, &resume) {
+                Ok(()) => {
+                    let consumed = guard.consume_challenge(&resume.request_id);
+                    consumed.map(|record| (record, resume.authorization.clone()))
+                }
+                Err(error) => {
+                    // Fail closed: a tampered/replayed/expired resume voids the pending challenge entirely.
+                    guard.consume_challenge(&resume.request_id);
+                    tracing::warn!(request_id = %request_id, error = %error,
+                        "capability resume authorization rejected; pending challenge voided");
+                    None
+                }
+            }
+        };
+        let Some((record, authorization)) = authorized else {
+            return;
+        };
+        let handlers = self.handlers.clone();
+        let write = write.clone();
+        let session = session.clone();
+        let capability = record.challenge.control.capability_id.clone();
+        tokio::spawn(async move {
+            let response = handlers
+                .respond(
+                    record.challenge.request_id.clone(),
+                    record.challenge.control.clone(),
+                    &capability,
+                    &record.input,
+                )
+                .with_governance(record.challenge.governance.clone())
+                .with_authorization(CapabilityAuthorizationLineage {
+                    authorization_id: authorization.authorization_id,
+                    approval_generation: authorization.approval_generation,
+                    challenge_digest: authorization.challenge_digest,
+                });
+            if let Some(response) = session.lock().await.complete(response) {
+                log_terminal(&capability, &response);
+                send_response(&write, response).await;
+            }
+        });
     }
 
     fn connect_params(&self, token: Option<String>, pairing_code: Option<String>) -> ConnectParams {
@@ -372,14 +468,29 @@ fn next_id() -> u64 {
     COUNTER.fetch_add(1, Ordering::Relaxed)
 }
 
+enum Authorized {
+    Respond(CapabilityRespond),
+    Challenge {
+        evidence: HostGovernanceEvidence,
+        request: CapabilityRequest,
+    },
+}
+
+enum Enforcement {
+    Respond(Box<CapabilityRespond>),
+    Ask(HostGovernanceEvidence),
+}
+
 async fn authorize_and_run(
     gate: Arc<Gate>,
     handlers: Arc<CapabilityRegistry>,
     exec_policy: Arc<ExecPolicy>,
     request: CapabilityRequest,
-) -> CapabilityRespond {
+) -> Authorized {
     let failure_request_id = request.request_id.clone();
     let failure_control = request.control.clone();
+    // The ask branch needs the exact raw input back to hold in memory-only pending state.
+    let sealed_request = request.clone();
     let CapabilityRequest {
         request_id,
         control,
@@ -387,7 +498,7 @@ async fn authorize_and_run(
     } = request;
     let capability = control.capability_id.clone();
     if input_digest(&capability, &input) != control.input_digest {
-        return CapabilityRespond::err(request_id, control, crate::protocol::CapabilityErrorCode::Denied, "input digest mismatch".into());
+        return Authorized::Respond(CapabilityRespond::err(request_id, control, crate::protocol::CapabilityErrorCode::Denied, "input digest mismatch".into()));
     }
     let joined = tokio::task::spawn_blocking(move || {
         let projection = &control.governance_projection;
@@ -430,32 +541,35 @@ async fn authorize_and_run(
                 crate::protocol::HostGovernanceConstraint::None
             },
         };
-        gate.audit_enforcement(&request_id, &capability, authorized, (capability == "exec").then(|| input.get("command").and_then(Value::as_str).unwrap_or("")));
+        // Privacy boundary: an ask stays pending, so its exact command must NOT enter the audit trail —
+        // the exec command is audited only once the attempt actually executes under auto.
+        let command = (capability == "exec" && authorized)
+            .then(|| input.get("command").and_then(Value::as_str).unwrap_or("").to_string());
+        gate.audit_enforcement(&request_id, &capability, authorized, command.as_deref());
         if authorized {
-            handlers.respond(request_id, control, &capability, &input).with_governance(evidence)
+            Enforcement::Respond(Box::new(handlers.respond(request_id, control, &capability, &input).with_governance(evidence)))
+        } else if effective_posture == crate::protocol::HostGovernancePosture::Ask {
+            Enforcement::Ask(evidence)
         } else {
-            let (code, message) = if effective_posture == crate::protocol::HostGovernancePosture::Ask {
-                (crate::protocol::CapabilityErrorCode::ApprovalRequired, "approval required")
-            } else {
-                (crate::protocol::CapabilityErrorCode::Denied, "denied")
-            };
-            CapabilityRespond::err(
+            Enforcement::Respond(Box::new(CapabilityRespond::err(
                 request_id,
                 control,
-                code,
-                message.into(),
-            ).with_governance(evidence)
+                crate::protocol::CapabilityErrorCode::Denied,
+                "denied".into(),
+            ).with_governance(evidence)))
         }
     })
     .await;
-    joined.unwrap_or_else(|error| {
-        CapabilityRespond::err(
+    match joined {
+        Ok(Enforcement::Ask(evidence)) => Authorized::Challenge { evidence, request: sealed_request },
+        Ok(Enforcement::Respond(response)) => Authorized::Respond(*response),
+        Err(error) => Authorized::Respond(CapabilityRespond::err(
             failure_request_id,
             failure_control,
             crate::protocol::CapabilityErrorCode::ExecFailed,
             error.to_string(),
-        )
-    })
+        )),
+    }
 }
 
 fn input_digest(capability: &str, input: &Value) -> String {
@@ -477,6 +591,17 @@ fn canonical_json(value: &Value) -> String {
 
 async fn send_response(write: &SharedWrite, response: CapabilityRespond) {
     let frame = json!({ "jsonrpc": "2.0", "id": next_id(), "method": "capability.respond", "params": response });
+    let _ = write
+        .lock()
+        .await
+        .send(Message::text(frame.to_string()))
+        .await;
+}
+
+// The ask handoff: a REQUEST frame (Core acknowledges with a Host ack); the raw input stays behind in
+// memory-only session state and never appears in this frame or in any log line.
+async fn send_challenge(write: &SharedWrite, challenge: crate::protocol::CapabilityChallenge) {
+    let frame = json!({ "jsonrpc": "2.0", "id": next_id(), "method": "capability.challenge", "params": challenge });
     let _ = write
         .lock()
         .await

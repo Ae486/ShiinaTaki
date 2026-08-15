@@ -6,6 +6,11 @@
 #[path = "host_control_protocol.rs"]
 mod host_control_protocol;
 pub use host_control_protocol::*;
+#[path = "host_approval_protocol.rs"]
+mod host_approval_protocol;
+pub use host_approval_protocol::*;
+#[path = "ws_challenge.rs"]
+pub(crate) mod ws_challenge;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -280,11 +285,16 @@ mod tests {
             "capability-request" => serde_json::from_str::<CapabilityRequest>(text)
                 .ok()
                 .map(to_value),
+            "capability-challenge" => serde_json::from_str::<Value>(text).ok()
+                .and_then(|value| parse_capability_challenge(value).ok()).map(to_value),
+            "capability-resume" => serde_json::from_str::<Value>(text).ok()
+                .and_then(|value| parse_capability_resume(value).ok()).map(to_value),
             "capability-cancel" => serde_json::from_str::<CapabilityCancel>(text)
                 .ok()
                 .map(to_value),
             "capability-respond" => serde_json::from_str::<CapabilityRespond>(text)
                 .ok()
+                .and_then(|response| response.validate_lineage().ok().map(|_| response))
                 .map(to_value),
             "host-catalog-publish" => serde_json::from_str::<HostCatalogPublish>(text)
                 .ok()

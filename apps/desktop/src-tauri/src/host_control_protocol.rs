@@ -6,7 +6,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-pub const HOST_CONTROL_PROTOCOL_VERSION: u64 = 2;
+pub const HOST_CONTROL_PROTOCOL_VERSION: u64 = 3;
 pub const HOST_CATALOG_SCHEMA_VERSION: u64 = 2;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -344,6 +344,8 @@ pub enum CapabilityCancelReason {
     DeadlineExceeded,
     PolicyRevoked,
     GenerationRetired,
+    ApprovalDenied,
+    ApprovalInvalidated,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -371,6 +373,17 @@ pub struct CapabilityError {
     pub message: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct CapabilityAuthorizationLineage {
+    #[serde(rename = "authorizationId")]
+    pub authorization_id: String,
+    #[serde(rename = "approvalGeneration")]
+    pub approval_generation: u64,
+    #[serde(rename = "challengeDigest")]
+    pub challenge_digest: String,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "state", rename_all = "snake_case", deny_unknown_fields)]
 pub enum CapabilityRespond {
@@ -380,6 +393,8 @@ pub enum CapabilityRespond {
         control: HostOperationControl,
         output: Value,
         governance: HostGovernanceEvidence,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        authorization: Option<CapabilityAuthorizationLineage>,
     },
     Failed {
         #[serde(rename = "requestId")]
@@ -387,16 +402,22 @@ pub enum CapabilityRespond {
         control: HostOperationControl,
         error: CapabilityError,
         governance: HostGovernanceEvidence,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        authorization: Option<CapabilityAuthorizationLineage>,
     },
     Cancelled {
         #[serde(rename = "requestId")]
         request_id: String,
         control: HostOperationControl,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        authorization: Option<CapabilityAuthorizationLineage>,
     },
     OutcomeUnknown {
         #[serde(rename = "requestId")]
         request_id: String,
         control: HostOperationControl,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        authorization: Option<CapabilityAuthorizationLineage>,
     },
 }
 
@@ -408,6 +429,7 @@ impl CapabilityRespond {
             control,
             output,
             governance,
+            authorization: None,
         }
     }
 
@@ -423,6 +445,7 @@ impl CapabilityRespond {
             control,
             error: CapabilityError { code, message },
             governance,
+            authorization: None,
         }
     }
 
@@ -436,10 +459,30 @@ impl CapabilityRespond {
         self
     }
 
+    pub fn with_authorization(mut self, lineage: CapabilityAuthorizationLineage) -> Self {
+        match &mut self {
+            Self::Completed { authorization, .. }
+            | Self::Failed { authorization, .. }
+            | Self::Cancelled { authorization, .. }
+            | Self::OutcomeUnknown { authorization, .. } => *authorization = Some(lineage),
+        }
+        self
+    }
+
+    pub fn authorization(&self) -> Option<&CapabilityAuthorizationLineage> {
+        match self {
+            Self::Completed { authorization, .. }
+            | Self::Failed { authorization, .. }
+            | Self::Cancelled { authorization, .. }
+            | Self::OutcomeUnknown { authorization, .. } => authorization.as_ref(),
+        }
+    }
+
     pub fn cancelled(request_id: String, control: HostOperationControl) -> Self {
         Self::Cancelled {
             request_id,
             control,
+            authorization: None,
         }
     }
 
@@ -447,6 +490,7 @@ impl CapabilityRespond {
         Self::OutcomeUnknown {
             request_id,
             control,
+            authorization: None,
         }
     }
 
@@ -459,6 +503,28 @@ impl CapabilityRespond {
         }
     }
 
+    /// Cross-field rule shared with the zod schema: an ask-classified completion requires its
+    /// Core-minted authorization lineage, and a lineage never vouches for a non-ask completion.
+    pub fn validate_lineage(&self) -> Result<(), String> {
+        if let Self::Completed { governance, authorization, .. } = self {
+            let is_ask = governance.effective_posture == HostGovernancePosture::Ask;
+            if is_ask != authorization.is_some() {
+                return Err(
+                    "a completed ask-classified execution requires matching authorization lineage".into(),
+                );
+            }
+        }
+        if let Some(lineage) = self.authorization() {
+            if uuid::Uuid::parse_str(&lineage.authorization_id).is_err()
+                || lineage.approval_generation == 0
+                || !is_sha256_hex(&lineage.challenge_digest)
+            {
+                return Err("capability authorization lineage is malformed".into());
+            }
+        }
+        Ok(())
+    }
+
     pub fn control(&self) -> &HostOperationControl {
         match self {
             Self::Completed { control, .. }
@@ -467,4 +533,11 @@ impl CapabilityRespond {
             | Self::OutcomeUnknown { control, .. } => control,
         }
     }
+}
+
+fn is_sha256_hex(value: &str) -> bool {
+    value.len() == 64
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
 }

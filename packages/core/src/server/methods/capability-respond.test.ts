@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { CapabilityRequest, JsonRpcRequest } from "@taki/shared";
 import { createCaptureLogger } from "../../testing/capture-logger.ts";
+import { fakeHost, testApproval } from "../../testing/capability-tool-harness.ts";
 import { createCapabilityBroker, type CapabilityBroker } from "../../capabilities/capability-broker.ts";
 import { createConnectionRegistry, type Connection, type ConnectionRegistry } from "../connection-registry.ts";
 import { createMethodRegistry, type MethodContext } from "../method-registry.ts";
@@ -15,7 +16,7 @@ function request(params: unknown): JsonRpcRequest {
 }
 function makeBroker(): CapabilityBroker {
   const { logger } = createCaptureLogger();
-  return createCapabilityBroker({ logger });
+  return createCapabilityBroker({ logger, approval: testApproval() });
 }
 function registryFor(broker: CapabilityBroker, connections: ConnectionRegistry) {
   const registry = createMethodRegistry();
@@ -48,6 +49,8 @@ describe("capabilityRespondMethod", () => {
       descriptor: { capabilityId: "screenshot", execution: "read", cancellation: "cooperative", governance: { descriptorRevision: 1, classifierId: "fixed-risk", classifierRevision: 1 } },
       policyGeneration: 1,
       governanceProjection: { registryRevision: 1, descriptorRevision: 1, classifierRevision: 1, cells: [{ key: "screenshot", posture: "auto" }], digest: "a".repeat(64) },
+      connection: fakeHost("screenshot"),
+      isCurrent: () => true,
       notify: (_m, p) => (sent = p as CapabilityRequest),
     }, {});
     const params = { requestId: sent!.requestId, control: sent!.control, state: "completed", output: {}, governance: { descriptorRevision: 1, classifierRevision: 1, cellKey: "screenshot", effectivePosture: "auto", constraint: "none" } };
@@ -81,6 +84,8 @@ describe("capabilityRespondMethod", () => {
       descriptor: { capabilityId: "screenshot", execution: "read", cancellation: "cooperative", governance: { descriptorRevision: 1, classifierId: "fixed-risk", classifierRevision: 1 } },
       policyGeneration: 1,
       governanceProjection: { registryRevision: 1, descriptorRevision: 1, classifierRevision: 1, cells: [{ key: "screenshot", posture: "auto" }], digest: "a".repeat(64) },
+      connection: fakeHost("screenshot"),
+      isCurrent: () => true,
       notify: (_method, params) => (sent = params as CapabilityRequest),
     }, {});
     const replacement = connections.create();
