@@ -658,3 +658,30 @@ At the time of this document:
 The next useful milestone is not another design loop. It is a recovered Trellis/ZCODE environment plus one complete,
 fail-closed, tested Host Approval challenge/resume vertical, followed by the single final Approval check. After that,
 move directly toward the user-visible Host Secret Catalog and secure MCP lifecycle.
+
+## 19. Owner authority rulings for the ZCode Leader (2026-08-16)
+
+Recorded from the live owner session after takeover. Where they conflict with stricter earlier
+defaults in this document or `docs/HANDOFF.md`, these rulings supersede.
+
+1. **Effort naming**: "xhigh/high" were Codex model-effort labels. ZCode equivalents are
+   最高/高. The Leader plans the actual per-dispatch thinking depth; the labels are not
+   mechanically binding.
+2. **Stop protocol / goal mode**: the owner drives via goals, not step approvals. Commit at task
+   milestones so history stays traceable and rollback-capable. The Trellis task lifecycle
+   (create/start/finish/archive) is Leader-decided.
+3. **Merge authority**: only the T4 worktree is currently active; `main` will not advance for
+   now. Merging the T4 branch into `main` is a Leader decision whenever the result is
+   conflict-free or the conflicts are resolvable while preserving both semantic contracts.
+   Push is optional and may be omitted entirely; staged commits and rollback capability are
+   the actual requirement.
+4. **Code search**: whether to use `jbcontext` is Leader-decided; direct reads are acceptable
+   when confidence is high. The YCE prohibition is unchanged.
+5. **Milestone reports**: after each milestone task completes, archive a report as the work
+   trace. When the next task breakdown is already clear, proceed directly per the process
+   without interrupting the owner.
+
+Standing honesty rule (Leader operationalization, not a new owner grant): owner-manual
+acceptance items are never marked passed without the owner's actual observation. They are
+recorded as "pending owner verification" in reports and archives; they gate release claims,
+not further implementation.
