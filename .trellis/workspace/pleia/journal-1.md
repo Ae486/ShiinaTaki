@@ -802,3 +802,24 @@ acceptance criterion can pass.
 
 [IN PROGRESS] **B+D is checkpointed; C+E Host/convergence is next.** No push, reset, rebase, force, finish, archive, or
 formal task-status mutation was performed.
+
+
+## Session 14: T4 Approval Productization C+E convergence and slice closeout
+
+**Date**: 2026-08-16
+**Task**: T4 Approval Productization C+E convergence and slice closeout
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Recovered the interrupted in-tree C-wave patch and completed the C+E Host/convergence wave as ffa9fff: protocol v3 capability.challenge/capability.resume with recomputed digests and ask-only evidence validation, single ApprovalInteractionService bridging against the initiating operator connection, one-use generation-bound CapabilityAuthorization, Rust memory-only pending challenge/input with exactly-once consumption, cross-language completed-ask-lineage schema enforcement, unattended fail-closed asks, legacy-reconfirmation seam, migration 016 timeline input scrub, and a real-process withStack e2e with sentinel absence proofs. The single final formal check passed as pass-with-fixes with all workspace gates independently re-verified (Shared 266, Core 1306+1 skip, CLI 36, Desktop 386+build, Rust 163 locked+Clippy, e2e 5/5, lint, diff-check) and one test-only coverage fix (a1a927e). Spec contract codified in permission-authorization.md; HANDOFF/ZCODE-HANDOFF updated; approval-productization and governance-authority archived. Residuals recorded: migration 016 secure_delete restore semantics, Rust soft-cap splits before the next Rust-heavy slice, Host-side cancel real-process evidence, packaged WebView pending owner verification. Separately committed the pre-existing trellis 0.6.15 + zcode tooling migration (f649464) and the C+E plan (abd8386). Next: Host Secret Catalog (Slice 5).
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `ffa9fff` | (see git log) |
+
+### Status
+
+[OK] **Completed**
