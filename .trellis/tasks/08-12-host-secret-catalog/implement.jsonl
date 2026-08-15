@@ -1,1 +1,7 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/tasks/08-10-skills-mcp-productization/research/vps-secret-backend-options.md", "reason": "Owner-selected secret architecture: libsodium secretstream catalog, Windows Credential Manager versioned key, systemd LoadCredentialEncrypted=, spike gates"}
+{"file": ".trellis/tasks/08-12-host-secret-catalog/research/live-secret-catalog-seam-map.md", "reason": "Live code seams for Host protocol sensitive path, credential storage, and operator command routing (produced during planning)"}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "Host-bound operation lifecycle: secret set/clear/test are Host-bound operations with generation ownership and fail-closed offline semantics"}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Governance convergence incl. the implemented Slice 4 challenge/resume contract; sensitive commands are operator-only"}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "Authenticated operator command path and connection-generation rules for the dedicated sensitive method"}
+{"file": ".trellis/spec/backend/tool-design.md", "reason": "Tool/command design conventions for the write-only secret seam and sanitized diagnostics"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Secret values must never enter logs; sanitized diagnostics rules"}
