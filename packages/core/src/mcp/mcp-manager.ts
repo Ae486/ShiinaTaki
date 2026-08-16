@@ -1,5 +1,6 @@
 /**
- * INPUT:  McpServerEntry[] (from mcp-config) + a logger + an optional connect override (tests)
+ * INPUT:  McpServerEntry[] (from mcp-config) + a logger + an optional connect override (tests) + an optional
+ *         catalog resolver for `secret-ref:` env/header markers (connect-time, fail-closed per server)
  * OUTPUT: createMcpManager(deps) -> Promise<McpManager> { tools(), describe(name), close() }
  * POS:    core/mcp — standard SDK list/prepare/convert/call path with trusted subject sidecars and pre-call governance
  */
@@ -12,6 +13,7 @@ import type { McpServerEntry } from "./mcp-config.ts";
 import { mcpPublicConfig } from "./mcp-config.ts";
 import { defaultConnect, type McpClient, type McpConnect } from "./mcp-connect.ts";
 import { prepareMcpToolDefinitions } from "./mcp-schema-compat.ts";
+import { resolveMcpConfigSecrets } from "../secrets/secret-ref.ts";
 
 /** The raw MCP identity behind a namespaced ToolSet key; the presentation key is never an authority key. */
 export interface McpToolRef {
@@ -34,6 +36,8 @@ export interface McpManagerDeps {
   entries: McpServerEntry[];
   logger: Logger;
   connect?: McpConnect;
+  /** Catalog resolution for `secret-ref:` markers in env/headers (just-in-time, connect-time only). */
+  resolveSecret?: (ref: string) => string | null;
   governance?: {
     service: GovernancePolicyService;
     ownerHostId: string;
@@ -54,7 +58,8 @@ export async function createMcpManager(deps: McpManagerDeps): Promise<McpManager
   const refs = new Map<string, McpToolRef>();
   const collisions = new Set<string>();
 
-  const results = await Promise.allSettled(deps.entries.map((entry) => discover(entry, connect, log)));
+  const context = { connect, log, resolveSecret: deps.resolveSecret };
+  const results = await Promise.allSettled(deps.entries.map((entry) => discover(entry, context)));
   results.forEach((result, index) => {
     const entry = deps.entries[index];
     if (!entry) return;
@@ -133,17 +138,23 @@ function mcpPresentation(ref: McpToolRef) {
   };
 }
 
-async function discover(
-  entry: McpServerEntry,
-  connect: McpConnect,
-  log: Logger,
-): Promise<{ client: McpClient; tools: ToolSet }> {
-  const client = await connect(entry);
+interface DiscoverContext {
+  connect: McpConnect;
+  log: Logger;
+  resolveSecret?: (ref: string) => string | null;
+}
+
+async function discover(entry: McpServerEntry, context: DiscoverContext): Promise<{ client: McpClient; tools: ToolSet }> {
+  // Secrets resolve ONLY here — immediately before connect/spawn, never into config, logs, or cached state.
+  const resolvedEntry: McpServerEntry = context.resolveSecret
+    ? { key: entry.key, config: resolveMcpConfigSecrets(entry.config, context.resolveSecret) }
+    : entry;
+  const client = await context.connect(resolvedEntry);
   try {
     const listed = await client.listTools();
     const prepared = prepareMcpToolDefinitions(listed);
     for (const skipped of prepared.skipped) {
-      log.warn({ server: entry.key, ...skipped }, "mcp tool schema incompatible; skipped");
+      context.log.warn({ server: entry.key, ...skipped }, "mcp tool schema incompatible; skipped");
     }
     // Dynamic MCP inputs are unknown while ToolSet is invariant. Execution stays in the SDK's raw-name closure.
     const tools = client.toolsFromDefinitions(prepared.definitions) as unknown as ToolSet;

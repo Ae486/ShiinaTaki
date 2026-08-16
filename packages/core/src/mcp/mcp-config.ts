@@ -1,7 +1,8 @@
 /**
  * INPUT:  the mcp-servers.json path under the app data root (TAKI_DATA_DIR) + a logger
- * OUTPUT: McpServerEntry types + loadMcpConfig(filePath, log) -> McpServerEntry[]
- * POS:    core/mcp — operator-owned MCP server config; NEVER agent-reachable (AC #8-2). Missing/malformed degrades to []
+ * OUTPUT: McpServerEntry types + loadMcpConfig(filePath, log) -> McpServerEntry[] + parseMcpServers(raw)
+ * POS:    core/mcp — operator-owned MCP server config; NEVER agent-reachable (AC #8-2). Missing/malformed degrades to [];
+ *         env/header VALUES may be `secret-ref:` markers once the encrypted-catalog migration has rewritten them
  */
 import { readFileSync } from "node:fs";
 import { z } from "zod";
@@ -58,21 +59,24 @@ export function loadMcpConfig(filePath: string, log: Logger): McpServerEntry[] {
     log.warn({ filePath, err: readable(error) }, "mcp config unreadable; starting with no MCP servers");
     return [];
   }
+  const parsed = parseMcpServers(raw);
+  if (!parsed.ok) {
+    log.warn({ filePath }, "mcp config is malformed; starting with no MCP servers");
+    return [];
+  }
+  return Object.entries(parsed.servers).map(([key, config]) => ({ key, config }));
+}
 
+/** Strict parse of the file body; the secret migration reuses it so a rewrite only ever follows a valid read. */
+export function parseMcpServers(raw: string): { ok: true; servers: Record<string, McpServerConfig> } | { ok: false } {
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch {
-    log.warn({ filePath }, "mcp config is not valid JSON; starting with no MCP servers");
-    return [];
+    return { ok: false };
   }
-
   const result = McpServersFileSchema.safeParse(parsed);
-  if (!result.success) {
-    log.warn({ filePath, issues: result.error.issues.length }, "mcp config is malformed; starting with no MCP servers");
-    return [];
-  }
-  return Object.entries(result.data).map(([key, config]) => ({ key, config }));
+  return result.success ? { ok: true, servers: result.data } : { ok: false };
 }
 
 function readable(error: unknown): string {

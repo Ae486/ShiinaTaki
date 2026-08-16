@@ -26,4 +26,5 @@
 - perception-schema.ts — PERCEPTION_METHODS + Privacy Pause state/set + activity-card schemas (current/recent/samplingStatus/pauseState) (T3b; panel UI at #26); operator-only, NO Rust mirror
 - capability-schema.ts — compatibility entry re-exporting the canonical Host-bound capability channel schemas
 - capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec/ForegroundWindow); mirrored in Rust serde
+- secret-catalog-schema.ts — SECRET_METHODS + write-only secret.set/clear/presence/list schemas + SecretRef charset + SecretRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)
 - ws-defaults.ts — default loopback WS host/port constants

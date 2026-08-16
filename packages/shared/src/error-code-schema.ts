@@ -16,6 +16,9 @@ export const ErrorCodeSchema = z.enum([
   // A config.set the store refuses on its own terms (secret / env-locked / env-only / unknown key / bad value);
   // the machine-readable ConfigRefusalReason rides error.data.reason beside this code.
   "CONFIG_REFUSED",
+  // A secret.set/clear the catalog service refuses on its own terms (locked / unreadable / unsupported store);
+  // the machine-readable SecretRefusalReason rides error.data.reason beside this code.
+  "SECRET_REFUSED",
   "POLICY_CONFLICT",
   "GOVERNANCE_REFUSED",
   // Tool execution outcomes are structured model-readable failures, not JSON-RPC envelope codes.

@@ -18,6 +18,12 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 name = "taki-node"
 path = "src/bin/taki-node.rs"
 
+# The Core secret-catalog master-key helper (Credential Manager get/create-only + systemd credentials read);
+# release-safe by design — it grants no approval and no capability, only brokers one versioned key (see header).
+[[bin]]
+name = "taki-secret-key"
+path = "src/bin/taki-secret-key.rs"
+
 [build-dependencies]
 tauri-build = { version = "2.6", features = [] }
 

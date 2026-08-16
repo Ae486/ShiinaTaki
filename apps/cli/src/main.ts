@@ -11,16 +11,23 @@ import { createCliApprovalController } from "./approval-controller.ts";
 import { connectChatClient, type ChatClient } from "./chat-client.ts";
 import { loadOrCreateIdentity, saveToken } from "./device-identity.ts";
 import { buildOperatorCall, parseOperatorCall, runOperatorCall, OPERATOR_CALL_USAGE } from "./operator-call.ts";
+import { runSecretCommand, SECRET_COMMAND_USAGE } from "./secret-commands.ts";
 import { showRecentHistory } from "./recent-history.ts";
 import { askOnce, runRepl } from "./repl.ts";
 
 const DEFAULT_URL = `ws://${DEFAULT_WS_HOST}:${DEFAULT_WS_PORT}`;
 const DEVICE_NAME = "taki-cli";
 
-const { values } = parseCliArgs();
+const { values, positionals } = parseCliArgs();
 
 const url = values.url ?? DEFAULT_URL;
 const characterId = values.character ?? "taki";
+// The ONLY positional surface is the `secret` family (its value deliberately arrives via stdin, never argv).
+const secretPositionals = positionals.length > 0 ? positionals : null;
+if (secretPositionals !== null && secretPositionals[0] !== "secret") {
+  process.stderr.write(`unexpected argument: ${secretPositionals[0]}\n${SECRET_COMMAND_USAGE}\n`);
+  process.exit(1);
+}
 // Both argv mistakes fail fast at the entry: --params without --call would otherwise be a silent swallow,
 // and a malformed one-shot call must not cost a socket. The authenticated paths never see either.
 if (values.call === undefined && values.params !== undefined) {
@@ -37,6 +44,7 @@ if (oneShot?.kind === "usage") {
 function parseCliArgs() {
   try {
     return parseArgs({
+      allowPositionals: true,
       options: {
         url: { type: "string", default: DEFAULT_URL },
         character: { type: "string", default: "taki" },
@@ -75,6 +83,19 @@ const approvalController = createCliApprovalController({
 approvalController.replace(client);
 const stopApproval = client.onApproval((event) => approvalController.receive(event));
 client.onClose(() => approvalController.replace(null));
+
+// Secret subcommand mode: authenticate, run exactly one stdin-fed secret command, exit with its outcome. The
+// value never enters argv (shell-history/process-list leak), so it is read from stdin right here.
+if (secretPositionals !== null) {
+  const secretIo = { input: process.stdin, output: process.stdout };
+  askLine = (query, signal) => askOnce(secretIo, query, signal);
+  await authenticate(client, (query, signal) => askOnce(secretIo, query, signal));
+  const succeeded = await runSecretCommand({ caller: client, io: secretIo, positionals: secretPositionals.slice(1) });
+  stopApproval();
+  approvalController.dispose();
+  client.close();
+  process.exit(succeeded ? 0 : 1);
+}
 
 if (oneShot === null) {
   await runRepl(

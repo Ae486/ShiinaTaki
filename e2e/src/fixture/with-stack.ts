@@ -4,8 +4,8 @@
  *         and ALWAYS tears the process tree + temp dirs down; a new scenario = a new *.e2e.test.ts calling this
  * POS:    e2e/fixture — the reusable harness entry (PRD layer B); test scope only, never imported by production code
  */
-import { randomUUID } from "node:crypto";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { randomBytes, randomUUID } from "node:crypto";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { TimelineEntry } from "@taki/shared";
@@ -45,6 +45,11 @@ export interface StackOptions {
   seedMemory?: SeedMemoryEntry[];
   /** Route only the Node connection through a test-only relay with an armable next-request mutator. */
   nodeWsRelay?: boolean;
+  /** Provision a random 32-byte catalog master key under <coreDataDir>/creds and point the core's
+   * TAKI_CREDENTIALS_DIRECTORY at it — the hermetic unlock path (systemd-style); never touches the OS keyring. */
+  secretMasterKey?: boolean;
+  /** Seed <coreDataDir>/mcp-servers.json BEFORE the core boots (plaintext-migration scenarios read it at startup). */
+  seedMcpServers?: Record<string, unknown>;
 }
 
 /** One node-side gate decision from <node dataDir>/audit.jsonl (names-only except exec's command). */
@@ -75,6 +80,11 @@ export interface Stack {
   startNode(feedPairing: boolean): Promise<void>;
   /** Kills the node's process tree and awaits its exit. */
   killNode(): Promise<void>;
+  /** Kills the core's process tree and awaits its exit (data dir, port, and env survive for restartCore). */
+  killCore(): Promise<void>;
+  /** Respawns the core on the SAME data dir/port with the boot env (plus overrides), re-using the port; the
+   * memoized operator socket is retired so the next operator() re-pairs against the new process. */
+  restartCore(envOverrides?: Record<string, string>): Promise<void>;
   /** The memoized paired operator socket (pairs on first use). */
   operator(): Promise<RpcSocket>;
   /** L1 drive (dev capability.trigger): run a capability tool's execute with no LLM; returns its structured result. */
@@ -94,6 +104,7 @@ interface Parts {
   wsUrl: string;
   coreDataDir: string;
   nodeDataDir: string;
+  coreEnv: Record<string, string>;
   core: Proc;
   node: Proc | null;
   relay: CapabilityRelay | null;
@@ -135,16 +146,10 @@ async function bootParts(options: StackOptions): Promise<Parts> {
   const coreEnv = baseCoreEnv(port, coreDataDir, provider);
   // The dev L1 drive is env double-gated: the core only registers capability.trigger when this is exactly "1".
   if (options.devTrigger) coreEnv.TAKI_DEV_TRIGGER = "1";
-  // Pre-boot seeding (timeline rows and/or memory entry files) must land BEFORE the core opens the db and runs its
-  // startup reconcile (sequential single-writer). The teardown guard below starts at the core spawn, so a failed
-  // seed cleans its own temp dirs here.
+  // Pre-boot seeding must land BEFORE the core opens the db / reads its config files (sequential single-writer).
+  // The teardown guard below starts at the core spawn, so a failed seed cleans its own temp dirs here.
   try {
-    if (options.seedTimeline !== undefined && options.seedTimeline.length > 0) {
-      seedTimeline(coreDataDir, options.seedTimeline);
-    }
-    if (options.seedMemory !== undefined && options.seedMemory.length > 0) {
-      seedMemoryEntries(coreDataDir, options.seedMemory);
-    }
+    seedCoreState(options, coreDataDir, coreEnv);
   } catch (error) {
     for (const dir of [coreDataDir, nodeDataDir]) rmSync(dir, { recursive: true, force: true });
     throw error;
@@ -154,6 +159,7 @@ async function bootParts(options: StackOptions): Promise<Parts> {
     wsUrl: `ws://127.0.0.1:${port}`,
     coreDataDir,
     nodeDataDir,
+    coreEnv,
     core: spawnProc({ command: process.execPath, args: ["src/main.ts"], cwd: CORE_DIR, env: childEnv(coreEnv) }),
     node: null,
     relay: null,
@@ -168,6 +174,26 @@ async function bootParts(options: StackOptions): Promise<Parts> {
   } catch (error) {
     await teardown(parts);
     throw error;
+  }
+}
+
+function seedCoreState(options: StackOptions, coreDataDir: string, coreEnv: Record<string, string>): void {
+  if (options.seedTimeline !== undefined && options.seedTimeline.length > 0) {
+    seedTimeline(coreDataDir, options.seedTimeline);
+  }
+  if (options.seedMemory !== undefined && options.seedMemory.length > 0) {
+    seedMemoryEntries(coreDataDir, options.seedMemory);
+  }
+  if (options.seedMcpServers !== undefined) {
+    writeFileSync(join(coreDataDir, "mcp-servers.json"), JSON.stringify(options.seedMcpServers, null, 2));
+  }
+  if (options.secretMasterKey) {
+    // The hermetic unlock path: a random 32-byte key in a temp credentials dir (the systemd-shaped source the
+    // core reads); the OS keyring is deliberately never touched by e2e (machine-global state, ruling 5).
+    const credsDir = join(coreDataDir, "creds");
+    mkdirSync(credsDir, { recursive: true });
+    writeFileSync(join(credsDir, "taki-secret-catalog-master-key"), randomBytes(32));
+    coreEnv.TAKI_CREDENTIALS_DIRECTORY = credsDir;
   }
 }
 
@@ -192,6 +218,23 @@ async function waitCoreListening(parts: Parts): Promise<void> {
   );
   const winner = await Promise.race([listening, died]);
   if (winner instanceof Error) throw winner;
+}
+
+/** Respawns the core on the SAME data dir/port with the boot env (plus overrides); retires the operator socket. */
+async function restartCoreProc(parts: Parts, envOverrides: Record<string, string> = {}): Promise<void> {
+  if (parts.core.child.exitCode === null) {
+    killTree(parts.core);
+    await parts.core.exited;
+  }
+  parts.operatorSocket?.close();
+  parts.operatorSocket = null;
+  parts.core = spawnProc({
+    command: process.execPath,
+    args: ["src/main.ts"],
+    cwd: CORE_DIR,
+    env: childEnv({ ...parts.coreEnv, ...envOverrides }),
+  });
+  await waitCoreListening(parts);
 }
 
 async function startNodeProc(parts: Parts, feedPairing: boolean): Promise<void> {
@@ -257,6 +300,11 @@ function makeStack(parts: Parts): Stack {
       killTree(parts.node);
       await parts.node.exited;
     },
+    killCore: async () => {
+      killTree(parts.core);
+      await parts.core.exited;
+    },
+    restartCore: (envOverrides) => restartCoreProc(parts, envOverrides),
     operator: () => getOperator(parts),
     l1: async (capability, input, timeoutMs) =>
       triggerCapability(await getOperator(parts), { capability, input, timeoutMs }),
