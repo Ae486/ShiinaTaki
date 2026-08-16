@@ -310,4 +310,14 @@ export type {
   ProcessInfo, ProcessListOutput, ScreenshotOutput, ShellOpenOutput,
 } from "./capability-outputs.ts";
 
+export {
+  SECRET_METHODS, SecretCatalogHealthSchema, SecretClearParamsSchema, SecretClearResultSchema, SecretListParamsSchema,
+  SecretListResultSchema, SecretPresenceParamsSchema, SecretPresenceResultSchema, SecretProvenanceSchema,
+  SecretProvenanceSourceSchema, SecretRefSchema, SecretRefusalReasonSchema, SecretSetParamsSchema, SecretSetResultSchema,
+} from "./secret-catalog-schema.ts";
+export type {
+  SecretCatalogHealth, SecretClearParams, SecretClearResult, SecretListParams, SecretListResult, SecretPresenceParams,
+  SecretPresenceResult, SecretProvenance, SecretProvenanceSource, SecretRef, SecretRefusalReason, SecretSetParams, SecretSetResult,
+} from "./secret-catalog-schema.ts";
+
 export { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "./ws-defaults.ts";

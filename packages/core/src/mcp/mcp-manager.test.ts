@@ -319,6 +319,33 @@ describe("createMcpManager", () => {
     expect(manager.records.some((r) => r.level === "warn")).toBe(true);
   });
 
+  it("resolves secret-ref markers just-in-time at connect; an unresolvable ref skips only that server", async () => {
+    const SENTINEL = "sentinel-not-a-real-secret-value-0123456789";
+    const seenMaps: Array<Record<string, string> | undefined> = [];
+    const transports = new Map([["good", new InMemoryTransport([ECHO_TOOL], echoOk)]]);
+    const connect: McpConnect = (entry) => {
+      seenMaps.push("command" in entry.config ? entry.config.env : entry.config.headers);
+      return memConnect(transports)(entry);
+    };
+    const { logger, records } = createCaptureLogger();
+    const manager = await createMcpManager({
+      entries: [
+        { key: "good", config: { command: "x", env: { TOKEN: "secret-ref:mcp.good.env.TOKEN", NODE_ENV: "production" } } },
+        { key: "locked", config: { command: "y", env: { TOKEN: "secret-ref:mcp.locked.env.TOKEN" } } },
+      ],
+      logger,
+      connect,
+      resolveSecret: (ref) => (ref === "mcp.good.env.TOKEN" ? SENTINEL : null),
+    });
+    managers.push(manager);
+
+    // The resolvable server connected with the RESOLVED value (never the marker, never logged); the locked one is skipped.
+    expect(seenMaps[0]).toEqual({ TOKEN: SENTINEL, NODE_ENV: "production" });
+    expect(seenMaps.length).toBe(1); // the unresolvable server never reached connect
+    expect(Object.keys(manager.tools())).toEqual(["good_echo"]);
+    expect(JSON.stringify(records)).not.toContain(SENTINEL);
+  });
+
   it("closeAll is idempotent (T8)", async () => {
     const transport = new InMemoryTransport([ECHO_TOOL], echoOk);
     const manager = await makeManager([{ key: "s", config: { command: "x" } }], memConnect(new Map([["s", transport]])));

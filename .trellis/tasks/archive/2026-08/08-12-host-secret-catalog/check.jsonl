@@ -1,0 +1,5 @@
+{"file": ".trellis/tasks/08-12-host-secret-catalog/research/live-secret-catalog-seam-map.md", "reason": "Seam map with acceptance anchors the check must verify against"}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Authority convergence and sensitive-path operator-only rules"}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "Host-bound lifecycle and fail-closed offline matrix"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "No-secret-in-logs audit"}
+{"file": ".trellis/spec/backend/e2e-harness.md", "reason": "Real-process evidence conventions for restart/rotation smoke"}

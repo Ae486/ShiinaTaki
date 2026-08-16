@@ -1,0 +1,9 @@
+# core/secrets/
+- secret-catalog-envelope.ts — pure TSC1 envelope: versioned public header (version/createdAt/keyVersion/storeId) as secretstream AAD + one FINAL-tagged ciphertext of the entries JSON; openCatalog maps every wrong-key/tamper/truncate/reorder/duplicate/AAD failure to a fixed sanitized SecretCatalogError reason (no fs, no logs)
+- catalog-publication.ts — the staged-write + fsync + atomic-rename publication core (create-only link for first publication, rename replace after); shared by the catalog envelope and the legacy-config rewrite
+- master-key.ts — bootstrap-key seam ONLY: $CREDENTIALS_DIRECTORY file (systemd LoadCredentialEncrypted=) or the taki-secret-key helper spawn (framed u32-LE stdout, key bytes never in errors); absent/invalid key = null = LOCKED, never a silent generate
+- secret-ref.ts — the only ref-derivation/marker-parse site (`secret-ref:` in mcp env/header values; `mcp.<server>.env|header.<FIELD>` refs) + just-in-time resolveMcpConfigSecrets for connect-time resolution
+- secret-catalog-service.ts — the owning-Host catalog authority: async factory (Wasm load) then synchronous set/clear/presence/list, internal resolve/verifyEntries, rotateToKey/backup/restore; whole-file re-seal per write; locked/unreadable stores fail every mutation closed without rewriting the file
+- mcp-secret-migration.ts — PRD-AC4 ordering owner: copy mcp-servers.json env/headers into the catalog, verify the encrypted read-back of every value, ONLY THEN rewrite the source to opaque markers; every failure path leaves the plaintext source byte-identical; `.env.local` is deliberately untouched
+
+Invariant (grep-verifiable): no module in this directory logs or returns a secret value — log lines carry opaque refs/counts/health only, and only `resolve`/`verifyEntries` (the internal non-WS seam) ever touch values.

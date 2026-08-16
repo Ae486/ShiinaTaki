@@ -44,6 +44,9 @@ import { directoryByteSize } from "./media/directory-size.ts";
 import { createMemorySubsystem } from "./memory/bootstrap.ts";
 import { createImageDescriptionWriter } from "./memory/image-description-writer.ts";
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
+import { migrateMcpPlaintextSecrets } from "./secrets/mcp-secret-migration.ts";
+import { resolveMasterKeySource } from "./secrets/master-key.ts";
+import { createSecretCatalogService } from "./secrets/secret-catalog-service.ts";
 import { createConnectionRegistry } from "./server/connection-registry.ts";
 import { createMethodRegistry } from "./server/method-registry.ts";
 import { avatarReportMethod } from "./server/methods/avatar-report.ts";
@@ -66,6 +69,7 @@ import { mediaUsageMethod } from "./server/methods/media-usage.ts";
 import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
 import { memoryStatusMethod } from "./server/methods/memory-status.ts";
 import { registerPerceptionMethods } from "./server/methods/perception-methods.ts";
+import { registerSecretMethods } from "./server/methods/secret-methods.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
 import { createLoadSkillTool } from "./skills/load-skill-tool.ts";
@@ -173,22 +177,27 @@ const skillsLoader = createSkillsLoader({
   state: createSkillsState({ filePath: join(serverConfig.dataDir, "skills-state.json"), logger }),
 });
 
+// Secret catalog (08-12): the Core-owned encrypted credential store. Master key from the credentials directory
+// (systemd) or the taki-secret-key helper; no key source = locked, every mutation fails closed — never a fresh
+// store over existing ciphertext. Boot survives a locked/unreadable catalog (integrations degrade, core lives).
+const secretLog = logger.child({ mod: "secrets" });
+const secretCatalog = await createSecretCatalogService({
+  filePath: join(serverConfig.dataDir, "secret-catalog.bin"), storeId: coreHostId,
+  keySource: resolveMasterKeySource(process.env), logger: secretLog,
+});
+// AC4 ordering: copy env/headers into the catalog, verify the encrypted read-back, only then rewrite the source
+// to opaque refs (every failure leaves the source untouched); refs resolve just-in-time at connect below.
+migrateMcpPlaintextSecrets({ catalog: secretCatalog, configPath: join(serverConfig.dataDir, "mcp-servers.json"), logger: secretLog });
+registerSecretMethods(registry, { service: secretCatalog, logger: secretLog });
+
 // MCP (#8): connect operator-configured servers at boot; a missing/malformed config or a failing server degrades
 // gracefully. Standard SDK closures are wrapped by canonical governance plus read-only legacy deny compatibility.
 const mcpLog = logger.child({ mod: "mcp" });
-const legacyMcpDeny = createLegacyMcpDenyReader({
-  filePath: join(serverConfig.dataDir, "mcp-approvals.json"),
-  logger,
-});
+const legacyMcpDeny = createLegacyMcpDenyReader({ filePath: join(serverConfig.dataDir, "mcp-approvals.json"), logger });
 const mcpManager = await createMcpManager({
-  entries: loadMcpConfig(join(serverConfig.dataDir, "mcp-servers.json"), mcpLog),
-  logger,
-  governance: {
-    service: governance,
-    ownerHostId: coreHostId,
-    approval,
-    legacyDeny: (serverName, toolName) => legacyMcpDeny.denies(serverName, toolName),
-  },
+  entries: loadMcpConfig(join(serverConfig.dataDir, "mcp-servers.json"), mcpLog), logger,
+  resolveSecret: (ref) => secretCatalog.resolve(ref),
+  governance: { service: governance, ownerHostId: coreHostId, approval, legacyDeny: (s, t) => legacyMcpDeny.denies(s, t) },
 });
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a

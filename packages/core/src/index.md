@@ -14,6 +14,7 @@
 - media/ — content-addressed attachment store (chat image bytes) under the Workspace; the DB never holds bytes (#17)
 - scheduler/ — the shared sweep runner every retention arm rides (boot sweep + unref'd interval + count-only log)
 - mcp/ — MCP client: connect operator servers at boot, namespace + error-wrap their tools (ADR 0006 spawn carve-out)
+- secrets/ — Core-owned encrypted credential catalog: TSC1 secretstream envelope, staged fsync/rename publication, bootstrap master-key seam (systemd credentials / taki-secret-key helper), write-only operator surface, and the AC4-ordered legacy plaintext migration
 - approval/ — canonical durable plus exact-Connection interactive Approval authority, production composition, targeted lifecycle, and retained dormant legacy compatibility modules
 - governance/ — Core-owned global policy repository/service plus trusted Core/MCP/Skill execution adapters
 - capabilities/ — core→node capability channel: ask/await broker + route helper + screenshot/process-list/clipboard/shell-open tools + sanctioned Workspace PNG write site

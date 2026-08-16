@@ -7,8 +7,11 @@ ordinary Core/Host/UI surfaces.
 
 ## Dependencies
 
-- `08-12-host-control-foundation` and `08-12-approval-productization` complete.
-- Explicit owner approval before adding `libsodium-wrappers` or another dependency.
+- `08-12-host-control-foundation` and `08-12-approval-productization` complete. (Both converged 2026-08-16;
+  host-control retains only its deferred two-Node process evidence in Slice 8.)
+- Dependency additions are pre-authorized by the owner ruling recorded in `docs/ZCODE-HANDOFF.md` §3.3/§19 when they
+  are the most efficient correct solution — conditional on the spike gates below (Node 24, TypeScript, packaging,
+  wrong-key/tamper/crash proofs), lockfile update, and a documented reason.
 
 ## Scope
 

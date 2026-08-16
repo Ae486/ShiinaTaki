@@ -1,11 +1,13 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
-> Updated 2026-08-16 after the Slice 4 C+E convergence. T4 remains isolated in its dedicated worktree.
-> Approval Productization is complete through its single final formal check (`pass-with-fixes`, one test-only
-> coverage fix) and is archived together with Governance Authority; Host-control remains in `review` for the deferred
-> two-Node process evidence (Slice 8). The ZCODE Leader now owns merge/checkpoint decisions (see
-> `docs/ZCODE-HANDOFF.md` §19); no push has occurred. Next work: Host Secret Catalog (Slice 5), then secure MCP
-> lifecycle. Verify every live status before use.
+> Updated 2026-08-16 after the Slice 5 convergence. T4 remains isolated in its dedicated worktree.
+> Approval Productization and Governance Authority are archived after their checks; Host Secret Catalog
+> (`0965358` + `c26e3f8`, contract in `.trellis/spec/backend/secret-catalog.md`) passed completeness audit plus a
+> standard formal check (`pass-with-fixes`); Host-control remains in `review` for the deferred two-Node process
+> evidence (Slice 8). The ZCODE Leader owns merge/checkpoint decisions (see `docs/ZCODE-HANDOFF.md` §19); no push
+> has occurred. Next work: secure MCP lifecycle (Slice 6), then standard Skill lifecycle. Recorded manual
+> residuals: real-Linux systemd/Wasm/locked-build proofs, live Windows keyring round-trip, packaged-WebView
+> Approval behavior, `desktop:build` packaging smoke. Verify every live status before use.
 
 ## 1. Mission and boundary
 
