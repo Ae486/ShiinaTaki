@@ -3,7 +3,7 @@
   "name": "secure-mcp-lifecycle",
   "title": "Secure MCP lifecycle and Home management",
   "description": "Implement host-owned MCP CRUD/test/reconnect, desired/runtime separation, candidate validation, last-good publication, immutable run snapshots, generation leases/draining, secret references, diagnostics, and Home management.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "shared-core-host-desktop-secure-mcp-lifecycle",
   "package": null,
