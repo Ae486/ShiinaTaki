@@ -54,6 +54,7 @@ describe("host secret catalog (real core process)", () => {
       await stack.restartCore();
       const afterRestart = await resultOf(stack, SECRET_METHODS.presence, { secretRef: REF });
       expect(afterRestart).toMatchObject({ present: true, provenance: { keyVersion: 1 }, health: "ok" });
+      const sealedBeforeLock = readFileSync(catalogPath); // baseline for the never-rewritten-while-locked proof
 
       // --- remove the ONLY key source and restart again: locked, fail-closed, never re-provisioned ---
       await stack.killCore();
@@ -73,6 +74,7 @@ describe("host secret catalog (real core process)", () => {
 
       // --- durability probes: the sealed catalog was never rewritten while locked; no plaintext anywhere ---
       const finalBytes = readFileSync(catalogPath);
+      expect(finalBytes.equals(sealedBeforeLock)).toBe(true); // byte-identical through the whole locked phase
       expect(finalBytes.includes(Buffer.from(SENTINEL))).toBe(false);
       expect(finalBytes.includes(Buffer.from(SECOND_SENTINEL))).toBe(false);
       const logs = coreOutput(stack);
