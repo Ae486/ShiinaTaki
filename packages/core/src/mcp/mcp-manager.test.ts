@@ -10,8 +10,9 @@ import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createGovernancePolicyRepo } from "../governance/governance-policy-repo.ts";
 import { createGovernancePolicyService, type GovernancePolicyService } from "../governance/governance-policy-service.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
+import { InMemoryTransport, memConnect, type CallHandler } from "../testing/mcp-test-transport.ts";
 import type { McpServerEntry } from "./mcp-config.ts";
-import { createMcpManager, type McpManager } from "./mcp-manager.ts";
+import { createMcpManager, type McpDesiredRuntime, type McpManager } from "./mcp-manager.ts";
 import type { McpConnect } from "./mcp-connect.ts";
 
 const FIXTURE = fileURLToPath(new URL("../testing/mcp-fixture.mjs", import.meta.url));
@@ -19,13 +20,17 @@ const OWNER_HOST_ID = "11111111-1111-4111-8111-111111111111";
 
 const managers: McpManager[] = [];
 const dbs: Database[] = [];
+function desired(entry: McpServerEntry): McpDesiredRuntime {
+  return { serverId: entry.key, config: entry.config, selectedTools: [], enabled: true };
+}
 async function makeManager(
   entries: McpServerEntry[],
   connect: McpConnect,
   governance?: { service: GovernancePolicyService; ownerHostId: string; legacyDeny?: (server: string, tool: string) => boolean },
 ): Promise<McpManager> {
   const { logger, records } = createCaptureLogger();
-  const manager = await createMcpManager({ entries, logger, connect, governance });
+  const manager = createMcpManager({ logger, connect, governance, drainBudgetMs: 50, shutdownBudgetMs: 50 });
+  await manager.reconcile(entries.map(desired));
   managers.push(manager);
   return Object.assign(manager, { records });
 }
@@ -38,48 +43,6 @@ function policy(): GovernancePolicyService {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
   return createGovernancePolicyService(createGovernancePolicyRepo(db));
-}
-
-// A duck-typed in-memory MCPTransport (copy of the shipped mock pattern, research §4c) — never imported from dist.
-interface CallHandler {
-  (msg: { id: number | string; params: { name: string; arguments?: Record<string, unknown> } }): unknown;
-}
-class InMemoryTransport {
-  onmessage?: (message: unknown) => void;
-  onclose?: () => void;
-  onerror?: (error: Error) => void;
-  closedCount = 0;
-  private readonly tools: Array<Record<string, unknown>>;
-  private readonly call: CallHandler;
-  constructor(tools: Array<Record<string, unknown>>, call: CallHandler) {
-    this.tools = tools;
-    this.call = call;
-  }
-  async start(): Promise<void> {}
-  async send(message: { id?: number | string; method?: string }): Promise<void> {
-    if (message.id === undefined) return; // notification
-    const reply = this.handle(message as { id: number | string; method: string; params?: unknown });
-    queueMicrotask(() => this.onmessage?.(reply));
-  }
-  private handle(msg: { id: number | string; method: string; params?: unknown }): unknown {
-    if (msg.method === "initialize")
-      return {
-        jsonrpc: "2.0",
-        id: msg.id,
-        result: {
-          protocolVersion: "2025-06-18",
-          capabilities: { tools: {} },
-          serverInfo: { name: "mem", version: "0.0.1" },
-        },
-      };
-    if (msg.method === "tools/list") return { jsonrpc: "2.0", id: msg.id, result: { tools: this.tools } };
-    if (msg.method === "tools/call") return this.call(msg as never);
-    return { jsonrpc: "2.0", id: msg.id, error: { code: -32601, message: "Method not found" } };
-  }
-  async close(): Promise<void> {
-    this.closedCount += 1;
-    this.onclose?.();
-  }
 }
 
 const ECHO_TOOL = {
@@ -111,14 +74,6 @@ const echoOk: CallHandler = (msg) => ({
   id: msg.id,
   result: { content: [{ type: "text", text: `echo: ${String(msg.params.arguments?.text)}` }] },
 });
-
-function memConnect(transports: Map<string, InMemoryTransport>): McpConnect {
-  return (entry) => {
-    const transport = transports.get(entry.key);
-    if (!transport) throw new Error(`no transport for ${entry.key}`);
-    return createMCPClient({ transport });
-  };
-}
 
 async function captureProviderTools(tools: ToolSet): Promise<unknown[]> {
   let requestBody: string | undefined;
@@ -169,7 +124,7 @@ describe("createMcpManager", () => {
     expect(result.code).toBe(-32601);
   });
 
-  it("removes both identities when sanitized MCP tool keys collide", async () => {
+  it("rejects a colliding candidate fail-closed while the first server keeps serving (risk §7.3)", async () => {
     const firstCalled: string[] = [];
     const secondCalled: string[] = [];
     const first = new InMemoryTransport([ECHO_TOOL], (msg) => {
@@ -180,18 +135,29 @@ describe("createMcpManager", () => {
       secondCalled.push(msg.params.name);
       return echoOk(msg);
     });
-    const manager = await makeManager(
-      [
-        { key: "files.prod", config: { command: "first" } },
-        { key: "files_prod", config: { command: "second" } },
-      ],
-      memConnect(new Map([["files.prod", first], ["files_prod", second]])),
-    );
+    const { logger } = createCaptureLogger();
+    const manager = createMcpManager({ logger, connect: memConnect(new Map([["files.prod", first], ["files_prod", second]])), drainBudgetMs: 50 });
+    managers.push(manager);
+    await manager.applyDesired(desired({ key: "files.prod", config: { command: "first" } }));
 
-    expect(Object.keys(manager.tools())).not.toContain("files_prod_echo");
-    expect(manager.describe("files_prod_echo")).toBeUndefined();
-    expect(firstCalled).toEqual([]);
+    // The second server's sanitized prefix folds onto the same `files_prod_echo` key: its candidate is REJECTED
+    // with a structured diagnostic naming both identities; the first server keeps serving.
+    const outcome = await manager.applyDesired(desired({ key: "files_prod", config: { command: "second" } }));
+    expect(outcome).toMatchObject({ status: "failed", reason: "tool-key-collision" });
+    expect(outcome.status === "failed" && outcome.collisions).toEqual([
+      {
+        key: "files_prod_echo",
+        existingServerId: "files.prod",
+        existingToolName: "echo",
+        candidateToolName: "echo",
+      },
+    ]);
+    expect(Object.keys(manager.tools())).toEqual(["files_prod_echo"]);
     expect(secondCalled).toEqual([]);
+    expect(await manager.tools().files_prod_echo?.execute?.(
+      { text: "still-live" }, { toolCallId: "c1", messages: [] } as never,
+    )).toMatchObject({ content: [{ text: "echo: still-live" }] });
+    expect(firstCalled).toEqual(["echo"]);
   });
 
   it("fails the default ask posture closed without calling the raw SDK closure", async () => {
@@ -328,22 +294,27 @@ describe("createMcpManager", () => {
       return memConnect(transports)(entry);
     };
     const { logger, records } = createCaptureLogger();
-    const manager = await createMcpManager({
-      entries: [
-        { key: "good", config: { command: "x", env: { TOKEN: "secret-ref:mcp.good.env.TOKEN", NODE_ENV: "production" } } },
-        { key: "locked", config: { command: "y", env: { TOKEN: "secret-ref:mcp.locked.env.TOKEN" } } },
-      ],
+    const manager = createMcpManager({
       logger,
       connect,
       resolveSecret: (ref) => (ref === "mcp.good.env.TOKEN" ? SENTINEL : null),
     });
     managers.push(manager);
+    await manager.reconcile([
+      desired({ key: "good", config: { command: "x", env: { TOKEN: "secret-ref:mcp.good.env.TOKEN", NODE_ENV: "production" } } }),
+      desired({ key: "locked", config: { command: "y", env: { TOKEN: "secret-ref:mcp.locked.env.TOKEN" } } }),
+    ]);
 
     // The resolvable server connected with the RESOLVED value (never the marker, never logged); the locked one is skipped.
     expect(seenMaps[0]).toEqual({ TOKEN: SENTINEL, NODE_ENV: "production" });
     expect(seenMaps.length).toBe(1); // the unresolvable server never reached connect
     expect(Object.keys(manager.tools())).toEqual(["good_echo"]);
     expect(JSON.stringify(records)).not.toContain(SENTINEL);
+    // The locked server's status is truthful: failed with the sanitized secret reason (no fake presence).
+    expect(manager.statuses()).toMatchObject([
+      { serverId: "good", phase: "connected", toolCount: 1, lastOutcome: { status: "published" } },
+      { serverId: "locked", phase: "failed", lastOutcome: { status: "failed", reason: "secret-unresolvable" } },
+    ]);
   });
 
   it("closeAll is idempotent (T8)", async () => {

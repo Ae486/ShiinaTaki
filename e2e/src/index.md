@@ -32,6 +32,7 @@ correct (exit / OS-clipboard / on-disk file):
 - exec-l2.e2e.test.ts — real agent asked to run `hostname` invokes exec and it exits 0
 - clipboard-l2.e2e.test.ts — real agent asked to copy a token; the OS clipboard holds it (verified via an L1 read)
 - workspace-l2.e2e.test.ts — real agent asked to write+read a file; the token lands on disk in the Workspace
+- mcp-lifecycle.e2e.test.ts — real-process Secure MCP Lifecycle: add/test(no publish)/edit(conflict+retry)/disable/enable all land with NO restart; a governed MCP tool call runs through Approval (dev L1 drive); Core restart reconciles desired state into a fresh generation lineage; a cleared or locked catalog secret retires ONLY the referencing server; the legacy mcp-servers.json seeds desired state once and is inert afterwards
 - secret-catalog.e2e.test.ts — real-process secret catalog: set → core restart → presence survives with no re-provisioning; a removed key source locks the store (mutations fail closed, file never rewritten, nothing queues); boot-time plaintext env/headers migration rewrites mcp-servers.json to opaque refs after verified copy; sentinel absent from frames/logs/disk
 
 Manual-only (recorded in the PRD, deliberately not automated): #10/#17/#18 dialog text renders verbatim (visual);

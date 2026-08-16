@@ -29,12 +29,21 @@ import {
   ErrorCodeSchema,
   MEDIA_METHODS,
   MEMORY_METHODS,
+  MCP_METHODS,
   MediaClearResultSchema,
   MediaGetResultSchema,
   MediaUsageResultSchema,
   MemoryStatusResultSchema,
   MemoryTidyResultSchema,
+  McpGetResultSchema,
+  McpListResultSchema,
+  McpMutationResultSchema,
+  McpRemoveResultSchema,
+  McpStatusResultSchema,
+  McpTestResultSchema,
   PERCEPTION_METHODS,
+  SECRET_METHODS,
+  SecretSetResultSchema,
   PerceptionCardSchema,
   PerceptionPauseStateSchema,
   PERMISSION_METHODS,
@@ -50,6 +59,11 @@ import {
   type ConfigSetParams,
   type ConnectParams,
   type ErrorCode,
+  type McpAddParams,
+  type McpEditParams,
+  type McpEnableParams,
+  type McpTestParams,
+  type SecretSetParams,
   type PerceptionPauseSetParams,
   type PermissionCellSetParams,
   type PermissionLevelSetParams,
@@ -78,6 +92,25 @@ function approvalMethods(request: <T>(method: string, params: JSONRPCParams) => 
     approvalList: async () => ApprovalListResultSchema.parse(await request(APPROVAL_METHODS.list, {})),
     approvalRevoke: async (params: ApprovalRevokeParams) =>
       ApprovalRevokeResultSchema.parse(await request(APPROVAL_METHODS.revoke, params)),
+  };
+}
+
+/** The MCP lifecycle family: every result parsed through its @taki/shared schema at the boundary. */
+function mcpMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
+  return {
+    mcpList: async () => McpListResultSchema.parse(await request(MCP_METHODS.list, {})),
+    mcpGet: async (serverId: string) => McpGetResultSchema.parse(await request(MCP_METHODS.get, { serverId })),
+    mcpAdd: async (params: McpAddParams) => McpMutationResultSchema.parse(await request(MCP_METHODS.add, params)),
+    mcpEdit: async (params: McpEditParams) => McpMutationResultSchema.parse(await request(MCP_METHODS.edit, params)),
+    mcpEnable: async (params: McpEnableParams) => McpMutationResultSchema.parse(await request(MCP_METHODS.enable, params)),
+    mcpDisable: async (params: McpEnableParams) => McpMutationResultSchema.parse(await request(MCP_METHODS.disable, params)),
+    mcpRemove: async (params: McpEnableParams) => McpRemoveResultSchema.parse(await request(MCP_METHODS.remove, params)),
+    mcpTest: async (params: McpTestParams) => McpTestResultSchema.parse(await request(MCP_METHODS.test, params)),
+    mcpReconnect: async (serverId: string) => McpMutationResultSchema.parse(await request(MCP_METHODS.reconnect, { serverId })),
+    mcpStatus: async () => McpStatusResultSchema.parse(await request(MCP_METHODS.status, {})),
+    // The MCP page's write-only secret-value path: the value goes ONLY to secret.set (the sanctioned sensitive
+    // method), never into any mcp.* frame or cached view; the desired config keeps the opaque marker.
+    secretSet: async (params: SecretSetParams) => SecretSetResultSchema.parse(await request(SECRET_METHODS.set, params)),
   };
 }
 
@@ -154,5 +187,6 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
     perceptionCard: async () => PerceptionCardSchema.parse(await request(PERCEPTION_METHODS.card, {})),
     ...permissionMethods(request),
     ...approvalMethods(request),
+    ...mcpMethods(request),
   };
 }

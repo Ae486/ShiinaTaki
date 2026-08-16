@@ -31,3 +31,4 @@
 - config-subscribe.ts — config.subscribe (operator-only): config.changed pushes, ctx.onClose auto-unsubscribe
 - permission-methods.ts — operator-only permission.levelGet/levelSet/cellsGet/cellSet; material policy mutations notify Approval invalidation while validated no-ops do not
 - secret-methods.ts — operator-only secret.set/clear/presence/list over the Core-local encrypted catalog; write-only results (presence/provenance/health), storage failures sanitized to bounded SECRET_REFUSED app exceptions BEFORE the registry's verbatim echo paths; logs carry the opaque ref only
+- mcp-methods.ts — operator-only mcp.* lifecycle registration seam (list/get/add/edit/enable/disable/remove/test/reconnect/status); MCP_CONFIG_CONFLICT carries currentConfigRevision, MCP_REFUSED carries a bounded reason, both sanitized before the registry's verbatim echo points

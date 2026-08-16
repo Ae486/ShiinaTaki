@@ -5,9 +5,10 @@
  *         refs are opaque and log-safe, resolved values never leave this seam except into the transport config
  */
 import type { McpServerConfig } from "../mcp/mcp-config.ts";
+import { MCP_SECRET_REF_MARKER } from "@taki/shared";
 
 /** Marker prefix in mcp-servers.json env/header values naming a catalog ref instead of a plaintext value. */
-export const SECRET_REF_MARKER = "secret-ref:";
+export const SECRET_REF_MARKER = MCP_SECRET_REF_MARKER;
 
 /** Same charset fold as the mcp-manager tool-key sanitizer — collision is guarded by the migration, not assumed. */
 export function sanitizeRefSegment(raw: string): string {

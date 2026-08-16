@@ -13,6 +13,8 @@ describe("ErrorCodeSchema", () => {
     "CONFIG_REFUSED",
     "POLICY_CONFLICT",
     "GOVERNANCE_REFUSED",
+    "MCP_REFUSED",
+    "MCP_CONFIG_CONFLICT",
     "GOVERNANCE_DENIED",
     "APPROVAL_REQUIRED",
   ])("accepts the %s code", (code) => {

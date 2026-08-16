@@ -33,9 +33,8 @@ import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
 import { createHostCatalogStore } from "./hosts/host-catalog.ts";
 import { bindHostGenerationRetirement } from "./hosts/host-generation-retirement.ts";
 import { loadOrCreateHostIdentity } from "./hosts/host-identity.ts";
-import { loadMcpConfig } from "./mcp/mcp-config.ts";
-import { createLegacyMcpDenyReader } from "./mcp/legacy-mcp-deny.ts";
-import { createMcpManager } from "./mcp/mcp-manager.ts";
+import { bootMcpLifecycle } from "./mcp/mcp-boot.ts";
+import { createMcpLifecycleService } from "./mcp/mcp-lifecycle-service.ts";
 import { createCharacterImporter } from "./characters/character-import.ts";
 import { createCharacterStore } from "./characters/character-store.ts";
 import { startAttachmentGc } from "./media/attachment-gc.ts";
@@ -70,6 +69,7 @@ import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
 import { memoryStatusMethod } from "./server/methods/memory-status.ts";
 import { registerPerceptionMethods } from "./server/methods/perception-methods.ts";
 import { registerSecretMethods } from "./server/methods/secret-methods.ts";
+import { registerMcpMethods } from "./server/methods/mcp-methods.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
 import { createLoadSkillTool } from "./skills/load-skill-tool.ts";
@@ -188,17 +188,15 @@ const secretCatalog = await createSecretCatalogService({
 // AC4 ordering: copy env/headers into the catalog, verify the encrypted read-back, only then rewrite the source
 // to opaque refs (every failure leaves the source untouched); refs resolve just-in-time at connect below.
 migrateMcpPlaintextSecrets({ catalog: secretCatalog, configPath: join(serverConfig.dataDir, "mcp-servers.json"), logger: secretLog });
-registerSecretMethods(registry, { service: secretCatalog, logger: secretLog });
 
-// MCP (#8): connect operator-configured servers at boot; a missing/malformed config or a failing server degrades
-// gracefully. Standard SDK closures are wrapped by canonical governance plus read-only legacy deny compatibility.
-const mcpLog = logger.child({ mod: "mcp" });
-const legacyMcpDeny = createLegacyMcpDenyReader({ filePath: join(serverConfig.dataDir, "mcp-approvals.json"), logger });
-const mcpManager = await createMcpManager({
-  entries: loadMcpConfig(join(serverConfig.dataDir, "mcp-servers.json"), mcpLog), logger,
-  resolveSecret: (ref) => secretCatalog.resolve(ref),
-  governance: { service: governance, ownerHostId: coreHostId, approval, legacyDeny: (s, t) => legacyMcpDeny.denies(s, t) },
-});
+// MCP lifecycle (#8 → secure-mcp-lifecycle): desired state persists in SQLite (migration 017); mcp-servers.json is
+// a SEED-ONLY legacy input; the runtime manager owns in-memory generations (candidate → publish → lease → drain).
+// Boot reconcile is non-blocking so the WS server starts while candidates connect; a locked catalog skips only
+// the servers whose refs it cannot resolve, truthfully — one bad server never disables its siblings.
+const mcpBoot = bootMcpLifecycle({ db, dataDir: serverConfig.dataDir, coreHostId, secretCatalog, governance, approval, logger });
+void mcpBoot.manager.reconcile(mcpBoot.desired.list()).then(() => undefined, () => undefined); // desired → candidates → publish
+registerSecretMethods(registry, { service: mcpBoot.catalog, logger: secretLog });
+registerMcpMethods(registry, { service: createMcpLifecycleService({ repo: mcpBoot.desired, manager: mcpBoot.manager }), logger: mcpBoot.log });
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
@@ -308,7 +306,7 @@ registry.register(
       // closures bind the same connection + abort signal — one interactive authority source for the whole turn.
       turnTools: (turn) => ({
         ...capabilityTools({ connection: turn.connection, signal: turn.signal }),
-        ...mcpManager.tools({ connection: turn.connection, signal: turn.signal }),
+        ...mcpBoot.manager.tools({ connection: turn.connection, signal: turn.signal }),
       }),
       // Stable Core-local tools join per-turn memory/avatar tools behind the explicit Core binding table.
       coreTools: staticCoreTools,
@@ -388,9 +386,11 @@ if (devTriggerEnabled(process.env)) {
   logger.warn("TAKI_DEV_TRIGGER=1 — registering the DEV capability.trigger method (L1 drive; node-side gate still authorizes)");
   registry.register(
     capabilityTriggerMethod({
+      // The MCP turn tools join the dev L1 drive so headless e2e can exercise the governed call + Approval flow.
       tools: (interactive) => ({
         ...capabilityTools(interactive),
         ...coreToolGovernance.wrap({ ...readFileTool, ...writeFileTool }, interactive),
+        ...mcpBoot.manager.tools(interactive),
       }),
       logger,
     }),
@@ -408,7 +408,9 @@ const server = await startWsServer({
 function shutdown(signal: string): void {
   logger.info({ signal }, "shutting down");
   void server.close().then(async () => {
-    await mcpManager.close(); // close every MCP client (kills stdio children / aborts http) before exit
+    // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients
+    // (each exactly once), before the db handle and process go away.
+    await mcpBoot.manager.close();
     db.close(); // release the sqlite file handle (and checkpoint the WAL) before exit
     process.exit(0);
   });

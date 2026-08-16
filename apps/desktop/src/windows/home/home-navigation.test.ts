@@ -11,8 +11,8 @@ import { pageFromSearch } from "./boot-page.ts";
 import { useHomeStore } from "./home-store.ts";
 
 describe("home page registry", () => {
-  it("registers the five v1 pages in menu order, chat first", () => {
-    expect(HOME_PAGES.map((page) => page.id)).toEqual(["chat", "settings", "operations", "perception", "costume"]);
+  it("registers the home pages in menu order, chat first", () => {
+    expect(HOME_PAGES.map((page) => page.id)).toEqual(["chat", "settings", "operations", "perception", "costume", "mcp"]);
     expect(DEFAULT_PAGE_ID).toBe("chat");
   });
 

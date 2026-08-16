@@ -3,7 +3,8 @@
  * OUTPUT: createWsClient({transport}) -> WsClient: connect()/chat()/subscribeAvatar()/reportAvatar() +
  *         timelineHistory()/subscribeTimeline()/mediaGet() (chat page) + importCharacter()/listCharacters()/
  *         characterCostumes()/costumeResolution() (#18) + configList()/configSet()/subscribeConfig() +
- *         memoryTidy()/memoryStatus()/mediaUsage()/mediaClear() plus perception/permission/Approval methods and pushes.
+ *         memoryTidy()/memoryStatus()/mediaUsage()/mediaClear() plus perception/permission/Approval methods and pushes
+ *         + the mcp.* lifecycle family (list/get/add/edit/enable/disable/remove/test/reconnect/status).
  * POS:    ui/lib — the Pet UI's operator transport to the Agent Core (mirrors apps/cli chat-client, browser WS). The
  *         composition root over ws-client-routes (inbound) and ws-client-methods (outbound). No React/Tauri imports.
  */
@@ -34,6 +35,18 @@ import type {
   MediaUsageResult,
   MemoryStatusResult,
   MemoryTidyResult,
+  McpAddParams,
+  McpEditParams,
+  McpEnableParams,
+  McpGetResult,
+  McpListResult,
+  McpMutationResult,
+  McpRemoveResult,
+  McpStatusResult,
+  McpTestParams,
+  McpTestResult,
+  SecretSetParams,
+  SecretSetResult,
   PerceptionCard,
   PerceptionPauseSetParams,
   PerceptionPauseState,
@@ -116,6 +129,28 @@ export interface WsClient {
   permissionCellsGet(): Promise<PermissionCellsState>;
   /** Stores or resets one Core cell override with optimistic generation matching. */
   permissionCellSet(params: PermissionCellSetParams): Promise<PermissionCellSetResult>;
+  /** Reads the merged desired + runtime view of every configured MCP server (the MCP page's read). */
+  mcpList(): Promise<McpListResult>;
+  /** Reads one MCP server's desired row plus its live runtime status. */
+  mcpGet(serverId: string): Promise<McpGetResult>;
+  /** Adds a desired MCP server (config carries opaque secret-ref markers only) and awaits its candidate. */
+  mcpAdd(params: McpAddParams): Promise<McpMutationResult>;
+  /** Edits a desired server under its optimistic configRevision; conflicts reject with MCP_CONFIG_CONFLICT. */
+  mcpEdit(params: McpEditParams): Promise<McpMutationResult>;
+  /** Enables a disabled server (re-runs its candidate and publishes; no restart). */
+  mcpEnable(params: McpEnableParams): Promise<McpMutationResult>;
+  /** Disables a server: new leases block immediately, the generation drains and closes once. */
+  mcpDisable(params: McpEnableParams): Promise<McpMutationResult>;
+  /** Removes a server from desired state and drains its runtime generation. */
+  mcpRemove(params: McpEnableParams): Promise<McpRemoveResult>;
+  /** Runs an ephemeral candidate with diagnostics only — it never publishes tools. */
+  mcpTest(params: McpTestParams): Promise<McpTestResult>;
+  /** Re-runs a server's candidate and publishes the replacement generation. */
+  mcpReconnect(serverId: string): Promise<McpMutationResult>;
+  /** Reads the sanitized runtime status of every server the manager knows. */
+  mcpStatus(): Promise<McpStatusResult>;
+  /** Stores one secret value through the sensitive write-only path (the MCP page's set-value flow). */
+  secretSet(params: SecretSetParams): Promise<SecretSetResult>;
   approvalRespond(params: CanonicalApprovalRespondParams): Promise<CanonicalApprovalRespondResult>;
   approvalList(): Promise<ApprovalListResult>;
   approvalRevoke(params: ApprovalRevokeParams): Promise<ApprovalRevokeResult>;
