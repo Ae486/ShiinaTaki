@@ -823,3 +823,24 @@ Recovered the interrupted in-tree C-wave patch and completed the C+E Host/conver
 ### Status
 
 [OK] **Completed**
+
+
+## Session 15: T4 Host Secret Catalog convergence and slice closeout
+
+**Date**: 2026-08-16
+**Task**: T4 Host Secret Catalog convergence and slice closeout
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Implemented and checked the Host Secret Catalog slice. The interrupted implement agent's work proved complete via a dedicated completeness audit (all implement.md steps, PRD scope, design requirements evidenced); three coverage gaps were closed (master-key env/framing/lock tests, secret-ref and mcp-manager resolution tests, e2e locked-phase byte-identity). A standard formal check then passed as pass-with-fixes: one stale invariant claim in mcp/index.md corrected, no production defects; adversarial crypto/TOCTOU/leak-path/race review clean; real-binary helper framing verified; all nine gates green (typecheck 5/5, lint, Shared 284, Core 1360+1 skip, CLI 44, Desktop 386, Rust 163+6 locked + Clippy, e2e 2/2, diff-check). Contract codified in .trellis/spec/backend/secret-catalog.md; ADR 0006 amended for the second sanctioned spawn site; boot fatal-fast/locked behavior recorded. Manual residuals: real-Linux systemd/Wasm/locked-build proofs, live Windows keyring round-trip, desktop:build packaging smoke, backup/restore/rotation operator surfaces with Slice 6. Task archived; checkpoint merged to main follows.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0965358` | (see git log) |
+
+### Status
+
+[OK] **Completed**
