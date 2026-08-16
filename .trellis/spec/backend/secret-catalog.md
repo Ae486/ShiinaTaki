@@ -39,6 +39,9 @@ reads a secret value (Slice 6 MCP lifecycle, later Node-host catalogs).
   touched; the only plaintext source is never deleted before a verified encrypted copy exists.
 - CLI takes secret values via stdin only (never argv / shell history).
 - Offline owning-Host secret operations fail immediately; there is no queue/retry/persistence path.
+- Boot behavior: an unlaunchable or create-refused helper with NO existing catalog fails boot fast with a
+  sanitized diagnostic; with an existing catalog the same failure degrades to `locked` and boot survives. Both
+  are fail-closed.
 
 ### 4. Validation & Error Matrix
 

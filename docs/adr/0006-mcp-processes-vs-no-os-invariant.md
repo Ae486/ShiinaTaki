@@ -8,6 +8,15 @@ Consequence: `packages/core` gets exactly one sanctioned `child_process` call si
 
 ---
 
+**Amendment 2026-08-16 — second sanctioned spawn site (secret-catalog key helper):** `packages/core` now has
+exactly two sanctioned `child_process` call sites: the MCP stdio transport inside `mcp/` (operator-configured,
+connect-time) and the `taki-secret-key` helper launch in `secrets/master-key.ts` (boot-time master-key bootstrap,
+operator-configured, never agent-initiated; frozen in `.trellis/spec/backend/secret-catalog.md`). Both are
+operator-configured integrations under the same principle: no model-discretionary spawn path exists, and
+agent-initiated execution still crosses the Rust Permission Gate without exception (ADR 0002).
+
+---
+
 **Amendment 2026-08-13 — standard MCP behind canonical governance:** the transport exception remains, but MCP tool
 authorization is no longer a separate mutable server-name decision product. `@ai-sdk/mcp` still performs standard
 discovery/conversion and calls the raw server tool name. A trusted sidecar maps that closure to a Host-qualified stable

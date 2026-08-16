@@ -6,4 +6,6 @@
 - mcp-manager.ts — connect-at-boot; list/prepare/convert definitions; stable raw server/tool identity sidecars; build per-turn exact-Connection Approval wrappers around raw SDK closures; describe(); closeAll; resolves `secret-ref:` env/header markers just-in-time via the injected catalog resolver (a server whose secret is unresolvable fails closed and is skipped)
 
 Invariant (grep-verifiable): only files in this directory may import `@ai-sdk/mcp` / `@ai-sdk/mcp/mcp-stdio`.
-The child-process spawn lives inside @ai-sdk/mcp (shell:false) — our code never imports node:child_process (invariant 1).
+The child-process spawn lives inside @ai-sdk/mcp (shell:false) — no module in mcp/ imports node:child_process (invariant 1);
+the package's one other sanctioned spawn site is the taki-secret-key helper launch in secrets/master-key.ts (08-12,
+per .trellis/spec/backend/secret-catalog.md — boot-time, operator-configured, never agent-initiated).
