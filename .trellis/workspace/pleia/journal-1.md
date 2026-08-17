@@ -947,5 +947,5 @@ compact repair/check cycle: no recursive delegation, no batch-per-check repetiti
 
 ### Status
 
-[IN PROGRESS] **Automated pre-Slice-7 convergence is approved. The task remains unarchived; checkpoint and semantic
-mainline merge precede Standard Skill Lifecycle planning/implementation.**
+[IN PROGRESS] **Automated pre-Slice-7 convergence is approved and checkpointed at `57fe909`. Main was merged at
+`cc2a65e` without conflicts or tree-content changes. The task remains unarchived; Standard Skill Lifecycle is next.**

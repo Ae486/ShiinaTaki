@@ -3,8 +3,8 @@
 > Updated 2026-08-18 after the pre-Slice-7 security convergence check. T4 remains isolated in its dedicated worktree.
 > Secure MCP Lifecycle and the bounded `[Approval C+E, Slice 6)` repair are approved by their automated checks; the
 > reusable contracts are `.trellis/spec/backend/mcp-lifecycle.md`, `permission-authorization.md`, and
-> `secret-catalog.md`. HEAD is `2c2ef5f`, while the approved convergence tree remains uncommitted pending checkpoint
-> and semantic mainline merge. Host-control still retains the
+> `secret-catalog.md`. The approved convergence checkpoint is `57fe909`; HEAD `cc2a65e` semantically merges current
+> main with no conflicts or tree-content change. Host-control still retains the
 > deferred two-Node process evidence for Slice 8. No push, reset, rebase, force, finish/archive, or cross-worktree
 > cleanup occurred in this session. Next product work is Standard Skill Lifecycle (Slice 7), then extension
 > discovery/integration. Manual residuals remain explicitly unclaimed below. Verify every live status before use.
@@ -48,10 +48,9 @@ acceptance.
 Current live status (2026-08-18 security closeout):
 
 - `main` is `bd9ddfb`; the main worktree has two user-owned dirty Hindsight task documents. Do not edit or clean them;
-- T4 HEAD is `2c2ef5f` on `task/t4-skills-mcp-productization`. `main...HEAD` is `2 2`, so both histories have advanced
-  from their common base and must be semantically merged at the next authorized checkpoint;
-- the current dirty tree is one ownership group: approved Slice 6 strict-review repairs, pre-Slice-7 security fixes,
-  executable specs, directory indexes, task records, and handoff/journal updates;
+- T4 HEAD is `cc2a65e` on `task/t4-skills-mcp-productization`. `main...HEAD` is `0 4`; current main is fully contained
+  after a conflict-free, tree-identical semantic merge;
+- the convergence implementation/specs are checkpointed at `57fe909`; only this post-merge status update is dirty;
 - `.trellis/.current-task` still points to archived Approval Productization. The live work is
   `.trellis/tasks/08-12-secure-mcp-lifecycle` (`in_progress`); preserve the known pointer mismatch until its tooling
   ownership is deliberately resolved rather than masking it with an unconditional rewrite;

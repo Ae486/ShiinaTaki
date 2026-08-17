@@ -13,8 +13,8 @@
 >
 > **Status update (2026-08-18):** Host Secret Catalog is archived; Secure MCP Lifecycle and the bounded pre-Slice-7
 > security convergence are implemented and approved by automated checks. Exact evidence and residuals are recorded in
-> `docs/HANDOFF.md`, the Slice `implement.md`, and Sessions 16-17 of the developer journal. HEAD is `2c2ef5f`; the
-> approved convergence tree is still uncommitted pending checkpoint and semantic mainline merge. The next product
+> `docs/HANDOFF.md`, the Slice `implement.md`, and Sessions 16-17 of the developer journal. The approved convergence
+> checkpoint is `57fe909`; HEAD `cc2a65e` contains current main after a conflict-free, tree-identical merge. The next product
 > slice is Standard Skill Lifecycle. The stale recovery narrative below remains historical unless explicitly
 > superseded here or in §20.
 
@@ -62,14 +62,15 @@ unrecognized modification as user-owned until proven otherwise.
 
 | Purpose | Path | Live state on 2026-08-17 | Rule |
 | --- | --- | --- | --- |
-| T4 work | `H:/TakiAgent-worktrees/t4` | `task/t4-skills-mcp-productization` at `2c2ef5f`; approved Slice 6/security convergence dirty tree | Run all T4 edits and commands here. |
+| T4 work | `H:/TakiAgent-worktrees/t4` | `task/t4-skills-mcp-productization` at `cc2a65e`; approved convergence checkpoint `57fe909`, current main merged | Run all T4 edits and commands here. |
 | Main TakiAgent work | `H:/TakiAgent` | `main` at `bd9ddfb`; two dirty Hindsight task documents | Read for coordination only; do not edit or clean it. |
 | Hindsight repository | `H:/hindsight` | separate repository and owner | Do not edit, stage, commit, or clean it. |
 | Legacy scratch worktree | `H:/TakiAgent/.claude/worktrees/agent-a0b3d2f31101f184a` | separate legacy branch | Do not use or remove it. |
 
-At the 2026-08-17 check closeout, `git rev-list --left-right --count main...HEAD` returned `2 2`: main and T4 both
-advanced from their common base. The owner warned that `main` may continue in parallel, so recheck it before every
-implementation wave and merge hotspot. Resolve shared composition/docs semantically; never choose a whole-file side.
+At the 2026-08-18 checkpoint, `57fe909` recorded the approved convergence tree and `cc2a65e` merged main without
+conflicts or tree-content changes. `git rev-list --left-right --count main...HEAD` then returned `0 4`. The owner warned
+that `main` may continue in parallel, so recheck it before every implementation wave and merge hotspot. Resolve shared
+composition/docs semantically; never choose a whole-file side.
 
 No push, reset, rebase, force operation, finish/archive, worktree cleanup, or final integration has been authorized or
 performed for this initiative. Push remains a separate owner decision.
@@ -125,7 +126,7 @@ execute; that parent status does not mean no production work has occurred.
 | 3. Governance Authority | `08-12-governance-authority` | `archived` | Production committed at `46a8487`; common authority is active and Approval convergence is complete. |
 | 4. Approval Productization | `08-12-approval-productization` | `archived` | Connection-bound challenge/resume, privacy convergence, and formal check are complete through `ffa9fff`/`a1a927e`. |
 | 5. Host Secret Catalog | `08-12-host-secret-catalog` | `archived` | Encrypted catalog, operator methods, migration, locked behavior, and formal check are complete through `0965358`/`c26e3f8`. |
-| 6. Secure MCP lifecycle | `08-12-secure-mcp-lifecycle` | `in_progress` | Production, strict-review repair, and pre-Slice-7 security convergence are implemented and approved. Changes/docs remain uncommitted at HEAD `2c2ef5f`. |
+| 6. Secure MCP lifecycle | `08-12-secure-mcp-lifecycle` | `in_progress` | Production, strict-review repair, and pre-Slice-7 security convergence are approved and checkpointed at `57fe909`; current main is merged at `cc2a65e`. |
 | 7. Standard Skill lifecycle | `08-12-standard-skill-lifecycle` | `planning` | Not implemented. Preserve portable `SKILL.md`; do not invent a Taki-only Skill format. |
 | 8. Discovery/integration | `08-12-extension-discovery-integration` | `planning` | Not implemented. Owns final product convergence and deferred cross-process evidence, not unfinished child features. |
 
@@ -732,12 +733,13 @@ not further implementation.
 
 This section supersedes the takeover-specific implementation directions above.
 
-- Work only in `H:/TakiAgent-worktrees/t4`; branch `task/t4-skills-mcp-productization`, HEAD `2c2ef5f`.
-- Main is `bd9ddfb`; `main...HEAD` is `2 2`, and main's two dirty Hindsight task documents are user-owned.
+- Work only in `H:/TakiAgent-worktrees/t4`; branch `task/t4-skills-mcp-productization`, HEAD `cc2a65e`.
+- Main is `bd9ddfb`; `main...HEAD` is `0 4`, and main's two dirty Hindsight task documents are user-owned.
 - The live child is `.trellis/tasks/08-12-secure-mcp-lifecycle` (`in_progress`). `.trellis/.current-task` is stale and
   still names archived Approval; do not mask this at random.
-- The current dirty tree is one approved Slice 6 plus pre-Slice-7 security convergence group. Exact commands, counts,
-  fixes, and manual residuals are in the Slice `implement.md` and `docs/HANDOFF.md`.
+- The approved Slice 6 plus pre-Slice-7 convergence is checkpointed at `57fe909`; `cc2a65e` is the conflict-free,
+  tree-identical main merge. Exact commands, counts, fixes, and manual residuals are in the Slice `implement.md` and
+  `docs/HANDOFF.md`.
 - No subagent is running. Do not allow recursive delegation. Any future direct agent prompt must be English, forbid
   YCE and child spawning, use `jbcontext` for unknown code, and separate completed/incomplete/unverified/extra/risk.
 - `jbcontext index --project-path H:/TakiAgent-worktrees/t4` was rerun. The CLI reports the HEAD revision and can read
