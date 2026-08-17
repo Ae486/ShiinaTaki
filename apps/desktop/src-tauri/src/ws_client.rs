@@ -1,6 +1,6 @@
-//! INPUT:  Core WS endpoint, pairing codes, Host negotiation, capability request/cancel frames
-//! OUTPUT: reconnecting Node client with complete catalog publication and generation-bound terminal responses
-//! POS:    shell/ws_client — socket/session owner; Tauri-free; exact control binding delegates to host_session
+//! INPUT:  Core WS endpoint, pairing codes, Host negotiation, capability request/cancel/resume frames
+//! OUTPUT: reconnecting Node client with catalog publication and final Host enforcement/audited terminal responses
+//! POS:    shell/ws_client — socket/session owner; resume rechecks current Host floors immediately before effects
 
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
@@ -357,23 +357,40 @@ impl WsClient {
             return;
         };
         let handlers = self.handlers.clone();
+        let gate = self.gate.clone();
+        let exec_policy = self.exec_policy.clone();
         let write = write.clone();
         let session = session.clone();
         let capability = record.challenge.control.capability_id.clone();
         tokio::spawn(async move {
-            let response = handlers
-                .respond(
+            let (approved, evidence) = enforce_authorized_resume(
+                &gate,
+                &exec_policy,
+                &record.challenge.request_id,
+                &record.challenge.control,
+                &record.input,
+            );
+            let response = if approved {
+                handlers.respond(
                     record.challenge.request_id.clone(),
                     record.challenge.control.clone(),
                     &capability,
                     &record.input,
                 )
-                .with_governance(record.challenge.governance.clone())
-                .with_authorization(CapabilityAuthorizationLineage {
-                    authorization_id: authorization.authorization_id,
-                    approval_generation: authorization.approval_generation,
-                    challenge_digest: authorization.challenge_digest,
-                });
+            } else {
+                CapabilityRespond::err(
+                    record.challenge.request_id.clone(),
+                    record.challenge.control.clone(),
+                    crate::protocol::CapabilityErrorCode::Denied,
+                    "Host governance tightened after Approval".into(),
+                )
+            }
+            .with_governance(evidence)
+            .with_authorization(CapabilityAuthorizationLineage {
+                authorization_id: authorization.authorization_id,
+                approval_generation: authorization.approval_generation,
+                challenge_digest: authorization.challenge_digest,
+            });
             if let Some(response) = session.lock().await.complete(response) {
                 log_terminal(&capability, &response);
                 send_response(&write, response).await;
@@ -501,56 +518,15 @@ async fn authorize_and_run(
         return Authorized::Respond(CapabilityRespond::err(request_id, control, crate::protocol::CapabilityErrorCode::Denied, "input digest mismatch".into()));
     }
     let joined = tokio::task::spawn_blocking(move || {
-        let projection = &control.governance_projection;
-        let local_allows = if capability == "exec" {
-            let class = classify_exec(&exec_policy, &input);
-            class.cell_key().is_some()
-        } else if capability == "shell-open" {
-            let class = classify_shell_open(&input);
-            class != crate::gate::ShellOpenClass::Blocked
-        } else {
-            true
-        };
-        let cell_key = if capability == "exec" {
-            classify_exec(&exec_policy, &input).cell_key().unwrap_or("exec:blocked")
-        } else if capability == "shell-open" {
-            classify_shell_open(&input).key()
-        } else { capability.as_str() };
-        let projected = projection.cells.iter().find(|cell| cell.key == cell_key).map(|cell| cell.posture);
-        let legacy_denied = gate.legacy_denied(cell_key);
-        let legacy_level_denied = !gate.legacy_level_allows_auto(cell_key);
-        let local_constraint = legacy_denied || legacy_level_denied || !local_allows;
-        let effective_posture = if local_constraint || projected.is_none() {
-            crate::protocol::HostGovernancePosture::Deny
-        } else {
-            projected.unwrap_or(crate::protocol::HostGovernancePosture::Deny)
-        };
-        let authorized = effective_posture == crate::protocol::HostGovernancePosture::Auto;
-        let evidence = crate::protocol::HostGovernanceEvidence {
-            descriptor_revision: projection.descriptor_revision,
-            classifier_revision: projection.classifier_revision,
-            cell_key: cell_key.to_string(),
-            effective_posture,
-            constraint: if legacy_denied || legacy_level_denied {
-                crate::protocol::HostGovernanceConstraint::LegacyDeny
-            } else if !local_allows {
-                crate::protocol::HostGovernanceConstraint::Local
-            } else if projected.is_none() {
-                crate::protocol::HostGovernanceConstraint::Hard
-            } else {
-                crate::protocol::HostGovernanceConstraint::None
-            },
-        };
-        // Privacy boundary: an ask stays pending, so its exact command must NOT enter the audit trail —
-        // the exec command is audited only once the attempt actually executes under auto.
-        let command = (capability == "exec" && authorized)
-            .then(|| input.get("command").and_then(Value::as_str).unwrap_or("").to_string());
-        gate.audit_enforcement(&request_id, &capability, authorized, command.as_deref());
-        if authorized {
+        let evidence = final_host_enforcement(&gate, &exec_policy, &control, &input);
+        if evidence.effective_posture == crate::protocol::HostGovernancePosture::Auto {
+            gate.audit_enforcement(&request_id, &capability, true, audit_command(&capability, &input));
             Enforcement::Respond(Box::new(handlers.respond(request_id, control, &capability, &input).with_governance(evidence)))
-        } else if effective_posture == crate::protocol::HostGovernancePosture::Ask {
+        } else if evidence.effective_posture == crate::protocol::HostGovernancePosture::Ask {
+            // Ask has not reached a terminal decision yet; resume/cancel owns its one truthful audit row.
             Enforcement::Ask(evidence)
         } else {
+            gate.audit_enforcement(&request_id, &capability, false, audit_command(&capability, &input));
             Enforcement::Respond(Box::new(CapabilityRespond::err(
                 request_id,
                 control,
@@ -570,6 +546,71 @@ async fn authorize_and_run(
             error.to_string(),
         )),
     }
+}
+
+fn final_host_enforcement(
+    gate: &Gate,
+    exec_policy: &ExecPolicy,
+    control: &crate::protocol::HostOperationControl,
+    input: &Value,
+) -> HostGovernanceEvidence {
+    let capability = control.capability_id.as_str();
+    let (cell_key, local_allows) = match capability {
+        "exec" => {
+            let class = classify_exec(exec_policy, input);
+            (class.cell_key().unwrap_or("exec:blocked"), class.cell_key().is_some())
+        }
+        "shell-open" => {
+            let class = classify_shell_open(input);
+            (class.key(), class != crate::gate::ShellOpenClass::Blocked)
+        }
+        _ => (capability, true),
+    };
+    let projection = &control.governance_projection;
+    let projected = projection.cells.iter().find(|cell| cell.key == cell_key).map(|cell| cell.posture);
+    let legacy_denied = gate.legacy_denied(cell_key);
+    let legacy_level_denied = !gate.legacy_level_allows_auto(cell_key);
+    let effective_posture = if legacy_denied || legacy_level_denied || !local_allows || projected.is_none() {
+        crate::protocol::HostGovernancePosture::Deny
+    } else {
+        projected.unwrap_or(crate::protocol::HostGovernancePosture::Deny)
+    };
+    HostGovernanceEvidence {
+        descriptor_revision: projection.descriptor_revision,
+        classifier_revision: projection.classifier_revision,
+        cell_key: cell_key.to_string(),
+        effective_posture,
+        constraint: if legacy_denied || legacy_level_denied {
+            crate::protocol::HostGovernanceConstraint::LegacyDeny
+        } else if !local_allows {
+            crate::protocol::HostGovernanceConstraint::Local
+        } else if projected.is_none() {
+            crate::protocol::HostGovernanceConstraint::Hard
+        } else {
+            crate::protocol::HostGovernanceConstraint::None
+        },
+    }
+}
+
+fn enforce_authorized_resume(
+    gate: &Gate,
+    exec_policy: &ExecPolicy,
+    request_id: &str,
+    control: &crate::protocol::HostOperationControl,
+    input: &Value,
+) -> (bool, HostGovernanceEvidence) {
+    let evidence = final_host_enforcement(gate, exec_policy, control, input);
+    let approved = evidence.effective_posture == crate::protocol::HostGovernancePosture::Ask;
+    if approved {
+        gate.audit_approved_enforcement(request_id, &control.capability_id, audit_command(&control.capability_id, input));
+    } else {
+        gate.audit_enforcement(request_id, &control.capability_id, false, audit_command(&control.capability_id, input));
+    }
+    (approved, evidence)
+}
+
+fn audit_command<'a>(capability: &str, input: &'a Value) -> Option<&'a str> {
+    (capability == "exec").then(|| input.get("command").and_then(Value::as_str).unwrap_or(""))
 }
 
 fn input_digest(capability: &str, input: &Value) -> String {
@@ -668,4 +709,95 @@ fn sanitized_label(label: &str) -> String {
 
 fn id_matches(id: &JsonRpcId, expected: u64) -> bool {
     matches!(id, JsonRpcId::Num(actual) if *actual >= 0 && *actual as u64 == expected)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::Mutex as StdMutex;
+
+    use crate::audit::{AuditSink, Decision};
+    use crate::gate::approver::{Approver, ApproverOutcome};
+    use crate::gate::decisions::DecisionStore;
+    use crate::gate::GatePolicy;
+
+    #[derive(Default)]
+    struct RecordingAudit {
+        records: StdMutex<Vec<(String, String, Decision)>>,
+    }
+
+    impl AuditSink for RecordingAudit {
+        fn record(&self, request_id: &str, capability: &str, decision: Decision, _command: Option<&str>) {
+            self.records.lock().unwrap().push((request_id.into(), capability.into(), decision));
+        }
+    }
+
+    struct UnusedApprover;
+
+    impl Approver for UnusedApprover {
+        fn ask(&self, _capability: &str, _detail: Option<&str>) -> ApproverOutcome {
+            ApproverOutcome::Unavailable
+        }
+    }
+
+    fn fixture() -> CapabilityRequest {
+        let path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../packages/shared/fixtures/protocol/capability-request.screenshot.valid.json");
+        let mut request: CapabilityRequest = serde_json::from_str(
+            &std::fs::read_to_string(path).expect("read capability request fixture"),
+        ).expect("parse capability request fixture");
+        request.control.governance_projection.cells[0].posture = crate::protocol::HostGovernancePosture::Ask;
+        request
+    }
+
+    fn harness() -> (tempfile::TempDir, Gate, ExecPolicy, Arc<RecordingAudit>, Arc<DecisionStore>) {
+        let dir = tempfile::tempdir().unwrap();
+        let audit = Arc::new(RecordingAudit::default());
+        let decisions = Arc::new(DecisionStore::load(dir.path().join("gate-decisions.json")));
+        let gate = Gate::new(
+            GatePolicy::new(),
+            decisions.clone(),
+            Arc::new(UnusedApprover),
+            audit.clone(),
+        );
+        let policy = ExecPolicy::load(dir.path().join("exec-policy.json").as_path(), dir.path().into());
+        (dir, gate, policy, audit, decisions)
+    }
+
+    #[test]
+    fn resume_refuses_when_the_host_floor_tightens_after_challenge() {
+        let (_dir, gate, policy, audit, decisions) = harness();
+        let request = fixture();
+        assert_eq!(
+            final_host_enforcement(&gate, &policy, &request.control, &request.input).effective_posture,
+            crate::protocol::HostGovernancePosture::Ask,
+        );
+        decisions.seed_for_test("screenshot", crate::gate::approver::Scope::Session, false);
+
+        let (approved, evidence) = enforce_authorized_resume(
+            &gate, &policy, &request.request_id, &request.control, &request.input,
+        );
+
+        assert!(!approved);
+        assert_eq!(evidence.effective_posture, crate::protocol::HostGovernancePosture::Deny);
+        assert_eq!(audit.records.lock().unwrap().as_slice(), &[(
+            request.request_id, "screenshot".into(), Decision::AutoDenied,
+        )]);
+    }
+
+    #[test]
+    fn approved_resume_emits_one_allowed_once_audit_row() {
+        let (_dir, gate, policy, audit, _decisions) = harness();
+        let request = fixture();
+
+        let (approved, evidence) = enforce_authorized_resume(
+            &gate, &policy, &request.request_id, &request.control, &request.input,
+        );
+
+        assert!(approved);
+        assert_eq!(evidence.effective_posture, crate::protocol::HostGovernancePosture::Ask);
+        assert_eq!(audit.records.lock().unwrap().as_slice(), &[(
+            request.request_id, "screenshot".into(), Decision::AllowedOnce,
+        )]);
+    }
 }

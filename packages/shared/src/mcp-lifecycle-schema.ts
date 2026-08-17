@@ -1,12 +1,10 @@
 /**
- * INPUT:  candidate mcp.* param/result instances (operator-role desired-state + runtime status surface)
- * OUTPUT: MCP_METHODS + desired-server wire schemas + write params (expectedConfigRevision) + sanitized
- *         runtime status/diagnostic schemas + McpRefusalReason (operator-only surface; NO Rust mirror — the
- *         Shell never handles these frames, so it is tested in its own schema test, never protocol-fixtures)
- * POS:    shared/protocol — the Secure MCP Lifecycle contract: three state planes stay separate; desired config
- *         carries opaque `secret-ref:` markers ONLY (values never ride this family — secret.set is the value path)
+ * INPUT: candidate operator-role mcp.* parameters and results
+ * OUTPUT: method, desired-state, revision, runtime, diagnostic, and refusal schemas with no Rust mirror
+ * POS: shared/protocol MCP contract; state planes stay separate and desired config carries opaque markers only
  */
 import { z } from "zod";
+import { SecretRefSchema } from "./secret-catalog-schema.ts";
 
 // Operator-role methods (same posture as permission.*/secret.*): the Home MCP page and the CLI drive these; the
 // agent has NO tool that reaches them. Writes carry expectedConfigRevision for per-row optimistic concurrency.
@@ -28,10 +26,14 @@ export const MCP_METHODS = {
 export const McpServerIdSchema = z.string().min(1).max(64).regex(/^[A-Za-z0-9][A-Za-z0-9_-]*$/);
 export type McpServerId = z.infer<typeof McpServerIdSchema>;
 
-// Env/header maps: values are plain non-secret strings OR opaque `secret-ref:` markers. A value is NEVER a stored
-// secret (the catalog owns values); validation never interpolates a value into an issue message.
+// Desired env/header maps carry markers only. Literal values would persist in SQLite and bypass the catalog.
+// The refinement message is fixed: validation never interpolates the submitted value into an issue.
 export const MCP_SECRET_REF_MARKER = "secret-ref:";
-export const McpFieldValueSchema = z.string().max(64 * 1024);
+export const McpFieldValueSchema = z.string().max(MCP_SECRET_REF_MARKER.length + 240).refine(
+  (value) => value.startsWith(MCP_SECRET_REF_MARKER)
+    && SecretRefSchema.safeParse(value.slice(MCP_SECRET_REF_MARKER.length)).success,
+  "MCP env/header values must be valid secret-ref markers",
+);
 export const McpEnvMapSchema = z.record(z.string().min(1).max(64), McpFieldValueSchema);
 export type McpFieldValue = z.infer<typeof McpFieldValueSchema>;
 
@@ -56,8 +58,11 @@ export type McpHttpConfig = z.infer<typeof McpHttpConfigSchema>;
 export const McpServerConfigSchema = z.union([McpStdioConfigSchema, McpHttpConfigSchema]);
 export type McpServerConfig = z.infer<typeof McpServerConfigSchema>;
 
+export const MAX_MCP_TOOL_COUNT = 1024;
+export const McpToolNameSchema = z.string().min(1).max(128);
+
 // Selected raw tool names (empty = every discovered tool). Applied at candidate preparation, never at call time.
-export const McpSelectedToolsSchema = z.array(z.string().min(1).max(128)).max(1024);
+export const McpSelectedToolsSchema = z.array(McpToolNameSchema).max(MAX_MCP_TOOL_COUNT);
 
 const TimestampSchema = z.iso.datetime({ offset: true });
 const RevisionSchema = z.number().int().positive();
@@ -163,8 +168,8 @@ export const McpCandidateOutcomeSchema = z.discriminatedUnion("status", [
     status: z.literal("published"),
     at: TimestampSchema,
     runtimeGeneration: z.number().int().positive(),
-    toolNames: z.array(z.string().min(1).max(128)).max(1024),
-    skipped: z.array(McpToolSkipIssueSchema).max(1024),
+    toolNames: z.array(McpToolNameSchema).max(MAX_MCP_TOOL_COUNT),
+    skipped: z.array(McpToolSkipIssueSchema).max(MAX_MCP_TOOL_COUNT),
     pages: z.number().int().positive(),
     durationMs: z.number().int().nonnegative(),
   }),
@@ -181,8 +186,8 @@ export const McpCandidateOutcomeSchema = z.discriminatedUnion("status", [
     ok: z.boolean(),
     reason: McpCandidateFailureReasonSchema.optional(),
     message: z.string().max(512).optional(),
-    toolNames: z.array(z.string().min(1).max(128)).max(1024),
-    skipped: z.array(McpToolSkipIssueSchema).max(1024),
+    toolNames: z.array(McpToolNameSchema).max(MAX_MCP_TOOL_COUNT),
+    skipped: z.array(McpToolSkipIssueSchema).max(MAX_MCP_TOOL_COUNT),
     pages: z.number().int().nonnegative(), // a failure before the first listing page reports zero
     durationMs: z.number().int().nonnegative(),
   }),
@@ -238,8 +243,8 @@ export const McpTestResultSchema = z.strictObject({
   status: z.enum(["ok", "failed"]),
   reason: McpCandidateFailureReasonSchema.optional(),
   message: z.string().max(512).optional(),
-  toolNames: z.array(z.string().min(1).max(128)).max(1024),
-  skipped: z.array(McpToolSkipIssueSchema).max(1024),
+  toolNames: z.array(McpToolNameSchema).max(MAX_MCP_TOOL_COUNT),
+  skipped: z.array(McpToolSkipIssueSchema).max(MAX_MCP_TOOL_COUNT),
   pages: z.number().int().nonnegative(), // zero when the candidate failed before the first listing page
   durationMs: z.number().int().nonnegative(),
 });
@@ -251,5 +256,6 @@ export const McpRefusalReasonSchema = z.enum([
   "duplicate-server",
   "key-collision",
   "invalid-config",
+  "server-disabled",
 ]);
 export type McpRefusalReason = z.infer<typeof McpRefusalReasonSchema>;

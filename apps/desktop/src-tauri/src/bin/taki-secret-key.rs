@@ -1,14 +1,6 @@
-//! INPUT:  argv — `get --account <name>` | `create --account <name>` | `credential --name <file>`;
-//!         `create` additionally reads a u32-LE-length-prefixed key from stdin; env — CREDENTIALS_DIRECTORY for
-//!         the `credential` subcommand (systemd `LoadCredentialEncrypted=` exposes the decrypted file there)
-//! OUTPUT: the catalog master-key helper for the Core process: `get`/`create` use Windows Credential Manager via
-//!         the shipped KeyringStore (service "TakiAgent", versioned account names like
-//!         `secret-catalog-master-key-v1`); `credential` streams the systemd-delivered key file; key bytes leave
-//!         ONLY as `[u32 LE length][bytes]` on stdout for the calling process, diagnostics go to stderr and never
-//!         contain key material; `create` is create-only (an existing account is refused, never overwritten)
-//! POS:    shell/bin — release-safe (unlike taki-node it grants nothing: no approver, no capability); account
-//!         model is the frozen interactive-user rule — Core and this helper must run as the same logged-in user,
-//!         because Credential Manager entries bind to the current token's logon session
+//! INPUT: framed get/create argv+stdin or systemd CREDENTIALS_DIRECTORY file requests
+//! OUTPUT: framed catalog master key; serialized create is create-only and diagnostics remain value-free
+//! POS: shell/bin — release-safe helper; Core and helper share the same interactive-user credential scope
 
 use std::io::{Read, Write};
 use std::path::PathBuf;
@@ -93,12 +85,9 @@ fn cmd_create(store: &dyn SecretStore, account: &str, stdin: &[u8]) -> Outcome {
     if key.len() != KEY_BYTES {
         return Outcome::fail(EXIT_USAGE, "key must be 32 bytes");
     }
-    match store.get(account) {
-        Ok(Some(_)) => Outcome::fail(EXIT_EXISTS, "credential exists; create never overwrites"),
-        Ok(None) => match store.set(account, &hex_encode(&key)) {
-            Ok(()) => Outcome { code: EXIT_OK, stdout: Vec::new(), stderr: String::new() },
-            Err(error) => Outcome::fail(EXIT_STORE, &format!("credential store error: {error}")),
-        },
+    match store.set_if_absent(account, &hex_encode(&key)) {
+        Ok(true) => Outcome { code: EXIT_OK, stdout: Vec::new(), stderr: String::new() },
+        Ok(false) => Outcome::fail(EXIT_EXISTS, "credential exists; create never overwrites"),
         Err(error) => Outcome::fail(EXIT_STORE, &format!("credential store error: {error}")),
     }
 }
@@ -169,7 +158,7 @@ fn hex_decode(text: &str) -> Option<Vec<u8>> {
 mod tests {
     use super::*;
     use std::collections::HashMap;
-    use std::sync::Mutex;
+    use std::sync::{Arc, Barrier, Mutex};
 
     /// Hermetic fake — never touches Credential Manager (machine-global state, ruling 5).
     struct FakeStore {
@@ -190,6 +179,15 @@ mod tests {
         fn set(&self, key: &str, secret: &str) -> Result<(), String> {
             self.map.lock().unwrap().insert(key.to_string(), secret.to_string());
             Ok(())
+        }
+
+        fn set_if_absent(&self, key: &str, secret: &str) -> Result<bool, String> {
+            let mut map = self.map.lock().unwrap();
+            if map.contains_key(key) {
+                return Ok(false);
+            }
+            map.insert(key.to_string(), secret.to_string());
+            Ok(true)
         }
 
         fn delete(&self, key: &str) -> Result<(), String> {
@@ -243,6 +241,34 @@ mod tests {
         assert_eq!(again.code, EXIT_EXISTS);
         // The stored key is the ORIGINAL — the second create changed nothing.
         assert_eq!(store.get(account).unwrap().as_deref(), Some(hex_encode(&KEY).as_str()));
+    }
+
+    #[test]
+    fn concurrent_first_creators_converge_without_overwrite() {
+        let store = Arc::new(FakeStore::new());
+        let barrier = Arc::new(Barrier::new(3));
+        let account = "secret-catalog-master-key-v1";
+        let keys = [[0x11; KEY_BYTES], [0x22; KEY_BYTES]];
+        let workers: Vec<_> = keys.into_iter().map(|key| {
+            let store = store.clone();
+            let barrier = barrier.clone();
+            std::thread::spawn(move || {
+                barrier.wait();
+                dispatch(
+                    &["create".into(), "--account".into(), account.into()],
+                    &frame(&key),
+                    None,
+                    store.as_ref(),
+                )
+            })
+        }).collect();
+        barrier.wait();
+        let outcomes: Vec<_> = workers.into_iter().map(|worker| worker.join().unwrap()).collect();
+
+        assert_eq!(outcomes.iter().filter(|outcome| outcome.code == EXIT_OK).count(), 1);
+        assert_eq!(outcomes.iter().filter(|outcome| outcome.code == EXIT_EXISTS).count(), 1);
+        let stored = store.get(account).unwrap().unwrap();
+        assert!(keys.iter().any(|key| stored == hex_encode(key)));
     }
 
     #[test]

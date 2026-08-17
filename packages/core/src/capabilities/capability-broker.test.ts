@@ -131,6 +131,35 @@ describe("createCapabilityBroker", () => {
     }
   });
 
+  it("clears the deadline timer after an earlier terminal response", async () => {
+    vi.useFakeTimers();
+    try {
+      const { broker: b } = broker(100);
+      let sent: CapabilityRequest | undefined;
+      let notifications = 0;
+      const pending = b.request(target(HOST_A, (_method, params) => {
+        notifications += 1;
+        sent = params as CapabilityRequest;
+      }), {});
+      expect(vi.getTimerCount()).toBe(1);
+
+      expect(b.resolve({
+        requestId: sent!.requestId,
+        control: sent!.control,
+        state: "completed",
+        output: OUTPUT,
+        governance: EVIDENCE,
+      }, { hostId: HOST_A, connectionGeneration: 1 })).toEqual({ accepted: true });
+      await expect(pending).resolves.toEqual({ ok: true, output: OUTPUT });
+      expect(vi.getTimerCount()).toBe(0);
+
+      await vi.advanceTimersByTimeAsync(100);
+      expect(notifications).toBe(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("returns unknown_request for never-issued and insertion-order-evicted terminal IDs", async () => {
     const { broker: b } = broker();
     expect(b.resolve({

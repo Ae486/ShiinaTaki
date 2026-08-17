@@ -49,3 +49,28 @@
 
 No `tools/list_changed` auto-refresh (SDK-unproven), no marketplace/prompts/resources/Apps, no provider-specific
 servers, no Node-host MCP replication, no weakening of governance/Approval/secret-catalog contracts.
+
+## Converged implementation contracts (2026-08-17)
+
+The strict Slice 6 review found lifecycle races and truth-boundary gaps in the first implementation. The approved
+convergence keeps the product design above and pins these implementation contracts:
+
+- Desired env/header values are valid `secret-ref:` markers only. Plaintext cannot cross the Shared wire or persist in
+  SQLite; `secret.set` remains the only value-carrying method.
+- Every desired operation creates a process-local ownership token. Candidate publication requires the exact current
+  desired object and candidate token, so a late completion cannot replace a newer revision or resurrect disabled,
+  removed, secret-cleared, or shutting-down state.
+- Candidate connect plus all locally paginated `tools/list` pages share one abortable deadline. Missing selected tools,
+  repeated cursors, the 1,024 tool/page bound, and normalized-key collisions fail the candidate closed.
+- One shared close promise owns each connected client. Generation records capture `ownerHostId`, `configRevision`, and
+  secret refs; active plus draining leases remain visible, and forced close of a dispatched call reports
+  `OUTCOME_UNKNOWN`.
+- Secret clear examines desired, candidate, active, and draining captures before retiring affected generations. Secret
+  set reloads each enabled desired server that references the changed ref.
+- Transport failures are sanitized before logs, operator views, or model results. Raw connect/list/tool-call errors are
+  never a product diagnostic surface.
+- Home treats env/header inputs as write-only. Renaming a field or switching transport requires re-entry. Edit first
+  wins the optimistic desired revision, then rotates secrets and reconnects; post-commit failure preserves the draft
+  and advances its retry revision. Failed tests remain failed, and disabled servers cannot reconnect.
+
+The executable cross-layer contract is `.trellis/spec/backend/mcp-lifecycle.md`.

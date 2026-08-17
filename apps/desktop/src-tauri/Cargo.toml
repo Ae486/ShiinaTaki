@@ -47,6 +47,9 @@ tokio = { version = "1", features = ["rt", "rt-multi-thread", "sync", "time", "m
 tokio-tungstenite = "0.29"
 futures-util = "0.3"
 keyring = "4.1"
+# The v1 wrapper initializes the platform store but omits per-entry modifiers; direct core access keeps Windows
+# credentials Local without adding a new package (keyring-core is already pinned transitively by keyring).
+keyring-core = "1.0"
 xcap = "0.9"
 sysinfo = "0.39"
 arboard = "3.6"
@@ -58,7 +61,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # transitive via xcap/sysinfo, so this pins it direct with ONLY the two Win32 sub-namespaces those calls need — no new
 # crate enters the tree. Target-gated: the crate compiles Windows-only; the sampler cfg-falls-back to None elsewhere.
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.62", features = ["Win32_UI_Input_KeyboardAndMouse", "Win32_System_SystemInformation"] }
+windows = { version = "0.62", features = ["Win32_Foundation", "Win32_Security", "Win32_System_SystemInformation", "Win32_System_Threading", "Win32_UI_Input_KeyboardAndMouse"] }
 
 [dev-dependencies]
 tempfile = "3"

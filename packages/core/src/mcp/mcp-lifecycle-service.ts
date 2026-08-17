@@ -1,10 +1,7 @@
 /**
- * INPUT:  the desired-state repo (plane 1) + the runtime manager (plane 3) + operator mcp.* params
- * OUTPUT: createMcpLifecycleService({ repo, manager }) — CRUD/test/reconnect orchestration that persists the
- *         desired row FIRST, then reconciles the runtime (candidate -> publish / drain) — every ordinary change
- *         lands without a process restart; conflicts and refusals are typed before they reach the WS surface
- * POS:    core/mcp — the operator plane-2 controller: desired truth is the repo, runtime truth is the manager,
- *         and the merged view never leaks secret values (configs carry opaque markers only)
+ * INPUT: desired-state repo, runtime manager, and operator mcp.* parameters
+ * OUTPUT: typed CRUD/test/reconnect orchestration that persists desired truth before runtime reconciliation
+ * POS: core/mcp operator controller; merged views expose opaque markers and never secret values
  */
 import type {
   McpAddParams,
@@ -92,7 +89,7 @@ function viewOf(context: LifecycleContext, row: McpDesiredServer): McpServerView
     configRevision: row.configRevision,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
-    status: row.enabled ? status : { ...status, phase: "disabled" as const },
+    status,
   };
 }
 
@@ -132,7 +129,7 @@ async function editServer(context: LifecycleContext, params: McpEditParams): Pro
   requireRow(context, params.serverId);
   const row = context.repo.edit(params);
   if (row.enabled) await context.manager.applyDesired(row);
-  else context.manager.disableServer(row.serverId);
+  else context.manager.disableServer(row);
   return viewOf(context, context.repo.get(row.serverId) ?? row);
 }
 
@@ -146,7 +143,7 @@ async function enableServer(context: LifecycleContext, params: McpEnableParams):
 function disableServer(context: LifecycleContext, params: McpDisableParams): McpServerView {
   requireRow(context, params.serverId);
   const row = context.repo.setEnabled({ serverId: params.serverId, enabled: false, expectedConfigRevision: params.expectedConfigRevision });
-  context.manager.disableServer(row.serverId); // lease blocking + drain/close exactly once (no restart)
+  context.manager.disableServer(row); // lease blocking + drain/close exactly once (no restart)
   return viewOf(context, context.repo.get(row.serverId) ?? row);
 }
 
@@ -167,6 +164,7 @@ async function testServer(context: LifecycleContext, params: McpTestParams): Pro
 
 async function reconnectServer(context: LifecycleContext, params: McpReconnectParams): Promise<McpServerView> {
   const row = requireRow(context, params.serverId);
-  await context.manager.applyDesired({ serverId: row.serverId, config: row.config, selectedTools: row.selectedTools, enabled: true });
+  if (!row.enabled) throw new McpRefusedError("server-disabled", `desired MCP server ${row.serverId} is disabled`);
+  await context.manager.applyDesired(row);
   return viewOf(context, context.repo.get(row.serverId) ?? row);
 }

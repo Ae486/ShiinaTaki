@@ -77,7 +77,14 @@ describe("createMcpManager over Streamable HTTP (T7)", () => {
     running = await startHttpFixture();
     const { logger } = createCaptureLogger();
     manager = createMcpManager({ logger, connect: defaultConnect });
-    await manager.reconcile([{ serverId: "remote", config: { url: running.url }, selectedTools: [], enabled: true }]);
+    await manager.reconcile([{
+      serverId: "remote",
+      ownerHostId: "11111111-1111-4111-8111-111111111111",
+      configRevision: 1,
+      config: { url: running.url },
+      selectedTools: [],
+      enabled: true,
+    }]);
 
     const tool = manager.tools().remote_echo;
     expect(tool).toBeDefined();

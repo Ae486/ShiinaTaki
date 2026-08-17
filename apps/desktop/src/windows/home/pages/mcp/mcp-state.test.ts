@@ -84,7 +84,7 @@ describe("editor draft model", () => {
   it("round-trips a view into a draft whose secret fields are write-only (value empty, hadSecret kept)", () => {
     const draft = draftFromView(view());
     expect(draft.fields).toHaveLength(1);
-    expect(draft.fields[0]).toMatchObject({ name: "TOKEN", value: "", secret: true, hadSecret: true });
+    expect(draft.fields[0]).toMatchObject({ name: "TOKEN", value: "", storedSecretRef: "mcp.github.env.TOKEN" });
     // Keeping the stored secret (no new value typed) round-trips the same opaque marker.
     expect(draftToConfig(draft)).toEqual(view().config);
     expect(secretValuesToStore(draft)).toEqual([]); // nothing re-sent unless a new value is typed
@@ -97,13 +97,16 @@ describe("editor draft model", () => {
 
   it("stores newly typed secret values separately and puts markers into the desired config", () => {
     const draft = { ...emptyDraft(), serverId: "github", command: "node", fields: [
-      { id: 1, name: "TOKEN", value: "typed-value", secret: true, hadSecret: true },
-      { id: 2, name: "NODE_ENV", value: "production", secret: false, hadSecret: false },
+      { id: 1, name: "TOKEN", value: "typed-value", storedSecretRef: "mcp.github.env.TOKEN" },
+      { id: 2, name: "NODE_ENV", value: "production", storedSecretRef: null },
     ] };
-    expect(secretValuesToStore(draft)).toEqual([{ secretRef: "mcp.github.env.TOKEN", value: "typed-value" }]);
+    expect(secretValuesToStore(draft)).toEqual([
+      { secretRef: "mcp.github.env.TOKEN", value: "typed-value" },
+      { secretRef: "mcp.github.env.NODE_ENV", value: "production" },
+    ]);
     expect(draftToConfig(draft)).toEqual({
       command: "node",
-      env: { TOKEN: "secret-ref:mcp.github.env.TOKEN", NODE_ENV: "production" },
+      env: { TOKEN: "secret-ref:mcp.github.env.TOKEN", NODE_ENV: "secret-ref:mcp.github.env.NODE_ENV" },
     });
   });
 
@@ -115,12 +118,16 @@ describe("editor draft model", () => {
     expect(validateDraft({ ...emptyDraft("http"), serverId: "ok", url: "ftp://nope" }, ids)).toContain("http(s)");
     expect(validateDraft({
       ...emptyDraft(), serverId: "ok", command: "node",
-      fields: [{ id: 1, name: "TOKEN", value: "", secret: true, hadSecret: false }],
-    }, ids)).toContain("需要一个值");
+      fields: [{ id: 1, name: "TOKEN", value: "", storedSecretRef: null }],
+    }, ids)).toContain("需要输入新值");
     expect(validateDraft({
       ...emptyDraft(), serverId: "ok", command: "node",
-      fields: [{ id: 1, name: "TOKEN", value: "kept", secret: true, hadSecret: true }],
+      fields: [{ id: 1, name: "TOKEN", value: "kept", storedSecretRef: "mcp.ok.env.TOKEN" }],
     }, ids)).toBeNull();
+    expect(validateDraft({
+      ...emptyDraft("http"), serverId: "ok", url: "https://mcp.example",
+      fields: [{ id: 1, name: "TOKEN", value: "", storedSecretRef: "mcp.ok.env.TOKEN" }],
+    }, ids)).toContain("更换传输类型");
     expect(draftSelectedTools({ ...emptyDraft(), selectedTools: "echo\n  search\n\n" })).toEqual(["echo", "search"]);
   });
 });

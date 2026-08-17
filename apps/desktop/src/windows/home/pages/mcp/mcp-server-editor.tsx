@@ -1,9 +1,7 @@
 /**
- * INPUT:  an McpServerDraft (page-local editor model) + change/cancel/save callbacks and a validation error line.
- * OUTPUT: <McpServerEditor> — the stdio/http desired-config form with write-only secret fields (a stored secret
- *         shows empty with a "已加密存储" placeholder; the value only ever travels via secret.set).
- * POS:    ui/windows/home/pages/mcp — presentation only; validation lives in mcp-state.ts and the write in the
- *         controller, so this file holds no transport or authority of its own.
+ * INPUT: page-local MCP draft, validation error, and change/cancel/save callbacks
+ * OUTPUT: stdio/http desired-config form whose stored secrets remain empty write-only placeholders
+ * POS: Home MCP presentation editor; state validates and the controller owns transport/authority
  */
 
 import { Badge } from "../../badge.tsx";
@@ -113,18 +111,14 @@ function FieldRows({ draft, patch }: { draft: McpServerDraft; patch(next: Partia
             type="password"
             autoComplete="off"
             value={field.value}
-            placeholder={field.hadSecret ? "已加密存储 — 输入新值以更换" : field.secret ? "输入密钥值（只写不读）" : "值"}
+            placeholder={field.storedSecretRef ? "已加密存储 — 输入新值以更换" : "输入密钥值（只写不读）"}
             onChange={(event) => patchField(field.id, { value: event.target.value })}
           />
-          <label className="flex items-center gap-1 text-[11px] text-slate-500">
-            <input type="checkbox" checked={field.secret} onChange={(event) => patchField(field.id, { secret: event.target.checked })} />
-            密钥
-          </label>
           <ActionButton tone="danger-soft" onClick={() => patch({ fields: draft.fields.filter((candidate) => candidate.id !== field.id) })}>删除</ActionButton>
         </div>
       ))}
       <div>
-        <ActionButton onClick={() => patch({ fields: [...draft.fields, { id: nextFieldId(), name: "", value: "", secret: false, hadSecret: false }] })}>
+        <ActionButton onClick={() => patch({ fields: [...draft.fields, { id: nextFieldId(), name: "", value: "", storedSecretRef: null }] })}>
           添加字段
         </ActionButton>
       </div>

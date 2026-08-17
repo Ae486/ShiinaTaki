@@ -20,8 +20,15 @@ const OWNER_HOST_ID = "11111111-1111-4111-8111-111111111111";
 
 const managers: McpManager[] = [];
 const dbs: Database[] = [];
-function desired(entry: McpServerEntry): McpDesiredRuntime {
-  return { serverId: entry.key, config: entry.config, selectedTools: [], enabled: true };
+function desired(entry: McpServerEntry, configRevision = 1): McpDesiredRuntime {
+  return {
+    serverId: entry.key,
+    ownerHostId: OWNER_HOST_ID,
+    configRevision,
+    config: entry.config,
+    selectedTools: [],
+    enabled: true,
+  };
 }
 async function makeManager(
   entries: McpServerEntry[],
@@ -119,9 +126,11 @@ describe("createMcpManager", () => {
     const result = (await tool?.execute?.({ text: "hi" }, { toolCallId: "c1", messages: [] } as never)) as {
       ok: boolean;
       code: number | string;
+      message: string;
     };
     expect(result.ok).toBe(false);
     expect(result.code).toBe(-32601);
+    expect(result.message).toBe("MCP tool call failed");
   });
 
   it("rejects a colliding candidate fail-closed while the first server keeps serving (risk §7.3)", async () => {
@@ -245,6 +254,31 @@ describe("createMcpManager", () => {
     );
 
     expect(first.describe("first_echo")?.subjectRevision).not.toBe(second.describe("second_echo")?.subjectRevision);
+  });
+
+  it("binds the durable configRevision into runtime authority even when public transport config is unchanged", async () => {
+    const firstTransport = new InMemoryTransport([ECHO_TOOL], echoOk);
+    const secondTransport = new InMemoryTransport([ECHO_TOOL], echoOk);
+    const transports = new Map([["srv", firstTransport]]);
+    const manager = await makeManager([{ key: "srv", config: { command: "node" } }], memConnect(transports));
+    const before = manager.describe("srv_echo")?.subjectRevision;
+    transports.set("srv", secondTransport);
+    await manager.applyDesired(desired({ key: "srv", config: { command: "node" } }, 2));
+    expect(manager.describe("srv_echo")?.subjectRevision).not.toBe(before);
+  });
+
+  it("rejects raw names that normalize to the same model-facing key", async () => {
+    const transport = new InMemoryTransport([
+      { ...ECHO_TOOL, name: "echo.one" },
+      { ...ECHO_TOOL, name: "echo_one" },
+    ], echoOk);
+    const { logger } = createCaptureLogger();
+    const manager = createMcpManager({ logger, connect: memConnect(new Map([["srv", transport]])) });
+    managers.push(manager);
+    const outcome = await manager.applyDesired(desired({ key: "srv", config: { command: "node" } }));
+    expect(outcome).toMatchObject({ status: "failed", reason: "tool-key-collision" });
+    expect(manager.tools()).toEqual({});
+    expect(transport.closedCount).toBe(1);
   });
 
   it("intersects legacy deny-only compatibility before the raw call", async () => {

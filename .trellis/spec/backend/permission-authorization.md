@@ -237,6 +237,11 @@ complete lexically sorted `cells` array. TypeScript and Rust both compute SHA-25
 - Rust holds the pending challenge and raw input memory-only inside the per-generation `HostSession`, consumes the
   authorization exactly once, executes at most once, and settles with authorization lineage; reconnect discards the
   pending slot.
+- Immediately before an approved resume executes, Rust recomputes trusted classification and the latest
+  legacy/local/managed/hard floor. The still-`ask` request records exactly one `AllowedOnce` audit row and executes;
+  a newly tightened `deny` records exactly one denial row and never reaches the effect handler.
+- `DecisionStore::remember` remains parent-module-visible only. Tests may seed legacy state only through a
+  `#[cfg(test)]` seam; testing convenience must not widen production decision-write authority.
 - `completed ⟺ ask ⟺ authorization lineage` is enforced cross-language (Zod `superRefine` plus Rust
   `validate_lineage`) and pinned by golden fixtures; a completed ask-class frame without valid lineage converts to a
   denial.
@@ -262,6 +267,8 @@ complete lexically sorted `cells` array. TypeScript and Rust both compute SHA-25
 | Host evidence revision/cell/posture invalid or wider than projection | Core converts terminal result to denial |
 | Effective Host posture is `ask` | `APPROVAL_REQUIRED`, no local prompt, no execution |
 | Effective Host posture is `deny` | Denied, audited where applicable, no execution |
+| Approved resume remains `ask` at final Host enforcement | Execute once; one `AllowedOnce` audit row; retain authorization lineage |
+| Host floor tightens before approved resume | Deny once; one denial audit row; no effect execution |
 | Legacy allow/session value | Ignore as authority |
 | Exact legacy `never` | Tighten matching action only |
 | Legacy file malformed/unreadable where a denial may exist | Affected adapter/Host fails closed with sanitized diagnostic |
@@ -276,12 +283,16 @@ complete lexically sorted `cells` array. TypeScript and Rust both compute SHA-25
 - Good: a Host legacy `never` tightens projected `auto` to `deny`; Core receives stricter evidence and the action never
   executes. Clearing a Core override at the next generation restores the factory posture without importing a legacy
   allow.
+- Good: an operator approves an `ask`, the Host rechecks the same sealed input immediately before execution, emits one
+  allowed audit row, and returns the single-use authorization lineage.
 - Base: a second Home window writes from stale generation N after N+1 exists. Core returns `POLICY_CONFLICT`; the stale
   window refetches and does not replay its mutation.
 - Base: an effective `ask` returns `APPROVAL_REQUIRED` and stops. This is secure but not independently releasable until
   Slice 4 installs canonical Approval.
 - Bad: use `mcpServer_toolName`, a Skill path, a display label, or an annotation as the durable grant key.
 - Bad: keep the old Shell prompt/decision writer while also adding Core policy; that is a third authorization system.
+- Bad: execute an approved resume from cached challenge evidence, or make legacy decision writers crate-visible so a
+  sibling production module can silently grant or deny.
 - Bad: accept a Host-provided posture, omit projection cells, default generation to `1`, cache policy in Home, or copy
   the Rust exec/shell-open classifier into TypeScript.
 
@@ -296,7 +307,8 @@ complete lexically sorted `cells` array. TypeScript and Rust both compute SHA-25
   collision, exact legacy deny, no legacy allow; Skill load confinement and no grant transfer.
 - Host/Rust: complete projection validation, canonical digest, per-capability lineage, stale generation, same-generation
   tampering, input digest recomputation, trusted cell classification, stricter composition, exact legacy deny,
-  malformed legacy state, `ask` fail-closed, no execution under non-`auto`, and bounded evidence.
+  malformed legacy state, `ask` fail-closed, approved-resume final-floor recheck, exactly-one allowed/denied audit,
+  single production decision writer, no execution under non-`auto`, and bounded evidence.
 - Home: typed WS schema boundaries, permission reads classified read-only, writes unknown-outcome, generation
   replacement/refetch, retired-result suppression, conflict refetch, second confirm, immutable, reset, one mutation at
   a time, validation/read/reconnect states, and a source/cache regression proving no permission persistence.

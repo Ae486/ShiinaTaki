@@ -53,6 +53,21 @@ restoration. The complete lifecycle, deadline, timing-policy, timeline-reconcili
   immutable, loading/reconnecting/read/validation/saved/conflict states. It may disclose that Hosts can tighten, but it
   must not invent a per-row Host constraint not present in the Core response.
 
+### Secure MCP management
+
+- The MCP page is an operator projection over Core desired rows plus process-local runtime status. It owns no
+  authoritative configuration, runtime generation, permission decision, or secret value.
+- State is component memory only. Each authenticated Home client generation performs a fresh `mcp.list`; late reads or
+  mutations from a retired client are ignored, and timeout/reconnect never replays a mutation.
+- Env/header values are always write-only. Core returns opaque markers only. A field name or transport-kind change
+  invalidates the retained ref and requires a new value before save.
+- Mutations are serialized. Revision conflict refetches Core truth. A desired edit committed before secret rotation or
+  reconnect failure keeps the editor open, preserves the draft, and advances its retry revision to the committed row.
+- Test result truth is preserved: a failed diagnostic never renders as success, and `test` never publishes tools.
+- Disabled servers cannot reconnect. Cancel, New, and successful Save clear stale editor revision and validation state.
+- Full backend/runtime/secret and verification requirements live in
+  [`mcp-lifecycle.md`](../backend/mcp-lifecycle.md).
+
 ## Cross-window commands (the pet owns the scene, the pages own the surface)
 
 A page that needs something only the pet window can do COMMANDS it and does not reach into it:

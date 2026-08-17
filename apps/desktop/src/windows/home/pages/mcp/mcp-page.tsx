@@ -1,10 +1,7 @@
 /**
- * INPUT:  the useMcpServers() view state (Core-authoritative desired + runtime truth) and editor drafts.
- * OUTPUT: <McpPage> — the MCP lifecycle management page: server cards with truthful phase/diagnostic badges,
- *         a write-only-secret editor, test/reconnect/enable/disable/remove actions, and the loading/empty/
- *         validation/partial-failure/reconnecting/success states the home conventions require.
- * POS:    ui/windows/home/pages/mcp — presentation only; every mutation goes through the controller, nothing is
- *         persisted locally (no storage or page-cache key for MCP state), and secret values are never echoed back.
+ * INPUT: Core-authoritative MCP view state and page-local editor drafts
+ * OUTPUT: lifecycle management page with complete states, server actions, and write-only-secret editing
+ * POS: Home MCP presentation; controller owns mutations, no MCP truth is persisted locally or echoed
  */
 
 import { useState } from "react";
@@ -16,60 +13,97 @@ import { draftFromView, emptyDraft, validateDraft, type McpFeedback, type McpSer
 import { useMcpServers } from "./use-mcp.ts";
 import { McpServerCard } from "./mcp-server-card.tsx";
 import { McpServerEditor } from "./mcp-server-editor.tsx";
+import type { McpEditorMutationResult } from "./mcp-controller.ts";
 
 export function McpPage() {
-  const { state, connectionReady, refresh, add, edit, setEnabled, remove, reconnect, test } = useMcpServers();
+  const mcp = useMcpServers();
   const [draft, setDraft] = useState<McpServerDraft | null>(null);
   const [editingRevision, setEditingRevision] = useState<number | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const servers = state.kind === "ready" ? state.data : state.kind === "failure" ? state.previous : null;
-  const busy = state.kind === "ready" && state.pending !== null;
+  const clearEditor = (): void => {
+    setDraft(null);
+    setEditingRevision(null);
+    setFormError(null);
+  };
+  const startAdd = (): void => {
+    setDraft(emptyDraft());
+    setEditingRevision(null);
+    setFormError(null);
+  };
 
   return (
     <>
       <PageHeader
         title="MCP 服务器"
         hint="期望状态存于 Core；添加/编辑/启停/移除即时生效，无需重启。密钥值只写入加密目录，绝不回显。"
-        busy={state.kind === "loading" && servers !== null}
+        busy={mcp.state.kind === "loading" && mcp.state.previous !== null}
       />
-      <PageBody>
-        {state.kind === "failure" && <PageAlert>{state.failureKind === "validation" ? "Core 返回的 MCP 快照校验失败" : `读取 MCP 服务器失败：${state.message}`}</PageAlert>}
-        {state.kind === "ready" && state.feedback && <FeedbackBanner feedback={state.feedback} />}
-        {servers === null && state.kind === "loading" && <p className="text-xs text-slate-400">载入中…</p>}
-        {servers !== null && servers.length === 0 && draft === null && <EmptyState disabled={!connectionReady} onAdd={() => setDraft(emptyDraft())} />}
-        {draft !== null && (
-          <McpServerEditor
-            draft={draft}
-            onChange={setDraft}
-            onCancel={() => setDraft(null)}
-            onSave={() => void saveDraft(draft, { editingRevision, servers, add, edit, setFormError, clearEditor: () => setDraft(null) })}
-            error={formError}
-            editing={editingRevision !== null}
-          />
-        )}
-        <ServerList
-          servers={servers}
-          disabled={!connectionReady || busy}
-          confirmRemove={confirmRemove}
-          hooks={{ setConfirmRemove, setDraft, setEditingRevision, setFormError, setEnabled, remove, reconnect, test }}
-        />
-        {servers !== null && servers.length > 0 && draft === null && (
-          <div className="flex justify-end gap-2">
-            <ActionButton disabled={!connectionReady} onClick={() => void refresh()}>刷新</ActionButton>
-            <ActionButton tone="primary" disabled={!connectionReady} onClick={() => setDraft(emptyDraft())}>添加服务器</ActionButton>
-          </div>
-        )}
-      </PageBody>
+      <McpPageBody input={{
+        mcp, draft, editingRevision, confirmRemove, formError,
+        setDraft, setEditingRevision, setConfirmRemove, setFormError,
+        clearEditor, startAdd,
+      }} />
     </>
+  );
+}
+
+interface McpPageBodyInput {
+  mcp: ReturnType<typeof useMcpServers>;
+  draft: McpServerDraft | null;
+  editingRevision: number | null;
+  confirmRemove: string | null;
+  formError: string | null;
+  setDraft(draft: McpServerDraft | null): void;
+  setEditingRevision(revision: number | null): void;
+  setConfirmRemove(id: string | null): void;
+  setFormError(error: string | null): void;
+  clearEditor(): void;
+  startAdd(): void;
+}
+
+function McpPageBody({ input }: { input: McpPageBodyInput }) {
+  const { mcp, draft } = input;
+  const servers = mcp.state.kind === "ready" ? mcp.state.data : mcp.state.kind === "failure" ? mcp.state.previous : null;
+  const busy = mcp.state.kind === "ready" && mcp.state.pending !== null;
+  return (
+    <PageBody>
+      {mcp.state.kind === "failure" && <PageAlert>{mcp.state.failureKind === "validation" ? "Core 返回的 MCP 快照校验失败" : `读取 MCP 服务器失败：${mcp.state.message}`}</PageAlert>}
+      {mcp.state.kind === "ready" && mcp.state.feedback && <FeedbackBanner feedback={mcp.state.feedback} />}
+      {servers === null && mcp.state.kind === "loading" && <p className="text-xs text-slate-400">载入中…</p>}
+      {servers !== null && servers.length === 0 && draft === null && <EmptyState disabled={!mcp.connectionReady} onAdd={input.startAdd} />}
+      {draft !== null && <McpServerEditor
+        draft={draft}
+        onChange={input.setDraft}
+        onCancel={input.clearEditor}
+        onSave={() => void saveDraft(draft, {
+          editingRevision: input.editingRevision, servers, add: mcp.add, edit: mcp.edit,
+          setEditingRevision: input.setEditingRevision, setFormError: input.setFormError,
+          clearEditor: input.clearEditor,
+        })}
+        error={input.formError}
+        editing={input.editingRevision !== null}
+      />}
+      <ServerList
+        servers={servers}
+        disabled={!mcp.connectionReady || busy}
+        confirmRemove={input.confirmRemove}
+        hooks={{ ...input, setEnabled: mcp.setEnabled, remove: mcp.remove, reconnect: mcp.reconnect, test: mcp.test }}
+      />
+      {servers !== null && servers.length > 0 && draft === null && <div className="flex justify-end gap-2">
+        <ActionButton disabled={!mcp.connectionReady} onClick={() => void mcp.refresh()}>刷新</ActionButton>
+        <ActionButton tone="primary" disabled={!mcp.connectionReady} onClick={input.startAdd}>添加服务器</ActionButton>
+      </div>}
+    </PageBody>
   );
 }
 
 interface SaveInput {
   editingRevision: number | null;
   servers: McpServerView[] | null;
-  add(draft: McpServerDraft): Promise<void>;
-  edit(draft: McpServerDraft, expectedRevision: number): Promise<void>;
+  add(draft: McpServerDraft): Promise<McpEditorMutationResult>;
+  edit(draft: McpServerDraft, expectedRevision: number): Promise<McpEditorMutationResult>;
+  setEditingRevision(revision: number | null): void;
   setFormError(error: string | null): void;
   clearEditor(): void;
 }
@@ -85,13 +119,18 @@ async function saveDraft(draft: McpServerDraft, input: SaveInput): Promise<void>
     return;
   }
   input.setFormError(null);
-  if (editingRevision === null) await input.add(draft);
-  else await input.edit(draft, editingRevision);
+  const result = editingRevision === null
+    ? await input.add(draft)
+    : await input.edit(draft, editingRevision);
+  if (!result.ok) {
+    if (result.committedRevision !== undefined) input.setEditingRevision(result.committedRevision);
+    return;
+  }
   input.clearEditor();
 }
 
 function FeedbackBanner({ feedback }: { feedback: McpFeedback }) {
-  const tone = feedback.kind === "saved"
+  const tone = feedback.kind === "saved" || feedback.kind === "tested"
     ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
     : feedback.kind === "conflict"
       ? "bg-amber-50 text-amber-700 ring-amber-100"

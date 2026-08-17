@@ -86,6 +86,7 @@ export function settlePending(
   const entry = state.pending.get(requestId);
   if (!entry) return false;
   state.pending.delete(requestId);
+  clearTimeout(entry.timer);
   releaseChallenge(entry);
   rememberTerminal(state.terminal, requestId, { control: entry.control, authorization: entry.authorization, reason: terminal.terminalReason });
   state.log.info({ requestId, attemptId: entry.control.attemptId, ok: terminal.outcome.ok }, "capability settled");

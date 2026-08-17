@@ -1,10 +1,7 @@
 /**
- * INPUT:  the active runtime generation records + governance deps + the turn's interactive context
- * OUTPUT: buildTurnTools(active, governance, interactive) — the per-turn ToolSet: every published tool gets the
- *         canonical governance wrapper (Approval/presentation) and an OUTER generation lease (acquire ->
- *         authorize/execute -> release in finally; a retired generation fails closed, never redirects)
- * POS:    core/mcp — the per-turn assembly seam main.ts calls fresh every turn, so a published replacement is
- *         what the NEXT turn sees while an existing turn keeps its captured snapshot
+ * INPUT: active runtime generations, governance dependencies, and interactive turn context
+ * OUTPUT: governed per-turn tools wrapped by acquire/execute/finally-release generation leases
+ * POS: core/mcp turn assembly; retired generations fail closed and captured snapshots never redirect
  */
 import type { Tool, ToolSet } from "ai";
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
@@ -23,6 +20,7 @@ export interface TurnGovernance {
 
 /** Model-facing stale-generation envelope: the same {ok:false} shape the model already reads. */
 const RETIRED_MESSAGE = "the captured MCP server generation retired before this call; the next turn sees the replacement";
+const UNKNOWN_OUTCOME_MESSAGE = "the MCP connection closed after dispatch; the remote side-effect outcome is unknown";
 
 export function buildTurnTools(
   active: ReadonlyMap<string, GenerationRecord>,
@@ -60,12 +58,20 @@ function withLease(record: GenerationRecord, tool: Tool): Tool {
         return { ok: false, code: "MCP_STALE_GENERATION", message: RETIRED_MESSAGE };
       }
       try {
-        return await execute(input, options);
+        const result = await execute(input, options);
+        return record.forcedClosed ? unknownOutcome() : result;
+      } catch (error) {
+        if (record.forcedClosed) return unknownOutcome();
+        throw error;
       } finally {
         releaseLease(record);
       }
     },
   } as Tool;
+}
+
+function unknownOutcome() {
+  return { ok: false as const, code: "OUTCOME_UNKNOWN" as const, message: UNKNOWN_OUTCOME_MESSAGE, state: "outcome_unknown" as const };
 }
 
 function mcpBinding(governance: TurnGovernance, ref: McpToolRef) {

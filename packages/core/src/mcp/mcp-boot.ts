@@ -1,10 +1,7 @@
 /**
- * INPUT:  Core boot handles (db, secret catalog, governance service, Approval runtime, data dir, host identity)
- * OUTPUT: bootMcpLifecycle(...) -> { manager, desired, catalog, log } — composes the desired-state repo (with the
- *         legacy seed), the runtime generation manager, and the secret-clear-aware catalog view; the caller owns
- *         the non-blocking reconcile kick and the method registrations
- * POS:    core/mcp — the lifecycle's composition seam so main.ts stays a thin wiring root; boot order is pinned:
- *         the legacy mcp-servers.json seeds ONLY while the table is empty and ONLY AFTER the secret migration
+ * INPUT: Core boot handles, data directory, and Host identity
+ * OUTPUT: composed desired repo, runtime manager, secret-aware catalog, and logger
+ * POS: core/mcp composition seam; legacy seed runs only into an empty table after secret migration
  */
 import type { ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
 import type { Database } from "../db/sqlite.ts";
@@ -19,7 +16,7 @@ import { createMcpManager, type McpManager } from "./mcp-manager.ts";
 export interface McpBoot {
   manager: McpManager;
   desired: McpDesiredRepo;
-  /** The catalog with one post-clear observer: a cleared secret retires exactly the generations referencing it. */
+  /** Catalog mutations invalidate/reload exactly the generations referencing the changed secret. */
   catalog: SecretCatalogService;
   log: Logger;
 }
@@ -51,6 +48,11 @@ export function bootMcpLifecycle(deps: {
   });
   const catalog: SecretCatalogService = {
     ...deps.secretCatalog,
+    set: (ref, value) => {
+      const result = deps.secretCatalog.set(ref, value);
+      manager.secretUpdated(ref);
+      return result;
+    },
     clear: (ref) => {
       const result = deps.secretCatalog.clear(ref);
       manager.secretCleared(ref);

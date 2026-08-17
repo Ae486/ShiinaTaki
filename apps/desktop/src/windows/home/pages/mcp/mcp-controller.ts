@@ -1,11 +1,10 @@
 /**
- * INPUT:  replaceable WsClient generations plus callbacks receiving validated Core MCP views and outcomes.
- * OUTPUT: createMcpController() — current-client-only reads/mutations, conflict refetch, serialized mutations,
- *         secret values stored via secret.set BEFORE the desired write, and zero auto replay after timeout.
- * POS:    ui/windows/home/pages/mcp — framework-free async authority guard used by the React MCP hook.
+ * INPUT: replaceable WsClient generations and callbacks for validated MCP views/outcomes
+ * OUTPUT: current-client-only reads/mutations, conflict refetch, serialization, and partial-commit truth
+ * POS: Home MCP framework-free authority guard; timed-out mutations are never replayed automatically
  */
 import type { WsClient } from "@/lib/ws-client.js";
-import type { McpServerView } from "@taki/shared";
+import type { McpServerView, McpTestResult } from "@taki/shared";
 import {
   draftSelectedTools,
   draftToConfig,
@@ -26,14 +25,18 @@ export interface McpControllerSink {
 export interface McpController {
   replace(client: McpPageClient | null): void;
   refresh(feedback?: McpFeedback): Promise<void>;
-  add(draft: McpServerDraft): Promise<void>;
-  edit(draft: McpServerDraft, expectedRevision: number): Promise<void>;
+  add(draft: McpServerDraft): Promise<McpEditorMutationResult>;
+  edit(draft: McpServerDraft, expectedRevision: number): Promise<McpEditorMutationResult>;
   setEnabled(input: { serverId: string; enabled: boolean; expectedRevision: number }): Promise<void>;
   remove(input: { serverId: string; expectedRevision: number }): Promise<void>;
   reconnect(serverId: string): Promise<void>;
   test(serverId: string): Promise<void>;
   dispose(): void;
 }
+
+export type McpEditorMutationResult =
+  | { ok: true }
+  | { ok: false; committedRevision?: number };
 
 export type McpPageClient = Pick<
   WsClient,
@@ -68,33 +71,58 @@ async function refreshController(state: ControllerState, sink: McpControllerSink
 
 interface MutationSpec {
   key: string;
-  operation: (candidate: McpPageClient) => Promise<void>;
+  operation: (candidate: McpPageClient) => Promise<{ feedback?: McpFeedback } | void>;
   feedback: McpFeedback;
 }
 
-async function mutateController(state: ControllerState, sink: McpControllerSink, spec: MutationSpec): Promise<void> {
+class PostCommitMutationError extends Error {
+  readonly configRevision: number;
+  readonly failureCause: unknown;
+  constructor(configRevision: number, cause: unknown) {
+    super("desired MCP state was committed before a dependent operation failed");
+    this.name = "PostCommitMutationError";
+    this.configRevision = configRevision;
+    this.failureCause = cause;
+  }
+}
+
+async function mutateController(
+  state: ControllerState,
+  sink: McpControllerSink,
+  spec: MutationSpec,
+): Promise<McpEditorMutationResult> {
   const candidate = state.client;
-  if (!candidate || state.mutating) return;
+  if (!candidate || state.mutating) return { ok: false };
   const token = state.epoch;
   state.mutating = true;
   sink.mutationStarted(spec.key);
   try {
-    await spec.operation(candidate);
-    if (!isCurrent(state, candidate, token)) return;
-    await refreshController(state, sink, spec.feedback);
+    const operation = await spec.operation(candidate);
+    if (!isCurrent(state, candidate, token)) return { ok: false };
+    await refreshController(state, sink, operation?.feedback ?? spec.feedback);
+    return { ok: true };
   } catch (cause) {
-    if (!isCurrent(state, candidate, token)) return;
-    sink.mutationFailed(cause);
+    if (!isCurrent(state, candidate, token)) return { ok: false };
+    const failure = cause instanceof PostCommitMutationError ? cause.failureCause : cause;
+    sink.mutationFailed(failure);
+    if (cause instanceof PostCommitMutationError) {
+      await refreshController(state, sink, {
+        kind: "error",
+        message: "期望配置已保存，但密钥更新或重连失败；草稿已保留，可修正后重试",
+      });
+      return { ok: false, committedRevision: cause.configRevision };
+    }
     if (mcpAppError(cause).code === "MCP_CONFIG_CONFLICT") {
       // A conflict means the desired row moved: refetch Core truth; the operator retries explicitly.
       await refreshController(state, sink, { kind: "conflict", message: "配置已在别处修改；已从 Core 重新读取" });
     }
+    return { ok: false };
   } finally {
     if (state.epoch === token) state.mutating = false;
   }
 }
 
-/** Secret values ride ONLY secret.set (the write-only sensitive path), and only before the desired write. */
+/** Secret values ride ONLY secret.set (the write-only sensitive path). */
 async function storeSecretValues(candidate: McpPageClient, draft: McpServerDraft): Promise<void> {
   for (const { secretRef, value } of secretValuesToStore(draft)) {
     await candidate.secretSet({ secretRef, value });
@@ -114,10 +142,10 @@ export function createMcpController(sink: McpControllerSink): McpController {
     refresh: (feedback) => refreshController(state, sink, feedback),
     add: (draft) => mutateController(state, sink, addSpec(draft)),
     edit: (draft, expectedRevision) => mutateController(state, sink, editSpec(draft, expectedRevision)),
-    setEnabled: (input) => mutateController(state, sink, setEnabledSpec(input)),
-    remove: (input) => mutateController(state, sink, removeSpec(input)),
-    reconnect: (serverId) => mutateController(state, sink, reconnectSpec(serverId)),
-    test: (serverId) => mutateController(state, sink, testSpec(serverId)),
+    setEnabled: async (input) => void (await mutateController(state, sink, setEnabledSpec(input))),
+    remove: async (input) => void (await mutateController(state, sink, removeSpec(input))),
+    reconnect: async (serverId) => void (await mutateController(state, sink, reconnectSpec(serverId))),
+    test: async (serverId) => void (await mutateController(state, sink, testSpec(serverId))),
     dispose() {
       state.epoch += 1;
       state.client = null;
@@ -141,13 +169,19 @@ function editSpec(draft: McpServerDraft, expectedRevision: number): MutationSpec
   return {
     key: `edit:${draft.serverId}`,
     operation: async (candidate) => {
-      await storeSecretValues(candidate, draft);
-      await candidate.mcpEdit({
+      const { server } = await candidate.mcpEdit({
         serverId: draft.serverId,
         config: draftToConfig(draft),
         selectedTools: draftSelectedTools(draft),
         expectedConfigRevision: expectedRevision,
       });
+      try {
+        const secrets = secretValuesToStore(draft);
+        await storeSecretValues(candidate, draft);
+        if (secrets.length > 0) await candidate.mcpReconnect(draft.serverId);
+      } catch (cause) {
+        throw new PostCommitMutationError(server.configRevision, cause);
+      }
     },
     feedback: { kind: "saved", message: `已保存 ${draft.serverId}` },
   };
@@ -181,7 +215,20 @@ function reconnectSpec(serverId: string): MutationSpec {
 function testSpec(serverId: string): MutationSpec {
   return {
     key: `test:${serverId}`,
-    operation: async (candidate) => void (await candidate.mcpTest({ serverId })),
+    operation: async (candidate) => ({ feedback: testFeedback(serverId, await candidate.mcpTest({ serverId })) }),
     feedback: { kind: "tested", message: `${serverId} 测试完成（诊断仅供参考，不会发布工具）` },
+  };
+}
+
+function testFeedback(serverId: string, result: McpTestResult): McpFeedback {
+  if (result.status === "failed") {
+    return {
+      kind: "test-failed",
+      message: `${serverId} 测试失败：${result.message ?? result.reason ?? "未知原因"}（未发布工具）`,
+    };
+  }
+  return {
+    kind: "tested",
+    message: `${serverId} 测试通过：${result.toolNames.length} 个工具，${result.pages} 页，${result.durationMs}ms，跳过 ${result.skipped.length} 个`,
   };
 }

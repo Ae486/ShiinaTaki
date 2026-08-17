@@ -27,5 +27,5 @@
 - capability-schema.ts — compatibility entry re-exporting the canonical Host-bound capability channel schemas
 - capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec/ForegroundWindow); mirrored in Rust serde
 - secret-catalog-schema.ts — SECRET_METHODS + write-only secret.set/clear/presence/list schemas + SecretRef charset + SecretRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)
-- mcp-lifecycle-schema.ts — MCP_METHODS + desired-server wire schemas + expectedConfigRevision writes + sanitized runtime status/diagnostic schemas + McpRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)
+- mcp-lifecycle-schema.ts — MCP_METHODS + marker-only desired-server wire schemas + expectedConfigRevision writes + bounded tool-name/list contracts + sanitized active/draining runtime diagnostics + McpRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)
 - ws-defaults.ts — default loopback WS host/port constants

@@ -179,8 +179,9 @@ function makeControl({ target, input, identity, dispatchedMs, timeoutMs }: {
 }
 
 function bestEffortCancel(requestId: string, entry: PendingCapability, reason: CapabilityCancel["reason"]): void {
+  const hasPreExecutionChallenge = entry.challenge !== undefined;
   releaseChallenge(entry);
-  if (entry.cancellation === "cooperative") {
+  if (hasPreExecutionChallenge || entry.cancellation === "cooperative") {
     notifyHostCancel(entry, requestId, reason);
   }
 }

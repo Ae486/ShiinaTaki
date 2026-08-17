@@ -1,14 +1,12 @@
 /**
- * INPUT:  an operator-typed REPL line (`/call <method> [json-params]`) or argv one-shot parts; an RPC caller
- * OUTPUT: parseOperatorCall/buildOperatorCall -> discriminated parse result; runOperatorCall -> prints, returns ok;
- *         OPERATOR_CALL_USAGE (the shared usage text for entry-level argv complaints)
- * POS:    cli — the generic operator WS-method surface and the seam where future operator command families land.
- *         Deliberately method-agnostic: no allowlist, no per-method schema (the server registry gates roles and
- *         validates params). No OS access, no @taki/core.
+ * INPUT: operator `/call` text or argv parts plus an RPC caller
+ * OUTPUT: parsed generic calls; dispatch results; pre-dispatch refusal for stdin-only secret.set
+ * POS: cli operator-method seam; otherwise method-agnostic with server-owned role/schema validation
  */
 import { JSONRPCErrorException } from "json-rpc-2.0";
 
 const PREFIX = "/call";
+const STDIN_ONLY_METHODS = new Set(["secret.set"]);
 // One string for both entries: the REPL types the `/call` form, scripts pass the argv form.
 export const OPERATOR_CALL_USAGE =
   `usage: ${PREFIX} <method> [json-params]   argv: --call <method> [--params <json>]\n` +
@@ -40,6 +38,7 @@ export function parseOperatorCall(line: string): OperatorCallParse {
 /** The argv one-shot entry (`--call` + `--params`); the JSON-params parse lives here only. */
 export function buildOperatorCall(method: string, paramsText: string): OperatorCallResult {
   if (method.length === 0) return { kind: "usage", message: OPERATOR_CALL_USAGE };
+  if (STDIN_ONLY_METHODS.has(method)) return stdinOnlyUsage(method);
   const text = paramsText.trim();
   if (text.length === 0) return { kind: "call", call: { method, params: {} } };
   try {
@@ -59,6 +58,10 @@ export async function runOperatorCall(
   call: OperatorCall,
   output: NodeJS.WritableStream,
 ): Promise<boolean> {
+  if (STDIN_ONLY_METHODS.has(call.method)) {
+    output.write(`${stdinOnlyUsage(call.method).message}\n`);
+    return false;
+  }
   try {
     const result = await caller.call(call.method, call.params);
     output.write(`${result === undefined ? "ok" : JSON.stringify(result, null, 2)}\n`);
@@ -67,6 +70,13 @@ export async function runOperatorCall(
     output.write(`[${errorLabel(error)}] ${reason(error)}\n`);
     return false;
   }
+}
+
+function stdinOnlyUsage(method: string): Extract<OperatorCallResult, { kind: "usage" }> {
+  return {
+    kind: "usage",
+    message: `${method} accepts secret values only through \`taki secret set\` stdin`,
+  };
 }
 
 // App refusals ride -32000 with the machine-readable ErrorCode in error.data.code, so prefer that over the

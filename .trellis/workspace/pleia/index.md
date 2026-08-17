@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 15
-- **Last Active**: 2026-08-16
+- **Total Sessions**: 17
+- **Last Active**: 2026-08-18
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~846 | Active |
+| `journal-1.md` | ~960 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,8 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 17 | 2026-08-18 | T4 pre-Slice-7 security convergence | - | `task/t4-skills-mcp-productization` |
+| 16 | 2026-08-17 | T4 Secure MCP Lifecycle strict-review convergence and formal check | - | `task/t4-skills-mcp-productization` |
 | 15 | 2026-08-16 | T4 Host Secret Catalog convergence and slice closeout | `0965358` | `task/t4-skills-mcp-productization` |
 | 14 | 2026-08-16 | T4 Approval Productization C+E convergence and slice closeout | `ffa9fff` | `task/t4-skills-mcp-productization` |
 | 13 | 2026-08-07 | MCP tool schema compatibility and D60 decision reopening | `f7a406a`, `445114d`, `91df680` | `main` |

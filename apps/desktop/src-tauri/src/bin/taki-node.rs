@@ -1,11 +1,6 @@
-//! INPUT:  env — TAKI_WS_URL (default ws://127.0.0.1:8974), TAKI_DATA_DIR (required, the node's private state root),
-//!         TAKI_GATE_AUTOAPPROVE (required, the ScriptedApprover directive spec), TAKI_CAPABILITIES (optional
-//!         comma-separated override); stdin — one line per pairing code (the e2e fixture reads the code from the
-//!         core's console and writes it here; the issued token persists under TAKI_DATA_DIR, so reconnects skip it)
-//! OUTPUT: a headless capability node — gate + ScriptedApprover + capability handlers + reconnecting WS client,
-//!         no tauri::Builder, no window (ADR 0007: a node can run without a Pet UI)
-//! POS:    shell/bin — the e2e/CI composition root; DEBUG BUILDS ONLY: the scripted approver is a permission-gate
-//!         bypass that does not exist in release, so a release taki-node refuses to start (R1)
+//! INPUT: node env configuration and stdin pairing codes
+//! OUTPUT: debug-only headless governed capability Node with reconnecting WS client
+//! POS: shell/bin — E2E/CI composition root; release builds refuse the scripted-approver bypass
 
 #[cfg(debug_assertions)]
 use std::collections::HashMap;
@@ -115,7 +110,8 @@ fn spawn_stdin_pairing_reader(tx: tokio::sync::mpsc::Sender<String>) {
 }
 
 /// Plaintext JSON secrets under the node's data dir. Deliberately NOT the OS keyring: the harness must never touch
-/// the real Shell's credentials, and a temp data dir makes every test run hermetic. Debug-only bin — never ships.
+/// the real Shell's credentials, and a temp data dir makes every test run hermetic. Its create-only lock is
+/// process-local, so parallel debug nodes must use distinct temp dirs. Debug-only bin — never ships.
 #[cfg(debug_assertions)]
 struct FileSecretStore {
     path: PathBuf,
@@ -167,6 +163,16 @@ impl SecretStore for FileSecretStore {
         let mut map = self.map.lock().map_err(|error| error.to_string())?;
         map.insert(key.to_string(), secret.to_string());
         self.persist(&map)
+    }
+
+    fn set_if_absent(&self, key: &str, secret: &str) -> Result<bool, String> {
+        let mut map = self.map.lock().map_err(|error| error.to_string())?;
+        if map.contains_key(key) {
+            return Ok(false);
+        }
+        map.insert(key.to_string(), secret.to_string());
+        self.persist(&map)?;
+        Ok(true)
     }
 
     fn delete(&self, key: &str) -> Result<(), String> {

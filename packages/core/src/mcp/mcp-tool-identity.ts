@@ -1,7 +1,7 @@
 /**
  * INPUT:  raw MCP server keys, sanitized public configs, and AI SDK Tool closures from toolsFromDefinitions
- * OUTPUT: sanitizeKey + stableSubjectId + publicConfigFingerprint + wrapExecute — the namespacing/identity
- *         helpers the candidate builder and the runtime manager share
+ * OUTPUT: sanitizeKey + stableSubjectId + publicConfigFingerprint + wrapExecute — collision-safe presentation
+ *         identity plus a fixed-message model-facing call failure boundary
  * POS:    core/mcp — presentation keys are never authority keys; the subject sidecar is the stable binding
  */
 import { createHash } from "node:crypto";
@@ -45,7 +45,7 @@ export function wrapExecute(tool: Tool): Tool {
       try {
         return await inner(input, options);
       } catch (error) {
-        return { ok: false, code: errorCode(error), message: readableError(error) } satisfies McpToolFailure;
+        return { ok: false, code: errorCode(error), message: "MCP tool call failed" } satisfies McpToolFailure;
       }
     },
   } as Tool;
@@ -59,8 +59,4 @@ function errorCode(error: unknown): number | string {
     if (typeof code === "number") return code;
   }
   return "MCP_CALL_FAILED";
-}
-
-export function readableError(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }

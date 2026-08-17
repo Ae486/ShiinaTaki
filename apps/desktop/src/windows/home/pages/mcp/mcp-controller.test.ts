@@ -64,7 +64,7 @@ describe("mcp controller", () => {
     const controller = createMcpController(sink);
     const draft: McpServerDraft = {
       ...emptyDraft(), serverId: "d", command: "node",
-      fields: [{ id: 1, name: "K", value: "sentinel-value", secret: true, hadSecret: false }],
+      fields: [{ id: 1, name: "K", value: "sentinel-value", storedSecretRef: null }],
     };
     const seenConfig: unknown[] = [];
     const stub = client({
@@ -91,19 +91,74 @@ describe("mcp controller", () => {
     const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn() };
     const controller = createMcpController(sink);
     let attempts = 0;
+    let secretWrites = 0;
     const stub = client({
       mcpEdit: async () => {
         attempts += 1;
         throw Object.assign(new Error("conflict"), { data: { code: "MCP_CONFIG_CONFLICT", currentConfigRevision: 7 } });
       },
+      secretSet: async () => {
+        secretWrites += 1;
+        throw new Error("must not run");
+      },
     });
     controller.replace(stub);
-    await controller.edit({ ...emptyDraft(), serverId: "github", command: "node" }, 1);
+    await controller.edit({
+      ...emptyDraft(),
+      serverId: "github",
+      command: "node",
+      fields: [{ id: 1, name: "TOKEN", value: "new-value", storedSecretRef: "mcp.github.env.TOKEN" }],
+    }, 1);
     expect(attempts).toBe(1); // one explicit attempt, zero automatic replay
+    expect(secretWrites).toBe(0); // optimistic desired revision is checked before rotating a live secret
     expect(sink.mutationFailed).toHaveBeenCalledTimes(1);
     expect(sink.loaded).toHaveBeenCalled(); // the conflict refetch repopulated Core truth
     const last = sink.loaded.mock.calls.at(-1)?.[1];
     expect(last).toMatchObject({ kind: "conflict" });
+  });
+
+  it("reports a committed revision and keeps an error feedback when post-edit secret rotation fails", async () => {
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn() };
+    const controller = createMcpController(sink);
+    const committed = { ...servers("github").servers[0]!, configRevision: 8 };
+    const stub = client({
+      mcpEdit: async () => ({ server: committed }),
+      secretSet: async () => {
+        throw new Error("catalog locked");
+      },
+    });
+    controller.replace(stub);
+    const result = await controller.edit({
+      ...emptyDraft(),
+      serverId: "github",
+      command: "node",
+      fields: [{ id: 1, name: "TOKEN", value: "new-value", storedSecretRef: "mcp.github.env.TOKEN" }],
+    }, 7);
+    expect(result).toEqual({ ok: false, committedRevision: 8 });
+    expect(sink.mutationFailed).toHaveBeenCalledWith(expect.objectContaining({ message: "catalog locked" }));
+    expect(sink.loaded.mock.calls.at(-1)?.[1]).toMatchObject({ kind: "error" });
+  });
+
+  it("renders test outcome facts and does not report a failed candidate as success", async () => {
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn() };
+    const controller = createMcpController(sink);
+    const stub = client({
+      mcpTest: async () => ({
+        status: "failed" as const,
+        reason: "connect-failed" as const,
+        message: "MCP server connection failed",
+        toolNames: [],
+        skipped: [],
+        pages: 0,
+        durationMs: 0,
+      }),
+    });
+    controller.replace(stub);
+    await controller.test("github");
+    expect(sink.loaded.mock.calls.at(-1)?.[1]).toMatchObject({
+      kind: "test-failed",
+      message: expect.stringContaining("测试失败"),
+    });
   });
 
   it("serializes mutations: a second call while one is in flight is dropped", async () => {

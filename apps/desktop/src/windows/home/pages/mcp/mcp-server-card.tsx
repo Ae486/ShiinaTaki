@@ -1,9 +1,7 @@
 /**
- * INPUT:  one Core MCP server view (desired row + live runtime status) + the card's action callbacks.
- * OUTPUT: <McpServerCard> — the per-server card: truthful phase badge, revision/generation/tool facts, sanitized
- *         last-outcome diagnostics, and the test/reconnect/toggle/edit/two-step-remove actions.
- * POS:    ui/windows/home/pages/mcp — presentation only; transport facts and sanitized diagnostics render,
- *         env/header values and markers never do (write-only by construction).
+ * INPUT: one Core MCP desired/runtime view and action callbacks
+ * OUTPUT: truthful status/facts/diagnostics plus test, reconnect, toggle, edit, and remove controls
+ * POS: Home MCP presentation card; env/header values and secret markers never render
  */
 
 import type { McpServerView } from "@taki/shared";
@@ -92,7 +90,7 @@ function Actions(input: McpServerCardActions) {
   return (
     <div className="mt-3 flex flex-wrap gap-2">
       <ActionButton disabled={disabled} onClick={input.onTest}>测试</ActionButton>
-      <ActionButton disabled={disabled} onClick={input.onReconnect}>重连</ActionButton>
+      <ActionButton disabled={disabled || !server.enabled} onClick={input.onReconnect}>重连</ActionButton>
       <ActionButton disabled={disabled} onClick={input.onToggleEnabled}>{server.enabled ? "停用" : "启用"}</ActionButton>
       <ActionButton disabled={disabled} onClick={input.onEdit}>编辑</ActionButton>
       {input.confirmRemove ? (

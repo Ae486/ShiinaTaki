@@ -8,6 +8,7 @@
  * POS:    core/mcp — the Secure MCP Lifecycle runtime contract suite (unit; real-process proofs live in e2e/)
  */
 import { afterEach, describe, expect, it } from "vitest";
+import { createMCPClient } from "@ai-sdk/mcp";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { AsyncCallTransport, InMemoryTransport, PagedToolsTransport, memConnect, type CallHandler } from "../testing/mcp-test-transport.ts";
 import type { McpServerConfig } from "@taki/shared";
@@ -20,6 +21,7 @@ const ECHO_TOOL = {
   inputSchema: { type: "object", properties: { text: { type: "string" } }, required: ["text"] },
 };
 const SEARCH_TOOL = { name: "search", description: "Searches", inputSchema: { type: "object" } };
+const OWNER_HOST_ID = "11111111-1111-4111-8111-111111111111";
 
 const echoOk: CallHandler = (msg) => ({
   jsonrpc: "2.0",
@@ -41,11 +43,19 @@ afterEach(async () => {
   await Promise.allSettled(managers.splice(0).map((manager) => manager.close()));
 });
 
-function desiredOf(serverId: string, config: McpServerConfig, selectedTools: string[] = []): McpDesiredRuntime {
-  return { serverId, config, selectedTools, enabled: true };
+function desiredOf(
+  serverId: string,
+  config: McpServerConfig,
+  selectedTools: string[] = [],
+): McpDesiredRuntime {
+  return { serverId, ownerHostId: OWNER_HOST_ID, configRevision: 1, config, selectedTools, enabled: true };
 }
 
-function makeManager(transports: Map<string, InMemoryTransport>, deps: { resolveSecret?: (ref: string) => string | null; connect?: McpConnect } = {}): McpManager {
+function makeManager(transports: Map<string, InMemoryTransport>, deps: {
+  resolveSecret?: (ref: string) => string | null;
+  connect?: McpConnect;
+  candidateDeadlineMs?: number;
+} = {}): McpManager {
   const { logger, records } = createCaptureLogger();
   const manager = createMcpManager({
     logger,
@@ -53,7 +63,7 @@ function makeManager(transports: Map<string, InMemoryTransport>, deps: { resolve
     resolveSecret: deps.resolveSecret,
     drainBudgetMs: 60,
     shutdownBudgetMs: 60,
-    candidateDeadlineMs: 500,
+    candidateDeadlineMs: deps.candidateDeadlineMs ?? 500,
   });
   managers.push(manager);
   return Object.assign(manager, { records });
@@ -116,6 +126,129 @@ describe("candidate publication and last-good retention", () => {
     const outcome = await manager.applyDesired(desiredOf("srv", { command: "x" }, ["search"]));
     expect(outcome).toMatchObject({ status: "published", toolNames: ["search"] });
     expect(Object.keys(manager.tools())).toEqual(["srv_search"]);
+  });
+
+  it("rejects a missing selected tool instead of publishing an unexpectedly empty surface", async () => {
+    const transport = new InMemoryTransport([ECHO_TOOL], echoOk);
+    const manager = makeManager(new Map([["srv", transport]]));
+    const outcome = await manager.applyDesired(desiredOf("srv", { command: "x" }, ["missing"]));
+    expect(outcome).toMatchObject({ status: "failed", reason: "tools-list-failed" });
+    expect(manager.tools()).toEqual({});
+    expect(transport.closedCount).toBe(1);
+  });
+
+  it("lets the newest desired revision publish and closes a superseded late candidate", async () => {
+    const gate = deferredGate();
+    const oldTransport = new InMemoryTransport([ECHO_TOOL], echoOk);
+    const newTransport = new InMemoryTransport([SEARCH_TOOL], echoOk);
+    const manager = makeManager(new Map(), {
+      connect: async (entry) => {
+        if ((entry.config as { command: string }).command === "old") {
+          await gate.promise;
+          return createMCPClient({ transport: oldTransport });
+        }
+        return createMCPClient({ transport: newTransport });
+      },
+    });
+    const old = manager.applyDesired(desiredOf("srv", { command: "old" }));
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(await manager.applyDesired({ ...desiredOf("srv", { command: "new" }), configRevision: 2 }))
+      .toMatchObject({ status: "published", toolNames: ["search"] });
+    gate.release();
+    expect(await old).toMatchObject({ status: "failed" });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(Object.keys(manager.tools())).toEqual(["srv_search"]);
+    expect(oldTransport.closedCount).toBe(1);
+    expect(newTransport.closedCount).toBe(0);
+    expect(manager.statuses()[0]?.lastOutcome).toMatchObject({ status: "published" });
+  });
+
+  it("reports a current reload as connecting while the last-good generation still serves", async () => {
+    const gate = deferredGate();
+    const first = new InMemoryTransport([ECHO_TOOL], echoOk);
+    const second = new InMemoryTransport([SEARCH_TOOL], echoOk);
+    const manager = makeManager(new Map(), {
+      connect: async (entry) => {
+        if ((entry.config as { command: string }).command === "next") await gate.promise;
+        return createMCPClient({ transport: (entry.config as { command: string }).command === "next" ? second : first });
+      },
+    });
+    await manager.applyDesired(desiredOf("srv", { command: "first" }));
+    const reload = manager.applyDesired({ ...desiredOf("srv", { command: "next" }), configRevision: 2 });
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(manager.statuses()[0]).toMatchObject({ phase: "connecting", runtimeGeneration: 1, toolCount: 1 });
+    expect(Object.keys(manager.tools())).toEqual(["srv_echo"]);
+    gate.release();
+    await reload;
+  });
+
+  it("remove wins over a candidate that connects late", async () => {
+    const gate = deferredGate();
+    const transport = new InMemoryTransport([ECHO_TOOL], echoOk);
+    const manager = makeManager(new Map(), {
+      connect: async () => {
+        await gate.promise;
+        return createMCPClient({ transport });
+      },
+    });
+    const pending = manager.applyDesired(desiredOf("srv", { command: "slow" }));
+    await new Promise((resolve) => setImmediate(resolve));
+    manager.removeServer("srv");
+    gate.release();
+    expect(await pending).toMatchObject({ status: "failed" });
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(manager.tools()).toEqual({});
+    expect(manager.statuses()).toEqual([]);
+    expect(transport.closedCount).toBe(1);
+  });
+
+  it("closes a client that arrives after the candidate deadline", async () => {
+    const gate = deferredGate();
+    const transport = new InMemoryTransport([ECHO_TOOL], echoOk);
+    const manager = makeManager(new Map(), {
+      candidateDeadlineMs: 20,
+      connect: async () => {
+        await gate.promise;
+        return createMCPClient({ transport });
+      },
+    });
+    const outcome = await manager.applyDesired(desiredOf("srv", { command: "slow" }));
+    expect(outcome).toMatchObject({ status: "failed", reason: "deadline-exceeded" });
+    gate.release();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(transport.closedCount).toBe(1);
+  });
+
+  it("keeps shutdown waiting within budget for a client that arrives after candidate timeout", async () => {
+    const gate = deferredGate();
+    const transport = new InMemoryTransport([ECHO_TOOL], echoOk);
+    const manager = makeManager(new Map(), {
+      candidateDeadlineMs: 10,
+      connect: async () => {
+        await gate.promise;
+        return createMCPClient({ transport });
+      },
+    });
+    expect(await manager.applyDesired(desiredOf("srv", { command: "slow" })))
+      .toMatchObject({ status: "failed", reason: "deadline-exceeded" });
+
+    const closing = manager.close();
+    setTimeout(gate.release, 20);
+    await closing;
+    expect(transport.closedCount).toBe(1);
+  });
+
+  it("fails a repeated pagination cursor under the bounded listing contract", async () => {
+    class RepeatingCursorTransport extends InMemoryTransport {
+      protected override replyTools(msg: { id: number | string }): unknown {
+        return { jsonrpc: "2.0", id: msg.id, result: { tools: [ECHO_TOOL], nextCursor: "repeat" } };
+      }
+    }
+    const transport = new RepeatingCursorTransport([ECHO_TOOL], echoOk);
+    const manager = makeManager(new Map([["srv", transport]]));
+    const outcome = await manager.applyDesired(desiredOf("srv", { command: "loop" }));
+    expect(outcome).toMatchObject({ status: "failed", reason: "tools-list-failed" });
+    expect(transport.closedCount).toBe(1);
   });
 });
 
@@ -186,9 +319,9 @@ describe("leases, draining, and exactly-once close", () => {
     const inFlight = call(manager, "srv_echo", "during-disable");
     await new Promise((resolve) => setImmediate(resolve));
 
-    manager.disableServer("srv");
+    manager.disableServer({ ...desiredOf("srv", { command: "x" }), configRevision: 2, enabled: false });
     expect(Object.keys(manager.tools())).toEqual([]); // new leases blocked; the key is gone from new turns
-    expect(manager.statuses().find((status) => status.serverId === "srv")).toMatchObject({ phase: "disabled" });
+    expect(manager.statuses().find((status) => status.serverId === "srv")).toMatchObject({ phase: "draining", leaseCount: 1 });
 
     gate.release();
     expect(await inFlight).toMatchObject({ content: [{ text: "echo: during-disable" }] });
@@ -211,6 +344,93 @@ describe("leases, draining, and exactly-once close", () => {
       { serverId: "a", phase: "failed", lastOutcome: { status: "failed", reason: "secret-unresolvable" } },
       { serverId: "b", phase: "connected" },
     ]);
+  });
+
+  it("secret clear retires a last-good generation even after desired state moved to another ref", async () => {
+    const live = new InMemoryTransport([ECHO_TOOL], echoOk);
+    const manager = makeManager(new Map([["srv", live]]), {
+      connect: (entry) => {
+        if ((entry.config as { command: string }).command === "bad") return Promise.reject(new Error("sentinel-secret"));
+        return Promise.resolve(createMCPClient({ transport: live }));
+      },
+      resolveSecret: () => "resolved",
+    });
+    await manager.applyDesired(desiredOf("srv", { command: "good", env: { TOKEN: "secret-ref:mcp.srv.env.OLD" } }));
+    await manager.applyDesired({
+      ...desiredOf("srv", { command: "bad", env: { TOKEN: "secret-ref:mcp.srv.env.NEW" } }),
+      configRevision: 2,
+    });
+    expect(Object.keys(manager.tools())).toEqual(["srv_echo"]);
+
+    manager.secretCleared("mcp.srv.env.OLD");
+    expect(manager.tools()).toEqual({});
+    expect(live.closedCount).toBe(1);
+    expect(manager.statuses()[0]).toMatchObject({ phase: "failed", lastOutcome: { reason: "secret-unresolvable" } });
+  });
+
+  it("secret clear does not retire a new active generation when only its predecessor used the ref", async () => {
+    const gate = deferredGate();
+    const oldTransport = new AsyncCallTransport([ECHO_TOOL], async (msg) => {
+      await gate.promise;
+      return echoOk(msg);
+    });
+    const newTransport = new InMemoryTransport([SEARCH_TOOL], echoOk);
+    const transports = new Map<string, InMemoryTransport>([["srv", oldTransport]]);
+    const manager = makeManager(transports, { resolveSecret: () => "resolved" });
+    await manager.applyDesired(desiredOf("srv", {
+      command: "old",
+      env: { TOKEN: "secret-ref:mcp.srv.env.OLD" },
+    }));
+    const inFlight = call(manager, "srv_echo", "old-generation");
+    await new Promise((resolve) => setImmediate(resolve));
+
+    transports.set("srv", newTransport);
+    await manager.applyDesired({ ...desiredOf("srv", { command: "new" }), configRevision: 2 });
+    manager.secretCleared("mcp.srv.env.OLD");
+    expect(Object.keys(manager.tools())).toEqual(["srv_search"]);
+    expect(manager.statuses()[0]).toMatchObject({ phase: "connected", runtimeGeneration: 2 });
+
+    gate.release();
+    await inFlight;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(oldTransport.closedCount).toBe(1);
+    expect(newTransport.closedCount).toBe(0);
+  });
+
+  it("secret update starts a fresh candidate for every enabled desired server that references the ref", async () => {
+    const first = new InMemoryTransport([ECHO_TOOL], echoOk);
+    const second = new InMemoryTransport([SEARCH_TOOL], echoOk);
+    const transports = new Map([["srv", first]]);
+    const manager = makeManager(transports, { resolveSecret: () => "resolved" });
+    await manager.applyDesired(desiredOf("srv", {
+      command: "node",
+      env: { TOKEN: "secret-ref:mcp.srv.env.TOKEN" },
+    }));
+    transports.set("srv", second);
+    manager.secretUpdated("mcp.srv.env.TOKEN");
+    for (let attempt = 0; attempt < 20 && manager.tools().srv_search === undefined; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    }
+    expect(Object.keys(manager.tools())).toEqual(["srv_search"]);
+    expect(first.closedCount).toBe(1);
+    expect(second.closedCount).toBe(0);
+  });
+
+  it("reports outcome_unknown when a drain deadline force-closes an in-flight call", async () => {
+    const gate = deferredGate();
+    const transport = new AsyncCallTransport([ECHO_TOOL], async (msg) => {
+      await gate.promise;
+      return echoOk(msg);
+    });
+    const manager = makeManager(new Map([["srv", transport]]));
+    await manager.applyDesired(desiredOf("srv", { command: "x" }));
+    const inFlight = call(manager, "srv_echo", "effect");
+    await new Promise((resolve) => setImmediate(resolve));
+    manager.disableServer({ ...desiredOf("srv", { command: "x" }), configRevision: 2, enabled: false });
+    await new Promise((resolve) => setTimeout(resolve, 90));
+    gate.release();
+    expect(await inFlight).toMatchObject({ ok: false, code: "OUTCOME_UNKNOWN", state: "outcome_unknown" });
+    expect(transport.closedCount).toBe(1);
   });
 
   it("test is an ephemeral candidate: diagnostics only, never publishes, always closes", async () => {
@@ -245,8 +465,9 @@ describe("leases, draining, and exactly-once close", () => {
     await new Promise((resolve) => setImmediate(resolve));
 
     gate.release();
-    await manager.close();
-    await manager.close(); // idempotent
+    const firstClose = manager.close();
+    expect(manager.close()).toBe(firstClose); // every caller shares one shutdown promise
+    await firstClose;
     expect(held.closedCount).toBe(1);
     expect(idle.closedCount).toBe(1);
     expect(await inFlight).toMatchObject({ content: [{ text: "echo: during-shutdown" }] });

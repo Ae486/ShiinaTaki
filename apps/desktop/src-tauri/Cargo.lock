@@ -4256,6 +4256,7 @@ dependencies = [
  "arboard",
  "futures-util",
  "keyring",
+ "keyring-core",
  "serde",
  "serde_json",
  "sha2",

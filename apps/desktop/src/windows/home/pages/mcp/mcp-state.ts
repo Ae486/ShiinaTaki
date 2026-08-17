@@ -1,10 +1,7 @@
 /**
- * INPUT:  Core mcp.list snapshots (desired + runtime views), mutations, structured JSON-RPC app errors, and the
- *         page's editor draft model (stdio/http config + write-only secret fields).
- * OUTPUT: pure generation-safe MCP view transitions, conflict/refusal classification, draft validation, and the
- *         client-side `mcp.<server>.env|header.<NAME>` ref derivation (charset-validated to match core's fold).
- * POS:    ui/windows/home/pages/mcp — node-testable state core; no transport, React, cache, or policy inference.
- *         Permission-snapshot discipline applies: component memory only, fresh refetch per client generation.
+ * INPUT: MCP snapshots/mutations/errors and stdio/http drafts with write-only secret fields
+ * OUTPUT: generation-safe transitions, error classification, validation, and canonical secret-ref derivation
+ * POS: Home MCP testable state core; component memory only, with no transport, React, cache, or policy inference
  */
 import { ErrorCodeSchema, MCP_SECRET_REF_MARKER, type McpServerConfig, type McpServerView } from "@taki/shared";
 
@@ -13,6 +10,7 @@ export type McpFeedback =
   | { kind: "conflict"; message: string }
   | { kind: "refused"; reason: string | null; message: string }
   | { kind: "tested"; message: string }
+  | { kind: "test-failed"; message: string }
   | { kind: "error"; message: string };
 
 export type McpViewState =
@@ -94,10 +92,10 @@ export function previousMcpData(state: McpViewState): McpServerView[] | null {
 export interface McpFieldDraft {
   id: number;
   name: string;
-  /** Write-only: never rendered back from Core; a kept secret shows empty with hadSecret=true. */
+  /** Write-only: never rendered back from Core; a kept secret stays empty and retains only its opaque ref. */
   value: string;
-  secret: boolean;
-  hadSecret: boolean;
+  /** Exact marker target read from Core; an empty value may keep it only while name + transport kind still match. */
+  storedSecretRef: string | null;
 }
 
 export interface McpServerDraft {
@@ -128,8 +126,9 @@ export function draftFromView(view: McpServerView): McpServerDraft {
     id: nextFieldId(),
     name,
     value: "",
-    secret: value.startsWith(MCP_SECRET_REF_MARKER),
-    hadSecret: value.startsWith(MCP_SECRET_REF_MARKER),
+    storedSecretRef: value.startsWith(MCP_SECRET_REF_MARKER)
+      ? value.slice(MCP_SECRET_REF_MARKER.length)
+      : null,
   }));
   return {
     serverId: view.serverId,
@@ -151,11 +150,11 @@ export function mcpFieldSecretRef(serverId: string, kind: "env" | "headers", fie
   return `mcp.${serverId}.${kind === "env" ? "env" : "header"}.${field}`;
 }
 
-/** New/updated secret values to store via secret.set BEFORE the desired write (the only value-carrying path). */
+/** New/updated secret values for secret.set, the only value-carrying path; the controller owns operation ordering. */
 export function secretValuesToStore(draft: McpServerDraft): Array<{ secretRef: string; value: string }> {
   const kind = draft.kind === "stdio" ? "env" : "headers";
   return draft.fields
-    .filter((field) => field.secret && field.value.length > 0)
+    .filter((field) => field.value.length > 0)
     .map((field) => ({ secretRef: mcpFieldSecretRef(draft.serverId, kind, field.name), value: field.value }));
 }
 
@@ -164,7 +163,7 @@ export function draftToConfig(draft: McpServerDraft): McpServerConfig {
   const map: Record<string, string> = {};
   for (const field of draft.fields) {
     if (field.name.length === 0) continue;
-    map[field.name] = field.secret ? `${MCP_SECRET_REF_MARKER}${mcpFieldSecretRef(draft.serverId, kind, field.name)}` : field.value;
+    map[field.name] = `${MCP_SECRET_REF_MARKER}${mcpFieldSecretRef(draft.serverId, kind, field.name)}`;
   }
   if (draft.kind === "stdio") {
     const args = splitLines(draft.args);
@@ -188,8 +187,10 @@ export function validateDraft(draft: McpServerDraft, existingServerIds: Readonly
     if (!/^[A-Za-z0-9_][A-Za-z0-9_-]{0,63}$/.test(field.name)) return `字段名 ${field.name || "(空)"} 不合法（需以字母/数字/下划线开头，仅含字母/数字/下划线/连字符）`;
     if (names.has(field.name)) return `字段名 ${field.name} 重复`;
     names.add(field.name);
-    if (!field.secret && field.value.length === 0) return `字段 ${field.name} 的值不能为空`;
-    if (field.secret && field.value.length === 0 && !field.hadSecret) return `密钥字段 ${field.name} 需要一个值`;
+    const expectedRef = mcpFieldSecretRef(draft.serverId, draft.kind === "stdio" ? "env" : "headers", field.name);
+    if (field.value.length === 0 && field.storedSecretRef !== expectedRef) {
+      return `密钥字段 ${field.name} 已更名或更换传输类型，需要输入新值`;
+    }
   }
   return null;
 }

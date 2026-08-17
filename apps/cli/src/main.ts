@@ -1,7 +1,7 @@
 /**
  * INPUT:  CLI args (--url, --character, --call/--params, `secret` positionals) + a device identity file + stdin lines
- * OUTPUT: authenticates (pairing on first run, token reuse after), then a chat REPL, one operator call, or one
- *         stdin-fed secret subcommand (set/clear/presence/list — the value never enters argv)
+ * OUTPUT: authenticates (pairing on first run, token reuse after), then a chat REPL, one non-secret operator call,
+ *         or one stdin-fed secret subcommand (set/clear/presence/list — the value never enters argv)
  * POS:    cli — the process entry; thin glue over device-identity + chat-client + repl + operator-call (manual smoke)
  */
 import { homedir } from "node:os";

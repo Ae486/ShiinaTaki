@@ -5,3 +5,8 @@
 {"file": ".trellis/spec/backend/permission-authorization.md", "reason": "No weakening of governed tool path"}
 {"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Migration correctness"}
 {"file": ".trellis/spec/frontend/home-window.md", "reason": "Page/state coverage verification"}
+{"file": ".trellis/spec/backend/mcp-lifecycle.md", "reason": "Primary executable Slice 6 contract and required validation/error/test matrix"}
+{"file": "docs/HANDOFF.md", "reason": "Authoritative seven-item pre-Slice-7 review findings and residual evidence boundaries"}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "Verify challenge retirement and generation-safe Host behavior"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Verify bounded errors, audit coverage, deadlines, and no replay"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Verify tests, lint, headers, indexes, size, and diff gates"}

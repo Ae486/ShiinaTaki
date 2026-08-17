@@ -17,14 +17,18 @@ import {
   type McpViewState,
 } from "./mcp-state.ts";
 import { useHomeClient } from "../../home-client-context.ts";
-import { createMcpController, type McpPageClient } from "./mcp-controller.ts";
+import {
+  createMcpController,
+  type McpEditorMutationResult,
+  type McpPageClient,
+} from "./mcp-controller.ts";
 
 export interface McpServersView {
   state: McpViewState;
   connectionReady: boolean;
   refresh(): Promise<void>;
-  add(draft: McpServerDraft): Promise<void>;
-  edit(draft: McpServerDraft, expectedRevision: number): Promise<void>;
+  add(draft: McpServerDraft): Promise<McpEditorMutationResult>;
+  edit(draft: McpServerDraft, expectedRevision: number): Promise<McpEditorMutationResult>;
   setEnabled(input: { serverId: string; enabled: boolean; expectedRevision: number }): Promise<void>;
   remove(input: { serverId: string; expectedRevision: number }): Promise<void>;
   reconnect(serverId: string): Promise<void>;
@@ -51,8 +55,9 @@ export function useMcpServers(): McpServersView {
   useEffect(() => () => controller.dispose(), [controller]);
 
   const refresh = useCallback((feedback?: McpFeedback) => controller.refresh(feedback), [controller]);
-  const add = useCallback(async (draft: McpServerDraft) => void (await controller.add(draft)), [controller]);
-  const edit = useCallback(async (draft: McpServerDraft, expectedRevision: number) => void (await controller.edit(draft, expectedRevision)), [controller]);
+  const add = useCallback((draft: McpServerDraft) => controller.add(draft), [controller]);
+  const edit = useCallback((draft: McpServerDraft, expectedRevision: number) =>
+    controller.edit(draft, expectedRevision), [controller]);
   const setEnabled = useCallback(async (input: { serverId: string; enabled: boolean; expectedRevision: number }) =>
     void (await controller.setEnabled(input)), [controller]);
   const remove = useCallback(async (input: { serverId: string; expectedRevision: number }) => void (await controller.remove(input)), [controller]);

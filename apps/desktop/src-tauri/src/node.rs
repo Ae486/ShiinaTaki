@@ -146,10 +146,26 @@ fn ensure_device_id(secrets: &dyn SecretStore) -> Result<String, std::io::Error>
         )),
         Ok(None) => {
             let id = generate_uuid_v4();
-            secrets.set(DEVICE_ID_KEY, &id).map_err(|error| {
-                std::io::Error::other(format!("failed to persist device identity: {error}"))
-            })?;
-            Ok(id)
+            match secrets.set_if_absent(DEVICE_ID_KEY, &id) {
+                Ok(true) => Ok(id),
+                Ok(false) => match secrets.get(DEVICE_ID_KEY) {
+                    Ok(Some(winner)) if is_uuid(&winner) => Ok(winner),
+                    Ok(Some(_)) => Err(std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        "persisted winning device identity is not a valid UUID",
+                    )),
+                    Ok(None) => Err(std::io::Error::new(
+                        std::io::ErrorKind::InvalidData,
+                        "device identity creator reported a winner but no identity was persisted",
+                    )),
+                    Err(error) => Err(std::io::Error::other(format!(
+                        "failed to read winning device identity: {error}"
+                    ))),
+                },
+                Err(error) => Err(std::io::Error::other(format!(
+                    "failed to persist device identity: {error}"
+                ))),
+            }
         }
         Err(error) => Err(std::io::Error::other(format!(
             "failed to read device identity: {error}"
@@ -233,7 +249,7 @@ mod tests {
     }
 
     #[test]
-    fn stable_device_identity_rejects_invalid_or_unreadable_existing_state() {
+    fn stable_device_identity_rejects_invalid_existing_state() {
         let invalid = FakeStore::with_value("not-a-uuid");
         assert!(ensure_device_id(&invalid)
             .unwrap_err()
@@ -244,30 +260,50 @@ mod tests {
             0,
             "invalid identity must never be silently replaced"
         );
+    }
 
+    #[test]
+    fn existing_device_identity_wins_without_a_write() {
+        let existing = "d9428888-122b-4c2f-bc91-36301f6b3c80";
+        let store = FakeStore::with_value(existing);
+        assert_eq!(ensure_device_id(&store).unwrap(), existing);
+        assert_eq!(store.set_calls(), 0);
+    }
+
+    #[test]
+    fn missing_device_identity_persists_the_create_only_winner() {
+        let store = FakeStore::default();
+        let identity = ensure_device_id(&store).expect("missing identity is created and persisted");
+        assert_eq!(store.get(DEVICE_ID_KEY).unwrap(), Some(identity));
+    }
+
+    #[test]
+    fn losing_device_identity_creator_adopts_and_validates_the_persisted_winner() {
+        let winner = "6ba7b810-9dad-41d1-80b4-00c04fd430c8";
+        let store = FakeStore::with_competing_value(winner);
+        assert_eq!(ensure_device_id(&store).unwrap(), winner);
+        assert_eq!(store.set_calls(), 1);
+
+        let malformed = FakeStore::with_competing_value("not-a-uuid");
+        assert!(ensure_device_id(&malformed)
+            .unwrap_err()
+            .to_string()
+            .contains("winning device identity"));
+    }
+
+    #[test]
+    fn device_identity_store_errors_fail_closed() {
         let unreadable = FakeStore::with_get_error("keyring unavailable");
         assert!(ensure_device_id(&unreadable)
             .unwrap_err()
             .to_string()
             .contains("failed to read"));
-        assert_eq!(
-            unreadable.set_calls(),
-            0,
-            "read failure must never mint a replacement"
-        );
-    }
 
-    #[test]
-    fn missing_device_identity_must_persist_before_it_is_returned() {
         let failing = FakeStore::with_set_error("disk full");
         assert!(ensure_device_id(&failing)
             .unwrap_err()
             .to_string()
             .contains("failed to persist"));
-
-        let store = FakeStore::default();
-        let identity = ensure_device_id(&store).expect("missing identity is created and persisted");
-        assert_eq!(store.get(DEVICE_ID_KEY).unwrap(), Some(identity));
     }
 
     #[derive(Default)]
@@ -275,6 +311,7 @@ mod tests {
         value: Option<String>,
         get_error: Option<String>,
         set_error: Option<String>,
+        competing_value: Option<String>,
         set_calls: usize,
     }
 
@@ -303,6 +340,13 @@ mod tests {
             }))
         }
 
+        fn with_competing_value(value: &str) -> Self {
+            Self(Mutex::new(FakeState {
+                competing_value: Some(value.into()),
+                ..FakeState::default()
+            }))
+        }
+
         fn set_calls(&self) -> usize {
             self.0.lock().unwrap().set_calls
         }
@@ -325,6 +369,26 @@ mod tests {
             }
             state.value = Some(secret.into());
             Ok(())
+        }
+
+        fn set_if_absent(&self, _key: &str, secret: &str) -> Result<bool, String> {
+            let mut state = self.0.lock().unwrap();
+            if let Some(error) = &state.get_error {
+                return Err(error.clone());
+            }
+            if state.value.is_some() {
+                return Ok(false);
+            }
+            state.set_calls += 1;
+            if let Some(error) = &state.set_error {
+                return Err(error.clone());
+            }
+            if let Some(winner) = state.competing_value.take() {
+                state.value = Some(winner);
+                return Ok(false);
+            }
+            state.value = Some(secret.into());
+            Ok(true)
         }
 
         fn delete(&self, _key: &str) -> Result<(), String> {

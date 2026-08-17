@@ -50,6 +50,15 @@ describe("desired server wire shapes", () => {
     expect(parsed.success).toBe(true);
   });
 
+  it("rejects plaintext desired env/header values while accepting valid catalog markers", () => {
+    expect(McpAddParamsSchema.safeParse({
+      serverId: "plain", config: { command: "node", env: { TOKEN: "plaintext-secret" } },
+    }).success).toBe(false);
+    expect(McpAddParamsSchema.safeParse({
+      serverId: "marked", config: { url: "https://mcp.example", headers: { Authorization: "secret-ref:mcp.marked.header.Authorization" } },
+    }).success).toBe(true);
+  });
+
   it.each([
     "files.prod", // a dot folds to '_' colliding with the literal `files_prod` prefix
     "-leading", // the first character must be alphanumeric

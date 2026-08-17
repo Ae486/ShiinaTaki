@@ -273,6 +273,39 @@ describe("capability challenge/resume", () => {
     }
   });
 
+  it("retires a non-cooperative effect challenge on deadline before any effect starts", async () => {
+    vi.useFakeTimers();
+    try {
+      const capture = createCaptureLogger();
+      const approval = testApproval();
+      const hostFrames = new Map<string, unknown[]>();
+      const operator = fakeOperator(() => undefined);
+      const broker = createCapabilityBroker({ logger: capture.logger, approval, timeoutMs: 100, now: Date.now });
+      const harness = { broker, approval, operator, hostFrames, approvalRequests: [], records: [] } satisfies Harness;
+      const target = askTarget(harness);
+      target.descriptor = { ...target.descriptor, execution: "effect", cancellation: "non-cooperative" };
+      const pending = broker.request(target, SENTINEL_INPUT);
+      const request = sentRequest(harness);
+      expect(broker.challenge(challengeFor(request), { hostId: HOST, connectionGeneration: 1 }))
+        .toEqual({ accepted: true });
+
+      await vi.advanceTimersByTimeAsync(100);
+
+      await expect(pending).resolves.toEqual({
+        ok: false,
+        code: "OUTCOME_UNKNOWN",
+        message: TIMEOUT_MESSAGE,
+        state: "outcome_unknown",
+      });
+      expect((hostFrames.get("capability.cancel") ?? []).at(-1)).toMatchObject({
+        requestId: request.requestId,
+        reason: "deadline_exceeded",
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("keeps raw capability input out of every broker log line", async () => {
     const harness = makeHarness();
     const { pending, request } = await driveToChallenge(harness);

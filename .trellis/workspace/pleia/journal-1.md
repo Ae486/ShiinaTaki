@@ -44,6 +44,7 @@ Grill sessions Q1-Q11 complete: product definition, layered memory registry, act
 
 [OK] **Completed**
 
+
 ### Next Steps
 
 - None - task complete
@@ -844,3 +845,107 @@ Implemented and checked the Host Secret Catalog slice. The interrupted implement
 ### Status
 
 [OK] **Completed**
+
+
+## Session 16: T4 Secure MCP Lifecycle strict-review convergence and formal check
+
+**Date**: 2026-08-17
+**Task**: `.trellis/tasks/08-12-secure-mcp-lifecycle`
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Resumed the T4 Leader role after the temporary ZCODE implementation reached Slice 6 without its final check. Performed
+a deliberately skeptical review, received owner approval for the Slice 6 repair list, converged the implementation,
+and completed the Slice's single formal check as **pass-with-fixes**. Secure MCP is now configurable and real-process
+invocable through the common Governance and Approval path; it remains standard MCP through `@ai-sdk/mcp`, not a
+Taki-specific replacement protocol or permission system.
+
+### Main Changes
+
+- Added desired/candidate operation tokens so stale candidates cannot replace a newer revision or resurrect disabled,
+  removed, secret-cleared, or shutting-down state.
+- Added abortable candidate deadlines, bounded pagination/cursor/tool validation, selected-tool existence checks,
+  collision-safe model identities, late-client cleanup, and sanitized transport/model/operator error boundaries.
+- Split runtime ownership into `mcp-manager-state.ts`, `mcp-publication.ts`, `mcp-client-close.ts`, and the thin manager;
+  every MCP client now shares one exactly-once close promise.
+- Extended generation truth with owner/revision/secret refs, active plus draining status, lease retention, and
+  `OUTCOME_UNKNOWN` after forced close.
+- Made secret clear/update generation-aware across desired/candidate/active/draining captures. The final check fixed a
+  server-level over-retirement bug and made shutdown wait within budget for late candidate cleanup.
+- Restricted desired env/header values to valid `secret-ref:` markers. Home now uses write-only fields, requires
+  re-entry after name/transport change, preserves partial-commit drafts/revisions, reports failed tests truthfully, and
+  refuses reconnect while disabled.
+- Added `.trellis/spec/backend/mcp-lifecycle.md`, synchronized backend/frontend specs, production headers, four folder
+  indexes, Slice artifacts, HANDOFF, and ZCODE-HANDOFF. Rebuilt the `jbcontext` index and recorded the HEAD-only
+  revision caveat for the next checkpoint.
+
+### Formal Check
+
+- [OK] Workspace typecheck (Shared, CLI, Desktop, E2E, Core) and root ESLint.
+- [OK] Focused MCP: Shared 15, Core 56, Desktop 21.
+- [OK] Full packages: Shared 301, CLI 44, Desktop 407, Core 1,405 passed plus 1 existing skip.
+- [OK] Real-process Secure MCP E2E 3/3: no-restart management, diagnostic-only test, governed Approval call,
+  conflict/retry, disable/enable, restart lineage, secret clear/locked isolation, seed-once migration, sentinel privacy.
+- [OK] Desktop Vite production build; existing Live2D non-module warnings only.
+- [OK] Independent Node strip-only Core boot reached `ws server listening` using a temporary data directory.
+- [OK] `git diff --check`, production header, affected `index.md`, debug/suppression, and size/function audits.
+- [N/A] Rust/Cargo: Slice 6 changed no Rust code.
+
+### Adjacent Historical Review
+
+The owner-requested strict review of `[Approval C+E, Slice 6)` returned `request changes` with eight findings. The
+current Slice fixed the historical MCP resolved-secret error leak. Seven remain outside this repair scope: final Host
+floor/audit on approved resume, CLI generic-call secret argv exposure, Windows master-key create race, incremental
+secret migration identity collision, non-cooperative challenge retirement, completed-request timer cleanup, and one
+historical EOF diff failure. No non-Slice-6 production fix was made; `docs/HANDOFF.md` records the full list.
+
+### Residual Risk and Status
+
+- Pending owner verification: packaged Home MCP interaction and a real external MCP provider/credential round-trip.
+- Deferred to Slice 8: real simultaneous two-Node Host convergence proof and the seven adjacent historical findings.
+- Main and T4 are both two commits ahead of their common base (`main...HEAD = 2 2`); shared docs/composition require a
+  semantic merge at the next authorized checkpoint.
+- The Trellis pointer remains stale on archived Approval; the live task is explicitly named above.
+
+[IN PROGRESS] **Slice 6 implementation and automated check are complete; reviewed changes/docs remain uncommitted and
+the task is not finished or archived. Next product work is Standard Skill Lifecycle after checkpoint/merge review.**
+
+## Session 17: T4 pre-Slice-7 security convergence
+
+**Date**: 2026-08-18
+**Task**: `.trellis/tasks/08-12-secure-mcp-lifecycle`
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Closed the owner-approved `[Approval C+E, Slice 6)` findings before Standard Skill Lifecycle. The work remained one
+compact repair/check cycle: no recursive delegation, no batch-per-check repetition, and no scope expansion into Slice
+7. The original review findings and every follow-up finding were independently confirmed before repair.
+
+### Main Changes
+
+- Approved resumes now recompute final Host enforcement, deny a newly tightened floor, and emit exactly one truthful
+  allowed/denied audit row without widening the legacy decision writer.
+- Generic CLI calls reject `secret.set`; secret input remains stdin-only. Migration identities include existing
+  markers before mutation; challenge expiry retires all pre-effect Host state; terminal settlement clears timers.
+- Windows create-only Credential Manager writes use a SID/service/account-scoped `Global\` mutex and Local
+  persistence. Device identity uses the same create-only seam and adopts a valid competing winner.
+- Preserved production `DecisionStore::remember` visibility, added a test-only seed seam, fixed non-Windows Rust test
+  cfgs, restored strict Clippy, completed MCP index coverage, and compressed all changed production headers to 3-6
+  lines.
+
+### Final Check
+
+- [OK] Full packages: Shared 301, CLI 47, Desktop 407, Core 1,409 passed plus 1 existing skip.
+- [OK] Approval/Secret/MCP real-process E2E: 8 passed.
+- [OK] Desktop production build and independent Core strip-only boot.
+- [OK] Rust: 170 library plus 7 helper tests; strict locked all-target Clippy.
+- [OK] Root lint, workspace typechecks, production header/index audits, and `git diff --check`.
+- [UNVERIFIED] Live competing Windows sessions and persisted Credential Manager metadata, packaged Home WebView,
+  external MCP credential round-trip, Linux systemd credentials, two-Node convergence, and owner-only manual ACs.
+
+### Status
+
+[IN PROGRESS] **Automated pre-Slice-7 convergence is approved. The task remains unarchived; checkpoint and semantic
+mainline merge precede Standard Skill Lifecycle planning/implementation.**
