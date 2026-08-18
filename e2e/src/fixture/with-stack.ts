@@ -5,7 +5,7 @@
  * POS:    e2e/fixture — the reusable harness entry (PRD layer B); test scope only, never imported by production code
  */
 import { randomBytes, randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { TimelineEntry } from "@taki/shared";
@@ -13,16 +13,20 @@ import { jsonLine } from "./line-buffer.ts";
 import { fetchTimelineEntries, sayToAgent, pairOperator, setPermissionLevel, triggerCapability, type AgentTurn } from "./operator-drivers.ts";
 import { childEnv, getFreePort, killTree, spawnProc, type Proc } from "./procs.ts";
 import { CORE_DIR, dummyProviderEnv, realProviderEnv, TAKI_NODE_BIN } from "./paths.ts";
+import { killNodeProcess, startNodeProcess, type NodeProcessParts } from "./node-process.ts";
 import { openRpcSocket, type RpcSocket } from "./rpc-socket.ts";
 import { seedMemoryEntries, type SeedMemoryEntry } from "./seed-memory.ts";
 import { seedTimeline, type SeedRow } from "./seed-timeline.ts";
+import { matchJson, readJsonLines, seedNodeState, teardownStack, type JsonLogPredicate } from "./stack-support.ts";
 import {
   startCapabilityRelay,
   type CapabilityRelay,
 } from "./ws-relay.ts";
 
-/** taki-node.rs hardcodes this device name; pairing lines for the node are matched by it. */
+/** Default taki-node device name; pairing lines for the primary node are matched by it. */
 export const NODE_DEVICE_NAME = "TakiAgent Headless Node";
+/** Distinct debug-only name used by the optional second node for deterministic pairing. */
+export const SECOND_NODE_DEVICE_NAME = "TakiAgent Headless Node B";
 const OPERATOR_DEVICE_NAME = "taki-e2e-operator";
 
 export interface StackOptions {
@@ -32,6 +36,8 @@ export interface StackOptions {
   provider?: "dummy" | "real";
   /** Spawn the node at boot (default true). */
   startNode?: boolean;
+  /** Provision and sequentially start a second isolated node against the same Core. */
+  secondNode?: boolean;
   /** Register the dev capability.trigger (adds TAKI_DEV_TRIGGER=1 to the core env) — enables stack.l1(). */
   devTrigger?: boolean;
   /** Seed <nodeDataDir>/exec-policy.json before the node boots (exec allowlist/mode/cwd scenarios read it at startup). */
@@ -43,8 +49,10 @@ export interface StackOptions {
   /** Seed entry files into the workspace memory tree BEFORE the core boots — startup reconcile indexes them (files
    *  are truth); the name-recall L2's "known only in memory" setup. */
   seedMemory?: SeedMemoryEntry[];
-  /** Route only the Node connection through a test-only relay with an armable next-request mutator. */
+  /** Route only the Node connection through a test-only relay with armable request/response mutation. */
   nodeWsRelay?: boolean;
+  /** Route only the second Node connection through its own test-only relay. Requires secondNode. */
+  secondNodeWsRelay?: boolean;
   /** Provision a random 32-byte catalog master key under <coreDataDir>/creds and point the core's
    * TAKI_CREDENTIALS_DIRECTORY at it — the hermetic unlock path (systemd-style); never touches the OS keyring. */
   secretMasterKey?: boolean;
@@ -61,25 +69,32 @@ export interface AuditRecord {
   command?: string;
 }
 
-type LogPred = (entry: Record<string, unknown>) => boolean;
-
 export interface Stack {
   wsUrl: string;
   coreDataDir: string;
   nodeDataDir: string;
+  secondNodeDataDir: string | null;
   screenshotsDir: string;
   auditPath: string;
+  secondAuditPath: string | null;
   core: Proc;
   node(): Proc | null;
-  /** The test-only Node relay, when capabilityRequestTransform was configured. */
+  secondNode(): Proc | null;
+  /** The test-only primary Node relay, when nodeWsRelay was configured. */
   relay(): CapabilityRelay | null;
+  /** The second test-only Node relay, when secondNodeWsRelay was configured. */
+  secondRelay(): CapabilityRelay | null;
   /** Resolves the first parsed core pino line matching pred (scans captured lines first). */
-  waitForCoreLog(pred: LogPred, timeoutMs?: number): Promise<Record<string, unknown>>;
-  countCoreLog(pred: LogPred): number;
-  /** Spawns the node (again); feedPairing wires core's next node pairing code into the node's stdin. */
-  startNode(feedPairing: boolean): Promise<void>;
+  waitForCoreLog(pred: JsonLogPredicate, timeoutMs?: number): Promise<Record<string, unknown>>;
+  countCoreLog(pred: JsonLogPredicate): number;
+  /** Spawns the node again; an optional capability list replaces its advertised catalog for this process. */
+  startNode(feedPairing: boolean, capabilities?: readonly string[]): Promise<void>;
+  /** Spawns the second node again; persisted identity/token support reconnect without pairing. */
+  startSecondNode(feedPairing: boolean, capabilities?: readonly string[]): Promise<void>;
   /** Kills the node's process tree and awaits its exit. */
   killNode(): Promise<void>;
+  /** Kills only the second node's process tree and awaits its exit. */
+  killSecondNode(): Promise<void>;
   /** Kills the core's process tree and awaits its exit (data dir, port, and env survive for restartCore). */
   killCore(): Promise<void>;
   /** Respawns the core on the SAME data dir/port with the boot env (plus overrides), re-using the port; the
@@ -97,17 +112,13 @@ export interface Stack {
   timeline(): Promise<TimelineEntry[]>;
   screenshots(): string[];
   audit(): AuditRecord[];
+  secondAudit(): AuditRecord[];
 }
 
-interface Parts {
-  autoApprove: string;
-  wsUrl: string;
+interface Parts extends NodeProcessParts {
   coreDataDir: string;
-  nodeDataDir: string;
   coreEnv: Record<string, string>;
   core: Proc;
-  node: Proc | null;
-  relay: CapabilityRelay | null;
   operatorSocket: RpcSocket | null;
 }
 
@@ -116,7 +127,7 @@ export async function withStack(options: StackOptions, fn: (stack: Stack) => Pro
   try {
     await fn(makeStack(parts));
   } finally {
-    await teardown(parts);
+    await teardownStack(parts);
   }
 }
 
@@ -134,15 +145,16 @@ function baseCoreEnv(port: number, coreDataDir: string, provider: Record<string,
 }
 
 async function bootParts(options: StackOptions): Promise<Parts> {
+  validateStackOptions(options);
   if (!existsSync(TAKI_NODE_BIN)) {
     throw new Error(`taki-node binary missing at ${TAKI_NODE_BIN} — build it: cargo build --bin taki-node`);
   }
   const provider = options.provider === "real" ? realProviderEnv() : dummyProviderEnv();
   if (!provider) throw new Error("real provider env missing in .env.local — gate the test with skipIf");
-
   const port = await getFreePort();
   const coreDataDir = mkdtempSync(join(tmpdir(), "taki-e2e-core-"));
   const nodeDataDir = mkdtempSync(join(tmpdir(), "taki-e2e-node-"));
+  const secondNodeDataDir = options.secondNode ? mkdtempSync(join(tmpdir(), "taki-e2e-node-b-")) : null;
   const coreEnv = baseCoreEnv(port, coreDataDir, provider);
   // The dev L1 drive is env double-gated: the core only registers capability.trigger when this is exactly "1".
   if (options.devTrigger) coreEnv.TAKI_DEV_TRIGGER = "1";
@@ -151,7 +163,9 @@ async function bootParts(options: StackOptions): Promise<Parts> {
   try {
     seedCoreState(options, coreDataDir, coreEnv);
   } catch (error) {
-    for (const dir of [coreDataDir, nodeDataDir]) rmSync(dir, { recursive: true, force: true });
+    for (const dir of [coreDataDir, nodeDataDir, secondNodeDataDir]) {
+      if (dir) rmSync(dir, { recursive: true, force: true });
+    }
     throw error;
   }
   const parts: Parts = {
@@ -159,22 +173,34 @@ async function bootParts(options: StackOptions): Promise<Parts> {
     wsUrl: `ws://127.0.0.1:${port}`,
     coreDataDir,
     nodeDataDir,
+    secondNodeDataDir,
     coreEnv,
     core: spawnProc({ command: process.execPath, args: ["src/main.ts"], cwd: CORE_DIR, env: childEnv(coreEnv) }),
     node: null,
+    secondNode: null,
     relay: null,
+    secondRelay: null,
     operatorSocket: null,
   };
   // B3: once the core process (or a temp dir) exists, ANY boot failure must tear the whole stack down — a leaked
   // core/node process or temp dir would poison later runs. Everything after the spawn lives inside this guard.
   try {
     await prepareNode(parts, options);
-    if (options.startNode !== false) await startNodeProc(parts, true);
+    if (options.startNode !== false) {
+      await startNodeProcess(parts, { slot: "primary", deviceName: NODE_DEVICE_NAME, pairingCode: () => nodePairingCode(parts, NODE_DEVICE_NAME) });
+      if (parts.secondNodeDataDir) {
+        await startNodeProcess(parts, { slot: "secondary", deviceName: SECOND_NODE_DEVICE_NAME, pairingCode: () => nodePairingCode(parts, SECOND_NODE_DEVICE_NAME) });
+      }
+    }
     return parts;
   } catch (error) {
-    await teardown(parts);
+    await teardownStack(parts);
     throw error;
   }
+}
+
+function validateStackOptions(options: StackOptions): void {
+  if (options.secondNodeWsRelay && !options.secondNode) throw new Error("secondNodeWsRelay requires secondNode");
 }
 
 function seedCoreState(options: StackOptions, coreDataDir: string, coreEnv: Record<string, string>): void {
@@ -200,14 +226,9 @@ function seedCoreState(options: StackOptions, coreDataDir: string, coreEnv: Reco
 async function prepareNode(parts: Parts, options: StackOptions): Promise<void> {
   await waitCoreListening(parts);
   if (options.nodeWsRelay) parts.relay = await startCapabilityRelay(parts.wsUrl);
-  // Seed node-side config BEFORE the node boots (ExecPolicy::load reads it once at startup).
-  if (options.execPolicy !== undefined) {
-    writeFileSync(join(parts.nodeDataDir, "exec-policy.json"), JSON.stringify(options.execPolicy));
-  }
-  if (options.gateDecisions !== undefined) {
-    const decisions = options.gateDecisions.map((entry) => ({ ...entry, decidedAt: new Date().toISOString() }));
-    writeFileSync(join(parts.nodeDataDir, "gate-decisions.json"), JSON.stringify({ decisions }));
-  }
+  if (options.secondNodeWsRelay) parts.secondRelay = await startCapabilityRelay(parts.wsUrl);
+  seedNodeState(parts.nodeDataDir, options);
+  if (parts.secondNodeDataDir) seedNodeState(parts.secondNodeDataDir, options);
 }
 
 async function waitCoreListening(parts: Parts): Promise<void> {
@@ -237,29 +258,12 @@ async function restartCoreProc(parts: Parts, envOverrides: Record<string, string
   await waitCoreListening(parts);
 }
 
-async function startNodeProc(parts: Parts, feedPairing: boolean): Promise<void> {
-  const node = spawnProc({
-    command: TAKI_NODE_BIN,
-    args: [],
-    cwd: parts.nodeDataDir,
-    env: childEnv({
-      TAKI_DATA_DIR: parts.nodeDataDir,
-      TAKI_WS_URL: parts.relay?.url ?? parts.wsUrl,
-      TAKI_GATE_AUTOAPPROVE: parts.autoApprove,
-    }),
-  });
-  parts.node = node;
-  // On reconnect (persisted token) no code is issued; the feeder simply never fires and is dropped.
-  if (feedPairing) void feedNodePairingCode(parts).catch(() => undefined);
-  await node.stderr.waitFor((line) => line.includes("state=connected"), 30_000);
-}
-
-async function feedNodePairingCode(parts: Parts): Promise<void> {
+async function nodePairingCode(parts: Parts, deviceName: string): Promise<string> {
   const line = await parts.core.stdout.waitFor(
-    matchJson((entry) => entry.msg === "pairing code issued" && entry.deviceName === NODE_DEVICE_NAME),
+    matchJson((entry) => entry.msg === "pairing code issued" && entry.deviceName === deviceName),
     20_000,
   );
-  parts.node?.child.stdin?.write(`${String(jsonLine(line)?.code)}\n`);
+  return String(jsonLine(line)?.code);
 }
 
 async function getOperator(parts: Parts): Promise<RpcSocket> {
@@ -280,26 +284,37 @@ async function getOperator(parts: Parts): Promise<RpcSocket> {
 function makeStack(parts: Parts): Stack {
   const screenshotsDir = join(parts.coreDataDir, "workspace", "screenshots");
   const auditPath = join(parts.nodeDataDir, "audit.jsonl");
+  const secondAuditPath = parts.secondNodeDataDir ? join(parts.secondNodeDataDir, "audit.jsonl") : null;
   return {
     wsUrl: parts.wsUrl,
     coreDataDir: parts.coreDataDir,
     nodeDataDir: parts.nodeDataDir,
+    secondNodeDataDir: parts.secondNodeDataDir,
     screenshotsDir,
     auditPath,
+    secondAuditPath,
     core: parts.core,
     node: () => parts.node,
+    secondNode: () => parts.secondNode,
     relay: () => parts.relay,
+    secondRelay: () => parts.secondRelay,
     waitForCoreLog: async (pred, timeoutMs) => {
       const line = await parts.core.stdout.waitFor(matchJson(pred), timeoutMs);
       return jsonLine(line) ?? {};
     },
     countCoreLog: (pred) => parts.core.stdout.count(matchJson(pred)),
-    startNode: (feedPairing) => startNodeProc(parts, feedPairing),
-    killNode: async () => {
-      if (!parts.node) return;
-      killTree(parts.node);
-      await parts.node.exited;
-    },
+    startNode: (feedPairing, capabilities) => startNodeProcess(parts, {
+      slot: "primary", deviceName: NODE_DEVICE_NAME,
+      capabilities,
+      pairingCode: feedPairing ? () => nodePairingCode(parts, NODE_DEVICE_NAME) : undefined,
+    }),
+    startSecondNode: (feedPairing, capabilities) => startNodeProcess(parts, {
+      slot: "secondary", deviceName: SECOND_NODE_DEVICE_NAME,
+      capabilities,
+      pairingCode: feedPairing ? () => nodePairingCode(parts, SECOND_NODE_DEVICE_NAME) : undefined,
+    }),
+    killNode: () => killNodeProcess(parts, "primary"),
+    killSecondNode: () => killNodeProcess(parts, "secondary"),
     killCore: async () => {
       killTree(parts.core);
       await parts.core.exited;
@@ -312,33 +327,7 @@ function makeStack(parts: Parts): Stack {
     agentSay: async (text, timeoutMs) => sayToAgent(await getOperator(parts), text, timeoutMs),
     timeline: async () => fetchTimelineEntries(await getOperator(parts), "taki"),
     screenshots: () => (existsSync(screenshotsDir) ? readdirSync(screenshotsDir) : []),
-    audit: () => readAudit(auditPath),
+    audit: () => readJsonLines<AuditRecord>(auditPath),
+    secondAudit: () => secondAuditPath ? readJsonLines<AuditRecord>(secondAuditPath) : [],
   };
-}
-
-function readAudit(auditPath: string): AuditRecord[] {
-  if (!existsSync(auditPath)) return [];
-  return readFileSync(auditPath, "utf8")
-    .split("\n")
-    .filter((line) => line.trim().length > 0)
-    .map((line) => JSON.parse(line) as AuditRecord);
-}
-
-function matchJson(pred: LogPred): (raw: string) => boolean {
-  return (raw) => {
-    const entry = jsonLine(raw);
-    return entry !== null && pred(entry);
-  };
-}
-
-async function teardown(parts: Parts): Promise<void> {
-  parts.operatorSocket?.close();
-  if (parts.node) killTree(parts.node);
-  await parts.relay?.close();
-  killTree(parts.core);
-  const exits = [parts.core.exited, ...(parts.node ? [parts.node.exited] : [])];
-  await Promise.allSettled(exits);
-  for (const dir of [parts.coreDataDir, parts.nodeDataDir]) {
-    rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
-  }
 }

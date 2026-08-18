@@ -3,6 +3,7 @@
  * OUTPUT: createMcpManager(deps) -> reconcile/CRUD-runtime/test/status/per-turn-tools/idempotent-close surface
  * POS:    core/mcp — thin plane-3 orchestrator; publication tokens and generation records are process-local only
  */
+import type { Tool, ToolSet } from "ai";
 import type { McpCandidateOutcome, McpServerConfig, McpServerStatus, McpTestResult } from "@taki/shared";
 import type { McpToolRef } from "./mcp-tool-identity.ts";
 import { buildTurnTools, type TurnInteractive } from "./mcp-turn-tools.ts";
@@ -26,8 +27,20 @@ import {
 
 export type { McpDesiredRuntime } from "./mcp-manager-state.ts";
 
+export interface McpToolSnapshot {
+  readonly toolKey: string;
+  readonly tool: Tool;
+  readonly ref: Readonly<McpToolRef>;
+  readonly serverId: string;
+  readonly ownerHostId: string;
+  readonly configRevision: number;
+  readonly generation: number;
+  readonly isCurrent: () => boolean;
+}
+
 export interface McpManager {
   tools(interactive?: TurnInteractive): ReturnType<typeof buildTurnTools>;
+  snapshot(interactive?: TurnInteractive): readonly McpToolSnapshot[];
   describe(toolKey: string): McpToolRef | undefined;
   reconcile(servers: McpDesiredRuntime[]): Promise<void>;
   applyDesired(input: McpDesiredRuntime): Promise<McpCandidateOutcome>;
@@ -46,6 +59,7 @@ export function createMcpManager(deps: McpManagerDeps): McpManager {
   const state = createManagerState(deps);
   return {
     tools: (interactive) => buildTurnTools(state.active, state.governance, interactive),
+    snapshot: (interactive) => snapshotTools(state, interactive),
     describe: (toolKey) => describeTool(state, toolKey),
     reconcile: (servers) => reconcileManager(state, servers),
     applyDesired: (input) => applyDesiredManager(state, input),
@@ -57,6 +71,28 @@ export function createMcpManager(deps: McpManagerDeps): McpManager {
     statuses: () => deriveRuntimeStatuses(state),
     close: () => closeManager(state),
   };
+}
+
+function snapshotTools(state: ManagerState, interactive?: TurnInteractive): readonly McpToolSnapshot[] {
+  const tools: ToolSet = buildTurnTools(state.active, state.governance, interactive);
+  const entries: McpToolSnapshot[] = [];
+  for (const record of state.active.values()) {
+    for (const [toolKey, ref] of record.refs) {
+      const tool = tools[toolKey];
+      if (!tool) continue;
+      entries.push(Object.freeze({
+        toolKey,
+        tool,
+        ref: Object.freeze({ ...ref }),
+        serverId: record.serverId,
+        ownerHostId: record.ownerHostId,
+        configRevision: record.configRevision,
+        generation: record.generation,
+        isCurrent: () => state.active.get(record.serverId) === record && !record.draining && !record.closed,
+      }));
+    }
+  }
+  return Object.freeze(entries);
 }
 
 function describeTool(state: ManagerState, toolKey: string): McpToolRef | undefined {

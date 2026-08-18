@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 17
-- **Last Active**: 2026-08-18
+- **Total Sessions**: 19
+- **Last Active**: 2026-08-19
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~960 | Active |
+| `journal-1.md` | ~1060 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,8 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 19 | 2026-08-19 | T4 Extension Discovery and two-Node convergence review | - | `task/t4-skills-mcp-productization` |
+| 18 | 2026-08-18 | T4 Standard Skill Lifecycle implementation and convergence | `4031ba7`, `d0c0ca9` | `task/t4-skills-mcp-productization` |
 | 17 | 2026-08-18 | T4 pre-Slice-7 security convergence | `57fe909`, `cc2a65e` | `task/t4-skills-mcp-productization` |
 | 16 | 2026-08-17 | T4 Secure MCP Lifecycle strict-review convergence and formal check | - | `task/t4-skills-mcp-productization` |
 | 15 | 2026-08-16 | T4 Host Secret Catalog convergence and slice closeout | `0965358` | `task/t4-skills-mcp-productization` |

@@ -1,6 +1,6 @@
 # core/capabilities/
-- capability-broker.ts — sealed Host-bound request/challenge/respond/cancel broker; per-generation settlement, all pre-execution challenge retirement, deadlines, and bounded duplicate/late terminal lineage
-- capability-broker-state.ts — the broker's internal state owner: pending attempts (memory-only raw input), terminal records, exact timer cleanup, and settlement/cancellation primitives shared with the Approval bridge
+- capability-broker.ts — sealed Host-bound request/challenge/respond/cancel broker; generation retirement distinguishes cooperative read cancellation from unknown effect outcomes
+- capability-broker-state.ts — pending/terminal state owner with exact cleanup and execution/cancellation-aware interruption settlement shared with the Approval bridge
 - capability-response.ts — pure terminal verifier shared by live and terminal-cache settlement: provenance, exact control, authorization lineage, and stricter-only governance evidence
 - capability-challenge.ts — the ONE Host ask bridge: capability.challenge provenance/digest validation, operator-owned Approval bridging, and single-use resume authorization minting
 - capability-tools.ts — the six Shell-routed capability tools as one per-call factory: binds the initiating operator socket for interactive turns and yields the unattended bag otherwise

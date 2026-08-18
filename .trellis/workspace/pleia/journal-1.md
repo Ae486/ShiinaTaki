@@ -1009,3 +1009,49 @@ no second formal-agent approval is claimed. Focused re-verification and a local 
 
 [IN PROGRESS] **Slice 7 implementation and automated convergence are complete in one dirty ownership group. Review and
 checkpoint are still required before Slice 8; manual residuals remain explicitly unclaimed.**
+
+## Session 19: T4 Extension Discovery and two-Node convergence review
+
+**Date**: 2026-08-19
+**Task**: `.trellis/tasks/08-12-extension-discovery-integration`
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Completed the single Slice 8 formal review, repaired the confirmed acceptance gaps, and verified the converged
+Shared/Core/Home/Rust/E2E surface. The work remained inside `H:/TakiAgent-worktrees/t4`; YCE and sub-agents were not
+used, and the stale `.trellis/.current-task` pointer was deliberately left unchanged.
+
+### Findings Fixed
+
+- Generation retirement previously reported every interrupted read as `NODE_DISCONNECTED`. Settlement now uses both
+  execution kind and cancellation capability: cooperative reads return `CANCELLED`/`cancelled`, effects return
+  `OUTCOME_UNKNOWN`/`outcome_unknown`, and non-cooperative reads retain the disconnected outcome.
+- The dev-only L1 trigger merged capability/Core/Extension tools by object spread. It now uses `mergeToolSets`, so a
+  duplicate model-facing key fails closed instead of selecting an authority by insertion order.
+- The initial two-Node test proved explicit routing and reconnect identity but omitted catalog replacement,
+  old-generation response rejection, and interruption settlement. The real-process relay now observes and can mutate
+  terminal responses; Node restarts can advertise a replacement catalog; the scenario proves both outcome classes,
+  Host B isolation, and no replay.
+- Synchronized the capabilities/fixture indexes, Slice 8 executable contract, implementation checklist, leader
+  handoff, and this journal with the verified behavior and residual manual gates.
+
+### Verification
+
+- [OK] Root ESLint and workspace typecheck.
+- [OK] Focused Shared/Core/Desktop suites and the dedicated Slice 8 two-Node E2E.
+- [OK] Full packages: Shared 309, CLI 47, Desktop 419, Core 1,471 plus one existing skip.
+- [OK] Full E2E: 33 passed / 6 skipped; real Core strip-only boot is exercised by the process harness.
+- [OK] Desktop production build; only existing Live2D non-module script warnings.
+- [OK] Rust: 170 library plus 7 helper tests; strict Clippy; scoped `rustfmt` on `taki-node.rs`.
+- [OK] `git diff --check`, production header/index, role/cache/secret/path, task JSON/JSONL, and source-size audits.
+
+### Residual Risk and Status
+
+- [UNVERIFIED] Packaged Home/file-picker interaction, real external MCP credentials, a compatible remote transfer
+  Host, and owner-observed manual acceptance.
+- `.trellis/.current-task` still names archived Approval; the live Slice 8 task remains explicitly `in_progress`.
+- No commit, push, rebase, reset, finish, archive, or edit to `docs/ZCODE-HANDOFF.md` occurred.
+
+[IN PROGRESS] **Slice 8 implementation and automated convergence are approved in the dirty worktree. Owner manual
+acceptance and authorized checkpoint/closeout remain pending.**

@@ -1,6 +1,6 @@
 # core/src/
 - index.ts — package public entry; empty until an external consumer exists (core runs as a process)
-- main.ts — process entry: wires config → logger → model(s) → db/store/subscriptions → governance authority + legacy MCP deny reader → memory/media/skills/MCP/capability/perception adapters → operator registries → ws-server; closes MCP clients + db on SIGINT/SIGTERM
+- main.ts — process entry: wires config → logger → model(s) → db/store/subscriptions → governance authority + legacy MCP deny reader → memory/media/skills/MCP/capability/perception/Extension adapters → operator registries (including dev-only Run-snapshot trigger tools) → ws-server; closes MCP clients + db on SIGINT/SIGTERM
 - config/ — env → validated boot config; plus the operator-facing settings store (knob registry, precedence source, writer, change fan-out)
 - boot/ — the composition root's config+storage phase: open the DB on the env-only data root, then resolve every other knob (env > stored > default) for the loaders
 - logging/ — pino root logger factory
@@ -8,6 +8,7 @@
 - devices/ — paired-device store + pairing/token registry (device identity security state)
 - db/ — SQLite wrapper + migrations + repos (the only node:sqlite importer; single-writer durable store)
 - agents/ — streaming chat agent + SQLite-backed conversation store + collision-safe governed ToolSet assembly
+- extensions/ — immutable per-Run host-qualified Skill/MCP/capability registry, progressive discovery/call tools, and explicit transfer adapter
 - activity/ — OS-neutral perception activity layer (#19 T3a): foreground-sample rolling state + system-initiated poll sampler + fenced prompt renderer
 - perception/ — perception composition + privacy controls (#20 T3b): Privacy Pause (db-persisted, restart-proof), sensitive-process skip, the VLM sensitive-screen verdict, deterministic PII scrub + the DEFAULT-OFF ambient screen sampler (own grant, own frame store, enforced retention) + the human-facing activity card; shared by every ambient sampler, never by on-demand captures
 - memory/ — layer-generic memory engine: files-as-truth store + FTS5 index + retriever + assembler + tools + the always-visible block tier, its boot wiring, the background utility slot and the retention sweeper

@@ -34,7 +34,7 @@ describe("shell-open governance remains class-scoped", () => {
         .resolves.toMatchObject({ ok: false, code: "APPROVAL_REQUIRED" });
       await expect(stack.l1("shell_open", { kind: "url", target: "javascript:alert(1)" }))
         .resolves.toMatchObject({ ok: false, code: "DENIED" });
-      expect(stack.audit().map((line) => line.decision)).toEqual(["auto-denied", "auto-denied", "auto-denied"]);
+      expect(stack.audit().map((line) => line.decision)).toEqual(["auto-denied"]);
     });
   });
 
@@ -45,7 +45,7 @@ describe("shell-open governance remains class-scoped", () => {
         await expect(stack.l1("shell_open", { kind: "path", target }))
           .resolves.toMatchObject({ ok: false, code: "APPROVAL_REQUIRED" });
       }
-      expect(stack.audit().map((line) => line.decision)).toEqual(["auto-denied", "auto-denied"]);
+      expect(stack.audit().map((line) => line.decision)).toEqual([]);
     });
   });
 });

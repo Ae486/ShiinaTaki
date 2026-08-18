@@ -1,6 +1,7 @@
 # core/server/methods/
 - connect.ts — connect: the ONLY pre-auth method; token verify, pairing handshake, or loopback operator auto-trust (P3), then authenticate the socket
 - host-catalog-publish.ts — host.catalogPublish (node-only): provenance-bound complete publication with fail-closed retirement for rejected current-generation candidates
+- extension-status.ts — operator-only extension.status convergence projection over current Host/Skill/MCP owner generations
 - chat-send.ts — chat.send (operator-only): ack { messageId }, then stream agent tokens as chat.delta/.complete/.error; turns serialized per characterId (queue) + cancellable (registry); a cancel-before-reply closes with chat.error { retracted:true } (draft restore) instead of complete
 - chat-cancel.ts — chat.cancel (operator-only): abort the character's in-flight turn via the TurnRegistry; idempotent ({cancelled:false} when idle)
 - timeline-history.ts — timeline.history (operator-only): newest-first cursor page of the conversation timeline

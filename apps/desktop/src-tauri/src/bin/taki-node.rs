@@ -65,7 +65,8 @@ fn config_from_env() -> Result<NodeConfig, String> {
     Ok(NodeConfig {
         exec_cwd,
         url: std::env::var("TAKI_WS_URL").unwrap_or_else(|_| node::DEFAULT_WS_URL.to_string()),
-        device_name: "TakiAgent Headless Node".to_string(),
+        device_name: std::env::var("TAKI_DEVICE_NAME")
+            .unwrap_or_else(|_| "TakiAgent Headless Node".to_string()),
         capabilities: capabilities_from_env(),
         approver: Arc::new(approver),
         // File-backed, keyed under the node's own data dir: hermetic per-run identity/token, never the Shell keyring.

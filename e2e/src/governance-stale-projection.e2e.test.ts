@@ -57,7 +57,7 @@ async function rejectedRequest(mutator: CapabilityRequestMutator): Promise<Clean
     await stack.node()?.stderr.waitFor((line) => line.includes("capability request binding rejected"), 10_000);
     await relay.close();
 
-    await expect(outcome).resolves.toMatchObject({ ok: false, code: "NODE_DISCONNECTED" });
+    await expect(outcome).resolves.toMatchObject({ ok: false, code: "CANCELLED", state: "cancelled" });
     expect(stack.audit()).toHaveLength(auditBefore);
     expect(relay.requestCount()).toBe(requestCountBefore + 1);
     await new Promise((resolve) => setTimeout(resolve, 750));

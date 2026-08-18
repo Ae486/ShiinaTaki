@@ -1,6 +1,6 @@
 /**
  * INPUT: WsTransport plus Core JSON-RPC frames parsed by ws-client-routes
- * OUTPUT: createWsClient() with chat, timeline, media, config, governance, Approval, mcp.*, and skill.* families
+ * OUTPUT: createWsClient() with chat, operator lifecycle, and extension convergence request families
  * POS:    ui/lib operator transport composition root over inbound routes and typed outbound methods
  */
 
@@ -25,6 +25,7 @@ import type {
   ConfigSetParams,
   ConfigSetResult,
   ConnectParams,
+  ExtensionConvergenceResult,
   MediaClearResult,
   MediaGetResult,
   MediaUsageResult,
@@ -131,6 +132,8 @@ export interface WsClient {
   permissionCellsGet(): Promise<PermissionCellsState>;
   /** Stores or resets one Core cell override with optimistic generation matching. */
   permissionCellSet(params: PermissionCellSetParams): Promise<PermissionCellSetResult>;
+  /** Reads current owner/generation convergence facts; this is not an executable Agent Run snapshot. */
+  extensionStatus(): Promise<ExtensionConvergenceResult>;
   /** Reads the merged desired + runtime view of every configured MCP server (the MCP page's read). */
   mcpList(): Promise<McpListResult>;
   /** Reads one MCP server's desired row plus its live runtime status. */

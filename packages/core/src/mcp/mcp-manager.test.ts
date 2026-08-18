@@ -111,6 +111,17 @@ describe("createMcpManager", () => {
     expect(Object.keys(manager.tools())).toEqual(["files_echo"]);
     expect(manager.describe("files_echo")).toMatchObject({ serverName: "files", toolName: "echo" });
     expect(manager.describe("nope")).toBeUndefined();
+    expect(manager.snapshot()).toEqual([
+      expect.objectContaining({
+        toolKey: "files_echo",
+        serverId: expect.any(String),
+        ownerHostId: expect.any(String),
+        configRevision: 0,
+        generation: 1,
+        ref: expect.objectContaining({ serverName: "files", toolName: "echo" }),
+      }),
+    ]);
+    expect(Object.isFrozen(manager.snapshot())).toBe(true);
   });
 
   it("wraps a JSON-RPC call error into {ok:false, code} (T4)", async () => {

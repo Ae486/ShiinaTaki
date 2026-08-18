@@ -55,6 +55,7 @@ export function McpServerCard(input: McpServerCardActions) {
       }
     >
       <p className="text-xs text-slate-500">{transportLine(server)}</p>
+      <p className="mt-1 text-[11px] text-slate-400">Owner {server.ownerHostId} · Runtime generation {server.status.runtimeGeneration ?? "—"}</p>
       {server.selectedTools.length > 0 && <p className="mt-1 text-xs text-slate-500">选定工具：{server.selectedTools.join("、")}</p>}
       <Diagnostics outcome={server.status.lastOutcome} />
       <Actions {...input} />

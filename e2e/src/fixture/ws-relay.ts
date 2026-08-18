@@ -1,23 +1,34 @@
 /**
- * INPUT:  an upstream Core WS URL and an optional capability.request frame transformer
- * OUTPUT: a loopback-only test relay with request observation, forced Node disconnect, and bounded shutdown
+ * INPUT:  an upstream Core WS URL plus armable capability request/response frame transformers
+ * OUTPUT: a loopback-only test relay with frame observation, forced Node disconnect, and bounded shutdown
  * POS:    e2e/fixture — test-only Core-to-Node fault injection; never imported by production transport
  */
 import { once } from "node:events";
 import { WebSocket, WebSocketServer, type RawData } from "ws";
-import { CapabilityRequestSchema, type CapabilityRequest } from "@taki/shared";
+import {
+  CapabilityRequestSchema,
+  CapabilityRespondParamsSchema,
+  type CapabilityRequest,
+  type CapabilityRespondParams,
+} from "@taki/shared";
 import { getFreePort } from "./procs.ts";
 
 export type CapabilityRequestMutator = (
   request: CapabilityRequest,
 ) => CapabilityRequest;
+export type CapabilityResponseMutator = (
+  response: CapabilityRespondParams,
+) => CapabilityRespondParams;
 
 export interface CapabilityRelay {
   url: string;
   requestCount(): number;
+  responseCount(): number;
   activeConnectionCount(): number;
   mutateNext(mutator: CapabilityRequestMutator): void;
+  mutateNextResponse(mutator: CapabilityResponseMutator): void;
   waitForRequestCount(count: number, timeoutMs?: number): Promise<void>;
+  waitForResponseCount(count: number, timeoutMs?: number): Promise<void>;
   close(): Promise<void>;
   isClosed(): boolean;
 }
@@ -30,75 +41,91 @@ interface RelayPair {
 
 interface RelayState {
   pairs: Set<RelayPair>;
-  waiters: Set<{ count: number; settle: () => void }>;
+  requestWaiters: Set<{ count: number; settle: () => void }>;
+  responseWaiters: Set<{ count: number; settle: () => void }>;
   requests: number;
+  responses: number;
   closed: boolean;
-  nextMutator?: CapabilityRequestMutator;
+  nextRequestMutator?: CapabilityRequestMutator;
+  nextResponseMutator?: CapabilityResponseMutator;
 }
 
 export async function startCapabilityRelay(upstreamUrl: string): Promise<CapabilityRelay> {
   const port = await getFreePort();
   const server = new WebSocketServer({ host: "127.0.0.1", port });
-  const state: RelayState = { pairs: new Set(), waiters: new Set(), requests: 0, closed: false };
+  const state: RelayState = {
+    pairs: new Set(),
+    requestWaiters: new Set(),
+    responseWaiters: new Set(),
+    requests: 0,
+    responses: 0,
+    closed: false,
+  };
 
-  server.on("connection", connectPair);
+  server.on("connection", (downstream) => connectPair(state, upstreamUrl, downstream));
   await once(server, "listening");
 
   const relay: CapabilityRelay = {
     url: `ws://127.0.0.1:${port}`,
     requestCount: () => state.requests,
+    responseCount: () => state.responses,
     activeConnectionCount: () => state.pairs.size,
     mutateNext: (mutator) => {
-      if (state.nextMutator) throw new Error("relay already has a pending capability.request mutator");
-      state.nextMutator = mutator;
+      if (state.nextRequestMutator) throw new Error("relay already has a pending capability.request mutator");
+      state.nextRequestMutator = mutator;
+    },
+    mutateNextResponse: (mutator) => {
+      if (state.nextResponseMutator) throw new Error("relay already has a pending capability.respond mutator");
+      state.nextResponseMutator = mutator;
     },
     waitForRequestCount: (count, timeoutMs = 20_000) =>
-      waitForCount({ waiters: state.waiters, current: () => state.requests, count, timeoutMs }),
-    close: () => closeRelay(state, closePair, server),
+      waitForCount({ waiters: state.requestWaiters, current: () => state.requests, count, timeoutMs, label: "requests" }),
+    waitForResponseCount: (count, timeoutMs = 20_000) =>
+      waitForCount({ waiters: state.responseWaiters, current: () => state.responses, count, timeoutMs, label: "responses" }),
+    close: () => closeRelay(state, server),
     isClosed: () => state.closed,
   };
   return relay;
+}
 
-  function closePair(pair: RelayPair): void {
-    if (!state.pairs.delete(pair)) return;
-    pair.downstream.terminate();
-    pair.upstream.terminate();
-  }
+function connectPair(state: RelayState, upstreamUrl: string, downstream: WebSocket): void {
+  const pair: RelayPair = { downstream, upstream: new WebSocket(upstreamUrl), queued: [] };
+  state.pairs.add(pair);
+  downstream.on("message", (data) => forwardToCore(pair, data, state));
+  downstream.on("close", () => closeRelayPair(state, pair));
+  downstream.on("error", () => closeRelayPair(state, pair));
+  pair.upstream.on("open", () => flushQueued(pair));
+  pair.upstream.on("message", (data) => forwardToNode(pair, data, state));
+  pair.upstream.on("close", () => closeRelayPair(state, pair));
+  pair.upstream.on("error", () => closeRelayPair(state, pair));
+}
 
-  function connectPair(downstream: WebSocket): void {
-    const pair: RelayPair = { downstream, upstream: new WebSocket(upstreamUrl), queued: [] };
-    state.pairs.add(pair);
-    downstream.on("message", (data) => forwardToCore(pair, data));
-    downstream.on("close", () => closePair(pair));
-    downstream.on("error", () => closePair(pair));
-    pair.upstream.on("open", () => flushQueued(pair));
-    pair.upstream.on("message", (data) => forwardToNode(pair, data));
-    pair.upstream.on("close", () => closePair(pair));
-    pair.upstream.on("error", () => closePair(pair));
-  }
+function forwardToNode(pair: RelayPair, data: RawData, state: RelayState): void {
+  const outgoing = transformCoreFrame(data, () => {
+    state.requests += 1;
+    settleWaiters(state.requestWaiters, state.requests);
+    return state.requests;
+  }, (request) => {
+    const mutator = state.nextRequestMutator;
+    state.nextRequestMutator = undefined;
+    return mutator ? mutator(request) : request;
+  });
+  if (pair.downstream.readyState === WebSocket.OPEN) pair.downstream.send(outgoing);
+}
 
-  function forwardToNode(pair: RelayPair, data: RawData): void {
-    const outgoing = transformCoreFrame(data, () => {
-      state.requests += 1;
-      settleWaiters(state.waiters, state.requests);
-      return state.requests;
-    }, (request) => {
-      const mutator = state.nextMutator;
-      state.nextMutator = undefined;
-      return mutator ? mutator(request) : request;
-    });
-    if (pair.downstream.readyState === WebSocket.OPEN) pair.downstream.send(outgoing);
-  }
+function closeRelayPair(state: RelayState, pair: RelayPair): void {
+  if (!state.pairs.delete(pair)) return;
+  pair.downstream.terminate();
+  pair.upstream.terminate();
 }
 
 async function closeRelay(
   state: RelayState,
-  closePair: (pair: RelayPair) => void,
   server: WebSocketServer,
 ): Promise<void> {
   if (state.closed) return;
   state.closed = true;
-  for (const pair of [...state.pairs]) closePair(pair);
+  for (const pair of [...state.pairs]) closeRelayPair(state, pair);
   await closeServer(server);
 }
 
@@ -108,8 +135,14 @@ function closeServer(server: WebSocketServer): Promise<void> {
   });
 }
 
-function forwardToCore(pair: RelayPair, data: RawData): void {
-  const text = String(data);
+function forwardToCore(pair: RelayPair, data: RawData, state: RelayState): void {
+  const text = transformNodeFrame(data, (response) => {
+    state.responses += 1;
+    settleWaiters(state.responseWaiters, state.responses);
+    const mutator = state.nextResponseMutator;
+    state.nextResponseMutator = undefined;
+    return mutator ? mutator(response) : response;
+  });
   if (pair.upstream.readyState === WebSocket.OPEN) pair.upstream.send(text);
   else if (pair.upstream.readyState === WebSocket.CONNECTING) pair.queued.push(text);
 }
@@ -135,6 +168,21 @@ function transformCoreFrame(
   return JSON.stringify({ ...parsed, params: mutate(CapabilityRequestSchema.parse(parsed.params)) });
 }
 
+function transformNodeFrame(
+  data: RawData,
+  mutate: (response: CapabilityRespondParams) => CapabilityRespondParams,
+): string {
+  const text = String(data);
+  let parsed: { method?: unknown; params?: unknown };
+  try {
+    parsed = JSON.parse(text) as typeof parsed;
+  } catch {
+    return text;
+  }
+  if (parsed.method !== "capability.respond") return text;
+  return JSON.stringify({ ...parsed, params: mutate(CapabilityRespondParamsSchema.parse(parsed.params)) });
+}
+
 function settleWaiters(waiters: Set<{ count: number; settle: () => void }>, actual: number): void {
   for (const waiter of waiters) {
     if (actual >= waiter.count) {
@@ -149,12 +197,13 @@ function waitForCount(spec: {
   current: () => number;
   count: number;
   timeoutMs: number;
+  label: "requests" | "responses";
 }): Promise<void> {
   if (spec.current() >= spec.count) return Promise.resolve();
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       spec.waiters.delete(waiter);
-      reject(new Error(`relay observed ${spec.current()} capability requests; expected ${spec.count}`));
+      reject(new Error(`relay observed ${spec.current()} capability ${spec.label}; expected ${spec.count}`));
     }, spec.timeoutMs);
     const waiter = { count: spec.count, settle: () => { clearTimeout(timer); resolve(); } };
     spec.waiters.add(waiter);

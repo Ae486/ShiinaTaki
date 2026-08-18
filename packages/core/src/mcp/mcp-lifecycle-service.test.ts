@@ -31,6 +31,7 @@ function repo(row: McpDesiredServer): McpDesiredRepo {
 function manager(status: McpServerStatus): McpManager {
   return {
     tools: () => ({}),
+    snapshot: () => [],
     describe: () => undefined,
     reconcile: vi.fn(),
     applyDesired: vi.fn(),

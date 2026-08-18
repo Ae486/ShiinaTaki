@@ -169,7 +169,7 @@ function resumeAuthorized(
     });
   } catch {
     settlePending(state, requestId, {
-      outcome: interruptedOutcome(pending.execution, "Host resume delivery failed"),
+      outcome: interruptedOutcome(pending.execution, pending.cancellation, "Host resume delivery failed"),
       terminalReason: "late",
     });
     return;
@@ -242,7 +242,10 @@ function decisionOutcome(pending: PendingCapability, reason: string): Capability
 function settleInvalidated(state: CapabilityBrokerState, requestId: string, message: string): void {
   const pending = state.pending.get(requestId);
   if (!pending) return;
-  settlePending(state, requestId, { outcome: interruptedOutcome(pending.execution, message), terminalReason: "late" });
+  settlePending(state, requestId, {
+    outcome: interruptedOutcome(pending.execution, pending.cancellation, message),
+    terminalReason: "late",
+  });
   notifyHostCancel(pending, requestId, "approval_invalidated");
 }
 

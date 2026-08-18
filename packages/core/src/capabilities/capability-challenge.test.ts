@@ -189,7 +189,7 @@ describe("capability challenge/resume", () => {
       .toEqual({ accepted: false, reason: "stale_generation" });
     const cancels = harness.hostFrames.get("capability.cancel") ?? [];
     expect(cancels.at(-1)).toMatchObject({ reason: "approval_invalidated" });
-    await expect(pending).resolves.toMatchObject({ ok: false, code: "NODE_DISCONNECTED" });
+    await expect(pending).resolves.toMatchObject({ ok: false, code: "CANCELLED", state: "cancelled" });
   });
 
   it("rejects an auto/deny-classified challenge and an unprojected evidence cell", async () => {
@@ -199,7 +199,7 @@ describe("capability challenge/resume", () => {
       const request = sentRequest(harness);
       expect(harness.broker.challenge({ ...challengeFor(request), governance }, { hostId: HOST, connectionGeneration: 1 }))
         .toEqual({ accepted: false, reason: "stale_generation" });
-      await expect(pending).resolves.toMatchObject({ ok: false, code: "NODE_DISCONNECTED" });
+      await expect(pending).resolves.toMatchObject({ ok: false, code: "CANCELLED", state: "cancelled" });
       expect(harness.approvalRequests).toHaveLength(0);
     }
   });

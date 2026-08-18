@@ -31,6 +31,7 @@ Before writing backend code:
 | [MCP Tool Schema Compatibility](./mcp-tool-schema-compatibility.md) | Definition-stage nullable normalization, per-tool isolation, warning privacy, and provider-boundary tests |
 | [Secure MCP Lifecycle](./mcp-lifecycle.md) | Desired/operator/runtime state planes, marker-only secrets, token-gated candidates, generation leases/draining, sanitized diagnostics, and Home management truth |
 | [Standard Skill Lifecycle](./skill-lifecycle.md) | Portable staged packages, bounded import, immutable publication, catalog generations/leases, confined resources, and disposable Home management |
+| [Extension Discovery](./extension-discovery.md) | Unified host-qualified MCP/Skill/capability discovery, immutable Run snapshots, explicit transfer routing, and final convergence evidence |
 | [Secret Catalog](./secret-catalog.md) | Implemented host-local encrypted credential store: TSC1 secretstream envelope, versioned master-key sources (systemd / taki-secret-key helper), operator-only write-only sensitive path, locked fail-closed semantics, AC4 migration ordering |
 
 ## Quality Check (run before handing off)

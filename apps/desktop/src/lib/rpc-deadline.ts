@@ -10,11 +10,13 @@ import {
   CHAT_METHODS,
   CONFIG_METHODS,
   CONNECT_METHOD,
+  EXTENSION_METHODS,
   MEDIA_METHODS,
   MEMORY_METHODS,
   MCP_METHODS,
   PERCEPTION_METHODS,
   PERMISSION_METHODS,
+  SKILL_METHODS,
   TIMELINE_METHODS,
   type TimingPolicy,
   type TimingPolicyField,
@@ -60,6 +62,7 @@ export const RPC_METHOD_POLICIES: ReadonlyMap<string, RpcMethodPolicy> = new Map
   [PERMISSION_METHODS.levelSet, INTERACTIVE_MUTATION],
   [PERMISSION_METHODS.cellsGet, INTERACTIVE_READ],
   [PERMISSION_METHODS.cellSet, INTERACTIVE_MUTATION],
+  [EXTENSION_METHODS.status, INTERACTIVE_READ],
   // MCP lifecycle: reads are interactive; every write/test/reconnect runs a bounded network candidate, so it
   // rides the long deadline like media.clear / character.import (outcome unknown on timeout — never replayed).
   [MCP_METHODS.list, INTERACTIVE_READ],
@@ -72,6 +75,13 @@ export const RPC_METHOD_POLICIES: ReadonlyMap<string, RpcMethodPolicy> = new Map
   [MCP_METHODS.remove, LONG_MUTATION],
   [MCP_METHODS.test, LONG_MUTATION],
   [MCP_METHODS.reconnect, LONG_MUTATION],
+  [SKILL_METHODS.list, INTERACTIVE_READ],
+  [SKILL_METHODS.inspect, INTERACTIVE_READ],
+  [SKILL_METHODS.import, LONG_MUTATION],
+  [SKILL_METHODS.enable, LONG_MUTATION],
+  [SKILL_METHODS.disable, LONG_MUTATION],
+  [SKILL_METHODS.remove, LONG_MUTATION],
+  [SKILL_METHODS.reconcile, LONG_MUTATION],
 ]);
 
 export function rpcMethodPolicy(method: string): RpcMethodPolicy {

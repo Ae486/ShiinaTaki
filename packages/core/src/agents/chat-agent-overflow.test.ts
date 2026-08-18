@@ -54,6 +54,29 @@ describe("chat-agent R2 overflow retry (batch 6, TDD row 10)", () => {
     expect(f.conversation.history("taki")).toHaveLength(2);
   });
 
+  it("captures one immutable Run context and reuses it across the overflow retry", async () => {
+    const f = fresh();
+    const dispose = vi.fn();
+    const runContext = vi.fn(() => ({ instructions: "captured-extension-generation-7", tools: {}, dispose }));
+    const model = errorPartThenStreamModel(overflowError(70000), ["ok"]);
+    const agent = createChatAgent({
+      model,
+      store: f.conversation,
+      memory: f.memory,
+      onOverflow: vi.fn(),
+      runContext,
+    });
+
+    await expect(drain(agent.stream({ characterId: "taki", message: "hi" }))).resolves.toBe("ok");
+
+    expect(runContext).toHaveBeenCalledTimes(1);
+    expect(dispose).toHaveBeenCalledTimes(1);
+    expect(model.doStreamCalls).toHaveLength(2);
+    for (const request of model.doStreamCalls) {
+      expect(JSON.stringify(request.prompt[0])).toContain("captured-extension-generation-7");
+    }
+  });
+
   it("retries ONCE on a first-request overflow that REJECTS the model call (thrown transport ending)", async () => {
     const f = fresh();
     const onOverflow = vi.fn();

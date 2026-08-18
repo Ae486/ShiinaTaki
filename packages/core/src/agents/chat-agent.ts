@@ -6,7 +6,7 @@
  *         a cancel before any output retracts the just-appended user row (deletes it + skips the memory writes)
  * POS:    core/agents — the streaming chat loop; DAY-STABLE instructions (base prompt + day line + memory context)
  *         with the volatile <turn-context> tail riding the outgoing user message (Q4/ADR 0008); auto-writes detached;
- *         a classified context-overflow retries ONCE after recalibration (R2 seam — never compaction)
+ *         a classified context-overflow retries ONCE against the same captured Run extension context
  */
 import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type ToolSet } from "ai";
 import type { ChatSendParams, ImageAttachment } from "@taki/shared";
@@ -48,6 +48,13 @@ export interface TurnUsageReport {
   estimatedInput: number;
 }
 
+/** Immutable-by-contract resources captured once before a Run's first model attempt and shared by every retry. */
+export interface AgentRunContext {
+  readonly tools?: ToolSet;
+  readonly instructions?: string;
+  dispose?(): void;
+}
+
 /** model + store + memory are injected so tests supply a MockLanguageModelV4 and a tmp-workspace engine (no network/disk deps). */
 export interface ChatAgentDeps {
   model: LanguageModel;
@@ -65,6 +72,8 @@ export interface ChatAgentDeps {
   extraTools?: ToolSet;
   /** Connection-bound adapter tools built per turn (MCP); preferred over static extraTools for interactive authority. */
   turnTools?: (turn: TurnContext) => ToolSet;
+  /** Host/extension snapshot captured once per Run; an overflow retry reuses this exact value. */
+  runContext?: (turn?: TurnContext) => AgentRunContext;
   /** Stable Core-local tools included with memory/avatar tools before the Core adapter runs. */
   coreTools?: ToolSet;
   /** Wraps only the Core-local per-turn ToolSet with trusted bindings; absent in focused agent tests. */
@@ -114,6 +123,7 @@ interface TurnAttempt {
   images: UserImageInput[];
   vision: VisionDeps | null;
   userSeq: number;
+  runContext?: AgentRunContext;
   state: AttemptState;
 }
 
@@ -140,31 +150,36 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   // attempt). Appended ONCE — an R2 retry replays the same committed row, never a second one.
   const userEntry = store.appendUser(characterId, message, images);
   if (approval && turn) wireApprovalDenial(approval, turn);
-  const base = { characterId, message, attachments, images, vision, userSeq: userEntry.seq };
+  const runContext = deps.runContext?.(turn);
+  const base = { characterId, message, attachments, images, vision, userSeq: userEntry.seq, runContext };
   // R2 retry seam (batch 6): ONE overflow-classified retry around the whole attempt. Retry ONLY when the failed
   // attempt was provably side-effect-free — zero text yielded (nothing user-visible lost) AND zero completed steps
   // (no tool can have acted; re-running the model after a completed tool step could act twice — the error-handling
   // spec's never-blind-retry rule). Unrecognized errors and second failures propagate as today (fail-open), and an
   // absent onOverflow seam disables the retry entirely (nothing would have recalibrated the window). NEVER any
   // compaction/summarization here — batch 7 owns that (R2).
-  for (let attempt = 0; ; attempt += 1) {
-    const state: AttemptState = { instructions: "", outgoing: [], stepEnded: false };
-    let yielded = false;
-    try {
-      for await (const delta of runAttempt(deps, { ...base, state }, turn)) {
-        yielded = true;
-        yield delta;
+  try {
+    for (let attempt = 0; ; attempt += 1) {
+      const state: AttemptState = { instructions: "", outgoing: [], stepEnded: false };
+      let yielded = false;
+      try {
+        for await (const delta of runAttempt(deps, { ...base, state }, turn)) {
+          yielded = true;
+          yield delta;
+        }
+        return;
+      } catch (error) {
+        const onOverflow = deps.onOverflow;
+        const clean = !yielded && !state.stepEnded;
+        if (attempt > 0 || !clean || onOverflow === undefined || !isContextOverflowError(error)) throw error;
+        // Observed = the provider-reported request size when the body names one, else our own estimate of the SAME
+        // request (computed only here, off every hot path). The calibrator persists the shrunken window, so the
+        // retry's fresh history() pull re-windows through the store's budget closure.
+        onOverflow(observedTokensOf(error) ?? estimateTokens(state.instructions) + estimateMessagesTokens(state.outgoing));
       }
-      return;
-    } catch (error) {
-      const onOverflow = deps.onOverflow;
-      const clean = !yielded && !state.stepEnded;
-      if (attempt > 0 || !clean || onOverflow === undefined || !isContextOverflowError(error)) throw error;
-      // Observed = the provider-reported request size when the body names one, else our own estimate of the SAME
-      // request (computed only here, off every hot path). The calibrator persists the shrunken window, so the
-      // retry's fresh history() pull re-windows through the store's budget closure.
-      onOverflow(observedTokensOf(error) ?? estimateTokens(state.instructions) + estimateMessagesTokens(state.outgoing));
     }
+  } finally {
+    runContext?.dispose?.();
   }
 }
 
@@ -179,12 +194,12 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   // ONE clock read per attempt: the instructions' day line and the tail's time line must agree (Q4).
   const now = Date.now();
   // Hoisted so the batch-6 usage seam can estimate the SAME instructions string the request carries.
-  const instructions = composeInstructions(deps, { characterId, message }, now);
+  const instructions = composeInstructions(deps, { characterId, message, runInstructions: attempt.runContext?.instructions }, now);
   // Per-turn construction: assembled instructions + characterId-bound tools (construction cost is trivial).
   const agent = new ToolLoopAgent({
     model: vision ? vision.model : deps.model,
     instructions,
-    tools: assembleTurnTools(deps, characterId, turn),
+    tools: assembleTurnTools(deps, attempt, turn),
     stopWhen: [isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS), ...(deps.stopConditions ?? [])],
     // Compatibility seam for focused tests and pre-Slice-3 callers. Production Batch 1 leaves this absent because
     // MCP execution is already guarded by its canonical adapter and `ask` fails closed before the raw closure.
@@ -246,15 +261,19 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   fireUsageReport(deps, { usage: result.usage, instructions, outgoing });
 }
 
-function assembleTurnTools(deps: ChatAgentDeps, characterId: string, turn?: TurnContext): ToolSet {
+function assembleTurnTools(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): ToolSet {
   const coreTools = mergeToolSets(
-    deps.memory.createTools(characterId),
+    deps.memory.createTools(attempt.characterId),
     deps.coreTools ?? {},
-    deps.characterTools?.(characterId) ?? {},
+    deps.characterTools?.(attempt.characterId) ?? {},
   );
   const interactive = turn?.connection ? { connection: turn.connection, signal: turn.signal } : undefined;
   const extra = turn?.connection && deps.turnTools ? deps.turnTools(turn) : deps.extraTools ?? {};
-  return mergeToolSets(deps.coreToolGovernance?.wrap(coreTools, interactive) ?? coreTools, extra);
+  return mergeToolSets(
+    deps.coreToolGovernance?.wrap(coreTools, interactive) ?? coreTools,
+    extra,
+    attempt.runContext?.tools ?? {},
+  );
 }
 
 // A disconnect mid-turn denies every pending approval immediately (fail-closed, ruling 3); so does an abort —
@@ -397,11 +416,17 @@ async function persistTurn(store: ConversationStore, characterId: string, outcom
 // dropped; the skills list enters HERE, never through the memory assembler (module boundary, ruling 10).
 function composeInstructions(
   deps: ChatAgentDeps,
-  turn: { characterId: string; message: string },
+  turn: { characterId: string; message: string; runInstructions?: string },
   now: number,
 ): string {
   const assembled = deps.memory.assemble({ characterId: turn.characterId, currentMessage: turn.message });
-  return [BASE_SYSTEM_PROMPT, renderDayDate(now), assembled, deps.instructionsExtra?.(turn.characterId) ?? ""]
+  return [
+    BASE_SYSTEM_PROMPT,
+    renderDayDate(now),
+    assembled,
+    deps.instructionsExtra?.(turn.characterId) ?? "",
+    turn.runInstructions ?? "",
+  ]
     .filter((section) => section.length > 0)
     .join("\n\n");
 }

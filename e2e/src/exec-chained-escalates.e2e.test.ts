@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { withStack } from "./fixture/with-stack.ts";
 
 // #18 — a chained/redirected command escalates even when its head is allowlisted: `git` auto-runs alone, but
-// `git status && del x` is compound, so Slice 3 fails closed as APPROVAL_REQUIRED without a local prompt.
+// `git status && del x` is compound, so unattended Approval fails closed before Host execution or audit.
 describe("chained command escalates past the allowlist", () => {
   it("git status && del x → fail-closed APPROVAL_REQUIRED (git alone would auto-run)", async () => {
     await withStack(
@@ -12,8 +12,7 @@ describe("chained command escalates past the allowlist", () => {
         expect(result).toMatchObject({ ok: false, code: "APPROVAL_REQUIRED" });
 
         const execDecisions = stack.audit().filter((line) => line.capability === "exec").map((line) => line.decision);
-        expect(execDecisions).toContain("auto-denied");
-        expect(execDecisions).not.toContain("auto-allowed");
+        expect(execDecisions).toEqual([]);
       },
     );
   });

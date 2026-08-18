@@ -8,6 +8,7 @@ import { join } from "node:path";
 import type { ToolSet } from "ai";
 import { createChatAgent } from "./agents/chat-agent.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
+import { mergeToolSets } from "./agents/tool-set-assembly.ts";
 import { createTurnQueue } from "./agents/turn-queue.ts";
 import { createTurnRegistry } from "./agents/turn-registry.ts";
 import { createWindowCalibrator } from "./agents/window-calibrator.ts";
@@ -30,6 +31,7 @@ import { createTimelineRepo } from "./db/timeline-repo.ts";
 import { createWindowStateRepo } from "./db/window-state-repo.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
 import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
+import { createExtensionComposition } from "./extensions/extension-composition.ts";
 import { createHostCatalogStore } from "./hosts/host-catalog.ts";
 import { bindHostGenerationRetirement } from "./hosts/host-generation-retirement.ts";
 import { loadOrCreateHostIdentity } from "./hosts/host-identity.ts";
@@ -61,6 +63,7 @@ import { characterImportMethod } from "./server/methods/character-import.ts";
 import { characterListMethod } from "./server/methods/character-list.ts";
 import { registerConfigMethods } from "./server/methods/config-methods.ts";
 import { connectMethod } from "./server/methods/connect.ts";
+import { extensionStatusMethod } from "./server/methods/extension-status.ts";
 import { hostCatalogPublishMethod } from "./server/methods/host-catalog-publish.ts";
 import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
@@ -73,8 +76,6 @@ import { registerMcpMethods } from "./server/methods/mcp-methods.ts";
 import { registerSkillMethods } from "./server/methods/skill-methods.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
-import { createLoadSkillTool } from "./skills/load-skill-tool.ts";
-import { createReadSkillResourceTool } from "./skills/read-skill-resource-tool.ts";
 import { bootSkillLifecycle } from "./skills/skill-boot.ts";
 import { createCurrentTimeTool } from "./time/current-time-tool.ts";
 import { createTimelineSubscriptions } from "./server/timeline-subscriptions.ts";
@@ -253,6 +254,12 @@ const workspacePaths = createWorkspacePaths({ root: join(serverConfig.dataDir, "
 const readFileTool = createReadFileTool({ paths: workspacePaths, logger });
 const writeFileTool = createWriteFileTool({ paths: workspacePaths, logger });
 const staticCoreTools: ToolSet = { ...createCurrentTimeTool(), ...readFileTool, ...writeFileTool };
+const extensions = createExtensionComposition({
+  coreHostId, catalogs: hostCatalogs,
+  skills: { catalog: skillBoot.catalog, loader: skillsLoader, governance },
+  mcp: mcpBoot.manager,
+  route: (request, interactive) => routeCapability({ ...ambientCapabilityDeps, interactive }, request),
+});
 
 // Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
 const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry() };
@@ -291,19 +298,19 @@ registry.register(
       imageMemory: imageDescriptionWriter
         ? { onImageTurn: (input) => void imageDescriptionWriter.onImageTurn(input) }
         : undefined,
-      // Adapter-governed tools stay outside the Core adapter: Skill and MCP carry canonical subject sidecars, while
-      // Shell capabilities retain Host governance until Batch 2 installs the Core projection.
+      // Compatibility tools remain available when no interactive socket exists. The same Skill tools are reused in
+      // the interactive bag below; MCP and progressive discovery are captured by runContext once per Run.
       extraTools: {
-        ...createLoadSkillTool(skillsLoader, { service: governance, ownerHostId: coreHostId }),
-        ...createReadSkillResourceTool(skillsLoader, { service: governance, ownerHostId: coreHostId }),
+        ...extensions.skillTools,
         ...capabilityTools(),
       },
-      // Per-turn bag: the capability tools bind the initiating operator socket (challenge ownership) and the MCP
-      // closures bind the same connection + abort signal — one interactive authority source for the whole turn.
+      // Per-turn compatibility bag: Skill reads remain present and capabilities bind the initiating operator socket.
       turnTools: (turn) => ({
+        ...extensions.skillTools,
         ...capabilityTools({ connection: turn.connection, signal: turn.signal }),
-        ...mcpBoot.manager.tools({ connection: turn.connection, signal: turn.signal }),
       }),
+      // One immutable Host/Skill/MCP projection is reused by every overflow retry in this Run.
+      runContext: extensions.runContext,
       // Stable Core-local tools join per-turn memory/avatar tools behind the explicit Core binding table.
       coreTools: staticCoreTools,
       coreToolGovernance,
@@ -340,6 +347,7 @@ registry.register(
 );
 registry.register(chatCancelMethod(turnControls.turns));
 registry.register(hostCatalogPublishMethod(hostCatalogs, connectionRegistry));
+registry.register(extensionStatusMethod({ coreHostId, snapshot: () => extensions.runContext().snapshot }));
 registry.register(capabilityRespondMethod(capabilityBroker, connectionRegistry));
 registry.register(timelineHistoryMethod(timelineRepo));
 registry.register(timelineSubscribeMethod(timelineSubscriptions));
@@ -375,19 +383,17 @@ registerConfigMethods(registry, { ...boot.config, logger });
 // Attachment GC (#17): a boot sweep + a 6h interval; only raw bytes expire, the description-memory is permanent.
 startAttachmentGc({ store: attachmentStore, ttlMs: boot.attachmentConfig.ttlMs, logger });
 
-// Dev-only L1 drive (env double-gate, mirror of the Shell's ScriptedApprover): registered ONLY with TAKI_DEV_TRIGGER=1
-// so it has zero production surface. It drives the same capability tools the agent does — the node-side gate still
-// authorizes every call (NOT a bypass); it only removes the LLM so headless e2e can drive governance deterministically.
+// Dev-only L1 drive: env-gated, no LLM, and still uses the Agent's tools plus node-side authorization.
 if (devTriggerEnabled(process.env)) {
   logger.warn("TAKI_DEV_TRIGGER=1 — registering the DEV capability.trigger method (L1 drive; node-side gate still authorizes)");
   registry.register(
     capabilityTriggerMethod({
-      // The MCP turn tools join the dev L1 drive so headless e2e can exercise the governed call + Approval flow.
-      tools: (interactive) => ({
-        ...capabilityTools(interactive),
-        ...coreToolGovernance.wrap({ ...readFileTool, ...writeFileTool }, interactive),
-        ...mcpBoot.manager.tools(interactive),
-      }),
+      // The current Run snapshot tools join the dev L1 drive so e2e calls the same sealed Extension closures as chat.
+      tools: (interactive) => mergeToolSets(
+        capabilityTools(interactive),
+        coreToolGovernance.wrap({ ...readFileTool, ...writeFileTool }, interactive),
+        extensions.runContext(interactive).tools,
+      ),
       logger,
     }),
   );

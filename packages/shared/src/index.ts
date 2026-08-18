@@ -267,16 +267,10 @@ export type {
   PermissionLevelState, PermissionPosture,
 } from "./governance-api.ts";
 
-export {
-  PERCEPTION_METHODS,
-  PerceptionActivityEntrySchema,
-  PerceptionCardParamsSchema,
-  PerceptionCardSchema,
-  PerceptionPauseGetParamsSchema,
-  PerceptionPauseSetParamsSchema,
-  PerceptionPauseStateSchema,
-  PerceptionSamplingStatusSchema,
-} from "./perception-schema.ts";
+export { EXTENSION_DISCOVERY_BUDGET, EXTENSION_CALL_ERROR_CODES, EXTENSION_KINDS, EXTENSION_METHODS, ExtensionCollisionSchema, ExtensionConvergenceResultSchema, ExtensionCallErrorCodeSchema, ExtensionCallModeSchema, ExtensionCallParamsSchema, ExtensionCallResultSchema, ExtensionDescribeParamsSchema, ExtensionDescribeResultSchema, ExtensionDescriptorSchema, ExtensionDiscoverParamsSchema, ExtensionDiscoverResultSchema, ExtensionDiscoveryBudgetSchema, ExtensionHostSnapshotSchema, ExtensionIdentitySchema, ExtensionKindSchema, ExtensionRunSnapshotSchema, ExtensionStatusParamsSchema } from "./extension-discovery-schema.ts";
+export type { ExtensionCallMode, ExtensionCallErrorCode, ExtensionCallParams, ExtensionCallResult, ExtensionCollision, ExtensionConvergenceResult, ExtensionDescriptor, ExtensionDescribeParams, ExtensionDescribeResult, ExtensionDiscoverParams, ExtensionDiscoverResult, ExtensionDiscoveryBudget, ExtensionHostSnapshot, ExtensionIdentity, ExtensionKind, ExtensionRunSnapshot, ExtensionStatusParams } from "./extension-discovery-schema.ts";
+
+export { PERCEPTION_METHODS, PerceptionActivityEntrySchema, PerceptionCardParamsSchema, PerceptionCardSchema, PerceptionPauseGetParamsSchema, PerceptionPauseSetParamsSchema, PerceptionPauseStateSchema, PerceptionSamplingStatusSchema } from "./perception-schema.ts";
 export type {
   PerceptionActivityEntry,
   PerceptionCard,

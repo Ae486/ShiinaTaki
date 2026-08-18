@@ -11,7 +11,7 @@
 - mcp-publication.ts — candidate-to-generation publication transaction: accepts only the still-current desired token, rejects cross-server key collisions, atomically swaps active truth, and drains the previous generation
 - mcp-turn-tools.ts — the per-turn ToolSet assembly: governance (Approval/presentation) wrapper plus the OUTER generation lease (acquire -> authorize/execute -> release in finally; retired generations fail closed, never redirect)
 - mcp-boot.ts — the lifecycle's composition seam (repo + legacy seed + manager + secret-update/clear-aware catalog view) so main.ts stays a thin wiring root; boot order pinned: seed only while the table is empty and only after the secret migration
-- mcp-manager.ts — thin runtime orchestrator: reconcile/apply/disable/remove, secret-triggered reload or retirement, diagnostics-only test, truthful active+draining status, per-turn governed+leased ToolSet assembly, and bounded idempotent shutdown
+- mcp-manager.ts — thin runtime orchestrator with immutable current-generation Run snapshots, governed leases, reload/retirement, status, test, and bounded shutdown
 - mcp-runtime-status.ts — pure runtime-status projection for active/draining generations and sanitized candidate/close outcomes
 - mcp-desired-repo.ts — plane-1 SQLite desired state (migration 017) with transactional per-row optimistic configRevision writes; seedFromLegacyFile imports mcp-servers.json ONLY while the table is empty and only after the secret migration rewrote every plaintext value to opaque refs
 - mcp-lifecycle-service.ts — the operator plane-2 controller: persists the desired row first, then reconciles the runtime (no restart for add/edit/enable/disable/remove/test/reconnect); typed conflict/refusal errors before the WS surface

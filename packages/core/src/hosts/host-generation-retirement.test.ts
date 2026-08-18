@@ -37,7 +37,7 @@ describe("bindHostGenerationRetirement", () => {
     expect(catalogs.get(HOST_B)).toBeDefined();
     expect(connections.isCurrentHost(oldA)).toBe(false);
     expect(connections.isCurrentHost(replacementA)).toBe(true);
-    await expect(pendingA).resolves.toMatchObject({ ok: false, code: "NODE_DISCONNECTED" });
+    await expect(pendingA).resolves.toMatchObject({ ok: false, code: "CANCELLED", state: "cancelled" });
 
     expect(broker.resolve({
       requestId: sentB!.requestId,

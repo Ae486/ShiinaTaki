@@ -96,9 +96,11 @@ describe("createCapabilityBroker", () => {
     const late = b.request(target(HOST_A, (_m, p) => (sentA = p as CapabilityRequest)), {});
     let sentB: CapabilityRequest | undefined;
     const second = b.request(target(HOST_B, (_m, p) => (sentB = p as CapabilityRequest)), {});
+    const effect = b.request(target(HOST_A, () => undefined, "effect"), {});
     b.cancelGeneration(HOST_A, 1, "Host disconnected");
-    await expect(first).resolves.toMatchObject({ ok: false, code: "NODE_DISCONNECTED" });
-    await expect(late).resolves.toMatchObject({ ok: false, code: "NODE_DISCONNECTED" });
+    await expect(first).resolves.toMatchObject({ ok: false, code: "CANCELLED", state: "cancelled" });
+    await expect(late).resolves.toMatchObject({ ok: false, code: "CANCELLED", state: "cancelled" });
+    await expect(effect).resolves.toMatchObject({ ok: false, code: "OUTCOME_UNKNOWN", state: "outcome_unknown" });
     expect(b.resolve({ requestId: sentA!.requestId, control: sentA!.control, state: "completed", output: OUTPUT, governance: EVIDENCE }, {
       hostId: HOST_A, connectionGeneration: 1,
     })).toEqual({ accepted: false, reason: "late" });

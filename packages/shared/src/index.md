@@ -20,6 +20,7 @@
 - legacy-approval-schema.ts — compatibility-only LegacyApproval* MCP prompt schemas used by dormant Core and CLI code
 - permission-level-schema.ts — Core-owned permission.* generation/concurrency schemas plus isolated legacy Rust-compatible leaves for pre-projection golden fixtures
 - governance-schema.ts — extension-neutral canonical identity, descriptor registry, override, and evaluation schemas
+- extension-discovery-schema.ts — bounded host-qualified Skill/MCP/capability identity, Run snapshot, progressive discovery, and call-result schemas
 - governance-registry.ts — validated versioned canonical descriptor registry and collision-safe lookup helpers
 - governance-evaluator.ts — pure fail-closed effective posture evaluator (Approval deliberately absent)
 - governance-api.ts — focused named public facade for governance and permission exports

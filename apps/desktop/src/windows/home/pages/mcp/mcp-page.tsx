@@ -7,6 +7,7 @@
 import { useState } from "react";
 import type { McpServerView } from "@taki/shared";
 import { ActionButton } from "../../action-button.tsx";
+import { ExtensionConvergenceStrip, useExtensionConvergence } from "../../extension-convergence.tsx";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { PageCard } from "../../page-card.tsx";
 import { draftFromView, emptyDraft, validateDraft, type McpFeedback, type McpServerDraft } from "./mcp-state.ts";
@@ -17,6 +18,7 @@ import type { McpEditorMutationResult } from "./mcp-controller.ts";
 
 export function McpPage() {
   const mcp = useMcpServers();
+  const convergence = useExtensionConvergence(mcpConvergenceKey(mcp.state));
   const [draft, setDraft] = useState<McpServerDraft | null>(null);
   const [editingRevision, setEditingRevision] = useState<number | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
@@ -39,6 +41,7 @@ export function McpPage() {
         hint="期望状态存于 Core；添加/编辑/启停/移除即时生效，无需重启。密钥值只写入加密目录，绝不回显。"
         busy={mcp.state.kind === "loading" && mcp.state.previous !== null}
       />
+      <ExtensionConvergenceStrip state={convergence} />
       <McpPageBody input={{
         mcp, draft, editingRevision, confirmRemove, formError,
         setDraft, setEditingRevision, setConfirmRemove, setFormError,
@@ -46,6 +49,16 @@ export function McpPage() {
       }} />
     </>
   );
+}
+
+function mcpConvergenceKey(state: ReturnType<typeof useMcpServers>["state"]): string {
+  const servers = state.kind === "ready" ? state.data : state.kind === "failure" ? state.previous : state.previous;
+  return (servers ?? []).map((server) => [
+    server.serverId,
+    server.configRevision,
+    server.status.runtimeGeneration ?? 0,
+    server.status.phase,
+  ].join(":" )).join("|");
 }
 
 interface McpPageBodyInput {
