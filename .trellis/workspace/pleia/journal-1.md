@@ -1051,7 +1051,8 @@ used, and the stale `.trellis/.current-task` pointer was deliberately left uncha
 - [UNVERIFIED] Packaged Home/file-picker interaction, real external MCP credentials, a compatible remote transfer
   Host, and owner-observed manual acceptance.
 - `.trellis/.current-task` still names archived Approval; the live Slice 8 task remains explicitly `in_progress`.
-- No commit, push, rebase, reset, finish, archive, or edit to `docs/ZCODE-HANDOFF.md` occurred.
+- Implementation checkpoint `1a7a1a5` was committed. No push, rebase, reset, finish, archive, or edit to
+  `docs/ZCODE-HANDOFF.md` occurred.
 
-[IN PROGRESS] **Slice 8 implementation and automated convergence are approved in the dirty worktree. Owner manual
-acceptance and authorized checkpoint/closeout remain pending.**
+[IN PROGRESS] **Slice 8 implementation and automated convergence are checkpointed at `1a7a1a5`. Owner manual
+acceptance and authorized finish/archive remain pending.**
