@@ -27,6 +27,8 @@ export const ErrorCodeSchema = z.enum([
   // An mcp.* write whose expectedConfigRevision no longer matches the desired row; error.data.currentConfigRevision
   // carries the row's current revision so the operator surface can refetch and retry explicitly (never replay).
   "MCP_CONFIG_CONFLICT",
+  "SKILL_REFUSED",
+  "SKILL_CONFIG_CONFLICT",
   // Tool execution outcomes are structured model-readable failures, not JSON-RPC envelope codes.
   "GOVERNANCE_DENIED",
   "APPROVAL_REQUIRED",

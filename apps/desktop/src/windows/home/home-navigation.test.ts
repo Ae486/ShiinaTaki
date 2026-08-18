@@ -12,7 +12,7 @@ import { useHomeStore } from "./home-store.ts";
 
 describe("home page registry", () => {
   it("registers the home pages in menu order, chat first", () => {
-    expect(HOME_PAGES.map((page) => page.id)).toEqual(["chat", "settings", "operations", "perception", "costume", "mcp"]);
+    expect(HOME_PAGES.map((page) => page.id)).toEqual(["chat", "settings", "operations", "perception", "costume", "mcp", "skills"]);
     expect(DEFAULT_PAGE_ID).toBe("chat");
   });
 

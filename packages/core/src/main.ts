@@ -70,12 +70,12 @@ import { memoryStatusMethod } from "./server/methods/memory-status.ts";
 import { registerPerceptionMethods } from "./server/methods/perception-methods.ts";
 import { registerSecretMethods } from "./server/methods/secret-methods.ts";
 import { registerMcpMethods } from "./server/methods/mcp-methods.ts";
+import { registerSkillMethods } from "./server/methods/skill-methods.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
 import { createLoadSkillTool } from "./skills/load-skill-tool.ts";
-import { createSkillsLoader } from "./skills/skills-loader.ts";
-import { createSkillsState } from "./skills/skills-state.ts";
-import { scanSkills } from "./skills/skill-scanner.ts";
+import { createReadSkillResourceTool } from "./skills/read-skill-resource-tool.ts";
+import { bootSkillLifecycle } from "./skills/skill-boot.ts";
 import { createCurrentTimeTool } from "./time/current-time-tool.ts";
 import { createTimelineSubscriptions } from "./server/timeline-subscriptions.ts";
 import { startWsServer } from "./server/ws-server.ts";
@@ -167,15 +167,9 @@ const hostCatalogs = createHostCatalogStore();
 const registry = createMethodRegistry();
 const { approval, coreToolGovernance } = composeApprovalRuntime({ db, governance, coreHostId, registry, connections: connectionRegistry, logger });
 
-// Skills (#9): discover SKILL.md folders, honor persisted enable/disable, expose the list + the load_skill tool.
-const skillsLog = logger.child({ mod: "skills" });
-const skillsScan = scanSkills(join(serverConfig.dataDir, "skills"));
-skillsLog.info({ count: skillsScan.skills.length }, "skills discovered");
-if (skillsScan.invalid.length > 0) skillsLog.warn({ invalid: skillsScan.invalid }, "invalid skills skipped");
-const skillsLoader = createSkillsLoader({
-  skills: skillsScan.skills,
-  state: createSkillsState({ filePath: join(serverConfig.dataDir, "skills-state.json"), logger }),
-});
+// Skills: durable lifecycle rows plus an immutable runtime catalog. Legacy files are read once as a seed and never written.
+const skillBoot = await bootSkillLifecycle({ db, dataDir: serverConfig.dataDir, ownerHostId: coreHostId, logger });
+const { loader: skillsLoader, service: skillLifecycle, log: skillsLog } = skillBoot;
 
 // Secret catalog (08-12): the Core-owned encrypted credential store. Master key from the credentials directory
 // (systemd) or the taki-secret-key helper; no key source = locked, every mutation fails closed — never a fresh
@@ -197,6 +191,7 @@ const mcpBoot = bootMcpLifecycle({ db, dataDir: serverConfig.dataDir, coreHostId
 void mcpBoot.manager.reconcile(mcpBoot.desired.list()).then(() => undefined, () => undefined); // desired → candidates → publish
 registerSecretMethods(registry, { service: mcpBoot.catalog, logger: secretLog });
 registerMcpMethods(registry, { service: createMcpLifecycleService({ repo: mcpBoot.desired, manager: mcpBoot.manager }), logger: mcpBoot.log });
+registerSkillMethods(registry, { service: skillLifecycle, logger: skillsLog });
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
@@ -300,6 +295,7 @@ registry.register(
       // Shell capabilities retain Host governance until Batch 2 installs the Core projection.
       extraTools: {
         ...createLoadSkillTool(skillsLoader, { service: governance, ownerHostId: coreHostId }),
+        ...createReadSkillResourceTool(skillsLoader, { service: governance, ownerHostId: coreHostId }),
         ...capabilityTools(),
       },
       // Per-turn bag: the capability tools bind the initiating operator socket (challenge ownership) and the MCP
@@ -408,6 +404,7 @@ const server = await startWsServer({
 function shutdown(signal: string): void {
   logger.info({ signal }, "shutting down");
   void server.close().then(async () => {
+    skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients
     // (each exactly once), before the db handle and process go away.
     await mcpBoot.manager.close();

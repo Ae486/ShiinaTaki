@@ -17,6 +17,13 @@
 > checkpoint is `57fe909`; HEAD `cc2a65e` contains current main after a conflict-free, tree-identical merge. The next product
 > slice is Standard Skill Lifecycle. The stale recovery narrative below remains historical unless explicitly
 > superseded here or in §20.
+>
+> **Status update (later on 2026-08-18):** Codex resumed leadership and implemented Slice 7 in the dirty worktree.
+> Standard Skill packages now have bounded directory/ZIP import, durable lifecycle state, immutable catalog
+> generations/leases, confined resource reads, Home management, and real-process lifecycle evidence. The initial
+> formal check returned `Not approved`; all independently confirmed findings were repaired and focused/full gates pass.
+> HEAD remains `f1e6dcb`, `main...HEAD` is `0 5`, and no commit/push/archive is authorized. Slice 8 is next only after
+> this dirty tree is reviewed and checkpointed.
 
 ## 1. Takeover directive
 
@@ -127,7 +134,7 @@ execute; that parent status does not mean no production work has occurred.
 | 4. Approval Productization | `08-12-approval-productization` | `archived` | Connection-bound challenge/resume, privacy convergence, and formal check are complete through `ffa9fff`/`a1a927e`. |
 | 5. Host Secret Catalog | `08-12-host-secret-catalog` | `archived` | Encrypted catalog, operator methods, migration, locked behavior, and formal check are complete through `0965358`/`c26e3f8`. |
 | 6. Secure MCP lifecycle | `08-12-secure-mcp-lifecycle` | `in_progress` | Production, strict-review repair, and pre-Slice-7 security convergence are approved and checkpointed at `57fe909`; current main is merged at `cc2a65e`. |
-| 7. Standard Skill lifecycle | `08-12-standard-skill-lifecycle` | `planning` | Not implemented. Preserve portable `SKILL.md`; do not invent a Taki-only Skill format. |
+| 7. Standard Skill lifecycle | `08-12-standard-skill-lifecycle` | `in_progress` | Implemented and automated-gate green in the dirty worktree. Portable `SKILL.md` remains authoritative; packaged WebView interaction is unverified. |
 | 8. Discovery/integration | `08-12-extension-discovery-integration` | `planning` | Not implemented. Owns final product convergence and deferred cross-process evidence, not unfinished child features. |
 
 Only after these eight slices satisfy the product acceptance should the Leader formally advance the remaining T4
@@ -693,14 +700,15 @@ At the time of this document:
 
 - **Completed and committed:** Host-control foundation, Governance Authority, Approval Productization, Host Secret
   Catalog, and the initial Secure MCP Lifecycle implementation through `2c2ef5f`.
-- **Implemented, formally checked, not yet checkpointed:** the approved Slice 6 strict-review convergence fixes,
-  executable MCP spec, task docs, handoffs, and journal in the current dirty tree.
-- **Next product work:** Standard Skill management/runtime lifecycle, preserving portable `SKILL.md` packages.
-- **After Skills:** final extension discovery/integration, parent acceptance, and the deferred real two-Node proof.
+- **Implemented and checkpointed:** the approved Slice 6 strict-review convergence fixes and executable MCP contract.
+- **Implemented, repaired after formal review, not yet checkpointed:** Standard Skill management/runtime lifecycle,
+  portable package storage, Home management, executable spec, and real-process lifecycle evidence.
+- **Next product work after checkpoint:** final extension discovery/integration, parent acceptance, and the deferred
+  real two-Node proof.
 - **Not part of the current deliverable:** formal Autonomous Run, Scheduled Task, Heartbeat, and later T4 product work.
 
-The next useful milestone is not another MCP design loop. It is a clean, semantically merged Slice 6 checkpoint, then
-one coherent Standard Skill Lifecycle implementation and one proportional formal check.
+The next useful milestone is a clean Slice 7 checkpoint after final diff review, then the frozen extension-integration
+child. Do not reopen the completed MCP/Skill design work without new evidence.
 
 ## 19. Owner authority rulings for the ZCode Leader (2026-08-16)
 
@@ -733,9 +741,9 @@ not further implementation.
 
 This section supersedes the takeover-specific implementation directions above.
 
-- Work only in `H:/TakiAgent-worktrees/t4`; branch `task/t4-skills-mcp-productization`, HEAD `cc2a65e`.
-- Main is `bd9ddfb`; `main...HEAD` is `0 4`, and main's two dirty Hindsight task documents are user-owned.
-- The live child is `.trellis/tasks/08-12-secure-mcp-lifecycle` (`in_progress`). `.trellis/.current-task` is stale and
+- Work only in `H:/TakiAgent-worktrees/t4`; branch `task/t4-skills-mcp-productization`, HEAD `f1e6dcb`.
+- Main is `bd9ddfb`; `main...HEAD` is `0 5`, and main's dirty Hindsight work remains user-owned.
+- The live child is `.trellis/tasks/08-12-standard-skill-lifecycle` (`in_progress`). `.trellis/.current-task` is stale and
   still names archived Approval; do not mask this at random.
 - The approved Slice 6 plus pre-Slice-7 convergence is checkpointed at `57fe909`; `cc2a65e` is the conflict-free,
   tree-identical main merge. Exact commands, counts, fixes, and manual residuals are in the Slice `implement.md` and
@@ -744,9 +752,10 @@ This section supersedes the takeover-specific implementation directions above.
   YCE and child spawning, use `jbcontext` for unknown code, and separate completed/incomplete/unverified/extra/risk.
 - `jbcontext index --project-path H:/TakiAgent-worktrees/t4` was rerun. The CLI reports the HEAD revision and can read
   current references, but rerun it after checkpointing so the new MCP modules become stable revision-owned units.
-- Before Standard Skill work, semantically integrate any newer main changes across Shared exports, Core composition,
+- Before checkpointing Slice 7, semantically integrate any newer main changes across Shared exports, Core composition,
   Home registries, specs, HANDOFF, and the journal. Do not rebase/reset or copy patches between worktrees.
 - The strict `[Approval C+E, Slice 6)` review and bounded repair are complete. All confirmed findings and repair
   regressions passed the final targeted review; do not reopen them without new evidence.
-- Next product slice: portable Standard Skill Lifecycle. The MCP product is implemented and process-proven, but
-  packaged Home interaction and a real external MCP credential/provider round-trip remain pending owner verification.
+- Next product slice after review/checkpoint: extension discovery/integration. MCP and Standard Skill lifecycles are
+  implemented and process-proven, but packaged Home interaction and a real external MCP credential/provider round-trip
+  remain pending owner verification.

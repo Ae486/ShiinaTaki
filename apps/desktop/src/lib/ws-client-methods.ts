@@ -1,7 +1,6 @@
 /**
  * INPUT:  a JSON-RPC client bound to the operator socket + call params from the UI hooks.
- * OUTPUT: handshake() (connect outcome) + requestMethods() — the plain request/response half of the WsClient
- *         (chat/timeline/media/character/config/memory/perception/permission governance/canonical Approval).
+ * OUTPUT: handshake() plus typed request methods including governance, Approval, mcp.*, and skill.* families
  * POS:    ui/lib — the outbound half of ws-client (no turn/stream state lives here). Every result is parsed through a
  *         @taki/shared schema: the zod boundary holds for every inbound frame.
  */
@@ -41,6 +40,12 @@ import {
   McpRemoveResultSchema,
   McpStatusResultSchema,
   McpTestResultSchema,
+  SKILL_METHODS,
+  SkillInspectResultSchema,
+  SkillListResultSchema,
+  SkillMutationResultSchema,
+  SkillRemoveResultSchema,
+  SkillReconcileResultSchema,
   PERCEPTION_METHODS,
   SECRET_METHODS,
   SecretSetResultSchema,
@@ -63,6 +68,8 @@ import {
   type McpEditParams,
   type McpEnableParams,
   type McpTestParams,
+  type SkillImportParams,
+  type SkillMutationParams,
   type SecretSetParams,
   type PerceptionPauseSetParams,
   type PermissionCellSetParams,
@@ -111,6 +118,18 @@ function mcpMethods(request: <T>(method: string, params: JSONRPCParams) => Promi
     // The MCP page's write-only secret-value path: the value goes ONLY to secret.set (the sanctioned sensitive
     // method), never into any mcp.* frame or cached view; the desired config keeps the opaque marker.
     secretSet: async (params: SecretSetParams) => SecretSetResultSchema.parse(await request(SECRET_METHODS.set, params)),
+  };
+}
+
+function skillMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
+  return {
+    skillList: async () => SkillListResultSchema.parse(await request(SKILL_METHODS.list, {})),
+    skillInspect: async (packageId: string) => SkillInspectResultSchema.parse(await request(SKILL_METHODS.inspect, { packageId })),
+    skillImport: async (params: SkillImportParams) => SkillMutationResultSchema.parse(await request(SKILL_METHODS.import, params)),
+    skillEnable: async (params: SkillMutationParams) => SkillMutationResultSchema.parse(await request(SKILL_METHODS.enable, params)),
+    skillDisable: async (params: SkillMutationParams) => SkillMutationResultSchema.parse(await request(SKILL_METHODS.disable, params)),
+    skillRemove: async (params: SkillMutationParams) => SkillRemoveResultSchema.parse(await request(SKILL_METHODS.remove, params)),
+    skillReconcile: async () => SkillReconcileResultSchema.parse(await request(SKILL_METHODS.reconcile, {})),
   };
 }
 
@@ -188,5 +207,6 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
     ...permissionMethods(request),
     ...approvalMethods(request),
     ...mcpMethods(request),
+    ...skillMethods(request),
   };
 }

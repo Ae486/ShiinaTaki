@@ -61,10 +61,10 @@ describe("scanSkills (T17)", () => {
     expect(scanSkills(root)).toMatchObject({ skills: [], invalid: ["nodesc"] });
   });
 
-  it("marks a block-scalar description (unsupported in v1) as invalid, not a crash", () => {
+  it("accepts a standards-compatible block-scalar description", () => {
     const root = skillsRoot();
     writeSkill(root, "block", "---\nname: block\ndescription: |\n  line one\n  line two\n---\nbody");
-    expect(scanSkills(root)).toMatchObject({ skills: [], invalid: ["block"] });
+    expect(scanSkills(root)).toMatchObject({ skills: [expect.objectContaining({ name: "block", description: "line one\nline two\n" })], invalid: [] });
   });
 
   it("keeps valid skills while collecting invalid ones", () => {

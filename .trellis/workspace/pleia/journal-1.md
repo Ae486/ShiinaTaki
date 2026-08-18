@@ -949,3 +949,63 @@ compact repair/check cycle: no recursive delegation, no batch-per-check repetiti
 
 [IN PROGRESS] **Automated pre-Slice-7 convergence is approved and checkpointed at `57fe909`. Main was merged at
 `cc2a65e` without conflicts or tree-content changes. The task remains unarchived; Standard Skill Lifecycle is next.**
+
+## Session 18: T4 Standard Skill Lifecycle implementation and convergence
+
+**Date**: 2026-08-18
+**Task**: `.trellis/tasks/08-12-standard-skill-lifecycle`
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Implemented Slice 7 as one Shared/Core/Home batch and one formal review cycle. The package remains the portable Agent
+Skills `SKILL.md` format; Taki state is a SQLite/content-store sidecar, and Skill text, metadata, trust, scan labels,
+scripts, and `allowed-tools` grant no permission. The implementation agent was resumed after repeated service 429s,
+then the Leader completed and verified the retained worktree patch directly without creating a replacement agent.
+
+### Main Changes
+
+- Added strict `skill.*` Shared schemas, migration 018, bounded repository rows, optimistic revisions, explicit Host
+  ownership, and standard metadata inspection.
+- Added lazy bounded ZIP and browser-directory import, shared package path/collision guards, safe YAML parsing with
+  aliases disabled, immutable staged publication, quarantine/rejected visibility, deterministic hashing, and legacy
+  seed-once behavior.
+- Added a prepared no-I/O catalog publication seam, process-local immutable generations, read leases, retirement/GC,
+  tamper reconciliation, mutation serialization, and orphan quarantine cleanup tied to durable package ids.
+- Kept `load_skill` metadata-first/lazy and added governed confined `read_skill_resource`; neither grants authority or
+  executes scripts.
+- Added operator-only Core methods and typed Home WS routes plus a disposable Skills page with ZIP/directory import and
+  replacement, inspect, enable/disable, reconcile, two-step remove, current-generation suppression, and no cache.
+- Added the executable backend/frontend Skill contract and a real-process operator WS lifecycle scenario covering
+  import, inspect, disable, restart persistence, enable, replace, reconcile, and remove.
+
+### Formal Review and Repairs
+
+The single xhigh formal check returned `Not approved`. The Leader independently confirmed and repaired its actionable
+findings: type/lint failures, explicit Shared exports, complete mutation serialization, standard metadata round-trip,
+directory replacement, parser/alias API correctness, published-read TOCTOU, repository input bounds, Core shutdown,
+quarantine cleanup semantics, source/header/index maintenance, and missing process/spec evidence. A bounded post-repair
+xhigh recheck was attempted twice through the existing check agent, but the agent service returned HTTP 429 both times;
+no second formal-agent approval is claimed. Focused re-verification and a local full-scope audit followed the repair.
+
+### Verification
+
+- [OK] Workspace typecheck and root ESLint.
+- [OK] Focused Skill suites: Shared 5, Core 59, Desktop 10; final storage/ZIP focused regression 34, plus the exact-
+  duplicate ZIP regression (16/16 source tests) added during the final local audit.
+- [OK] Full packages: Shared 306, CLI 47, Desktop 417, Core 1,461 plus 1 existing skip.
+- [OK] Full E2E: 32 passed / 6 skipped; dedicated Skill lifecycle E2E passed.
+- [OK] Desktop production build; only existing Live2D non-module warnings.
+- [OK] Independent Node strip-only Core boot reached `ws server listening` on a temporary data root.
+- [OK] Main remained `bd9ddfb`; `main...HEAD` remained `0 5` before final documentation convergence.
+
+### Residual Risk and Status
+
+- [UNVERIFIED] Packaged Home WebView/file-picker interaction, real external provider credentials, two-Node Host
+  convergence, and owner-only manual acceptance.
+- [DEFERRED TO SLICE 8] Whole-Run Skill/MCP discovery convergence and cross-Host package transfer/routing.
+- `.trellis/.current-task` remains stale on archived Approval; the session-bound task resolver correctly reports this
+  Slice. No commit, push, rebase, reset, finish, or archive occurred.
+
+[IN PROGRESS] **Slice 7 implementation and automated convergence are complete in one dirty ownership group. Review and
+checkpoint are still required before Slice 8; manual residuals remain explicitly unclaimed.**

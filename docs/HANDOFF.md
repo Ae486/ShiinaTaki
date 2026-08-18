@@ -1,13 +1,13 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
-> Updated 2026-08-18 after the pre-Slice-7 security convergence check. T4 remains isolated in its dedicated worktree.
+> Updated 2026-08-18 after the Slice 7 automated convergence check. T4 remains isolated in its dedicated worktree.
 > Secure MCP Lifecycle and the bounded `[Approval C+E, Slice 6)` repair are approved by their automated checks; the
-> reusable contracts are `.trellis/spec/backend/mcp-lifecycle.md`, `permission-authorization.md`, and
-> `secret-catalog.md`. The approved convergence checkpoint is `57fe909`; HEAD `cc2a65e` semantically merges current
-> main with no conflicts or tree-content change. Host-control still retains the
-> deferred two-Node process evidence for Slice 8. No push, reset, rebase, force, finish/archive, or cross-worktree
-> cleanup occurred in this session. Next product work is Standard Skill Lifecycle (Slice 7), then extension
-> discovery/integration. Manual residuals remain explicitly unclaimed below. Verify every live status before use.
+> reusable contracts are `.trellis/spec/backend/mcp-lifecycle.md`, `skill-lifecycle.md`, `permission-authorization.md`,
+> and `secret-catalog.md`. The approved convergence checkpoint is `57fe909`; HEAD `f1e6dcb` is the current branch
+> checkpoint and `main...HEAD` is `0 5`. Host-control still retains the deferred two-Node process evidence for Slice 8.
+> Slice 7 is implemented in the dirty worktree and has passed its automated gates; no push, reset, rebase, force,
+> finish/archive, or cross-worktree cleanup occurred. Manual residuals remain explicitly unclaimed below. Verify every
+> live status before use.
 
 ## 1. Mission and boundary
 
@@ -16,17 +16,17 @@ productization of Skills and MCP because Scheduled Tasks, Heartbeat, unattended 
 must depend on a truthful extension surface rather than the current boot-only developer configuration.
 
 The completed foundations now include the generation-safe Host-control spine, Core-owned Governance, connection-bound
-Approval challenge/resume, the encrypted Host Secret Catalog, and Secure MCP desired/runtime/Home lifecycle. MCP is no
-longer a boot-only developer configuration: operators can manage it without restart, and real-process evidence invokes
-a configured standard MCP tool through Governance and Approval. Standard Skill lifecycle, final extension convergence,
-Scheduled Tasks, Heartbeat, Autonomous Runs, Run Receipts, and later Memory adapters are not yet delivered.
+Approval challenge/resume, the encrypted Host Secret Catalog, Secure MCP desired/runtime/Home lifecycle, and the
+standards-compatible Skill package lifecycle. MCP and Skills are operator-configurable without a Core restart and have
+real-process evidence; final extension convergence, Scheduled Tasks, Heartbeat, Autonomous Runs, Run Receipts, and later
+Memory adapters are not yet delivered.
 
 The immediate job is therefore:
 
 1. preserve and extend the committed Host-control contracts;
 2. execute the remaining evidence-driven Trellis children through implement, proportional check, spec update, and
    closeout;
-3. converge secure MCP and standard Skill lifecycle work through the final integration child; and
+3. converge the completed MCP/Skill surfaces through the final extension-integration child; and
 4. only then create and execute the formal T4 Autonomous Run/Scheduler/Heartbeat task family.
 
 Do not restart the completed product Grill and do not repeat the three existing Skills/MCP research studies.
@@ -45,15 +45,15 @@ Shared TakiAgent checkpoint: `3d8a320c5a3aea72ed3ee504c910adee10a5e2b1`
 The commit is a mergeable parallel-work baseline; it is not a declaration that every included task passed manual
 acceptance.
 
-Current live status (2026-08-18 security closeout):
+Current live status (2026-08-18 Slice 7 convergence):
 
 - `main` is `bd9ddfb`; the main worktree has two user-owned dirty Hindsight task documents. Do not edit or clean them;
-- T4 HEAD is `cc2a65e` on `task/t4-skills-mcp-productization`. `main...HEAD` is `0 4`; current main is fully contained
-  after a conflict-free, tree-identical semantic merge;
-- the convergence implementation/specs are checkpointed at `57fe909`; only this post-merge status update is dirty;
-- `.trellis/.current-task` still points to archived Approval Productization. The live work is
-  `.trellis/tasks/08-12-secure-mcp-lifecycle` (`in_progress`); preserve the known pointer mismatch until its tooling
-  ownership is deliberately resolved rather than masking it with an unconditional rewrite;
+- T4 HEAD is `f1e6dcb` on `task/t4-skills-mcp-productization`. `main...HEAD` is `0 5`; current main is fully contained;
+- the approved security convergence is checkpointed at `57fe909`; the Slice 7 implementation/specs remain one dirty,
+  uncommitted ownership group;
+- `.trellis/.current-task` still points to archived Approval Productization. The session-bound live work is
+  `.trellis/tasks/08-12-standard-skill-lifecycle` (`in_progress`); preserve the known pointer mismatch until its
+  tooling ownership is deliberately resolved rather than masking it with an unconditional rewrite;
 - no agent or child agent is running. Recursive agent delegation remains prohibited by owner direction; and
 - locked workspace dependencies are installed only inside the T4 worktree; `.env.local` remains absent.
 
@@ -240,6 +240,27 @@ Clippy; Core strip-only boot; header/index audits; and `git diff --check`. Live 
 contention/persistence remains source/dependency verified rather than exercised. Do not mark the packaged Home,
 external MCP credential, Linux systemd credential, two-Node, or owner-only manual residuals as passed.
 
+### 3.4 Standard Skill Lifecycle (Slice 7)
+
+Slice 7 is implemented as one compact Shared/Core/Home vertical. It preserves portable `SKILL.md` packages and adds
+bounded directory/ZIP import, standard metadata validation, provenance/hash/trust/scan/quarantine state, optimistic
+enable/disable/replace/remove/reconcile methods, immutable content-addressed publication, generation leases/drain/GC,
+legacy seed-once behavior, confined `read_skill_resource`, and a disposable Home Skills page.
+
+The single formal review returned `Not approved`. The Leader independently confirmed and repaired its actionable
+findings: all lifecycle mutations are serialized; inspect round-trips standard metadata; ZIP/directory sources use
+bounded parser and path checks; published reads use one integrity-checked snapshot; YAML alias handling matches the
+installed `yaml` API; Shared exports are explicit; Home replacement accepts ZIP and directory; and quarantined orphan
+cleanup is retryable after durable removal. A bounded post-repair xhigh recheck was attempted twice but the agent service
+returned HTTP 429 both times; no second formal-agent approval is claimed. The Leader completed a local full-scope audit instead.
+
+Automated evidence now passes: Shared 306, CLI 47, Desktop 417, Core 1,461 plus one existing skip; full E2E 32 passed
+and 6 skipped; the dedicated Skill lifecycle E2E passed; Desktop production build passed with existing Live2D script
+warnings; and independent strip-only Core boot reached `ws server listening`. Packaged Home WebView/file-picker
+interaction, real external provider credentials, two-Node Host convergence, and owner-only manual checks remain
+unverified. The task remains uncommitted, unarchived, and in progress until the owner authorizes Git integration and
+closeout.
+
 ## 4. Required reading order
 
 Read these files before changing the Skills/MCP plan:
@@ -358,12 +379,12 @@ two-Node harness described above.
 
 ### Phase A — Skills/MCP prerequisite
 
-1. Slices 1-6 have frozen and implemented authority, Host-control, Governance, Approval, secrets, and Secure MCP.
-2. Implement and formally check the portable Standard Skill lifecycle without introducing a Taki-only Skill format.
-3. Converge extension discovery, Host behavior, operator surfaces, restart/reconnect, migration, security evidence, and
+1. Slices 1-7 have frozen and implemented authority, Host-control, Governance, Approval, secrets, Secure MCP, and the
+   portable Standard Skill lifecycle without introducing a Taki-only Skill format.
+2. Converge extension discovery, Host behavior, operator surfaces, restart/reconnect, migration, security evidence, and
    the deferred real two-Node proof in Slice 8.
-4. Re-run final operator/Agent acceptance across both MCP and Skills, including pending owner-manual surfaces.
-5. Update reusable specs and close the parent only after end-to-end operator acceptance.
+3. Re-run final operator/Agent acceptance across both MCP and Skills, including pending owner-manual surfaces.
+4. Update reusable specs and close the parent only after end-to-end operator acceptance.
 
 ### Phase B — formal T4 program
 
@@ -443,15 +464,13 @@ Push remains a separate owner-authorized action.
 The incoming Leader should report the live state to the owner, then:
 
 1. verify this worktree, current child, branch, `main...HEAD`, and Hindsight separation;
-2. review and checkpoint the current Slice 6 convergence without mixing main-worktree Hindsight changes;
-3. rebuild `jbcontext` again after the new MCP modules are committed so they become stable indexed units;
-4. start Standard Skill Lifecycle from its existing PRD/frozen portable `SKILL.md` decisions, using one coherent
-   implementation wave and one proportional final check;
-5. preserve the common Governance/Approval/Host/secret/runtime contracts; a Skill suggests procedure and tools but
+2. review and checkpoint the current Slice 7 dirty tree without mixing main-worktree Hindsight changes;
+3. rebuild `jbcontext` again after the new Skill modules are checkpointed so they become stable indexed units;
+4. preserve the common Governance/Approval/Host/secret/runtime contracts; a Skill suggests procedure and tools but
    never grants permission or creates a third authority;
-6. retain packaged Home MCP interaction and a real external MCP credential round-trip as pending owner verification;
+5. retain packaged Home MCP/Skill interaction and a real external MCP credential round-trip as pending owner verification;
    do not relabel automated E2E as those manual observations; and
-7. keep the missing real two-Node process scenario as the mandatory Slice 8 convergence gate.
+6. keep the missing real two-Node process scenario as the mandatory Slice 8 convergence gate.
 
 No new product Grill is currently required. Ask the owner only if live code/research exposes a genuine product choice
 that would materially change behavior, security, scope, or delivery.

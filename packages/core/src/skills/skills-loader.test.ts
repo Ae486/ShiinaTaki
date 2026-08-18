@@ -47,7 +47,13 @@ describe("createSkillsLoader (T19)", () => {
   it("loads an enabled skill's body", () => {
     const a = skillFile("alpha", "The full alpha instructions.");
     const loader = createSkillsLoader({ skills: [a], state: fakeState() });
-    expect(loader.load("alpha")).toEqual({ ok: true, content: "The full alpha instructions." });
+    expect(loader.load("alpha")).toEqual({ ok: true, content: "The full alpha instructions.", contentRevision: "sha256.alpha", files: [] });
+  });
+
+  it("loads a block-scalar Skill through the standard parser", () => {
+    const skill = skillFile("alpha", "The full alpha instructions.");
+    writeFileSync(skill.skillPath, "---\nname: alpha\ndescription: |\n  Alpha skill.\nmetadata:\n  team: tools\n---\nBlock body");
+    expect(createSkillsLoader({ skills: [skill], state: fakeState() }).load("alpha")).toMatchObject({ ok: true, content: "Block body" });
   });
 
   it("returns NOT_FOUND for an unknown skill", () => {

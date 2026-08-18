@@ -68,6 +68,23 @@ restoration. The complete lifecycle, deadline, timing-policy, timeline-reconcili
 - Full backend/runtime/secret and verification requirements live in
   [`mcp-lifecycle.md`](../backend/mcp-lifecycle.md).
 
+### Standard Skill management
+
+- The Skills page is a disposable operator projection over Core package rows and the process-local catalog. It owns no
+  package bytes, enabled truth, revision, trust decision, scan verdict, or runtime generation.
+- Each authenticated Home client generation starts with a fresh `skill.list`. Late list/inspect/mutation results from a
+  retired client are ignored; reconnect and timeout never replay a write.
+- ZIP and browser-directory import share one Core-authoritative validation pipeline. Home applies count/size preflight
+  only to avoid waste; it never treats browser paths or client validation as trusted.
+- Import, replacement, enable/disable, remove, and reconcile are serialized. Every success or failure refetches Core
+  truth; optimistic conflicts remain visible and require a new operator action against the returned revision.
+- Replacement supports both ZIP and directory sources. Remove requires an explicit second confirmation. Inspect shows
+  only validated standard metadata and a bounded relative-file inventory, never absolute paths or package bytes.
+- Active, disabled, quarantined/rejected, loading, empty, reconnecting, validation, conflict, partial-failure, inspect,
+  and removal-confirmation states are rendered from current-generation state held only in component memory.
+- Full storage/runtime/governance and verification requirements live in
+  [`skill-lifecycle.md`](../backend/skill-lifecycle.md).
+
 ## Cross-window commands (the pet owns the scene, the pages own the surface)
 
 A page that needs something only the pet window can do COMMANDS it and does not reach into it:

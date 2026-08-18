@@ -21,6 +21,7 @@ import { governancePolicyMigration014 } from "./014-governance-policy.ts";
 import { approvalMigration015 } from "./015-approval.ts";
 import { timelineInputScrubMigration016 } from "./016-timeline-input-scrub.ts";
 import { mcpDesiredServersMigration017 } from "./017-mcp-desired-servers.ts";
+import { skillPackagesMigration018 } from "./018-skill-packages.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -40,4 +41,5 @@ export const MIGRATIONS: Migration[] = [
   approvalMigration015,
   timelineInputScrubMigration016,
   mcpDesiredServersMigration017,
+  skillPackagesMigration018,
 ];

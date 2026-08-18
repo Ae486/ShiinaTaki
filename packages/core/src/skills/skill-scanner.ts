@@ -6,7 +6,8 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
-import { parseFrontmatter } from "../memory/frontmatter.ts";
+import { SKILL_DESCRIPTION_MAX_LENGTH, SKILL_NAME_MAX_LENGTH, SKILL_NAME_PATTERN } from "@taki/shared";
+import { parseSkillDocument } from "./skill-package-store.ts";
 
 /** Level-1 metadata (always loaded) + the path to lazy-load the body from (level 2, via load_skill). */
 export interface SkillMeta {
@@ -22,7 +23,6 @@ export interface SkillScan {
 }
 
 // Spec name rule: kebab-case, must equal the directory name (agentskills.io / Claude Code).
-const NAME_RE = /^[a-z][a-z0-9-]*[a-z0-9]$/;
 const SKILL_FILE = "SKILL.md";
 
 /** Read-only scan; a hand-broken SKILL.md is collected into `invalid` (logged at boot), never a crash. */
@@ -47,13 +47,13 @@ function validate(dirName: string, skillPath: string): SkillMeta | null {
   }
   let data: Record<string, unknown>;
   try {
-    data = parseFrontmatter(text).data; // block scalars / lists / bad structure throw -> invalid (single-line only, v1)
+    data = parseSkillDocument(text).data;
   } catch {
     return null;
   }
   const { name, description } = data;
-  if (typeof name !== "string" || !NAME_RE.test(name) || name !== dirName) return null;
-  if (typeof description !== "string" || description.length === 0) return null;
+  if (typeof name !== "string" || name.length > SKILL_NAME_MAX_LENGTH || !SKILL_NAME_PATTERN.test(name) || name !== dirName) return null;
+  if (typeof description !== "string" || description.length === 0 || description.length > SKILL_DESCRIPTION_MAX_LENGTH) return null;
   return { name, description, skillPath, contentRevision: `sha256.${createHash("sha256").update(text).digest("hex")}` };
 }
 

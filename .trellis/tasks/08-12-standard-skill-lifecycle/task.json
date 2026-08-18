@@ -3,7 +3,7 @@
   "name": "standard-skill-lifecycle",
   "title": "Standard Skill package lifecycle and Home management",
   "description": "Implement standards-compatible staged Skill import, validation, provenance/hash/trust/quarantine, enable/remove/reconcile, confined support resources, atomic catalog publication, and Home management.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "shared-core-host-desktop-standard-skill-lifecycle",
   "package": null,

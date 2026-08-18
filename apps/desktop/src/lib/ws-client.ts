@@ -1,12 +1,7 @@
 /**
- * INPUT:  a WsTransport (browser WebSocket by default) + inbound JSON-RPC frames from the Core (parsed in ws-client-routes).
- * OUTPUT: createWsClient({transport}) -> WsClient: connect()/chat()/subscribeAvatar()/reportAvatar() +
- *         timelineHistory()/subscribeTimeline()/mediaGet() (chat page) + importCharacter()/listCharacters()/
- *         characterCostumes()/costumeResolution() (#18) + configList()/configSet()/subscribeConfig() +
- *         memoryTidy()/memoryStatus()/mediaUsage()/mediaClear() plus perception/permission/Approval methods and pushes
- *         + the mcp.* lifecycle family (list/get/add/edit/enable/disable/remove/test/reconnect/status).
- * POS:    ui/lib — the Pet UI's operator transport to the Agent Core (mirrors apps/cli chat-client, browser WS). The
- *         composition root over ws-client-routes (inbound) and ws-client-methods (outbound). No React/Tauri imports.
+ * INPUT: WsTransport plus Core JSON-RPC frames parsed by ws-client-routes
+ * OUTPUT: createWsClient() with chat, timeline, media, config, governance, Approval, mcp.*, and skill.* families
+ * POS:    ui/lib operator transport composition root over inbound routes and typed outbound methods
  */
 
 import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
@@ -45,6 +40,13 @@ import type {
   McpStatusResult,
   McpTestParams,
   McpTestResult,
+  SkillImportParams,
+  SkillInspectResult,
+  SkillListResult,
+  SkillMutationParams,
+  SkillMutationResult,
+  SkillRemoveResult,
+  SkillReconcileResult,
   SecretSetParams,
   SecretSetResult,
   PerceptionCard,
@@ -149,6 +151,13 @@ export interface WsClient {
   mcpReconnect(serverId: string): Promise<McpMutationResult>;
   /** Reads the sanitized runtime status of every server the manager knows. */
   mcpStatus(): Promise<McpStatusResult>;
+  skillList(): Promise<SkillListResult>;
+  skillInspect(packageId: string): Promise<SkillInspectResult>;
+  skillImport(params: SkillImportParams): Promise<SkillMutationResult>;
+  skillEnable(params: SkillMutationParams): Promise<SkillMutationResult>;
+  skillDisable(params: SkillMutationParams): Promise<SkillMutationResult>;
+  skillRemove(params: SkillMutationParams): Promise<SkillRemoveResult>;
+  skillReconcile(): Promise<SkillReconcileResult>;
   /** Stores one secret value through the sensitive write-only path (the MCP page's set-value flow). */
   secretSet(params: SecretSetParams): Promise<SecretSetResult>;
   approvalRespond(params: CanonicalApprovalRespondParams): Promise<CanonicalApprovalRespondResult>;
