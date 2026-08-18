@@ -3,7 +3,8 @@
 > Updated 2026-08-19 after the Slice 8 automated convergence check. T4 remains isolated in its dedicated worktree.
 > Secure MCP, Standard Skill, Governance/Approval, Secret Catalog, and Extension Discovery contracts are implemented;
 > the reusable Slice 8 contract is `.trellis/spec/backend/extension-discovery.md`. Slice 7 is checkpointed at `4031ba7`;
-> `main...HEAD` is `0 8`; Slice 8 is checkpointed at `1a7a1a5`.
+> `main...HEAD` is `0 9`; Slice 8 implementation is checkpointed at `1a7a1a5` and the documentation checkpoint at
+> `dafe437`.
 > Slice 8 automated gates pass, including the mandatory simultaneous two-Node process proof. No push, reset, rebase,
 > force, finish/archive, or cross-worktree cleanup occurred. Manual residuals remain explicitly unclaimed
 > below. Verify every live status before use.
@@ -46,7 +47,7 @@ acceptance.
 Current live status (2026-08-19 Slice 8 convergence review):
 
 - `main` is `bd9ddfb`; the main worktree has two user-owned dirty Hindsight task documents. Do not edit or clean them;
-- T4 HEAD is `1a7a1a5` on `task/t4-skills-mcp-productization`. `main...HEAD` is `0 8`; current main is fully contained;
+- T4 HEAD is `dafe437` on `task/t4-skills-mcp-productization`. `main...HEAD` is `0 9`; current main is fully contained;
 - the approved security convergence is checkpointed at `57fe909`; the Slice 7 implementation/specs are committed as
   one reviewable ownership group;
 - `.trellis/.current-task` still points to archived Approval Productization. The session-bound live work is
@@ -437,7 +438,7 @@ git log -3 --oneline --decorate
 
 The pointer currently (and incorrectly) names archived `.trellis/tasks/08-12-approval-productization`; do not silently
 rewrite it. The live child is `.trellis/tasks/08-12-extension-discovery-integration`, still `in_progress` and
-checkpointed at `1a7a1a5`; owner acceptance and finish/archive remain pending. The two-Node evidence is complete; the parent remains
+checkpointed at `dafe437` (implementation `1a7a1a5`); owner acceptance and finish/archive remain pending. The two-Node evidence is complete; the parent remains
 `planning` until the remaining manual Skills/MCP acceptance is observed.
 
 If the worktree is dirty for an unknown reason, stop and identify ownership before editing. Never run T4 commands from

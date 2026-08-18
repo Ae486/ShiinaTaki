@@ -1054,5 +1054,5 @@ used, and the stale `.trellis/.current-task` pointer was deliberately left uncha
 - Implementation checkpoint `1a7a1a5` was committed. No push, rebase, reset, finish, archive, or edit to
   `docs/ZCODE-HANDOFF.md` occurred.
 
-[IN PROGRESS] **Slice 8 implementation and automated convergence are checkpointed at `1a7a1a5`. Owner manual
-acceptance and authorized finish/archive remain pending.**
+[IN PROGRESS] **Slice 8 implementation and automated convergence are checkpointed at `1a7a1a5`, with documentation
+checkpoint `dafe437`. Owner manual acceptance and authorized finish/archive remain pending.**
