@@ -3,9 +3,9 @@
 > Updated 2026-08-18 after the Slice 7 automated convergence check. T4 remains isolated in its dedicated worktree.
 > Secure MCP Lifecycle and the bounded `[Approval C+E, Slice 6)` repair are approved by their automated checks; the
 > reusable contracts are `.trellis/spec/backend/mcp-lifecycle.md`, `skill-lifecycle.md`, `permission-authorization.md`,
-> and `secret-catalog.md`. The approved convergence checkpoint is `57fe909`; HEAD `f1e6dcb` is the current branch
-> checkpoint and `main...HEAD` is `0 5`. Host-control still retains the deferred two-Node process evidence for Slice 8.
-> Slice 7 is implemented in the dirty worktree and has passed its automated gates; no push, reset, rebase, force,
+> and `secret-catalog.md`. The approved convergence checkpoint is `57fe909`; Slice 7 is checkpointed at `4031ba7` and
+> `main...HEAD` is `0 6`. Host-control still retains the deferred two-Node process evidence for Slice 8.
+> Slice 7 is implemented and committed after passing its automated gates; no push, reset, rebase, force,
 > finish/archive, or cross-worktree cleanup occurred. Manual residuals remain explicitly unclaimed below. Verify every
 > live status before use.
 
@@ -48,9 +48,9 @@ acceptance.
 Current live status (2026-08-18 Slice 7 convergence):
 
 - `main` is `bd9ddfb`; the main worktree has two user-owned dirty Hindsight task documents. Do not edit or clean them;
-- T4 HEAD is `f1e6dcb` on `task/t4-skills-mcp-productization`. `main...HEAD` is `0 5`; current main is fully contained;
-- the approved security convergence is checkpointed at `57fe909`; the Slice 7 implementation/specs remain one dirty,
-  uncommitted ownership group;
+- T4 HEAD is `4031ba7` on `task/t4-skills-mcp-productization`. `main...HEAD` is `0 6`; current main is fully contained;
+- the approved security convergence is checkpointed at `57fe909`; the Slice 7 implementation/specs are committed as
+  one reviewable ownership group;
 - `.trellis/.current-task` still points to archived Approval Productization. The session-bound live work is
   `.trellis/tasks/08-12-standard-skill-lifecycle` (`in_progress`); preserve the known pointer mismatch until its
   tooling ownership is deliberately resolved rather than masking it with an unconditional rewrite;
@@ -258,8 +258,8 @@ Automated evidence now passes: Shared 306, CLI 47, Desktop 417, Core 1,461 plus 
 and 6 skipped; the dedicated Skill lifecycle E2E passed; Desktop production build passed with existing Live2D script
 warnings; and independent strip-only Core boot reached `ws server listening`. Packaged Home WebView/file-picker
 interaction, real external provider credentials, two-Node Host convergence, and owner-only manual checks remain
-unverified. The task remains uncommitted, unarchived, and in progress until the owner authorizes Git integration and
-closeout.
+unverified. The task remains unarchived and in progress; the implementation checkpoint is committed, while owner
+manual acceptance and Trellis closeout remain pending.
 
 ## 4. Required reading order
 
