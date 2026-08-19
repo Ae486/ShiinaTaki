@@ -6,7 +6,8 @@
  */
 
 import { create } from "zustand";
-import { DEFAULT_PAGE_ID, type PageId } from "./pages.ts";
+import { DEFAULT_PAGE_ID } from "./default-page-id.ts";
+import type { PageId } from "./pages.ts";
 
 interface HomeState {
   currentPage: PageId;

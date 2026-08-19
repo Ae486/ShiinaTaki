@@ -10,6 +10,30 @@
 2. `extensions.add(Live2DPlugin)` before `new Application()`; PixiJS 8 `await app.init(...)` is async.
 3. `Live2DModel.from(source)` → `Promise<Live2DModel>`; `model.motion(group, index?)` / `model.expression(id?)` → `Promise<boolean>`; `model.hitTest(x, y)` → `string[]`; `model.speak(url, opts?)` (lip-sync wheel, activation deferred to #31).
 
+## Teardown order (established by real WebView2 StrictMode repro, 2026-08-19)
+
+The Pet scene owns the Live2D model and its Pixi `Application`, so it also owns their teardown order. Destroy the
+attached `Live2DModel` while `app.ticker` is still alive, remove it from the stage, and only then call `app.destroy()`.
+The disposer must be idempotent.
+
+Pixi destroys Application plugins (including its ticker) before stage children. If a Live2D model remains attached,
+its `Automator.destroy()` later calls `ticker.remove()` against the destroyed ticker and throws
+`Cannot read properties of null (reading 'next')`. Under React StrictMode that leaves the probe canvas in the DOM above
+the second live canvas, making successfully loaded model assets appear blank.
+
+```typescript
+// Wrong: ticker plugin dies before the Live2D child unregisters its Automator.
+app.destroy(true, { children: true });
+
+// Correct: model teardown runs while the governed ticker is valid; the empty app can then remove its canvas.
+app.stage.removeChild(model);
+model.destroy({ children: true });
+app.destroy(true);
+```
+
+Required regression points: two `dispose()` calls do not throw; model removal/destruction occur exactly once before
+application destruction; a real Tauri development reload has exactly one canvas and no teardown exception.
+
 ## Generation split — raw parameter access (the gotcha)
 
 The API differs by model generation; any param-driven feature (head tracking, lip-sync, click feedback) MUST branch:

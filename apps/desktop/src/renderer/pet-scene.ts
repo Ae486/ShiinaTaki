@@ -4,7 +4,7 @@
  *         optional drift sink, handleClick, focusAt, handleProximity), switchCostume (teardown+reload a new costume,
  *         returns its re-read vocabulary), reportSnapshot (truthful live vocabulary/costume identity),
  *         abortSwitch (mark an in-flight switch stale so a late model self-discards),
- *         and dispose. The scene may boot MODEL-LESS (initial source unreachable —
+ *         and idempotent dispose (Live2D child before Pixi ticker). The scene may boot MODEL-LESS (initial source unreachable —
  *         normal in a packaged build, where the dev route does not exist): the stage runs empty, avatar methods no-op,
  *         and the first switchCostume (initial-costume promotion) attaches a model.
  * POS:    ui/renderer — framework-free (ZERO React/Tauri imports). The single assembly point the React bridge
@@ -125,12 +125,29 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
     handleProximity: (x, y) => slot.current?.avatar.handleProximity(x, y),
     switchCostume: (source) => switchCostume(ctx, source),
     abortSwitch: () => abortSwitch(ctx),
-    dispose: () => {
-      slot.current?.idle.dispose();
-      app.ticker.remove(mask.refresh);
-      mask.dispose();
-      app.destroy(true, { children: true });
-    },
+    dispose: createSceneDisposer(ctx, mask),
+  };
+}
+
+// Pixi destroys Application plugins (including its ticker) before stage children. A Live2D child unregisters its
+// Automator from that ticker during model.destroy(), so the model must leave the stage while the ticker is still live.
+// This also makes React StrictMode's development mount probe harmless instead of leaving a dead canvas above the real one.
+function createSceneDisposer(ctx: SwitchContext, mask: ReturnType<typeof createAlphaMaskSource>): () => void {
+  let disposed = false;
+  return () => {
+    if (disposed) return;
+    disposed = true;
+    abortSwitch(ctx);
+    ctx.slot.current?.idle.dispose();
+    ctx.app.ticker.remove(mask.refresh);
+    mask.dispose();
+    const current = ctx.slot.current;
+    ctx.slot.current = null;
+    if (current !== null) {
+      ctx.app.stage.removeChild(current.model);
+      current.model.destroy({ children: true });
+    }
+    ctx.app.destroy(true);
   };
 }
 

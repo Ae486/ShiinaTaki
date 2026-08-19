@@ -21,6 +21,7 @@ import { PerceptionPage } from "./pages/perception/perception-page.tsx";
 import { CostumePage } from "./pages/costume/costume-page.tsx";
 import { McpPage } from "./pages/mcp/mcp-page.tsx";
 import { SkillsPage } from "./pages/skills/skills-page.tsx";
+export { DEFAULT_PAGE_ID } from "./default-page-id.ts";
 
 export interface HomePage {
   id: string;
@@ -41,8 +42,6 @@ export const HOME_PAGES = [
 
 /** The registered ids as a closed union — an unregistered page id cannot be navigated to at the type level. */
 export type PageId = (typeof HOME_PAGES)[number]["id"];
-
-export const DEFAULT_PAGE_ID: PageId = "chat";
 
 /** The runtime gate for ids arriving from outside the type system (boot query param, Tauri event payload). */
 export function isPageId(value: unknown): value is PageId {

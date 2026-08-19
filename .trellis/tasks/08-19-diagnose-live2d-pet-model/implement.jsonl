@@ -1,0 +1,6 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend pre-development contract"}
+{"file": ".trellis/spec/frontend/home-window.md", "reason": "Home page registry and Pet shortcut contracts"}
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "Live2D ownership and renderer lifecycle contract"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Frontend test and quality requirements"}
+{"file": ".trellis/tasks/08-19-diagnose-live2d-pet-model/research/browser-esm-cycle.md", "reason": "Confirmed runtime cycle and differential evidence"}
+{"file": ".trellis/tasks/08-19-diagnose-live2d-pet-model/research/strict-mode-teardown.md", "reason": "Confirmed real-Tauri renderer teardown ordering defect"}
