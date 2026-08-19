@@ -1,4 +1,5 @@
 # core/db/migrations/
+- 017-canonical-memory.ts — additive dormant canonical memory authority, structured records, policy, receipt, Block, and FTS schema
 - 001-timeline.ts — migration 1: timeline_messages table + (character_id, seq DESC) index
 - 002-memory.ts — migration 2: memory_entries metadata + the original memory_fts trigram virtual table (retokenized by 008)
 - 003-memory-auto-state.ts — migration 3: memory_auto_state (per-character episodic/flush auto-write watermarks)

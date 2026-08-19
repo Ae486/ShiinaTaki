@@ -49,16 +49,21 @@ export function openDatabase(options: OpenDatabaseOptions): Database {
 
 function wrap(raw: DatabaseSync): Database {
   let closed = false;
+  let transactionDepth = 0;
   return {
     exec: (sql) => raw.exec(sql),
     prepare: (sql) => wrapStatement(raw.prepare(sql)),
     transaction(fn) {
-      raw.exec("BEGIN");
+      const savepoint = `taki_nested_${transactionDepth}`;
+      raw.exec(transactionDepth === 0 ? "BEGIN" : `SAVEPOINT ${savepoint}`);
+      transactionDepth += 1;
       try {
         fn();
-        raw.exec("COMMIT");
+        transactionDepth -= 1;
+        raw.exec(transactionDepth === 0 ? "COMMIT" : `RELEASE SAVEPOINT ${savepoint}`);
       } catch (error) {
-        raw.exec("ROLLBACK");
+        transactionDepth -= 1;
+        raw.exec(transactionDepth === 0 ? "ROLLBACK" : `ROLLBACK TO SAVEPOINT ${savepoint}`);
         throw error;
       }
     },

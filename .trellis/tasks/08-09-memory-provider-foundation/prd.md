@@ -108,30 +108,30 @@ always-visible Memory Block policy.
 
 ## Acceptance Criteria
 
-- [ ] Strict shared schemas validate the complete canonical domain, capability/error envelopes, and all six operation
+- [x] Strict shared schemas validate the complete canonical domain, capability/error envelopes, and all six operation
   request/result families; malformed, extra, and contradictory fields are rejected.
-- [ ] A fresh canonical Local Provider creates or reuses one persisted Local Authority Epoch and remains fully usable
+- [x] A fresh canonical Local Provider creates or reuses one persisted Local Authority Epoch and remains fully usable
   after database reopen with no Hindsight endpoint, API key, model, or embedding configuration.
-- [ ] Canonical retain creates a structured source, one memory unit, provenance, Taki policy projection, sparse index
+- [x] Canonical retain creates a structured source, one memory unit, provenance, Taki policy projection, sparse index
   row, and idempotent receipt atomically; no canonical write creates or modifies a Markdown file.
-- [ ] Exact request replay returns the recorded success, request-ID reuse for different work returns a typed conflict,
+- [x] Exact request replay returns the recorded success, request-ID reuse for different work returns a typed conflict,
   and a failed transaction leaves no partial source/unit/policy/index/receipt state.
-- [ ] Edit, invalidate, restore, and reclassify enforce `expectedRevision`; a stale request changes nothing and returns
+- [x] Edit, invalidate, restore, and reclassify enforce `expectedRevision`; a stale request changes nothing and returns
   the current revision in a typed precondition result.
-- [ ] Document-to-many-unit mapping, same-Bank/epoch observation lineage, derived payload identity, classified
+- [x] Document-to-many-unit mapping, same-Bank/epoch observation lineage, derived payload identity, classified
   layer/Bank ownership, and exact layer-registry retention projection are constraint- and roundtrip-tested.
-- [ ] Sparse recall is bounded, Bank/epoch scoped, active-lifecycle filtered, CJK-capable, and works with vector support
+- [x] Sparse recall is bounded, Bank/epoch scoped, active-lifecycle filtered, CJK-capable, and works with vector support
   absent or failing.
-- [ ] Deleting and rebuilding the canonical FTS projection produces equivalent sparse results from canonical records.
-- [ ] Structured Memory Blocks preserve global/per-character scope and registry writer policy, render in deterministic
+- [x] Deleting and rebuilding the canonical FTS projection produces equivalent sparse results from canonical records.
+- [x] Structured Memory Blocks preserve global/per-character scope and registry writer policy, render in deterministic
   registry order, and are absent from canonical FTS and generic memory-unit queries.
-- [ ] Coordinator/provider methods are async-compatible, expose stable capability snapshots, reject authority mismatch,
+- [x] Coordinator/provider methods are async-compatible, expose stable capability snapshots, reject authority mismatch,
   and never perform implicit provider fallback.
-- [ ] Isolated canonical tool tests prove Hindsight-aligned names, capability filtering, bounded/fenced results, and one
+- [x] Isolated canonical tool tests prove Hindsight-aligned names, capability filtering, bounded/fenced results, and one
   structured envelope. No production turn advertises both the legacy and canonical suites.
-- [ ] Existing legacy memory, tool, block, assembler, auto-memory, and compaction regression suites remain green; the
+- [x] Existing legacy memory, tool, block, assembler, auto-memory, and compaction regression suites remain green; the
   production composition root continues using legacy Markdown until Batch 2.
-- [ ] The additive SQLite migration, reopen behavior, constraints, indexes, and rollback-on-error paths are covered by
+- [x] The additive SQLite migration, reopen behavior, constraints, indexes, and rollback-on-error paths are covered by
   focused tests, and full Shared/Core typecheck, lint, tests, and diff checks pass.
 
 ## Definition of Done

@@ -3,7 +3,7 @@
   "name": "memory-provider-foundation",
   "title": "Canonical memory provider foundation",
   "description": "Introduce provider-neutral canonical memory contracts, explicit authority state, and a structured Local Provider with always-available sparse retrieval.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "backend-memory-foundation",
   "package": null,

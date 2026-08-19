@@ -28,3 +28,6 @@
 - capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec/ForegroundWindow); mirrored in Rust serde
 - secret-catalog-schema.ts — SECRET_METHODS + write-only secret.set/clear/presence/list schemas + SecretRef charset + SecretRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)
 - ws-defaults.ts — default loopback WS host/port constants
+- memory-provider-domain-schema.ts — strict canonical authority, Bank, source, unit, derived, policy, capability, and error contracts
+- memory-provider-operation-schema.ts — strict retain, recall, reflect, and mutation operation contracts
+- memory-provider-envelope-schema.ts — validated success/error envelopes for canonical provider operations
