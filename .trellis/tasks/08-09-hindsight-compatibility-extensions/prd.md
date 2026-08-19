@@ -21,12 +21,12 @@ Add the smallest upstream-compatible extension set that makes Hindsight `0.9.0` 
 
 ## Acceptance Criteria
 
-- [ ] Every recall-relevant mutation source appears exactly once in cursor order or as an explicit tombstone.
-- [ ] Snapshot-concurrent writes appear either in the snapshot or strictly after its `end_cursor`.
-- [ ] Matching revisions apply; stale revisions return a typed precondition result without mutation.
-- [ ] Entity reclassification and tag projection cannot diverge.
-- [ ] Taki can reject a healthy server with a missing or unsupported extension version.
-- [ ] The patch series remains isolated, documented, and rebaseable onto the pinned upstream release.
+- [x] Every recall-relevant mutation source appears exactly once in cursor order or as an explicit tombstone.
+- [x] Snapshot-concurrent writes appear either in the snapshot or strictly after its `end_cursor`.
+- [x] Matching revisions apply; stale revisions return a typed precondition result without mutation.
+- [x] Entity reclassification and tag projection cannot diverge.
+- [x] Taki can reject a healthy server with a missing or unsupported extension version.
+- [x] The patch series remains isolated, documented, and rebaseable onto the pinned upstream release.
 
 ## Out of Scope
 
