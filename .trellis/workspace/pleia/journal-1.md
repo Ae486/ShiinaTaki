@@ -886,3 +886,42 @@ Accepted and archived the Hindsight 0.9.0 Taki compatibility Slice 0 after conve
 ### Next Steps
 
 - Plan Batch 1 canonical memory-provider foundation without starting implementation.
+
+
+## Session 17: Canonical memory provider foundation Batch 1
+
+**Date**: 2026-08-19
+**Task**: Canonical memory provider foundation Batch 1
+**Branch**: `main`
+
+### Summary
+
+Implemented and accepted the dormant Canonical Memory Provider Foundation. Local structured canonical storage, provider-neutral contracts, additive migration, sparse retrieval, optional vector seam, authority coordinator, structured Blocks, and Hindsight-aligned canonical tools are complete without production activation or legacy migration.
+
+### Main Changes
+
+- Added strict Shared canonical memory domain, operation, envelope schemas and tests.
+- Added additive canonical SQLite migration 017, Local authority/Bank/Block repositories, source-to-many records, revisioned mutations, receipts, lineage, derived records, and rebuildable FTS5 projection.
+- Added async Local Provider/coordinator and capability-filtered canonical tool modules while preserving legacy Markdown production paths.
+- Recorded FTS rebuild, Unicode-safe Block budgets, and stable-versus-dynamic capability snapshot rules in backend quality guidelines.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `dc9bee6` | (see git log) |
+| `5de6ee1` | (see git log) |
+
+### Testing
+
+- [OK] Shared 294 tests and Core 1386 tests passed.
+- [OK] Migration and legacy regression focus: 375 tests passed; focused coordinator: 6 tests passed.
+- [OK] Recursive workspace typecheck, root lint, Trellis validation, git diff check, and UTF-8/no-BOM checks passed.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Plan and implement Batch 2 legacy memory normalization and migration; do not activate the canonical provider before migration verification.

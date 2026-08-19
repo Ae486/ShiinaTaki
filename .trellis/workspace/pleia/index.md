@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 16
+- **Total Sessions**: 17
 - **Last Active**: 2026-08-19
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~888 | Active |
+| `journal-1.md` | ~927 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 17 | 2026-08-19 | Canonical memory provider foundation Batch 1 | `dc9bee6`, `5de6ee1` | `main` |
 | 16 | 2026-08-19 | Hindsight Slice 0 acceptance and closeout | `52b5faad`, `64fa85f8`, `f700d9ac`, `7eca2056`, `30b9688`, `944ed04` | `main` |
 | 15 | 2026-08-16 | T4 Host Secret Catalog convergence and slice closeout | `0965358` | `task/t4-skills-mcp-productization` |
 | 14 | 2026-08-16 | T4 Approval Productization C+E convergence and slice closeout | `ffa9fff` | `task/t4-skills-mcp-productization` |
