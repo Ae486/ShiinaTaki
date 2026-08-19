@@ -128,4 +128,3 @@ reads and exact `rg` searches. YCE, fast-context, and ACE were not used.
   `packages/core/src/agents/compaction-pass.test.ts` cover the detached maintenance ordering and failure behavior.
 - `packages/core/src/db/migration-runner.test.ts`, `sqlite.test.ts`, and the numbered migration tests are the patterns
   for additive SQLite schema/reopen/rollback proof.
-
