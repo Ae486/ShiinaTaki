@@ -6,6 +6,7 @@
 import { createMCPClient, type MCPClient } from "@ai-sdk/mcp";
 import { Experimental_StdioMCPTransport } from "@ai-sdk/mcp/mcp-stdio";
 import { isStdioConfig, type McpServerEntry } from "./mcp-config.ts";
+import { resolveStdioLaunch } from "./mcp-stdio-launch.ts";
 
 export type McpClient = MCPClient;
 
@@ -13,16 +14,17 @@ export type McpClient = MCPClient;
 export type McpConnect = (entry: McpServerEntry) => Promise<McpClient>;
 
 /**
- * Connect one server. The stdio spawn happens inside @ai-sdk/mcp (shell:false) — our code never touches
- * node:child_process (invariant 1 / ADR 0006). Connect throwing is expected and handled by the manager.
+ * Connect one server. The stdio spawn happens inside @ai-sdk/mcp (shell:false); launch adaptation only changes
+ * the in-memory command tuple for Windows shims, and our code never touches node:child_process.
  */
 export const defaultConnect: McpConnect = (entry) => {
   const { config } = entry;
   if (isStdioConfig(config)) {
+    const launch = resolveStdioLaunch(config);
     return createMCPClient({
       transport: new Experimental_StdioMCPTransport({
-        command: config.command,
-        args: config.args,
+        command: launch.command,
+        args: launch.args,
         env: config.env,
         cwd: config.cwd,
       }),

@@ -68,6 +68,9 @@ desired mutation increments only that row's revision.
 
 ### Candidate and publication
 
+- Stdio desired configuration stays portable as `command + args + env + cwd`. The runtime preserves that tuple on
+  Unix and uses an internal Windows shim relay only when the configured command resolves to a `.cmd`/`.bat` launcher;
+  platform paths and shell wrappers are never persisted or exposed to the operator.
 - A candidate resolves secrets just in time, connects, lists every page under one deadline, applies the narrow schema
   compatibility contract, validates selected raw tool names, and builds collision-safe model keys.
 - The local listing loop rejects repeated cursors and more than `MAX_MCP_TOOL_COUNT` tools or pages. A selected tool

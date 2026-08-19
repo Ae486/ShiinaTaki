@@ -100,6 +100,7 @@ function McpPageBody({ input }: { input: McpPageBodyInput }) {
       <ServerList
         servers={servers}
         disabled={!mcp.connectionReady || busy}
+        editingServerId={input.editingRevision !== null ? draft?.serverId ?? null : null}
         confirmRemove={input.confirmRemove}
         hooks={{ ...input, setEnabled: mcp.setEnabled, remove: mcp.remove, reconnect: mcp.reconnect, test: mcp.test }}
       />
@@ -172,12 +173,12 @@ interface ServerListHooks {
 }
 
 /** The per-server cards plus the page-level list actions; kept out of McpPage for the size caps. */
-function ServerList(input: { servers: McpServerView[] | null; disabled: boolean; confirmRemove: string | null; hooks: ServerListHooks }) {
+function ServerList(input: { servers: McpServerView[] | null; disabled: boolean; editingServerId: string | null; confirmRemove: string | null; hooks: ServerListHooks }) {
   const { servers, disabled, confirmRemove, hooks } = input;
   if (servers === null) return null;
   return (
     <>
-      {servers.map((server) => (
+      {visibleMcpServers(servers, input.editingServerId).map((server) => (
         <McpServerCard
           key={server.serverId}
           server={server}
@@ -197,4 +198,8 @@ function ServerList(input: { servers: McpServerView[] | null; disabled: boolean;
       ))}
     </>
   );
+}
+
+export function visibleMcpServers(servers: McpServerView[], editingServerId: string | null): McpServerView[] {
+  return editingServerId === null ? servers : servers.filter((server) => server.serverId !== editingServerId);
 }

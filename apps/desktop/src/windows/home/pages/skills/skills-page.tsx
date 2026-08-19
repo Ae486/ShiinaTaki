@@ -10,7 +10,7 @@ import { Badge } from "../../badge.tsx";
 import { ExtensionConvergenceStrip, useExtensionConvergence } from "../../extension-convergence.tsx";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { LabeledRows, PageCard } from "../../page-card.tsx";
-import { readDirectorySource, readZipSource } from "./skill-import-files.ts";
+import { readDirectorySource, readZipSource, snapshotFileList } from "./skill-import-files.ts";
 import { useSkills } from "./use-skills.ts";
 
 export function SkillsPage() {
@@ -29,7 +29,7 @@ export function SkillsPage() {
   </PageBody></>;
 }
 
-function Pickers(input: { zipRef: RefObject<HTMLInputElement | null>; directoryRef: RefObject<HTMLInputElement | null>; onZip(file: File): Promise<void>; onDirectory(files: FileList): Promise<void> }) { return <><input ref={input.zipRef} hidden type="file" accept=".zip,application/zip" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void input.onZip(file); }} /><input ref={input.directoryRef} hidden type="file" multiple {...({ webkitdirectory: "" } as Record<string, string>)} onChange={(event) => { const files = event.target.files; event.target.value = ""; if (files?.length) void input.onDirectory(files); }} /></>; }
+function Pickers(input: { zipRef: RefObject<HTMLInputElement | null>; directoryRef: RefObject<HTMLInputElement | null>; onZip(file: File): Promise<void>; onDirectory(files: File[]): Promise<void> }) { return <><input ref={input.zipRef} hidden type="file" accept=".zip,application/zip" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; if (file) void input.onZip(file); }} /><input ref={input.directoryRef} hidden type="file" multiple {...({ webkitdirectory: "" } as Record<string, string>)} onChange={(event) => { const files = snapshotFileList(event.target.files); event.target.value = ""; if (files.length) void input.onDirectory(files); }} /></>; }
 export function SkillCard(input: { row: SkillPackageView; disabled: boolean; confirming: boolean; inspected: SkillInspectResult | null; actions: { inspect(): void; toggle(): void; replaceDirectory(): void; replaceZip(): void; askRemove(): void; cancelRemove(): void; remove(): void } }) {
   const { row, actions } = input; const rejected = row.lifecycleState !== "active";
   return <PageCard title={row.skillName ?? "Rejected package"} action={<div className="flex gap-1"><Badge tone={rejected ? "warn" : row.enabled ? "ok" : "muted"}>{row.runtimeState}</Badge><Badge tone={row.scanVerdict === "rejected" ? "warn" : "neutral"}>{row.scanVerdict}</Badge></div>}>

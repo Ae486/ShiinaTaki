@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { McpServerView } from "@taki/shared";
 import { McpServerCard } from "./mcp-server-card.tsx";
+import { visibleMcpServers } from "./mcp-page.tsx";
 
 const NOW = "2026-08-16T00:00:00.000Z";
 const HOST = "11111111-1111-4111-8111-111111111111";
@@ -82,5 +83,10 @@ describe("MCP page components", () => {
     />);
     expect(markup).not.toContain(SENTINEL); // the card renders transport facts only — never env/header maps
     expect(markup).not.toContain("secret-ref");
+  });
+
+  it("hides the edited server card while its editor is visible", () => {
+    expect(visibleMcpServers([view(), view({ serverId: "tavily" })], "github").map((server) => server.serverId)).toEqual(["tavily"]);
+    expect(visibleMcpServers([view()], null)).toHaveLength(1);
   });
 });

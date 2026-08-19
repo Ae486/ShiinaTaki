@@ -4,6 +4,7 @@
  * POS:    Home Skills preflight boundary; Core remains authoritative and revalidates every byte/path
  */
 import { SKILL_FILE_COUNT_MAX, SKILL_FILE_MAX_BYTES, SKILL_IMPORT_MAX_BYTES, SKILL_TOTAL_MAX_BYTES, type SkillImportSource } from "@taki/shared";
+export function snapshotFileList(list: FileList | null): File[] { return list ? Array.from(list) : []; }
 export async function readZipSource(file: File): Promise<SkillImportSource> { if (file.size > SKILL_IMPORT_MAX_BYTES) throw new Error("ZIP 超过 20 MB 导入上限"); return { kind: "zip", fileName: file.name, archiveBase64: encode(await file.arrayBuffer()) }; }
 export async function readDirectorySource(list: FileList | File[]): Promise<SkillImportSource> {
   const files = Array.from(list); if (files.length === 0 || files.length > SKILL_FILE_COUNT_MAX) throw new Error(`目录文件数必须在 1-${SKILL_FILE_COUNT_MAX} 之间`);

@@ -8,7 +8,7 @@
 import { z } from "zod";
 
 // stdio: an operator-configured child process (ADR 0006 spawn happens inside @ai-sdk/mcp, never our code).
-// Windows note: `command` must be a real exe (`node`) or `cmd /c npx ...` — the transport spawns with shell:false.
+// The transport boundary adapts common Windows .cmd/.bat shims at runtime; persisted command/args stay portable.
 const StdioServerConfigSchema = z.strictObject({
   command: z.string().min(1),
   args: z.array(z.string()).optional(),

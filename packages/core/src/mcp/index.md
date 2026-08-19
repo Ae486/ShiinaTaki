@@ -1,6 +1,7 @@
 # core/mcp/
 - mcp-config.ts — strict zod schemas + parseMcpServers body parse for mcp-servers.json (operator-owned; NEVER agent-reachable; env/header values may be `secret-ref:` markers post-migration) — the file is a SEED-ONLY legacy input consumed once by mcp-desired-repo
 - mcp-connect.ts — sanctioned MCP transport-construction boundary (ADR 0006); builds a stdio/http transport + connects
+- mcp-stdio-launch.ts / mcp-stdio-relay.mjs — portable command/args launch tuple plus Windows cross-spawn relay; no platform adapter leaks into desired config
 - mcp-schema-compat.ts — deep-clone definitions; narrow verified optional-nullable properties; isolate unsafe tools
 - legacy-mcp-deny.ts — read-only mcp-approvals.json deny adapter; missing is empty, allows inert, corrupt/ambiguous state fail-closed
 - mcp-tool-identity.ts — shared namespacing/identity helpers: sanitizeKey, stableSubjectId (governance subject), publicConfigFingerprint (secret-free revision), wrapExecute ({ok:false} error envelope)
@@ -17,6 +18,7 @@
 - mcp-lifecycle-service.ts — the operator plane-2 controller: persists the desired row first, then reconciles the runtime (no restart for add/edit/enable/disable/remove/test/reconnect); typed conflict/refusal errors before the WS surface
 
 Invariant (grep-verifiable): only files in this directory may import `@ai-sdk/mcp` / `@ai-sdk/mcp/mcp-stdio`.
-The child-process spawn lives inside @ai-sdk/mcp (shell:false) — no module in mcp/ imports node:child_process (invariant 1);
+Unix child-process spawn lives inside @ai-sdk/mcp (shell:false); Windows stdio uses the colocated cross-spawn relay.
+No module in mcp/ imports node:child_process, and persisted command/args remain portable (invariant 1);
 the package's one other sanctioned spawn site is the taki-secret-key helper launch in secrets/master-key.ts (08-12,
 per .trellis/spec/backend/secret-catalog.md — boot-time, operator-configured, never agent-initiated).
