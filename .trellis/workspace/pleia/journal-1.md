@@ -844,3 +844,45 @@ Implemented and checked the Host Secret Catalog slice. The interrupted implement
 ### Status
 
 [OK] **Completed**
+
+
+## Session 16: Hindsight Slice 0 acceptance and closeout
+
+**Date**: 2026-08-19
+**Task**: Hindsight Slice 0 acceptance and closeout
+**Branch**: `main`
+
+### Summary
+
+Accepted and archived the Hindsight 0.9.0 Taki compatibility Slice 0 after converged offline, migration, OpenAPI, generated-client, Docker, authenticated manifest, journal, snapshot, recall, and conditional-mutation verification.
+
+### Main Changes
+
+- Recorded the four-commit Hindsight patch boundary and TAKI-HS-006 through TAKI-HS-008 traceability.
+- Codified deterministic generated-client whitespace and Windows Docker LF quality gates.
+- Closed all six Slice 0 acceptance criteria and archived the Trellis child task.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `52b5faad` | (see git log) |
+| `64fa85f8` | (see git log) |
+| `f700d9ac` | (see git log) |
+| `7eca2056` | (see git log) |
+| `30b9688` | (see git log) |
+| `944ed04` | (see git log) |
+
+### Testing
+
+- [OK] Final xhigh documentation and repository review: ACCEPT.
+- [OK] Hindsight compatibility/CAS/snapshot 36 passed; replication writers 101 passed; migration/DAG 198 passed with 98 expected skips; OpenAPI generator 3 passed; generated Python offline 2 passed.
+- [OK] Live Docker health, fail-closed anonymous access, authenticated 0.9.0 manifest, journal/client parity, and LF checks passed.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Plan Batch 1 canonical memory-provider foundation without starting implementation.
