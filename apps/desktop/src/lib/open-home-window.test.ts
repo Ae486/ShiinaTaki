@@ -1,7 +1,7 @@
 /**
  * INPUT:  a mocked @tauri-apps/api surface (WebviewWindow + emitTo) — no real Tauri runtime.
  * OUTPUT: assertions on the pet→home seam: absent window → created ONCE at the requested page, present window →
- *         navigate event + focus (never a second window), and a create failure rejecting to the caller.
+ *         restore + navigate + focus (never a second window), and a create failure rejecting to the caller.
  * POS:    unit test for lib/open-home-window (node-safe). Exempt from size caps.
  */
 
@@ -9,10 +9,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const tauri = vi.hoisted(() => {
   const state = {
-    existing: null as { show: () => Promise<void>; setFocus: () => Promise<void> } | null,
+    existing: null as { unminimize: () => Promise<void>; show: () => Promise<void>; setFocus: () => Promise<void> } | null,
     created: [] as Array<{ label: string; url: string }>,
     emitted: [] as Array<{ target: string; event: string; payload: unknown }>,
     shown: 0,
+    unminimized: 0,
     focused: 0,
     createFails: false,
   };
@@ -49,12 +50,17 @@ beforeEach(() => {
   tauri.created = [];
   tauri.emitted = [];
   tauri.shown = 0;
+  tauri.unminimized = 0;
   tauri.focused = 0;
   tauri.createFails = false;
 });
 
 function existingWindow() {
   return {
+    unminimize: () => {
+      tauri.unminimized += 1;
+      return Promise.resolve();
+    },
     show: () => {
       tauri.shown += 1;
       return Promise.resolve();
@@ -83,6 +89,7 @@ describe("openHome", () => {
       { target: "home", event: HOME_NAVIGATE_EVENT, payload: { page: "chat" } },
     ]);
     expect(tauri.shown).toBe(2);
+    expect(tauri.unminimized).toBe(2);
     expect(tauri.focused).toBe(2);
   });
 
