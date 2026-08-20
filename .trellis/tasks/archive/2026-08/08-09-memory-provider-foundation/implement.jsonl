@@ -1,0 +1,13 @@
+{"file":".trellis/spec/backend/index.md","reason":"Apply Core ownership, public-boundary, logging, test, and package-quality invariants before adding the provider foundation."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Implement additive SQLite migrations, one Core writer, strict repository parsing, indexes, and synchronous transaction boundaries correctly."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Build stable typed provider/tool errors, fail-closed authority checks, bounded diagnostics, and truthful retryability."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Keep memory text, recall queries, provenance, metadata, tags, entities, and secret-adjacent data out of logs and errors."}
+{"file":".trellis/spec/backend/tool-design.md","reason":"Define one bounded capability-filtered Hindsight-aligned tool suite with strict schemas and fenced results."}
+{"file":".trellis/spec/backend/agent-runtime.md","reason":"Keep the new async provider seam compatible with the runtime while preserving detached work and the explicit no-activation boundary."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Follow red-green tests, migration/reopen proof, generated-quality gates, and full-scope verification requirements."}
+{"file":".trellis/spec/backend/directory-structure.md","reason":"Place new Shared, Core DB, and Core memory modules in the established ownership layers and update local indexes."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Trace canonical schemas through repositories, provider, coordinator, tools, and activation gates without partial contracts."}
+{"file":".trellis/spec/guides/code-reuse-thinking-guide.md","reason":"Reuse the existing SQLite wrapper, tokenizer, token estimator, untrusted fence, and registry policies without coupling to legacy authority."}
+{"file":".trellis/tasks/08-09-memory-provider-foundation/research/current-local-memory-seams.md","reason":"Use verified live seams and regression suites; preserve Markdown production behavior until Batch 2."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/hindsight-api-deployment-contracts.md","reason":"Match public retain, recall, reflect, mutation, Bank, document, and tool semantics without copying provider-private storage."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/batch0-hindsight-source-exploration.md","reason":"Match the accepted Slice 0 Bank/document/memory-unit/mental-model/directive logical payload and revision contract."}

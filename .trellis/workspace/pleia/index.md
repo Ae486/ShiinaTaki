@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 19
+- **Total Sessions**: 21
 - **Last Active**: 2026-08-19
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1060 | Active |
+| `journal-1.md` | ~1140 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,8 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 21 | 2026-08-19 | Canonical memory provider foundation Batch 1 | `dc9bee6`, `5de6ee1` | `main` |
+| 20 | 2026-08-19 | Hindsight Slice 0 acceptance and closeout | `52b5faad`, `64fa85f8`, `f700d9ac`, `7eca2056`, `30b9688`, `944ed04` | `main` |
 | 19 | 2026-08-19 | T4 Extension Discovery and two-Node convergence review | `1a7a1a5`, `dafe437`, `5fc039f` | `task/t4-skills-mcp-productization` |
 | 18 | 2026-08-18 | T4 Standard Skill Lifecycle implementation and convergence | `4031ba7`, `d0c0ca9` | `task/t4-skills-mcp-productization` |
 | 17 | 2026-08-18 | T4 pre-Slice-7 security convergence | `57fe909`, `cc2a65e` | `task/t4-skills-mcp-productization` |

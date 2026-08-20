@@ -33,4 +33,8 @@
 - tidy-report.ts — the tidy pass's deterministic health report (rc five-class contract): facts flat (missing trigger, over-budget incl. block used/limit beside full content), hypotheses as questions (stale, near-duplicate) + the new-writes slice carrying the misfiled question; per-class caps with dropped counts stated; observed content fenced; never prescribes an action
 - tidy-tools.ts — the maintenance verbs the foreground agent never gets: memory_reinforce / memory_archive_supersede (the sanctioned promotion route) / memory_set_disclosure / memory_refile / block_rethink (background blocks only) / memory_finish_edits (the structural terminal); never-throw envelopes
 - tidy-pass.ts — the model-led maintenance pass: write-count trigger (maybeRun) + operator runNow over one execute path; clean store = zero model calls; system-reminder input framing; six refinement principles + do-nothing permission + imported R10 voice; stopWhen finish-tool/step-cap; watermark advances only on success; tidy event + counts-only log line
+- memory-provider.ts — async provider and optional vector projection interfaces
+- local-memory-provider.ts — dormant structured Local provider with atomic retain, sparse recall, and CAS mutations
+- memory-coordinator.ts — persisted-authority dispatch, capability checks, cancellation, and no-fallback envelopes
+- canonical-tools/ — dormant capability-filtered Hindsight-aligned tool adapters
 - image-description-writer.ts — thin, DELETABLE image→text bridge (#17 decision 6, D28): VLM describes a turn's images, PII-scrubs the text, writes ONE episode via the existing store path with origin "observed" (the marker the render sites fence on — D47); detached, warn+drop

@@ -1056,3 +1056,82 @@ used, and the stale `.trellis/.current-task` pointer was deliberately left uncha
 
 [IN PROGRESS] **Slice 8 implementation and automated convergence are checkpointed at `1a7a1a5`, with documentation
 checkpoint `dafe437`. Owner manual acceptance and authorized finish/archive remain pending.**
+## Session 16: Hindsight Slice 0 acceptance and closeout
+
+**Date**: 2026-08-19
+**Task**: Hindsight Slice 0 acceptance and closeout
+**Branch**: `main`
+
+### Summary
+
+Accepted and archived the Hindsight 0.9.0 Taki compatibility Slice 0 after converged offline, migration, OpenAPI, generated-client, Docker, authenticated manifest, journal, snapshot, recall, and conditional-mutation verification.
+
+### Main Changes
+
+- Recorded the four-commit Hindsight patch boundary and TAKI-HS-006 through TAKI-HS-008 traceability.
+- Codified deterministic generated-client whitespace and Windows Docker LF quality gates.
+- Closed all six Slice 0 acceptance criteria and archived the Trellis child task.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `52b5faad` | (see git log) |
+| `64fa85f8` | (see git log) |
+| `f700d9ac` | (see git log) |
+| `7eca2056` | (see git log) |
+| `30b9688` | (see git log) |
+| `944ed04` | (see git log) |
+
+### Testing
+
+- [OK] Final xhigh documentation and repository review: ACCEPT.
+- [OK] Hindsight compatibility/CAS/snapshot 36 passed; replication writers 101 passed; migration/DAG 198 passed with 98 expected skips; OpenAPI generator 3 passed; generated Python offline 2 passed.
+- [OK] Live Docker health, fail-closed anonymous access, authenticated 0.9.0 manifest, journal/client parity, and LF checks passed.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Plan Batch 1 canonical memory-provider foundation without starting implementation.
+
+
+## Session 17: Canonical memory provider foundation Batch 1
+
+**Date**: 2026-08-19
+**Task**: Canonical memory provider foundation Batch 1
+**Branch**: `main`
+
+### Summary
+
+Implemented and accepted the dormant Canonical Memory Provider Foundation. Local structured canonical storage, provider-neutral contracts, additive migration, sparse retrieval, optional vector seam, authority coordinator, structured Blocks, and Hindsight-aligned canonical tools are complete without production activation or legacy migration.
+
+### Main Changes
+
+- Added strict Shared canonical memory domain, operation, envelope schemas and tests.
+- Added additive canonical SQLite migration 017, Local authority/Bank/Block repositories, source-to-many records, revisioned mutations, receipts, lineage, derived records, and rebuildable FTS5 projection.
+- Added async Local Provider/coordinator and capability-filtered canonical tool modules while preserving legacy Markdown production paths.
+- Recorded FTS rebuild, Unicode-safe Block budgets, and stable-versus-dynamic capability snapshot rules in backend quality guidelines.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `dc9bee6` | (see git log) |
+| `5de6ee1` | (see git log) |
+
+### Testing
+
+- [OK] Shared 294 tests and Core 1386 tests passed.
+- [OK] Migration and legacy regression focus: 375 tests passed; focused coordinator: 6 tests passed.
+- [OK] Recursive workspace typecheck, root lint, Trellis validation, git diff check, and UTF-8/no-BOM checks passed.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Plan and implement Batch 2 legacy memory normalization and migration; do not activate the canonical provider before migration verification.

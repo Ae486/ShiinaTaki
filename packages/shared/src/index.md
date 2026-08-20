@@ -31,3 +31,6 @@
 - mcp-lifecycle-schema.ts — MCP_METHODS + marker-only desired-server wire schemas + expectedConfigRevision writes + bounded tool-name/list contracts + sanitized active/draining runtime diagnostics + McpRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)
 - skill-lifecycle-schema.ts — strict Skill package lifecycle/operator protocol, import limits, provenance, trust, scan, and runtime projections
 - ws-defaults.ts — default loopback WS host/port constants
+- memory-provider-domain-schema.ts — strict canonical authority, Bank, source, unit, derived, policy, capability, and error contracts
+- memory-provider-operation-schema.ts — strict retain, recall, reflect, and mutation operation contracts
+- memory-provider-envelope-schema.ts — validated success/error envelopes for canonical provider operations

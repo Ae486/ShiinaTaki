@@ -15,6 +15,8 @@
 - 014-governance-policy.ts — migration 14: Core-owned global Level/policy generation singleton + sparse validated cell overrides
 - 015-approval.ts — migration 15: Core Approval generation/revision singleton + canonical durable always-allow decisions
 - 016-timeline-input-scrub.ts — migration 16: idempotent timeline privacy scrub — persisted tool-call `input` is removed from timeline parts (secure_delete zeroes the old bytes); no schema shape change
-- 017-mcp-desired-servers.ts — migration 17: mcp_desired_servers (plane-1 desired MCP rows: sanitized config JSON with opaque secret-ref markers ONLY, enabled, selected tools, per-row config_revision; values live exclusively in the encrypted catalog)
-- 018-skill-packages.ts — migration 18: durable Skill package lifecycle rows and active-name uniqueness
+- 017-canonical-memory.ts — migration 17: additive dormant canonical memory authority, structured records, policy, receipt, Block, and FTS schema
+- 018-mcp-desired-servers.ts — migration 18: mcp_desired_servers (plane-1 desired MCP rows: sanitized config JSON with opaque secret-ref markers ONLY, enabled, selected tools, per-row config_revision; values live exclusively in the encrypted catalog)
+- 019-skill-packages.ts — migration 19: durable Skill package lifecycle rows and active-name uniqueness
+- 020-parallel-foundation-convergence.ts — idempotent bridge for databases created by either parallel migration-17 lineage
 - index-list.ts — the explicit ordered MIGRATIONS registry (no fs/glob discovery)

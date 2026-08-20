@@ -6,28 +6,8 @@
 export { PingSchema, PongSchema } from "./ping-schema.ts";
 export type { Ping, Pong } from "./ping-schema.ts";
 
-export {
-  JSON_RPC_APP_ERROR,
-  JSON_RPC_ERROR_CODES,
-  JsonRpcClientFrameSchema,
-  JsonRpcErrorObjectSchema,
-  JsonRpcErrorResponseSchema,
-  JsonRpcIdSchema,
-  JsonRpcInboundFrameSchema,
-  JsonRpcNotificationSchema,
-  JsonRpcRequestSchema,
-  JsonRpcSuccessResponseSchema,
-} from "./json-rpc-schema.ts";
-export type {
-  JsonRpcClientFrame,
-  JsonRpcErrorObject,
-  JsonRpcErrorResponse,
-  JsonRpcId,
-  JsonRpcInboundFrame,
-  JsonRpcNotification,
-  JsonRpcRequest,
-  JsonRpcSuccessResponse,
-} from "./json-rpc-schema.ts";
+export { JSON_RPC_APP_ERROR, JSON_RPC_ERROR_CODES, JsonRpcClientFrameSchema, JsonRpcErrorObjectSchema, JsonRpcErrorResponseSchema, JsonRpcIdSchema, JsonRpcInboundFrameSchema, JsonRpcNotificationSchema, JsonRpcRequestSchema, JsonRpcSuccessResponseSchema } from "./json-rpc-schema.ts";
+export type { JsonRpcClientFrame, JsonRpcErrorObject, JsonRpcErrorResponse, JsonRpcId, JsonRpcInboundFrame, JsonRpcNotification, JsonRpcRequest, JsonRpcSuccessResponse } from "./json-rpc-schema.ts";
 
 export { ErrorCodeSchema } from "./error-code-schema.ts";
 export type { ErrorCode } from "./error-code-schema.ts";
@@ -55,109 +35,17 @@ export type {
 export { CONNECT_METHOD, ConnectParamsSchema, ConnectResultSchema, RoleSchema } from "./connect-schema.ts";
 export type { ConnectParams, ConnectResult, Role } from "./connect-schema.ts";
 
-export {
-  CHAT_METHODS,
-  ChatCancelParamsSchema,
-  ChatCancelResultSchema,
-  ChatCompleteSchema,
-  ChatDeltaSchema,
-  ChatErrorSchema,
-  ChatSendParamsSchema,
-  ChatSendResultSchema,
-  IMAGE_MEDIA_TYPES,
-  ImageAttachmentSchema,
-  MAX_ATTACHMENTS_PER_MESSAGE,
-} from "./chat-schema.ts";
-export type {
-  ChatCancelParams,
-  ChatCancelResult,
-  ChatComplete,
-  ChatDelta,
-  ChatError,
-  ChatSendParams,
-  ChatSendResult,
-  ImageAttachment,
-} from "./chat-schema.ts";
+export { CHAT_METHODS, ChatCancelParamsSchema, ChatCancelResultSchema, ChatCompleteSchema, ChatDeltaSchema, ChatErrorSchema, ChatSendParamsSchema, ChatSendResultSchema, IMAGE_MEDIA_TYPES, ImageAttachmentSchema, MAX_ATTACHMENTS_PER_MESSAGE } from "./chat-schema.ts";
+export type { ChatCancelParams, ChatCancelResult, ChatComplete, ChatDelta, ChatError, ChatSendParams, ChatSendResult, ImageAttachment } from "./chat-schema.ts";
 
-export {
-  TIMELINE_HISTORY_LIMIT_DEFAULT,
-  TIMELINE_HISTORY_LIMIT_MAX,
-  TIMELINE_METHODS,
-  TimelineAppendedSchema,
-  TimelineEntrySchema,
-  TimelineHistoryParamsSchema,
-  TimelineHistoryResultSchema,
-  TimelinePartSchema,
-  TimelineRemovedSchema,
-  TimelineRoleSchema,
-  TimelineSubscribeParamsSchema,
-  TimelineSubscribeResultSchema,
-  TimelineToolOutputSchema,
-} from "./timeline-schema.ts";
-export type {
-  TimelineAppended,
-  TimelineEntry,
-  TimelineHistoryParams,
-  TimelineHistoryResult,
-  TimelinePart,
-  TimelineRemoved,
-  TimelineRole,
-  TimelineSubscribeParams,
-  TimelineSubscribeResult,
-  TimelineToolOutput,
-} from "./timeline-schema.ts";
+export { TIMELINE_HISTORY_LIMIT_DEFAULT, TIMELINE_HISTORY_LIMIT_MAX, TIMELINE_METHODS, TimelineAppendedSchema, TimelineEntrySchema, TimelineHistoryParamsSchema, TimelineHistoryResultSchema, TimelinePartSchema, TimelineRemovedSchema, TimelineRoleSchema, TimelineSubscribeParamsSchema, TimelineSubscribeResultSchema, TimelineToolOutputSchema } from "./timeline-schema.ts";
+export type { TimelineAppended, TimelineEntry, TimelineHistoryParams, TimelineHistoryResult, TimelinePart, TimelineRemoved, TimelineRole, TimelineSubscribeParams, TimelineSubscribeResult, TimelineToolOutput } from "./timeline-schema.ts";
 
-export {
-  MEMORY_METHODS,
-  MemoryAutoStatusSchema,
-  MemoryStatusParamsSchema,
-  MemoryStatusResultSchema,
-  MemorySummaryStatusSchema,
-  MemoryTidyDefectsSchema,
-  MemoryTidyParamsSchema,
-  MemoryTidyResultSchema,
-  MemoryWindowSlotSchema,
-} from "./memory-schema.ts";
-export type {
-  MemoryAutoStatus,
-  MemoryStatusParams,
-  MemoryStatusResult,
-  MemorySummaryStatus,
-  MemoryTidyDefects,
-  MemoryTidyParams,
-  MemoryTidyResult,
-  MemoryWindowSlot,
-} from "./memory-schema.ts";
+export { MEMORY_METHODS, MemoryAutoStatusSchema, MemoryStatusParamsSchema, MemoryStatusResultSchema, MemorySummaryStatusSchema, MemoryTidyDefectsSchema, MemoryTidyParamsSchema, MemoryTidyResultSchema, MemoryWindowSlotSchema } from "./memory-schema.ts";
+export type { MemoryAutoStatus, MemoryStatusParams, MemoryStatusResult, MemorySummaryStatus, MemoryTidyDefects, MemoryTidyParams, MemoryTidyResult, MemoryWindowSlot } from "./memory-schema.ts";
 
-export {
-  CONFIG_METHODS,
-  ConfigApplySchema,
-  ConfigChangedSchema,
-  ConfigEntrySchema,
-  ConfigInputSchema,
-  ConfigListParamsSchema,
-  ConfigListResultSchema,
-  ConfigRefusalReasonSchema,
-  ConfigSetParamsSchema,
-  ConfigSetResultSchema,
-  ConfigSubscribeParamsSchema,
-  ConfigSubscribeResultSchema,
-  ConfigValueSchema,
-} from "./config-schema.ts";
-export type {
-  ConfigApply,
-  ConfigChanged,
-  ConfigEntry,
-  ConfigInput,
-  ConfigListParams,
-  ConfigListResult,
-  ConfigRefusalReason,
-  ConfigSetParams,
-  ConfigSetResult,
-  ConfigSubscribeParams,
-  ConfigSubscribeResult,
-  ConfigValue,
-} from "./config-schema.ts";
+export { CONFIG_METHODS, ConfigApplySchema, ConfigChangedSchema, ConfigEntrySchema, ConfigInputSchema, ConfigListParamsSchema, ConfigListResultSchema, ConfigRefusalReasonSchema, ConfigSetParamsSchema, ConfigSetResultSchema, ConfigSubscribeParamsSchema, ConfigSubscribeResultSchema, ConfigValueSchema } from "./config-schema.ts";
+export type { ConfigApply, ConfigChanged, ConfigEntry, ConfigInput, ConfigListParams, ConfigListResult, ConfigRefusalReason, ConfigSetParams, ConfigSetResult, ConfigSubscribeParams, ConfigSubscribeResult, ConfigValue } from "./config-schema.ts";
 
 export {
   TIMING_CONFIG_KEYS,
@@ -314,3 +202,32 @@ export { MAX_MCP_TOOL_COUNT, MCP_METHODS, MCP_SECRET_REF_MARKER, McpAddParamsSch
 export { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "./ws-defaults.ts";
 export { SKILL_METHODS, SKILL_IMPORT_MAX_BYTES, SKILL_FILE_MAX_BYTES, SKILL_MD_MAX_BYTES, SKILL_TOTAL_MAX_BYTES, SKILL_FILE_COUNT_MAX, SKILL_RESOURCE_MAX_BYTES, SKILL_NAME_PATTERN, SKILL_NAME_MAX_LENGTH, SKILL_DESCRIPTION_MAX_LENGTH, SKILL_COMPATIBILITY_MAX_LENGTH, SKILL_RELATIVE_PATH_MAX_LENGTH, SKILL_SOURCE_LOCATOR_MAX_LENGTH, SKILL_SCAN_VERSION_MAX_LENGTH, SKILL_FAILURE_REASON_MAX_LENGTH, SkillSourceKindSchema, SkillLifecycleStateSchema, SkillTrustSchema, SkillScanVerdictSchema, SkillRuntimeStateSchema, SkillScanFindingCodeSchema, SkillScanFindingSchema, SkillStandardMetadataSchema, SkillFileEntrySchema, SkillImportSourceSchema, SkillPackageViewSchema, SkillListParamsSchema, SkillInspectParamsSchema, SkillImportParamsSchema, SkillMutationParamsSchema, SkillReconcileParamsSchema, SkillInspectResultSchema, SkillListResultSchema, SkillMutationResultSchema, SkillRemoveResultSchema, SkillReconcileResultSchema, SkillRefusalReasonSchema } from "./skill-lifecycle-schema.ts";
 export type { SkillSourceKind, SkillLifecycleState, SkillTrust, SkillScanVerdict, SkillRuntimeState, SkillScanFindingCode, SkillScanFinding, SkillStandardMetadata, SkillFileEntry, SkillImportSource, SkillPackageView, SkillListParams, SkillInspectParams, SkillImportParams, SkillMutationParams, SkillReconcileParams, SkillInspectResult, SkillListResult, SkillMutationResult, SkillRemoveResult, SkillReconcileResult, SkillRefusalReason } from "./skill-lifecycle-schema.ts";
+
+export {
+  JsonValueSchema, MemoryAuthorityEpochSchema, MemoryBankScopeSchema, CanonicalMemoryBankSchema,
+  MemoryProvenanceSchema, CanonicalMemorySourceSchema, CanonicalMemoryUnitSchema, CanonicalDerivedPayloadSchema,
+  CanonicalDerivedMemorySchema, TakiMemoryPolicyProjectionSchema, CanonicalMemoryRecordSchema,
+  MemoryProviderCapabilitiesSchema, MEMORY_ERROR_POLICY, MemoryErrorCodeSchema, MemoryErrorSchema,
+} from "./memory-provider-domain-schema.ts";
+export type {
+  JsonValue, MemoryAuthorityEpoch, MemoryBankScope, CanonicalMemoryBank, MemoryProvenance, CanonicalMemorySource,
+  CanonicalMemoryUnit, CanonicalDerivedPayload, CanonicalDerivedMemory, TakiMemoryPolicyProjection,
+  CanonicalMemoryRecord, MemoryProviderCapabilities, MemoryErrorCode, MemoryError,
+} from "./memory-provider-domain-schema.ts";
+export {
+  RetainRequestSchema, RetainResultSchema, RecallRequestSchema, RecallScoreSchema, RecallHitSchema, RecallResultSchema,
+  ReflectRequestSchema, ReflectResultSchema, EditableMemoryPatchSchema, MutationRequestSchema, UpdateMemoryRequestSchema,
+  InvalidateMemoryRequestSchema, RestoreMemoryRequestSchema, MutationResultSchema, EditResultSchema, InvalidateResultSchema,
+  RestoreResultSchema,
+} from "./memory-provider-operation-schema.ts";
+export type {
+  RetainRequest, RetainResult, RecallRequest, RecallResult, ReflectRequest, ReflectResult, EditableMemoryPatch,
+  MutationRequest, UpdateMemoryRequest, InvalidateMemoryRequest, RestoreMemoryRequest, MutationResult,
+} from "./memory-provider-operation-schema.ts";
+export {
+  MemorySuccessEnvelopeSchema, MemoryErrorEnvelopeSchema, RetainEnvelopeSchema, RecallEnvelopeSchema, ReflectEnvelopeSchema,
+  EditEnvelopeSchema, InvalidateEnvelopeSchema, RestoreEnvelopeSchema,
+} from "./memory-provider-envelope-schema.ts";
+export type {
+  MemoryResult, RetainEnvelope, RecallEnvelope, ReflectEnvelope, EditEnvelope, InvalidateEnvelope, RestoreEnvelope,
+} from "./memory-provider-envelope-schema.ts";

@@ -184,7 +184,7 @@ const secretCatalog = await createSecretCatalogService({
 // to opaque refs (every failure leaves the source untouched); refs resolve just-in-time at connect below.
 migrateMcpPlaintextSecrets({ catalog: secretCatalog, configPath: join(serverConfig.dataDir, "mcp-servers.json"), logger: secretLog });
 
-// MCP lifecycle (#8 → secure-mcp-lifecycle): desired state persists in SQLite (migration 017); mcp-servers.json is
+// MCP lifecycle (#8 → secure-mcp-lifecycle): desired state persists in SQLite (migration 018); mcp-servers.json is
 // a SEED-ONLY legacy input; the runtime manager owns in-memory generations (candidate → publish → lease → drain).
 // Boot reconcile is non-blocking so the WS server starts while candidates connect; a locked catalog skips only
 // the servers whose refs it cannot resolve, truthfully — one bad server never disables its siblings.

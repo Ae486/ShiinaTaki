@@ -1,14 +1,14 @@
 /**
  * INPUT:  n/a (static DDL)
- * OUTPUT: skillPackagesMigration018 — durable Skill package lifecycle rows and active-name uniqueness
- * POS:    core/db migration 18; immutable content paths are derived and never persisted
+ * OUTPUT: skillPackagesMigration019 — durable Skill package lifecycle rows and active-name uniqueness
+ * POS:    core/db migration 19; immutable content paths are derived and never persisted
  */
 import type { Migration } from "../migration-runner.ts";
 
-export const skillPackagesMigration018: Migration = {
-  version: 18,
+export const skillPackagesMigration019: Migration = {
+  version: 19,
   sql: `
-    CREATE TABLE skill_packages (
+    CREATE TABLE IF NOT EXISTS skill_packages (
       package_id TEXT PRIMARY KEY,
       skill_name TEXT,
       description TEXT,
@@ -27,7 +27,7 @@ export const skillPackagesMigration018: Migration = {
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     ) STRICT;
-    CREATE UNIQUE INDEX skill_packages_active_name ON skill_packages(skill_name)
+    CREATE UNIQUE INDEX IF NOT EXISTS skill_packages_active_name ON skill_packages(skill_name)
       WHERE lifecycle_state = 'active' AND skill_name IS NOT NULL;
   `,
 };
