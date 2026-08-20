@@ -1,0 +1,6 @@
+{"file":".trellis/spec/backend/index.md","reason":"Preserve repository architecture, shared-first contracts, and backend integration rules during semantic merge."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Resolve migration numbering and registry order without losing applied-history compatibility."}
+{"file":".trellis/spec/backend/extension-discovery.md","reason":"Keep the frozen Skills/MCP extension identity, Run snapshot, and Host routing contract intact."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Apply source header, index, test, lint, and integration quality gates."}
+{"file":".trellis/spec/frontend/index.md","reason":"Preserve Home integration and frontend package conventions across the merge."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Verify merged Home changes and documentation consistency."}
