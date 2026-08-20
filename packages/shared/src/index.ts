@@ -155,16 +155,10 @@ export type {
   PermissionLevelState, PermissionPosture,
 } from "./governance-api.ts";
 
-export {
-  PERCEPTION_METHODS,
-  PerceptionActivityEntrySchema,
-  PerceptionCardParamsSchema,
-  PerceptionCardSchema,
-  PerceptionPauseGetParamsSchema,
-  PerceptionPauseSetParamsSchema,
-  PerceptionPauseStateSchema,
-  PerceptionSamplingStatusSchema,
-} from "./perception-schema.ts";
+export { EXTENSION_DISCOVERY_BUDGET, EXTENSION_CALL_ERROR_CODES, EXTENSION_KINDS, EXTENSION_METHODS, ExtensionCollisionSchema, ExtensionConvergenceResultSchema, ExtensionCallErrorCodeSchema, ExtensionCallModeSchema, ExtensionCallParamsSchema, ExtensionCallResultSchema, ExtensionDescribeParamsSchema, ExtensionDescribeResultSchema, ExtensionDescriptorSchema, ExtensionDiscoverParamsSchema, ExtensionDiscoverResultSchema, ExtensionDiscoveryBudgetSchema, ExtensionHostSnapshotSchema, ExtensionIdentitySchema, ExtensionKindSchema, ExtensionRunSnapshotSchema, ExtensionStatusParamsSchema } from "./extension-discovery-schema.ts";
+export type { ExtensionCallMode, ExtensionCallErrorCode, ExtensionCallParams, ExtensionCallResult, ExtensionCollision, ExtensionConvergenceResult, ExtensionDescriptor, ExtensionDescribeParams, ExtensionDescribeResult, ExtensionDiscoverParams, ExtensionDiscoverResult, ExtensionDiscoveryBudget, ExtensionHostSnapshot, ExtensionIdentity, ExtensionKind, ExtensionRunSnapshot, ExtensionStatusParams } from "./extension-discovery-schema.ts";
+
+export { PERCEPTION_METHODS, PerceptionActivityEntrySchema, PerceptionCardParamsSchema, PerceptionCardSchema, PerceptionPauseGetParamsSchema, PerceptionPauseSetParamsSchema, PerceptionPauseStateSchema, PerceptionSamplingStatusSchema } from "./perception-schema.ts";
 export type {
   PerceptionActivityEntry,
   PerceptionCard,
@@ -197,18 +191,17 @@ export type {
   ClipboardReadOutput, ClipboardWriteOutput, ExecOutput, ForegroundWindowOutput,
   ProcessInfo, ProcessListOutput, ScreenshotOutput, ShellOpenOutput,
 } from "./capability-outputs.ts";
-
 export {
   SECRET_METHODS, SecretCatalogHealthSchema, SecretClearParamsSchema, SecretClearResultSchema, SecretListParamsSchema,
   SecretListResultSchema, SecretPresenceParamsSchema, SecretPresenceResultSchema, SecretProvenanceSchema,
   SecretProvenanceSourceSchema, SecretRefSchema, SecretRefusalReasonSchema, SecretSetParamsSchema, SecretSetResultSchema,
 } from "./secret-catalog-schema.ts";
-export type {
-  SecretCatalogHealth, SecretClearParams, SecretClearResult, SecretListParams, SecretListResult, SecretPresenceParams,
-  SecretPresenceResult, SecretProvenance, SecretProvenanceSource, SecretRef, SecretRefusalReason, SecretSetParams, SecretSetResult,
-} from "./secret-catalog-schema.ts";
+export type { SecretCatalogHealth, SecretClearParams, SecretClearResult, SecretListParams, SecretListResult, SecretPresenceParams, SecretPresenceResult, SecretProvenance, SecretProvenanceSource, SecretRef, SecretRefusalReason, SecretSetParams, SecretSetResult } from "./secret-catalog-schema.ts";
+export { MAX_MCP_TOOL_COUNT, MCP_METHODS, MCP_SECRET_REF_MARKER, McpAddParamsSchema, McpCandidateFailureReasonSchema, McpCandidateOutcomeSchema, McpDesiredServerSchema, McpDisableParamsSchema, McpEditParamsSchema, McpEnableParamsSchema, McpEnvMapSchema, McpFieldValueSchema, McpGetParamsSchema, McpGetResultSchema, McpHttpConfigSchema, McpListParamsSchema, McpListResultSchema, McpMutationResultSchema, McpRefusalReasonSchema, McpRemoveParamsSchema, McpRemoveResultSchema, McpReconnectParamsSchema, McpRuntimePhaseSchema, McpSelectedToolsSchema, McpServerConfigSchema, McpServerIdSchema, McpServerStatusSchema, McpServerViewSchema, McpStatusParamsSchema, McpStatusResultSchema, McpStdioConfigSchema, McpTestParamsSchema, McpTestResultSchema, McpToolKeyCollisionSchema, McpToolNameSchema, McpToolSkipCodeSchema, McpToolSkipIssueSchema, type McpAddParams, type McpCandidateFailureReason, type McpCandidateOutcome, type McpDesiredServer, type McpDisableParams, type McpEditParams, type McpEnableParams, type McpGetParams, type McpGetResult, type McpListParams, type McpListResult, type McpMutationResult, type McpRefusalReason, type McpRemoveParams, type McpRemoveResult, type McpReconnectParams, type McpServerConfig, type McpServerStatus, type McpServerView, type McpStatusParams, type McpStatusResult, type McpTestParams, type McpTestResult, type McpToolKeyCollision, type McpToolSkipIssue } from "./mcp-lifecycle-schema.ts";
 
 export { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "./ws-defaults.ts";
+export { SKILL_METHODS, SKILL_IMPORT_MAX_BYTES, SKILL_FILE_MAX_BYTES, SKILL_MD_MAX_BYTES, SKILL_TOTAL_MAX_BYTES, SKILL_FILE_COUNT_MAX, SKILL_RESOURCE_MAX_BYTES, SKILL_NAME_PATTERN, SKILL_NAME_MAX_LENGTH, SKILL_DESCRIPTION_MAX_LENGTH, SKILL_COMPATIBILITY_MAX_LENGTH, SKILL_RELATIVE_PATH_MAX_LENGTH, SKILL_SOURCE_LOCATOR_MAX_LENGTH, SKILL_SCAN_VERSION_MAX_LENGTH, SKILL_FAILURE_REASON_MAX_LENGTH, SkillSourceKindSchema, SkillLifecycleStateSchema, SkillTrustSchema, SkillScanVerdictSchema, SkillRuntimeStateSchema, SkillScanFindingCodeSchema, SkillScanFindingSchema, SkillStandardMetadataSchema, SkillFileEntrySchema, SkillImportSourceSchema, SkillPackageViewSchema, SkillListParamsSchema, SkillInspectParamsSchema, SkillImportParamsSchema, SkillMutationParamsSchema, SkillReconcileParamsSchema, SkillInspectResultSchema, SkillListResultSchema, SkillMutationResultSchema, SkillRemoveResultSchema, SkillReconcileResultSchema, SkillRefusalReasonSchema } from "./skill-lifecycle-schema.ts";
+export type { SkillSourceKind, SkillLifecycleState, SkillTrust, SkillScanVerdict, SkillRuntimeState, SkillScanFindingCode, SkillScanFinding, SkillStandardMetadata, SkillFileEntry, SkillImportSource, SkillPackageView, SkillListParams, SkillInspectParams, SkillImportParams, SkillMutationParams, SkillReconcileParams, SkillInspectResult, SkillListResult, SkillMutationResult, SkillRemoveResult, SkillReconcileResult, SkillRefusalReason } from "./skill-lifecycle-schema.ts";
 
 export {
   JsonValueSchema, MemoryAuthorityEpochSchema, MemoryBankScopeSchema, CanonicalMemoryBankSchema,

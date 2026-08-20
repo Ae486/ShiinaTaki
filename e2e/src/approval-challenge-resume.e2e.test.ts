@@ -1,7 +1,7 @@
 /**
  * INPUT: real Core and taki-node processes plus one paired operator socket
  * OUTPUT: process proof of challenge -> operator allow/deny -> resume -> single execution -> lineage settle
- * POS:    e2e — Slice-4 Host Approval vertical over the real WS protocol; privacy sentinel must stay absent
+ * POS:    e2e — Slice-4 Host Approval vertical; pending input stays private while approved exec uses its audit exception
  */
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
@@ -44,7 +44,10 @@ describe("Host approval challenge/resume process lifecycle", () => {
       // Lineage settle: Core accepted the terminal frame only after the resume authorization was consumed once.
       await stack.waitForCoreLog((entry) => entry.msg === "capability settled" && entry.ok === true, 10_000);
       expect(stack.countCoreLog((entry) => entry.msg === "capability resume authorized")).toBe(1);
-      assertSentinelPrivate(stack);
+      const execAudit = stack.audit().filter((line) => line.capability === "exec");
+      expect(execAudit).toHaveLength(1);
+      expect(execAudit[0]?.command).toBe(SENTINEL_COMMAND);
+      assertSentinelAbsentFromDiagnostics(stack);
     });
   }, 120_000);
 
@@ -97,6 +100,10 @@ describe("Host approval challenge/resume process lifecycle", () => {
 function assertSentinelPrivate(stack: Stack): void {
   const audit = readAudit(stack.auditPath);
   expect(JSON.stringify(audit)).not.toContain("SENTINEL-EXEC-4f2b");
+  assertSentinelAbsentFromDiagnostics(stack);
+}
+
+function assertSentinelAbsentFromDiagnostics(stack: Stack): void {
   for (const stream of [stack.core.stdout.lines(), stack.core.stderr.lines()]) {
     expect(stream.join("\n")).not.toContain("SENTINEL-EXEC-4f2b");
   }

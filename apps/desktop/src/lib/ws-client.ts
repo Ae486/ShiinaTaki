@@ -1,11 +1,7 @@
 /**
- * INPUT:  a WsTransport (browser WebSocket by default) + inbound JSON-RPC frames from the Core (parsed in ws-client-routes).
- * OUTPUT: createWsClient({transport}) -> WsClient: connect()/chat()/subscribeAvatar()/reportAvatar() +
- *         timelineHistory()/subscribeTimeline()/mediaGet() (chat page) + importCharacter()/listCharacters()/
- *         characterCostumes()/costumeResolution() (#18) + configList()/configSet()/subscribeConfig() +
- *         memoryTidy()/memoryStatus()/mediaUsage()/mediaClear() plus perception/permission/Approval methods and pushes.
- * POS:    ui/lib — the Pet UI's operator transport to the Agent Core (mirrors apps/cli chat-client, browser WS). The
- *         composition root over ws-client-routes (inbound) and ws-client-methods (outbound). No React/Tauri imports.
+ * INPUT: WsTransport plus Core JSON-RPC frames parsed by ws-client-routes
+ * OUTPUT: createWsClient() with chat, operator lifecycle, and extension convergence request families
+ * POS:    ui/lib operator transport composition root over inbound routes and typed outbound methods
  */
 
 import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
@@ -29,11 +25,31 @@ import type {
   ConfigSetParams,
   ConfigSetResult,
   ConnectParams,
+  ExtensionConvergenceResult,
   MediaClearResult,
   MediaGetResult,
   MediaUsageResult,
   MemoryStatusResult,
   MemoryTidyResult,
+  McpAddParams,
+  McpEditParams,
+  McpEnableParams,
+  McpGetResult,
+  McpListResult,
+  McpMutationResult,
+  McpRemoveResult,
+  McpStatusResult,
+  McpTestParams,
+  McpTestResult,
+  SkillImportParams,
+  SkillInspectResult,
+  SkillListResult,
+  SkillMutationParams,
+  SkillMutationResult,
+  SkillRemoveResult,
+  SkillReconcileResult,
+  SecretSetParams,
+  SecretSetResult,
   PerceptionCard,
   PerceptionPauseSetParams,
   PerceptionPauseState,
@@ -116,6 +132,37 @@ export interface WsClient {
   permissionCellsGet(): Promise<PermissionCellsState>;
   /** Stores or resets one Core cell override with optimistic generation matching. */
   permissionCellSet(params: PermissionCellSetParams): Promise<PermissionCellSetResult>;
+  /** Reads current owner/generation convergence facts; this is not an executable Agent Run snapshot. */
+  extensionStatus(): Promise<ExtensionConvergenceResult>;
+  /** Reads the merged desired + runtime view of every configured MCP server (the MCP page's read). */
+  mcpList(): Promise<McpListResult>;
+  /** Reads one MCP server's desired row plus its live runtime status. */
+  mcpGet(serverId: string): Promise<McpGetResult>;
+  /** Adds a desired MCP server (config carries opaque secret-ref markers only) and awaits its candidate. */
+  mcpAdd(params: McpAddParams): Promise<McpMutationResult>;
+  /** Edits a desired server under its optimistic configRevision; conflicts reject with MCP_CONFIG_CONFLICT. */
+  mcpEdit(params: McpEditParams): Promise<McpMutationResult>;
+  /** Enables a disabled server (re-runs its candidate and publishes; no restart). */
+  mcpEnable(params: McpEnableParams): Promise<McpMutationResult>;
+  /** Disables a server: new leases block immediately, the generation drains and closes once. */
+  mcpDisable(params: McpEnableParams): Promise<McpMutationResult>;
+  /** Removes a server from desired state and drains its runtime generation. */
+  mcpRemove(params: McpEnableParams): Promise<McpRemoveResult>;
+  /** Runs an ephemeral candidate with diagnostics only — it never publishes tools. */
+  mcpTest(params: McpTestParams): Promise<McpTestResult>;
+  /** Re-runs a server's candidate and publishes the replacement generation. */
+  mcpReconnect(serverId: string): Promise<McpMutationResult>;
+  /** Reads the sanitized runtime status of every server the manager knows. */
+  mcpStatus(): Promise<McpStatusResult>;
+  skillList(): Promise<SkillListResult>;
+  skillInspect(packageId: string): Promise<SkillInspectResult>;
+  skillImport(params: SkillImportParams): Promise<SkillMutationResult>;
+  skillEnable(params: SkillMutationParams): Promise<SkillMutationResult>;
+  skillDisable(params: SkillMutationParams): Promise<SkillMutationResult>;
+  skillRemove(params: SkillMutationParams): Promise<SkillRemoveResult>;
+  skillReconcile(): Promise<SkillReconcileResult>;
+  /** Stores one secret value through the sensitive write-only path (the MCP page's set-value flow). */
+  secretSet(params: SecretSetParams): Promise<SecretSetResult>;
   approvalRespond(params: CanonicalApprovalRespondParams): Promise<CanonicalApprovalRespondResult>;
   approvalList(): Promise<ApprovalListResult>;
   approvalRevoke(params: ApprovalRevokeParams): Promise<ApprovalRevokeResult>;

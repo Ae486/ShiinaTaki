@@ -10,6 +10,21 @@
 > completed in place and committed as `ffa9fff`), the active-task resolver behavior was diagnosed as the designed
 > 0.6 session-scoped mechanism, and the Approval slice passed its single final formal check. §2's warnings are
 > resolved; keep the rest as historical context. §19 records the live owner authority rulings.
+>
+> **Status update (2026-08-18):** Host Secret Catalog is archived; Secure MCP Lifecycle and the bounded pre-Slice-7
+> security convergence are implemented and approved by automated checks. Exact evidence and residuals are recorded in
+> `docs/HANDOFF.md`, the Slice `implement.md`, and Sessions 16-17 of the developer journal. The approved convergence
+> checkpoint is `57fe909`; HEAD `cc2a65e` contains current main after a conflict-free, tree-identical merge. The next product
+> slice is Standard Skill Lifecycle. The stale recovery narrative below remains historical unless explicitly
+> superseded here or in §20.
+>
+> **Status update (later on 2026-08-18):** Codex resumed leadership, implemented Slice 7, and checkpointed it as
+> `4031ba7`.
+> Standard Skill packages now have bounded directory/ZIP import, durable lifecycle state, immutable catalog
+> generations/leases, confined resource reads, Home management, and real-process lifecycle evidence. The initial
+> formal check returned `Not approved`; all independently confirmed findings were repaired and focused/full gates pass.
+> HEAD is `4031ba7`, `main...HEAD` is `0 6`, and no push/archive has been performed. Slice 8 is next after the
+> remaining owner-manual evidence and Trellis closeout boundary are handled.
 
 ## 1. Takeover directive
 
@@ -21,15 +36,19 @@ This objective is broader than accepting configuration in a file. The operator m
 the product, the Agent must discover the resulting tools or Skills through the standard formats, and a real invocation
 must execute through the common governance, Approval, Host, credential, and runtime-generation contracts.
 
-The current child is Approval Productization, not MCP CRUD or Skill UI yet. Complete the one missing Host
-challenge/resume vertical first because secure MCP execution and effectful Skill-mediated operations depend on it.
-Then continue through Host secrets, MCP lifecycle, Skill lifecycle, and final discovery/integration in the frozen order.
+Approval Productization, Host Secret Catalog, and Secure MCP runtime/product implementation are now complete through
+their automated gates. The live handoff point is Slice 6 checkpoint/closeout followed by Standard Skill Lifecycle, then
+final extension discovery/integration in the frozen order.
 
 Infrastructure work is acceptable only when it is required to make the Skills/MCP product truthful or is a direct,
 reusable extraction from that requirement. Do not let Heartbeat, Scheduled Task, Autonomous Run, artifact transfer,
 or a broad cross-Host product become the active deliverable before Skills/MCP acceptance.
 
-## 2. Critical warning: do not commit the current tree as one change
+## 2. Historical takeover warning (resolved)
+
+The mixed Approval/tooling tree described below was separated and committed on 2026-08-16. It is retained only to
+explain the takeover. The 2026-08-17 dirty tree is one reviewed Slice 6 convergence ownership group; do not apply the
+old “two unrelated groups” diagnosis to it.
 
 The worktree contains two unrelated ownership groups plus this handoff document:
 
@@ -49,30 +68,34 @@ unrecognized modification as user-owned until proven otherwise.
 
 ### 3.1 Worktrees and branches
 
-| Purpose | Path | Live state on 2026-08-16 | Rule |
+| Purpose | Path | Live state on 2026-08-17 | Rule |
 | --- | --- | --- | --- |
-| T4 work | `H:/TakiAgent-worktrees/t4` | `task/t4-skills-mcp-productization` at `cac8f19` | Run all T4 edits and commands here. |
-| Main TakiAgent work | `H:/TakiAgent` | `main` at `5dd6dd2`; two dirty Hindsight task documents | Read for coordination only; do not edit or clean it. |
+| T4 work | `H:/TakiAgent-worktrees/t4` | `task/t4-skills-mcp-productization` at `cc2a65e`; approved convergence checkpoint `57fe909`, current main merged | Run all T4 edits and commands here. |
+| Main TakiAgent work | `H:/TakiAgent` | `main` at `bd9ddfb`; two dirty Hindsight task documents | Read for coordination only; do not edit or clean it. |
 | Hindsight repository | `H:/hindsight` | separate repository and owner | Do not edit, stage, commit, or clean it. |
 | Legacy scratch worktree | `H:/TakiAgent/.claude/worktrees/agent-a0b3d2f31101f184a` | separate legacy branch | Do not use or remove it. |
 
-At the snapshot, `git rev-list --left-right --count main...HEAD` returned `0 12`: T4 was 0 commits behind and 12
-commits ahead of the local `main`. The owner has warned that `main` is now advancing in parallel, so this is not a
-stable fact. Recheck it before every implementation wave and before touching a merge hotspot.
+At the 2026-08-18 checkpoint, `57fe909` recorded the approved convergence tree and `cc2a65e` merged main without
+conflicts or tree-content changes. `git rev-list --left-right --count main...HEAD` then returned `0 4`. The owner warned
+that `main` may continue in parallel, so recheck it before every implementation wave and merge hotspot. Resolve shared
+composition/docs semantically; never choose a whole-file side.
 
 No push, reset, rebase, force operation, finish/archive, worktree cleanup, or final integration has been authorized or
 performed for this initiative. Push remains a separate owner decision.
 
 ### 3.2 Trellis pointer drift
 
-The local pointer file contains:
+The local pointer file still contains:
 
 ```text
 .trellis/tasks/08-12-approval-productization
 ```
 
-The task metadata also lists Approval Productization as `in_progress`. However, the currently modified Trellis tooling
-reports no current task:
+Approval Productization is archived. The live child is `.trellis/tasks/08-12-secure-mcp-lifecycle` and its own
+`task.json` remains `in_progress` while the reviewed convergence tree awaits checkpoint/closeout. Preserve this known
+pointer mismatch rather than masking it with an unconditional rewrite; use the live task path explicitly.
+
+Historical takeover output was:
 
 ```text
 python ./.trellis/scripts/get_context.py
@@ -84,10 +107,9 @@ python ./.trellis/scripts/task.py current --source
 # Source: none
 ```
 
-This mismatch appeared alongside the uncommitted Trellis/ZCODE migration. Diagnose the active-task resolver and
-configuration before dispatching any agent. Do not blindly rewrite `.trellis/.current-task`; the pointer is already
-correct for this worktree, and an unconditional rewrite could hide a tooling regression or bind the wrong authority
-source.
+The original resolver issue was diagnosed during takeover, but the pointer has since become stale because later task
+transitions did not update it. Do not blindly rewrite `.trellis/.current-task`; diagnose current Trellis ownership at
+the next lifecycle transition so the fix does not hide another task-source regression.
 
 ### 3.3 Local environment
 
@@ -108,12 +130,12 @@ execute; that parent status does not mean no production work has occurred.
 | Slice | Trellis child | Status | Current truth |
 | --- | --- | --- | --- |
 | 1. Authority/credential design | `08-12-authority-credential-design` | `planning` | Planning gate and authority model are frozen; no independent production deliverable is expected. |
-| 2. Host-control foundation | `08-12-host-control-foundation` | `review` | Production committed at `7427edf`; unit/wire/process evidence is strong, but the final two-Node process proof is deferred to convergence. |
-| 3. Governance Authority | `08-12-governance-authority` | `review` | Production committed at `46a8487`; retained in review because effective `ask` depends on Slice 4. |
-| 4. Approval Productization | `08-12-approval-productization` | `in_progress` | Batch A and B+D are committed; C+E is interrupted and partially modified in the dirty tree. This is the active work. |
-| 5. Host Secret Catalog | `08-12-host-secret-catalog` | `planning` | Not implemented. Required before secure MCP credentials. |
-| 6. Secure MCP lifecycle | `08-12-secure-mcp-lifecycle` | `planning` | Not implemented. The shipped MCP path is still boot-oriented developer configuration. |
-| 7. Standard Skill lifecycle | `08-12-standard-skill-lifecycle` | `planning` | Not implemented. Preserve portable `SKILL.md`; do not invent a Taki-only Skill format. |
+| 2. Host-control foundation | `08-12-host-control-foundation` | `review` | Production committed at `7427edf`; unit/wire/process evidence is strong, but the final two-Node process proof is deferred to Slice 8. |
+| 3. Governance Authority | `08-12-governance-authority` | `archived` | Production committed at `46a8487`; common authority is active and Approval convergence is complete. |
+| 4. Approval Productization | `08-12-approval-productization` | `archived` | Connection-bound challenge/resume, privacy convergence, and formal check are complete through `ffa9fff`/`a1a927e`. |
+| 5. Host Secret Catalog | `08-12-host-secret-catalog` | `archived` | Encrypted catalog, operator methods, migration, locked behavior, and formal check are complete through `0965358`/`c26e3f8`. |
+| 6. Secure MCP lifecycle | `08-12-secure-mcp-lifecycle` | `in_progress` | Production, strict-review repair, and pre-Slice-7 security convergence are approved and checkpointed at `57fe909`; current main is merged at `cc2a65e`. |
+| 7. Standard Skill lifecycle | `08-12-standard-skill-lifecycle` | `in_progress` | Implemented and checkpointed at `4031ba7`; portable `SKILL.md` remains authoritative; packaged WebView interaction is unverified. |
 | 8. Discovery/integration | `08-12-extension-discovery-integration` | `planning` | Not implemented. Owns final product convergence and deferred cross-process evidence, not unfinished child features. |
 
 Only after these eight slices satisfy the product acceptance should the Leader formally advance the remaining T4
@@ -185,7 +207,32 @@ also passed the full Core suite at 1,290 tests plus one existing skip. Packaged 
 Core/operator process E2E remain unverified. Existing historical raw tool inputs are hidden from current reads but not
 physically scrubbed.
 
-## 6. Current interrupted Approval work
+### 5.4 Host Secret Catalog and Secure MCP
+
+Host Secret Catalog is archived after its complete encrypted-store/operator/migration implementation and one formal
+check. Secure MCP is implemented at `2c2ef5f` plus the current reviewed convergence tree. It provides marker-only
+desired config, per-row revisions, no-restart operator CRUD/test/reconnect/status, a disposable Home surface,
+token-owned candidates, last-good publication, selected-tool/collision validation, leases/draining, exactly-once
+close, secret update/clear invalidation, sanitized diagnostics, and restart reconcile from desired truth only.
+
+The single Slice 6 check passed with fixes: workspace typecheck and lint; Shared 301, CLI 44, Desktop 407, Core 1,405
+plus 1 existing skip; MCP focused suites; real-process MCP E2E 3/3; Desktop production build; independent Core
+strip-only boot; diff/header/index/size audits. The final two fixes track late candidate cleanup during shutdown and
+preserve a new active generation when a cleared ref belongs only to its draining predecessor. See
+`.trellis/spec/backend/mcp-lifecycle.md` and the Slice `implement.md` for executable detail.
+
+The later strict `[Approval C+E, Slice 6)` review and bounded repair are also approved. The repair closes final
+Host-floor/audit enforcement, CLI secret argv blocking, Windows create-only key/device identity convergence,
+migration collision rejection, challenge retirement, timer cleanup, transport-error sanitization, and quality/index
+contracts. Final evidence includes Shared 301, CLI 47, Desktop 407, Core 1,409 plus 1 existing skip; 8 real-process
+Approval/Secret/MCP tests; Rust 170 library plus 7 helper tests; strict locked Clippy; Desktop build; Core strip-only
+boot; and diff/header/index audits. Live cross-session Credential Manager behavior and the owner/platform residuals
+remain explicitly unverified.
+
+## 6. Historical interrupted Approval work (resolved)
+
+Everything in this section describes the 2026-08-16 takeover state. Approval and the ZCODE/Trellis ownership split were
+subsequently completed and checkpointed; do not treat the paths below as current work.
 
 ### 6.1 Agent state
 
@@ -652,18 +699,17 @@ MCP or Skill feature implementation.
 
 At the time of this document:
 
-- **Completed and committed:** Host-control foundation, Governance Authority, Approval canonical state, and
-  Core/MCP/Desktop/CLI connection-owned Approval interaction.
-- **In progress but incomplete:** Approval Host challenge/resume, legacy/privacy convergence, and real process proof.
-- **Unverified partial work:** the current uncommitted protocol v3/Rust/Core broker patch.
-- **Not started in production:** Host Secret Catalog, secure MCP management/runtime lifecycle, standard Skill
-  management/lifecycle, and final extension integration.
-- **Separately in progress:** uncommitted ZCODE/Trellis tooling migration that currently breaks active-task discovery.
+- **Completed and committed:** Host-control foundation, Governance Authority, Approval Productization, Host Secret
+  Catalog, and the initial Secure MCP Lifecycle implementation through `2c2ef5f`.
+- **Implemented and checkpointed:** the approved Slice 6 strict-review convergence fixes and executable MCP contract.
+- **Implemented and checkpointed at `4031ba7`, repaired after formal review:** Standard Skill management/runtime
+  lifecycle, portable package storage, Home management, executable spec, and real-process lifecycle evidence.
+- **Next product work after checkpoint:** final extension discovery/integration, parent acceptance, and the deferred
+  real two-Node proof.
 - **Not part of the current deliverable:** formal Autonomous Run, Scheduled Task, Heartbeat, and later T4 product work.
 
-The next useful milestone is not another design loop. It is a recovered Trellis/ZCODE environment plus one complete,
-fail-closed, tested Host Approval challenge/resume vertical, followed by the single final Approval check. After that,
-move directly toward the user-visible Host Secret Catalog and secure MCP lifecycle.
+The next useful milestone is a clean Slice 7 checkpoint after final diff review, then the frozen extension-integration
+child. Do not reopen the completed MCP/Skill design work without new evidence.
 
 ## 19. Owner authority rulings for the ZCode Leader (2026-08-16)
 
@@ -691,3 +737,26 @@ Standing honesty rule (Leader operationalization, not a new owner grant): owner-
 acceptance items are never marked passed without the owner's actual observation. They are
 recorded as "pending owner verification" in reports and archives; they gate release claims,
 not further implementation.
+
+## 20. Current Codex continuation state (2026-08-18)
+
+This section supersedes the takeover-specific implementation directions above.
+
+- Work only in `H:/TakiAgent-worktrees/t4`; branch `task/t4-skills-mcp-productization`, HEAD `4031ba7`.
+- Main is `bd9ddfb`; `main...HEAD` is `0 6`, and main's dirty Hindsight work remains user-owned.
+- The live child is `.trellis/tasks/08-12-standard-skill-lifecycle` (`in_progress`). `.trellis/.current-task` is stale and
+  still names archived Approval; do not mask this at random.
+- The approved Slice 6 plus pre-Slice-7 convergence is checkpointed at `57fe909`; `cc2a65e` is the conflict-free,
+  tree-identical main merge. Exact commands, counts, fixes, and manual residuals are in the Slice `implement.md` and
+  `docs/HANDOFF.md`.
+- No subagent is running. Do not allow recursive delegation. Any future direct agent prompt must be English, forbid
+  YCE and child spawning, use `jbcontext` for unknown code, and separate completed/incomplete/unverified/extra/risk.
+- `jbcontext index --project-path H:/TakiAgent-worktrees/t4` was rerun after the Slice 7 checkpoint; revision `4031ba7`
+  now has 186 clusters and is the stable indexed unit for the new Skill modules.
+- Slice 7 was semantically reviewed against the current main boundary and checkpointed. Do not rebase/reset or copy
+  patches between worktrees.
+- The strict `[Approval C+E, Slice 6)` review and bounded repair are complete. All confirmed findings and repair
+  regressions passed the final targeted review; do not reopen them without new evidence.
+- Next product slice after review/checkpoint: extension discovery/integration. MCP and Standard Skill lifecycles are
+  implemented and process-proven, but packaged Home interaction and a real external MCP credential/provider round-trip
+  remain pending owner verification.

@@ -21,11 +21,11 @@ surface across Core, Nodes, Agent discovery, and Home.
 
 ## Acceptance Criteria
 
-- [ ] Agent sees only currently eligible host-qualified extensions and cannot infer a Host from label/path.
-- [ ] Core/Home/Host state converges after enable/disable/reload/reconnect/restart without silent replay/fallback.
-- [ ] A real simultaneous two-Node harness proves explicit same-capability routing, generation-safe reconnect,
+- [x] Agent sees only currently eligible host-qualified extensions and cannot infer a Host from label/path.
+- [x] Core/Home/Host state converges after enable/disable/reload/reconnect/restart without silent replay/fallback.
+- [x] A real simultaneous two-Node harness proves explicit same-capability routing, generation-safe reconnect,
       cross-Host disconnect isolation, and distinct cancelled versus `outcome_unknown` interruption results.
-- [ ] Skills cannot grant permission and Agent tools cannot mutate governance, credentials, trust, or CRUD authority.
+- [x] Skills cannot grant permission and Agent tools cannot mutate governance, credentials, trust, or CRUD authority.
 - [ ] Full relevant automated gates and owner-observed manual checks pass.
 
 ## Out of Scope

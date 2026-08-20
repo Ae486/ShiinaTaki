@@ -1,16 +1,13 @@
 /**
- * INPUT:  <dataDir>/mcp-servers.json (legacy plaintext `env`/`headers` values) + the catalog service
- * OUTPUT: migrateMcpPlaintextSecrets() — copy → verify encrypted read-back → ONLY THEN rewrite the source to
- *         opaque `secret-ref:` markers; the result reports counts, never values
- * POS:    core/secrets — the PRD-AC4 ordering owner: the only plaintext source is never rewritten before a
- *         verified encrypted copy exists (any failure leaves the source byte-identical); `.env.local` is a
- *         separate live plaintext source this migration deliberately never touches
+ * INPUT: legacy mcp-servers.json plaintext fields and the secret catalog
+ * OUTPUT: reserve identities, copy and verify values, then atomically rewrite opaque secret-ref markers
+ * POS: core/secrets AC4 ordering owner; failures preserve source bytes and .env.local is never touched
  */
 import { readFileSync } from "node:fs";
 import type { Logger } from "../logging/logger.ts";
 import { parseMcpServers, type McpServerConfig } from "../mcp/mcp-config.ts";
 import { publishFileAtomically } from "./catalog-publication.ts";
-import { SECRET_REF_MARKER, mcpEnvRef, mcpHeaderRef } from "./secret-ref.ts";
+import { SECRET_REF_MARKER, mcpEnvRef, mcpHeaderRef, parseSecretRefValue } from "./secret-ref.ts";
 import type { SecretCatalogHealth } from "./secret-catalog-service.ts";
 
 /** The catalog surface the migration needs — structural, so tests can drive failure orderings with a stub. */
@@ -118,12 +115,17 @@ function planMigration(servers: Record<string, McpServerConfig>):
     for (const { kind, map } of maps) {
       if (map === undefined) continue;
       for (const [field, value] of Object.entries(map)) {
-        if (value.startsWith(SECRET_REF_MARKER)) continue; // already migrated — re-runs are no-ops
         const ref = kind === "env" ? mcpEnvRef(serverKey, field) : mcpHeaderRef(serverKey, field);
         const identity = `${serverKey}\u0000${kind}\u0000${field}`;
         const prior = seen.get(ref);
         if (prior !== undefined && prior !== identity) return { kind: "collision" };
         seen.set(ref, identity);
+        const markerRef = parseSecretRefValue(value);
+        if (markerRef !== null) {
+          // An incremental rerun must not let a later plaintext identity claim a ref already owned by this marker.
+          if (markerRef !== ref) return { kind: "collision" };
+          continue;
+        }
         entries.push({ serverKey, kind, field, ref, value });
       }
     }

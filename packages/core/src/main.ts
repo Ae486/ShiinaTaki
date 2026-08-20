@@ -8,6 +8,7 @@ import { join } from "node:path";
 import type { ToolSet } from "ai";
 import { createChatAgent } from "./agents/chat-agent.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
+import { mergeToolSets } from "./agents/tool-set-assembly.ts";
 import { createTurnQueue } from "./agents/turn-queue.ts";
 import { createTurnRegistry } from "./agents/turn-registry.ts";
 import { createWindowCalibrator } from "./agents/window-calibrator.ts";
@@ -30,12 +31,12 @@ import { createTimelineRepo } from "./db/timeline-repo.ts";
 import { createWindowStateRepo } from "./db/window-state-repo.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
 import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
+import { createExtensionComposition } from "./extensions/extension-composition.ts";
 import { createHostCatalogStore } from "./hosts/host-catalog.ts";
 import { bindHostGenerationRetirement } from "./hosts/host-generation-retirement.ts";
 import { loadOrCreateHostIdentity } from "./hosts/host-identity.ts";
-import { loadMcpConfig } from "./mcp/mcp-config.ts";
-import { createLegacyMcpDenyReader } from "./mcp/legacy-mcp-deny.ts";
-import { createMcpManager } from "./mcp/mcp-manager.ts";
+import { bootMcpLifecycle } from "./mcp/mcp-boot.ts";
+import { createMcpLifecycleService } from "./mcp/mcp-lifecycle-service.ts";
 import { createCharacterImporter } from "./characters/character-import.ts";
 import { createCharacterStore } from "./characters/character-store.ts";
 import { startAttachmentGc } from "./media/attachment-gc.ts";
@@ -62,6 +63,7 @@ import { characterImportMethod } from "./server/methods/character-import.ts";
 import { characterListMethod } from "./server/methods/character-list.ts";
 import { registerConfigMethods } from "./server/methods/config-methods.ts";
 import { connectMethod } from "./server/methods/connect.ts";
+import { extensionStatusMethod } from "./server/methods/extension-status.ts";
 import { hostCatalogPublishMethod } from "./server/methods/host-catalog-publish.ts";
 import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
@@ -70,12 +72,11 @@ import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
 import { memoryStatusMethod } from "./server/methods/memory-status.ts";
 import { registerPerceptionMethods } from "./server/methods/perception-methods.ts";
 import { registerSecretMethods } from "./server/methods/secret-methods.ts";
+import { registerMcpMethods } from "./server/methods/mcp-methods.ts";
+import { registerSkillMethods } from "./server/methods/skill-methods.ts";
 import { timelineHistoryMethod } from "./server/methods/timeline-history.ts";
 import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts";
-import { createLoadSkillTool } from "./skills/load-skill-tool.ts";
-import { createSkillsLoader } from "./skills/skills-loader.ts";
-import { createSkillsState } from "./skills/skills-state.ts";
-import { scanSkills } from "./skills/skill-scanner.ts";
+import { bootSkillLifecycle } from "./skills/skill-boot.ts";
 import { createCurrentTimeTool } from "./time/current-time-tool.ts";
 import { createTimelineSubscriptions } from "./server/timeline-subscriptions.ts";
 import { startWsServer } from "./server/ws-server.ts";
@@ -167,15 +168,9 @@ const hostCatalogs = createHostCatalogStore();
 const registry = createMethodRegistry();
 const { approval, coreToolGovernance } = composeApprovalRuntime({ db, governance, coreHostId, registry, connections: connectionRegistry, logger });
 
-// Skills (#9): discover SKILL.md folders, honor persisted enable/disable, expose the list + the load_skill tool.
-const skillsLog = logger.child({ mod: "skills" });
-const skillsScan = scanSkills(join(serverConfig.dataDir, "skills"));
-skillsLog.info({ count: skillsScan.skills.length }, "skills discovered");
-if (skillsScan.invalid.length > 0) skillsLog.warn({ invalid: skillsScan.invalid }, "invalid skills skipped");
-const skillsLoader = createSkillsLoader({
-  skills: skillsScan.skills,
-  state: createSkillsState({ filePath: join(serverConfig.dataDir, "skills-state.json"), logger }),
-});
+// Skills: durable lifecycle rows plus an immutable runtime catalog. Legacy files are read once as a seed and never written.
+const skillBoot = await bootSkillLifecycle({ db, dataDir: serverConfig.dataDir, ownerHostId: coreHostId, logger });
+const { loader: skillsLoader, service: skillLifecycle, log: skillsLog } = skillBoot;
 
 // Secret catalog (08-12): the Core-owned encrypted credential store. Master key from the credentials directory
 // (systemd) or the taki-secret-key helper; no key source = locked, every mutation fails closed — never a fresh
@@ -188,17 +183,16 @@ const secretCatalog = await createSecretCatalogService({
 // AC4 ordering: copy env/headers into the catalog, verify the encrypted read-back, only then rewrite the source
 // to opaque refs (every failure leaves the source untouched); refs resolve just-in-time at connect below.
 migrateMcpPlaintextSecrets({ catalog: secretCatalog, configPath: join(serverConfig.dataDir, "mcp-servers.json"), logger: secretLog });
-registerSecretMethods(registry, { service: secretCatalog, logger: secretLog });
 
-// MCP (#8): connect operator-configured servers at boot; a missing/malformed config or a failing server degrades
-// gracefully. Standard SDK closures are wrapped by canonical governance plus read-only legacy deny compatibility.
-const mcpLog = logger.child({ mod: "mcp" });
-const legacyMcpDeny = createLegacyMcpDenyReader({ filePath: join(serverConfig.dataDir, "mcp-approvals.json"), logger });
-const mcpManager = await createMcpManager({
-  entries: loadMcpConfig(join(serverConfig.dataDir, "mcp-servers.json"), mcpLog), logger,
-  resolveSecret: (ref) => secretCatalog.resolve(ref),
-  governance: { service: governance, ownerHostId: coreHostId, approval, legacyDeny: (s, t) => legacyMcpDeny.denies(s, t) },
-});
+// MCP lifecycle (#8 → secure-mcp-lifecycle): desired state persists in SQLite (migration 018); mcp-servers.json is
+// a SEED-ONLY legacy input; the runtime manager owns in-memory generations (candidate → publish → lease → drain).
+// Boot reconcile is non-blocking so the WS server starts while candidates connect; a locked catalog skips only
+// the servers whose refs it cannot resolve, truthfully — one bad server never disables its siblings.
+const mcpBoot = bootMcpLifecycle({ db, dataDir: serverConfig.dataDir, coreHostId, secretCatalog, governance, approval, logger });
+void mcpBoot.manager.reconcile(mcpBoot.desired.list()).then(() => undefined, () => undefined); // desired → candidates → publish
+registerSecretMethods(registry, { service: mcpBoot.catalog, logger: secretLog });
+registerMcpMethods(registry, { service: createMcpLifecycleService({ repo: mcpBoot.desired, manager: mcpBoot.manager }), logger: mcpBoot.log });
+registerSkillMethods(registry, { service: skillLifecycle, logger: skillsLog });
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
@@ -260,6 +254,12 @@ const workspacePaths = createWorkspacePaths({ root: join(serverConfig.dataDir, "
 const readFileTool = createReadFileTool({ paths: workspacePaths, logger });
 const writeFileTool = createWriteFileTool({ paths: workspacePaths, logger });
 const staticCoreTools: ToolSet = { ...createCurrentTimeTool(), ...readFileTool, ...writeFileTool };
+const extensions = createExtensionComposition({
+  coreHostId, catalogs: hostCatalogs,
+  skills: { catalog: skillBoot.catalog, loader: skillsLoader, governance },
+  mcp: mcpBoot.manager,
+  route: (request, interactive) => routeCapability({ ...ambientCapabilityDeps, interactive }, request),
+});
 
 // Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
 const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry() };
@@ -298,18 +298,19 @@ registry.register(
       imageMemory: imageDescriptionWriter
         ? { onImageTurn: (input) => void imageDescriptionWriter.onImageTurn(input) }
         : undefined,
-      // Adapter-governed tools stay outside the Core adapter: Skill and MCP carry canonical subject sidecars, while
-      // Shell capabilities retain Host governance until Batch 2 installs the Core projection.
+      // Compatibility tools remain available when no interactive socket exists. The same Skill tools are reused in
+      // the interactive bag below; MCP and progressive discovery are captured by runContext once per Run.
       extraTools: {
-        ...createLoadSkillTool(skillsLoader, { service: governance, ownerHostId: coreHostId }),
+        ...extensions.skillTools,
         ...capabilityTools(),
       },
-      // Per-turn bag: the capability tools bind the initiating operator socket (challenge ownership) and the MCP
-      // closures bind the same connection + abort signal — one interactive authority source for the whole turn.
+      // Per-turn compatibility bag: Skill reads remain present and capabilities bind the initiating operator socket.
       turnTools: (turn) => ({
+        ...extensions.skillTools,
         ...capabilityTools({ connection: turn.connection, signal: turn.signal }),
-        ...mcpManager.tools({ connection: turn.connection, signal: turn.signal }),
       }),
+      // One immutable Host/Skill/MCP projection is reused by every overflow retry in this Run.
+      runContext: extensions.runContext,
       // Stable Core-local tools join per-turn memory/avatar tools behind the explicit Core binding table.
       coreTools: staticCoreTools,
       coreToolGovernance,
@@ -346,6 +347,7 @@ registry.register(
 );
 registry.register(chatCancelMethod(turnControls.turns));
 registry.register(hostCatalogPublishMethod(hostCatalogs, connectionRegistry));
+registry.register(extensionStatusMethod({ coreHostId, snapshot: () => extensions.runContext().snapshot }));
 registry.register(capabilityRespondMethod(capabilityBroker, connectionRegistry));
 registry.register(timelineHistoryMethod(timelineRepo));
 registry.register(timelineSubscribeMethod(timelineSubscriptions));
@@ -381,17 +383,17 @@ registerConfigMethods(registry, { ...boot.config, logger });
 // Attachment GC (#17): a boot sweep + a 6h interval; only raw bytes expire, the description-memory is permanent.
 startAttachmentGc({ store: attachmentStore, ttlMs: boot.attachmentConfig.ttlMs, logger });
 
-// Dev-only L1 drive (env double-gate, mirror of the Shell's ScriptedApprover): registered ONLY with TAKI_DEV_TRIGGER=1
-// so it has zero production surface. It drives the same capability tools the agent does — the node-side gate still
-// authorizes every call (NOT a bypass); it only removes the LLM so headless e2e can drive governance deterministically.
+// Dev-only L1 drive: env-gated, no LLM, and still uses the Agent's tools plus node-side authorization.
 if (devTriggerEnabled(process.env)) {
   logger.warn("TAKI_DEV_TRIGGER=1 — registering the DEV capability.trigger method (L1 drive; node-side gate still authorizes)");
   registry.register(
     capabilityTriggerMethod({
-      tools: (interactive) => ({
-        ...capabilityTools(interactive),
-        ...coreToolGovernance.wrap({ ...readFileTool, ...writeFileTool }, interactive),
-      }),
+      // The current Run snapshot tools join the dev L1 drive so e2e calls the same sealed Extension closures as chat.
+      tools: (interactive) => mergeToolSets(
+        capabilityTools(interactive),
+        coreToolGovernance.wrap({ ...readFileTool, ...writeFileTool }, interactive),
+        extensions.runContext(interactive).tools,
+      ),
       logger,
     }),
   );
@@ -408,7 +410,10 @@ const server = await startWsServer({
 function shutdown(signal: string): void {
   logger.info({ signal }, "shutting down");
   void server.close().then(async () => {
-    await mcpManager.close(); // close every MCP client (kills stdio children / aborts http) before exit
+    skillBoot.catalog.close();
+    // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients
+    // (each exactly once), before the db handle and process go away.
+    await mcpBoot.manager.close();
     db.close(); // release the sqlite file handle (and checkpoint the WAL) before exit
     process.exit(0);
   });

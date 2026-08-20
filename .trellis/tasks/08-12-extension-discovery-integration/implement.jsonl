@@ -1,1 +1,13 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/host-operation-lifecycle.md","reason":"Sealed Host identity, generation, deadline, cancellation, stale response, and cancelled versus outcome_unknown semantics for every bridge call."}
+{"file":".trellis/spec/backend/mcp-lifecycle.md","reason":"MCP desired/runtime separation, immutable generation leases, last-good publication, drain/close, and no replay contracts."}
+{"file":".trellis/spec/backend/skill-lifecycle.md","reason":"Portable Skill package identity, catalog generations, read leases, lazy loading, and the explicit Slice 8 boundary."}
+{"file":".trellis/spec/backend/permission-authorization.md","reason":"One Governance/Approval authority; discovery, Skill metadata, and MCP configuration cannot grant permission."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Bounded structured failures, provenance-safe diagnostics, deadlines, and unknown-outcome handling."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Required tests, headers, indexes, size limits, build gates, and cross-layer quality expectations."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Home page registration, operator role boundary, disposable page state, and current-client lifecycle conventions."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"No authoritative browser cache, current-generation refetch, serialized mutations, and no replay after unknown outcomes."}
+{"file":".trellis/tasks/08-10-skills-mcp-productization/info.md","reason":"Frozen Host context, MCP reload, Skill/MCP persistence, run snapshot, transfer, and child-boundary contracts."}
+{"file":".trellis/tasks/08-10-skills-mcp-productization/research/current-gap-and-dependency-map.md","reason":"Verified live seams and the remaining final integration gap; prevents absorbing already completed lifecycle work."}
+{"file":".trellis/tasks/08-10-skills-mcp-productization/research/standards-and-reference-prior-art.md","reason":"Progressive discovery, portable Skill behavior, host-qualified data flow, and reference-compatible boundaries."}
+{"file":".trellis/tasks/08-12-extension-discovery-integration/design.md","reason":"Slice-specific identity, snapshot, discovery bridge, transfer boundary, two-Node proof, and persistence contract."}
+{"file":".trellis/tasks/08-12-extension-discovery-integration/implement.md","reason":"One-batch execution order, owned files, focused/full gates, manual residuals, and rollback points."}

@@ -1,1 +1,15 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Check migration ordering, row validation, optimistic revisions, reopen behavior, and Core-only writes."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Check all import/read/operator failures are bounded, truthful, and safe after unknown outcomes."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Check architecture invariants, size caps, tests, strip-only boot, headers, and folder indexes."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Audit logs and errors for raw package content, absolute paths, or submitted bytes."}
+{"file":".trellis/spec/backend/skill-lifecycle.md","reason":"Check the complete portable package, lifecycle, generation, resource, and operator contract."}
+{"file":".trellis/spec/backend/permission-authorization.md","reason":"Verify Skills add no third permission system and metadata/trust cannot widen policy."}
+{"file":".trellis/spec/backend/host-operation-lifecycle.md","reason":"Verify ownerHostId and generation provenance are explicit and stale state is non-routable."}
+{"file":".trellis/spec/backend/tool-design.md","reason":"Review load/resource tools for schema, result, governance identity, and thin delegation."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Review registry wiring, complete states, current-client races, serialized mutations, and no replay."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Prove no Skill truth or mutation queue enters localStorage, SWR cache, or a second store."}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"Check Shared schema parsing and absence of parallel wire types or unsafe assertions."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Check component/hook boundaries, tests, size caps, headers, and directory indexes."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Review the entire source-to-publication-to-Agent/Home round trip and failure transitions."}
+{"file":".trellis/tasks/08-10-skills-mcp-productization/research/current-gap-and-dependency-map.md","reason":"Check the implementation closes the actual live gaps without absorbing Slice 8."}
+{"file":".trellis/tasks/08-10-skills-mcp-productization/research/standards-and-reference-prior-art.md","reason":"Check standards compatibility, safe import, provenance/trust semantics, and confined reads."}

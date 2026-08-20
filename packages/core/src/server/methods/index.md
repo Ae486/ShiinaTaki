@@ -1,6 +1,7 @@
 # core/server/methods/
 - connect.ts — connect: the ONLY pre-auth method; token verify, pairing handshake, or loopback operator auto-trust (P3), then authenticate the socket
 - host-catalog-publish.ts — host.catalogPublish (node-only): provenance-bound complete publication with fail-closed retirement for rejected current-generation candidates
+- extension-status.ts — operator-only extension.status convergence projection over current Host/Skill/MCP owner generations
 - chat-send.ts — chat.send (operator-only): ack { messageId }, then stream agent tokens as chat.delta/.complete/.error; turns serialized per characterId (queue) + cancellable (registry); a cancel-before-reply closes with chat.error { retracted:true } (draft restore) instead of complete
 - chat-cancel.ts — chat.cancel (operator-only): abort the character's in-flight turn via the TurnRegistry; idempotent ({cancelled:false} when idle)
 - timeline-history.ts — timeline.history (operator-only): newest-first cursor page of the conversation timeline
@@ -31,3 +32,5 @@
 - config-subscribe.ts — config.subscribe (operator-only): config.changed pushes, ctx.onClose auto-unsubscribe
 - permission-methods.ts — operator-only permission.levelGet/levelSet/cellsGet/cellSet; material policy mutations notify Approval invalidation while validated no-ops do not
 - secret-methods.ts — operator-only secret.set/clear/presence/list over the Core-local encrypted catalog; write-only results (presence/provenance/health), storage failures sanitized to bounded SECRET_REFUSED app exceptions BEFORE the registry's verbatim echo paths; logs carry the opaque ref only
+- mcp-methods.ts — operator-only mcp.* lifecycle registration seam (list/get/add/edit/enable/disable/remove/test/reconnect/status); MCP_CONFIG_CONFLICT carries currentConfigRevision, MCP_REFUSED carries a bounded reason, both sanitized before the registry's verbatim echo points
+- skill-methods.ts — operator-only skill.* lifecycle registration seam; strict Shared schemas plus bounded conflict/refusal errors

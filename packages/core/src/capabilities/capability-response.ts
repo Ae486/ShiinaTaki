@@ -83,4 +83,3 @@ function postureRank(posture: "auto" | "ask" | "deny"): number {
 export function sameControl(left: HostOperationControl, right: HostOperationControl): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
 }
-

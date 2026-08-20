@@ -137,6 +137,12 @@ fn write_atomic(path: &PathBuf, file: &DecisionFile) -> std::io::Result<()> {
 mod tests {
     use super::*;
 
+    impl DecisionStore {
+        pub(crate) fn seed_for_test(&self, capability: &str, scope: Scope, allow: bool) {
+            self.remember(capability, scope, allow);
+        }
+    }
+
     fn store() -> (tempfile::TempDir, DecisionStore) {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("gate-decisions.json");

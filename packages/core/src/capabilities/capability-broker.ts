@@ -90,7 +90,7 @@ export function createCapabilityBroker(deps: {
         if (entry.control.targetHostId !== hostId || entry.control.connectionGeneration !== connectionGeneration) continue;
         bestEffortCancel(requestId, entry, "generation_retired");
         settlePending(state, requestId, {
-          outcome: interruptedOutcome(entry.execution, reason),
+          outcome: interruptedOutcome(entry.execution, entry.cancellation, reason),
           terminalReason: "late",
         });
       }
@@ -179,8 +179,9 @@ function makeControl({ target, input, identity, dispatchedMs, timeoutMs }: {
 }
 
 function bestEffortCancel(requestId: string, entry: PendingCapability, reason: CapabilityCancel["reason"]): void {
+  const hasPreExecutionChallenge = entry.challenge !== undefined;
   releaseChallenge(entry);
-  if (entry.cancellation === "cooperative") {
+  if (hasPreExecutionChallenge || entry.cancellation === "cooperative") {
     notifyHostCancel(entry, requestId, reason);
   }
 }

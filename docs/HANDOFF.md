@@ -1,13 +1,13 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
-> Updated 2026-08-16 after the Slice 5 convergence. T4 remains isolated in its dedicated worktree.
-> Approval Productization and Governance Authority are archived after their checks; Host Secret Catalog
-> (`0965358` + `c26e3f8`, contract in `.trellis/spec/backend/secret-catalog.md`) passed completeness audit plus a
-> standard formal check (`pass-with-fixes`); Host-control remains in `review` for the deferred two-Node process
-> evidence (Slice 8). The ZCODE Leader owns merge/checkpoint decisions (see `docs/ZCODE-HANDOFF.md` §19); no push
-> has occurred. Next work: secure MCP lifecycle (Slice 6), then standard Skill lifecycle. Recorded manual
-> residuals: real-Linux systemd/Wasm/locked-build proofs, live Windows keyring round-trip, packaged-WebView
-> Approval behavior, `desktop:build` packaging smoke. Verify every live status before use.
+> Updated 2026-08-19 after the Slice 8 automated convergence check. T4 remains isolated in its dedicated worktree.
+> Secure MCP, Standard Skill, Governance/Approval, Secret Catalog, and Extension Discovery contracts are implemented;
+> the reusable Slice 8 contract is `.trellis/spec/backend/extension-discovery.md`. Slice 7 is checkpointed at `4031ba7`;
+> The last recorded `main...HEAD` at the Slice 8 documentation checkpoint was `0 9`; Slice 8 implementation is
+> checkpointed at `1a7a1a5` and the documentation checkpoint at `dafe437`. Verify live Git status before use.
+> Slice 8 automated gates pass, including the mandatory simultaneous two-Node process proof. No push, reset, rebase,
+> force, finish/archive, or cross-worktree cleanup occurred. Manual residuals remain explicitly unclaimed
+> below. Verify every live status before use.
 
 ## 1. Mission and boundary
 
@@ -15,17 +15,17 @@ The incoming session owns the T4 program from the dedicated worktree. Its first 
 productization of Skills and MCP because Scheduled Tasks, Heartbeat, unattended governance, and Procedural Knowledge
 must depend on a truthful extension surface rather than the current boot-only developer configuration.
 
-The Host-control and Governance Authority children now implement the generation-safe execution spine plus Core-owned
-durable global policy, canonical adapters, Host projection/evidence, deny-only migration, and the Home operator view.
-They do not yet implement canonical Approval decisions/challenge-resume, secret storage, MCP CRUD/reload, Skill
-lifecycle, Scheduled Tasks, Heartbeat, Autonomous Runs, Run Receipts, or Memory adapters.
+The completed foundations now include generation-safe Host control, Core-owned Governance, connection-bound Approval,
+the encrypted Host Secret Catalog, Secure MCP and Standard Skill lifecycles, and their converged extension discovery,
+Run snapshot, Home projection, and two-Node process evidence. Scheduled Tasks, Heartbeat, Autonomous Runs, Run Receipts,
+and later Memory adapters are not yet delivered.
 
 The immediate job is therefore:
 
 1. preserve and extend the committed Host-control contracts;
 2. execute the remaining evidence-driven Trellis children through implement, proportional check, spec update, and
    closeout;
-3. converge secure MCP and standard Skill lifecycle work through the final integration child; and
+3. converge the completed MCP/Skill surfaces through the final extension-integration child; and
 4. only then create and execute the formal T4 Autonomous Run/Scheduler/Heartbeat task family.
 
 Do not restart the completed product Grill and do not repeat the three existing Skills/MCP research studies.
@@ -44,17 +44,17 @@ Shared TakiAgent checkpoint: `3d8a320c5a3aea72ed3ee504c910adee10a5e2b1`
 The commit is a mergeable parallel-work baseline; it is not a declaration that every included task passed manual
 acceptance.
 
-Current live status:
+Current live status (2026-08-19 Slice 8 convergence review):
 
-- `main` remains at `5dd6dd2` and is not ahead of the T4 branch; nothing was pushed;
-- the T4 branch contains the frozen planning commits, Host-control production commit `7427edf`, Governance Authority
-  production commit `46a8487`, verified Slice 4 Batch A commit `cd67ad0`, and B+D interactive checkpoint `2c1c4e5`;
-  verify the live HEAD before relying on any recorded commit hash;
-- `.trellis/.current-task` is intentionally ignored by Git and is independently bound in each worktree;
-- the main worktree remains bound to `08-09-hindsight-compatibility-extensions`;
-- the T4 worktree is bound to child task `08-12-approval-productization`, which is `in_progress` after its approved
-  planning convergence; `08-12-governance-authority` and `08-12-host-control-foundation` remain in `review`, and the
-  parent remains `planning` while children execute; and
+- `main` is `bd9ddfb`; the main worktree has two user-owned dirty Hindsight task documents. Do not edit or clean them;
+- T4 implementation checkpoint is `1a7a1a5` on `task/t4-skills-mcp-productization`, with documentation checkpoint `dafe437`;
+  verify the live T4 HEAD and `main...HEAD` before acting; current main was fully contained at the recorded checkpoint;
+- the approved security convergence is checkpointed at `57fe909`; the Slice 7 implementation/specs are committed as
+  one reviewable ownership group;
+- `.trellis/.current-task` still points to archived Approval Productization. The session-bound live work is
+  `.trellis/tasks/08-12-extension-discovery-integration` (`in_progress`); preserve the known pointer mismatch until its
+  tooling ownership is deliberately resolved rather than masking it with an unconditional rewrite;
+- no agent or child agent is running. Recursive agent delegation remains prohibited by owner direction; and
 - locked workspace dependencies are installed only inside the T4 worktree; `.env.local` remains absent.
 
 Ignored local resources are intentionally handled as follows:
@@ -128,9 +128,9 @@ Recorded gates for this commit:
 - the real `withStack` reconnect and `process-list` scenarios passed, covering Core boot, identity creation, Host
   negotiation/catalog publication, same-Host reconnect, and one live capability request/response.
 
-Do not overstate coverage: the existing fixture starts one Node, so a real two-Node process test for simultaneous
-same-capability routing remains unverified. Core unit tests cover explicit two-Host routing and cross-Host provenance.
-Rust cooperative cancellation suppresses accepted late settlement but cannot forcibly abort arbitrary blocking OS work.
+At the Slice 2 checkpoint the fixture started one Node, so simultaneous same-capability routing remained unverified.
+Slice 8 now closes that process gap with two isolated real Nodes. Rust cooperative cancellation still cannot forcibly
+abort arbitrary blocking OS work; Core settlement and late-response suppression remain generation-safe.
 
 Slice 3 has a live reconnaissance, owner-review PRD, implemented technical design, and curated implement/check context:
 
@@ -203,6 +203,91 @@ unit-proven only; dispatched-but-unchallenged generation changes settle effect-k
 legacy `always` rows surface no reconfirmation candidates (fresh `allow_always` is the practice); packaged WebView
 prompt behavior remains pending owner verification.
 
+Slice 5 Host Secret Catalog is archived after a completeness audit and one `pass-with-fixes` formal check. Its
+committed implementation (`0965358` plus closeout `c26e3f8`) owns encrypted catalog values, write-only operator methods,
+systemd/Windows master-key seams, migration ordering, locked behavior, and secret-ref resolution. Its executable
+contract is `.trellis/spec/backend/secret-catalog.md`. Live Windows Credential Manager, real Linux systemd credential,
+and packaged helper proofs remain manual/platform residuals.
+
+Slice 6 Secure MCP Lifecycle is implemented at committed baseline `2c2ef5f` plus the current approved convergence
+worktree. It adds marker-only Shared schemas, SQLite desired rows with optimistic `configRevision`, operator-only
+CRUD/test/reconnect/status methods, Home management, token-owned candidates, bounded local pagination, selected-tool
+validation, collision-safe publication, last-good generations, leases/draining, exactly-once close, secret-triggered
+reload/retirement, restart reconcile, sanitized failures, and forced-close `OUTCOME_UNKNOWN` truth. The manager is
+split by ownership across `mcp-manager.ts`, `mcp-manager-state.ts`, `mcp-publication.ts`, and `mcp-client-close.ts`.
+
+The single Slice 6 formal check passed with two final fixes: shutdown now tracks late candidate cleanup within its
+global budget, and clearing a ref held only by an old draining generation preserves the newer active generation. Final
+automated evidence: workspace typecheck, root lint, Shared 301, CLI 44, Desktop 407, Core 1,405 plus 1 existing skip,
+focused Shared/Core/Desktop MCP suites, real-process MCP E2E 3/3, Desktop production build, independent Core strip-only
+boot, diff/header/index/size audits. The original product diff did not touch Rust; the later security batch did and is
+covered below. Packaged Home WebView interaction and a real external MCP
+provider/credential round-trip remain pending owner verification. The executable contract is
+`.trellis/spec/backend/mcp-lifecycle.md`.
+
+The separately requested strict review of `[Approval C+E, Slice 6)` initially returned `request changes` against
+commit `325b8e2`. The bounded pre-Slice-7 repair is now complete and approved. It closes final Host-floor/audit on
+approved resume, generic CLI secret argv exposure, Windows create-only key races, migration identity collisions,
+non-cooperative challenge retirement, terminal timer cleanup, transport-error redaction, and the historical EOF
+failure. The follow-up review also closed four concrete repair regressions: the mutex is cross-session `Global\` and
+SID/service/account-scoped, new Credential Manager entries use Local persistence, device identity adopts the
+create-only winner, and production decision-write visibility remains narrow. Strict Clippy, MCP index coverage,
+3-6-line production headers, and cross-platform Rust test cfgs are green.
+
+Final security-convergence evidence: Shared 301, CLI 47, Desktop 407, Core 1,409 plus 1 existing skip;
+Approval/Secret/MCP real-process E2E 8; Desktop production build; Rust 170 library plus 7 helper tests; strict locked
+Clippy; Core strip-only boot; header/index audits; and `git diff --check`. Live cross-session Credential Manager
+contention/persistence remains source/dependency verified rather than exercised. Do not mark the packaged Home,
+external MCP credential, Linux systemd credential, or owner-only manual residuals as passed.
+
+### 3.4 Standard Skill Lifecycle (Slice 7)
+
+Slice 7 is implemented as one compact Shared/Core/Home vertical. It preserves portable `SKILL.md` packages and adds
+bounded directory/ZIP import, standard metadata validation, provenance/hash/trust/scan/quarantine state, optimistic
+enable/disable/replace/remove/reconcile methods, immutable content-addressed publication, generation leases/drain/GC,
+legacy seed-once behavior, confined `read_skill_resource`, and a disposable Home Skills page.
+
+The single formal review returned `Not approved`. The Leader independently confirmed and repaired its actionable
+findings: all lifecycle mutations are serialized; inspect round-trips standard metadata; ZIP/directory sources use
+bounded parser and path checks; published reads use one integrity-checked snapshot; YAML alias handling matches the
+installed `yaml` API; Shared exports are explicit; Home replacement accepts ZIP and directory; and quarantined orphan
+cleanup is retryable after durable removal. A bounded post-repair xhigh recheck was attempted twice but the agent service
+returned HTTP 429 both times; no second formal-agent approval is claimed. The Leader completed a local full-scope audit instead.
+
+Automated evidence now passes: Shared 306, CLI 47, Desktop 417, Core 1,461 plus one existing skip; full E2E 32 passed
+and 6 skipped; the dedicated Skill lifecycle E2E passed; Desktop production build passed with existing Live2D script
+warnings; and independent strip-only Core boot reached `ws server listening`. Packaged Home WebView/file-picker
+interaction, real external provider credentials, and owner-only manual checks remain unverified. Slice 8 closes the
+formerly deferred two-Node Host convergence gap. The task remains unarchived and in progress; the implementation
+checkpoint is committed, while owner manual acceptance and Trellis closeout remain pending.
+
+### 3.5 Converged Extension Discovery and Integration (Slice 8)
+
+Slice 8 now composes Host control, Governance/Approval, Secure MCP, and Standard Skills into one bounded extension
+surface. Shared owns strict identity/discovery/status schemas. Core rejects duplicate canonical identities and model
+keys, captures one immutable Host/Skill/MCP registry before the first model attempt, reuses it across overflow retries,
+and dispatches `extension_call` only through the captured owner-qualified binding. Display labels, paths, metadata,
+Skill trust, and `allowed-tools` never become authority.
+
+The Host context now fences untrusted labels and emits fixed routing/transfer rules. Home reads an operator-only,
+Shared-parsed convergence projection using current-client suppression and memory-only state. The transfer adapter
+accepts only a sealed Host id plus an advertised capability and delegates to the existing Host route; a compatible
+remote transfer Host remains required before claiming successful package movement.
+
+The formal review fixed three concrete gaps: cooperative read retirement now settles `cancelled` while interrupted
+effects settle `outcome_unknown`; the dev L1 tool composition rejects duplicate presentation keys; and the real two-Node
+scenario now proves catalog replacement, old-generation response rejection, cross-Host isolation, cancellation, unknown
+effect outcome, and no automatic replay. Both Nodes retain stable Host identity across generation replacements.
+
+Automated evidence passes: Shared 309, CLI 47, Desktop 419, and Core 1,471 plus one existing skip; full E2E 33 passed
+and 6 skipped; Desktop production build passed with the existing Live2D script warnings; Rust passed 170 library and 7
+helper tests plus strict Clippy; workspace typecheck, root lint, scoped rustfmt, source/header/index/security audits, and
+`git diff --check` passed. Full E2E repeatedly booted Core through Node's strip-only TypeScript path.
+
+Manual residuals remain packaged Home/file-picker interaction, a real external MCP credential round-trip, execution
+against a compatible remote transfer Host, and owner-observed acceptance. The Slice 8 task stays `in_progress` and
+unarchived until those owner gates and checkpoint/closeout actions are explicitly authorized.
+
 ## 4. Required reading order
 
 Read these files before changing the Skills/MCP plan:
@@ -218,7 +303,7 @@ Read these files before changing the Skills/MCP plan:
 6. `.trellis/tasks/08-10-skills-mcp-productization/research/vps-secret-backend-options.md` — selected host-local secret
    architecture and spike gates.
 7. `.trellis/spec/backend/host-operation-lifecycle.md` — common offline/in-flight/resume/receipt lifecycle.
-8. `.trellis/spec/backend/permission-authorization.md`, `tool-design.md`,
+8. `.trellis/spec/backend/permission-authorization.md`, `secret-catalog.md`, `mcp-lifecycle.md`, `tool-design.md`,
    `mcp-tool-schema-compatibility.md`, `server-push-and-connection-auth.md`, and `config-store.md`.
 9. `.trellis/spec/frontend/home-window.md`, `state-management.md`, and `type-safety.md`.
 10. `.trellis/workspace/pleia/t4-second-grill-prep.md` and
@@ -312,22 +397,21 @@ The Product Owner has resolved the product behavior. The following are engineeri
    - Governance Authority context is curated. Repeat the same requirement independently for every later child before
      dispatching its implementer.
 
-The four former P0 multi-Host gaps are closed at the unit/wire level: routing is explicit or single-Host-only,
-disconnect settlement is generation-scoped, responses require authenticated connection provenance, and the shared
-control tuple carries Host/generation/deadline identity. The remaining process-level evidence gap is the dedicated
-two-Node harness described above.
+The four former P0 multi-Host gaps are closed at both unit/wire and real-process levels: routing is explicit or
+single-Host-only, disconnect settlement is generation-scoped, responses require authenticated connection provenance,
+and the shared control tuple carries Host/generation/deadline identity. Slice 8's dedicated two-Node harness verifies
+the composed behavior without weakening the Rust cooperative-cancellation limitation.
 
 ## 7. Intended program order
 
 ### Phase A — Skills/MCP prerequisite
 
-1. Freeze the remaining contracts above and obtain owner acknowledgement of the concrete implementation decision.
-2. Create evidence-driven Trellis children and curate each child's context.
-3. Implement common governance and Approval foundations before parallel MCP/Skill lifecycle children.
-4. Converge discovery, Host behavior, Home management, restart/reconnect, migration, and security evidence.
-5. Run one proportional formal check for each substantial child or converged batch; do not spend a formal check on
-   discussion-only or documentation-only work.
-6. Update reusable specs and close the parent only after end-to-end operator acceptance.
+1. Slices 1-7 have frozen and implemented authority, Host-control, Governance, Approval, secrets, Secure MCP, and the
+   portable Standard Skill lifecycle without introducing a Taki-only Skill format.
+2. Converge extension discovery, Host behavior, operator surfaces, restart/reconnect, migration, security evidence, and
+   the real two-Node proof in Slice 8.
+3. Re-run final operator/Agent acceptance across both MCP and Skills, including pending owner-manual surfaces.
+4. Update reusable specs and close the parent only after end-to-end operator acceptance.
 
 ### Phase B — formal T4 program
 
@@ -353,10 +437,10 @@ python ./.trellis/scripts/get_context.py
 git log -3 --oneline --decorate
 ```
 
-Expected task pointer: `.trellis/tasks/08-12-approval-productization`. Its PRD/design/research/context are curated and
-the task is `in_progress`; revalidate them plus live Git/migration state before each remaining C+E dispatch. Host-control
-stays in `review` until the deferred real two-Node evidence and owner closeout; Governance Authority stays in `review`
-because Slice 3 cannot release without Slice 4; the parent remains `planning` until the full program converges.
+The pointer currently (and incorrectly) names archived `.trellis/tasks/08-12-approval-productization`; do not silently
+rewrite it. The live child is `.trellis/tasks/08-12-extension-discovery-integration`, still `in_progress` and
+checkpointed at `dafe437` (implementation `1a7a1a5`); owner acceptance and finish/archive remain pending. The two-Node evidence is complete; the parent remains
+`planning` until the remaining manual Skills/MCP acceptance is observed.
 
 If the worktree is dirty for an unknown reason, stop and identify ownership before editing. Never run T4 commands from
 `H:/TakiAgent` merely because it is the familiar path.
@@ -407,16 +491,13 @@ Push remains a separate owner-authorized action.
 The incoming Leader should report the live state to the owner, then:
 
 1. verify this worktree, current child, branch, `main...HEAD`, and Hindsight separation;
-2. confirm `7427edf` and the recorded gates before treating Host-control as the dependency baseline;
-3. treat the missing two-Node process harness as the owner-approved mandatory Slice 8 convergence gate without
-   weakening the existing unit/wire evidence;
-4. treat Approval Batch A plus B+D checkpoint `2c1c4e5` as the verified baseline, refresh `main...HEAD`, then dispatch
-   one C+E Host/convergence wave covering challenge/resume, legacy reconfirmation, privacy, and real-process evidence;
-5. keep the one Approval lifecycle Core-owned and generation-bound; do not revive Shell-local prompts or legacy allow
-   writers;
-6. do not mark either reviewed child complete or archive it without the applicable owner closeout direction; and
-7. run the Slice's sole xhigh formal check only after C+E convergence, then continue in the recorded slice order,
-   keeping secure MCP and standard Skill lifecycle behind governance, Approval, and secret foundations.
+2. verify the Slice 8 checkpoint without mixing main-worktree Hindsight changes;
+3. rebuild `jbcontext` at the Slice 8 checkpoint so the Extension modules are stable indexed units;
+4. preserve the common Governance/Approval/Host/secret/runtime contracts; a Skill suggests procedure and tools but
+   never grants permission or creates a third authority;
+5. retain packaged Home/file-picker interaction, a real external MCP credential round-trip, and a compatible remote
+   transfer Host as pending manual evidence; do not relabel automated E2E as those observations; and
+6. request owner-observed acceptance before any finish/archive or parent closeout action.
 
 No new product Grill is currently required. Ask the owner only if live code/research exposes a genuine product choice
 that would materially change behavior, security, scope, or delivery.

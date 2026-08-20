@@ -1,18 +1,18 @@
 # desktop/src-tauri/src/
 - main.rs — thin shim (windows_subsystem + mobile entry) calling taki_desktop_lib::run(); untouched
 - lib.rs — Tauri composition root: dirs/legacy-approver/status-sink resolution, TauriStatusEmitter, node::build_node call, commands; the retained approver is not consulted by the Slice-3 production WS execution path
-- node.rs — tauri-FREE node assembly: NodeConfig + build_node (legacy deny/level readers, audit, capabilities, WsClient) + init_tracing; shared by lib.rs and bin/taki-node
+- node.rs — tauri-FREE node assembly: NodeConfig + build_node, create-only stable device identity with winner adoption, tracing, and WsClient; shared by lib.rs and bin/taki-node
 - status.rs — StatusEmitter trait (status sink seam) + TracingStatusEmitter (headless log-only impl)
 - protocol.rs — stable crate-internal protocol import surface, non-Host serde mirrors, and the golden-fixture parity sweep
 - ws_challenge.rs — pure Host ask helpers: sealed challenge building, redacted classification-only presentation, and exact one-shot resume authorization validation
 - host_control_protocol.rs — strict Host negotiation/catalog/immutable-control/request/cancel/response serde mirrors and protocol-v3 constants
 - host_approval_protocol.rs — validated Host challenge/resume authorization DTOs plus cross-language canonical digest helpers (control, challenge, and approval decision scope)
 - host_session.rs — one live Host generation's exact binding, cancellation, 256-entry terminal-attempt cache, and memory-only one-shot pending challenge state
-- ws_client.rs — the reconnecting node client: handshake, token persist, capability.request → projection/classification/stricter constraint → execute / deny / capability.challenge, capability.resume consumption with one-shot lineage settlement; tauri-free
-- gate.rs — retained pre-Slice-3 evaluator plus the production legacy-deny/legacy-level readers and audit-only final-enforcement seam; `ws_client.rs` does not call the local prompt/decision writer
+- ws_client.rs — reconnecting node client: handshake/catalog, request classification, challenge/resume; resume consumes once, rechecks current Host floors immediately before execution, and audits approved/denied truth
+- gate.rs — retained pre-Slice-3 evaluator plus production legacy-deny/legacy-level readers and distinct auto/deny/Core-approved final-enforcement audit seams; `ws_client.rs` never calls the local prompt/writer
 - gate/ — read-only legacy compatibility plus dormant pre-Slice-3 evaluator/approver helpers and tests; current production authority is the Core projection composed with Host stricter-only constraints
 - audit.rs — Shell-owned JSONL audit trail (append-only, names-only EXCEPT exec's command, ruling 9) + ISO-8601 timestamp
-- secrets.rs — SecretStore trait + Windows Credential Manager (keyring) + in-memory fake
+- secrets.rs — SecretStore trait + Windows Credential Manager; SID/service/account-scoped `Global\` create lock, Local-persistence new entries, and in-memory fake
 - capabilities_impl.rs — capability handler registry (invariant 7; opaque Value output + optional dialog detail) + capabilities_impl/ executors
 - capabilities_impl/ — one executor per capability (screenshot, screenshot-ambient, process-list, clipboard read/write, shell-open, exec, foreground-window)
 - bin/ — extra crate roots (taki-node, the headless e2e/CI node)

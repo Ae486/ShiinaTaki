@@ -1,0 +1,6 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend quality checklist"}
+{"file": ".trellis/spec/frontend/home-window.md", "reason": "Verify page registry and window boundary invariants"}
+{"file": ".trellis/spec/frontend/live2d-renderer.md", "reason": "Verify Live2D teardown preserves ticker ownership"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Verify tests and production quality"}
+{"file": ".trellis/tasks/08-19-diagnose-live2d-pet-model/research/browser-esm-cycle.md", "reason": "Verify the confirmed browser ESM defect is closed"}
+{"file": ".trellis/tasks/08-19-diagnose-live2d-pet-model/research/strict-mode-teardown.md", "reason": "Verify the StrictMode stale-canvas defect is closed"}

@@ -10,22 +10,30 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { idleDisposers } = vi.hoisted(() => ({ idleDisposers: [] as Array<ReturnType<typeof vi.fn>> }));
+const { idleDisposers, lifecycle } = vi.hoisted(() => ({
+  idleDisposers: [] as Array<ReturnType<typeof vi.fn>>,
+  lifecycle: {
+    order: [] as string[],
+    removeModel: vi.fn(),
+    destroyModel: vi.fn(),
+    destroyApp: vi.fn(),
+  },
+}));
 
 vi.mock("./stage.ts", () => ({
   createStage: vi.fn(async () => ({
     ticker: { add: vi.fn(), remove: vi.fn(), start: vi.fn(), stop: vi.fn(), maxFPS: 0, started: false },
     screen: { width: 400, height: 600 },
     renderer: {},
-    stage: {},
-    destroy: vi.fn(),
+    stage: { removeChild: lifecycle.removeModel },
+    destroy: lifecycle.destroyApp,
   })),
 }));
 vi.mock("./alpha-mask-source.ts", () => ({
   createAlphaMaskSource: () => ({ refresh: vi.fn(), isOpaque: () => false, dispose: vi.fn() }),
 }));
 vi.mock("./live2d/load-character-model.ts", () => ({
-  loadCharacterModel: vi.fn(async () => ({ tag: "model" })),
+  loadCharacterModel: vi.fn(async () => ({ tag: "model", destroy: lifecycle.destroyModel })),
   DEV_MODEL_SOURCE: "dev",
 }));
 vi.mock("./live2d/avatar-controller.ts", () => ({
@@ -55,6 +63,19 @@ const host = {} as unknown as HTMLElement;
 
 beforeEach(() => {
   idleDisposers.length = 0;
+  lifecycle.order.length = 0;
+  lifecycle.removeModel.mockReset();
+  lifecycle.destroyModel.mockReset();
+  lifecycle.destroyApp.mockReset();
+  lifecycle.removeModel.mockImplementation(() => {
+    lifecycle.order.push("remove-model");
+  });
+  lifecycle.destroyModel.mockImplementation(() => {
+    lifecycle.order.push("destroy-model");
+  });
+  lifecycle.destroyApp.mockImplementation(() => {
+    lifecycle.order.push("destroy-app");
+  });
 });
 
 describe("createPetScene idle scheduler lifecycle", () => {
@@ -82,6 +103,23 @@ describe("createPetScene idle scheduler lifecycle", () => {
     const scene = await createPetScene(host, { renderThrottling: false });
     scene.dispose();
     expect(idleDisposers[0]).toHaveBeenCalledTimes(1);
+  });
+
+  it("destroys the Live2D model before the Pixi application and remains idempotent", async () => {
+    const scene = await createPetScene(host, { renderThrottling: false });
+    lifecycle.destroyApp.mockImplementation(() => {
+      lifecycle.order.push("destroy-app");
+      if (lifecycle.destroyModel.mock.calls.length === 0) {
+        throw new TypeError("Cannot read properties of null (reading 'next')");
+      }
+    });
+
+    expect(() => scene.dispose()).not.toThrow();
+    expect(() => scene.dispose()).not.toThrow();
+    expect(lifecycle.order).toEqual(["remove-model", "destroy-model", "destroy-app"]);
+    expect(lifecycle.removeModel).toHaveBeenCalledTimes(1);
+    expect(lifecycle.destroyModel).toHaveBeenCalledTimes(1);
+    expect(lifecycle.destroyApp).toHaveBeenCalledTimes(1);
   });
 });
 

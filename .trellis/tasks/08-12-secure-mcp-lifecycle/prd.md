@@ -19,12 +19,12 @@ candidate validation, last-good publication, immutable Run snapshots, and genera
 
 ## Acceptance Criteria
 
-- [ ] Ordinary add/edit/enable/disable/remove/test/reconnect requires no process restart.
-- [ ] Failed candidate keeps last-good truth; test never publishes tools.
-- [ ] An in-flight call stays on its captured generation while future Runs see the replacement.
-- [ ] Disable/remove/secret clear block new leases and close/drain exactly once.
-- [ ] Crash/restart reconciles desired state without restoring fake runtime truth or replaying calls.
-- [ ] One bad server/tool does not disable unrelated tools.
+- [x] Ordinary add/edit/enable/disable/remove/test/reconnect requires no process restart.
+- [x] Failed candidate keeps last-good truth; test never publishes tools.
+- [x] An in-flight call stays on its captured generation while future Runs see the replacement.
+- [x] Disable/remove/secret clear block new leases and close/drain exactly once.
+- [x] Crash/restart reconciles desired state without restoring fake runtime truth or replaying calls.
+- [x] One bad server/tool does not disable unrelated tools.
 
 ## Out of Scope
 

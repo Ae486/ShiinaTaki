@@ -20,6 +20,7 @@
 - legacy-approval-schema.ts — compatibility-only LegacyApproval* MCP prompt schemas used by dormant Core and CLI code
 - permission-level-schema.ts — Core-owned permission.* generation/concurrency schemas plus isolated legacy Rust-compatible leaves for pre-projection golden fixtures
 - governance-schema.ts — extension-neutral canonical identity, descriptor registry, override, and evaluation schemas
+- extension-discovery-schema.ts — bounded host-qualified Skill/MCP/capability identity, Run snapshot, progressive discovery, and call-result schemas
 - governance-registry.ts — validated versioned canonical descriptor registry and collision-safe lookup helpers
 - governance-evaluator.ts — pure fail-closed effective posture evaluator (Approval deliberately absent)
 - governance-api.ts — focused named public facade for governance and permission exports
@@ -27,6 +28,8 @@
 - capability-schema.ts — compatibility entry re-exporting the canonical Host-bound capability channel schemas
 - capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec/ForegroundWindow); mirrored in Rust serde
 - secret-catalog-schema.ts — SECRET_METHODS + write-only secret.set/clear/presence/list schemas + SecretRef charset + SecretRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)
+- mcp-lifecycle-schema.ts — MCP_METHODS + marker-only desired-server wire schemas + expectedConfigRevision writes + bounded tool-name/list contracts + sanitized active/draining runtime diagnostics + McpRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)
+- skill-lifecycle-schema.ts — strict Skill package lifecycle/operator protocol, import limits, provenance, trust, scan, and runtime projections
 - ws-defaults.ts — default loopback WS host/port constants
 - memory-provider-domain-schema.ts — strict canonical authority, Bank, source, unit, derived, policy, capability, and error contracts
 - memory-provider-operation-schema.ts — strict retain, recall, reflect, and mutation operation contracts

@@ -1,1 +1,14 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/tasks/08-12-secure-mcp-lifecycle/research/live-mcp-lifecycle-seam-map.md", "reason": "Live file:line anchors: manager rework surface, configRevision exemplar, migration registry, Home page conventions, testing seams, risk register"}
+{"file": ".trellis/tasks/08-10-skills-mcp-productization/info.md", "reason": "Frozen candidate/lease/drain/close/crash/persistence contracts and the three state planes"}
+{"file": ".trellis/spec/backend/secret-catalog.md", "reason": "Secret catalog the runtime consumes: refs, JIT resolution, locked semantics, AC4 seed interplay"}
+{"file": ".trellis/spec/backend/mcp-tool-schema-compatibility.md", "reason": "Candidate-stage normalization, per-tool isolation, collision handling"}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Governed MCP tool wrapper and adapter convergence; do not weaken"}
+{"file": ".trellis/spec/backend/config-store.md", "reason": "Why desired MCP state is NOT a config key (composites) + operator protocol conventions"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Migration and repo conventions"}
+{"file": ".trellis/spec/frontend/home-window.md", "reason": "Home page registration and management-page conventions"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "No-snapshot-persistence and generation refetch rules"}
+{"file": ".trellis/spec/backend/mcp-lifecycle.md", "reason": "Converged executable contract for marker-only desired state, candidate ownership, generations, secrets, and Home partial-success behavior"}
+{"file": "docs/HANDOFF.md", "reason": "Confirmed seven-item pre-Slice-7 security finding list and worktree/merge boundaries"}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "Challenge retirement, generation ownership, no replay, and outcome semantics"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Bounded refusal, audit, deadline, and side-effect error contracts"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Rust/TS size, test, header, index, and quality gates"}

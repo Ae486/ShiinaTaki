@@ -44,6 +44,7 @@ Grill sessions Q1-Q11 complete: product definition, layered memory registry, act
 
 [OK] **Completed**
 
+
 ### Next Steps
 
 - None - task complete
@@ -846,6 +847,215 @@ Implemented and checked the Host Secret Catalog slice. The interrupted implement
 [OK] **Completed**
 
 
+## Session 16: T4 Secure MCP Lifecycle strict-review convergence and formal check
+
+**Date**: 2026-08-17
+**Task**: `.trellis/tasks/08-12-secure-mcp-lifecycle`
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Resumed the T4 Leader role after the temporary ZCODE implementation reached Slice 6 without its final check. Performed
+a deliberately skeptical review, received owner approval for the Slice 6 repair list, converged the implementation,
+and completed the Slice's single formal check as **pass-with-fixes**. Secure MCP is now configurable and real-process
+invocable through the common Governance and Approval path; it remains standard MCP through `@ai-sdk/mcp`, not a
+Taki-specific replacement protocol or permission system.
+
+### Main Changes
+
+- Added desired/candidate operation tokens so stale candidates cannot replace a newer revision or resurrect disabled,
+  removed, secret-cleared, or shutting-down state.
+- Added abortable candidate deadlines, bounded pagination/cursor/tool validation, selected-tool existence checks,
+  collision-safe model identities, late-client cleanup, and sanitized transport/model/operator error boundaries.
+- Split runtime ownership into `mcp-manager-state.ts`, `mcp-publication.ts`, `mcp-client-close.ts`, and the thin manager;
+  every MCP client now shares one exactly-once close promise.
+- Extended generation truth with owner/revision/secret refs, active plus draining status, lease retention, and
+  `OUTCOME_UNKNOWN` after forced close.
+- Made secret clear/update generation-aware across desired/candidate/active/draining captures. The final check fixed a
+  server-level over-retirement bug and made shutdown wait within budget for late candidate cleanup.
+- Restricted desired env/header values to valid `secret-ref:` markers. Home now uses write-only fields, requires
+  re-entry after name/transport change, preserves partial-commit drafts/revisions, reports failed tests truthfully, and
+  refuses reconnect while disabled.
+- Added `.trellis/spec/backend/mcp-lifecycle.md`, synchronized backend/frontend specs, production headers, four folder
+  indexes, Slice artifacts, HANDOFF, and ZCODE-HANDOFF. Rebuilt the `jbcontext` index and recorded the HEAD-only
+  revision caveat for the next checkpoint.
+
+### Formal Check
+
+- [OK] Workspace typecheck (Shared, CLI, Desktop, E2E, Core) and root ESLint.
+- [OK] Focused MCP: Shared 15, Core 56, Desktop 21.
+- [OK] Full packages: Shared 301, CLI 44, Desktop 407, Core 1,405 passed plus 1 existing skip.
+- [OK] Real-process Secure MCP E2E 3/3: no-restart management, diagnostic-only test, governed Approval call,
+  conflict/retry, disable/enable, restart lineage, secret clear/locked isolation, seed-once migration, sentinel privacy.
+- [OK] Desktop Vite production build; existing Live2D non-module warnings only.
+- [OK] Independent Node strip-only Core boot reached `ws server listening` using a temporary data directory.
+- [OK] `git diff --check`, production header, affected `index.md`, debug/suppression, and size/function audits.
+- [N/A] Rust/Cargo: Slice 6 changed no Rust code.
+
+### Adjacent Historical Review
+
+The owner-requested strict review of `[Approval C+E, Slice 6)` returned `request changes` with eight findings. The
+current Slice fixed the historical MCP resolved-secret error leak. Seven remain outside this repair scope: final Host
+floor/audit on approved resume, CLI generic-call secret argv exposure, Windows master-key create race, incremental
+secret migration identity collision, non-cooperative challenge retirement, completed-request timer cleanup, and one
+historical EOF diff failure. No non-Slice-6 production fix was made; `docs/HANDOFF.md` records the full list.
+
+### Residual Risk and Status
+
+- Pending owner verification: packaged Home MCP interaction and a real external MCP provider/credential round-trip.
+- Deferred to Slice 8: real simultaneous two-Node Host convergence proof and the seven adjacent historical findings.
+- Main and T4 are both two commits ahead of their common base (`main...HEAD = 2 2`); shared docs/composition require a
+  semantic merge at the next authorized checkpoint.
+- The Trellis pointer remains stale on archived Approval; the live task is explicitly named above.
+
+[IN PROGRESS] **Slice 6 implementation and automated check are complete; reviewed changes/docs remain uncommitted and
+the task is not finished or archived. Next product work is Standard Skill Lifecycle after checkpoint/merge review.**
+
+## Session 17: T4 pre-Slice-7 security convergence
+
+**Date**: 2026-08-18
+**Task**: `.trellis/tasks/08-12-secure-mcp-lifecycle`
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Closed the owner-approved `[Approval C+E, Slice 6)` findings before Standard Skill Lifecycle. The work remained one
+compact repair/check cycle: no recursive delegation, no batch-per-check repetition, and no scope expansion into Slice
+7. The original review findings and every follow-up finding were independently confirmed before repair.
+
+### Main Changes
+
+- Approved resumes now recompute final Host enforcement, deny a newly tightened floor, and emit exactly one truthful
+  allowed/denied audit row without widening the legacy decision writer.
+- Generic CLI calls reject `secret.set`; secret input remains stdin-only. Migration identities include existing
+  markers before mutation; challenge expiry retires all pre-effect Host state; terminal settlement clears timers.
+- Windows create-only Credential Manager writes use a SID/service/account-scoped `Global\` mutex and Local
+  persistence. Device identity uses the same create-only seam and adopts a valid competing winner.
+- Preserved production `DecisionStore::remember` visibility, added a test-only seed seam, fixed non-Windows Rust test
+  cfgs, restored strict Clippy, completed MCP index coverage, and compressed all changed production headers to 3-6
+  lines.
+
+### Final Check
+
+- [OK] Full packages: Shared 301, CLI 47, Desktop 407, Core 1,409 passed plus 1 existing skip.
+- [OK] Approval/Secret/MCP real-process E2E: 8 passed.
+- [OK] Desktop production build and independent Core strip-only boot.
+- [OK] Rust: 170 library plus 7 helper tests; strict locked all-target Clippy.
+- [OK] Root lint, workspace typechecks, production header/index audits, and `git diff --check`.
+- [UNVERIFIED] Live competing Windows sessions and persisted Credential Manager metadata, packaged Home WebView,
+  external MCP credential round-trip, Linux systemd credentials, two-Node convergence, and owner-only manual ACs.
+
+### Status
+
+[IN PROGRESS] **Automated pre-Slice-7 convergence is approved and checkpointed at `57fe909`. Main was merged at
+`cc2a65e` without conflicts or tree-content changes. The task remains unarchived; Standard Skill Lifecycle is next.**
+
+## Session 18: T4 Standard Skill Lifecycle implementation and convergence
+
+**Date**: 2026-08-18
+**Task**: `.trellis/tasks/08-12-standard-skill-lifecycle`
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Implemented Slice 7 as one Shared/Core/Home batch and one formal review cycle. The package remains the portable Agent
+Skills `SKILL.md` format; Taki state is a SQLite/content-store sidecar, and Skill text, metadata, trust, scan labels,
+scripts, and `allowed-tools` grant no permission. The implementation agent was resumed after repeated service 429s,
+then the Leader completed and verified the retained worktree patch directly without creating a replacement agent.
+
+### Main Changes
+
+- Added strict `skill.*` Shared schemas, migration 018, bounded repository rows, optimistic revisions, explicit Host
+  ownership, and standard metadata inspection.
+- Added lazy bounded ZIP and browser-directory import, shared package path/collision guards, safe YAML parsing with
+  aliases disabled, immutable staged publication, quarantine/rejected visibility, deterministic hashing, and legacy
+  seed-once behavior.
+- Added a prepared no-I/O catalog publication seam, process-local immutable generations, read leases, retirement/GC,
+  tamper reconciliation, mutation serialization, and orphan quarantine cleanup tied to durable package ids.
+- Kept `load_skill` metadata-first/lazy and added governed confined `read_skill_resource`; neither grants authority or
+  executes scripts.
+- Added operator-only Core methods and typed Home WS routes plus a disposable Skills page with ZIP/directory import and
+  replacement, inspect, enable/disable, reconcile, two-step remove, current-generation suppression, and no cache.
+- Added the executable backend/frontend Skill contract and a real-process operator WS lifecycle scenario covering
+  import, inspect, disable, restart persistence, enable, replace, reconcile, and remove.
+
+### Formal Review and Repairs
+
+The single xhigh formal check returned `Not approved`. The Leader independently confirmed and repaired its actionable
+findings: type/lint failures, explicit Shared exports, complete mutation serialization, standard metadata round-trip,
+directory replacement, parser/alias API correctness, published-read TOCTOU, repository input bounds, Core shutdown,
+quarantine cleanup semantics, source/header/index maintenance, and missing process/spec evidence. A bounded post-repair
+xhigh recheck was attempted twice through the existing check agent, but the agent service returned HTTP 429 both times;
+no second formal-agent approval is claimed. Focused re-verification and a local full-scope audit followed the repair.
+
+### Verification
+
+- [OK] Workspace typecheck and root ESLint.
+- [OK] Focused Skill suites: Shared 5, Core 59, Desktop 10; final storage/ZIP focused regression 34, plus the exact-
+  duplicate ZIP regression (16/16 source tests) added during the final local audit.
+- [OK] Full packages: Shared 306, CLI 47, Desktop 417, Core 1,461 plus 1 existing skip.
+- [OK] Full E2E: 32 passed / 6 skipped; dedicated Skill lifecycle E2E passed.
+- [OK] Desktop production build; only existing Live2D non-module warnings.
+- [OK] Independent Node strip-only Core boot reached `ws server listening` on a temporary data root.
+- [OK] Main remained `bd9ddfb`; `main...HEAD` remained `0 5` before final documentation convergence.
+
+### Residual Risk and Status
+
+- [UNVERIFIED] Packaged Home WebView/file-picker interaction, real external provider credentials, two-Node Host
+  convergence, and owner-only manual acceptance.
+- [DEFERRED TO SLICE 8] Whole-Run Skill/MCP discovery convergence and cross-Host package transfer/routing.
+- `.trellis/.current-task` remains stale on archived Approval; the session-bound task resolver correctly reports this
+  Slice. No commit, push, rebase, reset, finish, or archive occurred.
+
+[IN PROGRESS] **Slice 7 implementation and automated convergence are complete in one dirty ownership group. Review and
+checkpoint are still required before Slice 8; manual residuals remain explicitly unclaimed.**
+
+## Session 19: T4 Extension Discovery and two-Node convergence review
+
+**Date**: 2026-08-19
+**Task**: `.trellis/tasks/08-12-extension-discovery-integration`
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Completed the single Slice 8 formal review, repaired the confirmed acceptance gaps, and verified the converged
+Shared/Core/Home/Rust/E2E surface. The work remained inside `H:/TakiAgent-worktrees/t4`; YCE and sub-agents were not
+used, and the stale `.trellis/.current-task` pointer was deliberately left unchanged.
+
+### Findings Fixed
+
+- Generation retirement previously reported every interrupted read as `NODE_DISCONNECTED`. Settlement now uses both
+  execution kind and cancellation capability: cooperative reads return `CANCELLED`/`cancelled`, effects return
+  `OUTCOME_UNKNOWN`/`outcome_unknown`, and non-cooperative reads retain the disconnected outcome.
+- The dev-only L1 trigger merged capability/Core/Extension tools by object spread. It now uses `mergeToolSets`, so a
+  duplicate model-facing key fails closed instead of selecting an authority by insertion order.
+- The initial two-Node test proved explicit routing and reconnect identity but omitted catalog replacement,
+  old-generation response rejection, and interruption settlement. The real-process relay now observes and can mutate
+  terminal responses; Node restarts can advertise a replacement catalog; the scenario proves both outcome classes,
+  Host B isolation, and no replay.
+- Synchronized the capabilities/fixture indexes, Slice 8 executable contract, implementation checklist, leader
+  handoff, and this journal with the verified behavior and residual manual gates.
+
+### Verification
+
+- [OK] Root ESLint and workspace typecheck.
+- [OK] Focused Shared/Core/Desktop suites and the dedicated Slice 8 two-Node E2E.
+- [OK] Full packages: Shared 309, CLI 47, Desktop 419, Core 1,471 plus one existing skip.
+- [OK] Full E2E: 33 passed / 6 skipped; real Core strip-only boot is exercised by the process harness.
+- [OK] Desktop production build; only existing Live2D non-module script warnings.
+- [OK] Rust: 170 library plus 7 helper tests; strict Clippy; scoped `rustfmt` on `taki-node.rs`.
+- [OK] `git diff --check`, production header/index, role/cache/secret/path, task JSON/JSONL, and source-size audits.
+
+### Residual Risk and Status
+
+- [UNVERIFIED] Packaged Home/file-picker interaction, real external MCP credentials, a compatible remote transfer
+  Host, and owner-observed manual acceptance.
+- `.trellis/.current-task` still names archived Approval; the live Slice 8 task remains explicitly `in_progress`.
+- Implementation checkpoint `1a7a1a5` was committed. No push, rebase, reset, finish, archive, or edit to
+  `docs/ZCODE-HANDOFF.md` occurred.
+
+[IN PROGRESS] **Slice 8 implementation and automated convergence are checkpointed at `1a7a1a5`, with documentation
+checkpoint `dafe437`. Owner manual acceptance and authorized finish/archive remain pending.**
 ## Session 16: Hindsight Slice 0 acceptance and closeout
 
 **Date**: 2026-08-19
@@ -925,3 +1135,24 @@ Implemented and accepted the dormant Canonical Memory Provider Foundation. Local
 ### Next Steps
 
 - Plan and implement Batch 2 legacy memory normalization and migration; do not activate the canonical provider before migration verification.
+
+
+## Session 22: Freeze Skills MCP and integrate Main
+
+**Date**: 2026-08-20
+**Task**: Freeze Skills MCP and integrate Main
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Validated the merged T4/Main migration lineage with focused tests, temporary-file reopen simulations, full workspace gates, Desktop build, Rust tests and Clippy, E2E, and isolated Core boot. Archived the closeout task; owner-manual packaged Home, external credential round-trip, Linux systemd credential, and compatible remote Host residuals remain unclaimed.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `35765a0` | (see git log) |
+
+### Status
+
+[OK] **Completed**

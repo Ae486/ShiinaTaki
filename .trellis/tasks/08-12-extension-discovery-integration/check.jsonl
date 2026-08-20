@@ -1,1 +1,13 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/extension-discovery.md","reason":"Primary executable contract for unified identity, bounded discovery, immutable Run snapshot, host provenance, and bridge behavior."}
+{"file":".trellis/spec/backend/host-operation-lifecycle.md","reason":"Audit every Host-bound dispatch for authenticated owner/generation binding, cancellation, stale frames, and no automatic replay."}
+{"file":".trellis/spec/backend/mcp-lifecycle.md","reason":"Audit MCP reload replacement, lease/drain, persistence boundary, secret isolation, and stale-generation tool results."}
+{"file":".trellis/spec/backend/skill-lifecycle.md","reason":"Audit Skill standard compatibility, catalog leases, lazy resource reads, and no permission widening."}
+{"file":".trellis/spec/backend/permission-authorization.md","reason":"Audit that no discovery or extension adapter creates a second permission or Approval system."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Audit bounded error/result envelopes, unknown outcomes, redaction, and no replay/retry behavior."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Audit Home operator ownership, complete states, current-client generations, and no direct alternate authority."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Audit cache/privacy and late-result behavior across MCP/Skill convergence UI."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Run final size/header/index/test/build and diff checks at the complete-slice gate."}
+{"file":".trellis/tasks/08-12-extension-discovery-integration/prd.md","reason":"Acceptance criteria and explicit out-of-scope T4 subject boundaries for the final MCP/Skill slice."}
+{"file":".trellis/tasks/08-12-extension-discovery-integration/design.md","reason":"Review implementation against the sealed design, especially collision rejection, snapshot immutability, transfer refusal, and two-Node evidence."}
+{"file":".trellis/tasks/08-12-extension-discovery-integration/implement.md","reason":"Verify the complete batch checklist, required gates, manual residuals, and rollback boundaries."}
+{"file":"docs/HANDOFF.md","reason":"Authoritative T4 topology, mainline merge rules, prior completion evidence, and verified two-Node convergence proof."}

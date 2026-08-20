@@ -26,7 +26,8 @@
     "08-12-host-secret-catalog",
     "08-12-secure-mcp-lifecycle",
     "08-12-standard-skill-lifecycle",
-    "08-12-extension-discovery-integration"
+    "08-12-extension-discovery-integration",
+    "08-20-skills-mcp-freeze-main-integration"
   ],
   "parent": null,
   "relatedFiles": [],

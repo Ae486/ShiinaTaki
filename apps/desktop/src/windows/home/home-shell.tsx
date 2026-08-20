@@ -1,11 +1,12 @@
 /**
  * INPUT:  the page registry + the home store's current page.
- * OUTPUT: <HomeShell> — the two-pane home layout: left menu (one icon+label entry per registry row) + the current
- *         page's body, shared client context, and the shared Home status banner on non-chat pages.
+ * OUTPUT: <HomeShell> — the two-pane home layout: left menu (one icon+label entry per registry row) + lazily mounted,
+ *         visited page bodies, shared client context, and the shared Home status banner on non-chat pages.
  * POS:    ui/windows/home — the window root. Owns navigation, the shared Home connection, that socket's Approval
- *         modal, and the one ToastHost; Chat retains an independent socket and modal.
+ *         modal, and the one ToastHost; visited page instances remain in memory for this window only.
  */
 
+import { useEffect, useState } from "react";
 import { ToastHost } from "@/components/toast/toast-host.js";
 import { ConnectionStatusBanner } from "@/components/connection-status/connection-status.js";
 import { useHomeStore } from "./home-store.ts";
@@ -14,6 +15,7 @@ import { useHomeConnection } from "./use-home-connection.ts";
 import { HomeClientContext } from "./home-client-context.ts";
 import { HOME_PAGES } from "./pages.ts";
 import { useApprovalDialog } from "@/components/approval/use-approval-dialog.js";
+import { appendVisitedPage } from "./visited-page-ids.ts";
 
 const ACTIVE_ROW = "bg-white text-rose-700 shadow-sm ring-1 ring-rose-200/70";
 const IDLE_ROW = "text-slate-500 ring-1 ring-transparent hover:bg-white/70 hover:text-slate-700";
@@ -54,9 +56,14 @@ export function HomeShell() {
   useHomeNavigateEvent();
   const connection = useHomeConnection();
   const currentPage = useHomeStore((state) => state.currentPage);
+  const [visitedPages, setVisitedPages] = useState<readonly (typeof HOME_PAGES)[number]["id"][]>([currentPage]);
   const page = HOME_PAGES.find((entry) => entry.id === currentPage) ?? HOME_PAGES[0];
+  const mountedPages = HOME_PAGES.filter((entry) => visitedPages.includes(entry.id) || entry.id === currentPage);
   const approvalDialog = useApprovalDialog(connection.client);
-  const CurrentPage = page.component;
+
+  useEffect(() => {
+    setVisitedPages((previous) => appendVisitedPage(previous, currentPage));
+  }, [currentPage]);
 
   return (
     <HomeClientContext.Provider value={connection}>
@@ -69,7 +76,20 @@ export function HomeShell() {
         </nav>
         <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
           {page.id !== "chat" && <ConnectionStatusBanner status={connection.status} />}
-          <CurrentPage />
+          {mountedPages.map((entry) => {
+            const PageComponent = entry.component;
+            const active = entry.id === currentPage;
+            return (
+              <div
+                key={entry.id}
+                hidden={!active}
+                aria-hidden={active ? undefined : true}
+                className="min-h-0 flex flex-1 flex-col"
+              >
+                <PageComponent />
+              </div>
+            );
+          })}
         </main>
         <ToastHost />
         {approvalDialog}

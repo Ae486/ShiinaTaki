@@ -1,7 +1,6 @@
 /**
  * INPUT:  a JSON-RPC client bound to the operator socket + call params from the UI hooks.
- * OUTPUT: handshake() (connect outcome) + requestMethods() — the plain request/response half of the WsClient
- *         (chat/timeline/media/character/config/memory/perception/permission governance/canonical Approval).
+ * OUTPUT: handshake() plus typed request methods including governance, lifecycle, and extension convergence
  * POS:    ui/lib — the outbound half of ws-client (no turn/stream state lives here). Every result is parsed through a
  *         @taki/shared schema: the zod boundary holds for every inbound frame.
  */
@@ -27,14 +26,31 @@ import {
   ConfigSubscribeResultSchema,
   ConnectResultSchema,
   ErrorCodeSchema,
+  EXTENSION_METHODS,
+  ExtensionConvergenceResultSchema,
   MEDIA_METHODS,
   MEMORY_METHODS,
+  MCP_METHODS,
   MediaClearResultSchema,
   MediaGetResultSchema,
   MediaUsageResultSchema,
   MemoryStatusResultSchema,
   MemoryTidyResultSchema,
+  McpGetResultSchema,
+  McpListResultSchema,
+  McpMutationResultSchema,
+  McpRemoveResultSchema,
+  McpStatusResultSchema,
+  McpTestResultSchema,
+  SKILL_METHODS,
+  SkillInspectResultSchema,
+  SkillListResultSchema,
+  SkillMutationResultSchema,
+  SkillRemoveResultSchema,
+  SkillReconcileResultSchema,
   PERCEPTION_METHODS,
+  SECRET_METHODS,
+  SecretSetResultSchema,
   PerceptionCardSchema,
   PerceptionPauseStateSchema,
   PERMISSION_METHODS,
@@ -50,6 +66,13 @@ import {
   type ConfigSetParams,
   type ConnectParams,
   type ErrorCode,
+  type McpAddParams,
+  type McpEditParams,
+  type McpEnableParams,
+  type McpTestParams,
+  type SkillImportParams,
+  type SkillMutationParams,
+  type SecretSetParams,
   type PerceptionPauseSetParams,
   type PermissionCellSetParams,
   type PermissionLevelSetParams,
@@ -81,6 +104,43 @@ function approvalMethods(request: <T>(method: string, params: JSONRPCParams) => 
   };
 }
 
+function extensionMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
+  return {
+    extensionStatus: async () => ExtensionConvergenceResultSchema.parse(await request(EXTENSION_METHODS.status, {})),
+  };
+}
+
+/** The MCP lifecycle family: every result parsed through its @taki/shared schema at the boundary. */
+function mcpMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
+  return {
+    mcpList: async () => McpListResultSchema.parse(await request(MCP_METHODS.list, {})),
+    mcpGet: async (serverId: string) => McpGetResultSchema.parse(await request(MCP_METHODS.get, { serverId })),
+    mcpAdd: async (params: McpAddParams) => McpMutationResultSchema.parse(await request(MCP_METHODS.add, params)),
+    mcpEdit: async (params: McpEditParams) => McpMutationResultSchema.parse(await request(MCP_METHODS.edit, params)),
+    mcpEnable: async (params: McpEnableParams) => McpMutationResultSchema.parse(await request(MCP_METHODS.enable, params)),
+    mcpDisable: async (params: McpEnableParams) => McpMutationResultSchema.parse(await request(MCP_METHODS.disable, params)),
+    mcpRemove: async (params: McpEnableParams) => McpRemoveResultSchema.parse(await request(MCP_METHODS.remove, params)),
+    mcpTest: async (params: McpTestParams) => McpTestResultSchema.parse(await request(MCP_METHODS.test, params)),
+    mcpReconnect: async (serverId: string) => McpMutationResultSchema.parse(await request(MCP_METHODS.reconnect, { serverId })),
+    mcpStatus: async () => McpStatusResultSchema.parse(await request(MCP_METHODS.status, {})),
+    // The MCP page's write-only secret-value path: the value goes ONLY to secret.set (the sanctioned sensitive
+    // method), never into any mcp.* frame or cached view; the desired config keeps the opaque marker.
+    secretSet: async (params: SecretSetParams) => SecretSetResultSchema.parse(await request(SECRET_METHODS.set, params)),
+  };
+}
+
+function skillMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
+  return {
+    skillList: async () => SkillListResultSchema.parse(await request(SKILL_METHODS.list, {})),
+    skillInspect: async (packageId: string) => SkillInspectResultSchema.parse(await request(SKILL_METHODS.inspect, { packageId })),
+    skillImport: async (params: SkillImportParams) => SkillMutationResultSchema.parse(await request(SKILL_METHODS.import, params)),
+    skillEnable: async (params: SkillMutationParams) => SkillMutationResultSchema.parse(await request(SKILL_METHODS.enable, params)),
+    skillDisable: async (params: SkillMutationParams) => SkillMutationResultSchema.parse(await request(SKILL_METHODS.disable, params)),
+    skillRemove: async (params: SkillMutationParams) => SkillRemoveResultSchema.parse(await request(SKILL_METHODS.remove, params)),
+    skillReconcile: async () => SkillReconcileResultSchema.parse(await request(SKILL_METHODS.reconcile, {})),
+  };
+}
+
 /** The handshake outcome: authenticated, or refused with the app ErrorCode (PAIRING_REQUIRED / AUTH_FAILED / ...). */
 export type ConnectOutcome = { ok: true; token?: string } | { ok: false; code: ErrorCode | null; message: string };
 
@@ -106,17 +166,22 @@ export async function handshake(
   }
 }
 
+function avatarMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
+  return {
+    subscribeAvatar: async (characterId: string) => void (await request(AVATAR_METHODS.subscribe, { characterId })),
+    reportAvatar: async (params: AvatarReportParams) => {
+      // One centralized trace for every re-report makes vocabulary drift observable without logging names.
+      console.info(`[avatar] reported vocab motions=${params.motions.length} expressions=${params.expressions.length}`);
+      await request(AVATAR_METHODS.report, params);
+    },
+  };
+}
+
 export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => TimingPolicy) {
   const request = <T>(method: string, params: JSONRPCParams): Promise<T> => requestWithDeadline({ rpc, timing, method, params });
   let configSubscription: Promise<void> | null = null;
   return {
-    subscribeAvatar: async (characterId: string) => void (await request(AVATAR_METHODS.subscribe, { characterId })),
-    reportAvatar: async (params: AvatarReportParams) => {
-      // One centralized trace for EVERY re-report (boot / costume promotion / manual switch / drift self-heal): the
-      // provable-re-report the acceptance needs. A dead-names regression shows here as a count mismatch (1b).
-      console.info(`[avatar] reported vocab motions=${params.motions.length} expressions=${params.expressions.length}`);
-      await request(AVATAR_METHODS.report, params);
-    },
+    ...avatarMethods(request),
     chatCancel: async (characterId: string) =>
       ChatCancelResultSchema.parse(await request(CHAT_METHODS.cancel, { characterId })).cancelled,
     timelineHistory: async (params: TimelineHistoryParams) =>
@@ -154,5 +219,8 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
     perceptionCard: async () => PerceptionCardSchema.parse(await request(PERCEPTION_METHODS.card, {})),
     ...permissionMethods(request),
     ...approvalMethods(request),
+    ...extensionMethods(request),
+    ...mcpMethods(request),
+    ...skillMethods(request),
   };
 }

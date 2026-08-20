@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { McpServerConfig } from "../mcp/mcp-config.ts";
-import { SECRET_REF_MARKER, mcpEnvRef, mcpHeaderRef, parseSecretRefValue, resolveMcpConfigSecrets, sanitizeRefSegment } from "./secret-ref.ts";
+import {
+  SECRET_REF_MARKER,
+  mcpConfigSecretRefs,
+  mcpEnvRef,
+  mcpHeaderRef,
+  parseSecretRefValue,
+  resolveMcpConfigSecrets,
+  sanitizeRefSegment,
+} from "./secret-ref.ts";
 
 const SENTINEL = "sentinel-not-a-real-secret-value-0123456789";
 const PLAIN = "not-a-secret-plain-value";
@@ -28,6 +36,11 @@ describe("parseSecretRefValue", () => {
 describe("resolveMcpConfigSecrets (connect-time resolution)", () => {
   const stdio: McpServerConfig = { command: "node", args: [], env: { TOKEN: `${SECRET_REF_MARKER}mcp.demo.env.API_KEY`, NODE_ENV: PLAIN } };
   const http: McpServerConfig = { url: "https://x.example/mcp", headers: { "X-Api-Key": `${SECRET_REF_MARKER}mcp.demo.header.X_API` } };
+
+  it("enumerates only opaque refs from either transport kind", () => {
+    expect([...mcpConfigSecretRefs(stdio)]).toEqual(["mcp.demo.env.API_KEY"]);
+    expect([...mcpConfigSecretRefs(http)]).toEqual(["mcp.demo.header.X_API"]);
+  });
 
   it("resolves markers just-in-time and passes plain values through untouched", () => {
     const resolved = resolveMcpConfigSecrets(stdio, (ref) => (ref === "mcp.demo.env.API_KEY" ? SENTINEL : null));

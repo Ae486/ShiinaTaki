@@ -96,9 +96,11 @@ describe("createCapabilityBroker", () => {
     const late = b.request(target(HOST_A, (_m, p) => (sentA = p as CapabilityRequest)), {});
     let sentB: CapabilityRequest | undefined;
     const second = b.request(target(HOST_B, (_m, p) => (sentB = p as CapabilityRequest)), {});
+    const effect = b.request(target(HOST_A, () => undefined, "effect"), {});
     b.cancelGeneration(HOST_A, 1, "Host disconnected");
-    await expect(first).resolves.toMatchObject({ ok: false, code: "NODE_DISCONNECTED" });
-    await expect(late).resolves.toMatchObject({ ok: false, code: "NODE_DISCONNECTED" });
+    await expect(first).resolves.toMatchObject({ ok: false, code: "CANCELLED", state: "cancelled" });
+    await expect(late).resolves.toMatchObject({ ok: false, code: "CANCELLED", state: "cancelled" });
+    await expect(effect).resolves.toMatchObject({ ok: false, code: "OUTCOME_UNKNOWN", state: "outcome_unknown" });
     expect(b.resolve({ requestId: sentA!.requestId, control: sentA!.control, state: "completed", output: OUTPUT, governance: EVIDENCE }, {
       hostId: HOST_A, connectionGeneration: 1,
     })).toEqual({ accepted: false, reason: "late" });
@@ -126,6 +128,35 @@ describe("createCapabilityBroker", () => {
       expect(b.resolve({ requestId: sentRead!.requestId, control: sentRead!.control, state: "completed", output: OUTPUT, governance: EVIDENCE }, {
         hostId: HOST_A, connectionGeneration: 1,
       })).toEqual({ accepted: false, reason: "late" });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("clears the deadline timer after an earlier terminal response", async () => {
+    vi.useFakeTimers();
+    try {
+      const { broker: b } = broker(100);
+      let sent: CapabilityRequest | undefined;
+      let notifications = 0;
+      const pending = b.request(target(HOST_A, (_method, params) => {
+        notifications += 1;
+        sent = params as CapabilityRequest;
+      }), {});
+      expect(vi.getTimerCount()).toBe(1);
+
+      expect(b.resolve({
+        requestId: sent!.requestId,
+        control: sent!.control,
+        state: "completed",
+        output: OUTPUT,
+        governance: EVIDENCE,
+      }, { hostId: HOST_A, connectionGeneration: 1 })).toEqual({ accepted: true });
+      await expect(pending).resolves.toEqual({ ok: true, output: OUTPUT });
+      expect(vi.getTimerCount()).toBe(0);
+
+      await vi.advanceTimersByTimeAsync(100);
+      expect(notifications).toBe(1);
     } finally {
       vi.useRealTimers();
     }

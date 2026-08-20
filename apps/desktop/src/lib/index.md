@@ -3,7 +3,7 @@ Cross-cutting Pet UI clients + seams (talk to the Agent Core / hold window-share
 icons/ (the shared glyph set) and the two window-shared React hooks below.
 - ws-client.ts — operator WS JSON-RPC client to the Core (browser WebSocket): the public WsClient surface + turn/handshake wiring
 - ws-client-routes.ts — inbound half: the zod boundary (frame parse + chat/avatar/timeline/config/Approval push routing) and the D29 mid-turn-close abort
-- ws-client-methods.ts — outbound half: the handshake + every plain request/response method, including canonical Approval respond/list/revoke
+- ws-client-methods.ts — outbound half: handshake plus schema-validated operator methods including extension convergence
 - rpc-deadline.ts — method-class timing table + typed deadline error + json-rpc-2.0 native timeout requester seam
 - timing-policy.ts — window-owned bootstrap/last-good timing policy store; validates full Core config refreshes without persistence
 - timing-policy-sync.ts — exact-once config subscription and serialized full-policy refresh for an authenticated client
@@ -19,7 +19,7 @@ icons/ (the shared glyph set) and the two window-shared React hooks below.
 - costume-switch-attempt.ts — D61's cancellable whole-attempt controller: resolution/Tauri stage admission, renderer attachment commit, and bounded recoverable avatar.report
 - promise-timeout.ts — withTimeout(promise, ms, label): labeled rejection for loads that can wedge (costume switches / boot promotion)
 - character-asset-url.ts — costume identity + settings/per-resource asset URLs (convertFileSrc per file); unresolvable/`..` refs are stripped before the engine (#18)
-- open-home-window.ts — pet→home window opener: creates home.html at the requested page or navigates the open one (single instance by label); also owns the home:navigate event name
+- open-home-window.ts — pet→home window opener: creates home.html at the requested page or restores, navigates and focuses the open one (single instance by label); also owns the home:navigate event name
 - costume-switch-event.ts — the BIDIRECTIONAL home↔pet costume seam: the three pet-scoped event names (switch / cancel / result), their emit helpers and the payload gates each side reads through (the live PetScene exists only in the pet window, so the page commands and the pet reports back)
 - use-tauri-event.ts — the shared window-event plumbing: one stable listener per event name, handler read through a ref, unlisten on unmount
 - use-cached-fetch.ts — the stale-while-revalidate seam every settings-family page loads through: last-good value first, background refresh, manual refresh, local mutate

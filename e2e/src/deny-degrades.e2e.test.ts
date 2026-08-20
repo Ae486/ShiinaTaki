@@ -19,7 +19,7 @@ describe("approval-required path degrades to a structured error", () => {
       const result = await stack.l1("exec", { command: "whoami" });
       expect(result).toMatchObject({ ok: false, code: "APPROVAL_REQUIRED" });
       const execDecisions = stack.audit().filter((line) => line.capability === "exec").map((line) => line.decision);
-      expect(execDecisions).toContain("auto-denied");
+      expect(execDecisions).toEqual([]);
     });
   });
 });

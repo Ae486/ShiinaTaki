@@ -7,6 +7,7 @@ Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pn
 - reconnect.e2e.test.ts — node pairs once, reconnects by persisted token (no second pairing code)
 - governance-authority.e2e.test.ts — real Core + external taki-node: compatible catalog, relaxed auto, Core deny, Host stricter deny, and higher-generation projection replacement
 - governance-stale-projection.e2e.test.ts — test-only loopback relay proves stale N-1 and same-N valid-digest projection tampering are rejected without execution/replay, then settles Core through bounded Host-generation retirement and verifies cleanup
+- extension-discovery.e2e.test.ts — simultaneous real Core + two isolated Nodes: ambiguous direct process-list refusal, sealed host-qualified Extension calls, stable Host A identity with higher reconnect generation, and Host B disconnect isolation
 - screenshot-l2.e2e.test.ts — L2 agent drive: real LLM asked to screenshot (key-gated; the H2 diagnosis)
 - trigger-gating.e2e.test.ts — the dev capability.trigger is absent without TAKI_DEV_TRIGGER=1 (METHOD_NOT_FOUND), present with it
 - screenshot-always-restart.e2e.test.ts — Slice-3 compatibility: legacy Always stays inert before/after restart; ask remains APPROVAL_REQUIRED
@@ -32,6 +33,8 @@ correct (exit / OS-clipboard / on-disk file):
 - exec-l2.e2e.test.ts — real agent asked to run `hostname` invokes exec and it exits 0
 - clipboard-l2.e2e.test.ts — real agent asked to copy a token; the OS clipboard holds it (verified via an L1 read)
 - workspace-l2.e2e.test.ts — real agent asked to write+read a file; the token lands on disk in the Workspace
+- mcp-lifecycle.e2e.test.ts — real-process Secure MCP Lifecycle: add/test(no publish)/edit(conflict+retry)/disable/enable all land with NO restart; a governed MCP tool call runs through Approval (dev L1 drive); Core restart reconciles desired state into a fresh generation lineage; a cleared or locked catalog secret retires ONLY the referencing server; the legacy mcp-servers.json seeds desired state once and is inert afterwards
+- skill-lifecycle.e2e.test.ts — real-process Standard Skill Lifecycle: operator WS import/inspect/disable/enable/replace/reconcile/remove work without manual filesystem edits, and durable disabled truth survives a Core restart
 - secret-catalog.e2e.test.ts — real-process secret catalog: set → core restart → presence survives with no re-provisioning; a removed key source locks the store (mutations fail closed, file never rewritten, nothing queues); boot-time plaintext env/headers migration rewrites mcp-servers.json to opaque refs after verified copy; sentinel absent from frames/logs/disk
 
 Manual-only (recorded in the PRD, deliberately not automated): #10/#17/#18 dialog text renders verbatim (visual);

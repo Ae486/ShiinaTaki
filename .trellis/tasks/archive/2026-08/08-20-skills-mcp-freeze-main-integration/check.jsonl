@@ -1,0 +1,6 @@
+{"file":".trellis/spec/backend/index.md","reason":"Review cross-layer architecture and complete backend quality requirements after synchronization."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Check migration uniqueness, ordering, reopen behavior, and compatibility."}
+{"file":".trellis/spec/backend/extension-discovery.md","reason":"Ensure Main integration does not weaken frozen extension authority, snapshot, or routing contracts."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Run full-scope backend quality, header, index, and regression checks."}
+{"file":".trellis/spec/frontend/index.md","reason":"Review merged Home package conventions and cross-layer data flow."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Run frontend quality and production build gates after integration."}

@@ -22,7 +22,7 @@ vi.mock("@/components/toast/toast-store.js", () => ({
 }));
 
 const { WHEEL_ITEMS } = await import("./wheel-items.ts");
-const { DEFAULT_PAGE_ID } = await import("@/windows/home/pages.js");
+const { DEFAULT_PAGE_ID } = await import("@/windows/home/default-page-id.js");
 
 function row(id: string) {
   const item = WHEEL_ITEMS.find((candidate) => candidate.id === id);

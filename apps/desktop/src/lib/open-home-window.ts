@@ -1,6 +1,7 @@
 /**
  * INPUT:  a click on a pet-side shortcut (bubble expand button today, the operation wheel next batch).
- * OUTPUT: openHome(pageId) — creates the home window at that page, or navigates the open one; HOME_NAVIGATE_EVENT.
+ * OUTPUT: openHome(pageId) — creates the home window at that page, or restores, navigates and focuses the open one;
+ *         HOME_NAVIGATE_EVENT.
  * POS:    ui/lib — the pet→home window seam. Single instance BY CONSTRUCTION: the window label is a constant and an
  *         existing window is reused, never re-created. Needs the pet capability's create-webview-window + set-focus +
  *         the get-all pair (getByLabel calls them) + core:event:default (emitTo).
@@ -23,6 +24,7 @@ export interface HomeNavigatePayload {
 export async function openHome(pageId: PageId): Promise<void> {
   const existing = await WebviewWindow.getByLabel(HOME_LABEL);
   if (existing) {
+    await existing.unminimize();
     await existing.show();
     await emitTo(HOME_LABEL, HOME_NAVIGATE_EVENT, { page: pageId } satisfies HomeNavigatePayload);
     await existing.setFocus();

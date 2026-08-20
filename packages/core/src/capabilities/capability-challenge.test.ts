@@ -189,7 +189,7 @@ describe("capability challenge/resume", () => {
       .toEqual({ accepted: false, reason: "stale_generation" });
     const cancels = harness.hostFrames.get("capability.cancel") ?? [];
     expect(cancels.at(-1)).toMatchObject({ reason: "approval_invalidated" });
-    await expect(pending).resolves.toMatchObject({ ok: false, code: "NODE_DISCONNECTED" });
+    await expect(pending).resolves.toMatchObject({ ok: false, code: "CANCELLED", state: "cancelled" });
   });
 
   it("rejects an auto/deny-classified challenge and an unprojected evidence cell", async () => {
@@ -199,7 +199,7 @@ describe("capability challenge/resume", () => {
       const request = sentRequest(harness);
       expect(harness.broker.challenge({ ...challengeFor(request), governance }, { hostId: HOST, connectionGeneration: 1 }))
         .toEqual({ accepted: false, reason: "stale_generation" });
-      await expect(pending).resolves.toMatchObject({ ok: false, code: "NODE_DISCONNECTED" });
+      await expect(pending).resolves.toMatchObject({ ok: false, code: "CANCELLED", state: "cancelled" });
       expect(harness.approvalRequests).toHaveLength(0);
     }
   });
@@ -268,6 +268,39 @@ describe("capability challenge/resume", () => {
       broker.challenge(challengeFor(request), { hostId: HOST, connectionGeneration: 1 });
       await vi.advanceTimersByTimeAsync(100);
       await expect(pending).resolves.toEqual({ ok: false, code: "CAPABILITY_TIMEOUT", message: TIMEOUT_MESSAGE });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("retires a non-cooperative effect challenge on deadline before any effect starts", async () => {
+    vi.useFakeTimers();
+    try {
+      const capture = createCaptureLogger();
+      const approval = testApproval();
+      const hostFrames = new Map<string, unknown[]>();
+      const operator = fakeOperator(() => undefined);
+      const broker = createCapabilityBroker({ logger: capture.logger, approval, timeoutMs: 100, now: Date.now });
+      const harness = { broker, approval, operator, hostFrames, approvalRequests: [], records: [] } satisfies Harness;
+      const target = askTarget(harness);
+      target.descriptor = { ...target.descriptor, execution: "effect", cancellation: "non-cooperative" };
+      const pending = broker.request(target, SENTINEL_INPUT);
+      const request = sentRequest(harness);
+      expect(broker.challenge(challengeFor(request), { hostId: HOST, connectionGeneration: 1 }))
+        .toEqual({ accepted: true });
+
+      await vi.advanceTimersByTimeAsync(100);
+
+      await expect(pending).resolves.toEqual({
+        ok: false,
+        code: "OUTCOME_UNKNOWN",
+        message: TIMEOUT_MESSAGE,
+        state: "outcome_unknown",
+      });
+      expect((hostFrames.get("capability.cancel") ?? []).at(-1)).toMatchObject({
+        requestId: request.requestId,
+        reason: "deadline_exceeded",
+      });
     } finally {
       vi.useRealTimers();
     }

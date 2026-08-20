@@ -17,7 +17,7 @@ Window-state persistence is configured POSITION-only with `main` on the denylist
 
 A secondary window is created at runtime, not declared in `tauri.conf.json`:
 
-- **Open-on-demand** via a `lib/open-<name>-window.ts` helper: `await WebviewWindow.getByLabel("<label>")` (async in `@tauri-apps/api` v2) → if it exists `show()` + push it to the right page + `setFocus()`; else `new WebviewWindow("<label>", { url: "<name>.html", ... })`. Fixed label, fixed url — never interpolate runtime data into either (the home page id rides a `?page=` query param, which is not the url). Single instance is BY CONSTRUCTION: the label is a constant and an existing window is reused, never re-created.
+- **Open-on-demand** via a `lib/open-<name>-window.ts` helper: `await WebviewWindow.getByLabel("<label>")` (async in `@tauri-apps/api` v2) → if it exists `unminimize()` + `show()` + push it to the right page + `setFocus()`; else `new WebviewWindow("<label>", { url: "<name>.html", ... })`. Fixed label, fixed url — never interpolate runtime data into either (the home page id rides a `?page=` query param, which is not the url). Single instance is BY CONSTRUCTION: the label is a constant and an existing window is reused, never re-created.
 - **Await the create race**: `tauri://created` resolves, `tauri://error` rejects, so a failed open reaches the caller. Packaged builds have no devtools and `window.alert` is a no-op — a rejected open MUST surface as a toast (`pushToast`), never console-only (D34; the dead opener defect).
 - **Entry**: a root `<name>.html` (opaque; no Cubism/renderer scripts unless it renders Live2D) + `src/windows/<name>/main.tsx`, added to `vite.config.ts` `build.rollupOptions.input.<name>`.
 - **Capability**: a dedicated `src-tauri/capabilities/<name>.json` with `"windows": ["<label>"]` granting only what that window needs (home needs just `core:event:default`: its Core traffic is a plain browser WebSocket, its file `<input>` is a web-platform API, and events cover `home:navigate` inbound + `pet:costume-switch` outbound). The window that OPENS another needs `core:webview:allow-create-webview-window` + `core:window:allow-set-focus` + `core:window:allow-get-all-windows` + `core:webview:allow-get-all-webviews` (the `getByLabel` lookup enumerates windows/webviews; without the get-all pair opening throws `plugin:window|get_all_windows not allowed by ACL`, #18 round 4) in ITS capability file — that is why `pet.json`, not `home.json`, carries them. A wrong/oversized permission set is a review-blocker; capability ids are validated by `cargo check` (tauri build script), so run it after editing capabilities.
@@ -52,6 +52,38 @@ restoration. The complete lifecycle, deadline, timing-policy, timeline-reconcili
 - The UI renders Core facts only: factory/override/effective posture, override mode, generation, reset, second-confirm,
   immutable, loading/reconnecting/read/validation/saved/conflict states. It may disclose that Hosts can tighten, but it
   must not invent a per-row Host constraint not present in the Core response.
+
+### Secure MCP management
+
+- The MCP page is an operator projection over Core desired rows plus process-local runtime status. It owns no
+  authoritative configuration, runtime generation, permission decision, or secret value.
+- State is component memory only. Each authenticated Home client generation performs a fresh `mcp.list`; late reads or
+  mutations from a retired client are ignored, and timeout/reconnect never replays a mutation.
+- Env/header values are always write-only. Core returns opaque markers only. A field name or transport-kind change
+  invalidates the retained ref and requires a new value before save.
+- Mutations are serialized. Revision conflict refetches Core truth. A desired edit committed before secret rotation or
+  reconnect failure keeps the editor open, preserves the draft, and advances its retry revision to the committed row.
+- Test result truth is preserved: a failed diagnostic never renders as success, and `test` never publishes tools.
+- Disabled servers cannot reconnect. Cancel, New, and successful Save clear stale editor revision and validation state.
+- Full backend/runtime/secret and verification requirements live in
+  [`mcp-lifecycle.md`](../backend/mcp-lifecycle.md).
+
+### Standard Skill management
+
+- The Skills page is a disposable operator projection over Core package rows and the process-local catalog. It owns no
+  package bytes, enabled truth, revision, trust decision, scan verdict, or runtime generation.
+- Each authenticated Home client generation starts with a fresh `skill.list`. Late list/inspect/mutation results from a
+  retired client are ignored; reconnect and timeout never replay a write.
+- ZIP and browser-directory import share one Core-authoritative validation pipeline. Home applies count/size preflight
+  only to avoid waste; it never treats browser paths or client validation as trusted.
+- Import, replacement, enable/disable, remove, and reconcile are serialized. Every success or failure refetches Core
+  truth; optimistic conflicts remain visible and require a new operator action against the returned revision.
+- Replacement supports both ZIP and directory sources. Remove requires an explicit second confirmation. Inspect shows
+  only validated standard metadata and a bounded relative-file inventory, never absolute paths or package bytes.
+- Active, disabled, quarantined/rejected, loading, empty, reconnecting, validation, conflict, partial-failure, inspect,
+  and removal-confirmation states are rendered from current-generation state held only in component memory.
+- Full storage/runtime/governance and verification requirements live in
+  [`skill-lifecycle.md`](../backend/skill-lifecycle.md).
 
 ## Cross-window commands (the pet owns the scene, the pages own the surface)
 

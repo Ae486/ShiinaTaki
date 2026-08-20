@@ -8,7 +8,8 @@
 
 import { openHome } from "@/lib/open-home-window.js";
 import { pushToast } from "@/components/toast/toast-store.js";
-import { DEFAULT_PAGE_ID, type PageId } from "@/windows/home/pages.js";
+import { DEFAULT_PAGE_ID } from "@/windows/home/default-page-id.js";
+import type { PageId } from "@/windows/home/pages.js";
 import type { IconComponent } from "@/lib/icons/glyph.js";
 import { ChatIcon } from "@/lib/icons/chat-icon.js";
 import { SettingsIcon } from "@/lib/icons/settings-icon.js";

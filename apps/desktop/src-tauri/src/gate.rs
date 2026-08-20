@@ -1,5 +1,5 @@
 //! INPUT:  a capability request (requestId, capability) + a Remembered verdict / an Approver answer; or a pre-classified exec command / shell-open target
-//! OUTPUT: evaluate_by_class/evaluate_class (the Level engine, T2b — fixed-risk + arg-determined) + evaluate_exec + evaluate_shell_open; ArgClass; ExecClass; ShellOpenClass; GatePolicy
+//! OUTPUT: Level/class evaluators plus final auto/deny and Core-approved audit seams; ArgClass/class enums; GatePolicy
 //! POS:    shell/gate — the Permission Gate policy core (ruling 10); fail-closed everywhere; NO tauri:: types
 
 pub mod approver;
@@ -186,6 +186,11 @@ impl Gate {
         } else {
             self.audit.record(request_id, key, decision, None);
         }
+    }
+
+    /// Records execution under a one-shot Core authorization after the latest Host floor still classifies it ask.
+    pub fn audit_approved_enforcement(&self, request_id: &str, key: &str, command: Option<&str>) {
+        self.audit.record(request_id, key, Decision::AllowedOnce, if key == "exec" { command } else { None });
     }
 
     /// The generic `(capability, argClass)` engine (T2b): enable switch -> deny-by-default floor -> Level

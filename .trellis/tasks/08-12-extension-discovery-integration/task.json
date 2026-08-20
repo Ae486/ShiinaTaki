@@ -3,7 +3,7 @@
   "name": "extension-discovery-integration",
   "title": "Converged extension discovery and integration",
   "description": "Converge bounded discovery, common registry identity/collision handling, Host context, restart/reconnect/migration behavior, cross-surface state, end-to-end verification, and operator acceptance.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "full-stack-extension-discovery-integration",
   "package": null,

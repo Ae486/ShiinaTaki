@@ -1,5 +1,8 @@
 # core/skills/
-- skill-scanner.ts — boot discovery of <root>/<name>/SKILL.md; validate name+description and bind a SHA-256 content revision; {skills, invalid}
-- skills-state.ts — skills-state.json enable/disable persistence (default-enabled); skill dirs stay pristine
-- skills-loader.ts — renderList() for system context + lazy load(name) of the body and trusted name/content-revision lookup (NOT_FOUND/DISABLED/IO_ERROR)
-- load-skill-tool.ts — governed explicit-auto load_skill meta-tool; loaded Markdown guides procedure but grants no underlying action
+- skill-scanner.ts / skills-state.ts / skills-loader.ts — legacy seed compatibility and the Agent-facing metadata/instruction loader
+- skill-package-types.ts / skill-package-repo.ts — durable lifecycle domain rows and optimistic SQLite repository
+- skill-package-source.ts / skill-package-store.ts — bounded source enumeration, validation, hashing, quarantine, and immutable publication
+- skill-catalog-manager.ts — process-local catalog generations, leased reads, tamper exclusion, and retired-root collection
+- skill-lifecycle-service.ts — serialized operator lifecycle orchestration and reconcile
+- skill-boot.ts — composition seam and read-only one-time legacy seed
+- load-skill-tool.ts / read-skill-resource-tool.ts — governed instruction and confined UTF-8 support-resource tools

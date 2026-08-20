@@ -150,6 +150,49 @@ describe("mcp plaintext secret migration (AC4 ordering)", () => {
     expect(readFileSync(configPath).equals(before)).toBe(true);
   });
 
+  it("reserves an existing marker identity before planning an incremental plaintext write", () => {
+    const dir = tempDir();
+    const configPath = seedConfig(dir, {
+      "a.b": { command: "node", env: { TOKEN: "secret-ref:mcp.a_b.env.TOKEN" } },
+      a_b: { command: "node", env: { TOKEN: "must-not-overwrite-the-existing-owner" } },
+    });
+    const before = readFileSync(configPath);
+    const setCalls: unknown[] = [];
+    const stub: MigrationCatalogView = {
+      health: () => "ok",
+      set: (...args) => setCalls.push(args),
+      verifyEntries: () => true,
+    };
+
+    expect(migrateMcpPlaintextSecrets({ catalog: stub, configPath, logger: createCaptureLogger().logger })).toEqual({
+      status: "skipped",
+      reason: "collision",
+    });
+    expect(setCalls).toEqual([]);
+    expect(readFileSync(configPath).equals(before)).toBe(true);
+  });
+
+  it("rejects a marker whose opaque ref does not belong to its source identity", () => {
+    const dir = tempDir();
+    const configPath = seedConfig(dir, {
+      server: { command: "node", env: { TOKEN: "secret-ref:mcp.other.env.TOKEN", NEXT: SENTINEL } },
+    });
+    const before = readFileSync(configPath);
+    let setCount = 0;
+    const stub: MigrationCatalogView = {
+      health: () => "ok",
+      set: () => { setCount += 1; },
+      verifyEntries: () => true,
+    };
+
+    expect(migrateMcpPlaintextSecrets({ catalog: stub, configPath, logger: createCaptureLogger().logger })).toEqual({
+      status: "skipped",
+      reason: "collision",
+    });
+    expect(setCount).toBe(0);
+    expect(readFileSync(configPath).equals(before)).toBe(true);
+  });
+
   it("a missing or unparsable config is a clean skip", () => {
     const dir = tempDir();
     const stub: MigrationCatalogView = { health: () => "ok", set: () => undefined, verifyEntries: () => false };

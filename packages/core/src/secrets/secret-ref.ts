@@ -1,13 +1,14 @@
 /**
  * INPUT:  MCP server config values (marker-prefixed strings) + a catalog resolver; serverKey/kind/field names
- * OUTPUT: mcpEnvRef/mcpHeaderRef (stable opaque refs) + resolveMcpConfigSecrets (just-in-time value resolution)
+ * OUTPUT: stable opaque ref derivation/enumeration + resolveMcpConfigSecrets (just-in-time value resolution)
  * POS:    core/secrets — the only place refs are derived and the only place the `secret-ref:` marker is parsed;
  *         refs are opaque and log-safe, resolved values never leave this seam except into the transport config
  */
 import type { McpServerConfig } from "../mcp/mcp-config.ts";
+import { MCP_SECRET_REF_MARKER } from "@taki/shared";
 
 /** Marker prefix in mcp-servers.json env/header values naming a catalog ref instead of a plaintext value. */
-export const SECRET_REF_MARKER = "secret-ref:";
+export const SECRET_REF_MARKER = MCP_SECRET_REF_MARKER;
 
 /** Same charset fold as the mcp-manager tool-key sanitizer — collision is guarded by the migration, not assumed. */
 export function sanitizeRefSegment(raw: string): string {
@@ -25,6 +26,17 @@ export function mcpHeaderRef(serverKey: string, headerName: string): string {
 /** The ref when the value is a marker, else null (a plain value stays a plain value). */
 export function parseSecretRefValue(value: string): string | null {
   return value.startsWith(SECRET_REF_MARKER) ? value.slice(SECRET_REF_MARKER.length) : null;
+}
+
+/** Capture refs at candidate time so later desired edits cannot hide a credential used by a live generation. */
+export function mcpConfigSecretRefs(config: McpServerConfig): ReadonlySet<string> {
+  const map = "command" in config ? config.env : config.headers;
+  const refs = new Set<string>();
+  for (const value of Object.values(map ?? {})) {
+    const ref = parseSecretRefValue(value);
+    if (ref !== null) refs.add(ref);
+  }
+  return refs;
 }
 
 /**

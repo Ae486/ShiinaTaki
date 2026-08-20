@@ -1,1 +1,17 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/directory-structure.md","reason":"Place Core lifecycle, repository, methods, and tools in the existing module boundaries."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Implement migration 018 and the Core-only SQLite sidecar with short optimistic transactions."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Keep operator and Agent failures structured, bounded, and non-replayed after unknown outcomes."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Respect size caps, strip-only boot, tests, module headers, and directory indexes."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Prevent package content, paths, and raw parser/archive failures from leaking into logs."}
+{"file":".trellis/spec/backend/skill-lifecycle.md","reason":"Follow the executable portable package, lifecycle, generation, resource, and operator contracts."}
+{"file":".trellis/spec/backend/permission-authorization.md","reason":"Reuse canonical Governance and Approval; Skill metadata and trust never grant authority."}
+{"file":".trellis/spec/backend/host-operation-lifecycle.md","reason":"Carry explicit Host ownership and generation truth without path/display-name inference."}
+{"file":".trellis/spec/backend/tool-design.md","reason":"Preserve the governed load_skill tool and add one thin confined resource-read tool."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Follow the registry-driven disposable Home page and secure MCP management patterns."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Keep Skill views in current authenticated client memory with no authoritative cache or replay."}
+{"file":".trellis/spec/frontend/type-safety.md","reason":"Parse every Skill wire payload through Shared Zod schemas at the WsClient boundary."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Meet frontend size, test, header, index, and no-direct-client rules."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Track package data from browser source through Core validation, persistence, runtime, and display."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Resolve YAML/ZIP and repo-pattern details from installed APIs and named sources, never memory."}
+{"file":".trellis/tasks/08-10-skills-mcp-productization/research/current-gap-and-dependency-map.md","reason":"Preserve the verified live Skill seams, parent ordering, and exact product gaps."}
+{"file":".trellis/tasks/08-10-skills-mcp-productization/research/standards-and-reference-prior-art.md","reason":"Implement the frozen Agent Skills fields, package preservation, quarantine, trust, and resource contract."}

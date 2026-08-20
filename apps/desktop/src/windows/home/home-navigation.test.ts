@@ -9,10 +9,11 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_PAGE_ID, HOME_PAGES, isPageId } from "./pages.ts";
 import { pageFromSearch } from "./boot-page.ts";
 import { useHomeStore } from "./home-store.ts";
+import { appendVisitedPage } from "./visited-page-ids.ts";
 
 describe("home page registry", () => {
-  it("registers the five v1 pages in menu order, chat first", () => {
-    expect(HOME_PAGES.map((page) => page.id)).toEqual(["chat", "settings", "operations", "perception", "costume"]);
+  it("registers the home pages in menu order, chat first", () => {
+    expect(HOME_PAGES.map((page) => page.id)).toEqual(["chat", "settings", "operations", "perception", "costume", "mcp", "skills"]);
     expect(DEFAULT_PAGE_ID).toBe("chat");
   });
 
@@ -54,5 +55,12 @@ describe("home store", () => {
     expect(useHomeStore.getState().currentPage).toBe(DEFAULT_PAGE_ID);
     useHomeStore.getState().navigate("chat");
     expect(useHomeStore.getState().currentPage).toBe("chat");
+  });
+});
+
+describe("visited page ids", () => {
+  it("appends a page once and preserves visit order", () => {
+    expect(appendVisitedPage(["chat"], "mcp")).toEqual(["chat", "mcp"]);
+    expect(appendVisitedPage(["chat", "mcp"], "chat")).toEqual(["chat", "mcp"]);
   });
 });

@@ -1,7 +1,7 @@
 import { PassThrough } from "node:stream";
 import { JSONRPCErrorException } from "json-rpc-2.0";
 import { describe, expect, it } from "vitest";
-import { JSON_RPC_APP_ERROR, MEMORY_METHODS } from "@taki/shared";
+import { JSON_RPC_APP_ERROR, MEMORY_METHODS, SECRET_METHODS } from "@taki/shared";
 import {
   buildOperatorCall,
   parseOperatorCall,
@@ -41,6 +41,14 @@ describe("parseOperatorCall", () => {
     expect(parsed.kind).toBe("usage");
     expect(parsed.kind === "usage" && parsed.message).toContain("/call <method>");
   });
+
+  it("refuses secret.set before the generic REPL path can dispatch it", () => {
+    const parsed = parseOperatorCall(`/call ${SECRET_METHODS.set} {"secretRef":"mcp.x.env.K","value":"sentinel"}`);
+    expect(parsed).toEqual({
+      kind: "usage",
+      message: "secret.set accepts secret values only through `taki secret set` stdin",
+    });
+  });
 });
 
 describe("buildOperatorCall (argv one-shot)", () => {
@@ -53,6 +61,13 @@ describe("buildOperatorCall (argv one-shot)", () => {
 
   it("shares the JSON usage error with the REPL parser", () => {
     expect(buildOperatorCall("memory.tidy", "{oops}").kind).toBe("usage");
+  });
+
+  it("refuses secret.set before one-shot argv mode opens a client", () => {
+    expect(buildOperatorCall(SECRET_METHODS.set, '{"value":"sentinel"}')).toEqual({
+      kind: "usage",
+      message: "secret.set accepts secret values only through `taki secret set` stdin",
+    });
   });
 });
 
@@ -80,6 +95,16 @@ async function run(caller: OperatorCaller, method: string, params: unknown): Pro
 }
 
 describe("runOperatorCall", () => {
+  it("fails closed without calling the client when handed a constructed secret.set call", async () => {
+    const { caller, calls } = stubCaller(() => Promise.resolve({ present: true }));
+
+    const { ok, text } = await run(caller, SECRET_METHODS.set, { value: "sentinel" });
+
+    expect(ok).toBe(false);
+    expect(calls).toEqual([]);
+    expect(text).toBe("secret.set accepts secret values only through `taki secret set` stdin\n");
+  });
+
   it("sends the call verbatim and pretty-prints the result", async () => {
     const { caller, calls } = stubCaller(() => Promise.resolve({ status: "clean", defects: { stale: 0 } }));
 

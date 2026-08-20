@@ -86,6 +86,7 @@ export function settlePending(
   const entry = state.pending.get(requestId);
   if (!entry) return false;
   state.pending.delete(requestId);
+  clearTimeout(entry.timer);
   releaseChallenge(entry);
   rememberTerminal(state.terminal, requestId, { control: entry.control, authorization: entry.authorization, reason: terminal.terminalReason });
   state.log.info({ requestId, attemptId: entry.control.attemptId, ok: terminal.outcome.ok }, "capability settled");
@@ -109,9 +110,16 @@ export function rememberTerminal(records: Map<string, TerminalRecord>, requestId
   records.set(requestId, terminal);
 }
 
-export function interruptedOutcome(execution: CapabilityExecutionKind, message: string): CapabilityOutcome {
-  return execution === "effect"
-    ? { ok: false, code: "OUTCOME_UNKNOWN", message, state: "outcome_unknown" }
+export function interruptedOutcome(
+  execution: CapabilityExecutionKind,
+  cancellation: CapabilityCancellation,
+  message: string,
+): CapabilityOutcome {
+  if (execution === "effect") {
+    return { ok: false, code: "OUTCOME_UNKNOWN", message, state: "outcome_unknown" };
+  }
+  return cancellation === "cooperative"
+    ? { ok: false, code: "CANCELLED", message, state: "cancelled" }
     : { ok: false, code: "NODE_DISCONNECTED", message };
 }
 

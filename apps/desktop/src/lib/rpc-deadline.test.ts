@@ -4,8 +4,10 @@ import {
   CHARACTER_METHODS,
   CHAT_METHODS,
   CONFIG_METHODS,
+  EXTENSION_METHODS,
   MEMORY_METHODS,
   PERMISSION_METHODS,
+  SKILL_METHODS,
   TIMING_POLICY_DEVELOPMENT_DEFAULTS,
 } from "@taki/shared";
 import { RpcDeadlineExceededError, requestWithDeadline, rpcMethodPolicy } from "./rpc-deadline.ts";
@@ -35,6 +37,9 @@ describe("RPC deadline method policy", () => {
     expect(rpcMethodPolicy(PERMISSION_METHODS.cellsGet).timeoutOutcome).toBe("read-only");
     expect(rpcMethodPolicy(PERMISSION_METHODS.levelSet).timeoutOutcome).toBe("unknown");
     expect(rpcMethodPolicy(PERMISSION_METHODS.cellSet).timeoutOutcome).toBe("unknown");
+    expect(rpcMethodPolicy(EXTENSION_METHODS.status).timeoutOutcome).toBe("read-only");
+    expect(rpcMethodPolicy(SKILL_METHODS.list).timeoutOutcome).toBe("read-only");
+    expect(rpcMethodPolicy(SKILL_METHODS.import)).toEqual({ class: "long", timing: "longRpcMs", timeoutOutcome: "unknown" });
   });
 });
 

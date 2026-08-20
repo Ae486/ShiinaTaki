@@ -1,241 +1,271 @@
 /**
- * INPUT:  McpServerEntry[] (from mcp-config) + a logger + an optional connect override (tests) + an optional
- *         catalog resolver for `secret-ref:` env/header markers (connect-time, fail-closed per server)
- * OUTPUT: createMcpManager(deps) -> Promise<McpManager> { tools(), describe(name), close() }
- * POS:    core/mcp — standard SDK list/prepare/convert/call path with trusted subject sidecars and pre-call governance
+ * INPUT:  durable desired MCP revisions plus catalog events, governance context, and runtime lifecycle budgets
+ * OUTPUT: createMcpManager(deps) -> reconcile/CRUD-runtime/test/status/per-turn-tools/idempotent-close surface
+ * POS:    core/mcp — thin plane-3 orchestrator; publication tokens and generation records are process-local only
  */
-import { createHash } from "node:crypto";
 import type { Tool, ToolSet } from "ai";
-import type { Logger } from "../logging/logger.ts";
-import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
-import { wrapGovernedTool, type InteractiveGovernanceContext } from "../governance/governed-tool.ts";
-import type { McpServerEntry } from "./mcp-config.ts";
-import { mcpPublicConfig } from "./mcp-config.ts";
-import { defaultConnect, type McpClient, type McpConnect } from "./mcp-connect.ts";
-import { prepareMcpToolDefinitions } from "./mcp-schema-compat.ts";
-import { resolveMcpConfigSecrets } from "../secrets/secret-ref.ts";
+import type { McpCandidateOutcome, McpServerConfig, McpServerStatus, McpTestResult } from "@taki/shared";
+import type { McpToolRef } from "./mcp-tool-identity.ts";
+import { buildTurnTools, type TurnInteractive } from "./mcp-turn-tools.ts";
+import { closeGeneration, retireGeneration, type GenerationRecord } from "./mcp-generations.ts";
+import { closeMcpClient } from "./mcp-client-close.ts";
+import { McpCandidateError, prepareCandidate, sanitizeCandidateFailure } from "./mcp-candidate.ts";
+import { deriveRuntimeStatuses } from "./mcp-runtime-status.ts";
+import { findPublishedCollisions, publishDesiredGeneration } from "./mcp-publication.ts";
+import {
+  abortCandidate,
+  createManagerState,
+  disconnectActive,
+  trackDesired,
+  trackCandidateCleanup,
+  underManagerLock,
+  withdrawDesired,
+  type ManagerState,
+  type ManagerStateDeps,
+  type McpDesiredRuntime,
+} from "./mcp-manager-state.ts";
 
-/** The raw MCP identity behind a namespaced ToolSet key; the presentation key is never an authority key. */
-export interface McpToolRef {
-  serverName: string;
-  toolName: string;
-  subjectId: string;
-  subjectRevision: string;
+export type { McpDesiredRuntime } from "./mcp-manager-state.ts";
+
+export interface McpToolSnapshot {
+  readonly toolKey: string;
+  readonly tool: Tool;
+  readonly ref: Readonly<McpToolRef>;
+  readonly serverId: string;
+  readonly ownerHostId: string;
+  readonly configRevision: number;
+  readonly generation: number;
+  readonly isCurrent: () => boolean;
 }
 
 export interface McpManager {
-  /** Builds the aggregated ToolSet for one turn; raw SDK closures remain cached and connection-neutral. */
-  tools(interactive?: Omit<InteractiveGovernanceContext, "presentation" | "approval">): ToolSet;
-  /** Maps a ToolSet key back to its raw identity plus stable subject binding. */
+  tools(interactive?: TurnInteractive): ReturnType<typeof buildTurnTools>;
+  snapshot(interactive?: TurnInteractive): readonly McpToolSnapshot[];
   describe(toolKey: string): McpToolRef | undefined;
-  /** Closes every connected client; idempotent (safe to call twice in the shutdown chain). */
+  reconcile(servers: McpDesiredRuntime[]): Promise<void>;
+  applyDesired(input: McpDesiredRuntime): Promise<McpCandidateOutcome>;
+  disableServer(input: McpDesiredRuntime): void;
+  removeServer(serverId: string): void;
+  secretCleared(ref: string): void;
+  secretUpdated(ref: string): void;
+  test(input: { serverId: string; config: McpServerConfig; selectedTools: string[] }): Promise<McpTestResult>;
+  statuses(): McpServerStatus[];
   close(): Promise<void>;
 }
 
-export interface McpManagerDeps {
-  entries: McpServerEntry[];
-  logger: Logger;
-  connect?: McpConnect;
-  /** Catalog resolution for `secret-ref:` markers in env/headers (just-in-time, connect-time only). */
-  resolveSecret?: (ref: string) => string | null;
-  governance?: {
-    service: GovernancePolicyService;
-    ownerHostId: string;
-    approval?: InteractiveGovernanceContext["approval"];
-    legacyDeny?: (serverName: string, toolName: string) => boolean;
-  };
-}
+export type McpManagerDeps = ManagerStateDeps;
 
-// Model-facing error envelope for a failed MCP call (error-handling spec; the model reads code + message).
-type McpToolFailure = { ok: false; code: number | string; message: string };
-
-export async function createMcpManager(deps: McpManagerDeps): Promise<McpManager> {
-  const log = deps.logger.child({ mod: "mcp" });
-  const connect = deps.connect ?? defaultConnect;
-
-  const clients: McpClient[] = [];
-  const tools: ToolSet = {};
-  const refs = new Map<string, McpToolRef>();
-  const collisions = new Set<string>();
-
-  const context = { connect, log, resolveSecret: deps.resolveSecret };
-  const results = await Promise.allSettled(deps.entries.map((entry) => discover(entry, context)));
-  results.forEach((result, index) => {
-    const entry = deps.entries[index];
-    if (!entry) return;
-    if (result.status === "rejected") {
-      // A failing server is skipped, never fatal — the others stay live (AC #8-5).
-      log.warn({ server: entry.key, err: readable(result.reason) }, "mcp server connect/discovery failed; skipped");
-      return;
-    }
-    clients.push(result.value.client);
-    mergeServerTools({ entry, discovered: result.value.tools, tools, refs, collisions, log });
-  });
-  log.info({ servers: clients.length, tools: Object.keys(tools).length }, "mcp servers connected");
-
-  let closed = false;
+export function createMcpManager(deps: McpManagerDeps): McpManager {
+  const state = createManagerState(deps);
   return {
-    tools: (interactive) => deps.governance ? wrapForTurn({ tools, refs, governance: deps.governance, interactive }) : tools,
-    describe: (toolKey) => refs.get(toolKey),
-    async close() {
-      if (closed) return;
-      closed = true;
-      await Promise.allSettled(clients.map((client) => client.close()));
-    },
+    tools: (interactive) => buildTurnTools(state.active, state.governance, interactive),
+    snapshot: (interactive) => snapshotTools(state, interactive),
+    describe: (toolKey) => describeTool(state, toolKey),
+    reconcile: (servers) => reconcileManager(state, servers),
+    applyDesired: (input) => applyDesiredManager(state, input),
+    disableServer: (input) => disableTracked(state, input),
+    removeServer: (serverId) => removeTracked(state, serverId),
+    secretCleared: (ref) => secretClearedManager(state, ref),
+    secretUpdated: (ref) => secretUpdatedManager(state, ref),
+    test: (input) => testCandidate(state, input),
+    statuses: () => deriveRuntimeStatuses(state),
+    close: () => closeManager(state),
   };
 }
 
-interface TurnWrapInput {
-  tools: ToolSet;
-  refs: ReadonlyMap<string, McpToolRef>;
-  governance: NonNullable<McpManagerDeps["governance"]>;
-  interactive?: Omit<InteractiveGovernanceContext, "presentation" | "approval">;
+function snapshotTools(state: ManagerState, interactive?: TurnInteractive): readonly McpToolSnapshot[] {
+  const tools: ToolSet = buildTurnTools(state.active, state.governance, interactive);
+  const entries: McpToolSnapshot[] = [];
+  for (const record of state.active.values()) {
+    for (const [toolKey, ref] of record.refs) {
+      const tool = tools[toolKey];
+      if (!tool) continue;
+      entries.push(Object.freeze({
+        toolKey,
+        tool,
+        ref: Object.freeze({ ...ref }),
+        serverId: record.serverId,
+        ownerHostId: record.ownerHostId,
+        configRevision: record.configRevision,
+        generation: record.generation,
+        isCurrent: () => state.active.get(record.serverId) === record && !record.draining && !record.closed,
+      }));
+    }
+  }
+  return Object.freeze(entries);
 }
 
-function wrapForTurn(input: TurnWrapInput): ToolSet {
-  const { tools, refs, governance, interactive: turn } = input;
-  const wrapped: ToolSet = {};
-  for (const [key, tool] of Object.entries(tools)) {
-    const ref = refs.get(key);
-    if (!ref) continue;
-    const interactive = governance.approval && turn ? {
-      ...turn,
-      approval: governance.approval,
-      presentation: mcpPresentation(ref),
-    } : undefined;
-    wrapped[key] = wrapGovernedTool(tool, {
-      service: governance.service,
-      binding: mcpBinding(governance, ref),
-      interactive,
+function describeTool(state: ManagerState, toolKey: string): McpToolRef | undefined {
+  for (const record of state.active.values()) {
+    const ref = record.refs.get(toolKey);
+    if (ref) return ref;
+  }
+  return undefined;
+}
+
+function applyDesiredManager(state: ManagerState, input: McpDesiredRuntime): Promise<McpCandidateOutcome> {
+  if (state.closed) return Promise.resolve(failed(state, "MCP manager is shutting down"));
+  if (!input.enabled) {
+    disableTracked(state, input);
+    return Promise.resolve(failed(state, "MCP server is disabled"));
+  }
+  return publishDesiredGeneration(state, input);
+}
+
+async function reconcileManager(state: ManagerState, servers: McpDesiredRuntime[]): Promise<void> {
+  const keep = new Set(servers.map((server) => server.serverId));
+  for (const serverId of [...state.desired.keys()]) {
+    if (!keep.has(serverId)) removeTracked(state, serverId);
+  }
+  const results = await Promise.all(servers.map((server) => {
+    if (server.enabled) return publishDesiredGeneration(state, server);
+    disableTracked(state, server);
+    return Promise.resolve(undefined);
+  }));
+  const published = results.filter((result) => result?.status === "published").length;
+  const failures = results.filter((result) => result?.status === "failed").length;
+  state.log.info({ servers: servers.length, published, failed: failures }, "mcp reconcile from desired state complete");
+}
+
+function disableTracked(state: ManagerState, input: McpDesiredRuntime): void {
+  trackDesired(state, { ...input, enabled: false });
+  disconnectActive(state, input.serverId);
+}
+
+function removeTracked(state: ManagerState, serverId: string): void {
+  withdrawDesired(state, serverId, true);
+  disconnectActive(state, serverId);
+}
+
+function secretClearedManager(state: ManagerState, ref: string): void {
+  const affected = affectedServers(state, ref);
+  for (const serverId of affected) {
+    const desired = state.desired.get(serverId);
+    const desiredAffected = desired?.secretRefs.has(ref) === true;
+    const candidateAffected = state.candidates.get(serverId)?.secretRefs.has(ref) === true;
+    const activeAffected = state.active.get(serverId)?.secretRefs.has(ref) === true;
+    if (desiredAffected && desired) trackDesired(state, runtimeOf(desired));
+    else if (candidateAffected) abortCandidate(state, serverId);
+    if (activeAffected) disconnectActive(state, serverId);
+    if (!desiredAffected && !activeAffected) continue;
+    state.outcomes.set(serverId, {
+      status: "failed",
+      at: state.now(),
+      reason: "secret-unresolvable",
+      message: "a referenced MCP secret was cleared; restore it and reconnect",
     });
+    state.log.warn({ server: serverId }, "mcp generation retired: a referenced secret was cleared");
   }
-  return wrapped;
 }
 
-function mcpBinding(governance: NonNullable<McpManagerDeps["governance"]>, ref: McpToolRef) {
+function affectedServers(state: ManagerState, ref: string): Set<string> {
+  const ids = new Set<string>();
+  for (const tracking of state.desired.values()) if (tracking.secretRefs.has(ref)) ids.add(tracking.serverId);
+  for (const candidate of state.candidates.values()) if (candidate.secretRefs.has(ref)) ids.add(candidate.serverId);
+  for (const record of [...state.active.values(), ...state.draining]) {
+    if (record.secretRefs.has(ref)) ids.add(record.serverId);
+  }
+  return ids;
+}
+
+function secretUpdatedManager(state: ManagerState, ref: string): void {
+  for (const tracking of [...state.desired.values()]) {
+    if (!tracking.enabled || !tracking.secretRefs.has(ref)) continue;
+    void publishDesiredGeneration(state, runtimeOf(tracking));
+  }
+}
+
+function runtimeOf(input: McpDesiredRuntime): McpDesiredRuntime {
   return {
-    identity: {
-      capabilityId: "mcp.tool.call",
-      ownerHostId: governance.ownerHostId,
-      subject: { subjectId: ref.subjectId, revision: ref.subjectRevision },
-    },
-    cellKey: "mcp-tool-call",
-    denyConstraints: governance.legacyDeny?.(ref.serverName, ref.toolName) ? ["legacy-mcp-deny"] : [],
+    serverId: input.serverId,
+    ownerHostId: input.ownerHostId,
+    configRevision: input.configRevision,
+    config: input.config,
+    selectedTools: input.selectedTools,
+    enabled: input.enabled,
   };
 }
 
-function mcpPresentation(ref: McpToolRef) {
-  return {
-    revision: 1 as const,
-    title: "Allow MCP tool",
-    capabilityLabel: ref.toolName,
-    subjectLabel: ref.serverName,
-    riskSummary: "This configured MCP tool can access its server with the supplied call.",
-    sections: [{ title: "Target", fields: [
-      { label: "Server", value: ref.serverName },
-      { label: "Tool", value: ref.toolName },
-    ] }],
-  };
-}
-
-interface DiscoverContext {
-  connect: McpConnect;
-  log: Logger;
-  resolveSecret?: (ref: string) => string | null;
-}
-
-async function discover(entry: McpServerEntry, context: DiscoverContext): Promise<{ client: McpClient; tools: ToolSet }> {
-  // Secrets resolve ONLY here — immediately before connect/spawn, never into config, logs, or cached state.
-  const resolvedEntry: McpServerEntry = context.resolveSecret
-    ? { key: entry.key, config: resolveMcpConfigSecrets(entry.config, context.resolveSecret) }
-    : entry;
-  const client = await context.connect(resolvedEntry);
+async function testCandidate(
+  state: ManagerState,
+  input: { serverId: string; config: McpServerConfig; selectedTools: string[] },
+): Promise<McpTestResult> {
   try {
-    const listed = await client.listTools();
-    const prepared = prepareMcpToolDefinitions(listed);
-    for (const skipped of prepared.skipped) {
-      context.log.warn({ server: entry.key, ...skipped }, "mcp tool schema incompatible; skipped");
+    const prepared = await prepareCandidate({
+      ...input,
+      connect: state.connect,
+      resolveSecret: state.resolveSecret,
+      log: state.log,
+      deadlineMs: state.candidateDeadlineMs,
+      onLateCleanup: (cleanup) => trackCandidateCleanup(state, cleanup),
+    });
+    try {
+      const collisions = await underManagerLock(state, () => findPublishedCollisions(state, input.serverId, prepared.refs));
+      if (collisions.length > 0) throw new McpCandidateError("tool-key-collision", "MCP test tool keys collide", collisions);
+      return {
+        status: "ok",
+        toolNames: [...prepared.refs.values()].map((ref) => ref.toolName),
+        skipped: prepared.skipped,
+        pages: prepared.pages,
+        durationMs: prepared.durationMs,
+      };
+    } finally {
+      await closeMcpClient(prepared.client);
     }
-    // Dynamic MCP inputs are unknown while ToolSet is invariant. Execution stays in the SDK's raw-name closure.
-    const tools = client.toolsFromDefinitions(prepared.definitions) as unknown as ToolSet;
-    return { client, tools };
   } catch (error) {
-    await client.close().catch(() => undefined); // no zombie transport if listing fails post-discovery
-    throw error;
+    const failure = sanitizeCandidateFailure(error);
+    return {
+      status: "failed",
+      reason: failure.reason,
+      message: failure.boundedMessage,
+      toolNames: [],
+      skipped: [],
+      pages: 0,
+      durationMs: 0,
+    };
   }
 }
 
-interface MergeArgs {
-  entry: McpServerEntry;
-  discovered: ToolSet;
-  tools: ToolSet;
-  refs: Map<string, McpToolRef>;
-  collisions: Set<string>;
-  log: Logger;
+function closeManager(state: ManagerState): Promise<void> {
+  state.closePromise ??= closeManagerOnce(state);
+  return state.closePromise;
 }
 
-// Namespace each tool as `${sanitizedKey}_${toolName}` (renaming the key is safe — execute closes over the raw
-// name). A collision is removed from the published set entirely: choosing either server would bind a presentation
-// key to an ambiguous authority, so the only safe result is fail-closed for that key while unrelated tools remain live.
-function mergeServerTools({ entry, discovered, tools, refs, collisions, log }: MergeArgs): void {
-  const prefix = sanitize(entry.key);
-  const revision = publicFingerprint(entry);
-  for (const [toolName, tool] of Object.entries(discovered)) {
-    const key = `${prefix}_${toolName}`;
-    if (collisions.has(key)) continue;
-    if (key in tools) {
-      delete tools[key];
-      refs.delete(key);
-      collisions.add(key);
-      log.warn({ key, server: entry.key }, "mcp tool name collision; key removed from published ToolSet");
-      continue;
-    }
-    const ref = { serverName: entry.key, toolName, subjectId: stableSubject(entry.key, toolName), subjectRevision: revision };
-    const wrapped = wrapExecute(tool);
-    tools[key] = wrapped;
-    refs.set(key, ref);
+async function closeManagerOnce(state: ManagerState): Promise<void> {
+  state.closed = true;
+  for (const candidate of state.candidates.values()) candidate.controller.abort();
+  const records = uniqueRecords(state);
+  state.active.clear();
+  for (const record of records) {
+    state.draining.add(record);
+    retireGeneration(record, state.shutdownBudgetMs);
   }
+  const deadline = Date.now() + state.shutdownBudgetMs;
+  while (Date.now() < deadline && hasPendingWork(state, records)) await delay(10);
+  const closes = records.map((record) => closeGeneration(record, record.leases > 0));
+  await settleWithin(closes, Math.max(0, deadline - Date.now()));
+  state.log.info({ clients: records.length }, "mcp manager closed");
 }
 
-function stableSubject(serverKey: string, toolName: string): string {
-  return `mcp.${createHash("sha256").update(`${serverKey}\u0000${toolName}`).digest("hex")}`;
+function uniqueRecords(state: ManagerState): GenerationRecord[] {
+  return [...new Set([...state.active.values(), ...state.draining])];
 }
 
-function publicFingerprint(entry: McpServerEntry): string {
-  return `cfg.${createHash("sha256").update(JSON.stringify(mcpPublicConfig(entry.config))).digest("hex")}`;
+function hasPendingWork(state: ManagerState, records: GenerationRecord[]): boolean {
+  return records.some((record) => !record.closed && record.leases > 0)
+    || [...state.candidates.values()].some((candidate) => !candidate.done)
+    || state.candidateCleanups.size > 0;
 }
 
-// Spread-and-replace: keep the tool's schema/metadata/toModelOutput, only guard execute so a JSON-RPC error or a
-// dropped connection becomes a structured {ok:false} the model can read (research §5). isError:true passes through.
-function wrapExecute(tool: Tool): Tool {
-  const inner = tool.execute;
-  if (typeof inner !== "function") return tool;
-  return {
-    ...tool,
-    execute: async (input, options) => {
-      try {
-        return await inner(input, options);
-      } catch (error) {
-        return { ok: false, code: errorCode(error), message: readable(error) } satisfies McpToolFailure;
-      }
-    },
-  } as Tool;
+async function settleWithin(promises: Promise<void>[], budgetMs: number): Promise<void> {
+  if (promises.length === 0 || budgetMs <= 0) return;
+  await Promise.race([Promise.allSettled(promises), delay(budgetMs)]);
 }
 
-// MCPClientError carries the JSON-RPC error code as a numeric `.code` (verified against installed mcp-client-error.ts);
-// duck-typed to avoid importing an unexported class.
-function errorCode(error: unknown): number | string {
-  if (typeof error === "object" && error !== null && "code" in error) {
-    const code = (error as { code: unknown }).code;
-    if (typeof code === "number") return code;
-  }
-  return "MCP_CALL_FAILED";
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function sanitize(key: string): string {
-  return key.replace(/[^a-zA-Z0-9_-]/g, "_");
-}
-
-function readable(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+function failed(state: ManagerState, message: string): McpCandidateOutcome {
+  return { status: "failed", at: state.now(), reason: "connect-failed", message };
 }
