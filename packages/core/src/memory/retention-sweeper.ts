@@ -32,6 +32,8 @@ export interface RetentionSweeperDeps {
   logger: Logger;
   /** Injected epoch-ms clock (defaults to Date.now); tests pass a synthetic one. */
   now?: () => number;
+  /** Optional authority gate; legacy retention must be silent after canonical cutover. */
+  enabled?: () => boolean;
 }
 
 export function startRetentionSweeper(deps: RetentionSweeperDeps): void {
@@ -40,6 +42,7 @@ export function startRetentionSweeper(deps: RetentionSweeperDeps): void {
     name: "memory-retention",
     message: "memory retention swept",
     logger: deps.logger,
+    enabled: deps.enabled,
     sweep: () => sweepOnce(deps, now()),
   });
 }

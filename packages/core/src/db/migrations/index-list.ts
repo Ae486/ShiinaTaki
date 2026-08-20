@@ -24,6 +24,7 @@ import { canonicalMemoryMigration017 } from "./017-canonical-memory.ts";
 import { mcpDesiredServersMigration018 } from "./018-mcp-desired-servers.ts";
 import { skillPackagesMigration019 } from "./019-skill-packages.ts";
 import { parallelFoundationConvergenceMigration020 } from "./020-parallel-foundation-convergence.ts";
+import { memoryLegacyMigration021 } from "./021-memory-legacy-migration.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -46,4 +47,5 @@ export const MIGRATIONS: Migration[] = [
   mcpDesiredServersMigration018,
   skillPackagesMigration019,
   parallelFoundationConvergenceMigration020,
+  memoryLegacyMigration021,
 ];

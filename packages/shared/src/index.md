@@ -34,3 +34,4 @@
 - memory-provider-domain-schema.ts — strict canonical authority, Bank, source, unit, derived, policy, capability, and error contracts
 - memory-provider-operation-schema.ts — strict retain, recall, reflect, and mutation operation contracts
 - memory-provider-envelope-schema.ts — validated success/error envelopes for canonical provider operations
+- memory-migration-schema.ts — strict operator-only migration control and bounded report contracts

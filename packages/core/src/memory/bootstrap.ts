@@ -26,6 +26,8 @@ import { createPersonaProvider } from "./persona-provider.ts";
 import { startRetentionSweeper } from "./retention-sweeper.ts";
 import { createTidyPass, type TidyPass } from "./tidy-pass.ts";
 import { createUtilitySlot, type UtilitySlot } from "./utility-slot.ts";
+import { fenceMemoryEngine } from "./legacy-migration/fenced-memory-engine.ts";
+import type { MemoryAuthorityFence } from "./legacy-migration/memory-authority-fence.ts";
 
 /** Batch-7 compaction wiring: the summary record + the store's view numbers + the context-config knobs. */
 export interface CompactionWiring {
@@ -47,6 +49,9 @@ export interface MemorySubsystemDeps {
   compaction?: CompactionWiring;
   env: Record<string, string | undefined>;
   logger: Logger;
+  authorityFence?: MemoryAuthorityFence;
+  /** Runtime authority state used to retire the legacy retention arm after canonical activation. */
+  isCanonical?: () => boolean;
 }
 
 export interface MemorySubsystem {
@@ -67,7 +72,8 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
   const config = loadMemoryConfig(deps.env);
   // Every background pass takes this model, so moving background work onto a cheaper provider is ONE env change.
   const utility = createUtilitySlot({ mainModel: deps.model, config: loadUtilityConfig(deps.env), logger });
-  const engine = buildEngine(deps, config);
+  const rawEngine = buildEngine(deps, config);
+  const engine = deps.authorityFence ? fenceMemoryEngine(rawEngine, deps.authorityFence) : rawEngine;
   const autoState = createMemoryAutoRepo(db);
   const events = createMemoryEventsRepo(db);
 
@@ -116,7 +122,12 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
   });
 
   // T5-R8: the layer registry's `retention` field finally gets its consumer — boot sweep + 6h, counts-only log.
-  startRetentionSweeper({ ops: engine.retention, intentionsDefaultDays: config.intentionsDefaultDays, logger });
+  startRetentionSweeper({
+    ops: engine.retention,
+    intentionsDefaultDays: config.intentionsDefaultDays,
+    logger,
+    enabled: () => !(deps.isCanonical?.() ?? false),
+  });
 
   return { engine, autoMemory, utility, tidy, memoryRoot: memoryRootOf(deps.dataDir), writeMemory };
 }

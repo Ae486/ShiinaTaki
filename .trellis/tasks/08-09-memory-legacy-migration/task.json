@@ -3,7 +3,7 @@
   "name": "memory-legacy-migration",
   "title": "Legacy memory normalization and migration",
   "description": "Normalize all supported legacy Markdown memory variants into canonical records with deterministic identities, dry-run reporting, and a resumable migration ledger.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "backend-memory-migration",
   "package": null,

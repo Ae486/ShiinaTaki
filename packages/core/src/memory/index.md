@@ -35,6 +35,10 @@
 - tidy-pass.ts — the model-led maintenance pass: write-count trigger (maybeRun) + operator runNow over one execute path; clean store = zero model calls; system-reminder input framing; six refinement principles + do-nothing permission + imported R10 voice; stopWhen finish-tool/step-cap; watermark advances only on success; tidy event + counts-only log line
 - memory-provider.ts — async provider and optional vector projection interfaces
 - local-memory-provider.ts — dormant structured Local provider with atomic retain, sparse recall, and CAS mutations
+- canonical-local-runtime.ts — post-activation SQLite-only runtime with canonical tools/assembly and no Markdown dependency
+- runtime-selector.ts — marker-first startup routing that never constructs legacy memory after canonical activation
+- runtime-composition.ts — marker-first process composition for runtime selection, legacy retirement wrappers, and on-demand migration cutover
+- authority-aware-legacy-surfaces.ts — mutable authority wrappers that retire legacy auto-memory, tidy, and direct writes after canonical activation
 - memory-coordinator.ts — persisted-authority dispatch, capability checks, cancellation, and no-fallback envelopes
 - canonical-tools/ — dormant capability-filtered Hindsight-aligned tool adapters
 - image-description-writer.ts — thin, DELETABLE image→text bridge (#17 decision 6, D28): VLM describes a turn's images, PII-scrubs the text, writes ONE episode via the existing store path with origin "observed" (the marker the render sites fence on — D47); detached, warn+drop

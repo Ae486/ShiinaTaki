@@ -22,7 +22,11 @@ interface ToolDeps { coordinator: MemoryCoordinator; router: MemoryToolBankRoute
 type RecallToolInput = { query: string; scope: "global" | "character" | "both"; limit: number; maxTokens: number };
 
 export async function createCanonicalMemoryTools(deps: ToolDeps): Promise<ToolSet> {
-  const caps = await deps.coordinator.capabilities(); const tools: ToolSet = {};
+  return createCanonicalMemoryToolsWithCapabilities(deps, await deps.coordinator.capabilities());
+}
+
+export function createCanonicalMemoryToolsWithCapabilities(deps: ToolDeps, caps: Awaited<ReturnType<MemoryCoordinator["capabilities"]>>): ToolSet {
+  const tools: ToolSet = {};
   // These user-approved Hindsight names intentionally omit Taki's usual family prefix; production activation must
   // still collision-check them and must never assemble this set beside the legacy memory tools.
   if (caps.retain) tools.retain = createRetainTool(WRITABLE_LAYER_IDS as [string, ...string[]], (input, signal) => safely(() => retain(deps, input, signal)));

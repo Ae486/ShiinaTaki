@@ -231,3 +231,10 @@ export {
 export type {
   MemoryResult, RetainEnvelope, RecallEnvelope, ReflectEnvelope, EditEnvelope, InvalidateEnvelope, RestoreEnvelope,
 } from "./memory-provider-envelope-schema.ts";
+export {
+  MEMORY_MIGRATION_METHODS, MemoryMigrationActivateParamsSchema, MemoryMigrationActivationSchema, MemoryMigrationDryRunParamsSchema,
+  MemoryMigrationExceptionPageSchema, MemoryMigrationExceptionSchema, MemoryMigrationExceptionsParamsSchema,
+  MemoryMigrationExcludeParamsSchema, MemoryMigrationReportSchema, MemoryMigrationRunParamsSchema,
+  MemoryMigrationResumeParamsSchema, MemoryMigrationStageParamsSchema, MemoryMigrationStatusSchema, MemoryMigrationVerifySchema,
+} from "./memory-migration-schema.ts";
+export type { MemoryMigrationActivation, MemoryMigrationReport, MemoryMigrationStatus, MemoryMigrationVerify } from "./memory-migration-schema.ts";

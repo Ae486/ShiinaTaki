@@ -19,4 +19,5 @@
 - 018-mcp-desired-servers.ts — migration 18: mcp_desired_servers (plane-1 desired MCP rows: sanitized config JSON with opaque secret-ref markers ONLY, enabled, selected tools, per-row config_revision; values live exclusively in the encrypted catalog)
 - 019-skill-packages.ts — migration 19: durable Skill package lifecycle rows and active-name uniqueness
 - 020-parallel-foundation-convergence.ts — idempotent bridge for databases created by either parallel migration-17 lineage
+- 021-memory-legacy-migration.ts — Batch 2 durable migration ledger, fenced leases, exclusions/results, activation receipts, and legacy-default authority selection
 - index-list.ts — the explicit ordered MIGRATIONS registry (no fs/glob discovery)

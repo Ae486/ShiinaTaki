@@ -24,11 +24,14 @@ export interface SweeperSpec {
   sweep(): SweepCounts | undefined;
   logger: Logger;
   intervalMs?: number;
+  /** Optional authority gate; disabled sweeps remain installed but perform no retired work. */
+  enabled?: () => boolean;
 }
 
 export function startSweeper(spec: SweeperSpec): void {
   const log = spec.logger.child({ mod: spec.name });
   const run = (): void => {
+    if (spec.enabled && !spec.enabled()) return;
     const swept = spec.sweep();
     if (swept) log.info(swept, spec.message);
   };

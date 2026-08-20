@@ -1,1 +1,10 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/index.md","reason":"Backend quality checklist for final migration review."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Review ledger schema, transaction boundaries, migrations, and activation rollback."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Review fail-closed, retry, exclusion, and sanitized diagnostics."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Review privacy and no-content logging invariants."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Review full test/typecheck/lint and regression gates."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Review filesystem/DB/runtime authority data flow and recovery."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Require every design/runtime claim to be grounded in named evidence."}
+{"file":".trellis/tasks/08-09-memory-legacy-migration/research/current-legacy-migration-map.md","reason":"Ground findings in verified current code and tests."}
+{"file":".trellis/tasks/archive/2026-08/08-09-memory-provider-foundation/research/current-local-memory-seams.md","reason":"Verify dormant Batch 1 canonical constraints and transaction behavior."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/taki-memory-integration-seams.md","reason":"Verify every current runtime memory write, prompt, maintenance, and startup seam."}
