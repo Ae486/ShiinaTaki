@@ -1135,3 +1135,24 @@ Implemented and accepted the dormant Canonical Memory Provider Foundation. Local
 ### Next Steps
 
 - Plan and implement Batch 2 legacy memory normalization and migration; do not activate the canonical provider before migration verification.
+
+
+## Session 22: Freeze Skills MCP and integrate Main
+
+**Date**: 2026-08-20
+**Task**: Freeze Skills MCP and integrate Main
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Validated the merged T4/Main migration lineage with focused tests, temporary-file reopen simulations, full workspace gates, Desktop build, Rust tests and Clippy, E2E, and isolated Core boot. Archived the closeout task; owner-manual packaged Home, external credential round-trip, Linux systemd credential, and compatible remote Host residuals remain unclaimed.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `35765a0` | (see git log) |
+
+### Status
+
+[OK] **Completed**
