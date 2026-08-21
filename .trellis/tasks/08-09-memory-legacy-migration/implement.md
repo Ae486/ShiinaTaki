@@ -160,3 +160,16 @@ in planning artifacts; manual operator acceptance remains pending.
 - UTF-8/no-BOM validation passed for 35 reviewed files.
 - Isolated Core boot smoke passed on port `18975`; startup applied migrations 1 through 21 and reported the WS server listening.
 - Manual operator Acceptance Criteria remain pending and are not claimed complete by this evidence.
+
+## Post-activation Governance repair
+
+- Owner acceptance reproduced `GOVERNANCE_DENIED` for canonical `recall` and `retain`: the Core Governance adapter
+  still bound only legacy `memory_search`, `memory_write`, and `memory_archive` keys after canonical Local activation.
+- Canonical names now reuse the existing default-auto stable policy identities: `recall`/`reflect` -> memory search,
+  `retain`/`update_memory`/`restore_memory` -> memory write, and `invalidate_memory` -> memory archive. Unknown Core tools
+  remain fail-closed.
+- The regression test failed before the binding repair and passes after it. Focused Governance/Memory/Chat Agent tests
+  pass (6 files, 18 tests); full Core passes 232 files and 1,551 tests; Core typecheck, root lint, task validation, and
+  `git diff --check` pass.
+- Final owner confirmation must come from retrying canonical Memory tools through the real Agent; automated evidence
+  does not mark that manual acceptance complete.
