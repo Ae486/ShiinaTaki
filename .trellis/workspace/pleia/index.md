@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 22
-- **Last Active**: 2026-08-20
+- **Total Sessions**: 23
+- **Last Active**: 2026-08-21
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1158 | Active |
+| `journal-1.md` | ~1194 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 23 | 2026-08-21 | Legacy memory migration and canonical Local cutover | `474b239`, `bd80713` | `main` |
 | 22 | 2026-08-20 | Freeze Skills MCP and integrate Main | `35765a0` | `task/t4-skills-mcp-productization` |
 | 21 | 2026-08-19 | Canonical memory provider foundation Batch 1 | `dc9bee6`, `5de6ee1` | `main` |
 | 20 | 2026-08-19 | Hindsight Slice 0 acceptance and closeout | `52b5faad`, `64fa85f8`, `f700d9ac`, `7eca2056`, `30b9688`, `944ed04` | `main` |

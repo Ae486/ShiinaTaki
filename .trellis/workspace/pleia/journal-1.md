@@ -1156,3 +1156,39 @@ Validated the merged T4/Main migration lineage with focused tests, temporary-fil
 ### Status
 
 [OK] **Completed**
+
+
+## Session 23: Legacy memory migration and canonical Local cutover
+
+**Date**: 2026-08-21
+**Task**: Legacy memory migration and canonical Local cutover
+**Branch**: `main`
+
+### Summary
+
+Migrated the live legacy Markdown memory corpus into canonical Local SQLite, activated canonical-local authority, repaired canonical Memory Governance bindings, and completed owner acceptance.
+
+### Main Changes
+
+- Created and verified a complete live-data backup, dry-run, resumable Migration Ledger, immutable snapshot, canonical records, Blocks, and atomic authority activation.
+- Bound canonical recall/retain/reflect/update/invalidate/restore tools to the existing default-auto Memory Governance identities while preserving unknown-tool fail-closed behavior.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `474b239` | (see git log) |
+| `bd80713` | (see git log) |
+
+### Testing
+
+- [OK] Shared 31 files / 319 tests and Core 232 files / 1551 tests passed; typecheck, root lint, task validation, and diff check passed.
+- [OK] Live database integrity was ok, canonical-local authority was active, and the owner confirmed real Agent recall and retain calls succeeded.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Review and activate Batch 3: 08-09-hindsight-connection-setup; do not perform Hindsight authority cutover before its gates pass.
