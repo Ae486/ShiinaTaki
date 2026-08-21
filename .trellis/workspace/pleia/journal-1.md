@@ -1192,3 +1192,25 @@ Migrated the live legacy Markdown memory corpus into canonical Local SQLite, act
 ### Next Steps
 
 - Review and activate Batch 3: 08-09-hindsight-connection-setup; do not perform Hindsight authority cutover before its gates pass.
+
+
+## Session 24: Complete B3 Hindsight connection setup
+
+**Date**: 2026-08-21
+**Task**: Complete B3 Hindsight connection setup
+**Branch**: `main`
+
+### Summary
+
+Completed and committed B3 Hindsight connection/setup control plane, passed quality gates, archived task 08-09-hindsight-connection-setup, preserved canonical-local authority and backup evidence.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `331982b` | (see git log) |
+| `d9173fa` | (see git log) |
+
+### Status
+
+[OK] **Completed**
