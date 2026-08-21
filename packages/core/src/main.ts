@@ -22,6 +22,7 @@ import { createCapabilityTools } from "./capabilities/capability-tools.ts";
 import { routeCapability } from "./capabilities/route-capability.ts";
 import { createScreenshotDescriber } from "./capabilities/screenshot-describe.ts";
 import { bootstrapCore } from "./boot/core-bootstrap.ts";
+import { composeHindsightSetup } from "./boot/hindsight-setup-boot.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
 import { composeApprovalRuntime } from "./approval/approval-runtime.ts";
 import { createGovernancePolicyRepo } from "./governance/governance-policy-repo.ts";
@@ -179,6 +180,9 @@ void mcpBoot.manager.reconcile(mcpBoot.desired.list()).then(() => undefined, () 
 registerSecretMethods(registry, { service: mcpBoot.catalog, logger: secretLog });
 registerMcpMethods(registry, { service: createMcpLifecycleService({ repo: mcpBoot.desired, manager: mcpBoot.manager }), logger: mcpBoot.log });
 registerSkillMethods(registry, { service: skillLifecycle, logger: skillsLog });
+// Hindsight B3 setup is an operator-only inactive control plane. Composition registers methods and SQLite state only;
+// it makes no boot request, performs no LLM health probe, and has no Memory Authority writer/provider registration.
+composeHindsightSetup({ db, config: boot.config.source, secrets: secretCatalog, registry, logger });
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending

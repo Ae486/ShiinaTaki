@@ -1,0 +1,13 @@
+# core/memory/hindsight/
+- hindsight-contracts.ts — bounded Hindsight 0.9.0 raw-wire schemas and safe projections
+- hindsight-endpoint-policy.ts — endpoint normalization and SSRF/redirect policy for explicit operator endpoints
+- hindsight-errors.ts — sanitized Hindsight setup failure code and retry projection
+- hindsight-client.ts — injected authenticated REST client with bounded/cancelled request handling and template import exception
+- hindsight-secret-refs.ts — fixed provider-neutral Secret Catalog refs and connection-only trusted resolver marker
+- hindsight-compatibility-service.ts — ordered exact-build health/version/manifest gate and safe configuration fingerprint
+- hindsight-bank-identity.ts — versioned deterministic opaque Global/Character external Bank ids
+- taki-bank-template-v1.ts — fixed secret-free additive template, canonical digest, and Taki-owned read-back verification
+- hindsight-setup-service.ts — resumable validate/setup/disable/explicit LLM-health state machine; never owns Memory Authority
+- hindsight-bank-setup.ts — idempotent Bank/template application, operation polling, and verified projection
+- hindsight-setup-stages.ts — deterministic setup targets and dry-run preflight orchestration
+- hindsight-setup-errors.ts — sanitized setup error normalization shared by setup stages

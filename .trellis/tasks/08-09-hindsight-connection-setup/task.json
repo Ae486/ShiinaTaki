@@ -3,7 +3,7 @@
   "name": "hindsight-connection-setup",
   "title": "Hindsight connection secrets and setup",
   "description": "Add authenticated Hindsight connection validation, provider-neutral secret handling, versioned bank/template setup, and operator deployment-helper contracts.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "full-stack-memory-connection-setup",
   "package": null,

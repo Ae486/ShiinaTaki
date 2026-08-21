@@ -14,3 +14,4 @@
 - config-writer.ts — createConfigWriter({env, repo, onChanged}) → { set }; the store's only write path, with five distinct fail-closed refusals (unknown key / invalid value / env-locked / secret / env-only)
 - timing-config-validation.ts — validates a proposed timing-row set/reset against the shared full-policy relationships before config-writer mutates the sparse store
 - config-subscriptions.ts — createConfigSubscriptions() → { subscribe, unsubscribe, publish, count }; the config.changed fan-out registry (global, not character-scoped)
+- hindsight-config.ts — sparse non-secret TAKI_HINDSIGHT_* projection; disabled/unconfigured/ready states with fixed Secret Catalog reference

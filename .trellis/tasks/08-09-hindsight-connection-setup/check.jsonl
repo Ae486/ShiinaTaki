@@ -1,1 +1,10 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/index.md","reason":"Backend quality-check routing and architecture checklist."}
+{"file":".trellis/spec/backend/secret-catalog.md","reason":"Verify no secret values cross protocol, logs, persistence, exports, or cache."}
+{"file":".trellis/spec/backend/config-store.md","reason":"Verify sparse non-secret configuration and precedence behavior."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Verify migrations, single-writer ownership, transactionality, and rollback evidence."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Verify stable error codes, sanitized diagnostics, retryability, timeout, and cancellation."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Run the required lint, typecheck, tests, and diff checks without false-green package commands."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Check protocol-to-service-to-HTTP-to-persistence data flow and ownership boundaries."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Check every Hindsight endpoint/schema/version claim against generated/OpenAPI sources."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/hindsight-api-deployment-contracts.md","reason":"Validate implementation and tests against the accepted Hindsight contract research."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/taki-memory-integration-seams.md","reason":"Validate that new wiring matches current composition and does not assume missing Shell/Core capabilities."}

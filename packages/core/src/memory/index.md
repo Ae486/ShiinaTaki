@@ -40,5 +40,6 @@
 - runtime-composition.ts — marker-first process composition for runtime selection, legacy retirement wrappers, and on-demand migration cutover
 - authority-aware-legacy-surfaces.ts — mutable authority wrappers that retire legacy auto-memory, tidy, and direct writes after canonical activation
 - memory-coordinator.ts — persisted-authority dispatch, capability checks, cancellation, and no-fallback envelopes
+- hindsight/ — inactive B3 Hindsight connection/setup client, compatibility, persistence, and operator orchestration; never wired into Memory Authority
 - canonical-tools/ — dormant capability-filtered Hindsight-aligned tool adapters
 - image-description-writer.ts — thin, DELETABLE image→text bridge (#17 decision 6, D28): VLM describes a turn's images, PII-scrubs the text, writes ONE episode via the existing store path with origin "observed" (the marker the render sites fence on — D47); detached, warn+drop
