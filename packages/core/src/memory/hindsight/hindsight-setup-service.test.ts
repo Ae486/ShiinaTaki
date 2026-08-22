@@ -116,11 +116,14 @@ describe("Hindsight setup service", () => {
   it("runs LLM health only through the explicit revision-checked action", async () => {
     const h = build();
     const setup = await validateAndSetup(h);
+    const authorityBefore = h.db.prepare("SELECT * FROM memory_authority_selection WHERE singleton=1").get();
     expect(h.client.bankLlmHealth).not.toHaveBeenCalled();
+    expect(h.service.status().phase).toBe("configured");
     const result = await h.service.llmHealth({ expectedRevision: setup.revision, acknowledgeProviderCalls: true });
     expect(result.status).toBe("healthy");
     expect(h.client.bankLlmHealth).toHaveBeenCalledTimes(2);
     expect(h.service.status().modelHealth).toBe("healthy");
+    expect(h.db.prepare("SELECT * FROM memory_authority_selection WHERE singleton=1").get()).toEqual(authorityBefore);
   });
 
   it("fails closed when Memory Authority is not canonical-local", async () => {

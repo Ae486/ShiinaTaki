@@ -36,3 +36,4 @@
 - mcp-methods.ts — operator-only mcp.* lifecycle registration seam (list/get/add/edit/enable/disable/remove/test/reconnect/status); MCP_CONFIG_CONFLICT carries currentConfigRevision, MCP_REFUSED carries a bounded reason, both sanitized before the registry's verbatim echo points
 - skill-methods.ts — operator-only skill.* lifecycle registration seam; strict Shared schemas plus bounded conflict/refusal errors
 - hindsight-setup-methods.ts — operator-only memory.hindsight.* setup/status/disable/explicit LLM-health controllers with bounded refusals
+- hindsight-cutover-methods.ts — operator-only memory.hindsight.cutover.status/verify projections; read-only, stale-epoch-aware, and privacy-bounded

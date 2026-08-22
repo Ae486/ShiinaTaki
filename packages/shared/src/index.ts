@@ -258,3 +258,22 @@ export {
   MemoryMigrationResumeParamsSchema, MemoryMigrationStageParamsSchema, MemoryMigrationStatusSchema, MemoryMigrationVerifySchema,
 } from "./memory-migration-schema.ts";
 export type { MemoryMigrationActivation, MemoryMigrationReport, MemoryMigrationStatus, MemoryMigrationVerify } from "./memory-migration-schema.ts";
+export {
+  HINDSIGHT_CUTOVER_METHODS, HindsightCutoverStatusParamsSchema, HindsightCutoverStatusSchema,
+  HindsightCutoverVerifyParamsSchema, HindsightCutoverVerifyResultSchema,
+  HindsightAuthorityActivationSchema, HindsightDocumentProjectionSchema, HindsightFactMappingSchema,
+  HindsightFactPageSchema, HindsightFactProjectionSchema, HindsightImportLedgerSchema, HindsightImportStatusSchema,
+  HindsightOperationResultSchema, HindsightOperationStatusSchema, HindsightReplicaCheckpointSchema,
+  HindsightRetainRequestSchema, HindsightRetainResultSchema, HindsightLogicalObjectKindSchema,
+  HindsightLogicalPayloadSchema, HindsightLogicalSnapshotRecordSchema, HindsightLogicalSnapshotCountsSchema,
+  HindsightLogicalSnapshotManifestSchema, HindsightLogicalSnapshotMetadataSchema, HindsightLogicalSnapshotPageSchema,
+} from "./hindsight-cutover-schema.ts";
+export type {
+  HindsightCutoverStatus, HindsightCutoverVerifyResult,
+  HindsightAuthorityActivation, HindsightDocumentProjection, HindsightFactMapping, HindsightFactPage,
+  HindsightFactProjection, HindsightImportLedger, HindsightImportStatus, HindsightOperationResult,
+  HindsightOperationStatus, HindsightReplicaCheckpoint, HindsightRetainRequest, HindsightRetainResult,
+  HindsightLogicalObjectKind, HindsightLogicalPayload, HindsightLogicalSnapshotRecord,
+  HindsightLogicalSnapshotCounts, HindsightLogicalSnapshotManifest, HindsightLogicalSnapshotMetadata,
+  HindsightLogicalSnapshotPage,
+} from "./hindsight-cutover-schema.ts";

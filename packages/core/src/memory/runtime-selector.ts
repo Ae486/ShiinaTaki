@@ -16,6 +16,9 @@ export interface SelectedMemoryRuntime {
 }
 export function selectMemoryRuntime(input: { db: Database; createLegacy: () => MemorySubsystem; createCanonical: (epochId: string) => MemoryEngine }): SelectedMemoryRuntime {
   const selection = readMemoryAuthoritySelection(input.db);
+  if (selection.mode === "hindsight") {
+    throw new Error("MEMORY_INTEGRITY_ERROR: Hindsight authority runtime is not installed");
+  }
   let canonical = selection.mode === "canonical-local";
   const legacy = canonical ? null : input.createLegacy();
   let current = canonical ? input.createCanonical(selection.epochId as string) : legacy!.engine;

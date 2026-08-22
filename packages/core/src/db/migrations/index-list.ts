@@ -26,6 +26,7 @@ import { skillPackagesMigration019 } from "./019-skill-packages.ts";
 import { parallelFoundationConvergenceMigration020 } from "./020-parallel-foundation-convergence.ts";
 import { memoryLegacyMigration021 } from "./021-memory-legacy-migration.ts";
 import { hindsightConnectionSetupMigration022 } from "./022-hindsight-connection-setup.ts";
+import { hindsightInitialCutoverMigration023 } from "./023-hindsight-initial-cutover.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -50,4 +51,5 @@ export const MIGRATIONS: Migration[] = [
   parallelFoundationConvergenceMigration020,
   memoryLegacyMigration021,
   hindsightConnectionSetupMigration022,
+  hindsightInitialCutoverMigration023,
 ];

@@ -1,7 +1,7 @@
 /**
  * INPUT:  Core Database wrapper and canonical authority/Bank values
- * OUTPUT: explicit Local epoch initialization, active-epoch reads, and scoped Bank persistence
- * POS:    core/db — sole authority-state writer; no switch/promote operation exists in Batch 1
+ * OUTPUT: explicit Local initialization, provider-neutral active-epoch reads, and scoped Local Bank persistence
+ * POS:    core/db — authority-state reader plus Local-only creation; Hindsight promotion has a separate transaction
  */
 import { randomUUID } from "node:crypto";
 import { CanonicalMemoryBankSchema, MemoryAuthorityEpochSchema, type CanonicalMemoryBank, type MemoryAuthorityEpoch } from "@taki/shared";
@@ -10,6 +10,7 @@ import type { Database, SqlRow } from "./sqlite.ts";
 const NOW = () => new Date().toISOString();
 export interface CanonicalMemoryAuthorityRepo {
   initializeLocalAuthority(now?: string): MemoryAuthorityEpoch;
+  authorityEpoch(expectedEpochId?: string): MemoryAuthorityEpoch;
   activeEpoch(expectedEpochId?: string): MemoryAuthorityEpoch;
   createBank(input: Omit<CanonicalMemoryBank, "revision" | "createdAt" | "updatedAt"> & Partial<Pick<CanonicalMemoryBank, "revision" | "createdAt" | "updatedAt">>): CanonicalMemoryBank;
   getBank(epochId: string, bankId: string): CanonicalMemoryBank | undefined;
@@ -19,7 +20,8 @@ export interface CanonicalMemoryAuthorityRepo {
 export function createCanonicalMemoryAuthorityRepo(db: Database): CanonicalMemoryAuthorityRepo {
   return {
     initializeLocalAuthority: (now) => initialize(db, now),
-    activeEpoch: (expected) => readActive(db, expected),
+    authorityEpoch: (expected) => readAuthority(db, expected),
+    activeEpoch: (expected) => requireActiveLocal(readAuthority(db, expected)),
     createBank: (input) => createBank(db, input),
     getBank: (epoch, bank) => readBank(db, { epochId: epoch, bankId: bank }),
     listBanks: (epoch) => listBanks(db, epoch),
@@ -37,10 +39,11 @@ function initialize(db: Database, now = NOW()): MemoryAuthorityEpoch {
   });
   return { epochId, providerId: "local", providerLineageId: lineage, mode: "authority", status: "active", predecessorEpochId: null, startedAt: now, endedAt: null, reason: "initial-local" };
 }
-function readActive(db: Database, expected?: string): MemoryAuthorityEpoch {
+function readAuthority(db: Database, expected?: string): MemoryAuthorityEpoch {
   const row = db.prepare("SELECT e.* FROM canonical_memory_authority_state s JOIN canonical_memory_authority_epochs e ON e.epoch_id=s.active_epoch_id WHERE s.singleton=1").get();
   if (!row) throw new Error("MEMORY_INTEGRITY_ERROR: active authority missing");
-  const epoch = requireActiveLocal(parseEpoch(row));
+  const epoch = parseEpoch(row);
+  if (epoch.status !== "active") throw new Error("MEMORY_INTEGRITY_ERROR: authority epoch is closed");
   if (expected && expected !== epoch.epochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
   return epoch;
 }
@@ -55,7 +58,7 @@ function parseEpoch(row: SqlRow): MemoryAuthorityEpoch {
 }
 function createBank(db: Database, input: Omit<CanonicalMemoryBank, "revision" | "createdAt" | "updatedAt"> & Partial<Pick<CanonicalMemoryBank, "revision" | "createdAt" | "updatedAt">>): CanonicalMemoryBank {
   const createdAt = input.createdAt ?? NOW(); const updatedAt = input.updatedAt ?? createdAt; const revision = input.revision ?? 1;
-  readActive(db, input.authorityEpochId);
+  requireActiveLocal(readAuthority(db, input.authorityEpochId));
   const bank = CanonicalMemoryBankSchema.parse({ ...input, revision, createdAt, updatedAt });
   const row = { authority_epoch_id: bank.authorityEpochId, bank_id: bank.bankId, scope_kind: bank.scope.kind, character_id: bank.scope.characterId, name: bank.name, disposition_json: JSON.stringify(bank.disposition), mission: bank.mission, config_json: JSON.stringify(bank.config), revision, created_at: createdAt, updated_at: updatedAt };
   db.prepare("INSERT INTO canonical_memory_banks (authority_epoch_id,bank_id,scope_kind,character_id,name,disposition_json,mission,config_json,revision,created_at,updated_at) VALUES (:authority_epoch_id,:bank_id,:scope_kind,:character_id,:name,:disposition_json,:mission,:config_json,:revision,:created_at,:updated_at)").run(row);

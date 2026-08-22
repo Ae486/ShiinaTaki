@@ -18,6 +18,10 @@ import {
   type HindsightBankTemplateManifest,
   type HindsightCompatibilityWire,
 } from "./hindsight-contracts.ts";
+import { HindsightDetailedOperationSchema, HindsightDocumentResponseSchema, HindsightFactPageResponseSchema, HindsightRetainResponseSchema, type HindsightImportDocumentWire, type HindsightImportFactWire } from "./hindsight-import-contracts.ts";
+import { canonicalPayloadHash } from "../legacy-migration/legacy-identities.ts";
+import { HindsightSnapshotMetadataWireSchema, HindsightSnapshotPageWireSchema, normalizeSnapshotMetadata, normalizeSnapshotPage } from "./hindsight-snapshot-contracts.ts";
+import type { HindsightLogicalSnapshotMetadata, HindsightLogicalSnapshotPage } from "@taki/shared";
 
 export interface HindsightTransportResponse {
   status: number;
@@ -44,6 +48,13 @@ export interface HindsightClient {
   exportTemplate(bankId: string, context: HindsightCallContext): Promise<HindsightBankTemplateManifest>;
   bankLlmHealth(bankId: string, context: HindsightCallContext): Promise<HindsightBankLlmHealthProjection>;
   operationStatus(bankId: string, operationId: string, context: HindsightCallContext): Promise<{ operationId: string; status: "pending" | "processing" | "completed" | "failed" | "cancelled" | "not_found" }>;
+  retainImport?: (input: { bankId: string; content: string; documentId: string; operationId: string; context: string | null; call: HindsightCallContext }) => Promise<{ operationId: string; itemsCount: number }>;
+  operationImportStatus?: (bankId: string, operationId: string, context: HindsightCallContext) => Promise<{ operationId: string; status: "pending" | "processing" | "completed" | "failed" | "cancelled" | "not_found"; resultMetadataHash: string | null; derivedUnitCount: number | null; extractionErrorCount: number | null }>;
+  document?: (bankId: string, documentId: string, context: HindsightCallContext) => Promise<HindsightImportDocumentWire>;
+  factPage?: (input: { bankId: string; documentId: string; limit: number; offset: number; context: HindsightCallContext }) => Promise<{ items: HindsightImportFactWire[]; total: number; limit: number; offset: number }>;
+  createLogicalSnapshot?: (input: { bankId: string; pageSize: number; ttlSeconds: number; context: HindsightCallContext }) => Promise<HindsightLogicalSnapshotMetadata>;
+  logicalSnapshot?: (bankId: string, snapshotId: string, context: HindsightCallContext) => Promise<HindsightLogicalSnapshotMetadata>;
+  logicalSnapshotPage?: (input: { bankId: string; snapshotId: string; pageNumber: number; context: HindsightCallContext }) => Promise<HindsightLogicalSnapshotPage>;
 }
 
 const MAX_RESPONSE_BYTES = 512 * 1024;
@@ -56,7 +67,11 @@ export function createHindsightClient(deps: {
   const endpoint = normalizeHindsightEndpoint(deps.endpoint);
   const transport = deps.transport ?? defaultTransport;
   const request = <T>(input: RequestInput<T>): Promise<T> => requestJson({ ...input, endpoint, transport, resolveApiKey: deps.resolveApiKey });
-  return {
+  return createClientMethods(request);
+}
+
+function createClientMethods(request: <T>(input: RequestInput<T>) => Promise<T>): HindsightClient {
+  const methods: HindsightClient = {
     health: (context) => request({ path: "/health", context, schema: HindsightHealthWireSchema }),
     version: async (context) => {
       const result = await request({ path: "/version", context, schema: HindsightVersionWireSchema });
@@ -83,7 +98,48 @@ export function createHindsightClient(deps: {
       const result = await request({ path: `/v1/default/banks/${encodeURIComponent(bankId)}/operations/${encodeURIComponent(operationId)}?include_payload=false`, context, schema: HindsightOperationStatusWireSchema });
       return { operationId: result.operation_id, status: result.status };
     },
+    retainImport: async (input) => {
+      const result = await request({ path: `/v1/default/banks/${encodeURIComponent(input.bankId)}/memories`, init: { method: "POST", body: JSON.stringify({ items: [{ content: input.content, document_id: input.documentId, context: input.context }], async: true, operation_id: input.operationId }) }, context: input.call, schema: HindsightRetainResponseSchema });
+      if (!result.operation_id || result.operation_id !== input.operationId) throw hindsightError("HINDSIGHT_RESPONSE_INVALID");
+      return { operationId: result.operation_id, itemsCount: result.items_count };
+    },
+    operationImportStatus: async (bankId, operationId, context) => {
+      const result = await request({ path: `/v1/default/banks/${encodeURIComponent(bankId)}/operations/${encodeURIComponent(operationId)}?include_payload=false`, context, schema: HindsightDetailedOperationSchema });
+      const metadata = result.result_metadata ?? {};
+      const extractionErrorCount = readCount(metadata, "extraction_errors_count");
+      return { operationId: result.operation_id, status: result.status, resultMetadataHash: Object.keys(metadata).length ? canonicalPayloadHash(metadata) : null, derivedUnitCount: readCount(metadata, "unit_ids_count"), extractionErrorCount };
+    },
+    document: (bankId, documentId, context) => request({ path: `/v1/default/banks/${encodeURIComponent(bankId)}/documents/${encodeURIComponent(documentId)}`, context, schema: HindsightDocumentResponseSchema }),
+    factPage: async (input) => {
+      const query = new URLSearchParams({ document_id: input.documentId, limit: String(input.limit), offset: String(input.offset) });
+      const result = await request({ path: `/v1/default/banks/${encodeURIComponent(input.bankId)}/memories/list?${query}`, context: input.context, schema: HindsightFactPageResponseSchema });
+      return { items: result.items, total: result.total, limit: result.limit, offset: result.offset };
+    },
   };
+  return Object.assign(methods, createSnapshotMethods(request));
+}
+
+function createSnapshotMethods(request: <T>(input: RequestInput<T>) => Promise<T>): Pick<HindsightClient, "createLogicalSnapshot" | "logicalSnapshot" | "logicalSnapshotPage"> {
+  return {
+    createLogicalSnapshot: async (input) => normalizeSnapshotMetadata(await request({
+      path: `/ext/taki-memory/banks/${encodeURIComponent(input.bankId)}/snapshots`,
+      init: { method: "POST", body: JSON.stringify({ page_size: input.pageSize, ttl_seconds: input.ttlSeconds }) },
+      context: input.context, schema: HindsightSnapshotMetadataWireSchema,
+    })),
+    logicalSnapshot: async (bankId, snapshotId, context) => normalizeSnapshotMetadata(await request({
+      path: `/ext/taki-memory/banks/${encodeURIComponent(bankId)}/snapshots/${encodeURIComponent(snapshotId)}`,
+      context, schema: HindsightSnapshotMetadataWireSchema,
+    })),
+    logicalSnapshotPage: async (input) => normalizeSnapshotPage(await request({
+      path: `/ext/taki-memory/banks/${encodeURIComponent(input.bankId)}/snapshots/${encodeURIComponent(input.snapshotId)}/pages/${input.pageNumber}`,
+      context: input.context, schema: HindsightSnapshotPageWireSchema,
+    })),
+  };
+}
+
+function readCount(metadata: Record<string, unknown>, key: string): number | null {
+  const value = metadata[key];
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : null;
 }
 
 interface RequestInput<T> {
@@ -109,8 +165,9 @@ async function requestJson<T>(input: RequestJsonInput<T>): Promise<T> {
     const response = await input.transport(new URL(input.path, input.endpoint), { ...input.init, signal, redirect: "manual", headers: { ...(input.init?.headers ?? {}), authorization: `Bearer ${apiKey}`, "content-type": "application/json", accept: "application/json" } });
     if (response.status >= 300 && response.status < 400) throw hindsightError("HINDSIGHT_UNREACHABLE");
     if (response.status === 401 || response.status === 403) throw hindsightError("HINDSIGHT_AUTHENTICATION_FAILED");
+    if (response.status === 500 && input.path.includes("/snapshots")) throw hindsightError("HINDSIGHT_SNAPSHOT_INTEGRITY");
     if (response.status >= 500) throw hindsightError("HINDSIGHT_UNREACHABLE");
-    if (response.status < 200 || response.status >= 300) throw mapHttpFailure(response.status);
+    if (response.status < 200 || response.status >= 300) throw mapHttpFailure(response.status, input.path);
     if (new TextEncoder().encode(response.body).byteLength > MAX_RESPONSE_BYTES) throw hindsightError("HINDSIGHT_RESPONSE_INVALID");
     let payload: unknown;
     try { payload = JSON.parse(response.body); } catch { throw hindsightError("HINDSIGHT_RESPONSE_INVALID"); }
@@ -130,8 +187,16 @@ function composeSignal(caller: AbortSignal | undefined, deadline: AbortSignal): 
   return AbortSignal.any([caller, deadline]);
 }
 
-function mapHttpFailure(status: number): HindsightError {
-  const code: HindsightErrorCode = status === 408 ? "HINDSIGHT_TIMEOUT" : status === 409 ? "HINDSIGHT_TEMPLATE_CONFLICT" : status === 422 || status === 400 ? "HINDSIGHT_TEMPLATE_INVALID" : "HINDSIGHT_RESPONSE_INVALID";
+function mapHttpFailure(status: number, path: string): HindsightError {
+  const snapshot = path.includes("/snapshots");
+  const code: HindsightErrorCode = status === 408 ? "HINDSIGHT_TIMEOUT"
+    : snapshot && status === 409 ? "HINDSIGHT_CURSOR_RESET_REQUIRED"
+      : snapshot && status === 410 ? "HINDSIGHT_SNAPSHOT_EXPIRED"
+        : snapshot && status === 404 && path.includes("/pages/") ? "HINDSIGHT_SNAPSHOT_PAGE_MISSING"
+          : snapshot && status === 404 ? "HINDSIGHT_SNAPSHOT_NOT_FOUND"
+            : status === 409 && path.endsWith("/memories") ? "HINDSIGHT_OPERATION_IDENTITY_CONFLICT"
+              : status === 409 ? "HINDSIGHT_TEMPLATE_CONFLICT"
+              : status === 422 || status === 400 ? "HINDSIGHT_TEMPLATE_INVALID" : "HINDSIGHT_RESPONSE_INVALID";
   return hindsightError(code);
 }
 

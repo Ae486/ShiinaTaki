@@ -37,3 +37,4 @@
 - memory-provider-operation-schema.ts — strict retain, recall, reflect, and mutation operation contracts
 - memory-provider-envelope-schema.ts — validated success/error envelopes for canonical provider operations
 - memory-migration-schema.ts — strict operator-only migration control and bounded report contracts
+- hindsight-cutover-schema.ts — strict B4 import, logical snapshot/page/record, staging checkpoint, fact mapping, activation, and operator status/verification contracts

@@ -6,12 +6,41 @@
 import type { Database } from "../../db/sqlite.ts";
 import type { Lease } from "./legacy-migration-ledger-repo.ts";
 
-export interface MemoryAuthoritySelection { mode: "legacy-markdown" | "canonical-local"; epochId: string | null; snapshotId: string | null; transactionId: string | null }
+export interface MemoryAuthoritySelection {
+  mode: "legacy-markdown" | "canonical-local" | "hindsight";
+  epochId: string | null;
+  snapshotId: string | null;
+  transactionId: string | null;
+  providerLineageId: string | null;
+  replicaCheckpointDigest: string | null;
+}
 export function readMemoryAuthoritySelection(db: Database): MemoryAuthoritySelection {
   const row = db.prepare("SELECT * FROM memory_authority_selection WHERE singleton=1").get();
-  if (!row || (row.mode !== "legacy-markdown" && row.mode !== "canonical-local")) throw new Error("MEMORY_INTEGRITY_ERROR");
+  if (!row || !["legacy-markdown", "canonical-local", "hindsight"].includes(String(row.mode))) throw new Error("MEMORY_INTEGRITY_ERROR");
   if (row.mode === "canonical-local" && (!row.active_epoch_id || !row.verified_snapshot_id || !row.activation_transaction_id)) throw new Error("MEMORY_INTEGRITY_ERROR");
-  return { mode: row.mode, epochId: row.active_epoch_id === null ? null : String(row.active_epoch_id), snapshotId: row.verified_snapshot_id === null ? null : String(row.verified_snapshot_id), transactionId: row.activation_transaction_id === null ? null : String(row.activation_transaction_id) };
+  if (row.mode === "hindsight" && (!row.active_epoch_id || row.verified_snapshot_id !== null || !row.activation_transaction_id || !row.provider_lineage_id || !row.replica_checkpoint_digest)) throw new Error("MEMORY_INTEGRITY_ERROR");
+  if (row.mode === "hindsight") verifyHindsightSelection(db, row);
+  return { mode: row.mode as MemoryAuthoritySelection["mode"], epochId: row.active_epoch_id === null ? null : String(row.active_epoch_id),
+    snapshotId: row.verified_snapshot_id === null ? null : String(row.verified_snapshot_id), transactionId: row.activation_transaction_id === null ? null : String(row.activation_transaction_id),
+    providerLineageId: row.provider_lineage_id === null || row.provider_lineage_id === undefined ? null : String(row.provider_lineage_id),
+    replicaCheckpointDigest: row.replica_checkpoint_digest === null || row.replica_checkpoint_digest === undefined ? null : String(row.replica_checkpoint_digest) };
+}
+
+function verifyHindsightSelection(db: Database, row: Record<string, unknown>): void {
+  const receipt = db.prepare(`SELECT receipt.bank_count,run.phase,run.status FROM hindsight_authority_activation_receipts receipt
+    JOIN hindsight_cutover_runs run ON run.run_id=receipt.run_id WHERE receipt.transaction_id=:tx
+    AND receipt.hindsight_epoch_id=:epoch AND receipt.provider_lineage=:lineage AND receipt.checkpoint_set_digest=:digest`)
+    .get({ tx: String(row.activation_transaction_id), epoch: String(row.active_epoch_id),
+      lineage: String(row.provider_lineage_id), digest: String(row.replica_checkpoint_digest) });
+  const authority = db.prepare(`SELECT e.provider_id,e.provider_lineage_id,e.status FROM canonical_memory_authority_state state
+    JOIN canonical_memory_authority_epochs e ON e.epoch_id=state.active_epoch_id
+    WHERE state.singleton=1 AND state.active_epoch_id=:epoch`).get({ epoch: String(row.active_epoch_id) });
+  const banks = db.prepare("SELECT count(*) AS n FROM hindsight_authority_bank_receipts WHERE transaction_id=:tx")
+    .get({ tx: String(row.activation_transaction_id) });
+  if (!receipt || receipt.phase !== "activated" || receipt.status !== "completed"
+    || Number(receipt.bank_count) < 1 || Number(receipt.bank_count) !== Number(banks?.n ?? -1)
+    || !authority || authority.provider_id !== "hindsight" || authority.status !== "active"
+    || authority.provider_lineage_id !== row.provider_lineage_id) throw new Error("MEMORY_INTEGRITY_ERROR");
 }
 
 export function activateCanonicalLocal(db: Database, input: { lease: Lease; manifestDigest: string; readinessDigest: string; transactionId: string; now: string }): MemoryAuthoritySelection {
