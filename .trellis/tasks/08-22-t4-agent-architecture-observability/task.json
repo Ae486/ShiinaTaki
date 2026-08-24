@@ -1,0 +1,28 @@
+{
+  "id": "t4-agent-architecture-observability",
+  "name": "t4-agent-architecture-observability",
+  "title": "Agent Harness architecture and observability research",
+  "description": "PI-based Agent Runtime/Harness architecture and DSH-based execution observability planning; T4 providers are downstream compatibility consumers, not the default implementation scope.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-08-22",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "08-23-slice-1-harness-foundation"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

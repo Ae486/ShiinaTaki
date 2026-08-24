@@ -1,0 +1,16 @@
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Review event/run persistence and migration safety."}
+{"file": ".trellis/spec/backend/index.md", "reason": "Final backend quality-check scope and architecture invariants."}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Review future autonomous seams against existing Agent runtime contracts."}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Review observability redaction and logging behavior."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/takiagent-architecture.md", "reason": "Cross-check proposed changes against live architecture gaps and strengths."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/dsh-observability.md", "reason": "Cross-check DSH-derived event/trajectory recommendations."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/pi-harness.md", "reason": "Cross-check PI-derived Harness recommendations."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/main-sync-2026-08-22.md", "reason": "Verify synchronization boundaries, migration lineage, and no-overwrite rules during the later implementation check."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-a-current-state-audit.md", "reason": "Check that implementation seams preserve the audited authority boundaries and do not duplicate the existing loop or Timeline."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-b-harness-contract.md", "reason": "Check legal lifecycle transitions, identity containment, immutable snapshots, effect settlement, cancellation, and stale completion behavior against the adopted contract."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-c-persistence-recovery.md", "reason": "Check persistence authority, atomic transitions, crash-point behavior, orphan recovery, retention, migration, and idempotent settlement requirements."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-d-observability-plane.md", "reason": "Check event taxonomy, projection isolation, cursor/backfill, privacy, retention, query authorization, and Pino diagnostic boundaries."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-e-integration-map.md", "reason": "Check one-owner-per-write-path mapping and preservation of the existing chat, Memory, Host, Extension, Timeline, and Pino boundaries."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-f-t4-compatibility.md", "reason": "Check that T4 providers consume common Harness contracts without moving scheduler, Heartbeat, delivery, or Child Run policy into Core."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-g-slices-gates.md", "reason": "Check slice ordering, reserved future seams, migration/test gates, and the non-finality of the first implementation batch."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/slice-0-semantic-sync-2026-08-23.md", "reason": "Check that semantic synchronization is complete before any Run/Event migration or production Harness child is created."}

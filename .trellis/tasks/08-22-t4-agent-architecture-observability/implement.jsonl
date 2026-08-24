@@ -1,0 +1,16 @@
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Existing turn persistence, cancellation, tool lifecycle, privacy, and prompt-boundary invariants."}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "SQLite single-writer, migration, repository, and post-commit event rules for Run/Event persistence."}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Pino levels, child logger convention, audit separation, and redaction requirements."}
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend package checklist and quality gate for future Core runtime work."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/takiagent-architecture.md", "reason": "Current architecture assessment and recommended seams produced during planning."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/dsh-observability.md", "reason": "DSH observability and trajectory source research and adopt/adapt/reject decisions."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/pi-harness.md", "reason": "PI/OpenClaw Harness source research and adopt/adapt/reject decisions."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/main-sync-2026-08-22.md", "reason": "Main/T4 lineage and staged synchronization record; prevents copying dirty Hindsight work or reserving a conflicting migration number."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-a-current-state-audit.md", "reason": "Phase A evidence-backed call graph, authority map, strengths, Harness gaps, and exit constraints for the Phase B contract."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-b-harness-contract.md", "reason": "Phase B canonical identity hierarchy, admission, lifecycle, snapshot, cancellation, effect, recovery, and single-loop contract."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-c-persistence-recovery.md", "reason": "Phase C durable current-state authority, event evidence, crash matrix, orphan reconciliation, idempotency, and usage/effect settlement planning."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-d-observability-plane.md", "reason": "Phase D DSH-derived event taxonomy, durable/live planes, projections, privacy, retention, query, and plugin boundaries."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-e-integration-map.md", "reason": "Phase E code-seam ownership map for chat, queue, Timeline, Replay, Memory, Host, Extension, Approval, delivery, and Pino."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-f-t4-compatibility.md", "reason": "Phase F downstream T4 TriggerRequest compatibility, provider-owned policy boundary, and Child Run contract."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-g-slices-gates.md", "reason": "Phase G implementation slices, dependencies, gates, non-goals, and living-plan maintenance rules."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/slice-0-semantic-sync-2026-08-23.md", "reason": "Slice 0 comparison, staged semantic merge, lineage proof, and gates before the first Harness implementation child."}

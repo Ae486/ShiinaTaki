@@ -16,6 +16,7 @@ Start here. Every design decision has exactly one canonical home; nothing is dup
 5. **`adr/`** — why the foundational decisions were made (see below).
 6. **`TTS-INTERFACE.md`** — reserved TTS wire contract (v1: interface only).
 7. **`deferred-decisions.md`** — the register of every "ship later" decision, with its trigger-to-complete. Consult when planning a task (are you about to defer something? log it) and when picking up a milestone (what debt comes due here?).
+8. **`ARCHITECTURE-ROADMAP.md`** — the living cross-module architecture plan: stable invariants, reference-design boundaries, adopted baseline, staged delivery, and implementation follow-up.
 
 ## Architecture Decision Records (`adr/`)
 
