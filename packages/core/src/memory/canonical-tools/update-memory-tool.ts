@@ -15,8 +15,8 @@ type UpdateMemoryChange =
   | { field: "layerId"; value: string };
 export interface UpdateMemoryToolInput { scope: "global" | "character"; memoryId: string; expectedRevision: number; changes: UpdateMemoryChange[] }
 
-export function createUpdateMemoryTool(layers: [string, ...string[]], execute: (input: UpdateMemoryToolInput & { patch: EditableMemoryPatch }, signal?: AbortSignal) => Promise<unknown>): Tool {
-  return tool({ description: `Update memory content, context, occurrence, fact type, entities, or Taki layer. ${MUTATION_DESCRIPTION}`, inputSchema: z.strictObject({ scope: MutationScopeSchema, memoryId: MemoryIdSchema, expectedRevision: ExpectedRevisionSchema, changes: changesSchema(layers) }), execute: (input, options) => execute({ ...input, patch: toPatch(input.changes) }, options.abortSignal) });
+export function createUpdateMemoryTool(layers: [string, ...string[]], execute: (input: UpdateMemoryToolInput & { patch: EditableMemoryPatch }, options?: unknown) => Promise<unknown>): Tool {
+  return tool({ description: `Update memory content, context, occurrence, fact type, entities, or Taki layer. ${MUTATION_DESCRIPTION}`, inputSchema: z.strictObject({ scope: MutationScopeSchema, memoryId: MemoryIdSchema, expectedRevision: ExpectedRevisionSchema, changes: changesSchema(layers) }), execute: (input, options) => execute({ ...input, patch: toPatch(input.changes) }, options) });
 }
 function toPatch(changes: UpdateMemoryToolInput["changes"]): EditableMemoryPatch { return Object.fromEntries(changes.map((change) => [change.field, change.value])) as EditableMemoryPatch; }
 function changesSchema(layers: [string, ...string[]]) {

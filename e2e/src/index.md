@@ -8,6 +8,7 @@ Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pn
 - governance-authority.e2e.test.ts — real Core + external taki-node: compatible catalog, relaxed auto, Core deny, Host stricter deny, and higher-generation projection replacement
 - governance-stale-projection.e2e.test.ts — test-only loopback relay proves stale N-1 and same-N valid-digest projection tampering are rejected without execution/replay, then settles Core through bounded Host-generation retirement and verifies cleanup
 - extension-discovery.e2e.test.ts — simultaneous real Core + two isolated Nodes: ambiguous direct process-list refusal, sealed host-qualified Extension calls, stable Host A identity with higher reconnect generation, and Host B disconnect isolation
+- canonical-memory-production.e2e.test.ts — real Core boot with a persisted canonical-local marker, canonical Memory tool composition, one settled Memory Effect, and retired Markdown surface proof
 - screenshot-l2.e2e.test.ts — L2 agent drive: real LLM asked to screenshot (key-gated; the H2 diagnosis)
 - trigger-gating.e2e.test.ts — the dev capability.trigger is absent without TAKI_DEV_TRIGGER=1 (METHOD_NOT_FOUND), present with it
 - screenshot-always-restart.e2e.test.ts — Slice-3 compatibility: legacy Always stays inert before/after restart; ask remains APPROVAL_REQUIRED

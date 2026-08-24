@@ -99,7 +99,7 @@ export interface ChatAgentDeps {
   /** Stable Core-local tools included with memory/avatar tools before the Core adapter runs. */
   coreTools?: ToolSet;
   /** Wraps only the Core-local per-turn ToolSet with trusted bindings; absent in focused agent tests. */
-  coreToolGovernance?: { wrap(tools: ToolSet, interactive?: { connection: Connection; signal?: AbortSignal; runId?: string; attemptId?: string; effects?: EffectLifecycleService }): ToolSet };
+  coreToolGovernance?: { wrap(tools: ToolSet, interactive?: { connection?: Connection; signal?: AbortSignal; runId?: string; attemptId?: string; effects?: EffectLifecycleService }): ToolSet };
   /** Per-character tools built fresh each turn with the turn's characterId (avatar tools bind their publish target here). */
   characterTools?: (characterId: string) => ToolSet;
   /** Extra instructions appended after the assembled memory context (skills list + avatar vocabulary); "" contributes nothing. */
@@ -301,7 +301,9 @@ function assembleTurnTools(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
     deps.coreTools ?? {},
     deps.characterTools?.(attempt.characterId) ?? {},
   );
-  const interactive = turn?.connection ? { connection: turn.connection, signal: turn.signal, runId: turn.runId, attemptId: turn.attemptId, effects: deps.effectLifecycle } : undefined;
+  const interactive = turn && (turn.connection || (turn.runId && turn.attemptId && deps.effectLifecycle))
+    ? { connection: turn.connection, signal: turn.signal, runId: turn.runId, attemptId: turn.attemptId, effects: deps.effectLifecycle }
+    : undefined;
   const extra = turn?.connection && deps.turnTools
     ? deps.turnTools({ ...turn, connection: turn.connection })
     : deps.extraTools ?? {};

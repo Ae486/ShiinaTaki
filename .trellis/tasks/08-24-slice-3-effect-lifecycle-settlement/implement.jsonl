@@ -11,3 +11,4 @@
 {"file": ".trellis/tasks/archive/2026-08/08-24-slice-2-durable-event-ledger/design.md", "reason": "Existing event envelope, transaction, live, projection, and reserved effect seams."}
 {"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "Host identity, generation, broker settlement, unknown outcome, and no-replay contract."}
 {"file": ".trellis/tasks/08-24-slice-3-effect-lifecycle-settlement/research/slice-3b-seam-review.md", "reason": "Slice 3B seam research, adopted Host preflight/explicit execute decision, bounded API plan, and test matrix."}
+{"file": ".trellis/tasks/08-24-slice-3-effect-lifecycle-settlement/research/slice-3c-memory-seam-review.md", "reason": "Slice 3C production Memory authority seam, one outer Memory Effect, deterministic recall branch identities, and integration test matrix."}

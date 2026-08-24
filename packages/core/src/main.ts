@@ -414,6 +414,10 @@ if (devTriggerEnabled(process.env)) {
     capabilityTriggerMethod({
       // The current Run snapshot tools join the dev L1 drive so e2e calls the same sealed Extension closures as chat.
       tools: (interactive) => mergeToolSets(
+        coreToolGovernance.wrap(
+          interactive?.runId ? runService.context(interactive.runId)?.memoryTools ?? memory.createTools("taki") : memory.createTools("taki"),
+          interactive,
+        ),
         capabilityTools(interactive),
         coreToolGovernance.wrap({ ...readFileTool, ...writeFileTool }, interactive),
         extensions.runContext(interactive).tools,

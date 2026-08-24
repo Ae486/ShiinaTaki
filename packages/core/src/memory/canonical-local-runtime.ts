@@ -30,7 +30,7 @@ export function createCanonicalLocalRuntime(input: { db: Database; epochId: stri
   return {
     reconcile: () => ({ upserted: 0, deleted: 0, total: 0, invalid: [] }),
     assemble: ({ characterId }) => assemble({ db: input.db, epochId: input.epochId, characterId, persona }),
-    createTools: (characterId) => toolsFor({ db: input.db, coordinator, epochId: input.epochId, characterId }),
+    createTools: (characterId) => toolsFor({ db: input.db, coordinator, authority, epochId: input.epochId, characterId }),
     createBackgroundTools: () => ({}),
     writeEntry: () => { throw new Error("MEMORY_LEGACY_WRITE_RETIRED"); },
     retention: EMPTY_RETENTION,
@@ -53,9 +53,10 @@ function assemble(input: { db: Database; epochId: string; characterId: string; p
   return sections.filter(Boolean).join("\n\n");
 }
 
-function toolsFor(input: { db: Database; coordinator: ReturnType<typeof createMemoryCoordinator>; epochId: string; characterId: string }): ToolSet {
+function toolsFor(input: { db: Database; coordinator: ReturnType<typeof createMemoryCoordinator>; authority: ReturnType<typeof createCanonicalMemoryAuthorityRepo>; epochId: string; characterId: string }): ToolSet {
   const banks = input.db.prepare("SELECT bank_id,scope_kind FROM canonical_memory_banks WHERE authority_epoch_id=:epoch AND (scope_kind='global' OR character_id=:character)").all({ epoch: input.epochId, character: input.characterId });
   const global = banks.find((row) => row.scope_kind === "global"); const character = banks.find((row) => row.scope_kind === "character");
   if (!global || !character) return {};
-  return createCanonicalMemoryToolsWithCapabilities({ coordinator: input.coordinator, router: { globalBankId: () => String(global.bank_id), characterBankId: () => String(character.bank_id), characterId: () => input.characterId } }, { providerId: "local", contractVersion: 1, retain: true, recall: true, reflect: false, edit: true, invalidate: true, restore: true, conditionalMutation: true, idempotentWrites: true, sparseRetrieval: true, vectorRetrieval: "unavailable", derivedMemoryRead: false });
+  const caps = { providerId: "local", contractVersion: 1 as const, retain: true, recall: true, reflect: false, edit: true, invalidate: true, restore: true, conditionalMutation: true, idempotentWrites: true, sparseRetrieval: true, vectorRetrieval: "unavailable" as const, derivedMemoryRead: false };
+  return createCanonicalMemoryToolsWithCapabilities({ coordinator: input.coordinator, authority: input.authority.activeEpoch(input.epochId), router: { globalBankId: () => String(global.bank_id), characterBankId: () => String(character.bank_id), characterId: () => input.characterId } }, caps);
 }

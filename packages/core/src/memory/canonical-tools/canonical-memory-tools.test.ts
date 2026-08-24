@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createCanonicalMemoryTools } from "./canonical-memory-tools.ts";
+import { attachEffectExecutionContext } from "../../governance/governed-tool.ts";
+import { memoryEffectMetadata } from "./memory-effect-tool.ts";
 
 describe("canonical memory tools", () => {
   it("filters unsupported reflect and uses exact Hindsight-aligned names", async () => {
@@ -23,5 +25,31 @@ describe("canonical memory tools", () => {
     const tools = await createCanonicalMemoryTools({ coordinator: coordinator as never, router: { globalBankId: () => "g", characterBankId: () => "c", characterId: () => "character" } });
     const result = await tools.recall?.execute?.({ query: "memory", scope: "both", limit: 5, maxTokens: 1 }, { toolCallId: "call", messages: [] } as never) as { ok: boolean; data: { returned: number; truncated: boolean; partial: boolean; branchFailures: Array<{ scope: string }> } };
     expect(result).toMatchObject({ ok: true, data: { returned: 0, truncated: true, partial: true, branchFailures: [{ scope: "character" }] } });
+  });
+
+  it("derives deterministic branch request identities from one outer Memory Effect", async () => {
+    const capabilities = { providerId: "local", contractVersion: 1 as const, retain: false, recall: true, reflect: false, edit: false, invalidate: false, restore: false, conditionalMutation: true, idempotentWrites: true, sparseRetrieval: true, vectorRetrieval: "unavailable" as const, derivedMemoryRead: false };
+    const calls: Array<{ bankId: string; requestId?: string; expectedAuthorityEpochId?: string }> = [];
+    const coordinator = {
+      capabilities: async () => capabilities,
+      recall: async (request: { bankId: string }, call: { requestId?: string; expectedAuthorityEpochId?: string }) => {
+        calls.push({ bankId: request.bankId, requestId: call.requestId, expectedAuthorityEpochId: call.expectedAuthorityEpochId });
+        return { ok: false as const, requestId: call.requestId!, providerId: "local", authorityEpochId: "epoch", capabilities, error: { code: "MEMORY_PROVIDER_UNAVAILABLE" as const, category: "availability" as const, message: "down", retryable: true, nextAction: "check-provider" as const } };
+      },
+    };
+    const tools = await createCanonicalMemoryTools({ coordinator: coordinator as never, authority: { epochId: "epoch", providerId: "local", providerLineageId: "lineage" } as never, router: { globalBankId: () => "g", characterBankId: () => "c", characterId: () => "character" } });
+    const metadata = memoryEffectMetadata(tools.recall!);
+    const options = attachEffectExecutionContext({ toolCallId: "call", messages: [], abortSignal: undefined }, {
+      effectId: "outer-effect", runId: "run", attemptId: "attempt",
+      sourceRef: { type: "memory", requestId: "outer-effect", authorityEpoch: "epoch", providerId: "local", providerLineageId: "lineage", capabilityDigest: metadata!.capabilityDigest, operation: "recall" },
+      executorRef: { type: "memory", authorityEpoch: "epoch", providerId: "local", providerLineageId: "lineage", capabilityDigest: metadata!.capabilityDigest },
+    });
+    await tools.recall?.execute?.({ query: "x", scope: "both", limit: 2, maxTokens: 32 }, options as never);
+    expect(calls).toHaveLength(2);
+    expect(calls[0]?.requestId).toMatch(/^memory-branch:(global|character):[0-9a-f]{64}$/);
+    expect(calls[1]?.requestId).toMatch(/^memory-branch:(global|character):[0-9a-f]{64}$/);
+    expect(calls[0]?.requestId).not.toBe(calls[1]?.requestId);
+    expect(calls[0]?.expectedAuthorityEpochId).toBe("epoch");
+    expect(calls[1]?.expectedAuthorityEpochId).toBe("epoch");
   });
 });

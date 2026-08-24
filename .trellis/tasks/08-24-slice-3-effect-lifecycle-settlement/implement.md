@@ -18,9 +18,9 @@ The batches reuse this task's PRD/design/research and the same Effect contracts.
 create one task per identifier/subsystem. Each implementation batch targets approximately two to three agent context
 windows and keeps highly coupled call-chain work together.
 
-Current execution status: Slice 3A is committed as `e55a8dc`. Slice 3B has passed its unique formal check and is pending
-its explicit batch commit. Slice 3C is the next implementation boundary; whole-Slice integration acceptance remains
-open and the parent task stays `in_progress` until 3C completes.
+Current execution status: Slice 3A is committed as `e55a8dc`, Slice 3B as `36a3596`, and Slice 3C has passed the final
+whole-Slice formal check. The next action is the explicit 3C batch commit; after that the parent task may be archived and
+Slice 4 planning may begin. Do not enter Slice 4 implementation from this task.
 
 ### Slice 3A - Effect Foundation, Model, and Usage
 
@@ -93,6 +93,10 @@ Owns:
 
 3C does not implement Slice 4 orphan scanning, automatic safe replay, durable queue/deadline/budget enforcement,
 Scheduler, Heartbeat, Child Run, monitor UI, or external telemetry.
+
+3C uses the existing marker-selected `MemoryCoordinator` and canonical Local receipt authority. It adds only the
+Effect-aware adapter and integration tests. The provider receipt transaction remains separate from the Core Effect
+transaction, and detached primary AutoMemory/image hooks remain outside Effect settlement.
 
 ### Dispatch and Completion Rules
 

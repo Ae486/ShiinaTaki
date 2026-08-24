@@ -7,8 +7,10 @@ import type { ToolSet } from "ai";
 import type { GovernancePolicyService } from "./governance-policy-service.ts";
 import type { ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
 import type { Connection } from "../server/connection-registry.ts";
-import { wrapGovernedTool, type GovernedToolBinding } from "./governed-tool.ts";
+import { wrapGovernedTool, type GovernedEffectContext, type GovernedToolBinding } from "./governed-tool.ts";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
+import { memoryEffectMetadata } from "../memory/canonical-tools/memory-effect-tool.ts";
+import { createHash } from "node:crypto";
 
 const CORE_TOOL_BINDINGS: Record<string, Omit<GovernedToolBinding["identity"], "ownerHostId"> & { cellKey: string }> = {
   get_current_time: { capabilityId: "core.time.read", cellKey: "get-current-time" },
@@ -28,7 +30,7 @@ const CORE_TOOL_BINDINGS: Record<string, Omit<GovernedToolBinding["identity"], "
 };
 
 export interface CoreToolGovernanceAdapter {
-  wrap(tools: ToolSet, interactive?: { connection: Connection; signal?: AbortSignal; runId?: string; attemptId?: string; effects?: EffectLifecycleService }): ToolSet;
+  wrap(tools: ToolSet, interactive?: { connection?: Connection; signal?: AbortSignal; runId?: string; attemptId?: string; effects?: EffectLifecycleService }): ToolSet;
 }
 
 export function createCoreToolGovernanceAdapter(
@@ -41,12 +43,19 @@ export function createCoreToolGovernanceAdapter(
       const wrapped: ToolSet = {};
       for (const [key, tool] of Object.entries(tools)) {
         const binding = CORE_TOOL_BINDINGS[key];
+        const memory = memoryEffectMetadata(tool);
         wrapped[key] = binding
           ? wrapGovernedTool(tool, {
               service,
-              binding: { identity: { capabilityId: binding.capabilityId, ownerHostId }, cellKey: binding.cellKey },
-              interactive: interactive && approval
-                ? { ...interactive, approval, presentation: corePresentation(key) }
+              binding: { identity: { capabilityId: binding.capabilityId, ownerHostId }, cellKey: binding.cellKey,
+                effect: memory ? { kind: "memory" as const, replayPosture: memory.replayPosture,
+                  sourceRef: (_input, effectId) => ({ type: "memory" as const, requestId: effectId, authorityEpoch: memory.authorityEpochId, providerId: memory.providerId, providerLineageId: memory.providerLineageId, capabilityDigest: memory.capabilityDigest, operation: memory.operation }),
+                  executorRef: { type: "memory" as const, authorityEpoch: memory.authorityEpochId, providerId: memory.providerId, providerLineageId: memory.providerLineageId, capabilityDigest: memory.capabilityDigest },
+                   capturedGenerationRef: memory.authorityEpochId, inputDigest: (input) => digestMemoryInput(input) } : undefined },
+              effect: effectContext(interactive),
+              interactive: interactive?.connection && approval
+                ? { connection: interactive.connection, signal: interactive.signal, runId: interactive.runId,
+                    attemptId: interactive.attemptId, effects: interactive.effects, approval, presentation: corePresentation(key) }
                 : undefined,
             })
           : closeUnknownCoreTool(tool, key);
@@ -54,6 +63,24 @@ export function createCoreToolGovernanceAdapter(
       return wrapped;
     },
   };
+}
+
+function effectContext(interactive: { runId?: string; attemptId?: string; effects?: EffectLifecycleService } | undefined): GovernedEffectContext | undefined {
+  return interactive?.runId && interactive.attemptId && interactive.effects
+    ? { runId: interactive.runId, attemptId: interactive.attemptId, effects: interactive.effects }
+    : undefined;
+}
+
+function digestMemoryInput(input: unknown): string {
+  return createHash("sha256").update(canonicalJson(input), "utf8").digest("hex");
+}
+
+function canonicalJson(value: unknown): string {
+  if (value === null || typeof value === "boolean" || typeof value === "string") return JSON.stringify(value);
+  if (typeof value === "number") return Number.isFinite(value) ? JSON.stringify(value) : "null";
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (typeof value === "object") { const record = value as Record<string, unknown>; return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`).join(",")}}`; }
+  throw new Error("memory input is not JSON-compatible");
 }
 
 function corePresentation(key: string) {

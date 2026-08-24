@@ -1,11 +1,12 @@
 /**
  * INPUT:  async MemoryCoordinator, trusted scope-to-Bank router, and current layer registry
- * OUTPUT: capability-filtered dormant Hindsight-aligned canonical ToolSet
- * POS:    core/memory/canonical-tools — isolated factory; never assembled with legacy tools in Batch 1
+ * OUTPUT: capability-filtered Hindsight-aligned canonical ToolSet
+ * POS:    core/memory/canonical-tools — marker-selected canonical runtime; never assembled beside legacy tools
  */
 import { randomUUID } from "node:crypto";
 import { MemoryErrorEnvelopeSchema, RecallEnvelopeSchema, type EditableMemoryPatch, type MemoryResult, type RecallResult, type TakiMemoryPolicyProjection } from "@taki/shared";
 import type { ToolSet } from "ai";
+import type { MemoryAuthorityEpoch } from "@taki/shared";
 import { DEFAULT_INTENTIONS_DAYS } from "../../config/memory-config.ts";
 import { estimateTokens } from "../token-estimator.ts";
 import type { MemoryCoordinator } from "../memory-coordinator.ts";
@@ -16,9 +17,11 @@ import { createReflectTool } from "./reflect-tool.ts";
 import { createRestoreMemoryTool, type RestoreMemoryToolInput } from "./restore-memory-tool.ts";
 import { createRetainTool } from "./retain-tool.ts";
 import { createUpdateMemoryTool, type UpdateMemoryToolInput } from "./update-memory-tool.ts";
+import { attachMemoryEffectMetadata, deriveMemoryBranchRequestId } from "./memory-effect-tool.ts";
+import { effectExecutionContext } from "../../governance/governed-tool.ts";
 
 export interface MemoryToolBankRouter { globalBankId(): string; characterBankId(): string; characterId(): string; }
-interface ToolDeps { coordinator: MemoryCoordinator; router: MemoryToolBankRouter }
+interface ToolDeps { coordinator: MemoryCoordinator; router: MemoryToolBankRouter; authority?: MemoryAuthorityEpoch }
 type RecallToolInput = { query: string; scope: "global" | "character" | "both"; limit: number; maxTokens: number };
 
 export async function createCanonicalMemoryTools(deps: ToolDeps): Promise<ToolSet> {
@@ -29,16 +32,16 @@ export function createCanonicalMemoryToolsWithCapabilities(deps: ToolDeps, caps:
   const tools: ToolSet = {};
   // These user-approved Hindsight names intentionally omit Taki's usual family prefix; production activation must
   // still collision-check them and must never assemble this set beside the legacy memory tools.
-  if (caps.retain) tools.retain = createRetainTool(WRITABLE_LAYER_IDS as [string, ...string[]], (input, signal) => safely(() => retain(deps, input, signal)));
-  if (caps.recall) tools.recall = createRecallTool((input, signal) => safely(() => recall(deps, input, signal)));
-  if (caps.edit) tools.update_memory = createUpdateMemoryTool(WRITABLE_LAYER_IDS as [string, ...string[]], (input, signal) => safely(() => updateMemory(deps, input, signal)));
-  if (caps.invalidate) tools.invalidate_memory = createInvalidateMemoryTool((input, signal) => safely(() => invalidateMemory(deps, input, signal)));
-  if (caps.restore) tools.restore_memory = createRestoreMemoryTool((input, signal) => safely(() => restoreMemory(deps, input, signal)));
-  if (caps.reflect) tools.reflect = createReflectTool((input, signal) => safely(() => deps.coordinator.reflect({ bankId: bank(deps.router, input.scope), query: input.query, budget: input.budget, maxTokens: input.maxTokens }, { signal })));
+  if (caps.retain) tools.retain = memoryTool(createRetainTool(WRITABLE_LAYER_IDS as [string, ...string[]], (input, options) => safely(() => retain(deps, input, options))), "retain", deps, caps);
+  if (caps.recall) tools.recall = memoryTool(createRecallTool((input, options) => safely(() => recall(deps, input, options))), "recall", deps, caps);
+  if (caps.edit) tools.update_memory = memoryTool(createUpdateMemoryTool(WRITABLE_LAYER_IDS as [string, ...string[]], (input, options) => safely(() => updateMemory(deps, input, options))), "edit", deps, caps);
+  if (caps.invalidate) tools.invalidate_memory = memoryTool(createInvalidateMemoryTool((input, options) => safely(() => invalidateMemory(deps, input, options))), "invalidate", deps, caps);
+  if (caps.restore) tools.restore_memory = memoryTool(createRestoreMemoryTool((input, options) => safely(() => restoreMemory(deps, input, options))), "restore", deps, caps);
+  if (caps.reflect) tools.reflect = memoryTool(createReflectTool((input, options) => safely(() => deps.coordinator.reflect({ bankId: bank(deps.router, input.scope), query: input.query, budget: input.budget, maxTokens: input.maxTokens }, callOptions(deps, options)))), "reflect", deps, caps);
   return tools;
 }
 
-async function retain(deps: ToolDeps, input: { content: string; layer: string; context: string | null }, signal?: AbortSignal) {
+async function retain(deps: ToolDeps, input: { content: string; layer: string; context: string | null }, options?: unknown) {
   const layer = getLayer(input.layer); if (!layer) throw new Error("invalid memory layer");
   const capturedAt = new Date().toISOString(); const bankId = layer.ownership === "global" ? deps.router.globalBankId() : deps.router.characterBankId();
   return deps.coordinator.retain({
@@ -46,13 +49,14 @@ async function retain(deps: ToolDeps, input: { content: string; layer: string; c
     observationScopes: null, documentId: null, strategy: null, updateMode: "replace",
     provenance: { actor: "agent", origin: "explicit-agent", characterId: deps.router.characterId(), timelineFromSeq: null, timelineToSeq: null, capturedAt, sanitized: true, sourceRef: null },
     policy: { layerId: input.layer, importance: 5, visibility: layer.recallPolicy, disclosure: null, origin: "self", emotionalWeight: null, retention: retentionFor(layer, capturedAt), policyVersion: 1 },
-  }, { signal });
+  }, callOptions(deps, options));
 }
 
-async function recall(deps: ToolDeps, input: RecallToolInput, signal?: AbortSignal): Promise<MemoryResult<RecallResult>> {
-  const request = (bankId: string) => deps.coordinator.recall({ bankId, query: input.query, queryTimestamp: new Date().toISOString(), budget: "mid", limit: input.limit, maxTokens: input.maxTokens, factTypes: ["world", "experience", "observation"], layerIds: [], includeInvalidated: false }, { signal });
-  if (input.scope !== "both") return request(bank(deps.router, input.scope));
-  const [global, character] = await Promise.all([request(deps.router.globalBankId()), request(deps.router.characterBankId())]);
+async function recall(deps: ToolDeps, input: RecallToolInput, options?: unknown): Promise<MemoryResult<RecallResult>> {
+  const effect = effectExecutionContext(options); const outer = effect?.effectId;
+  const request = (bankId: string, scope: "global" | "character") => deps.coordinator.recall({ bankId, query: input.query, queryTimestamp: new Date().toISOString(), budget: "mid", limit: input.limit, maxTokens: input.maxTokens, factTypes: ["world", "experience", "observation"], layerIds: [], includeInvalidated: false }, callOptions(deps, options, outer ? deriveMemoryBranchRequestId(outer, scope) : undefined));
+  if (input.scope !== "both") return request(bank(deps.router, input.scope), input.scope);
+  const [global, character] = await Promise.all([request(deps.router.globalBankId(), "global"), request(deps.router.characterBankId(), "character")]);
   return combineRecall(global, character, input);
 }
 
@@ -84,11 +88,11 @@ function fitRecall(candidates: RecallResult["hits"], limit: number, maxTokens: n
   return { hits, truncated };
 }
 
-function updateMemory(deps: ToolDeps, input: UpdateMemoryToolInput & { patch: EditableMemoryPatch }, signal?: AbortSignal) {
-  return deps.coordinator.mutate({ kind: "edit", bankId: bank(deps.router, input.scope), memoryId: input.memoryId, expectedRevision: input.expectedRevision, patch: input.patch }, { signal });
+function updateMemory(deps: ToolDeps, input: UpdateMemoryToolInput & { patch: EditableMemoryPatch }, options?: unknown) {
+  return deps.coordinator.mutate({ kind: "edit", bankId: bank(deps.router, input.scope), memoryId: input.memoryId, expectedRevision: input.expectedRevision, patch: input.patch }, callOptions(deps, options));
 }
-function invalidateMemory(deps: ToolDeps, input: InvalidateMemoryToolInput, signal?: AbortSignal) { return deps.coordinator.mutate({ kind: "invalidate", bankId: bank(deps.router, input.scope), memoryId: input.memoryId, expectedRevision: input.expectedRevision, reason: input.reason }, { signal }); }
-function restoreMemory(deps: ToolDeps, input: RestoreMemoryToolInput, signal?: AbortSignal) { return deps.coordinator.mutate({ kind: "restore", bankId: bank(deps.router, input.scope), memoryId: input.memoryId, expectedRevision: input.expectedRevision }, { signal }); }
+function invalidateMemory(deps: ToolDeps, input: InvalidateMemoryToolInput, options?: unknown) { return deps.coordinator.mutate({ kind: "invalidate", bankId: bank(deps.router, input.scope), memoryId: input.memoryId, expectedRevision: input.expectedRevision, reason: input.reason }, callOptions(deps, options)); }
+function restoreMemory(deps: ToolDeps, input: RestoreMemoryToolInput, options?: unknown) { return deps.coordinator.mutate({ kind: "restore", bankId: bank(deps.router, input.scope), memoryId: input.memoryId, expectedRevision: input.expectedRevision }, callOptions(deps, options)); }
 function bank(router: MemoryToolBankRouter, scope: "global" | "character"): string { return scope === "global" ? router.globalBankId() : router.characterBankId(); }
 
 function retentionFor(layer: MemoryLayerDefinition, capturedAt: string): TakiMemoryPolicyProjection["retention"] {
@@ -110,4 +114,26 @@ async function safely<T>(operation: () => Promise<T>): Promise<T | ReturnType<ty
 }
 function fallbackEnvelope() {
   return MemoryErrorEnvelopeSchema.parse({ ok: false, requestId: randomUUID(), providerId: "unknown", authorityEpochId: null, capabilities: null, error: { code: "MEMORY_INTERNAL_ERROR", category: "internal", message: "memory tool failed", retryable: false, nextAction: "check-provider" } });
+}
+
+// eslint-disable-next-line max-params
+function memoryTool(tool: ToolSet[string], operation: Parameters<typeof attachMemoryEffectMetadata>[1]["operation"], deps: ToolDeps, capabilities: Awaited<ReturnType<MemoryCoordinator["capabilities"]>>) {
+  const authority = deps.authority ?? { epochId: "test-epoch", providerId: capabilities.providerId, providerLineageId: "test-lineage" };
+  return attachMemoryEffectMetadata(tool, { operation, authorityEpochId: authority.epochId,
+    providerId: authority.providerId, providerLineageId: authority.providerLineageId, capabilities,
+    replayPosture: operation === "recall" ? "safe" : "never" });
+}
+
+function callOptions(deps: ToolDeps, options?: unknown, requestId?: string) {
+  const effect = effectExecutionContext(options);
+  const source = effect?.sourceRef.type === "memory" ? effect.sourceRef : undefined;
+  return {
+    requestId: requestId ?? source?.requestId,
+    expectedAuthorityEpochId: deps.authority?.epochId,
+    expectedProviderId: deps.authority?.providerId,
+    expectedProviderLineageId: deps.authority?.providerLineageId,
+    expectedCapabilityDigest: source?.capabilityDigest,
+    signal: typeof options === "object" && options !== null && "abortSignal" in options
+      ? (options as { abortSignal?: AbortSignal }).abortSignal : undefined,
+  };
 }

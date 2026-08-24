@@ -195,6 +195,13 @@ liveBus.publish(committed);
   payloads never enter Effect rows, usage rows, events, or ordinary projections.
 - Retry identity is mutable execution context: when context overflow creates a replacement Attempt, the exact
   `TurnContext` passed to the model middleware must receive the replacement `attemptId` before the next provider request.
+- Memory writes have an asymmetric uncertainty rule: if the provider may have applied `retain` or a mutation but its
+  post-dispatch acknowledgement, capability snapshot, or authority evidence cannot be validated, settle the Core
+  Memory Effect as `MEMORY_OUTCOME_UNKNOWN`; do not relabel it as an ordinary failure or silently replay it. The
+  canonical Memory receipt remains its own authority and transaction boundary for later reconciliation.
+- Run-owned Effect context (`runId`, `attemptId`, `effectId`, and lifecycle service) is independent from optional
+  interactive Approval context. Non-primary/background turns may record governed Effects without an operator socket;
+  an Approval-required action still fails closed when no interactive authority exists.
 
 ### 4. Validation & Error Matrix
 

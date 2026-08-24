@@ -125,7 +125,7 @@ export const MemoryProviderCapabilitiesSchema = z.strictObject({
 });
 export type MemoryProviderCapabilities = z.infer<typeof MemoryProviderCapabilitiesSchema>;
 
-export const MemoryErrorCodeSchema = z.enum(["MEMORY_INVALID_REQUEST", "MEMORY_NOT_FOUND", "MEMORY_REQUEST_ID_CONFLICT", "MEMORY_REVISION_MISMATCH", "MEMORY_CAPABILITY_UNSUPPORTED", "MEMORY_AUTHORITY_MISMATCH", "MEMORY_OPERATION_CANCELLED", "MEMORY_PROVIDER_UNAVAILABLE", "MEMORY_INTEGRITY_ERROR", "MEMORY_INTERNAL_ERROR"]);
+export const MemoryErrorCodeSchema = z.enum(["MEMORY_INVALID_REQUEST", "MEMORY_NOT_FOUND", "MEMORY_REQUEST_ID_CONFLICT", "MEMORY_REVISION_MISMATCH", "MEMORY_CAPABILITY_UNSUPPORTED", "MEMORY_AUTHORITY_MISMATCH", "MEMORY_OPERATION_CANCELLED", "MEMORY_OUTCOME_UNKNOWN", "MEMORY_PROVIDER_UNAVAILABLE", "MEMORY_INTEGRITY_ERROR", "MEMORY_INTERNAL_ERROR"]);
 export type MemoryErrorCode = z.infer<typeof MemoryErrorCodeSchema>;
 const ErrorCategorySchema = z.enum(["validation", "not-found", "conflict", "capability", "authority", "availability", "integrity", "internal"]);
 const ErrorNextActionSchema = z.enum(["fix-request", "refresh-memory", "retry", "check-provider", "none"]);
@@ -137,6 +137,7 @@ export const MEMORY_ERROR_POLICY = {
   MEMORY_CAPABILITY_UNSUPPORTED: ["capability", false, "none"],
   MEMORY_AUTHORITY_MISMATCH: ["authority", false, "check-provider"],
   MEMORY_OPERATION_CANCELLED: ["availability", false, "none"],
+  MEMORY_OUTCOME_UNKNOWN: ["availability", false, "check-provider"],
   MEMORY_PROVIDER_UNAVAILABLE: ["availability", true, "check-provider"],
   MEMORY_INTEGRITY_ERROR: ["integrity", false, "check-provider"],
   MEMORY_INTERNAL_ERROR: ["internal", false, "check-provider"],

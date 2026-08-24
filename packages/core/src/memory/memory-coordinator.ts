@@ -1,7 +1,7 @@
 /**
  * INPUT:  persisted Local authority epoch, provider registry, and provider-neutral operation requests
  * OUTPUT: async capability-checked dispatch with one validated envelope and no implicit fallback
- * POS:    core/memory — authority routing seam; production composition remains legacy until Batch 2
+ * POS:    core/memory — authority routing seam used by the marker-selected canonical Local runtime
  */
 import { randomUUID } from "node:crypto";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@taki/shared";
 import type { CanonicalMemoryAuthorityRepo } from "../db/canonical-memory-authority-repo.ts";
 import type { MemoryProvider, MemoryProviderCallContext } from "./memory-provider.ts";
+import { createHash } from "node:crypto";
 
 type Operation = "retain" | "recall" | "reflect" | "mutate";
 interface CoordinatorDeps { authority: CanonicalMemoryAuthorityRepo; providers: Map<string, MemoryProvider> }
@@ -21,7 +22,15 @@ interface ProviderDispatchInput extends DispatchInput { requestId: string; epoch
 interface ProviderInvocation extends ProviderDispatchInput {
   provider: MemoryProvider; context: MemoryProviderCallContext; caps: MemoryProviderCapabilities;
 }
-export interface MemoryCoordinatorCallOptions { requestId?: string; actor?: MemoryProviderCallContext["actor"]; expectedAuthorityEpochId?: string; signal?: AbortSignal; }
+export interface MemoryCoordinatorCallOptions {
+  requestId?: string;
+  actor?: MemoryProviderCallContext["actor"];
+  expectedAuthorityEpochId?: string;
+  expectedProviderId?: string;
+  expectedProviderLineageId?: string;
+  expectedCapabilityDigest?: string;
+  signal?: AbortSignal;
+}
 export interface MemoryCoordinator {
   capabilities(): Promise<MemoryProviderCapabilities>;
   retain(request: RetainRequest, call?: MemoryCoordinatorCallOptions): Promise<MemoryResult<RetainResult>>;
@@ -60,6 +69,8 @@ async function dispatch(input: DispatchInput): Promise<MemoryResult<unknown>> {
   if (call?.expectedAuthorityEpochId && call.expectedAuthorityEpochId !== epoch.value.epochId) {
     return errorEnvelope({ requestId, epoch: epoch.value, code: "MEMORY_AUTHORITY_MISMATCH", message: "memory authority is stale" });
   }
+  if (call?.expectedProviderId && call.expectedProviderId !== epoch.value.providerId) return errorEnvelope({ requestId, epoch: epoch.value, code: "MEMORY_AUTHORITY_MISMATCH", message: "memory provider identity is stale" });
+  if (call?.expectedProviderLineageId && call.expectedProviderLineageId !== epoch.value.providerLineageId) return errorEnvelope({ requestId, epoch: epoch.value, code: "MEMORY_AUTHORITY_MISMATCH", message: "memory provider lineage is stale" });
   return dispatchToProvider({ deps, operation, request: parsed.value, call, requestId, epoch: epoch.value });
 }
 
@@ -70,6 +81,7 @@ async function dispatchToProvider(input: ProviderDispatchInput): Promise<MemoryR
   catch (error) { return providerResolutionFailure(error, { requestId, epoch }); }
   let caps: MemoryProviderCapabilities;
   try { caps = MemoryProviderCapabilitiesSchema.parse(await provider.capabilities()); } catch { return errorEnvelope({ requestId, epoch, code: "MEMORY_INTERNAL_ERROR", message: "memory capability snapshot invalid" }); }
+  if (input.call?.expectedCapabilityDigest && input.call.expectedCapabilityDigest !== capabilityDigest(caps)) return errorEnvelope({ requestId, epoch, caps, code: "MEMORY_AUTHORITY_MISMATCH", message: "memory capabilities are stale" });
   if (caps.providerId !== provider.providerId) return errorEnvelope({ requestId, epoch, caps, code: "MEMORY_AUTHORITY_MISMATCH", message: "memory provider identity is stale" });
   if (!caps[capabilityFor(operation, request)]) return errorEnvelope({ requestId, epoch, caps, code: "MEMORY_CAPABILITY_UNSUPPORTED", message: "memory operation unsupported" });
   if (call?.signal?.aborted) return errorEnvelope({ requestId, epoch, caps, code: "MEMORY_OPERATION_CANCELLED", message: "memory operation cancelled" });
@@ -77,26 +89,61 @@ async function dispatchToProvider(input: ProviderDispatchInput): Promise<MemoryR
   return invokeProvider({ ...input, provider, context, caps });
 }
 
+function capabilityDigest(caps: MemoryProviderCapabilities): string {
+  return createHash("sha256").update(canonicalJson(caps), "utf8").digest("hex");
+}
+
+function canonicalJson(value: unknown): string {
+  if (value === null || typeof value === "boolean" || typeof value === "string") return JSON.stringify(value);
+  if (typeof value === "number") return Number.isFinite(value) ? JSON.stringify(value) : "null";
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${canonicalJson(record[key])}`).join(",")}}`;
+  }
+  throw new Error("memory capabilities are not JSON-compatible");
+}
+
 async function invokeProvider(input: ProviderInvocation): Promise<MemoryResult<unknown>> {
   const { deps, provider, operation, request, context, epoch, caps } = input;
+  let raw: unknown;
+  try { raw = await callProvider(input); }
+  catch { return postInvocationFailure(input, "MEMORY_INTERNAL_ERROR", "memory provider failed"); }
   let result: MemoryResult<unknown>;
-  try { result = parseEnvelope(operation, request, await callProvider(input)); }
-  catch { return errorEnvelope({ requestId: context.requestId, epoch, caps, code: "MEMORY_INTERNAL_ERROR", message: "memory provider failed" }); }
+  try { result = parseEnvelope(operation, request, raw); }
+  catch { return postInvocationFailure(input, "MEMORY_INTERNAL_ERROR", "memory provider envelope is invalid"); }
   let currentCaps: MemoryProviderCapabilities;
   try { currentCaps = MemoryProviderCapabilitiesSchema.parse(await provider.capabilities()); }
-  catch { return errorEnvelope({ requestId: context.requestId, epoch, caps, code: "MEMORY_INTERNAL_ERROR", message: "memory capability snapshot invalid" }); }
+  catch { return postInvocationFailure(input, "MEMORY_INTERNAL_ERROR", "memory capability snapshot is unavailable"); }
   // The capability snapshot is part of the invocation contract.  Comparing only with the
   // post-call snapshot would accept a provider that changed capabilities mid-operation and
   // echoed the changed snapshot back in its envelope.  Reject both the envelope mismatch
   // and any snapshot drift so callers never observe a result under different capabilities.
   if (!matchesInvocation({ result, context, provider, epoch, operation, capabilities: caps, currentCapabilities: currentCaps })) {
-    return errorEnvelope({ requestId: context.requestId, epoch, caps, code: "MEMORY_AUTHORITY_MISMATCH", message: "memory provider envelope identity is stale" });
+    return postInvocationFailure(input, "MEMORY_AUTHORITY_MISMATCH", "memory provider envelope identity is stale");
   }
   let active: MemoryAuthorityEpoch;
   try { active = deps.authority.activeEpoch(epoch.epochId); }
-  catch (error) { return authorityFailure(error, { requestId: context.requestId, epoch, caps }); }
-  if (active.providerId !== provider.providerId || active.providerLineageId !== provider.providerLineageId) return errorEnvelope({ requestId: context.requestId, epoch: active, caps, code: "MEMORY_AUTHORITY_MISMATCH", message: "memory authority changed during operation" });
+  catch { return postInvocationFailure(input, "MEMORY_AUTHORITY_MISMATCH", "memory authority changed during operation"); }
+  if (active.providerId !== provider.providerId || active.providerLineageId !== provider.providerLineageId) return postInvocationFailure(input, "MEMORY_AUTHORITY_MISMATCH", "memory authority changed during operation", active);
   return result;
+}
+
+// eslint-disable-next-line max-params
+function postInvocationFailure(
+  input: ProviderInvocation,
+  readCode: "MEMORY_AUTHORITY_MISMATCH" | "MEMORY_INTERNAL_ERROR",
+  readMessage: string,
+  activeEpoch = input.epoch,
+): MemoryResult<never> {
+  const writeMayHaveApplied = input.operation === "retain" || input.operation === "mutate";
+  return errorEnvelope({
+    requestId: input.context.requestId,
+    epoch: activeEpoch,
+    caps: input.caps,
+    code: writeMayHaveApplied ? "MEMORY_OUTCOME_UNKNOWN" : readCode,
+    message: writeMayHaveApplied ? "memory operation outcome is unknown" : readMessage,
+  });
 }
 
 function requireProvider(deps: CoordinatorDeps, epoch: MemoryAuthorityEpoch): MemoryProvider {
@@ -156,12 +203,12 @@ function sameStableCapabilities(left: MemoryProviderCapabilities, right: MemoryP
   return JSON.stringify({ ...left, vectorRetrieval: undefined }) === JSON.stringify({ ...right, vectorRetrieval: undefined });
 }
 
-interface ErrorInput { requestId: string; epoch?: MemoryAuthorityEpoch; caps?: MemoryProviderCapabilities; code: "MEMORY_INVALID_REQUEST" | "MEMORY_OPERATION_CANCELLED" | "MEMORY_AUTHORITY_MISMATCH" | "MEMORY_PROVIDER_UNAVAILABLE" | "MEMORY_INTEGRITY_ERROR" | "MEMORY_INTERNAL_ERROR" | "MEMORY_CAPABILITY_UNSUPPORTED"; message: string }
+interface ErrorInput { requestId: string; epoch?: MemoryAuthorityEpoch; caps?: MemoryProviderCapabilities; code: "MEMORY_INVALID_REQUEST" | "MEMORY_OPERATION_CANCELLED" | "MEMORY_OUTCOME_UNKNOWN" | "MEMORY_AUTHORITY_MISMATCH" | "MEMORY_PROVIDER_UNAVAILABLE" | "MEMORY_INTEGRITY_ERROR" | "MEMORY_INTERNAL_ERROR" | "MEMORY_CAPABILITY_UNSUPPORTED"; message: string }
 function errorEnvelope(input: ErrorInput): MemoryResult<never> {
   const policies = {
     MEMORY_INVALID_REQUEST: ["validation", false, "fix-request"], MEMORY_OPERATION_CANCELLED: ["availability", false, "none"],
     MEMORY_AUTHORITY_MISMATCH: ["authority", false, "check-provider"], MEMORY_PROVIDER_UNAVAILABLE: ["availability", true, "check-provider"],
-    MEMORY_INTEGRITY_ERROR: ["integrity", false, "check-provider"], MEMORY_INTERNAL_ERROR: ["internal", false, "check-provider"], MEMORY_CAPABILITY_UNSUPPORTED: ["capability", false, "none"],
+    MEMORY_INTEGRITY_ERROR: ["integrity", false, "check-provider"], MEMORY_INTERNAL_ERROR: ["internal", false, "check-provider"], MEMORY_OUTCOME_UNKNOWN: ["availability", false, "check-provider"], MEMORY_CAPABILITY_UNSUPPORTED: ["capability", false, "none"],
   } as const;
   const [category, retryable, nextAction] = policies[input.code];
   const error = MemoryErrorSchema.parse({ code: input.code, category, message: input.message, retryable, nextAction });

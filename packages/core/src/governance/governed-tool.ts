@@ -12,16 +12,20 @@ import type { Connection } from "../server/connection-registry.ts";
 import { approvalDecisionScopeDigest } from "../approval/approval-binding.ts";
 import type { EffectLifecycle } from "@taki/shared";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
+import { randomUUID } from "node:crypto";
 
 export interface GovernedToolBinding {
   identity: CanonicalCapabilityIdentity;
   cellKey: string;
   denyConstraints?: string[];
   effect?: {
-    sourceRef: EffectLifecycle["sourceRef"];
+    kind?: EffectLifecycle["kind"];
+    sourceRef: EffectLifecycle["sourceRef"] | ((input: unknown, effectId: string) => EffectLifecycle["sourceRef"]);
     executorRef?: EffectLifecycle["executorRef"];
     replayPosture?: EffectLifecycle["replayPosture"];
     capturedGenerationRef?: string;
+    inputDigest?: (input: unknown) => string;
+    onIntent?: (effect: EffectLifecycle, input: unknown) => void;
   };
 }
 
@@ -42,11 +46,41 @@ export interface InteractiveGovernanceContext {
   effects?: EffectLifecycleService;
 }
 
+/** Run-owned Effect authority for turns that have no operator socket (for example non-primary Runs). */
+export interface GovernedEffectContext {
+  runId: string;
+  attemptId: string;
+  effects: EffectLifecycleService;
+}
+
 export interface GovernedToolContext {
   service: GovernancePolicyService;
   binding: GovernedToolBinding;
   interactive?: InteractiveGovernanceContext;
+  effect?: GovernedEffectContext;
   dispatchLease?: GovernedDispatchLease;
+}
+
+/** Metadata passed only in-memory from the Core Effect bracket to an explicit Memory adapter. */
+export interface EffectExecutionContext {
+  effectId: string;
+  runId: string;
+  attemptId: string;
+  sourceRef: EffectLifecycle["sourceRef"];
+  executorRef?: EffectLifecycle["executorRef"];
+  capturedGenerationRef?: string;
+}
+
+const EFFECT_CONTEXT = Symbol("taki.effect-context");
+export function effectExecutionContext(options: unknown): EffectExecutionContext | undefined {
+  return typeof options === "object" && options !== null
+    ? (options as Record<PropertyKey, unknown>)[EFFECT_CONTEXT] as EffectExecutionContext | undefined
+    : undefined;
+}
+
+export function attachEffectExecutionContext(options: unknown, effect: EffectExecutionContext): unknown {
+  if (typeof options !== "object" || options === null) return options;
+  return { ...(options as Record<string, unknown>), [EFFECT_CONTEXT]: effect };
 }
 
 export function wrapGovernedTool(tool: Tool, context: GovernedToolContext): Tool {
@@ -83,7 +117,9 @@ async function executeGoverned(args: ExecuteGovernedArgs) {
   let waiting: ReturnType<NonNullable<EffectLifecycleService["prepareWaiting"]>> | undefined;
   if (handle.approvalId && interactive.effects && interactive.runId && interactive.attemptId && interactive.effects.prepareWaiting) {
     try {
-      waiting = interactive.effects.prepareWaiting({ ...effectIntent(context, interactive.runId, interactive.attemptId), approvalRef: { approvalId: handle.approvalId, policyGeneration: decision.evaluation.policyGeneration, approvalGeneration: interactive.approval.approvalGeneration(), bindingDigest: requestedBinding.decisionScopeDigest } });
+      const effectId = randomUUID();
+      waiting = interactive.effects.prepareWaiting({ ...effectIntent(context, interactive.runId, interactive.attemptId, effectId, input), effectId, approvalRef: { approvalId: handle.approvalId, policyGeneration: decision.evaluation.policyGeneration, approvalGeneration: interactive.approval.approvalGeneration(), bindingDigest: requestedBinding.decisionScopeDigest } });
+      binding.effect?.onIntent?.(waiting, input);
     } catch {
       handle.cancel();
       return { ok: false, code: "STALE_EFFECT", message: "tool authorization became stale" };
@@ -118,9 +154,9 @@ async function executeGoverned(args: ExecuteGovernedArgs) {
 async function executeWithEffect(args: ExecuteGovernedArgs & { waiting?: ReturnType<NonNullable<EffectLifecycleService["prepareWaiting"]>> }) {
   const { execute, context, input, options, waiting } = args;
   const interactive = context.interactive;
-  const effects = interactive?.effects;
-  const runId = interactive?.runId;
-  const attemptId = interactive?.attemptId;
+  const effects = context.effect?.effects ?? interactive?.effects;
+  const runId = context.effect?.runId ?? interactive?.runId;
+  const attemptId = context.effect?.attemptId ?? interactive?.attemptId;
   const lease = context.dispatchLease;
   if (lease && !lease.acquire()) {
     if (waiting && effects?.settleWaiting) effects.settleWaiting({
@@ -135,9 +171,12 @@ async function executeWithEffect(args: ExecuteGovernedArgs & { waiting?: ReturnT
   }
   try {
     const committed = waiting && effects?.commitIntent ? effects.commitIntent({ effectId: waiting.effectId, runId: waiting.runId, attemptId: waiting.attemptId, expectedVersion: waiting.version }) : undefined;
-    const effect = committed?.effect ?? (effects && runId && attemptId ? effects.prepare(effectIntent(context, runId, attemptId)) : undefined);
+    const effectId = randomUUID();
+    const effect = committed?.effect ?? (effects && runId && attemptId ? effects.prepare({ ...effectIntent(context, runId, attemptId, effectId, input), effectId }) : undefined);
     if (waiting && (committed?.stale || !effect)) return { ok: false, code: "STALE_EFFECT", message: "tool authorization became stale" };
-    const raw = await Promise.resolve(execute(input, options)).catch((error: unknown) => {
+    context.binding.effect?.onIntent?.(effect!, input);
+    const executionOptions = effect ? withEffectContext(options, effect) : options;
+    const raw = await Promise.resolve(execute(input, executionOptions as Parameters<NonNullable<Tool["execute"]>>[1])).catch((error: unknown) => {
       if (effect && effects) effects.settle({ effectId: effect.effectId, runId: effect.runId, attemptId: effect.attemptId, expectedVersion: effect.version, outcome: "failed", errorCode: "tool_error" });
       throw error;
     });
@@ -149,16 +188,26 @@ async function executeWithEffect(args: ExecuteGovernedArgs & { waiting?: ReturnT
   }
 }
 
-function effectIntent(context: GovernedToolContext, runId: string, attemptId: string) {
+function withEffectContext(options: unknown, effect: EffectLifecycle): unknown {
+  return attachEffectExecutionContext(options, {
+    effectId: effect.effectId, runId: effect.runId, attemptId: effect.attemptId,
+    sourceRef: effect.sourceRef, executorRef: effect.executorRef, capturedGenerationRef: effect.capturedGenerationRef,
+  });
+}
+
+// eslint-disable-next-line max-params
+function effectIntent(context: GovernedToolContext, runId: string, attemptId: string, effectId: string, input: unknown) {
   const declared = context.binding.effect;
   return {
     runId,
     attemptId,
-    kind: "tool" as const,
-    sourceRef: declared?.sourceRef ?? { type: "tool" as const, toolName: context.binding.identity.capabilityId },
+    kind: declared?.kind ?? "tool" as const,
+    sourceRef: typeof declared?.sourceRef === "function" ? declared.sourceRef(input, effectId) : declared?.sourceRef ?? { type: "tool" as const, toolName: context.binding.identity.capabilityId },
     executorRef: declared?.executorRef,
     replayPosture: declared?.replayPosture ?? "never" as const,
     capturedGenerationRef: declared?.capturedGenerationRef,
+    inputDigest: declared?.inputDigest?.(input),
+    idempotencyKey: declared?.kind === "memory" ? effectId : undefined,
   };
 }
 
@@ -179,7 +228,8 @@ function toolFailure(result: unknown) {
   if (typeof result !== "object" || result === null || !("ok" in result) || (result as { ok?: unknown }).ok !== false) return undefined;
   const failure = result as { code?: unknown; state?: unknown };
   const outcome = failure.state === "outcome_unknown" ? "outcome_unknown" as const
-    : failure.state === "cancelled" ? "cancelled" as const : "failed" as const;
+    : failure.state === "cancelled" || failure.code === "MEMORY_OPERATION_CANCELLED" ? "cancelled" as const
+      : failure.code === "MEMORY_OUTCOME_UNKNOWN" ? "outcome_unknown" as const : "failed" as const;
   const errorCode = typeof failure.code === "string" ? failure.code.toLowerCase().slice(0, 100) : "tool_failed";
   return { outcome, errorCode };
 }

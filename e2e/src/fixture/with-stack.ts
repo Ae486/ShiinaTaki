@@ -58,6 +58,8 @@ export interface StackOptions {
   secretMasterKey?: boolean;
   /** Seed <coreDataDir>/mcp-servers.json BEFORE the core boots (plaintext-migration scenarios read it at startup). */
   seedMcpServers?: Record<string, unknown>;
+  /** Test-only hook to prepare the migrated SQLite data directory immediately before Core starts. */
+  prepareCoreData?: (coreDataDir: string) => void;
 }
 
 /** One node-side gate decision from <node dataDir>/audit.jsonl (names-only except exec's command). */
@@ -162,6 +164,7 @@ async function bootParts(options: StackOptions): Promise<Parts> {
   // The teardown guard below starts at the core spawn, so a failed seed cleans its own temp dirs here.
   try {
     seedCoreState(options, coreDataDir, coreEnv);
+    options.prepareCoreData?.(coreDataDir);
   } catch (error) {
     for (const dir of [coreDataDir, nodeDataDir, secondNodeDataDir]) {
       if (dir) rmSync(dir, { recursive: true, force: true });

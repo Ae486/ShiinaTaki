@@ -8,12 +8,95 @@ after session compaction; verify it against Git and the latest agent report befo
 | Batch | Boundary | Status |
 | --- | --- | --- |
 | 3A | Effect/Usage contracts, migration/repository/service, per-provider model middleware, authoritative usage, Model/Run/Attempt truthfulness | `committed:e55a8dc` |
-| 3B | Governed Tool, Approval wait/final revalidation, Host identity threading, MCP generation/lease settlement | `approved_pending_commit` |
-| 3C | Explicit Memory effects, non-primary preservation, full cross-boundary/process acceptance | `not_started` |
+| 3B | Governed Tool, Approval wait/final revalidation, Host identity threading, MCP generation/lease settlement | `committed:36a3596` |
+| 3C | Explicit Memory effects, non-primary preservation, full cross-boundary/process acceptance | `approved_pending_commit` |
 
 The unique Slice 3A implementation and formal-check agents have finished. The final xhigh check approved 3A only after
 repairing the real overflow replacement-Attempt binding, durable Effect event evidence, stale callback classification,
 and the direct acceptance-matrix tests. Do not dispatch another 3A implementation or check agent.
+
+## Slice 3C authoritative implementation boundary
+
+The focused Memory seam review is in `research/slice-3c-memory-seam-review.md`. 3C reuses the one Effect lifecycle and
+the selected Memory authority; it does not create a second Memory runtime, receipt store, or recovery worker.
+
+1. Explicit canonical Memory tools are classified as `kind: "memory"` Effects with bounded Memory source/executor
+   references. Their request identity, captured authority epoch, provider lineage, capability snapshot/digest, and
+   request digest are passed to the existing `MemoryCoordinator`.
+2. The Effect intent commits immediately before the coordinator call. The validated MemoryResult settles the same Effect
+   once. Provider receipts remain a separate authority/transaction; 3C must document this boundary rather than claim
+   Core Effect plus canonical-memory receipt atomicity.
+3. `recall(both)` is one model-facing Memory Effect. It derives bounded `global`/`character` branch request identities
+   from the outer request identity and captures one expected authority epoch; branch partial failure stays in the single
+   bounded result and never creates two Core Effects.
+4. Explicit retain/edit/invalidate/restore writes default to replay posture `never`. `safe` is allowed only when the
+   exact request identity/hash, expected revision, provider lineage, authority epoch, and idempotent-write capability
+   remain valid. Conflicts and revision mismatches remain Memory domain results.
+5. Detached primary AutoMemory/image hooks are not re-fired by Effect observers. Retraction suppresses them as today.
+   Non-primary turns preserve no fake Timeline, costume, conversational watermark, or image-save side effects; an
+   explicit Memory tool on a non-primary turn may still produce one normal Memory Effect.
+
+### Slice 3C acceptance matrix
+
+- [x] Explicit recall/retain/reflect/edit/invalidate/restore each create one Memory Effect with intent-before-provider and
+      one terminal settlement.
+- [x] `recall(both)` creates one outer Effect with deterministic branch request IDs; partial/both failure is bounded and
+      does not double-record Effects.
+- [x] Expected epoch/provider/capability drift fails closed; stale/duplicate/wrong-Attempt callbacks cannot mutate truth.
+- [x] Exact canonical receipt replay remains idempotent; same request ID with a different hash remains conflict; stale
+      expected revision remains revision mismatch.
+- [x] Write Effects default `never`; no unsafe replay or epoch redirect is introduced.
+- [x] Raw memory content, queries, tool args, provider exceptions and credentials are absent from Effects/events/logs;
+      only digest, identity, epoch, bounded outcome/code/counts and safe summaries remain.
+- [x] Primary detached AutoMemory/image, retract, and all non-primary invariants remain green; observers do not trigger
+      detached work a second time.
+- [x] Full Slice 3 cross-boundary tests cover Model -> Memory -> Tool/Approval/Host/MCP interactions and preserve 3A/3B
+      ordering, projections, and unknown/stale semantics.
+- [x] Shared/Core/Desktop/CLI/E2E/Rust gates, real Core boot/process smoke where applicable, task validation, and
+      `git diff --check` pass.
+
+### Slice 3C implementation evidence (2026-08-25)
+
+- Canonical Memory metadata is attached as an in-process sidecar and mapped by Core Tool Governance to one
+  `kind: "memory"` Effect. The sidecar carries only the operation, authority epoch, provider identity/lineage,
+  capability digest, replay posture, and request/input digests; it is not part of model-facing tool input or the
+  Timeline payload.
+- The governed boundary commits Effect intent immediately before the coordinator call and settles the same Effect
+  from the bounded Memory result. Recall uses `safe`; retain, edit, invalidate, restore, and reflect use `never`.
+- `recall(both)` remains one model-facing call. Global and character branches derive deterministic request IDs from
+  the outer request identity and share one captured authority epoch; branch failures remain bounded in the one result.
+- MemoryCoordinator validates expected epoch/provider/lineage/capability before and after provider dispatch. Provider
+  retain/mutation transport ambiguity maps to `MEMORY_OUTCOME_UNKNOWN`; post-dispatch envelope/capability/authority
+  acceptance failures on writes remain unknown because the provider may already have applied the mutation; authority
+  drift on reads fails closed.
+- Core governance carries Run/Attempt/Effect authority independently of the optional operator Approval socket. This
+  keeps explicit Memory calls in non-primary/background turns inside the same Effect bracket while preserving the
+  fail-closed Approval requirement when an interactive connection is absent.
+- Focused verification already passed: Shared full suite 36 files / 342 tests; Core full suite 269 files / 1704 passed /
+  1 skipped; Core Memory/Governance/Agent focus 63 files / 445 tests; Rust workspace 171 tests plus 7 secret-key tests;
+  Shared/Core/E2E typechecks; `pnpm lint`; and the three Slice 3B lifecycle E2E files (9 tests).
+- Whole-Slice integration evidence: `packages/core/src/agents/slice-3c-whole-slice.integration.test.ts` passed 1/1.
+  A scripted real `ToolLoopAgent` turn produced two Model Effects and one canonical Memory Effect; the same fixture then
+  exercised an Approval-gated MCP tool and Host preflight/settlement. It asserted one Memory Effect, no duplicate Memory
+  Effect, five bounded intent/settled projection milestones, raw-content redaction, and Host `outcome_unknown` plus
+  wrong-Attempt stale settlement rejection.
+- Canonical production-process evidence: `e2e/src/canonical-memory-production.e2e.test.ts` passed 1/1. The existing
+  `withStack` boots a real Core process against a temporary DB seeded with the canonical-local marker and two Banks;
+  `capability.trigger` uses the same captured canonical Memory tools and Core Governance wrapper as production. The test
+  proves marker selection, callable canonical `retain`, one terminal Memory Effect with epoch/provider metadata, no
+  duplicate Tool Effect, no raw content in events/logs, and no legacy Markdown workspace surface.
+- Final full gates: Shared 36 files / 342 passed; Core 269 files / 1704 passed / 1 skipped; Desktop 82 files / 427
+  passed; CLI 8 files / 47 passed; E2E 24 files / 37 passed / 6 skipped; all workspace typechecks; `pnpm lint`; Rust
+  workspace 171 tests plus 7 secret-key tests; Rust check/build/taki-node/clippy `-D warnings`; task validation; and
+  `git diff --check`.
+- The canonical Memory receipt transaction and Core Effect settlement are intentionally separate transactions. A crash
+  between them leaves an unfinished Effect for Slice 4 reconciliation; Slice 3 does not claim cross-repository atomicity.
+- Final xhigh formal check: `APPROVED (Slice 3C / whole Slice 3)`. Check fixes classify post-dispatch Memory write
+  acknowledgement/capability/authority uncertainty as `MEMORY_OUTCOME_UNKNOWN`, and keep Run-owned Effect context
+  available without an interactive Approval connection while Approval itself remains fail-closed. Final gates: Core
+  1704 passed / 1 skipped; Shared 342; Desktop 427; CLI 47; E2E 37 passed / 6 skipped; Rust 171 plus 7 secret-key;
+  all workspace typechecks, lint, Rust check/build/clippy, migration lineage, task validation, and `git diff --check`
+  passed. No findings remained.
 
 Recovery procedure:
 

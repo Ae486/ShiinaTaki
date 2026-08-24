@@ -5,3 +5,4 @@
 {"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Regression checks for primary chat and non-primary behavior."}
 {"file": ".trellis/tasks/08-24-slice-3-effect-lifecycle-settlement/research/implementation-seams.md", "reason": "Injection-safe formal review evidence, residual risks, and required regression anchors."}
 {"file": ".trellis/tasks/08-24-slice-3-effect-lifecycle-settlement/research/slice-3b-seam-review.md", "reason": "Slice 3B formal review evidence, Host two-phase ordering, cross-boundary test matrix, and residual risks."}
+{"file": ".trellis/tasks/08-24-slice-3-effect-lifecycle-settlement/research/slice-3c-memory-seam-review.md", "reason": "Slice 3C formal review boundary for Memory authority, receipts, detached hooks, non-primary behavior, privacy, and whole-Slice acceptance."}

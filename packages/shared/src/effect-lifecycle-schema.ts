@@ -16,14 +16,16 @@ export const EffectSourceRefSchema = z.discriminatedUnion("type", [
   z.strictObject({ type: z.literal("approval"), approvalId: ID }),
   z.strictObject({ type: z.literal("host"), operationId: ID }),
   z.strictObject({ type: z.literal("mcp"), serverId: ID, generation: z.number().int().positive().max(2_000_000_000) }),
-  z.strictObject({ type: z.literal("memory"), requestId: ID, authorityEpoch: ID }),
+  z.strictObject({ type: z.literal("memory"), requestId: ID, authorityEpoch: ID, providerId: ID,
+    providerLineageId: ID, capabilityDigest: DIGEST, operation: z.enum(["retain", "recall", "reflect", "edit", "invalidate", "restore"]) }),
 ]);
 export const EffectExecutorRefSchema = z.discriminatedUnion("type", [
   z.strictObject({ type: z.literal("provider"), provider: ID }),
   z.strictObject({ type: z.literal("core"), module: ID }),
   z.strictObject({ type: z.literal("host"), hostId: ID, connectionGeneration: z.number().int().positive().max(2_000_000_000) }),
   z.strictObject({ type: z.literal("mcp"), serverId: ID, generation: z.number().int().positive().max(2_000_000_000) }),
-  z.strictObject({ type: z.literal("memory"), authorityEpoch: ID }),
+  z.strictObject({ type: z.literal("memory"), authorityEpoch: ID, providerId: ID, providerLineageId: ID,
+    capabilityDigest: DIGEST }),
 ]);
 export const ApprovalEffectRefSchema = z.strictObject({
   approvalId: ID, policyGeneration: z.number().int().positive().max(2_000_000_000),
