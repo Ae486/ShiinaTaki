@@ -1,0 +1,18 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Final backend quality scope, architecture invariants, lint, tests, and Rust checks."}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Check primary turn compatibility, single ToolLoopAgent use, Replay isolation, cancellation, and retry safety."}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Check migration lineage, single-writer ownership, expected-version transitions, and atomic commit boundaries."}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Check outcome vocabulary, structured errors, deadline/cancel semantics, and no blind retry."}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Check that Run evidence is not replaced by Pino and that content/secrets remain redacted."}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Check Governance/Approval ownership and stale generation settlement."}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "Check Host effects preserve explicit routing, cancellation, retry, and outcome_unknown behavior."}
+{"file": "docs/T4-HANDOFF.md", "reason": "Check implementation remains inside the approved Slice 1 boundary and preserves manual acceptance rules."}
+{"file": ".trellis/tasks/08-23-slice-1-harness-foundation/prd.md", "reason": "Verify every acceptance criterion and non-goal against the final changes."}
+{"file": ".trellis/tasks/08-23-slice-1-harness-foundation/design.md", "reason": "Review identity containment, state authority, immutable snapshot, chat adaptation, compatibility, and rollback."}
+{"file": ".trellis/tasks/08-23-slice-1-harness-foundation/implement.md", "reason": "Review implementation order, verification coverage, stop conditions, and delivery claims."}
+{"file": ".trellis/tasks/08-23-slice-1-harness-foundation/research/live-execution-chain.md", "reason": "Verify existing call-chain owners and every named primary regression anchor remain intact."}
+{"file": ".trellis/tasks/08-23-slice-1-harness-foundation/research/implementation-seams.md", "reason": "Check the concrete persistence, ack/admission, snapshot, non-primary, query, and test decisions against the final implementation."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-b-harness-contract.md", "reason": "Check Run/Attempt/Operation semantics, Admission, cancellation, snapshot, and Context Manifest conformance."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-c-persistence-recovery.md", "reason": "Check state/evidence authority split, late callbacks, crash behavior, idempotency, and migration safety."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-e-integration-map.md", "reason": "Check no write-path authority is duplicated across Run, Timeline, Memory, Host, Approval, or projections."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-g-slices-gates.md", "reason": "Check that full event ledger, effect integration, recovery, and T4 providers remain outside Slice 1."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/slice-0-semantic-sync-2026-08-23.md", "reason": "Check main synchronization and historical migration lineage before accepting a new migration."}

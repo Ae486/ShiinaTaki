@@ -77,6 +77,24 @@ describe("chat-agent R2 overflow retry (batch 6, TDD row 10)", () => {
     }
   });
 
+  it("uses Admission-captured Memory tools instead of a newer live authority", async () => {
+    const f = fresh();
+    const liveCreateTools = vi.fn(() => ({}));
+    const agent = createChatAgent({
+      model: errorPartThenStreamModel(overflowError(70000), ["ok"]),
+      store: f.conversation,
+      memory: { ...f.memory, createTools: liveCreateTools },
+      onOverflow: vi.fn(),
+    });
+    await expect(drain(agent.stream({ characterId: "taki", message: "hi" }, {
+      connection: { state: { status: "authenticated", deviceId: "test", role: "operator", capabilities: [] } },
+      notify: () => undefined,
+      onClose: () => undefined,
+      runContext: { memoryTools: {} },
+    }))).resolves.toBe("ok");
+    expect(liveCreateTools).not.toHaveBeenCalled();
+  });
+
   it("retries ONCE on a first-request overflow that REJECTS the model call (thrown transport ending)", async () => {
     const f = fresh();
     const onOverflow = vi.fn();
@@ -242,5 +260,21 @@ describe("chat-agent R2 overflow retry (batch 6, TDD row 10)", () => {
 
     expect(APICallError.isInstance(caught)).toBe(true);
     expect(model.doStreamCalls).toHaveLength(1);
+  });
+
+  it("does not start a retry when the durable Attempt callback is stale", async () => {
+    const f = fresh();
+    const onOverflow = vi.fn();
+    const model = errorPartThenStreamModel(overflowError(70000), ["never"]);
+    const agent = createChatAgent({ model, store: f.conversation, memory: f.memory, onOverflow });
+    const caught = await drain(agent.stream({ characterId: "taki", message: "hi" }, {
+      connection: { state: { status: "authenticated", deviceId: "test", role: "operator", capabilities: [] } },
+      notify: () => undefined,
+      onClose: () => undefined,
+      onRetry: () => false,
+    })).then(() => null, (error: unknown) => error);
+    expect(APICallError.isInstance(caught)).toBe(true);
+    expect(model.doStreamCalls).toHaveLength(1);
+    expect(onOverflow).not.toHaveBeenCalled();
   });
 });

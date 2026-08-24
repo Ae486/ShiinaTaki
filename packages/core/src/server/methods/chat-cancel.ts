@@ -10,13 +10,36 @@ import {
   type ChatCancelResult,
 } from "@taki/shared";
 import type { TurnRegistry } from "../../agents/turn-registry.ts";
+import type { RunService } from "../../harness/run-service.ts";
 import type { MethodDefinition } from "../method-registry.ts";
 
-export function chatCancelMethod(turns: TurnRegistry): MethodDefinition<ChatCancelParams> {
+export function chatCancelMethod(
+  turns: TurnRegistry,
+  runs?: Pick<RunService, "requestCancel" | "status">,
+): MethodDefinition<ChatCancelParams> {
   return {
     method: CHAT_METHODS.cancel,
     roles: ["operator"], // the conversation is an operator concern, and so is stopping it
     paramsSchema: ChatCancelParamsSchema,
-    handler: (params): ChatCancelResult => ({ cancelled: turns.cancel(params.characterId) }),
+    handler: (params): ChatCancelResult => {
+      const exact = params.runId === undefined ? undefined : readExactRun(runs, params.runId);
+      const durable = exact?.characterId === params.characterId
+        && runs?.requestCancel(exact.runId, "operator cancel") === true;
+      const active = turns.cancel(params.characterId, params.runId);
+      return { cancelled: durable || active };
+    },
   };
+}
+
+function readExactRun(
+  runs: Pick<RunService, "status"> | undefined,
+  runId: string,
+): ReturnType<RunService["status"]>["run"] | undefined {
+  if (!runs) return undefined;
+  try {
+    return runs.status(runId).run;
+  } catch (error) {
+    if (error instanceof Error && error.message === "RUN_NOT_FOUND") return undefined;
+    throw error;
+  }
 }

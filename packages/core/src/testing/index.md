@@ -10,4 +10,5 @@
 - mcp-test-transport.ts — in-memory MCP transports (closedCount exactly-once assertions, deferred tools/call for in-flight leases, cursor-honoring tools/list for pagination) + memConnect; test-only
 - ws-test-client.ts — WS integration-test client harness (makeClient/openClient + frame helpers); test-only
 - capability-tool-harness.ts — ConnectionRegistry + CapabilityBroker doubles, a REAL in-memory Approval service, and operator/Host Connection fakes for the Shell-backed capability tools; test-only
+- run-service-stub.ts — in-memory RunService contract for transport tests that do not exercise SQLite lifecycle semantics; test-only
 - seed-timeline-cli.ts — pre-boot CLI seeding timeline rows into <dataDir>/taki.db via the real migrations + repo (e2e polluted-history); test-only

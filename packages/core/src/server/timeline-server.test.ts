@@ -26,6 +26,7 @@ import { createLogger } from "../logging/logger.ts";
 import { createMemoryEngine } from "../memory/memory-engine.ts";
 import { streamingMockModel } from "../testing/mock-language-model.ts";
 import { rmTempDir } from "../testing/rm-temp.ts";
+import { createRunServiceStub } from "../testing/run-service-stub.ts";
 import { appCode, notification, openClient, sendConnect, type TestClient } from "../testing/ws-test-client.ts";
 import { createConnectionRegistry } from "./connection-registry.ts";
 import { createMethodRegistry } from "./method-registry.ts";
@@ -99,7 +100,7 @@ async function bootServer(options: BootOptions): Promise<ServerHarness> {
     chatSendMethod(createChatAgent({ model: options.model, store, memory }), logger, {
       queue: createTurnQueue(),
       turns: createTurnRegistry(),
-    }),
+    }, createRunServiceStub()),
   );
   registry.register(timelineHistoryMethod(repo));
   registry.register(timelineSubscribeMethod(subscriptions));

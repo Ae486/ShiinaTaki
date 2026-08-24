@@ -38,6 +38,21 @@ export type { ConnectParams, ConnectResult, Role } from "./connect-schema.ts";
 export { CHAT_METHODS, ChatCancelParamsSchema, ChatCancelResultSchema, ChatCompleteSchema, ChatDeltaSchema, ChatErrorSchema, ChatSendParamsSchema, ChatSendResultSchema, IMAGE_MEDIA_TYPES, ImageAttachmentSchema, MAX_ATTACHMENTS_PER_MESSAGE } from "./chat-schema.ts";
 export type { ChatCancelParams, ChatCancelResult, ChatComplete, ChatDelta, ChatError, ChatSendParams, ChatSendResult, ImageAttachment } from "./chat-schema.ts";
 
+export {
+  RUN_METHODS, RunInitiatorSchema, RunProvenanceSchema, DeliveryClassSchema, ContextModeSchema, RunStateSchema,
+  AttemptStateSchema, RunOutcomeSchema, RetryabilitySchema, RunOperationPhaseSchema, TriggerRequestSchema,
+  SnapshotReferenceSchema, RunHostReferenceSchema, RunExtensionReferenceSchema, RunGovernanceReferenceSchema,
+  RunMemoryReferenceSchema, RunContextDecisionSchema, RunReplayDecisionSchema, RunBudgetReferenceSchema,
+  RunImplementationReferenceSchema, RunSnapshotSchema, AttemptSchema, RunReceiptSchema, RunSchema,
+  RunStatusParamsSchema, RunStatusResultSchema,
+} from "./harness-schema.ts";
+export type {
+  RunInitiator, RunProvenance, DeliveryClass, ContextMode, RunState, AttemptState, RunOutcome, Retryability,
+  RunOperationPhase, TriggerRequest, SnapshotReference, RunHostReference, RunExtensionReference,
+  RunGovernanceReference, RunMemoryReference, RunSnapshot, Attempt, RunReceipt, Run, RunStatusParams,
+  RunStatusResult, RunContextDecision, RunReplayDecision, RunBudgetReference, RunImplementationReference,
+} from "./harness-schema.ts";
+
 export { TIMELINE_HISTORY_LIMIT_DEFAULT, TIMELINE_HISTORY_LIMIT_MAX, TIMELINE_METHODS, TimelineAppendedSchema, TimelineEntrySchema, TimelineHistoryParamsSchema, TimelineHistoryResultSchema, TimelinePartSchema, TimelineRemovedSchema, TimelineRoleSchema, TimelineSubscribeParamsSchema, TimelineSubscribeResultSchema, TimelineToolOutputSchema } from "./timeline-schema.ts";
 export type { TimelineAppended, TimelineEntry, TimelineHistoryParams, TimelineHistoryResult, TimelinePart, TimelineRemoved, TimelineRole, TimelineSubscribeParams, TimelineSubscribeResult, TimelineToolOutput } from "./timeline-schema.ts";
 

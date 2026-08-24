@@ -27,6 +27,7 @@ import { parallelFoundationConvergenceMigration020 } from "./020-parallel-founda
 import { memoryLegacyMigration021 } from "./021-memory-legacy-migration.ts";
 import { hindsightConnectionSetupMigration022 } from "./022-hindsight-connection-setup.ts";
 import { hindsightInitialCutoverMigration023 } from "./023-hindsight-initial-cutover.ts";
+import { harnessRunsMigration024 } from "./024-harness-runs.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -52,4 +53,5 @@ export const MIGRATIONS: Migration[] = [
   memoryLegacyMigration021,
   hindsightConnectionSetupMigration022,
   hindsightInitialCutoverMigration023,
+  harnessRunsMigration024,
 ];

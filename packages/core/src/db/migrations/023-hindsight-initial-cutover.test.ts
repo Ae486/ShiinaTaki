@@ -11,7 +11,7 @@ import { hindsightInitialCutoverMigration023 } from "./023-hindsight-initial-cut
 describe("hindsight initial cutover migration 023", () => {
   it("applies after B2/B3 and creates additive B4 tables", () => {
     const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
-    expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(23);
+    expect(db.prepare("SELECT version FROM migrations WHERE version = 23").get()?.version).toBe(23);
     expect(db.prepare("SELECT name FROM sqlite_master WHERE name='hindsight_import_operations'").get()?.name).toBe("hindsight_import_operations");
     expect(db.prepare("SELECT name FROM sqlite_master WHERE name='hindsight_cutover_runs'").get()?.name).toBe("hindsight_cutover_runs");
     expect(db.prepare("SELECT name FROM sqlite_master WHERE name='hindsight_import_facts'").get()?.name).toBe("hindsight_import_facts");

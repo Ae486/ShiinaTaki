@@ -25,6 +25,7 @@ import { createLogger } from "../logging/logger.ts";
 import { createMemoryEngine } from "../memory/memory-engine.ts";
 import { createMemoryStore } from "../testing/memory-store.ts";
 import { rmTempDir } from "../testing/rm-temp.ts";
+import { createRunServiceStub } from "../testing/run-service-stub.ts";
 import { failingMockModel, streamingMockModel } from "../testing/mock-language-model.ts";
 import { appCode, notification, openClient, sendConnect, type TestClient } from "../testing/ws-test-client.ts";
 import { createConnectionRegistry, type ConnectionRegistry } from "./connection-registry.ts";
@@ -80,7 +81,7 @@ async function boot(model: LanguageModel, options?: { trustLoopbackOperator: boo
     chatSendMethod(createChatAgent({ model, store: memoryStore.store, memory }), logger, {
       queue: createTurnQueue(),
       turns: createTurnRegistry(),
-    }),
+    }, createRunServiceStub()),
   );
   const server = await startWsServer({ host: "127.0.0.1", port: 0, registry, connectionRegistry, logger });
   servers.push(server);

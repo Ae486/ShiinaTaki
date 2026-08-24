@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /**
  * INPUT:  process env (bootstrap) + the config store's resolved knobs, and OS signals
  * OUTPUT: a running headless Agent Core — WS server bound to loopback; exits 0 on SIGINT/SIGTERM
@@ -31,6 +32,9 @@ import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
 import { createSummaryRepo } from "./db/summary-repo.ts";
 import { createTimelineRepo } from "./db/timeline-repo.ts";
 import { createWindowStateRepo } from "./db/window-state-repo.ts";
+import { createRunRepo } from "./db/run-repo.ts";
+import { createRunService } from "./harness/run-service.ts";
+import { createRunSnapshotCapture } from "./harness/run-snapshot-capture.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
 import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
 import { createExtensionComposition } from "./extensions/extension-composition.ts";
@@ -72,6 +76,7 @@ import { mediaGetMethod } from "./server/methods/media-get.ts";
 import { mediaUsageMethod } from "./server/methods/media-usage.ts";
 import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
 import { memoryStatusMethod } from "./server/methods/memory-status.ts";
+import { runStatusMethod } from "./server/methods/run-status.ts";
 import { createAsyncOnDemandMemoryMigrationMethods } from "./server/methods/memory-migration.ts";
 import { registerPerceptionMethods } from "./server/methods/perception-methods.ts";
 import { registerSecretMethods } from "./server/methods/secret-methods.ts";
@@ -94,6 +99,7 @@ const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
 const coreHostId = loadOrCreateHostIdentity(join(serverConfig.dataDir, "host-identity.json"));
 logger.info("Core Host identity loaded");
 const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
+const runRepo = createRunRepo(db);
 const timelineRepo = createTimelineRepo(db);
 // R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
 // their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).
@@ -255,6 +261,21 @@ const extensions = createExtensionComposition({
   mcp: mcpBoot.manager,
   route: (request, interactive) => routeCapability({ ...ambientCapabilityDeps, interactive }, request),
 });
+const modelProvider = "openai-compatible";
+const modelId = boot.env.TAKI_PROVIDER_MODEL ?? "configured-main-model";
+const runService = createRunService({
+  repo: runRepo,
+  provider: modelProvider,
+  modelId,
+  snapshot: createRunSnapshotCapture({
+    extensions,
+    governance,
+    approval,
+    memory: { snapshot: memoryRuntime.snapshot, createTools: (characterId) => memory.createTools(characterId) },
+    provider: modelProvider,
+    modelId,
+  }),
+});
 
 // Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
 const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry() };
@@ -305,8 +326,7 @@ registry.register(
         ...extensions.skillTools,
         ...capabilityTools({ connection: turn.connection, signal: turn.signal }),
       }),
-      // One immutable Host/Skill/MCP projection is reused by every overflow retry in this Run.
-      runContext: extensions.runContext,
+      // Admission supplies the immutable Host/Skill/MCP projection; compatibility callers may still omit it.
       // Stable Core-local tools join per-turn memory/avatar tools behind the explicit Core binding table.
       coreTools: staticCoreTools,
       coreToolGovernance,
@@ -339,9 +359,10 @@ registry.register(
     }),
     logger,
     turnControls,
+    runService,
   ),
 );
-registry.register(chatCancelMethod(turnControls.turns));
+registry.register(chatCancelMethod(turnControls.turns, runService));
 registry.register(hostCatalogPublishMethod(hostCatalogs, connectionRegistry));
 registry.register(extensionStatusMethod({ coreHostId, snapshot: () => extensions.runContext().snapshot }));
 registry.register(capabilityRespondMethod(capabilityBroker, connectionRegistry));
@@ -368,6 +389,7 @@ for (const method of createAsyncOnDemandMemoryMigrationMethods(memoryRuntime.mig
 registry.register(
   memoryStatusMethod({ windowState: windowStateRepo, summaries: summaryRepo, autoState: createMemoryAutoRepo(db) }),
 );
+registry.register(runStatusMethod(runService));
 // Settings store (#26 batch 1): read every knob with its provenance, store operator values, push config.changed.
 // Operator-only, NO Rust mirror; secrets are reported as set/not-set and refused on write (invariant 5).
 registerConfigMethods(registry, { ...boot.config, logger });

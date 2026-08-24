@@ -25,7 +25,7 @@ interface ExtensionCompositionInput {
 
 export function createExtensionComposition(input: ExtensionCompositionInput): {
   skillTools: ToolSet;
-  runContext: (interactive?: TurnInteractive) => ExtensionRunContext;
+  runContext: (interactive?: TurnInteractive, runId?: string) => ExtensionRunContext;
 } {
   const skillTools: ToolSet = {
     ...createLoadSkillTool(input.skills.loader, { service: input.skills.governance, ownerHostId: input.coreHostId }),
@@ -33,8 +33,8 @@ export function createExtensionComposition(input: ExtensionCompositionInput): {
   };
   return {
     skillTools: Object.freeze(skillTools),
-    runContext: (interactive) => createExtensionRunContext({
-      runId: randomUUID(),
+    runContext: (interactive, runId = randomUUID()) => createExtensionRunContext({
+      runId,
       coreHostId: input.coreHostId,
       catalogs: input.catalogs,
       skills: input.skills,

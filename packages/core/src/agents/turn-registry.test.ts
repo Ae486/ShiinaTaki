@@ -45,4 +45,12 @@ describe("createTurnRegistry", () => {
     expect(registry.cancel("taki")).toBe(true);
     expect(yui.signal.aborted).toBe(false);
   });
+
+  it("does not let an exact Run cancel target a different active Run", () => {
+    const registry = createTurnRegistry();
+    const active = registry.begin("taki", undefined, "run-active");
+    expect(registry.cancel("taki", "run-queued")).toBe(false);
+    expect(active.signal.aborted).toBe(false);
+    expect(registry.cancel("taki", "run-active")).toBe(true);
+  });
 });

@@ -1,4 +1,6 @@
 # core/db/
+- run-repo.ts — Slice 1 durable Run aggregate with atomic admission, immutable snapshot/Attempt creation, CAS lifecycle transitions, and bounded Receipt status
+- run-row-mappers.ts — strict Run/Attempt/Receipt row parsing and deterministic snapshot digests
 - sqlite.ts — DatabaseSync wrapper (open/pragmas/transaction/close); the ONLY node:sqlite importer; toSafeInteger
 - migration-runner.ts — startup migration runner: applies version > max(applied), one transaction each, tracked
 - timeline-repo.ts — timeline_messages SQL: append / deleteEntry / pageBefore / latestAscending / latestSeq / rangeAscending (zod-parse at the row boundary)

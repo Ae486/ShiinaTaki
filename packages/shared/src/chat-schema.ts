@@ -43,12 +43,15 @@ export type ChatSendParams = z.infer<typeof ChatSendParamsSchema>;
 
 export const ChatSendResultSchema = z.object({
   messageId: z.string(),
+  runId: z.string().min(1),
 });
 export type ChatSendResult = z.infer<typeof ChatSendResultSchema>;
 
 // Cancel the in-flight turn for a character (new message arriving, UI close). Idempotent: no active turn = cancelled:false.
 export const ChatCancelParamsSchema = z.object({
   characterId: z.string().min(1),
+  /** Optional exact Run identity; legacy callers omit it and cancel the active character turn. */
+  runId: z.string().min(1).optional(),
 });
 export type ChatCancelParams = z.infer<typeof ChatCancelParamsSchema>;
 

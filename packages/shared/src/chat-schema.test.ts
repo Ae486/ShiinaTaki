@@ -120,6 +120,12 @@ describe("chat event round-trips", () => {
   });
 
   it("accepts a send result", () => {
-    expect(ChatSendResultSchema.safeParse({ messageId: "m1" }).success).toBe(true);
+    expect(ChatSendResultSchema.safeParse({ messageId: "m1", runId: "r1" }).success).toBe(true);
+    expect(ChatSendResultSchema.safeParse({ messageId: "m1" }).success).toBe(false);
+  });
+
+  it("keeps chat.cancel backward compatible while allowing an exact Run target", () => {
+    expect(ChatCancelParamsSchema.parse({ characterId: "taki" })).toEqual({ characterId: "taki" });
+    expect(ChatCancelParamsSchema.parse({ characterId: "taki", runId: "run-1" })).toEqual({ characterId: "taki", runId: "run-1" });
   });
 });

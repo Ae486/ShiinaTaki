@@ -23,17 +23,25 @@ import { isContextOverflowError, observedTokensOf } from "./overflow-error.ts";
 import { mergeToolSets } from "./tool-set-assembly.ts";
 import type { TurnMessage, UserImageInput } from "./turn-mapping.ts";
 
-/** Per-turn WS handle: notify pushes to the asking operator socket; onClose denies pending approvals on disconnect. */
+/** Per-turn execution handle. Primary chat supplies a WS connection; unattended non-primary Runs omit it. */
 export interface TurnContext {
   /** Exact physical operator socket that initiated this turn; Approval session authority is object-identity bound. */
-  connection: Connection;
-  notify: (method: string, params: unknown) => void;
-  onClose: (cb: () => void) => void;
+  connection?: Connection;
+  notify?: (method: string, params: unknown) => void;
+  onClose?: (cb: () => void) => void;
   /** Aborts the in-flight model stream (chat.cancel / connection close); absent = uncancellable turn (tests). */
   signal?: AbortSignal;
   /** Fired when a cancel landed before the turn produced anything: the user row was retracted, so the pump closes
    *  with a retract error (restore the draft) instead of a normal complete. Absent = no retract handling (tests). */
   onRetract?: () => void;
+  /** Durable Harness identity and input classification; omitted callers remain primary-compatible. */
+  runId?: string;
+  turnKind?: "primary" | "non-primary";
+  controlInput?: string;
+  /** Admission-captured runtime bindings reused by every model retry for this durable Run. */
+  runContext?: AgentRunContext;
+  /** Records a new durable Attempt immediately before the one supported overflow retry. */
+  onRetry?: (reason: string) => boolean;
 }
 
 export interface ChatAgent {
@@ -58,6 +66,8 @@ export interface TurnUsageReport {
 /** Immutable-by-contract resources captured once before a Run's first model attempt and shared by every retry. */
 export interface AgentRunContext {
   readonly tools?: ToolSet;
+  /** Memory authority tool closures captured at Admission so a queued Run cannot switch epochs before execution. */
+  readonly memoryTools?: ToolSet;
   readonly instructions?: string;
   dispose?(): void;
 }
@@ -80,7 +90,7 @@ export interface ChatAgentDeps {
   /** Adapter-governed tools merged after Core governance (Skill/MCP/Host); stable across turns. */
   extraTools?: ToolSet;
   /** Connection-bound adapter tools built per turn (MCP); preferred over static extraTools for interactive authority. */
-  turnTools?: (turn: TurnContext) => ToolSet;
+  turnTools?: (turn: TurnContext & { connection: Connection }) => ToolSet;
   /** Host/extension snapshot captured once per Run; an overflow retry reuses this exact value. */
   runContext?: (turn?: TurnContext) => AgentRunContext;
   /** Stable Core-local tools included with memory/avatar tools before the Core adapter runs. */
@@ -98,7 +108,7 @@ export interface ChatAgentDeps {
    *  onto the model-facing user message (never persisted) so the model adopts the freshly-reported avatar vocabulary
    *  (1f). Absent = no costume tracking (tests). */
   costumeChanged?: (characterId: string) => boolean;
-  /** MCP tool-approval gate; only consulted when a TurnContext is present (its notify carries the ask). */
+  /** MCP tool-approval gate; a missing notify channel makes ask fail closed for unattended turns. */
   approval?: ApprovalGate;
   /** Tool-loop step cap per turn (round-trips: call -> observe -> decide). Injected from AgentConfig; falls back to DEFAULT_MAX_STEPS. */
   maxSteps?: number;
@@ -131,7 +141,8 @@ interface TurnAttempt {
   attachments: ImageAttachment[];
   images: UserImageInput[];
   vision: VisionDeps | null;
-  userSeq: number;
+  userSeq?: number;
+  primary: boolean;
   runContext?: AgentRunContext;
   state: AttemptState;
 }
@@ -152,15 +163,17 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   // chat.error; the UI also disables attach). `vision` is null for a text turn, else the narrowed {model, store}.
   const vision = attachments.length > 0 ? requireVisionDeps(deps) : null;
   // Save the in-flight bytes to the content-addressed store; only the refs (mediaType + ref) persist on the timeline row.
-  const images = vision
+  const primary = (turn?.turnKind ?? "primary") === "primary";
+  const images = primary && vision
     ? attachments.map((a) => ({ mediaType: a.mediaType, ref: vision.store.save(a.dataBase64, a.mediaType).ref }))
     : [];
   // Capture the committed user row so a cancel-before-reply can retract exactly this seq (the retract seam in the
   // attempt). Appended ONCE — an R2 retry replays the same committed row, never a second one.
-  const userEntry = store.appendUser(characterId, message, images);
+  const userEntry = primary ? store.appendUser(characterId, message, images) : undefined;
   if (approval && turn) wireApprovalDenial(approval, turn);
-  const runContext = deps.runContext?.(turn);
-  const base = { characterId, message, attachments, images, vision, userSeq: userEntry.seq, runContext };
+  const runContext = turn?.runContext ?? deps.runContext?.(turn);
+  const ownsRunContext = turn?.runContext === undefined;
+  const base = { characterId, message, attachments, images, vision, userSeq: userEntry?.seq, primary, runContext };
   // R2 retry seam (batch 6): ONE overflow-classified retry around the whole attempt. Retry ONLY when the failed
   // attempt was provably side-effect-free — zero text yielded (nothing user-visible lost) AND zero completed steps
   // (no tool can have acted; re-running the model after a completed tool step could act twice — the error-handling
@@ -181,6 +194,7 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
         const onOverflow = deps.onOverflow;
         const clean = !yielded && !state.stepEnded;
         if (attempt > 0 || !clean || onOverflow === undefined || !isContextOverflowError(error)) throw error;
+        if (turn?.onRetry?.("context_overflow") === false) throw error;
         // Observed = the provider-reported request size when the body names one, else our own estimate of the SAME
         // request (computed only here, off every hot path). The calibrator persists the shrunken window, so the
         // retry's fresh history() pull re-windows through the store's budget closure.
@@ -188,7 +202,7 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
       }
     }
   } finally {
-    runContext?.dispose?.();
+    if (ownsRunContext) runContext?.dispose?.();
   }
 }
 
@@ -198,12 +212,13 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
 // window is computed under the budget the calibrator just shrank.
 async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): AsyncIterable<string> {
   const { store, approval } = deps;
-  const { characterId, message, attachments, images, vision, userSeq, state } = attempt;
+  const { characterId, message, attachments, images, vision, userSeq, primary, state } = attempt;
+  const controlMessage = turn?.controlInput ?? message;
   const history = store.history(characterId);
   // ONE clock read per attempt: the instructions' day line and the tail's time line must agree (Q4).
   const now = Date.now();
   // Hoisted so the batch-6 usage seam can estimate the SAME instructions string the request carries.
-  const instructions = composeInstructions(deps, { characterId, message, runInstructions: attempt.runContext?.instructions }, now);
+  const instructions = composeInstructions(deps, { characterId, message: controlMessage, runInstructions: attempt.runContext?.instructions }, now);
   // Per-turn construction: assembled instructions + characterId-bound tools (construction cost is trivial).
   const agent = new ToolLoopAgent({
     model: vision ? vision.model : deps.model,
@@ -227,7 +242,7 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   // consumeCostumeChanged fires here even if the turn is later cancelled/retracted or R2-retried (baseline advances
   // anyway, and a retry attempt carries no second notice → a rare skipped notice, backstopped by the 1e enum;
   // accepted narrow edge).
-  const outgoing = buildOutgoing({ history, isImageTurn: vision !== null, message, attachments, changed: deps.costumeChanged?.(characterId) ?? false, tail: buildTurnTail(now, deps.volatileContext) });
+  const outgoing = buildOutgoing({ history, isImageTurn: vision !== null, message: controlMessage, attachments, changed: primary ? (deps.costumeChanged?.(characterId) ?? false) : false, tail: buildTurnTail(now, deps.volatileContext), primary });
   // Exposed for the R2 estimate fallback — read only on the retry path, never on the hot path.
   state.instructions = instructions;
   state.outgoing = outgoing;
@@ -256,28 +271,30 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
       streamEnded = true;
     } finally {
       // Persist whatever the turn produced — completed steps AND partial text — even on abort/error (D1 #1/#5).
-      await persistTurn(store, characterId, { result, pendingStepText, streamEnded });
+      if (primary) await persistTurn(store, characterId, { result, pendingStepText, streamEnded });
     }
   } catch (error) {
     // Throw ending of a cancel: the transport rejects the read with our string reason (fails isAbortError), so the
     // SDK errors the stream — same retract rule as the graceful ending (see retractIfCancelledSilent); else propagate.
-    if (await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
+    if (primary && userSeq !== undefined && await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
     throw error;
   }
   // Graceful ending (the SDK emitted an `abort` part then closed): the same retract check on the clean path.
-  if (await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
-  fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
-  fireUsageReport(deps, { usage: result.usage, instructions, outgoing });
+  if (primary && userSeq !== undefined && await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
+  if (primary) fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
+  if (primary) fireUsageReport(deps, { usage: result.usage, instructions, outgoing });
 }
 
 function assembleTurnTools(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): ToolSet {
   const coreTools = mergeToolSets(
-    deps.memory.createTools(attempt.characterId),
+    attempt.runContext?.memoryTools ?? deps.memory.createTools(attempt.characterId),
     deps.coreTools ?? {},
     deps.characterTools?.(attempt.characterId) ?? {},
   );
   const interactive = turn?.connection ? { connection: turn.connection, signal: turn.signal } : undefined;
-  const extra = turn?.connection && deps.turnTools ? deps.turnTools(turn) : deps.extraTools ?? {};
+  const extra = turn?.connection && deps.turnTools
+    ? deps.turnTools({ ...turn, connection: turn.connection })
+    : deps.extraTools ?? {};
   return mergeToolSets(
     deps.coreToolGovernance?.wrap(coreTools, interactive) ?? coreTools,
     extra,
@@ -290,7 +307,7 @@ function assembleTurnTools(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
 // (Pure move out of runTurn: the batch-6 usage seam pushed it past the 50-line fn cap — the design's named-fn
 // relief clause.)
 function wireApprovalDenial(approval: ApprovalGate, turn: TurnContext): void {
-  turn.onClose(() => approval.denyPending("connection closed"));
+  turn.onClose?.(() => approval.denyPending("connection closed"));
   turn.signal?.addEventListener("abort", () => approval.denyPending("turn cancelled"), { once: true });
 }
 
@@ -367,12 +384,14 @@ function buildOutgoing(args: {
   attachments: ImageAttachment[];
   changed: boolean;
   tail: string;
+  primary: boolean;
 }): ModelMessage[] {
   const modelText = [args.changed ? COSTUME_CHANGE_NOTICE : "", args.message, args.tail]
     .filter((part) => part.length > 0)
     .join("\n\n");
-  if (args.isImageTurn) return [...args.history.slice(0, -1), buildMultimodalUser(modelText, args.attachments)];
-  return [...args.history.slice(0, -1), { role: "user", content: modelText }];
+  const prefix = args.primary && args.history.at(-1)?.role === "user" ? args.history.slice(0, -1) : args.history;
+  if (args.isImageTurn) return [...prefix, buildMultimodalUser(modelText, args.attachments)];
+  return [...prefix, { role: "user", content: modelText }];
 }
 
 // The volatile tail (Q4/ADR 0008): every minute-granular item — the wall-clock line first, unconditionally, then

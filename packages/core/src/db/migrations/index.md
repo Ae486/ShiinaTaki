@@ -22,4 +22,5 @@
 - 021-memory-legacy-migration.ts — Batch 2 durable migration ledger, fenced leases, exclusions/results, activation receipts, and legacy-default authority selection
 - 022-hindsight-connection-setup.ts — additive sanitized Hindsight connection and per-Bank setup evidence; no authority mutation
 - 023-hindsight-initial-cutover.ts — B4 cutover lifecycle lease, import mappings, logical replica/checkpoints, Hindsight marker, and activation receipts
+- 024-harness-runs.ts — Slice 1 additive Run, Attempt, immutable snapshot, and bounded Receipt current-state tables
 - index-list.ts — the explicit ordered MIGRATIONS registry (no fs/glob discovery)

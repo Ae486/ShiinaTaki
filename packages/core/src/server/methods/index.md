@@ -2,8 +2,9 @@
 - connect.ts — connect: the ONLY pre-auth method; token verify, pairing handshake, or loopback operator auto-trust (P3), then authenticate the socket
 - host-catalog-publish.ts — host.catalogPublish (node-only): provenance-bound complete publication with fail-closed retirement for rejected current-generation candidates
 - extension-status.ts — operator-only extension.status convergence projection over current Host/Skill/MCP owner generations
-- chat-send.ts — chat.send (operator-only): ack { messageId }, then stream agent tokens as chat.delta/.complete/.error; turns serialized per characterId (queue) + cancellable (registry); a cancel-before-reply closes with chat.error { retracted:true } (draft restore) instead of complete
-- chat-cancel.ts — chat.cancel (operator-only): abort the character's in-flight turn via the TurnRegistry; idempotent ({cancelled:false} when idle)
+- chat-send.ts — chat.send (operator-only): durably admit and ack { messageId, runId }, then stream chat.delta/.complete/.error; turns serialize per characterId, settle the Run, and preserve cancel-before-reply retraction
+- chat-cancel.ts — chat.cancel (operator-only): legacy character-only active-turn abort plus optional exact runId durable cancellation for queued work; idempotent ({cancelled:false} when absent/mismatched)
+- run-status.ts — run.status (operator-only): bounded Run/Attempt/Receipt status by durable runId
 - timeline-history.ts — timeline.history (operator-only): newest-first cursor page of the conversation timeline
 - timeline-subscribe.ts — timeline.subscribe (operator-only): register a timeline.appended/removed sink; auto-unsubscribe on disconnect
 - avatar-subscribe.ts — avatar.subscribe (operator-only): register an avatar.command sink; auto-unsubscribe on disconnect

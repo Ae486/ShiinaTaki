@@ -1,0 +1,18 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend pre-development checklist, architecture invariants, and full quality gate."}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Existing ToolLoopAgent, full-turn persistence, cancellation, Replay, privacy, prompt, and retry contracts."}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "SQLite single-writer, migration convergence, repository, atomic transition, and post-commit notification rules."}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Structured failure, cancellation, deadline, retry, and unknown-outcome behavior."}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Pino diagnostic boundary and mandatory redaction requirements."}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Core Governance/Approval authority and generation-safe effect constraints."}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "Host operation identity, cancellation, reconnect, explicit retry, and outcome_unknown rules."}
+{"file": "docs/T4-HANDOFF.md", "reason": "Owner-approved Slice 1 boundary, frozen T4 contracts, delegation rules, and convergence gates."}
+{"file": ".trellis/tasks/08-23-slice-1-harness-foundation/prd.md", "reason": "Child requirements, acceptance criteria, and explicit non-goals."}
+{"file": ".trellis/tasks/08-23-slice-1-harness-foundation/design.md", "reason": "Slice 1 identity, state, persistence, integration, compatibility, and rollback design."}
+{"file": ".trellis/tasks/08-23-slice-1-harness-foundation/implement.md", "reason": "Ordered implementation steps, stop conditions, verification commands, and delegation contract."}
+{"file": ".trellis/tasks/08-23-slice-1-harness-foundation/research/live-execution-chain.md", "reason": "Live code path, existing owners, regression tests, additive seams, and unverified implementation details."}
+{"file": ".trellis/tasks/08-23-slice-1-harness-foundation/research/implementation-seams.md", "reason": "Concrete repository, transaction, ack/admission, snapshot manifest, chat adapter, query, and test seams verified against live code."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-b-harness-contract.md", "reason": "Canonical identity hierarchy, Admission, lifecycle, cancellation, immutable snapshot, Context Manifest, and single-loop contract."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-c-persistence-recovery.md", "reason": "Current-state authority, atomic settlement, crash matrix, idempotency, recovery, and migration constraints."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-e-integration-map.md", "reason": "One-owner-per-write-path mapping to chat, Timeline, Memory, Host, Extension, Approval, and Pino."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-g-slices-gates.md", "reason": "Slice ordering, later event/effect/recovery boundaries, non-finality, and required gates."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/slice-0-semantic-sync-2026-08-23.md", "reason": "Staged main synchronization, migration lineage evidence, and residual prerequisites before Run/Event work."}

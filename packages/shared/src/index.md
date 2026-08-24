@@ -1,4 +1,5 @@
 # shared/src/
+- harness-schema.ts — strict provider-neutral Trigger Request, Run/Attempt, immutable authority/capability snapshot, Receipt, and run.status contracts
 - index.ts — package public entry; named re-exports of the protocol surface
 - ping-schema.ts — scaffold ping/pong smoke schema (desktop IPC smoke; untouched this slice)
 - json-rpc-schema.ts — JSON-RPC 2.0 envelope schemas + JSON_RPC_ERROR_CODES + JSON_RPC_APP_ERROR + client-frame union
@@ -7,7 +8,7 @@
 - host-approval-schema.ts — protocol-v3 Host challenge/resume extension with redacted presentation, nested single-use authorization, and canonical digest payloads
 - host-control-api.ts — focused named public export surface for Host-control schemas and types
 - connect-schema.ts — CONNECT_METHOD + RoleSchema + connect handshake param/result schemas (ADR 0004)
-- chat-schema.ts — CHAT_METHODS + chat.send/cancel/delta/complete/error param & event schemas; +ImageAttachment/IMAGE_MEDIA_TYPES (in-flight image input, #17)
+- chat-schema.ts — CHAT_METHODS + chat.send { messageId, runId } acknowledgement, legacy/exact-run cancel, delta/complete/error schemas; +ImageAttachment/IMAGE_MEDIA_TYPES (in-flight image input, #17)
 - timeline-schema.ts — TIMELINE_METHODS + timeline entry/part/history/subscribe/appended/removed schemas (ADR 0005); parts = structured tool-call/result + image fidelity; removed = cancel-retract push
 - config-schema.ts — CONFIG_METHODS + knob entry/list/set/subscribe/changed schemas + ConfigRefusalReason (settings store); operator-only, NO Rust mirror
 - timing-policy-schema.ts — single D59/D61 timing-key vocabulary + cross-field policy schema + owner-approved development defaults; shared by Core registry and Desktop consumers

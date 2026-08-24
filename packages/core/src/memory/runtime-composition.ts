@@ -9,10 +9,12 @@ import type { Database } from "../db/sqlite.ts";
 import type { SummaryRepo } from "../db/summary-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import type { Logger } from "../logging/logger.ts";
+import type { MemoryProviderCapabilities } from "@taki/shared";
 import { authorityAwareAutoMemory, authorityAwareTidy, authorityAwareWrite } from "./authority-aware-legacy-surfaces.ts";
 import { createMemorySubsystem } from "./bootstrap.ts";
 import { createCanonicalLocalRuntime } from "./canonical-local-runtime.ts";
 import { createMemoryAuthorityFence } from "./legacy-migration/memory-authority-fence.ts";
+import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
 import { selectMemoryRuntime } from "./runtime-selector.ts";
 
 export function composeMemoryRuntime(input: {
@@ -30,6 +32,17 @@ export function composeMemoryRuntime(input: {
   const bindCanonical = (epochId: string): void => { selected.bindCanonical(epochId); activated = true; };
   return {
     selected, memory: selected.memory, fence,
+    snapshot: () => {
+      const selection = readMemoryAuthoritySelection(input.db);
+      const capabilities = runtimeCapabilities(selection.mode);
+      return {
+        providerId: selection.mode === "canonical-local" ? "local" : selection.mode,
+        providerLineageId: selection.providerLineageId ?? undefined,
+        authorityEpochId: selection.epochId ?? undefined,
+        contractVersion: 1,
+        capabilities,
+      };
+    },
     autoMemory: legacy?.autoMemory ? authorityAwareAutoMemory(legacy.autoMemory, isCanonical) : undefined,
     tidy: legacy?.tidy ? authorityAwareTidy(legacy.tidy, isCanonical) : undefined,
     writeMemory: legacy?.writeMemory ? authorityAwareWrite(legacy.writeMemory, isCanonical) : undefined,
@@ -38,5 +51,25 @@ export function composeMemoryRuntime(input: {
       const { createLegacyMigrationRunner } = await import("./legacy-migration/legacy-migration-runner.ts");
       return createLegacyMigrationRunner({ db: input.db, destinationRoot: join(input.dataDir, "workspace", "memory-migration"), fence, onActivated: bindCanonical });
     },
+  };
+}
+
+function runtimeCapabilities(mode: "legacy-markdown" | "canonical-local" | "hindsight"): MemoryProviderCapabilities {
+  if (mode === "hindsight") throw new Error("MEMORY_INTEGRITY_ERROR: Hindsight authority runtime is not installed");
+  const canonical = mode === "canonical-local";
+  return {
+    providerId: canonical ? "local" : mode,
+    contractVersion: 1,
+    retain: true,
+    recall: true,
+    reflect: false,
+    edit: canonical,
+    invalidate: true,
+    restore: canonical,
+    conditionalMutation: canonical,
+    idempotentWrites: canonical,
+    sparseRetrieval: true,
+    vectorRetrieval: "unavailable",
+    derivedMemoryRead: false,
   };
 }
