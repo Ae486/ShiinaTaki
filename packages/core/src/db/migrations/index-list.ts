@@ -28,6 +28,7 @@ import { memoryLegacyMigration021 } from "./021-memory-legacy-migration.ts";
 import { hindsightConnectionSetupMigration022 } from "./022-hindsight-connection-setup.ts";
 import { hindsightInitialCutoverMigration023 } from "./023-hindsight-initial-cutover.ts";
 import { harnessRunsMigration024 } from "./024-harness-runs.ts";
+import { runEventsMigration025 } from "./025-run-events.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -54,4 +55,5 @@ export const MIGRATIONS: Migration[] = [
   hindsightConnectionSetupMigration022,
   hindsightInitialCutoverMigration023,
   harnessRunsMigration024,
+  runEventsMigration025,
 ];

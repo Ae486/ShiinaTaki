@@ -1,0 +1,15 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend package quality gate and architecture invariants."}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Preserve ToolLoopAgent, Timeline/Replay, and primary/non-primary runtime ownership."}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "SQLite migrations, single writer, synchronous transaction, typed repositories, and post-commit events."}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Structured failures, bounded diagnostics, rollback, and unknown-outcome rules."}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Pino remains diagnostics and redaction boundaries."}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "Future effect/event compatibility and stale generation constraints."}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Storage/service/protocol/live-plane data-flow checklist."}
+{"file": ".trellis/spec/guides/source-grounding-guide.md", "reason": "Resolve concrete gaps from named sources and live code."}
+{"file": ".trellis/tasks/archive/2026-08/08-23-slice-1-harness-foundation/prd.md", "reason": "Slice 1 accepted contracts and explicit boundary."}
+{"file": ".trellis/tasks/archive/2026-08/08-23-slice-1-harness-foundation/design.md", "reason": "Existing Run/Attempt/Receipt design and compatibility."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-c-persistence-recovery.md", "reason": "Current-state authority, event evidence, crash and sequence contracts."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-d-observability-plane.md", "reason": "Event taxonomy, durable/live planes, privacy and projection requirements."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-g-slices-gates.md", "reason": "Slice ordering, dependencies, and non-finality rules."}
+{"file": "docs/ARCHITECTURE-ROADMAP.md", "reason": "Adopted PI/DSH baseline and implementation follow-up."}
+{"file": "docs/T4-HANDOFF.md", "reason": "Frozen T4 boundary and future consumer seams."}

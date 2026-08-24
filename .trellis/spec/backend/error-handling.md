@@ -17,6 +17,9 @@ A failing Capability or tool call must degrade into a **structured error the LLM
   not a generic permission denial and must remain distinguishable so the later canonical Approval lifecycle can resume
   it without adding a second policy lane.
 - WS/JSON-RPC errors follow JSON-RPC 2.0 error objects; map protocol errors to the same code union.
+- Durable Run/Attempt/Receipt evidence and streamed `chat.error` payloads use sanitized outcome summaries and stable
+  error codes; never copy provider exception messages, request bodies, prompts, tool payloads, or credentials into
+  persistence, logs, or transport notifications.
 - Desktop ordinary requests are bounded at the `json-rpc-2.0` native timeout requester. An outer `Promise.race` is
   forbidden because it does not remove the library's pending request ID. A native timeout becomes the typed
   `RpcDeadlineExceededError`; non-timeout JSON-RPC application errors pass through unchanged for existing refusal

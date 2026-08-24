@@ -33,6 +33,8 @@ import { createSummaryRepo } from "./db/summary-repo.ts";
 import { createTimelineRepo } from "./db/timeline-repo.ts";
 import { createWindowStateRepo } from "./db/window-state-repo.ts";
 import { createRunRepo } from "./db/run-repo.ts";
+import { createRunEventLiveBus } from "./db/run-event-live.ts";
+import { createRunEventRepo } from "./db/run-event-repo.ts";
 import { createRunService } from "./harness/run-service.ts";
 import { createRunSnapshotCapture } from "./harness/run-snapshot-capture.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
@@ -99,7 +101,9 @@ const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
 const coreHostId = loadOrCreateHostIdentity(join(serverConfig.dataDir, "host-identity.json"));
 logger.info("Core Host identity loaded");
 const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
-const runRepo = createRunRepo(db);
+const runEventRepo = createRunEventRepo(db);
+const runEventLive = createRunEventLiveBus((runId, afterSeq) => runEventRepo.list(runId, afterSeq));
+const runRepo = createRunRepo(db, runEventRepo, runEventLive);
 const timelineRepo = createTimelineRepo(db);
 // R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
 // their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).

@@ -1,5 +1,10 @@
 # core/db/
 - run-repo.ts — Slice 1 durable Run aggregate with atomic admission, immutable snapshot/Attempt creation, CAS lifecycle transitions, and bounded Receipt status
+- run-event-repo.ts — immutable, contiguous, redaction-safe lifecycle evidence ledger queries and appends
+- run-event-live.ts — post-commit best-effort observer bus with cursor isolation
+- run-event-projection.ts — deterministic replay/projection anchor and readable summary mapper
+- run-event-factory.ts — bounded canonical lifecycle event construction and transition predicates
+- run-readers.ts — strict Run/Attempt/Receipt aggregate reads shared by the lifecycle writer
 - run-row-mappers.ts — strict Run/Attempt/Receipt row parsing and deterministic snapshot digests
 - sqlite.ts — DatabaseSync wrapper (open/pragmas/transaction/close); the ONLY node:sqlite importer; toSafeInteger
 - migration-runner.ts — startup migration runner: applies version > max(applied), one transaction each, tracked

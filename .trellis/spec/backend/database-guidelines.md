@@ -14,7 +14,8 @@
 
 ## Patterns
 
-- Repos expose typed functions; zod-parse rows at boundaries where shape matters.
+- Repos expose typed functions; zod-parse rows at boundaries where shape matters. Bound or reject every externally
+  supplied diagnostic field before a write, so a post-commit row parse cannot fail after durable state has changed.
 - Every externally-relevant write emits a WS event after commit (this is how desktop→phone real-time works). Write + event emission live together in the repo/service layer.
 - No transactions across async gaps; keep them synchronous and short.
 
@@ -78,6 +79,78 @@ export const skillMigration = { version: 17, sql: "CREATE TABLE skill_packages (
 // Correct: preserve the canonical sequence and append an idempotent bridge for historical databases.
 export const skillMigration = { version: 19, sql: "CREATE TABLE IF NOT EXISTS skill_packages (...)" };
 export const convergenceMigration = { version: 20, sql: canonicalMemoryMigration.sql };
+```
+
+## Scenario: Run Event Ledger and Post-Commit Live Plane
+
+### 1. Scope / Trigger
+
+- Trigger: a Core Run lifecycle transition needs durable execution evidence, deterministic replay, or live observers.
+- The mutable `runs`/`run_attempts` state remains the recovery authority. The append-only `run_events` ledger is
+  immutable evidence for receipts, trajectory, diagnostics, metrics, and projection rebuilds.
+
+### 2. Signatures
+
+- Event identity/order: `RunEvent { eventId, runId, attemptId?, seq, schemaVersion, category, kind, occurredAt,
+  source, correlation?, payload }`.
+- Repository: append/read/tail operations are typed and Zod-validated; `seq` is contiguous and unique per `runId`.
+- Live: `publish(committedEvents)` happens after the transaction; subscriptions use a per-Run `(runId, seq)` cursor.
+
+### 3. Contracts
+
+- Lifecycle state mutation, Attempt/Receipt mutation, and corresponding RunEvent append occur in one short synchronous
+  `db.transaction` callback. Event validation or insert failure rolls back the state transition.
+- Publish only after commit. Live delivery is best effort; bounded asynchronous queues expose overflow/lag state and
+  consumers recover gaps from the durable cursor. Observer errors never change Run correctness.
+- Idempotent admission reuses the existing Run/Attempt and returns its unchanged event tail; it does not append a second
+  admission fact.
+- The ledger is per-Run. Character-lineage aggregation needs a separate multi-Run cursor/order/authorization contract;
+  do not merge independent Run sequence spaces as a shortcut.
+- Event rows are append-only at the database boundary: normal lifecycle code never updates/deletes them, and migration
+  triggers reject such mutations. Projection rows may hide opaque IDs, hashes, generations, and revisions from ordinary
+  presentation while retaining them for explicit developer inspection.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required result |
+| --- | --- |
+| Event payload kind/category/version mismatch, secret-bearing text, or bound violation | Reject before durable insert; surrounding state transaction rolls back. |
+| `(runId, seq)` gap, duplicate, or malformed stored row | Fail closed; never silently rebuild from an ambiguous tail. |
+| Event row UPDATE/DELETE attempted | Reject with immutable-ledger error. |
+| Observer throws, is slow, disconnects, or queue overflows | Preserve committed Run; mark observer failure/overflow; backfill from durable cursor. |
+| Character-lineage live aggregation requested without a defined global cursor | Keep the per-Run contract; defer aggregation to a dedicated projection/query task. |
+
+### 5. Good/Base/Bad Cases
+
+- Good: `RunRepo` commits state plus ordered events, then publishes the committed batch; a reconnect reads the durable
+  suffix after its last cursor before accepting live events.
+- Base: developer detail tracing is disabled, but the canonical lifecycle ledger and receipts remain available.
+- Bad: publish inside the SQLite transaction, let a UI observer write Run state, or infer Run recovery by folding the
+  event ledger instead of reading the mutable program counter.
+
+### 6. Tests Required
+
+- Migration fresh/historical/reopen lineage and immutable trigger tests.
+- Transition atomicity and event-write rollback tests for admission/start/retry/cancel/settle.
+- Idempotent admission tail, sequence contiguity, cursor/backfill, observer isolation, bounded overflow, and restart
+  replay tests.
+- Projection tests asserting readable ordinary summaries and inspector-only technical metadata.
+
+### 7. Wrong vs Correct
+
+```ts
+// Wrong: state commits, then a failed event write or pre-commit observer leaves an unverifiable transition.
+db.prepare("UPDATE runs SET state = 'running'").run();
+liveBus.publish(event);
+eventRepo.append(event);
+
+// Correct: append evidence in the same synchronous transaction, publish only after commit.
+let committed: RunEvent[] = [];
+db.transaction(() => {
+  updateRunState(db);
+  committed = eventRepo.appendMany(events);
+});
+liveBus.publish(committed);
 ```
 
 ## Scenario: Legacy Memory Migration and Authority Cutover

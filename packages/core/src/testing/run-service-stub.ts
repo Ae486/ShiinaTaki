@@ -28,7 +28,7 @@ export function createRunServiceStub(): RunService {
         deliveryClass: request.deliveryClass, state: "queued", stateVersion: 0, operationPhase: "admitted",
         snapshot, activeAttemptId: attempt.attemptId, queuedAt: AT };
       statuses.set(runId, { run, attempts: [attempt] });
-      return { run, attempt, reused: false };
+      return { run, attempt, eventTail: { runId: run.runId, seq: 0 }, reused: false };
     },
     start: () => true,
     retry: (runId) => read(runId),

@@ -209,9 +209,13 @@ single-flight schedules, model/tool/Host budgets, backpressure, and bounded deta
 
 Emit fixed typed lifecycle events at Run, model, tool, governance, Host, persistence, delivery, and recovery boundaries.
 Produce DSH-like trajectory and query projections from the same source, but attach them to the PI-shaped Runtime
-boundaries rather than introducing DSH runtime objects. Keep Pino for process diagnostics. Define redaction, payload
-bounds, retention, local development detail, user-facing detail, export policy, and query authorization before exposing
-content-bearing traces.
+boundaries rather than introducing DSH runtime objects. Keep Pino for process diagnostics. Separate the always-on Core
+Run Event Ledger, an optional mode-controlled Developer Trace, and the human-facing trajectory/inspector projection.
+The ledger records bounded execution facts even when detail monitoring is disabled; a local `FULL`-style developer mode
+may capture bounded Agent behavior detail for optimization, while secrets and authorization material remain excluded.
+Use DSH-like `DISABLED`/`FEEDBACK_ONLY`/`FULL` modes and `current`/`shadowed`/`log-only` surface classification as
+adapted contracts. Ordinary UI projections show readable labels, phases, statuses, outcomes, timings, counts, and
+bounded error summaries, not raw protocol/database fields.
 
 ### 6.8 Delivery and Client Consistency
 
@@ -222,8 +226,9 @@ clients instead of per-window behavior.
 ### 6.9 Security, Privacy, and Data Governance
 
 Unify secret exclusion, prompt/body logging rules, sensor fencing, cross-Run and cross-Character authorization, artifact
-access, telemetry export, retention, deletion, and operator audit. A readable trajectory must not become a secret
-exfiltration path.
+access, telemetry export, retention, deletion, and operator audit. Canonical events remain bounded and redacted; any
+content-bearing Developer Trace is separate, local/detail-authorized, mode-controlled, and never bypasses mandatory
+secret exclusion. A readable trajectory must not become a secret exfiltration path.
 
 ### 6.10 Subagents, Tasks, and Lineage
 
@@ -291,8 +296,8 @@ production implementation is authorized only by a later, explicitly selected imp
 | State authority | Mutable current state determines the next recoverable action; the event ledger is immutable evidence, not a second recovery authority |
 | Trigger boundary | Chat, future T4 providers, system events, and Child Runs enter typed admission/Run requests; none invokes a private model loop |
 | Persistence | Intent-before-effect and settlement-after-effect are defined for model, tool, approval, MCP, Host, and delivery boundaries where uncertainty exists |
-| Observability | One typed event source feeds Receipt, trajectory, metrics, diagnostics, and optional telemetry; Pino remains process diagnostics |
-| Privacy | Secret, prompt, tool payload, sensor, Host, and artifact exposure rules are defined per projection and query role |
+| Observability | One typed event source feeds Receipt, trajectory, metrics, diagnostics, and optional telemetry; optional Developer Trace and human-facing projections remain separate; Pino remains process diagnostics |
+| Privacy | Secret, prompt, tool payload, sensor, Host, and artifact exposure rules are defined per layer, mode, projection, and query role |
 | Context | Replay View remains the relationship-to-model seam; Context Manifest is redaction-safe and does not become fake Timeline content |
 | Extensibility | Provider/plugin seams exist only for independently replaceable or lifecycle-owned components; Core identity, governance, persistence, security, and Character boundaries stay privileged |
 | T4 compatibility | Scheduler, Heartbeat, delivery, and subagent requirements are compatibility contracts, not product policy implemented here |

@@ -193,6 +193,20 @@ await requestCostumeSwitch(costumeId);
 - **`references/BANDORI-PET-REV` is GPLv3: a LAYOUT and organization reference only.** Read it to learn shape (sidebar with brand row + icon nav, card-grouped right pane, label-left/control-right rows); never transcribe code, class schemes, or asset files into this repo.
 - Overlay animation is CSS-only (the wheel's appear keyframe is registered in `styles.css` under Tailwind v4 `@theme`) — no JS timers on the pet window, whose idle CPU is a feature.
 
+### Human-facing execution projections
+
+- A monitor or trajectory page is a presentation projection over Core facts, not a direct ledger/database viewer. Ordinary
+  rows lead with readable event labels, phase/category, status, outcome, duration, counts, and bounded error summaries.
+- Opaque protocol fields such as `runId`, `attemptId`, `serverId`, hashes/digests, generations, revisions,
+  `ownerHostId`, and catalog/config identifiers are internal join or diagnostic fields. Keep them out of ordinary rows;
+  expose them only in an explicitly opened developer inspector with clear labels and copy-diagnostic affordances.
+- Adapt DSH's `current`/`shadowed`/`log-only` classification so superseded or internal evidence remains queryable without
+  producing duplicate or meaningless user-facing rows. Category/severity/Run/Attempt/tool/trigger/delivery filters are
+  preferred over exposing raw event JSON.
+- The current MCP and Skills pages have known presentation debt where technical identifiers and generation/revision/hash
+  fields are shown in primary cards. Record their cleanup as a separate UI task; do not expand Slice 2's backend ledger
+  implementation to modify those pages.
+
 ## Streaming timeline: the in-flight assistant row lifecycle
 
 The persisted timeline and the live stream are two sources merged in one store (`pages/chat/chat-timeline-store.ts`), keyed by `seq`:

@@ -1,0 +1,10 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend quality scope and final checks."}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Primary chat and single-loop regression review."}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Migration, transaction, sequence, repository, and event emission review."}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Rollback, bounded error evidence, observer isolation, and no blind retry."}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Pino/event-ledger separation and privacy review."}
+{"file": ".trellis/tasks/archive/2026-08/08-23-slice-1-harness-foundation/implement.md", "reason": "Slice 1 verification evidence and preserved behavior."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-c-persistence-recovery.md", "reason": "Recovery authority and atomic transition review."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-d-observability-plane.md", "reason": "Durable/live, redaction, cursor, and projection review."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-g-slices-gates.md", "reason": "Scope and non-goal review."}
+{"file": "docs/ARCHITECTURE-ROADMAP.md", "reason": "Cross-module authority and future-slice review."}

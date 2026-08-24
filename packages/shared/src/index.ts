@@ -46,6 +46,9 @@ export {
   RunImplementationReferenceSchema, RunSnapshotSchema, AttemptSchema, RunReceiptSchema, RunSchema,
   RunStatusParamsSchema, RunStatusResultSchema,
 } from "./harness-schema.ts";
+
+export { RUN_EVENT_SCHEMA_VERSION, RunEventCategorySchema, RunEventKindSchema, RunEventSourceSchema, RunEventPayloadSchema, RunEventSchema, RunEventCursorSchema, RunEventSurfaceSchema, RunEventSummarySchema, RunEventInspectorSchema } from "./run-event-schema.ts";
+export type { RunEvent, RunEventCategory, RunEventKind, RunEventPayload, RunEventCursor, RunEventSummary, RunEventInspector } from "./run-event-schema.ts";
 export type {
   RunInitiator, RunProvenance, DeliveryClass, ContextMode, RunState, AttemptState, RunOutcome, Retryability,
   RunOperationPhase, TriggerRequest, SnapshotReference, RunHostReference, RunExtensionReference,

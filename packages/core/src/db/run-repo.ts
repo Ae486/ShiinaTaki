@@ -6,17 +6,22 @@
 import { randomUUID } from "node:crypto";
 import {
   RunSnapshotSchema,
-  RunStatusResultSchema,
   type Attempt,
   type Retryability,
   type Run,
   type RunOutcome,
   type RunSnapshot,
   type RunStatusResult,
+  type RunEventCursor,
   type TriggerRequest,
 } from "@taki/shared";
 import type { Database } from "./sqlite.ts";
-import { digestRunValue, readAttemptRow, readReceiptRow, readRunRow } from "./run-row-mappers.ts";
+import { digestRunValue, readRunRow } from "./run-row-mappers.ts";
+import { readAttemptById, readRunById, readRunByIdempotency, readStatus } from "./run-readers.ts";
+import { createRunEventRepo, type RunEventRepo } from "./run-event-repo.ts";
+import type { RunEvent } from "@taki/shared";
+import type { RunEventLiveBus } from "./run-event-live.ts";
+import { activeAttempt, boundNonEmptyText, boundText, legalAttemptTerminal, legalTerminalTransition, lifecycleEvent } from "./run-event-factory.ts";
 
 type SnapshotDraft = Omit<RunSnapshot, "snapshotId" | "runId" | "capturedAt" | "manifestDigest">;
 
@@ -32,6 +37,7 @@ export interface RunAdmissionInput {
 export interface RunAdmissionResult {
   run: Run;
   attempt: Attempt;
+  eventTail: RunEventCursor;
   reused: boolean;
 }
 
@@ -64,27 +70,35 @@ const ATTEMPT_TERMINAL = new Set<Attempt["state"]>([
 ]);
 
 // eslint-disable-next-line max-lines-per-function
-export function createRunRepo(db: Database): RunRepo {
+export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunEventRepo(db), liveBus?: RunEventLiveBus): RunRepo {
   const now = () => new Date().toISOString();
   return {
     admit(input) {
       const requestHash = digestRunValue(input.request);
       const existing = readRunByIdempotency(db, input.request.idempotencyKey);
-      if (existing) return reuseAdmission(db, existing, requestHash);
+      if (existing) return reuseAdmission({ db, eventRepo, row: existing, requestHash });
       const admittedAt = input.now ?? now();
       const snapshotId = randomUUID();
       const attemptId = randomUUID();
       const snapshotBase = { ...input.snapshot, snapshotId, runId: input.runId, capturedAt: admittedAt };
       const manifest = RunSnapshotSchema.parse({ ...snapshotBase, manifestDigest: digestRunValue(snapshotBase) });
-      db.transaction(() => insertAdmission(db, { ...input, requestHash, snapshotId, attemptId, admittedAt, manifest }));
-      return { run: readRunById(db, input.runId), attempt: readAttemptById(db, attemptId), reused: false };
+      let committed: RunEvent[] = [];
+      db.transaction(() => {
+        insertAdmission(db, { ...input, requestHash, snapshotId, attemptId, admittedAt, manifest });
+        committed = eventRepo.appendMany([
+          lifecycleEvent({ runId: input.runId, kind: "run.admitted", occurredAt: admittedAt, payload: { kind: "run.admitted", state: "queued", initiator: input.request.initiator, deliveryClass: input.request.deliveryClass, attemptOrdinal: 1 }, request: input.request }),
+          lifecycleEvent({ runId: input.runId, attemptId, kind: "attempt.prepared", occurredAt: admittedAt, payload: { kind: "attempt.prepared", state: "prepared", attemptOrdinal: 1 }, request: input.request }),
+        ]);
+      });
+      liveBus?.publish(committed);
+      return { run: readRunById(db, input.runId), attempt: readAttemptById(db, attemptId), eventTail: eventRepo.tail(input.runId), reused: false };
     },
     status: (runId) => readStatus(db, runId),
     start(runId, attemptId) {
       const status = readStatus(db, runId);
       if (TERMINAL.has(status.run.state) || status.run.activeAttemptId !== attemptId) return { started: false, status };
       if (status.run.state === "cancel_requested") {
-        return { started: false, status: settle(db, status, {
+        return { started: false, status: settle({ db, eventRepo, liveBus }, status, {
           runId, attemptId, outcome: "cancelled", retryability: "not_retryable", summary: "cancelled before start", at: now(),
         }) };
       }
@@ -92,10 +106,16 @@ export function createRunRepo(db: Database): RunRepo {
       if (status.run.state !== "queued") throw new Error("RUN_INVALID_TRANSITION");
       const attempt = activeAttempt(status);
       const at = now();
+      let committed: RunEvent[] = [];
       db.transaction(() => {
         updateRun(db, status.run, { state: "running", operationPhase: "executing", at });
         updateAttempt(db, attempt, { state: "effect_running", at });
+        committed = eventRepo.appendMany([
+          lifecycleEvent({ runId, kind: "run.started", occurredAt: at, payload: { kind: "run.started", state: "running", operationPhase: "executing" } }),
+          lifecycleEvent({ runId, attemptId, kind: "attempt.started", occurredAt: at, payload: { kind: "attempt.started", state: "effect_running", attemptOrdinal: attempt.ordinal } }),
+        ]);
       });
+      liveBus?.publish(committed);
       return { started: true, status: readStatus(db, runId) };
     },
     retry(runId, attemptId, reason) {
@@ -109,6 +129,7 @@ export function createRunRepo(db: Database): RunRepo {
       const at = now();
       const boundedReason = boundText(reason, 1000);
       const nextId = randomUUID();
+      let committed: RunEvent[] = [];
       db.transaction(() => {
         updateAttempt(db, attempt, { state: "failed", outcome: "failed", retryability: "retryable",
           summary: boundedReason, errorCode: "context_overflow", at });
@@ -123,13 +144,18 @@ export function createRunRepo(db: Database): RunRepo {
           state_version=:version AND active_attempt_id=:oldAttemptId`)
           .run({ attemptId: nextId, at, runId, version: status.run.stateVersion, oldAttemptId: attempt.attemptId });
         if (changed.changes !== 1) throw new Error("RUN_STALE_VERSION");
+        committed = eventRepo.appendMany([
+          lifecycleEvent({ runId, attemptId: attempt.attemptId, kind: "attempt.settled", occurredAt: at, payload: { kind: "attempt.settled", state: "failed", outcome: "failed", attemptOrdinal: attempt.ordinal, retryability: "retryable", summary: boundedReason, errorCode: "context_overflow" } }),
+          lifecycleEvent({ runId, attemptId: nextId, kind: "attempt.started", occurredAt: at, payload: { kind: "attempt.started", state: "effect_running", attemptOrdinal: attempt.ordinal + 1 } }),
+        ]);
       });
+      liveBus?.publish(committed);
       return readStatus(db, runId);
     },
     settle(input) {
       const status = readStatus(db, input.runId);
       if (TERMINAL.has(status.run.state) || status.run.activeAttemptId !== input.attemptId) return status;
-      return settle(db, status, { ...input, summary: boundText(input.summary, 1000),
+      return settle({ db, eventRepo, liveBus }, status, { ...input, summary: boundText(input.summary, 1000),
         errorCode: boundNonEmptyText(input.errorCode, 100), at: now() });
     },
     cancel(runId, reason = "cancel requested") {
@@ -139,26 +165,20 @@ export function createRunRepo(db: Database): RunRepo {
         throw new Error("RUN_INVALID_TRANSITION");
       }
       const at = now();
-      const changed = db.prepare(`UPDATE runs SET state='cancel_requested',state_version=state_version+1,
-        operation_phase='cancelling',cancel_requested_at=:at,cancel_reason=:reason,updated_at=:at
-        WHERE run_id=:runId AND state_version=:version AND state NOT IN
-         ('completed','failed','cancelled','skipped','deadline_exceeded','outcome_unknown','cancel_requested')`)
-          .run({ at, reason: boundText(reason, 1000), runId, version: run.stateVersion });
-      return { run: readRunById(db, runId), changed: changed.changes === 1 };
+      let changed = 0; let committed: RunEvent[] = [];
+      db.transaction(() => {
+        const result = db.prepare(`UPDATE runs SET state='cancel_requested',state_version=state_version+1,
+          operation_phase='cancelling',cancel_requested_at=:at,cancel_reason=:reason,updated_at=:at
+          WHERE run_id=:runId AND state_version=:version AND state NOT IN
+           ('completed','failed','cancelled','skipped','deadline_exceeded','outcome_unknown','cancel_requested')`)
+            .run({ at, reason: boundText(reason, 1000), runId, version: run.stateVersion });
+        changed = result.changes;
+        if (changed === 1) committed = [eventRepo.append(lifecycleEvent({ runId, kind: "run.cancel_requested", occurredAt: at, payload: { kind: "run.cancel_requested", state: "cancel_requested", reason: boundText(reason, 1000) ?? "cancel requested" } }))];
+      });
+      liveBus?.publish(committed);
+      return { run: readRunById(db, runId), changed: changed === 1 };
     },
   };
-}
-
-/** Keep durable diagnostic fields bounded before the transaction commits, so row parsing cannot fail after a write. */
-function boundText(value: string, max: number): string;
-function boundText(value: string | undefined, max: number): string | undefined;
-function boundText(value: string | undefined, max: number): string | undefined {
-  return value === undefined ? undefined : value.slice(0, max);
-}
-
-function boundNonEmptyText(value: string | undefined, max: number): string | undefined {
-  const bounded = boundText(value, max);
-  return bounded === "" ? undefined : bounded;
 }
 
 function insertAdmission(db: Database, input: RunAdmissionInput & {
@@ -193,14 +213,15 @@ function insertAdmission(db: Database, input: RunAdmissionInput & {
       modelId: input.modelId, snapshotId: input.snapshotId, deadlineAt: request.deadlineAt ?? null });
 }
 
-function reuseAdmission(db: Database, row: Record<string, unknown>, requestHash: string): RunAdmissionResult {
+function reuseAdmission(input: { db: Database; eventRepo: RunEventRepo; row: Record<string, unknown>; requestHash: string }): RunAdmissionResult {
+  const { db, eventRepo, row, requestHash } = input;
   if (row.request_hash !== requestHash) throw new Error("RUN_IDEMPOTENCY_CONFLICT");
   const run = readRunRow(row);
   if (!run.activeAttemptId) throw new Error("RUN_ATTEMPT_MISSING");
-  return { run, attempt: readAttemptById(db, run.activeAttemptId), reused: true };
+  return { run, attempt: readAttemptById(db, run.activeAttemptId), eventTail: eventRepo.tail(run.runId), reused: true };
 }
 
-function settle(db: Database, status: RunStatusResult, input: {
+function settle(deps: { db: Database; eventRepo: RunEventRepo; liveBus?: RunEventLiveBus }, status: RunStatusResult, input: {
   runId: string;
   attemptId: string;
   outcome: RunOutcome;
@@ -210,6 +231,7 @@ function settle(db: Database, status: RunStatusResult, input: {
   at?: string;
 }): RunStatusResult {
   const at = input.at ?? new Date().toISOString();
+  const { db, eventRepo, liveBus } = deps;
   const target = status.run.state === "cancel_requested" && input.outcome !== "outcome_unknown"
     ? "cancelled"
     : input.outcome;
@@ -218,6 +240,7 @@ function settle(db: Database, status: RunStatusResult, input: {
   if (attempt.attemptId !== input.attemptId) return status;
   const attemptTarget = target === "skipped" ? "failed" : target;
   const receiptId = randomUUID();
+  let committed: RunEvent[] = [];
   db.transaction(() => {
     if (!ATTEMPT_TERMINAL.has(attempt.state)) {
       if (!legalAttemptTerminal(attempt.state, attemptTarget)) throw new Error("ATTEMPT_INVALID_TRANSITION");
@@ -236,8 +259,13 @@ function settle(db: Database, status: RunStatusResult, input: {
       VALUES (:receiptId,:runId,:state,:outcome,:retryability,:reason,NULL,:attemptCount,:snapshotId,:summary,:at,:at)`)
       .run({ receiptId, runId: input.runId, state: target, outcome: target,
         retryability: input.retryability, reason: input.summary ?? null, attemptCount: status.attempts.length,
-        snapshotId: status.run.snapshot.snapshotId, summary: input.summary ?? null, at });
+      snapshotId: status.run.snapshot.snapshotId, summary: input.summary ?? null, at });
+    committed = eventRepo.appendMany([
+      lifecycleEvent({ runId: input.runId, attemptId: attempt.attemptId, kind: "attempt.settled", occurredAt: at, payload: { kind: "attempt.settled", state: attemptTarget, outcome: target, attemptOrdinal: attempt.ordinal, retryability: input.retryability, summary: input.summary, errorCode: input.errorCode } }),
+      lifecycleEvent({ runId: input.runId, kind: "run.settled", occurredAt: at, payload: { kind: "run.settled", state: target, outcome: target, retryability: input.retryability, summary: input.summary, errorCode: input.errorCode } }),
+    ]);
   });
+  liveBus?.publish(committed);
   return readStatus(db, input.runId);
 }
 
@@ -271,52 +299,4 @@ function updateAttempt(db: Database, attempt: Attempt, input: {
       terminal: ATTEMPT_TERMINAL.has(input.state) ? 1 : 0, attemptId: attempt.attemptId,
       runId: attempt.runId, version: attempt.stateVersion });
   if (changed.changes !== 1) throw new Error("ATTEMPT_STALE_VERSION");
-}
-
-function legalTerminalTransition(from: Run["state"], to: RunOutcome): boolean {
-  if (from === "queued") return ["skipped", "cancelled", "failed", "deadline_exceeded"].includes(to);
-  if (from === "cancel_requested") return to === "cancelled" || to === "outcome_unknown";
-  return ["running", "waiting", "recovering"].includes(from);
-}
-
-function legalAttemptTerminal(from: Attempt["state"], to: Attempt["state"]): boolean {
-  if (from === "prepared") return ["failed", "cancelled", "deadline_exceeded"].includes(to);
-  return ["intent_committed", "effect_running", "settling"].includes(from)
-    && ["completed", "failed", "cancelled", "deadline_exceeded", "outcome_unknown"].includes(to);
-}
-
-function activeAttempt(status: RunStatusResult): Attempt {
-  const attempt = status.attempts.find((item) => item.attemptId === status.run.activeAttemptId);
-  if (!attempt) throw new Error("RUN_ATTEMPT_MISSING");
-  return attempt;
-}
-
-function readStatus(db: Database, runId: string): RunStatusResult {
-  const run = readRunById(db, runId);
-  const attempts = db.prepare(`SELECT a.*,s.manifest_digest,s.schema_version FROM run_attempts a
-    JOIN run_snapshots s ON s.snapshot_id=a.snapshot_id WHERE a.run_id=:id ORDER BY a.ordinal`)
-    .all({ id: runId }).map(readAttemptRow);
-  const receiptRow = db.prepare(`SELECT rr.*,s.manifest_digest,s.schema_version FROM run_receipts rr
-    JOIN run_snapshots s ON s.snapshot_id=rr.snapshot_id WHERE rr.run_id=:id`).get({ id: runId });
-  const receipt = receiptRow ? readReceiptRow(receiptRow) : undefined;
-  return RunStatusResultSchema.parse({ run, attempts, ...(receipt ? { receipt } : {}) });
-}
-
-function readRunById(db: Database, runId: string): Run {
-  const row = db.prepare(`SELECT r.*,s.manifest_json FROM runs r JOIN run_snapshots s
-    ON s.snapshot_id=r.snapshot_id WHERE r.run_id=:id`).get({ id: runId });
-  if (!row) throw new Error("RUN_NOT_FOUND");
-  return readRunRow(row);
-}
-
-function readRunByIdempotency(db: Database, key: string): Record<string, unknown> | undefined {
-  return db.prepare(`SELECT r.*,s.manifest_json FROM runs r JOIN run_snapshots s
-    ON s.snapshot_id=r.snapshot_id WHERE r.idempotency_key=:key`).get({ key });
-}
-
-function readAttemptById(db: Database, attemptId: string): Attempt {
-  const row = db.prepare(`SELECT a.*,s.manifest_digest,s.schema_version FROM run_attempts a
-    JOIN run_snapshots s ON s.snapshot_id=a.snapshot_id WHERE a.attempt_id=:id`).get({ id: attemptId });
-  if (!row) throw new Error("RUN_ATTEMPT_MISSING");
-  return readAttemptRow(row);
 }
