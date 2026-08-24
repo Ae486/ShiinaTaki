@@ -72,4 +72,40 @@ describe("EffectRepo", () => {
     expect(db.prepare("SELECT count(*) AS n FROM run_usage").get()?.n).toBe(1);
     db.close();
   });
+
+  it("rejects Approval wait creation after the Attempt becomes terminal", () => {
+    const { db, repo } = fixture();
+    db.prepare("UPDATE run_attempts SET state='cancelled',state_version=state_version+1 WHERE attempt_id='a' AND run_id='r'").run();
+    expect(() => repo.prepareWaiting({ runId: "r", attemptId: "a", kind: "tool", sourceRef: { type: "tool", toolName: "x" }, replayPosture: "never", approvalRef: { approvalId: "approval-1", policyGeneration: 1, approvalGeneration: 1, bindingDigest: "a".repeat(64) } })).toThrow("EFFECT_ATTEMPT_NOT_ACTIVE");
+    expect(db.prepare("SELECT count(*) AS n FROM run_effects").get()?.n).toBe(0);
+    expect(db.prepare("SELECT count(*) AS n FROM run_events").get()?.n).toBe(0);
+    db.close();
+  });
+
+  it("classifies late Approval allow and deny callbacks as stale after Attempt termination", () => {
+    const { db, repo } = fixture();
+    const waiting = repo.prepareWaiting({ runId: "r", attemptId: "a", kind: "tool", sourceRef: { type: "tool", toolName: "x" }, replayPosture: "never", approvalRef: { approvalId: "approval-2", policyGeneration: 1, approvalGeneration: 1, bindingDigest: "b".repeat(64) } });
+    const before = db.prepare("SELECT state_version FROM run_attempts WHERE attempt_id='a'").get()?.state_version;
+    db.prepare("UPDATE run_attempts SET state='cancelled',state_version=state_version+1 WHERE attempt_id='a' AND run_id='r'").run();
+    const allow = repo.commitIntent({ effectId: waiting.effectId, runId: "r", attemptId: "a", expectedVersion: waiting.version });
+    const deny = repo.settleWaiting({ effectId: waiting.effectId, runId: "r", attemptId: "a", expectedVersion: waiting.version, outcome: "failed", errorCode: "approval_denied" });
+    expect(allow).toMatchObject({ stale: true, duplicate: false });
+    expect(deny).toMatchObject({ stale: true, duplicate: false });
+    expect(repo.get(waiting.effectId)).toMatchObject({ state: "waiting", version: waiting.version });
+    expect(db.prepare("SELECT state_version FROM run_attempts WHERE attempt_id='a'").get()?.state_version).toBe(Number(before) + 1);
+    expect(db.prepare("SELECT kind FROM run_events ORDER BY seq").all().map((row) => row.kind)).toEqual(["effect.waiting"]);
+    db.close();
+  });
+
+  it("rolls back terminal Effect writes when the Attempt is inactive at settlement", () => {
+    const { db, repo } = fixture();
+    const effect = repo.prepareIntent({ runId: "r", attemptId: "a", kind: "tool", sourceRef: { type: "tool", toolName: "x" }, replayPosture: "never" });
+    db.prepare("UPDATE run_attempts SET state='cancelled',state_version=state_version+1 WHERE attempt_id='a' AND run_id='r'").run();
+    const result = repo.settle({ effectId: effect.effectId, runId: "r", attemptId: "a", expectedVersion: effect.version, outcome: "completed" });
+    expect(result).toMatchObject({ stale: true, duplicate: false });
+    expect(repo.get(effect.effectId)).toMatchObject({ state: "intent_committed", version: effect.version });
+    expect(db.prepare("SELECT count(*) AS n FROM run_events").get()?.n).toBe(1);
+    expect(db.prepare("SELECT count(*) AS n FROM run_usage").get()?.n).toBe(0);
+    db.close();
+  });
 });

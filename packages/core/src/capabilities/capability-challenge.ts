@@ -31,6 +31,7 @@ import {
 } from "./capability-broker-state.ts";
 import { sameControl } from "./capability-response.ts";
 import type { CapabilityOutcome } from "./capability-broker.ts";
+import { commitHostIntent, prepareHostIntent, prepareHostWaiting } from "./capability-effect-lifecycle.ts";
 
 const UNATTENDED_MESSAGE = "approval requires an active operator connection";
 const DENIED_MESSAGE = "approval was not granted";
@@ -51,6 +52,23 @@ export function acceptCapabilityChallenge(
     || state.approval.approvalGeneration() !== pending.control.approvalGeneration) {
     retireForInvalidChallenge(state, params.requestId);
     return reject(failure ?? "stale_generation");
+  }
+  if (params.governance.effectivePosture === "auto") {
+    if (!prepareHostIntent(state, pending)) {
+      settlePending(state, params.requestId, {
+        outcome: { ok: false, code: "EXEC_FAILED", message: "Host Effect intent could not be committed" },
+        terminalReason: "late",
+      });
+      notifyHostCancel(pending, params.requestId, "approval_invalidated");
+      return { accepted: true };
+    }
+    try {
+      pending.targetDispatched = true;
+      pending.target.notify(HOST_CONTROL_METHODS.execute, { requestId: params.requestId, control: pending.control, challengeId: params.challengeId });
+    } catch {
+      settlePending(state, params.requestId, { outcome: interruptedOutcome(pending.execution, pending.cancellation, "Host execute delivery failed"), terminalReason: "late" });
+    }
+    return { accepted: true };
   }
   const binding = challengeBinding(pending, params.governance);
   if (!binding || binding.decisionScopeDigest !== params.decisionScopeDigest) {
@@ -106,6 +124,15 @@ function bridgeToOperator(args: {
     presentation: params.presentation,
     timeoutMs: remainingMs,
   });
+  if (handle.approvalId && !prepareHostWaiting({ state, pending, approvalId: handle.approvalId, binding })) {
+    handle.cancel();
+    settlePending(state, requestId, {
+      outcome: { ok: false, code: "EXEC_FAILED", message: "Host Approval wait could not be committed" },
+      terminalReason: "late",
+    });
+    notifyHostCancel(pending, requestId, "approval_invalidated");
+    return { accepted: true };
+  }
   pending.challenge = { value: params, binding, handle };
   const onAbort = (): void => void handle.cancel();
   operator.signal?.addEventListener("abort", onAbort, { once: true });
@@ -146,21 +173,21 @@ function resumeAuthorized(
     return;
   }
   const { value: challenge, binding } = pending.challenge;
-  const authorization = {
-    authorizationId: randomUUID(),
-    approvalGeneration: decision.approvalGeneration,
-    decisionScope: decision.scope,
-    controlDigest: challenge.controlDigest,
-    challengeDigest: challenge.challengeDigest,
-    decisionScopeDigest: binding.decisionScopeDigest,
-    issuedAt: new Date(state.now()).toISOString(),
-    expiresAt: pending.control.deadlineAt,
-  };
+  if (!commitHostIntent(state, pending)) {
+    settlePending(state, requestId, {
+      outcome: { ok: false, code: "CANCELLED", message: "Host Effect intent became stale", state: "cancelled" },
+      terminalReason: "late",
+    });
+    notifyHostCancel(pending, requestId, "approval_invalidated");
+    return;
+  }
+  const authorization = mintAuthorization({ state, pending, challenge, binding, decision });
   pending.authorization = { value: authorization };
   pending.challenge = undefined;
   pending.abortListener?.();
   pending.abortListener = undefined;
   try {
+    pending.targetDispatched = true;
     pending.target.notify(HOST_CONTROL_METHODS.resume, {
       requestId,
       control: pending.control,
@@ -193,7 +220,7 @@ function challengeEvidenceFailure(
   if (evidence.descriptorRevision !== projection.descriptorRevision
     || evidence.classifierRevision !== projection.classifierRevision) return "stale_generation";
   const projected = projection.cells.find((cell) => cell.key === evidence.cellKey)?.posture;
-  if (!projected || rank(evidence.effectivePosture) < rank(projected) || evidence.effectivePosture !== "ask") {
+  if (!projected || rank(evidence.effectivePosture) < rank(projected) || !["auto", "ask"].includes(evidence.effectivePosture)) {
     return "stale_generation";
   }
   if (evidence.constraint === "none" && evidence.effectivePosture !== projected) return "stale_generation";
@@ -228,10 +255,7 @@ function challengeBinding(pending: PendingCapability, evidence: HostGovernanceEv
 function decisionOutcome(pending: PendingCapability, reason: string): CapabilityOutcome {
   if (reason === "denied") return { ok: false, code: "DENIED", message: DENIED_MESSAGE };
   if (reason === "expired") {
-    // The Host deadline bounds the whole attempt; an effect-kind expiry keeps the conservative unknown outcome.
-    return pending.execution === "effect"
-      ? { ok: false, code: "OUTCOME_UNKNOWN", message: TIMEOUT_MESSAGE, state: "outcome_unknown" }
-      : { ok: false, code: "CAPABILITY_TIMEOUT", message: TIMEOUT_MESSAGE };
+    return { ok: false, code: "CAPABILITY_TIMEOUT", message: TIMEOUT_MESSAGE };
   }
   if (reason === "operator_unavailable" || reason === "notification_failed") {
     return { ok: false, code: "APPROVAL_REQUIRED", message: UNATTENDED_MESSAGE };
@@ -255,6 +279,25 @@ function retireForInvalidChallenge(state: CapabilityBrokerState, requestId: stri
 
 function invalidatedDecision(state: CapabilityBrokerState): ApprovalInteractionDecision {
   return { allowed: false, reason: "invalidated", approvalGeneration: state.approval.approvalGeneration() };
+}
+
+function mintAuthorization(input: {
+  state: CapabilityBrokerState;
+  pending: PendingCapability;
+  challenge: CapabilityChallenge;
+  binding: ApprovalDecisionBinding;
+  decision: Extract<ApprovalInteractionDecision, { allowed: true }>;
+}) {
+  return {
+    authorizationId: randomUUID(),
+    approvalGeneration: input.decision.approvalGeneration,
+    decisionScope: input.decision.scope,
+    controlDigest: input.challenge.controlDigest,
+    challengeDigest: input.challenge.challengeDigest,
+    decisionScopeDigest: input.binding.decisionScopeDigest,
+    issuedAt: new Date(input.state.now()).toISOString(),
+    expiresAt: input.pending.control.deadlineAt,
+  };
 }
 
 function reject(reason: HostFrameRejectReason): CapabilityRespondResult {

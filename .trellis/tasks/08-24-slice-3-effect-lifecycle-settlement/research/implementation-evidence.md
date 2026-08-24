@@ -7,8 +7,8 @@ after session compaction; verify it against Git and the latest agent report befo
 
 | Batch | Boundary | Status |
 | --- | --- | --- |
-| 3A | Effect/Usage contracts, migration/repository/service, per-provider model middleware, authoritative usage, Model/Run/Attempt truthfulness | `approved_pending_commit` |
-| 3B | Governed Tool, Approval wait/final revalidation, Host identity threading, MCP generation/lease settlement | `not_started` |
+| 3A | Effect/Usage contracts, migration/repository/service, per-provider model middleware, authoritative usage, Model/Run/Attempt truthfulness | `committed:e55a8dc` |
+| 3B | Governed Tool, Approval wait/final revalidation, Host identity threading, MCP generation/lease settlement | `approved_pending_commit` |
 | 3C | Explicit Memory effects, non-primary preservation, full cross-boundary/process acceptance | `not_started` |
 
 The unique Slice 3A implementation and formal-check agents have finished. The final xhigh check approved 3A only after
@@ -22,6 +22,45 @@ Recovery procedure:
 3. Treat the final `APPROVED (Slice 3A only)` check below as authoritative over historical failed checks.
 4. Commit 3A with an explicit batch label; then continue 3B using the same parent research and shared contracts.
 5. Never claim complete Slice 3 until 3C integration acceptance passes.
+
+## Slice 3B authoritative implementation boundary
+
+The focused seam review is in `research/slice-3b-seam-review.md`. Its Host ordering caveat is resolved as follows and
+must not be weakened into an exception:
+
+1. `capability.request` becomes a bounded Host preflight. It validates the sealed control/input against the current
+   Host connection/catalog/policy lineage and returns trusted `auto | ask | deny` classification without invoking the
+   real capability handler.
+2. `deny` settles the one logical Tool Effect without target intent. `ask` creates a durable Effect waiting reference
+   to the canonical Approval identity/generations. Approval denial, expiry, cancellation, disconnect, or invalidation
+   settles that wait and never creates target intent.
+3. After `auto`, or after accepted Approval plus Core final policy/generation revalidation, Core commits the same Tool
+   Effect's target intent. Only then may Core send an explicit Host execute/resume frame.
+4. Host execution revalidates the same control, generation, input digest, trusted classification, and any one-use
+   authorization immediately before the handler. It never redirects to a replacement generation.
+5. Core `runId`, model `attemptId`, and `effectId` are typed correlation fields distinct from Host-local operation and
+   execution-attempt identities. Neither authority overwrites the other.
+6. MCP lease acquisition happens after Governance/Approval final revalidation and immediately before target intent.
+   Direct MCP and `extension_call` share the same captured closure and are instrumented once, never at both layers.
+
+### Slice 3B acceptance matrix
+
+- [x] One AI SDK tool call creates exactly one durable Tool Effect across Core, Host, direct MCP, and MCP extension paths.
+- [x] Auto tools commit intent immediately before raw execution; failed intent starts no raw tool/Host/MCP call.
+- [x] Approval wait stores bounded canonical identity/generation/binding evidence; every non-allow terminal result settles
+      without target intent, and allow is revalidated before intent.
+- [x] Host preflight cannot execute. Explicit execute/resume is accepted only after target intent and against the same
+      current connection/catalog/policy/input lineage.
+- [x] Host-local operation/attempt identity remains distinct from enclosing Core Run/model-Attempt/Effect identity, and
+      wrong/stale/duplicate/late frames cannot settle current Effect truth.
+- [x] Cooperative reads cancel truthfully; unsafe Host disconnect/deadline and MCP forced-close/transport ambiguity
+      settle `outcome_unknown` without redirect or replay.
+- [x] MCP leases are not held during Approval waiting; retired generations reject new target intent, and the shared
+      direct/extension closure cannot double-record.
+- [x] Parallel tool calls preserve distinct Effect identities and AI SDK tool-result ordering.
+- [x] Canonical rows/events/logs exclude raw arguments/results, prompts, credentials, unrestricted errors, and media.
+- [x] Shared/Core/Desktop/Rust focused and full tests, cross-language fixtures, typechecks, lint, Clippy, E2E typecheck,
+      task validation, real Core/Host process smoke, and `git diff --check` pass.
 
 ## Slice 3A acceptance matrix
 
@@ -90,6 +129,39 @@ Recovery procedure:
 - `pnpm lint`, `pnpm --filter @taki/e2e typecheck`, task validation, and `git diff --check` passed on 2026-08-24.
 - Post-check repair full gates on 2026-08-24: Shared 338 passed; Core 1682 passed, 1 skipped; Shared/Core/E2E
   typechecks, lint, task validation, and `git diff --check` passed.
+- Slice 3B implementation progress (2026-08-25): added bounded Approval effect references, waiting/terminal/CAS
+  transitions, final-revalidation Tool coordinator in `governed-tool.ts`, MCP lease-after-governance ordering, and
+  Core-to-Host correlation fields (`coreAttemptId`, `effectId`) with Rust serde parity. Focused governance/effect/MCP/
+  Host tests and Rust `cargo check` pass.
+- Slice 3B continuation (2026-08-25): Host `capability.request` is now preflight-only. Core reserves the correlation
+  `effectId` in sealed control without writing target intent, then auto classification commits Host Effect intent before
+  `capability.execute`; ask classification persists bounded Approval waiting evidence, commits the same Effect intent
+  only after accepted Approval/current-lineage revalidation, then sends explicit `capability.resume`. Denial settles the
+  waiting Effect without target intent. Focused order tests cover auto, allow, and deny.
+- Host settlement now checks the same Core Run/model-Attempt/Effect tuple and fails stale settlement closed. Host-local
+  operation/attempt identity remains distinct. Rust has a deterministic preflight test proving classification has no
+  executor dependency or audit side effect, and shared/Rust golden fixtures cover the new `capability.execute` frame.
+- Run admission now preserves one mutable interactive identity reference for captured MCP/Extension closures. The MCP
+  governed wrapper reads Run/Attempt/Effect service lazily, and overflow retry updates that same reference without
+  recapturing or redirecting the MCP generation.
+- Latest checks: Shared full suite 35 files / 340 passed; Core full suite 266 files / 1692 passed / 1 skipped; Rust
+  full suite 171 passed plus 7 secret-key tests; focused 3B Core 10 files / 69 passed; Shared/Core/E2E typechecks,
+  lint, Rust check, Rust Clippy with warnings denied, task validation, and `git diff --check` passed.
+- Real process-level 3B acceptance is now covered by `e2e/src/effect-host-lifecycle.e2e.test.ts`. The relay pauses the
+  next `capability.execute`; while paused, the test opens the live Core SQLite database read-only and proves the exact
+  `(runId, coreAttemptId, effectId)` row is already `intent_committed` with no outcome. Release then proves one Host
+  audit/handler path, terminal Effect settlement, ordered `effect.intent_committed` -> `effect.settled` events, and
+  no raw command in Core logs. The same file covers ask waiting -> Approval -> resume and an unsafe `exec` disconnect
+  that settles `outcome_unknown` without replay. The dev-only trigger's `lifecycle` flag uses the production
+  `RunService.admit/start/settle` path and leaves legacy L1 behavior unchanged.
+- Cross-language Host canonicalization was repaired and pinned: Rust now excludes Core-only `coreAttemptId/effectId`
+  from the Host control digest exactly as the shared canonicalizer does; Rust protocol tests and the real socket smoke
+  both pass with populated Core correlation identities.
+- Direct MCP keys and `extension_call` now have a durable exactly-once integration proof in
+  `packages/core/src/extensions/extension-effect-exactly-once.test.ts`: each model-facing call creates one Tool Effect
+  and one underlying dispatch, while a stale generation creates no replacement Effect. Parallel AI SDK tool calls are
+  covered by `packages/core/src/agents/parallel-tool-effect.test.ts` with distinct Effect IDs, independent terminal
+  settlement, and preserved call-a/call-b result ordering.
 - Direct regression suite after the unique formal-check repair: 39 focused Core tests passed across EffectRepo,
   middleware/usage, overflow, and chat-send; full Core now 1686 passed, 1 skipped; Shared 338 passed. Shared/Core/E2E
   typechecks, lint, task validation, and `git diff --check` passed.
@@ -99,6 +171,15 @@ Recovery procedure:
 - Final xhigh formal check: `APPROVED (Slice 3A only)`. Focused Core: 5 files / 42 passed; Shared: 338 passed; Core:
   1688 passed, 1 skipped; Shared/Core/E2E typechecks, lint, task validation, and `git diff --check` passed. No 3B/3C
   production adapters were included.
+- Slice 3B completion gates (2026-08-25): Shared 35 files / 340 passed; Core 268 files / 1694 passed / 1 skipped;
+  E2E 23 passed / 6 skipped (36 tests passed / 6 skipped); focused real Host lifecycle E2E 3 passed; Rust 171 tests
+  plus 7 secret-key tests; Shared/Core/E2E typechecks, `pnpm lint`, `cargo build --bin taki-node`, `cargo clippy
+  --manifest-path apps/desktop/src-tauri/Cargo.toml -- -D warnings`, and `git diff --check` all passed.
+- Final xhigh formal check: `APPROVED (Slice 3B)`. Check fixes added active-Attempt/state-version guards for waiting and
+  terminal transitions, prevented stale Approval/MCP leases from leaving waiting Effects, required canonical approval IDs,
+  and added waiting/event-chain evidence. Final gates: Core 1697 passed / 1 skipped; Shared 340 passed; Desktop 427,
+  CLI 47, E2E 36 passed / 6 skipped; focused Host E2E 3 passed; Rust tests/check/build/clippy, typechecks, lint, task
+  validation, and `git diff --check` passed. No findings remained.
 
 These historical checks are evidence for the initial 3A foundation only. The latest implementation report and a fresh
 full 3A check supersede them.

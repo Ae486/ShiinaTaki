@@ -25,10 +25,16 @@ export const EffectExecutorRefSchema = z.discriminatedUnion("type", [
   z.strictObject({ type: z.literal("mcp"), serverId: ID, generation: z.number().int().positive().max(2_000_000_000) }),
   z.strictObject({ type: z.literal("memory"), authorityEpoch: ID }),
 ]);
+export const ApprovalEffectRefSchema = z.strictObject({
+  approvalId: ID, policyGeneration: z.number().int().positive().max(2_000_000_000),
+  approvalGeneration: z.number().int().positive().max(2_000_000_000), bindingDigest: DIGEST,
+  expiresAt: z.string().datetime({ offset: true }).optional(),
+});
+export type ApprovalEffectRef = z.infer<typeof ApprovalEffectRefSchema>;
 export const EffectLifecycleSchema = z.strictObject({
   schemaVersion: z.literal(EFFECT_SCHEMA_VERSION), effectId: ID, runId: ID, attemptId: ID,
   kind: EffectKindSchema, state: EffectStateSchema, version: z.number().int().nonnegative().max(2_000_000_000),
-  sourceRef: EffectSourceRefSchema, executorRef: EffectExecutorRefSchema.optional(), inputDigest: DIGEST.optional(),
+  sourceRef: EffectSourceRefSchema, executorRef: EffectExecutorRefSchema.optional(), inputDigest: DIGEST.optional(), approvalRef: ApprovalEffectRefSchema.optional(),
   replayPosture: EffectReplayPostureSchema, capturedGenerationRef: ID.optional(), idempotencyKey: ID.optional(),
   reservedResultRef: ID.optional(), reservedUsageRef: ID.optional(), startedAt: z.string().datetime({ offset: true }).optional(),
   settledAt: z.string().datetime({ offset: true }).optional(), outcome: EffectOutcomeSchema.optional(),

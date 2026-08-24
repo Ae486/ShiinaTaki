@@ -5,7 +5,7 @@
  */
 import type { Tool, ToolSet } from "ai";
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
-import { wrapGovernedTool, type InteractiveGovernanceContext } from "../governance/governed-tool.ts";
+import { wrapGovernedTool, type GovernedDispatchLease, type InteractiveGovernanceContext } from "../governance/governed-tool.ts";
 import { acquireLease, releaseLease, type GenerationRecord } from "./mcp-generations.ts";
 import type { McpToolRef } from "./mcp-tool-identity.ts";
 
@@ -32,22 +32,39 @@ export function buildTurnTools(
     for (const [key, tool] of Object.entries(record.tools)) {
       const ref = record.refs.get(key);
       if (!ref) continue;
-      wrapped[key] = withLease(record, governance
+      wrapped[key] = governance
         ? wrapGovernedTool(tool, {
             service: governance.service,
-            binding: mcpBinding(governance, ref),
+            binding: mcpBinding(governance, record, ref),
             interactive: governance.approval && interactive
-              ? { ...interactive, approval: governance.approval, presentation: mcpPresentation(ref) }
+              ? lateBoundInteractive(interactive, governance.approval, mcpPresentation(ref))
               : undefined,
+            dispatchLease: generationLease(record),
           })
-        : tool);
+        : withLease(record, tool);
     }
   }
   return wrapped;
 }
 
-// The lease wraps the governed execute: acquire -> authorize/execute -> release in finally. A retired generation
-// fails closed with the structured envelope (never redirected to the replacement).
+function lateBoundInteractive(
+  interactive: TurnInteractive,
+  approval: NonNullable<TurnGovernance["approval"]>,
+  presentation: ReturnType<typeof mcpPresentation>,
+): InteractiveGovernanceContext {
+  return {
+    approval,
+    connection: interactive.connection,
+    signal: interactive.signal,
+    presentation,
+    get runId() { return interactive.runId; },
+    get attemptId() { return interactive.attemptId; },
+    get effects() { return interactive.effects; },
+  };
+}
+
+// Governance/Approval wraps this leased closure, so the lease is acquired only after final revalidation and released
+// after the exact captured generation settles. A retired generation never redirects to its replacement.
 function withLease(record: GenerationRecord, tool: Tool): Tool {
   const execute = tool.execute;
   if (typeof execute !== "function") return tool;
@@ -74,7 +91,16 @@ function unknownOutcome() {
   return { ok: false as const, code: "OUTCOME_UNKNOWN" as const, message: UNKNOWN_OUTCOME_MESSAGE, state: "outcome_unknown" as const };
 }
 
-function mcpBinding(governance: TurnGovernance, ref: McpToolRef) {
+function generationLease(record: GenerationRecord): GovernedDispatchLease {
+  return {
+    acquire: () => acquireLease(record),
+    release: () => releaseLease(record),
+    unavailable: { ok: false, code: "MCP_STALE_GENERATION", message: RETIRED_MESSAGE },
+    acceptResult: (result) => record.forcedClosed ? unknownOutcome() : result,
+  };
+}
+
+function mcpBinding(governance: TurnGovernance, record: GenerationRecord, ref: McpToolRef) {
   return {
     identity: {
       capabilityId: "mcp.tool.call",
@@ -83,6 +109,12 @@ function mcpBinding(governance: TurnGovernance, ref: McpToolRef) {
     },
     cellKey: "mcp-tool-call",
     denyConstraints: governance.legacyDeny?.(ref.serverName, ref.toolName) ? ["legacy-mcp-deny"] : [],
+    effect: {
+      sourceRef: { type: "mcp" as const, serverId: record.serverId, generation: record.generation },
+      executorRef: { type: "mcp" as const, serverId: record.serverId, generation: record.generation },
+      replayPosture: "never" as const,
+      capturedGenerationRef: `${record.serverId}:${record.generation}`,
+    },
   };
 }
 

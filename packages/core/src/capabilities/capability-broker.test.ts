@@ -110,7 +110,7 @@ describe("createCapabilityBroker", () => {
     await expect(second).resolves.toEqual({ ok: true, output: OUTPUT });
   });
 
-  it("deadline cancels a cooperative read but settles an effect outcome_unknown", async () => {
+  it("deadline before Host preflight execution settles both request kinds as not dispatched", async () => {
     vi.useFakeTimers();
     try {
       const { broker: b } = broker(100);
@@ -124,7 +124,7 @@ describe("createCapabilityBroker", () => {
       await vi.advanceTimersByTimeAsync(100);
       expect(cancel?.reason).toBe("deadline_exceeded");
       await expect(read).resolves.toEqual({ ok: false, code: "CAPABILITY_TIMEOUT", message: TIMEOUT_MESSAGE });
-      await expect(effect).resolves.toMatchObject({ ok: false, code: "OUTCOME_UNKNOWN", state: "outcome_unknown" });
+      await expect(effect).resolves.toEqual({ ok: false, code: "CAPABILITY_TIMEOUT", message: TIMEOUT_MESSAGE });
       expect(b.resolve({ requestId: sentRead!.requestId, control: sentRead!.control, state: "completed", output: OUTPUT, governance: EVIDENCE }, {
         hostId: HOST_A, connectionGeneration: 1,
       })).toEqual({ accepted: false, reason: "late" });

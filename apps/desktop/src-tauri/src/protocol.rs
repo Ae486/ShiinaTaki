@@ -285,6 +285,9 @@ mod tests {
             "capability-request" => serde_json::from_str::<CapabilityRequest>(text)
                 .ok()
                 .map(to_value),
+            "capability-execute" => serde_json::from_str::<CapabilityExecute>(text)
+                .ok()
+                .map(to_value),
             "capability-challenge" => serde_json::from_str::<Value>(text).ok()
                 .and_then(|value| parse_capability_challenge(value).ok()).map(to_value),
             "capability-resume" => serde_json::from_str::<Value>(text).ok()

@@ -1,5 +1,6 @@
 # core/db/migrations/
 - 026-run-effects.ts — additive Run-owned effect current state and authoritative usage persistence for Slice 3
+- 027-effect-approval-ref.ts — additive bounded Approval wait reference on Run Effects for Slice 3B
 - 001-timeline.ts — migration 1: timeline_messages table + (character_id, seq DESC) index
 - 002-memory.ts — migration 2: memory_entries metadata + the original memory_fts trigram virtual table (retokenized by 008)
 - 003-memory-auto-state.ts — migration 3: memory_auto_state (per-character episodic/flush auto-write watermarks)

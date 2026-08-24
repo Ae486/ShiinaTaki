@@ -20,6 +20,8 @@ import type { ApprovalInteractionService, ApprovalRequestHandle } from "../appro
 import type { Logger } from "../logging/logger.ts";
 import type { Connection } from "../server/connection-registry.ts";
 import type { CapabilityOutcome } from "./capability-broker.ts";
+import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
+import { settleHostEffect } from "./capability-effect-lifecycle.ts";
 
 export type CapabilityNotify = (method: string, params: unknown) => void;
 
@@ -58,6 +60,8 @@ export interface PendingCapability {
   abortListener?: () => void;
   challenge?: PendingChallenge;
   authorization?: PendingAuthorization;
+  effect?: { id: string; version: number; state: "waiting" | "intent_committed" };
+  targetDispatched?: boolean;
 }
 
 export interface TerminalRecord {
@@ -72,6 +76,7 @@ export interface CapabilityBrokerState {
   now: () => number;
   pending: Map<string, PendingCapability>;
   terminal: Map<string, TerminalRecord>;
+  effects?: EffectLifecycleService;
 }
 
 export const TERMINAL_RECORD_LIMIT = 256;
@@ -85,12 +90,19 @@ export function settlePending(
 ): boolean {
   const entry = state.pending.get(requestId);
   if (!entry) return false;
+  const accepted = settleHostEffect(state, entry, terminal.outcome);
+  const outcome = accepted ? terminal.outcome : {
+    ok: false as const,
+    code: "CANCELLED" as const,
+    message: "Host Effect settlement was stale",
+    state: "cancelled" as const,
+  };
   state.pending.delete(requestId);
   clearTimeout(entry.timer);
   releaseChallenge(entry);
   rememberTerminal(state.terminal, requestId, { control: entry.control, authorization: entry.authorization, reason: terminal.terminalReason });
-  state.log.info({ requestId, attemptId: entry.control.attemptId, ok: terminal.outcome.ok }, "capability settled");
-  entry.finish(terminal.outcome);
+  state.log.info({ requestId, attemptId: entry.control.attemptId, ok: outcome.ok }, "capability settled");
+  entry.finish(outcome);
   return true;
 }
 
@@ -122,6 +134,7 @@ export function interruptedOutcome(
     ? { ok: false, code: "CANCELLED", message, state: "cancelled" }
     : { ok: false, code: "NODE_DISCONNECTED", message };
 }
+
 
 /**
  * Best-effort pre-execution retirement notice for the Host. Sent regardless of the descriptor's cancellation

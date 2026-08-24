@@ -28,11 +28,12 @@ const CONTROL = {
 };
 
 describe("Host-control schemas", () => {
-  it("freezes all six method names", () => {
+  it("freezes all Host-control method names", () => {
     expect(HOST_CONTROL_METHODS).toEqual({
       catalogPublish: "host.catalogPublish",
       request: "capability.request",
       challenge: "capability.challenge",
+      execute: "capability.execute",
       resume: "capability.resume",
       cancel: "capability.cancel",
       respond: "capability.respond",

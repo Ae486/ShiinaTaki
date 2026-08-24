@@ -202,7 +202,7 @@ composeHindsightSetup({ db, config: boot.config.source, secrets: secretCatalog, 
 // requests immediately (fail-closed); the 90s backstop covers a node that never answers. An ask-classified request
 // comes back as capability.challenge and the SAME canonical Approval service that governs Core/MCP tools owns the
 // operator prompt; the broker mints the single-use resume authorization after the operator answers.
-const capabilityBroker = createCapabilityBroker({ logger, approval });
+const capabilityBroker = createCapabilityBroker({ logger, approval, effects: effectLifecycle });
 bindHostGenerationRetirement({ connections: connectionRegistry, catalogs: hostCatalogs, broker: capabilityBroker });
 registry.register(capabilityChallengeMethod(capabilityBroker, connectionRegistry));
 // Screenshot→VLM bridge: reuses the OPTIONAL vision slot; without it a result stays path+dims (no pixels to the text
@@ -218,6 +218,7 @@ const capabilityTools = createCapabilityTools({
   logger,
   governance,
   approval,
+  effects: effectLifecycle,
   screenshotsDir: join(serverConfig.dataDir, "workspace", "screenshots"),
   describe: describeScreenshot,
 });
@@ -266,7 +267,7 @@ const extensions = createExtensionComposition({
   coreHostId, catalogs: hostCatalogs,
   skills: { catalog: skillBoot.catalog, loader: skillsLoader, governance },
   mcp: mcpBoot.manager,
-  route: (request, interactive) => routeCapability({ ...ambientCapabilityDeps, interactive }, request),
+  route: (request, interactive) => routeCapability({ ...ambientCapabilityDeps, interactive }, { ...request, runId: interactive?.runId, attemptId: interactive?.attemptId }),
 });
 const modelProvider = "openai-compatible";
 const modelId = boot.env.TAKI_PROVIDER_MODEL ?? "configured-main-model";
@@ -281,6 +282,7 @@ const runService = createRunService({
     memory: { snapshot: memoryRuntime.snapshot, createTools: (characterId) => memory.createTools(characterId) },
     provider: modelProvider,
     modelId,
+    effects: effectLifecycle,
   }),
 });
 
@@ -332,7 +334,7 @@ registry.register(
       // Per-turn compatibility bag: Skill reads remain present and capabilities bind the initiating operator socket.
       turnTools: (turn) => ({
         ...extensions.skillTools,
-        ...capabilityTools({ connection: turn.connection, signal: turn.signal }),
+        ...capabilityTools({ connection: turn.connection, signal: turn.signal, runId: turn.runId, attemptId: turn.attemptId }),
       }),
       // Admission supplies the immutable Host/Skill/MCP projection; compatibility callers may still omit it.
       // Stable Core-local tools join per-turn memory/avatar tools behind the explicit Core binding table.
@@ -416,6 +418,7 @@ if (devTriggerEnabled(process.env)) {
         coreToolGovernance.wrap({ ...readFileTool, ...writeFileTool }, interactive),
         extensions.runContext(interactive).tools,
       ),
+      runs: runService,
       logger,
     }),
   );

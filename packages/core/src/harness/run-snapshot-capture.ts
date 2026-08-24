@@ -10,6 +10,7 @@ import type { ExtensionRunContext } from "../extensions/extension-run-context.ts
 import type { ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
 import type { TurnInteractive } from "../mcp/mcp-turn-tools.ts";
+import type { EffectLifecycleService } from "./effect-lifecycle-service.ts";
 import type { CapturedRunSnapshot, RunSnapshotCapture } from "./run-service.ts";
 
 interface SnapshotMemoryReference {
@@ -27,6 +28,7 @@ interface CaptureDeps {
   memory: { snapshot(): SnapshotMemoryReference; createTools(characterId: string): ToolSet };
   provider: string;
   modelId: string;
+  effects?: EffectLifecycleService;
 }
 
 export function createRunSnapshotCapture(input: CaptureDeps): RunSnapshotCapture<TurnInteractive> {
@@ -42,6 +44,10 @@ async function captureSnapshot(args: {
   interactive?: TurnInteractive;
 }): Promise<CapturedRunSnapshot> {
   const { input, request } = args;
+  if (args.interactive) {
+    args.interactive.runId = args.runId;
+    args.interactive.effects ??= input.effects;
+  }
   const context = input.extensions.runContext(args.interactive, args.runId);
   const hosts = context.snapshot.hosts.map((host) => ({ hostId: host.hostId, available: host.available,
     connectionGeneration: host.connectionGeneration, catalogGeneration: host.catalogGeneration }));

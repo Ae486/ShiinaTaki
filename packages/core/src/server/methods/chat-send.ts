@@ -59,15 +59,18 @@ export function chatSendMethod(
         initiator: "primary", provenance: { provider: "chat", triggerRequestId: messageId },
         deliveryClass: "class_a", contextMode: "primary",
       });
-      const admitted = await runs.admit(request, { connection: ctx.connection, signal: controller.signal });
+      const interactive: TurnInteractive = { connection: ctx.connection, signal: controller.signal };
+      const admitted = await runs.admit(request, interactive);
       const runId = admitted.run.runId;
       const attemptId = admitted.attempt.attemptId;
+      interactive.runId = runId;
+      interactive.attemptId = attemptId;
       runIdRef.value = runId;
       if (closed) runs.requestCancel(runId, "connection closed");
       // Defer streaming to the next macrotask so the ack — sent by the server as
       // this dispatch's result, a couple of microtask hops later — is flushed to
       // the socket before the first delta notification.
-      setImmediate(() => void runQueued({ chatAgent, log, params, ctx, messageId, runId, attemptId, controller, controls, runs }));
+      setImmediate(() => void runQueued({ chatAgent, log, params, ctx, messageId, runId, attemptId, controller, controls, runs, interactive }));
       return { messageId, runId };
     },
   };
@@ -84,6 +87,7 @@ interface PumpArgs {
   controller: AbortController;
   controls: TurnControls;
   runs: RunService<TurnInteractive>;
+  interactive: TurnInteractive;
 }
 
 // A turn fully commits (append user -> stream -> append turn) before the character's next send starts; concurrent
@@ -103,7 +107,7 @@ async function runQueued(args: PumpArgs): Promise<void> {
 
 // eslint-disable-next-line max-lines-per-function
 async function pump(args: PumpArgs, controller: AbortController): Promise<void> {
-  const { chatAgent, log, params, ctx, messageId, runId, runs } = args;
+  const { chatAgent, log, params, ctx, messageId, runId, runs, interactive } = args;
   let attemptId = args.attemptId;
   const { characterId } = params;
   // A closing operator socket aborts its own in-flight turn — nobody is listening to the deltas anymore.
@@ -131,6 +135,7 @@ async function pump(args: PumpArgs, controller: AbortController): Promise<void> 
         if (next.run.state !== "running" || !nextAttemptId || nextAttemptId === attemptId) return false;
         attemptId = nextAttemptId;
         turn.attemptId = nextAttemptId;
+        interactive.attemptId = nextAttemptId;
         return true;
       },
     };

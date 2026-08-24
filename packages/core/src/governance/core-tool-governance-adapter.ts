@@ -8,6 +8,7 @@ import type { GovernancePolicyService } from "./governance-policy-service.ts";
 import type { ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
 import type { Connection } from "../server/connection-registry.ts";
 import { wrapGovernedTool, type GovernedToolBinding } from "./governed-tool.ts";
+import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 
 const CORE_TOOL_BINDINGS: Record<string, Omit<GovernedToolBinding["identity"], "ownerHostId"> & { cellKey: string }> = {
   get_current_time: { capabilityId: "core.time.read", cellKey: "get-current-time" },
@@ -27,7 +28,7 @@ const CORE_TOOL_BINDINGS: Record<string, Omit<GovernedToolBinding["identity"], "
 };
 
 export interface CoreToolGovernanceAdapter {
-  wrap(tools: ToolSet, interactive?: { connection: Connection; signal?: AbortSignal }): ToolSet;
+  wrap(tools: ToolSet, interactive?: { connection: Connection; signal?: AbortSignal; runId?: string; attemptId?: string; effects?: EffectLifecycleService }): ToolSet;
 }
 
 export function createCoreToolGovernanceAdapter(

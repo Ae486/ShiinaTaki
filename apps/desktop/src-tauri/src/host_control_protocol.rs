@@ -215,6 +215,10 @@ impl<'de> Deserialize<'de> for HostFrameAck {
 pub struct HostOperationControl {
     #[serde(rename = "runId")]
     pub run_id: String,
+    #[serde(rename = "coreAttemptId", skip_serializing_if = "Option::is_none")]
+    pub core_attempt_id: Option<String>,
+    #[serde(rename = "effectId", skip_serializing_if = "Option::is_none")]
+    pub effect_id: Option<String>,
     #[serde(rename = "operationId")]
     pub operation_id: String,
     #[serde(rename = "attemptId")]
@@ -335,6 +339,18 @@ pub struct CapabilityRequest {
     pub request_id: String,
     pub control: HostOperationControl,
     pub input: Value,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(deny_unknown_fields)]
+pub struct CapabilityExecute {
+    #[serde(rename = "requestId")]
+    pub request_id: String,
+    pub control: HostOperationControl,
+    #[serde(rename = "challengeId")]
+    pub challenge_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub authorization: Option<Value>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]

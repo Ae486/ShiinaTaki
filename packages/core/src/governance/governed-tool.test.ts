@@ -11,6 +11,9 @@ import type { Connection } from "../server/connection-registry.ts";
 import { createGovernancePolicyRepo } from "./governance-policy-repo.ts";
 import { createGovernancePolicyService } from "./governance-policy-service.ts";
 import { wrapGovernedTool } from "./governed-tool.ts";
+import { createEffectRepo } from "../db/effect-repo.ts";
+import { createRunEventRepo } from "../db/run-event-repo.ts";
+import { createEffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 
 const OWNER_HOST_ID = "11111111-1111-4111-8111-111111111111";
 const dbs: Database[] = [];
@@ -54,7 +57,7 @@ function fixture(options: { interactive?: boolean } = {}) {
       },
     },
   });
-  return { approval, connection, execute, governance, notifications, wrapped };
+  return { approval, connection, execute, governance, notifications, wrapped, db };
 }
 
 function requestOf(notifications: Array<{ method: string; params: unknown }>): CanonicalApprovalRequest {
@@ -64,6 +67,19 @@ function requestOf(notifications: Array<{ method: string; params: unknown }>): C
 }
 
 describe("wrapGovernedTool interactive authority", () => {
+  it("records one waiting tool effect then commits intent only after approval", async () => {
+    const f = fixture();
+    const effects = createEffectLifecycleService(createEffectRepo(f.db, createRunEventRepo(f.db)));
+    f.db.exec("INSERT INTO run_snapshots (snapshot_id,run_id,schema_version,manifest_json,manifest_digest,captured_at,created_at) VALUES ('s','r','harness.v1','{}','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z'); INSERT INTO runs (run_id,character_id,trigger_request_id,idempotency_key,request_hash,initiator,provenance_json,delivery_class,state,state_version,snapshot_id,active_attempt_id,queued_at,operation_phase,created_at,updated_at) VALUES ('r','c','t','i','h','primary','{}','class_a','running',0,'s','a','2026-08-25T00:00:00.000Z','executing','2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z'); INSERT INTO run_attempts (attempt_id,run_id,ordinal,state,state_version,provider,model_id,snapshot_id) VALUES ('a','r',1,'effect_running',0,'p','m','s');");
+    const wrapped = wrapGovernedTool(tool({ description: "echo", inputSchema: z.object({}), execute: f.execute }), { service: f.governance, binding: { identity: { capabilityId: "mcp.tool.call", ownerHostId: OWNER_HOST_ID, subject: { subjectId: "mcp.server:tool", revision: "cfg.1" } }, cellKey: "mcp-tool-call" }, interactive: { approval: f.approval, connection: f.connection, effects, runId: "r", attemptId: "a", presentation: { revision: APPROVAL_PRESENTATION_REVISION, title: "Allow", capabilityLabel: "echo", riskSummary: "risk", sections: [{ title: "Target", fields: [{ label: "Tool", value: "echo" }] }] } } });
+    const pending = wrapped.execute?.({}, { toolCallId: "call-effect", messages: [] } as never);
+    const request = requestOf(f.notifications);
+    expect(f.db.prepare("SELECT state FROM run_effects").get()?.state).toBe("waiting");
+    f.approval.respond(f.connection, { approvalId: request.approvalId, choice: "allow_once", expectedApprovalGeneration: request.approvalGeneration });
+    await expect(pending).resolves.toEqual({ ok: true });
+    expect(f.db.prepare("SELECT state FROM run_effects").get()?.state).toBe("terminal");
+  });
+
   it("executes the original closure exactly once after an ask is approved", async () => {
     const f = fixture();
     const pending = f.wrapped.execute?.({}, { toolCallId: "call-1", messages: [] } as never);

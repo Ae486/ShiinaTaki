@@ -172,6 +172,7 @@ export function midStreamErrorModel(deltas: string[], error: unknown): MockLangu
 export type ScriptStep =
   | { kind: "text"; deltas: string[] }
   | { kind: "tool"; toolCallId: string; toolName: string; input: unknown }
+  | { kind: "tools"; calls: Array<{ toolCallId: string; toolName: string; input: unknown }> }
   | { kind: "textTool"; deltas: string[]; toolCallId: string; toolName: string; input: unknown };
 
 export function scriptedModel(steps: ScriptStep[]): MockLanguageModelV4 {
@@ -179,6 +180,17 @@ export function scriptedModel(steps: ScriptStep[]): MockLanguageModelV4 {
 }
 
 function stepToResult(step: ScriptStep) {
+  if (step.kind === "tools") {
+    return {
+      stream: simulateReadableStream({
+        chunks: [
+          { type: "stream-start" as const, warnings: [] },
+          ...step.calls.map((call) => ({ type: "tool-call" as const, toolCallId: call.toolCallId, toolName: call.toolName, input: JSON.stringify(call.input) })),
+          { type: "finish" as const, finishReason: { unified: "tool-calls" as const, raw: undefined }, usage: USAGE },
+        ],
+      }),
+    };
+  }
   if (step.kind === "tool") {
     return {
       stream: simulateReadableStream({
@@ -259,6 +271,9 @@ function stepToGenerateResult(step: ScriptStep) {
       ],
       "tool-calls",
     );
+  }
+  if (step.kind === "tools") {
+    return generateResult(step.calls.map((call) => ({ type: "tool-call", toolCallId: call.toolCallId, toolName: call.toolName, input: JSON.stringify(call.input) })), "tool-calls");
   }
   return generateResult([{ type: "text", text: step.deltas.join("") }], "stop");
 }

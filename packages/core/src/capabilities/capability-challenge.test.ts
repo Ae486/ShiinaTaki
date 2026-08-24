@@ -6,6 +6,7 @@ import type {
   CapabilityRequest,
   CapabilityResume,
   CanonicalApprovalRequest,
+  HostGovernanceEvidence,
 } from "@taki/shared";
 import { canonicalCapabilityChallenge, canonicalHostOperationControl } from "@taki/shared";
 import { approvalDecisionScopeDigest } from "../approval/approval-binding.ts";
@@ -13,6 +14,7 @@ import type { ApprovalInteractionService } from "../approval/approval-interactio
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { fakeOperator, testApproval } from "../testing/capability-tool-harness.ts";
 import type { Connection } from "../server/connection-registry.ts";
+import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { TIMEOUT_MESSAGE, createCapabilityBroker, type CapabilityBroker } from "./capability-broker.ts";
 import type { CapabilityDispatchTarget } from "./capability-broker-state.ts";
 
@@ -37,7 +39,7 @@ interface Harness {
   records: unknown[];
 }
 
-function makeHarness(operatorNotify = true): Harness {
+function makeHarness(operatorNotify = true, effects?: EffectLifecycleService): Harness {
   const capture = createCaptureLogger();
   const approval = testApproval();
   const hostFrames = new Map<string, unknown[]>();
@@ -45,6 +47,7 @@ function makeHarness(operatorNotify = true): Harness {
     logger: capture.logger,
     approval,
     now: () => Date.parse("2026-08-12T00:00:00.000Z"),
+    effects,
   });
   const approvalRequests: CanonicalApprovalRequest[] = [];
   const operator = fakeOperator(operatorNotify
@@ -70,7 +73,7 @@ function askTarget(harness: Harness): CapabilityDispatchTarget {
   };
 }
 
-function challengeFor(request: CapabilityRequest): CapabilityChallenge {
+function challengeFor(request: CapabilityRequest, governance: HostGovernanceEvidence = ASK_EVIDENCE): CapabilityChallenge {
   const scopeDigest = approvalDecisionScopeDigest({
     bindingRevision: 1,
     identity: { capabilityId: "screenshot", ownerHostId: HOST },
@@ -86,7 +89,7 @@ function challengeFor(request: CapabilityRequest): CapabilityChallenge {
     challengeId: "77777777-7777-4777-8777-777777777777",
     controlDigest,
     decisionScopeDigest: scopeDigest,
-    governance: ASK_EVIDENCE,
+    governance,
     presentation: PRESENTATION,
   };
   const challengeDigest = createHash("sha256").update(canonicalCapabilityChallenge({ ...base, challengeDigest: "0".repeat(64) } as CapabilityChallenge), "utf8").digest("hex");
@@ -192,8 +195,8 @@ describe("capability challenge/resume", () => {
     await expect(pending).resolves.toMatchObject({ ok: false, code: "CANCELLED", state: "cancelled" });
   });
 
-  it("rejects an auto/deny-classified challenge and an unprojected evidence cell", async () => {
-    for (const governance of [AUTO_EVIDENCE, { ...ASK_EVIDENCE, cellKey: "unknown-cell" }]) {
+  it("rejects an unprojected evidence cell", async () => {
+    for (const governance of [{ ...ASK_EVIDENCE, cellKey: "unknown-cell" }]) {
       const harness = makeHarness();
       const pending = harness.broker.request(askTarget(harness), SENTINEL_INPUT);
       const request = sentRequest(harness);
@@ -202,6 +205,79 @@ describe("capability challenge/resume", () => {
       await expect(pending).resolves.toMatchObject({ ok: false, code: "CANCELLED", state: "cancelled" });
       expect(harness.approvalRequests).toHaveLength(0);
     }
+  });
+
+  it("commits the Host Effect only after auto preflight and before explicit execute", async () => {
+    const order: string[] = [];
+    const effects = effectService(order);
+    const harness = makeHarness(true, effects);
+    const target = askTarget(harness);
+    target.governanceProjection = { ...target.governanceProjection, cells: [{ key: "screenshot", posture: "auto" }] };
+    target.notify = (method, params) => {
+      order.push(method);
+      harness.hostFrames.set(method, [...(harness.hostFrames.get(method) ?? []), params]);
+    };
+    const pending = harness.broker.request(target, SENTINEL_INPUT, {
+      runId: "22222222-2222-4222-8222-222222222222",
+      coreAttemptId: "33333333-3333-4333-8333-333333333333",
+    });
+    const request = sentRequest(harness);
+    expect(request.control.effectId).toBeDefined();
+    expect(order).toEqual(["capability.request"]);
+
+    expect(harness.broker.challenge(challengeFor(request, AUTO_EVIDENCE), { hostId: HOST, connectionGeneration: 1 }))
+      .toEqual({ accepted: true });
+    expect(order).toEqual(["capability.request", "effect.prepare", "capability.execute"]);
+    harness.broker.resolve({
+      requestId: request.requestId,
+      control: request.control,
+      state: "completed",
+      output: { ok: true },
+      governance: AUTO_EVIDENCE,
+    }, { hostId: HOST, connectionGeneration: 1 });
+    await expect(pending).resolves.toEqual({ ok: true, output: { ok: true } });
+    expect(order).toEqual(["capability.request", "effect.prepare", "capability.execute", "effect.settle"]);
+  });
+
+  it("persists Host Approval waiting before prompt settlement and commits intent before resume", async () => {
+    const order: string[] = [];
+    const effects = effectService(order);
+    const harness = makeHarness(true, effects);
+    const target = askTarget(harness);
+    target.notify = (method, params) => {
+      order.push(method);
+      harness.hostFrames.set(method, [...(harness.hostFrames.get(method) ?? []), params]);
+    };
+    const pending = harness.broker.request(target, SENTINEL_INPUT, {
+      runId: "22222222-2222-4222-8222-222222222222",
+      coreAttemptId: "33333333-3333-4333-8333-333333333333",
+    });
+    const request = sentRequest(harness);
+    harness.broker.challenge(challengeFor(request), { hostId: HOST, connectionGeneration: 1 });
+    expect(order).toEqual(["capability.request", "effect.waiting"]);
+
+    harness.approval.respond(harness.operator, {
+      approvalId: harness.approvalRequests[0]!.approvalId,
+      choice: "allow_once",
+      expectedApprovalGeneration: 1,
+    });
+    await Promise.resolve();
+    expect(order).toEqual(["capability.request", "effect.waiting", "effect.commit", "capability.resume"]);
+    const resume = (harness.hostFrames.get("capability.resume") ?? []).at(-1) as CapabilityResume;
+    harness.broker.resolve({
+      requestId: request.requestId,
+      control: request.control,
+      state: "completed",
+      output: {},
+      governance: ASK_EVIDENCE,
+      authorization: {
+        authorizationId: resume.authorization.authorizationId,
+        approvalGeneration: resume.authorization.approvalGeneration,
+        challengeDigest: resume.authorization.challengeDigest,
+      },
+    }, { hostId: HOST, connectionGeneration: 1 });
+    await pending;
+    expect(order.at(-1)).toBe("effect.settle");
   });
 
   it("settles denied with a retirement cancel and never resumes", async () => {
@@ -215,6 +291,31 @@ describe("capability challenge/resume", () => {
     await expect(pending).resolves.toEqual({ ok: false, code: "DENIED", message: "approval was not granted" });
     expect(harness.hostFrames.get("capability.resume")).toBeUndefined();
     expect((harness.hostFrames.get("capability.cancel") ?? []).at(-1)).toMatchObject({ reason: "approval_denied" });
+  });
+
+  it("settles a denied Host Approval wait without committing target intent", async () => {
+    const order: string[] = [];
+    const harness = makeHarness(true, effectService(order));
+    const target = askTarget(harness);
+    target.notify = (method, params) => {
+      order.push(method);
+      harness.hostFrames.set(method, [...(harness.hostFrames.get(method) ?? []), params]);
+    };
+    const pending = harness.broker.request(target, SENTINEL_INPUT, {
+      runId: "22222222-2222-4222-8222-222222222222",
+      coreAttemptId: "33333333-3333-4333-8333-333333333333",
+    });
+    const request = sentRequest(harness);
+    harness.broker.challenge(challengeFor(request), { hostId: HOST, connectionGeneration: 1 });
+    harness.approval.respond(harness.operator, {
+      approvalId: harness.approvalRequests[0]!.approvalId,
+      choice: "deny",
+      expectedApprovalGeneration: 1,
+    });
+    await pending;
+    expect(order).toContain("effect.settle-waiting");
+    expect(order).not.toContain("effect.commit");
+    expect(order).not.toContain("capability.resume");
   });
 
   it("fails closed without an ambient prompt when the turn carries no operator", async () => {
@@ -291,12 +392,7 @@ describe("capability challenge/resume", () => {
 
       await vi.advanceTimersByTimeAsync(100);
 
-      await expect(pending).resolves.toEqual({
-        ok: false,
-        code: "OUTCOME_UNKNOWN",
-        message: TIMEOUT_MESSAGE,
-        state: "outcome_unknown",
-      });
+      await expect(pending).resolves.toEqual({ ok: false, code: "CAPABILITY_TIMEOUT", message: TIMEOUT_MESSAGE });
       expect((hostFrames.get("capability.cancel") ?? []).at(-1)).toMatchObject({
         requestId: request.requestId,
         reason: "deadline_exceeded",
@@ -365,4 +461,40 @@ function openSecondInteraction(harness: Harness): string {
     presentation: PRESENTATION,
   });
   return harness.approvalRequests[before]!.approvalId;
+}
+
+function effectService(order: string[]): EffectLifecycleService {
+  const base = {
+    schemaVersion: "effect.v1" as const,
+    effectId: "88888888-8888-4888-8888-888888888888",
+    runId: "22222222-2222-4222-8222-222222222222",
+    attemptId: "33333333-3333-4333-8333-333333333333",
+    kind: "host" as const,
+    sourceRef: { type: "host" as const, operationId: "operation" },
+    replayPosture: "safe" as const,
+  };
+  return {
+    prepare: (input) => {
+      order.push("effect.prepare");
+      return { ...base, ...input, state: "intent_committed", version: 0 };
+    },
+    prepareWaiting: (input) => {
+      order.push("effect.waiting");
+      return { ...base, ...input, state: "waiting", version: 0 };
+    },
+    commitIntent: (input) => {
+      order.push("effect.commit");
+      return { effect: { ...base, effectId: input.effectId, state: "intent_committed", version: 1 }, stale: false, duplicate: false };
+    },
+    settleWaiting: (input) => {
+      order.push("effect.settle-waiting");
+      return { effect: { ...base, effectId: input.effectId, state: "terminal", version: input.expectedVersion + 1, outcome: input.outcome }, stale: false, duplicate: false };
+    },
+    settle: (input) => {
+      order.push("effect.settle");
+      return { effect: { ...base, effectId: input.effectId, state: "terminal", version: input.expectedVersion + 1, outcome: input.outcome }, stale: false, duplicate: false };
+    },
+    get: () => undefined,
+    unfinished: () => [],
+  };
 }

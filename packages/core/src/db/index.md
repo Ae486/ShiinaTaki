@@ -1,5 +1,5 @@
 # core/db/
-- effect-repo.ts — Core-owned provider-neutral effect intent/settlement CAS boundary with authoritative usage rows
+- effect-repo.ts — Core-owned provider-neutral effect intent/wait/settlement CAS boundary with authoritative usage rows
 - run-repo.ts — Slice 1 durable Run aggregate with atomic admission, immutable snapshot/Attempt creation, CAS lifecycle transitions, and bounded Receipt status
 - run-event-repo.ts — immutable, contiguous, redaction-safe lifecycle evidence ledger queries and appends
 - run-event-live.ts — post-commit best-effort observer bus with cursor isolation

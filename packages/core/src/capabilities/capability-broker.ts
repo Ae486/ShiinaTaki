@@ -28,6 +28,7 @@ import {
   type PendingCapability,
 } from "./capability-broker-state.ts";
 import { responseOutcome, terminalFailure } from "./capability-response.ts";
+import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 
 export type CapabilityFailureCode =
   | "DENIED"
@@ -56,6 +57,8 @@ export { TIMEOUT_MESSAGE } from "./capability-broker-state.ts";
 
 export interface CapabilityRequestIdentity {
   runId?: string;
+  coreAttemptId?: string;
+  effectId?: string;
   operationId?: string;
   approvalGeneration?: number;
 }
@@ -67,6 +70,7 @@ export function createCapabilityBroker(deps: {
   approval: ApprovalInteractionService;
   timeoutMs?: number;
   now?: () => number;
+  effects?: EffectLifecycleService;
 }): CapabilityBroker {
   const log = deps.logger.child({ mod: "capability" });
   const timeoutMs = deps.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -76,6 +80,7 @@ export function createCapabilityBroker(deps: {
     now: deps.now ?? Date.now,
     pending: new Map(),
     terminal: new Map(),
+    effects: deps.effects,
   };
   // Registered ONCE per broker: append-only listener arrays make per-request subscription a leak.
   deps.approval.onApprovalGenerationChanged((generation) => retireChallengesForGeneration(state, generation));
@@ -147,7 +152,7 @@ function expire(state: CapabilityBrokerState, requestId: string): void {
   const entry = state.pending.get(requestId);
   if (!entry) return;
   bestEffortCancel(requestId, entry, "deadline_exceeded");
-  const outcome = entry.execution === "effect"
+  const outcome = entry.execution === "effect" && entry.targetDispatched
     ? { ok: false as const, code: "OUTCOME_UNKNOWN" as const, message: TIMEOUT_MESSAGE, state: "outcome_unknown" as const }
     : { ok: false as const, code: "CAPABILITY_TIMEOUT" as const, message: TIMEOUT_MESSAGE };
   settlePending(state, requestId, { outcome, terminalReason: "late" });
@@ -162,6 +167,8 @@ function makeControl({ target, input, identity, dispatchedMs, timeoutMs }: {
 }): HostOperationControl {
   return {
     runId: identity.runId ?? randomUUID(),
+    coreAttemptId: identity.coreAttemptId,
+    effectId: identity.effectId ?? (identity.runId && identity.coreAttemptId ? randomUUID() : undefined),
     operationId: identity.operationId ?? randomUUID(),
     attemptId: randomUUID(),
     targetHostId: target.hostId,

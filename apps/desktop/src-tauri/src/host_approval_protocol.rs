@@ -8,7 +8,7 @@ use sha2::{Digest, Sha256};
 use time::{format_description::well_known::Rfc3339, OffsetDateTime};
 use uuid::{Variant, Version, Uuid};
 
-use super::host_control_protocol::{HostGovernanceEvidence, HostOperationControl};
+use super::host_control_protocol::{HostGovernanceEvidence, HostGovernanceProjection, HostOperationControl};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
@@ -167,16 +167,68 @@ pub fn approval_decision_scope_digest(
 }
 
 fn canonical_control(control: &HostOperationControl) -> Result<String, String> {
+    // Keep this byte shape aligned with shared/src/host-approval-schema.ts. Core-owned correlation fields are
+    // deliberately excluded from the Host authorization digest: they identify the enclosing lifecycle record but
+    // are not part of the Host-local operation authority lineage.
+    #[derive(Serialize)]
+    struct CanonicalControl<'a> {
+        #[serde(rename = "runId")]
+        run_id: &'a str,
+        #[serde(rename = "operationId")]
+        operation_id: &'a str,
+        #[serde(rename = "attemptId")]
+        attempt_id: &'a str,
+        #[serde(rename = "targetHostId")]
+        target_host_id: &'a str,
+        #[serde(rename = "connectionGeneration")]
+        connection_generation: u64,
+        #[serde(rename = "catalogGeneration")]
+        catalog_generation: u64,
+        #[serde(rename = "policyGeneration")]
+        policy_generation: u64,
+        #[serde(rename = "governanceProjection")]
+        governance_projection: &'a HostGovernanceProjection,
+        #[serde(rename = "approvalGeneration")]
+        approval_generation: u64,
+        #[serde(rename = "capabilityId")]
+        capability_id: &'a str,
+        #[serde(rename = "inputDigest")]
+        input_digest: &'a str,
+        #[serde(rename = "idempotencyKey")]
+        idempotency_key: &'a str,
+        #[serde(rename = "dispatchedAt")]
+        dispatched_at: &'a str,
+        #[serde(rename = "deadlineAt")]
+        deadline_at: &'a str,
+        #[serde(rename = "expiresAt", skip_serializing_if = "Option::is_none")]
+        expires_at: &'a Option<String>,
+    }
     #[derive(Serialize)]
     struct Canonical<'a> {
         domain: &'static str,
         revision: u64,
-        control: &'a HostOperationControl,
+        control: CanonicalControl<'a>,
     }
     serde_json::to_string(&Canonical {
         domain: "taki.host.operation-control",
         revision: 1,
-        control,
+        control: CanonicalControl {
+            run_id: &control.run_id,
+            operation_id: &control.operation_id,
+            attempt_id: &control.attempt_id,
+            target_host_id: &control.target_host_id,
+            connection_generation: control.connection_generation,
+            catalog_generation: control.catalog_generation,
+            policy_generation: control.policy_generation,
+            governance_projection: &control.governance_projection,
+            approval_generation: control.approval_generation,
+            capability_id: &control.capability_id,
+            input_digest: &control.input_digest,
+            idempotency_key: &control.idempotency_key,
+            dispatched_at: &control.dispatched_at,
+            deadline_at: &control.deadline_at,
+            expires_at: &control.expires_at,
+        },
     })
     .map_err(|error| error.to_string())
 }

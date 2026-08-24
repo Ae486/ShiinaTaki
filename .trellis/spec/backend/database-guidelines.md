@@ -173,6 +173,8 @@ liveBus.publish(committed);
 - Durable storage: `run_effects` owns current Effect state and `run_usage` owns one accepted usage result linked to the
   settled model Effect. Canonical events are `effect.intent_committed`, `effect.waiting`, `effect.settled`, and
   `usage.settled`.
+- An `effect.waiting` row is reserved for a real Approval prompt and therefore requires a canonical `approvalId`; already
+  resolved session/always authority proceeds directly to target intent without an untraceable wait row.
 
 ### 3. Contracts
 
@@ -180,6 +182,9 @@ liveBus.publish(committed);
   action must not start.
 - Settle with `(runId, attemptId, effectId, expectedVersion)` ownership/CAS. Exact terminal duplicates are no-ops;
   unknown IDs, wrong Attempts, inactive/terminal Attempts, and late callbacks are stale and cannot change current truth.
+- Approval waiting, waiting settlement, and waiting-to-intent promotion must apply the same active-Attempt check and
+  advance `run_attempts.state_version` in the surrounding SQLite transaction; an inactive race rolls back the Effect
+  write and emits no event.
 - Every terminal model Effect writes exactly one usage row and `usage.settled` event with quality
   `reported | estimated | unknown`. Missing counts are never represented as zero. Abort, interrupted close, provider
   ambiguity, no finish, and finish-without-usage settle truthfully, using `outcome_unknown` where acceptance is uncertain.

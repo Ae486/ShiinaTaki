@@ -18,9 +18,9 @@ The batches reuse this task's PRD/design/research and the same Effect contracts.
 create one task per identifier/subsystem. Each implementation batch targets approximately two to three agent context
 windows and keeps highly coupled call-chain work together.
 
-Current execution status: Slice 3A is formally approved and pending its explicit batch commit. Slice 3B is the next
-implementation boundary. Slice 3C and whole-Slice integration acceptance remain not started; the parent task stays
-`in_progress` until both are complete.
+Current execution status: Slice 3A is committed as `e55a8dc`. Slice 3B has passed its unique formal check and is pending
+its explicit batch commit. Slice 3C is the next implementation boundary; whole-Slice integration acceptance remains
+open and the parent task stays `in_progress` until 3C completes.
 
 ### Slice 3A - Effect Foundation, Model, and Usage
 
@@ -57,6 +57,23 @@ AI SDK tool call -> canonical governance -> Approval wait -> final revalidation
   identity, generation, deadline, idempotency, duplicate/late, cooperative cancel, and unsafe `OUTCOME_UNKNOWN` rules.
 - MCP outer governed generation/lease boundary, draining/forced-close uncertainty, and no generation redirect/replay.
 - Parallel-tool settlement and existing AI SDK tool-result ordering regressions.
+
+Host dispatch uses a required two-phase boundary; no ordering exception is accepted:
+
+```text
+Core -> Host preflight (classify only; never execute)
+  deny -> settle without target intent
+  ask  -> durable Approval wait -> final Core revalidation
+  auto -> final Core revalidation
+Core commits target Effect intent
+Core -> Host explicit execute/resume
+Host final lineage/classification validation -> handler -> terminal response
+```
+
+The preflight response is bounded authority evidence, not a second Effect or a grant. Core correlation
+`(runId, modelAttemptId, effectId)` remains separate from Host-local operation/execution-attempt identity. Existing
+challenge/resume authorization, generation retirement, terminal cache, cooperative cancellation, and unsafe unknown
+outcome behavior must be adapted rather than replaced.
 
 3B reuses 3A contracts/repository/service and the parent research. Its additional context is limited to governed-tool,
 Approval, Host broker/routing, MCP generation/lease, and their tests.

@@ -34,6 +34,7 @@ impl AttemptBinding {
 
 /// One awaiting-approval challenge plus the exact raw input. Memory-only: dropped on consume,
 /// cancel, terminal settlement, and every reconnect.
+#[derive(Clone)]
 pub(crate) struct PendingChallengeRecord {
     pub(crate) challenge: crate::protocol::CapabilityChallenge,
     pub(crate) input: serde_json::Value,
@@ -400,6 +401,8 @@ mod tests {
             request_id: uuid(index + 1_000),
             control: HostOperationControl {
                 run_id: uuid(index + 2_000),
+                core_attempt_id: None,
+                effect_id: None,
                 operation_id: uuid(index + 3_000),
                 attempt_id: uuid(index + 4_000),
                 target_host_id: HOST.into(),

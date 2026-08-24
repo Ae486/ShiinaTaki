@@ -12,6 +12,7 @@ import type { ConnectionRegistry } from "../server/connection-registry.ts";
 import type { HostCatalogStore } from "../hosts/host-catalog.ts";
 import type { CapabilityBroker } from "./capability-broker.ts";
 import type { InteractiveOperator } from "./route-capability.ts";
+import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { createClipboardReadTool } from "./clipboard-read-tool.ts";
 import { createClipboardWriteTool } from "./clipboard-write-tool.ts";
 import { createExecTool } from "./exec-tool.ts";
@@ -29,6 +30,7 @@ export interface CapabilityToolsDeps {
   approval: ApprovalInteractionService;
   screenshotsDir: string;
   describe?: (input: { dataBase64: string; mediaType: string; prompt?: string }) => Promise<string | null>;
+  effects?: EffectLifecycleService;
 }
 
 export function createCapabilityTools(
@@ -41,6 +43,7 @@ export function createCapabilityTools(
     logger: deps.logger,
     governance: deps.governance,
     approval: deps.approval,
+    effects: deps.effects,
     interactive,
   });
   return (interactive) => ({

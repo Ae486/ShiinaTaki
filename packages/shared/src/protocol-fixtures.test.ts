@@ -17,7 +17,7 @@ import {
   CapabilityRespondParamsSchema,
   CapabilityResumeSchema,
 } from "./capability-schema.ts";
-import { CapabilityCancelSchema, HostCatalogPublishParamsSchema, HostFrameAckSchema } from "./host-control-schema.ts";
+import { CapabilityCancelSchema, CapabilityExecuteSchema, HostCatalogPublishParamsSchema, HostFrameAckSchema } from "./host-control-schema.ts";
 import {
   LegacyPermissionCellSetParamsSchema,
   LegacyPermissionCellStateSchema,
@@ -54,6 +54,7 @@ const SCHEMA_BY_PREFIX: Record<string, ZodType> = {
   "app-error": AppErrorFrameSchema,
   "client-frame": JsonRpcClientFrameSchema,
   "capability-request": CapabilityRequestSchema,
+  "capability-execute": CapabilityExecuteSchema,
   "capability-challenge": CapabilityChallengeSchema,
   "capability-resume": CapabilityResumeSchema,
   "capability-cancel": CapabilityCancelSchema,

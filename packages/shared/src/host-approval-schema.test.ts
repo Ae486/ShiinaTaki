@@ -83,6 +83,11 @@ describe("Host Approval schemas", () => {
     expect(canonicalHostOperationControl({ ...CONTROL, approvalGeneration: 8 })).not.toBe(
       canonicalHostOperationControl(CONTROL),
     );
+    expect(canonicalHostOperationControl({
+      ...CONTROL,
+      coreAttemptId: "99999999-9999-4999-8999-999999999999",
+      effectId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    })).toBe(canonicalHostOperationControl(CONTROL));
     expect(canonicalCapabilityChallenge({
       ...challenge,
       presentation: { ...challenge.presentation, riskSummary: "A distinct bounded disclosure." },

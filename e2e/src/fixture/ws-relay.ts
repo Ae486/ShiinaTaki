@@ -7,8 +7,10 @@ import { once } from "node:events";
 import { WebSocket, WebSocketServer, type RawData } from "ws";
 import {
   CapabilityRequestSchema,
+  CapabilityExecuteSchema,
   CapabilityRespondParamsSchema,
   type CapabilityRequest,
+  type CapabilityExecute,
   type CapabilityRespondParams,
 } from "@taki/shared";
 import { getFreePort } from "./procs.ts";
@@ -29,6 +31,8 @@ export interface CapabilityRelay {
   mutateNextResponse(mutator: CapabilityResponseMutator): void;
   waitForRequestCount(count: number, timeoutMs?: number): Promise<void>;
   waitForResponseCount(count: number, timeoutMs?: number): Promise<void>;
+  /** Holds the next explicit execute frame until the caller releases it. */
+  pauseNextExecute(timeoutMs?: number): Promise<{ execute: CapabilityExecute; release(): void }>;
   close(): Promise<void>;
   isClosed(): boolean;
 }
@@ -48,6 +52,7 @@ interface RelayState {
   closed: boolean;
   nextRequestMutator?: CapabilityRequestMutator;
   nextResponseMutator?: CapabilityResponseMutator;
+  nextExecutePause?: { resolve: (value: { execute: CapabilityExecute; release(): void }) => void; timer: ReturnType<typeof setTimeout> };
 }
 
 export async function startCapabilityRelay(upstreamUrl: string): Promise<CapabilityRelay> {
@@ -82,6 +87,14 @@ export async function startCapabilityRelay(upstreamUrl: string): Promise<Capabil
       waitForCount({ waiters: state.requestWaiters, current: () => state.requests, count, timeoutMs, label: "requests" }),
     waitForResponseCount: (count, timeoutMs = 20_000) =>
       waitForCount({ waiters: state.responseWaiters, current: () => state.responses, count, timeoutMs, label: "responses" }),
+    pauseNextExecute: (timeoutMs = 20_000) => new Promise((resolve, reject) => {
+      if (state.nextExecutePause) { reject(new Error("relay already has a pending capability.execute pause")); return; }
+      const timer = setTimeout(() => {
+        state.nextExecutePause = undefined;
+        reject(new Error(`relay did not observe capability.execute before timeout (requests=${state.requests}, responses=${state.responses})`));
+      }, timeoutMs);
+      state.nextExecutePause = { resolve, timer };
+    }),
     close: () => closeRelay(state, server),
     isClosed: () => state.closed,
   };
@@ -101,6 +114,8 @@ function connectPair(state: RelayState, upstreamUrl: string, downstream: WebSock
 }
 
 function forwardToNode(pair: RelayPair, data: RawData, state: RelayState): void {
+  const paused = captureExecutePause(pair, data, state);
+  if (paused) return;
   const outgoing = transformCoreFrame(data, () => {
     state.requests += 1;
     settleWaiters(state.requestWaiters, state.requests);
@@ -111,6 +126,28 @@ function forwardToNode(pair: RelayPair, data: RawData, state: RelayState): void 
     return mutator ? mutator(request) : request;
   });
   if (pair.downstream.readyState === WebSocket.OPEN) pair.downstream.send(outgoing);
+}
+
+function captureExecutePause(pair: RelayPair, data: RawData, state: RelayState): boolean {
+  if (!state.nextExecutePause) return false;
+  let parsed: { method?: unknown; params?: unknown };
+  try { parsed = JSON.parse(String(data)) as typeof parsed; } catch { return false; }
+  if (parsed.method !== "capability.execute") return false;
+  let execute: CapabilityExecute;
+  try { execute = CapabilityExecuteSchema.parse(parsed.params); } catch { return false; }
+  const pending = state.nextExecutePause;
+  state.nextExecutePause = undefined;
+  clearTimeout(pending.timer);
+  let released = false;
+  pending.resolve({
+    execute,
+    release: () => {
+      if (released) return;
+      released = true;
+      if (pair.downstream.readyState === WebSocket.OPEN) pair.downstream.send(String(data));
+    },
+  });
+  return true;
 }
 
 function closeRelayPair(state: RelayState, pair: RelayPair): void {

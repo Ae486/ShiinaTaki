@@ -230,6 +230,7 @@ impl WsClient {
         };
         match method.as_str() {
             "capability.request" => self.dispatch_request(params, write, session).await,
+            "capability.execute" => self.dispatch_execute(params, write, session).await,
             "capability.cancel" => self.dispatch_cancel(params, write, session).await,
             "capability.resume" => self.dispatch_resume(params, write, session).await,
             _ => {}
@@ -257,7 +258,6 @@ impl WsClient {
             }
             BeginDecision::Start => {
                 let gate = self.gate.clone();
-                let handlers = self.handlers.clone();
                 let exec_policy = self.exec_policy.clone();
                 let write = write.clone();
                 let session = session.clone();
@@ -265,7 +265,7 @@ impl WsClient {
                 // session here would re-lock a guard the match scrutinee still holds (same-task deadlock).
                 let host_id = self.device_id.clone();
                 tokio::spawn(async move {
-                    match authorize_and_run(gate, handlers, exec_policy, request).await {
+                    match authorize_and_run(gate, exec_policy, request).await {
                         Authorized::Respond(response) => {
                             if let Some(response) = session.lock().await.complete(response) {
                                 log_terminal(&capability, &response);
@@ -301,6 +301,44 @@ impl WsClient {
                 });
             }
         }
+    }
+
+    async fn dispatch_execute(&self, params: Value, write: &SharedWrite, session: &SharedSession) {
+        let Ok(execute) = serde_json::from_value::<crate::protocol::CapabilityExecute>(params) else { return; };
+        let Some(record) = session.lock().await.pending_challenge(&execute.request_id).cloned() else { return; };
+        if record.challenge.challenge_id != execute.challenge_id || record.challenge.control != execute.control { return; }
+        let authorized_ask = execute.authorization.is_some();
+        if let Some(raw) = execute.authorization.clone() {
+            let Ok(authorization) = serde_json::from_value(raw) else { return; };
+            let resume = crate::protocol::CapabilityResume { request_id: execute.request_id.clone(), control: execute.control.clone(), challenge_id: execute.challenge_id.clone(), authorization };
+            if matches_pending_authorization(&record, &resume).is_err() { return; }
+        }
+        let _ = session.lock().await.consume_challenge(&execute.request_id);
+        let handlers = self.handlers.clone(); let gate = self.gate.clone(); let exec_policy = self.exec_policy.clone(); let session = session.clone(); let write = write.clone();
+        tokio::spawn(async move {
+            let evidence = final_host_enforcement(&gate, &exec_policy, &execute.control, &record.input);
+            let approved = evidence.effective_posture == if authorized_ask { crate::protocol::HostGovernancePosture::Ask } else { crate::protocol::HostGovernancePosture::Auto };
+            let response = if approved {
+                // Preflight is classification-only. The one audit record belongs at this post-intent execution seam,
+                // immediately before the handler is invoked.
+                gate.audit_enforcement(
+                    &execute.request_id,
+                    &execute.control.capability_id,
+                    true,
+                    audit_command(&execute.control.capability_id, &record.input),
+                );
+                handlers.respond(execute.request_id.clone(), execute.control.clone(), &execute.control.capability_id, &record.input).with_governance(evidence)
+            } else {
+                gate.audit_enforcement(
+                    &execute.request_id,
+                    &execute.control.capability_id,
+                    false,
+                    audit_command(&execute.control.capability_id, &record.input),
+                );
+                CapabilityRespond::err(execute.request_id.clone(), execute.control.clone(), crate::protocol::CapabilityErrorCode::Denied, "Host governance tightened after Core intent".into()).with_governance(evidence)
+            };
+            if let Some(response) = session.lock().await.complete(response) { send_response(&write, response).await; }
+        });
     }
 
     async fn dispatch_cancel(&self, params: Value, write: &SharedWrite, session: &SharedSession) {
@@ -495,12 +533,11 @@ enum Authorized {
 
 enum Enforcement {
     Respond(Box<CapabilityRespond>),
-    Ask(HostGovernanceEvidence),
+    Preflight(HostGovernanceEvidence),
 }
 
 async fn authorize_and_run(
     gate: Arc<Gate>,
-    handlers: Arc<CapabilityRegistry>,
     exec_policy: Arc<ExecPolicy>,
     request: CapabilityRequest,
 ) -> Authorized {
@@ -519,12 +556,9 @@ async fn authorize_and_run(
     }
     let joined = tokio::task::spawn_blocking(move || {
         let evidence = final_host_enforcement(&gate, &exec_policy, &control, &input);
-        if evidence.effective_posture == crate::protocol::HostGovernancePosture::Auto {
-            gate.audit_enforcement(&request_id, &capability, true, audit_command(&capability, &input));
-            Enforcement::Respond(Box::new(handlers.respond(request_id, control, &capability, &input).with_governance(evidence)))
-        } else if evidence.effective_posture == crate::protocol::HostGovernancePosture::Ask {
-            // Ask has not reached a terminal decision yet; resume/cancel owns its one truthful audit row.
-            Enforcement::Ask(evidence)
+        if matches!(evidence.effective_posture, crate::protocol::HostGovernancePosture::Auto | crate::protocol::HostGovernancePosture::Ask) {
+            // Preflight never executes. Core commits the target Effect before capability.execute/resume.
+            Enforcement::Preflight(evidence)
         } else {
             gate.audit_enforcement(&request_id, &capability, false, audit_command(&capability, &input));
             Enforcement::Respond(Box::new(CapabilityRespond::err(
@@ -537,7 +571,7 @@ async fn authorize_and_run(
     })
     .await;
     match joined {
-        Ok(Enforcement::Ask(evidence)) => Authorized::Challenge { evidence, request: sealed_request },
+        Ok(Enforcement::Preflight(evidence)) => Authorized::Challenge { evidence, request: sealed_request },
         Ok(Enforcement::Respond(response)) => Authorized::Respond(*response),
         Err(error) => Authorized::Respond(CapabilityRespond::err(
             failure_request_id,
@@ -762,6 +796,32 @@ mod tests {
         );
         let policy = ExecPolicy::load(dir.path().join("exec-policy.json").as_path(), dir.path().into());
         (dir, gate, policy, audit, decisions)
+    }
+
+    #[tokio::test]
+    async fn preflight_returns_classification_without_executor_access() {
+        let (_dir, gate, policy, audit, _decisions) = harness();
+        let mut request = fixture();
+        request.control.governance_projection.cells[0].posture =
+            crate::protocol::HostGovernancePosture::Ask;
+        request.control.input_digest = input_digest(
+            &request.control.capability_id,
+            &request.input,
+        );
+
+        let outcome = authorize_and_run(Arc::new(gate), Arc::new(policy), request.clone()).await;
+
+        match outcome {
+            Authorized::Challenge { evidence, request: sealed } => {
+                assert_eq!(sealed, request);
+                assert_eq!(
+                    evidence.effective_posture,
+                    crate::protocol::HostGovernancePosture::Ask
+                );
+            }
+            Authorized::Respond(_) => panic!("preflight must not execute or settle"),
+        }
+        assert!(audit.records.lock().unwrap().is_empty());
     }
 
     #[test]

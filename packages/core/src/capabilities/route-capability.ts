@@ -11,10 +11,13 @@ import type { CapabilityBroker, CapabilityFailureCode } from "./capability-broke
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
 import type { ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
 import type { Connection } from "../server/connection-registry.ts";
+import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 
 export interface InteractiveOperator {
   connection: Connection;
   signal?: AbortSignal;
+  runId?: string;
+  attemptId?: string;
 }
 
 export interface CapabilityRouteDeps {
@@ -25,6 +28,7 @@ export interface CapabilityRouteDeps {
   governance: GovernancePolicyService;
   approval: ApprovalInteractionService;
   interactive?: InteractiveOperator;
+  effects?: EffectLifecycleService;
 }
 
 export type RouteFailureCode = CapabilityFailureCode | "NO_NODE" | "TARGET_HOST_REQUIRED" | "CAPABILITY_MISSING";
@@ -36,6 +40,9 @@ export interface CapabilityRouteRequest {
   capabilityId: string;
   input: unknown;
   targetHostId?: string;
+  runId?: string;
+  attemptId?: string;
+  effectId?: string;
 }
 
 export async function routeCapability(
@@ -83,7 +90,7 @@ export async function routeCapability(
       policyGeneration: dispatchPolicy.policyGeneration,
       projection: dispatchPolicy.projection,
     }),
-  }, input, { approvalGeneration: deps.approval.approvalGeneration() });
+  }, input, { runId: request.runId ?? deps.interactive?.runId, coreAttemptId: request.attemptId ?? deps.interactive?.attemptId, effectId: request.effectId, approvalGeneration: deps.approval.approvalGeneration() });
 }
 
 interface SealedDispatch {

@@ -8,6 +8,7 @@ import { z } from "zod";
 export const HOST_CONTROL_METHODS = {
   catalogPublish: "host.catalogPublish",
   request: "capability.request",
+  execute: "capability.execute",
   challenge: "capability.challenge",
   resume: "capability.resume",
   cancel: "capability.cancel",
@@ -162,6 +163,8 @@ export function canonicalHostGovernanceProjection(projection: HostGovernanceProj
 
 export const HostOperationControlSchema = z.strictObject({
   runId: z.uuid(),
+  coreAttemptId: z.uuid().optional(),
+  effectId: z.uuid().optional(),
   operationId: z.uuid(),
   attemptId: z.uuid(),
   targetHostId: z.uuid(),
@@ -193,6 +196,13 @@ export const CapabilityRequestSchema = z.strictObject({
   input: z.unknown(),
 });
 export type CapabilityRequest = z.infer<typeof CapabilityRequestSchema>;
+export const CapabilityExecuteSchema = z.strictObject({
+  requestId: z.uuid(),
+  control: HostOperationControlSchema,
+  challengeId: z.uuid(),
+  authorization: z.unknown().optional(),
+});
+export type CapabilityExecute = z.infer<typeof CapabilityExecuteSchema>;
 
 export const CapabilityCancelReasonSchema = z.enum([
   "caller_cancelled",

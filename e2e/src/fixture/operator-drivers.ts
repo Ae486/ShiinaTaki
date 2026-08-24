@@ -92,11 +92,11 @@ export async function sayToAgent(socket: RpcSocket, message: string, timeoutMs =
  */
 export async function triggerCapability(
   socket: RpcSocket,
-  spec: { capability: string; input?: unknown; timeoutMs?: number; interactive?: boolean },
+  spec: { capability: string; input?: unknown; timeoutMs?: number; interactive?: boolean; lifecycle?: boolean },
 ): Promise<unknown> {
   const frame = await socket.request(
     "capability.trigger",
-    { capability: spec.capability, input: spec.input, interactive: spec.interactive },
+    { capability: spec.capability, input: spec.input, interactive: spec.interactive, lifecycle: spec.lifecycle },
     spec.timeoutMs,
   );
   return JsonRpcSuccessResponseSchema.parse(frame).result;
