@@ -40,6 +40,13 @@ export interface ChatAgent {
   stream(params: ChatSendParams, turn?: TurnContext): AsyncIterable<string>;
 }
 
+// Activation swaps the advertised memory vocabulary as one bundle. Keeping the authority-specific variant next to
+// the shared prompt prevents canonical Local from exposing retired Markdown tool names in a normal turn.
+export const CANONICAL_MEMORY_SYSTEM_PROMPT = BASE_SYSTEM_PROMPT
+  .replaceAll("memory_search", "recall")
+  .replaceAll("memory_write", "retain")
+  .replaceAll("memory_archive", "invalidate_memory");
+
 /** One committed turn's usage sample: the provider's post-hoc numbers + our estimate for the SAME request. */
 export interface TurnUsageReport {
   inputTokens?: number;
@@ -60,6 +67,8 @@ export interface ChatAgentDeps {
   model: LanguageModel;
   store: ConversationStore;
   memory: MemoryEngine;
+  /** Authority-selected memory procedure prompt; canonical Local must not advertise retired Markdown tool names. */
+  memoryPrompt?: string | (() => string);
   /** Optional auto-write orchestrator; when present, fired detached after each turn (existing tests omit it). */
   autoMemory?: AutoMemory;
   /** Vision model slot (TAKI_VLM_*, #17 decision 5); image-bearing turns route here. Absent = image turns rejected. */
@@ -421,7 +430,7 @@ function composeInstructions(
 ): string {
   const assembled = deps.memory.assemble({ characterId: turn.characterId, currentMessage: turn.message });
   return [
-    BASE_SYSTEM_PROMPT,
+    resolveMemoryPrompt(deps.memoryPrompt),
     renderDayDate(now),
     assembled,
     deps.instructionsExtra?.(turn.characterId) ?? "",
@@ -429,4 +438,8 @@ function composeInstructions(
   ]
     .filter((section) => section.length > 0)
     .join("\n\n");
+}
+
+function resolveMemoryPrompt(prompt: ChatAgentDeps["memoryPrompt"]): string {
+  return typeof prompt === "function" ? prompt() : prompt ?? BASE_SYSTEM_PROMPT;
 }

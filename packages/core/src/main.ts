@@ -6,7 +6,8 @@
  */
 import { join } from "node:path";
 import type { ToolSet } from "ai";
-import { createChatAgent } from "./agents/chat-agent.ts";
+import { CANONICAL_MEMORY_SYSTEM_PROMPT, createChatAgent } from "./agents/chat-agent.ts";
+import { BASE_SYSTEM_PROMPT } from "./agents/base-prompt.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
 import { mergeToolSets } from "./agents/tool-set-assembly.ts";
 import { createTurnQueue } from "./agents/turn-queue.ts";
@@ -21,6 +22,7 @@ import { createCapabilityTools } from "./capabilities/capability-tools.ts";
 import { routeCapability } from "./capabilities/route-capability.ts";
 import { createScreenshotDescriber } from "./capabilities/screenshot-describe.ts";
 import { bootstrapCore } from "./boot/core-bootstrap.ts";
+import { composeHindsightSetup } from "./boot/hindsight-setup-boot.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
 import { composeApprovalRuntime } from "./approval/approval-runtime.ts";
 import { createGovernancePolicyRepo } from "./governance/governance-policy-repo.ts";
@@ -42,7 +44,7 @@ import { createCharacterStore } from "./characters/character-store.ts";
 import { startAttachmentGc } from "./media/attachment-gc.ts";
 import { createAttachmentStore } from "./media/attachment-store.ts";
 import { directoryByteSize } from "./media/directory-size.ts";
-import { createMemorySubsystem } from "./memory/bootstrap.ts";
+import { composeMemoryRuntime } from "./memory/runtime-composition.ts";
 import { createImageDescriptionWriter } from "./memory/image-description-writer.ts";
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
 import { migrateMcpPlaintextSecrets } from "./secrets/mcp-secret-migration.ts";
@@ -70,6 +72,7 @@ import { mediaGetMethod } from "./server/methods/media-get.ts";
 import { mediaUsageMethod } from "./server/methods/media-usage.ts";
 import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
 import { memoryStatusMethod } from "./server/methods/memory-status.ts";
+import { createAsyncOnDemandMemoryMigrationMethods } from "./server/methods/memory-migration.ts";
 import { registerPerceptionMethods } from "./server/methods/perception-methods.ts";
 import { registerSecretMethods } from "./server/methods/secret-methods.ts";
 import { registerMcpMethods } from "./server/methods/mcp-methods.ts";
@@ -117,27 +120,11 @@ const conversationStore = createConversationStore({
 const avatarSubscriptions = createAvatarSubscriptions();
 const avatarVocabulary = createAvatarVocabulary();
 
-// The memory engine's Workspace: markdown files under the app data root (beside the db, NOT in it — invariant 1).
-// One call wires persona cards + block store + engine + startup reconcile + the utility slot every background pass
-// runs on + the auto-write orchestrator + the tidy pass + the retention sweeper (memory/bootstrap.ts).
-const { engine: memory, autoMemory, tidy, memoryRoot, writeMemory } = createMemorySubsystem({
-  db,
-  dataDir: serverConfig.dataDir,
-  promptDir: serverConfig.promptDir,
-  model,
-  timeline: timelineRepo,
-  // The flush boundary IS the store's replay boundary (batch 6 coupling point 2 — same slice, no drift window).
-  windowStart: conversationStore.windowStart,
-  // Batch 7: the compactor retires all-but-tail into the rolling summary once the view crosses the trigger ratio.
-  compaction: {
-    summaries: summaryRepo,
-    view: { estimatedTokens: conversationStore.estimatedTokens, budget: historyBudget },
-    config: contextConfig.compact,
-  },
-  // The memory + utility knobs come from the RESOLVED env too, so the panel governs them like every other knob.
-  env: boot.env,
-  logger,
-});
+// Marker-first composition owns every legacy/canonical reader, writer, prompt, scheduler, and migration cutover seam.
+const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, promptDir: serverConfig.promptDir, model,
+  timeline: timelineRepo, windowStart: conversationStore.windowStart, summaries: summaryRepo,
+  estimatedTokens: conversationStore.estimatedTokens, budget: historyBudget, compact: contextConfig.compact, env: boot.env, logger });
+const { selected: selectedMemory, memory, autoMemory, tidy, memoryRoot, writeMemory } = memoryRuntime;
 
 // Attachment store (#17): the sanctioned content-addressed Workspace R/W site for chat image attachments — the DB never
 // holds bytes (invariant 2). Retained under a user-editable TTL and GC-swept below; the description-memory is permanent.
@@ -151,7 +138,7 @@ const characterImporter = createCharacterImporter({ store: characterStore });
 // Image→text bridge (#17 decision 6, D28): ONLY when a vision slot exists — an image turn's authoritative cross-turn
 // record is the VLM's text description, written via the EXISTING episodic path (same bound op the episodic writer uses).
 // A thin, deletable writer riding its own detached hook; the memory engine itself is untouched.
-const imageDescriptionWriter = visionModel
+const imageDescriptionWriter = visionModel && writeMemory
   ? createImageDescriptionWriter({
       model: visionModel,
       attachments: attachmentStore,
@@ -193,6 +180,9 @@ void mcpBoot.manager.reconcile(mcpBoot.desired.list()).then(() => undefined, () 
 registerSecretMethods(registry, { service: mcpBoot.catalog, logger: secretLog });
 registerMcpMethods(registry, { service: createMcpLifecycleService({ repo: mcpBoot.desired, manager: mcpBoot.manager }), logger: mcpBoot.log });
 registerSkillMethods(registry, { service: skillLifecycle, logger: skillsLog });
+// Hindsight B3 setup is an operator-only inactive control plane. Composition registers methods and SQLite state only;
+// it makes no boot request, performs no LLM health probe, and has no Memory Authority writer/provider registration.
+composeHindsightSetup({ db, config: boot.config.source, secrets: secretCatalog, registry, logger });
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
@@ -250,7 +240,12 @@ perception.start();
 
 // Workspace file RW (#11): CORE-side tools (no broker/gate) confined to the Workspace root — the agent's own scratch
 // space, the same subtree memory/ and screenshots/ live under. read+write are auto-allowed within it (ruling 1/8).
-const workspacePaths = createWorkspacePaths({ root: join(serverConfig.dataDir, "workspace") });
+const workspacePaths = createWorkspacePaths({
+  root: join(serverConfig.dataDir, "workspace"),
+  // Migration snapshots are immutable operator evidence, never model-facing Workspace files. Canonical activation
+  // additionally retires the mutable Markdown roots so no normal tool can reintroduce a dual-write path.
+  forbiddenPrefixes: () => selectedMemory.canonical ? ["memory", "blocks", "memory-migration"] : ["memory-migration"],
+});
 const readFileTool = createReadFileTool({ paths: workspacePaths, logger });
 const writeFileTool = createWriteFileTool({ paths: workspacePaths, logger });
 const staticCoreTools: ToolSet = { ...createCurrentTimeTool(), ...readFileTool, ...writeFileTool };
@@ -285,6 +280,7 @@ registry.register(
       model,
       store: conversationStore,
       memory,
+       memoryPrompt: () => selectedMemory.canonical ? CANONICAL_MEMORY_SYSTEM_PROMPT : BASE_SYSTEM_PROMPT,
       autoMemory,
       maxSteps: boot.agentConfig.maxSteps,
       // Presentation tools (avatar expression/motion) return nothing to read; stop the loop after a spoken,
@@ -296,7 +292,7 @@ registry.register(
       attachments: attachmentStore,
       // Detached, fire-and-forget (mirrors autoMemory) — present only when a vision slot is configured.
       imageMemory: imageDescriptionWriter
-        ? { onImageTurn: (input) => void imageDescriptionWriter.onImageTurn(input) }
+        ? { onImageTurn: (input) => { if (!selectedMemory.canonical) void imageDescriptionWriter.onImageTurn(input); } }
         : undefined,
       // Compatibility tools remain available when no interactive socket exists. The same Skill tools are reused in
       // the interactive bag below; MCP and progressive discovery are captured by runContext once per Run.
@@ -357,7 +353,7 @@ registry.register(avatarReportMethod(avatarVocabulary));
 // for the M5 settings UI, D27). Operator-only, NO Rust mirror — the ref confinement is single-sourced in attachment-store.
 registry.register(mediaGetMethod(attachmentStore));
 registry.register(mediaClearMethod(attachmentStore));
-registry.register(mediaUsageMethod(attachmentStore, () => directoryByteSize(memoryRoot)));
+registry.register(mediaUsageMethod(attachmentStore, () => selectedMemory.canonical ? 0 : directoryByteSize(memoryRoot)));
 // Character methods (#18): import a generic-Cubism / BanG-Dream `.zst` model into the Workspace, list imported
 // characters, and read a character's costumes. Operator-only (like media.*), NO Rust mirror — traversal confinement is
 // single-sourced in characters/member-path. Costume switching is client-side (renderer reloads + re-reports vocabulary).
@@ -365,14 +361,10 @@ registry.register(characterImportMethod(characterImporter));
 registry.register(characterListMethod(characterStore));
 registry.register(characterCostumesMethod({ store: characterStore, charactersDir }));
 registry.register(characterCostumeResolutionMethod({ store: characterStore, charactersDir }));
-// Perception methods (T3b): Privacy Pause read/write + the activity card. Operator-only — the agent has no path to
-// un-pause its own observation (pinned by privacy-pause-writer.test.ts); the panel lands with #26.
+// Perception and memory maintenance remain operator-only.
 registerPerceptionMethods(registry, perception);
-// Memory maintenance (T5 batch 4b): run the tidy pass on demand. Operator-only, NO Rust mirror; the write-count
-// trigger rides autoMemory internally — this surface exists for the settings panel/CLI (#26).
-registry.register(memoryTidyMethod(tidy));
-// The panel's operations page reads the maintenance counters (calibration / compaction / auto-write watermarks).
-// Counts only — the rolling summary's LENGTH crosses, never its text.
+if (tidy) registry.register(memoryTidyMethod(tidy));
+for (const method of createAsyncOnDemandMemoryMigrationMethods(memoryRuntime.migrationRunner)) registry.register(method);
 registry.register(
   memoryStatusMethod({ windowState: windowStateRepo, summaries: summaryRepo, autoState: createMemoryAutoRepo(db) }),
 );

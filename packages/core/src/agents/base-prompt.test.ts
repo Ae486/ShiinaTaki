@@ -3,6 +3,7 @@ import { createMemoryTools, type MemoryToolOps } from "../memory/memory-tools.ts
 import { createCurrentTimeTool } from "../time/current-time-tool.ts";
 import { renderCurrentTime, renderDayDate } from "../time/time-context.ts";
 import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
+import { CANONICAL_MEMORY_SYSTEM_PROMPT } from "./chat-agent.ts";
 import { fenceUntrusted } from "./untrusted-fence.ts";
 
 // The base prompt is the ONLY prompt layer a user cannot edit away, so each safety/mechanics contract it carries gets
@@ -14,6 +15,15 @@ const FLAT = BASE_SYSTEM_PROMPT.replace(/\s+/g, " ");
 const NOW = Date.UTC(2026, 6, 26, 9, 5);
 const DAY_PREFIX = "Today is ";
 const TIME_PREFIX = "Current local time: ";
+
+describe("authority-selected memory prompt", () => {
+  it("does not advertise retired Markdown tool names in canonical mode", () => {
+    expect(CANONICAL_MEMORY_SYSTEM_PROMPT).toContain("run recall");
+    expect(CANONICAL_MEMORY_SYSTEM_PROMPT).not.toContain("memory_search");
+    expect(CANONICAL_MEMORY_SYSTEM_PROMPT).not.toContain("memory_write");
+    expect(CANONICAL_MEMORY_SYSTEM_PROMPT).not.toContain("memory_archive");
+  });
+});
 
 describe("BASE_SYSTEM_PROMPT — untrusted-observation contract", () => {
   it("names the exact fence tag the renderers emit", () => {

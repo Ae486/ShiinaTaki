@@ -70,3 +70,13 @@ describe("workspace path confinement — accepted paths", () => {
     expect(paths.resolve(".")).toEqual({ ok: true, real: root, relative: "." });
   });
 });
+
+describe("workspace path confinement — authority-owned prefixes", () => {
+  it("rejects exact protected roots and every descendant", () => {
+    const protectedPaths = createWorkspacePaths({ root, forbiddenPrefixes: ["memory", "blocks", "memory-migration"] });
+    expect(protectedPaths.resolve("memory")).toEqual({ ok: false, code: "OUTSIDE_WORKSPACE" });
+    expect(protectedPaths.resolve("blocks/global/user-card.md")).toEqual({ ok: false, code: "OUTSIDE_WORKSPACE" });
+    expect(protectedPaths.resolve("memory-migration/snapshot/manifest.json")).toEqual({ ok: false, code: "OUTSIDE_WORKSPACE" });
+    expect(protectedPaths.resolve("memory-notes/todo.md").ok).toBe(true);
+  });
+});

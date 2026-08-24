@@ -3,7 +3,7 @@
   "name": "hindsight-initial-cutover",
   "title": "Initial Hindsight import and authority cutover",
   "description": "Import canonical legacy memory into Hindsight deterministically, build and verify the initial local replica, and atomically activate a new Hindsight Authority Epoch.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "backend-memory-cutover",
   "package": null,

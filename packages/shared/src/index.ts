@@ -197,6 +197,26 @@ export {
   SecretProvenanceSourceSchema, SecretRefSchema, SecretRefusalReasonSchema, SecretSetParamsSchema, SecretSetResultSchema,
 } from "./secret-catalog-schema.ts";
 export type { SecretCatalogHealth, SecretClearParams, SecretClearResult, SecretListParams, SecretListResult, SecretPresenceParams, SecretPresenceResult, SecretProvenance, SecretProvenanceSource, SecretRef, SecretRefusalReason, SecretSetParams, SecretSetResult } from "./secret-catalog-schema.ts";
+export {
+  HINDSIGHT_API_VERSION, HINDSIGHT_COMPATIBILITY_BUILD, HINDSIGHT_COMPATIBILITY_VERSION, HINDSIGHT_ERROR_CODES,
+  HindsightBankLlmHealthProjectionSchema, HindsightBankSetupProjectionSchema, HindsightCompatibilityProjectionSchema,
+  HindsightCompatibilitySupportSchema, HindsightConnectionProjectionSchema, HindsightDeploymentModeSchema,
+  HindsightErrorCodeSchema, HindsightLlmOperationHealthSchema, HindsightModelProjectionSchema, HindsightSetupErrorSchema,
+} from "./hindsight-connection-schema.ts";
+export type {
+  HindsightBankLlmHealthProjection, HindsightBankSetupProjection, HindsightCompatibilityProjection,
+  HindsightCompatibilitySupport, HindsightConnectionProjection, HindsightDeploymentMode, HindsightErrorCode,
+  HindsightModelProjection, HindsightSetupError,
+} from "./hindsight-connection-schema.ts";
+export {
+  HINDSIGHT_METHODS, HindsightDisableParamsSchema, HindsightLlmHealthParamsSchema, HindsightLlmHealthResultSchema,
+  HindsightManagedDeploymentReceiptSchema, HindsightSetupParamsSchema, HindsightSetupPhaseSchema,
+  HindsightSetupSnapshotSchema, HindsightStatusParamsSchema, HindsightStatusResultSchema, HindsightValidateParamsSchema,
+} from "./hindsight-setup-schema.ts";
+export type {
+  HindsightDisableParams, HindsightLlmHealthParams, HindsightLlmHealthResult, HindsightManagedDeploymentReceipt,
+  HindsightSetupParams, HindsightSetupPhase, HindsightSetupSnapshot, HindsightStatusParams, HindsightValidateParams,
+} from "./hindsight-setup-schema.ts";
 export { MAX_MCP_TOOL_COUNT, MCP_METHODS, MCP_SECRET_REF_MARKER, McpAddParamsSchema, McpCandidateFailureReasonSchema, McpCandidateOutcomeSchema, McpDesiredServerSchema, McpDisableParamsSchema, McpEditParamsSchema, McpEnableParamsSchema, McpEnvMapSchema, McpFieldValueSchema, McpGetParamsSchema, McpGetResultSchema, McpHttpConfigSchema, McpListParamsSchema, McpListResultSchema, McpMutationResultSchema, McpRefusalReasonSchema, McpRemoveParamsSchema, McpRemoveResultSchema, McpReconnectParamsSchema, McpRuntimePhaseSchema, McpSelectedToolsSchema, McpServerConfigSchema, McpServerIdSchema, McpServerStatusSchema, McpServerViewSchema, McpStatusParamsSchema, McpStatusResultSchema, McpStdioConfigSchema, McpTestParamsSchema, McpTestResultSchema, McpToolKeyCollisionSchema, McpToolNameSchema, McpToolSkipCodeSchema, McpToolSkipIssueSchema, type McpAddParams, type McpCandidateFailureReason, type McpCandidateOutcome, type McpDesiredServer, type McpDisableParams, type McpEditParams, type McpEnableParams, type McpGetParams, type McpGetResult, type McpListParams, type McpListResult, type McpMutationResult, type McpRefusalReason, type McpRemoveParams, type McpRemoveResult, type McpReconnectParams, type McpServerConfig, type McpServerStatus, type McpServerView, type McpStatusParams, type McpStatusResult, type McpTestParams, type McpTestResult, type McpToolKeyCollision, type McpToolSkipIssue } from "./mcp-lifecycle-schema.ts";
 
 export { DEFAULT_WS_HOST, DEFAULT_WS_PORT } from "./ws-defaults.ts";
@@ -231,3 +251,29 @@ export {
 export type {
   MemoryResult, RetainEnvelope, RecallEnvelope, ReflectEnvelope, EditEnvelope, InvalidateEnvelope, RestoreEnvelope,
 } from "./memory-provider-envelope-schema.ts";
+export {
+  MEMORY_MIGRATION_METHODS, MemoryMigrationActivateParamsSchema, MemoryMigrationActivationSchema, MemoryMigrationDryRunParamsSchema,
+  MemoryMigrationExceptionPageSchema, MemoryMigrationExceptionSchema, MemoryMigrationExceptionsParamsSchema,
+  MemoryMigrationExcludeParamsSchema, MemoryMigrationReportSchema, MemoryMigrationRunParamsSchema,
+  MemoryMigrationResumeParamsSchema, MemoryMigrationStageParamsSchema, MemoryMigrationStatusSchema, MemoryMigrationVerifySchema,
+} from "./memory-migration-schema.ts";
+export type { MemoryMigrationActivation, MemoryMigrationReport, MemoryMigrationStatus, MemoryMigrationVerify } from "./memory-migration-schema.ts";
+export {
+  HINDSIGHT_CUTOVER_METHODS, HindsightCutoverStatusParamsSchema, HindsightCutoverStatusSchema,
+  HindsightCutoverVerifyParamsSchema, HindsightCutoverVerifyResultSchema,
+  HindsightAuthorityActivationSchema, HindsightDocumentProjectionSchema, HindsightFactMappingSchema,
+  HindsightFactPageSchema, HindsightFactProjectionSchema, HindsightImportLedgerSchema, HindsightImportStatusSchema,
+  HindsightOperationResultSchema, HindsightOperationStatusSchema, HindsightReplicaCheckpointSchema,
+  HindsightRetainRequestSchema, HindsightRetainResultSchema, HindsightLogicalObjectKindSchema,
+  HindsightLogicalPayloadSchema, HindsightLogicalSnapshotRecordSchema, HindsightLogicalSnapshotCountsSchema,
+  HindsightLogicalSnapshotManifestSchema, HindsightLogicalSnapshotMetadataSchema, HindsightLogicalSnapshotPageSchema,
+} from "./hindsight-cutover-schema.ts";
+export type {
+  HindsightCutoverStatus, HindsightCutoverVerifyResult,
+  HindsightAuthorityActivation, HindsightDocumentProjection, HindsightFactMapping, HindsightFactPage,
+  HindsightFactProjection, HindsightImportLedger, HindsightImportStatus, HindsightOperationResult,
+  HindsightOperationStatus, HindsightReplicaCheckpoint, HindsightRetainRequest, HindsightRetainResult,
+  HindsightLogicalObjectKind, HindsightLogicalPayload, HindsightLogicalSnapshotRecord,
+  HindsightLogicalSnapshotCounts, HindsightLogicalSnapshotManifest, HindsightLogicalSnapshotMetadata,
+  HindsightLogicalSnapshotPage,
+} from "./hindsight-cutover-schema.ts";

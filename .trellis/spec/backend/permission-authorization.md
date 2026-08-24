@@ -184,6 +184,12 @@ complete lexically sorted `cells` array. TypeScript and Rust both compute SHA-25
 #### Adapter convergence
 
 - **Core tools:** trusted construction binds the model-facing tool key to one canonical identity and cell.
+- A model-facing rename or capability-gated tool family must update the Core binding table in the same activation
+  change. Legacy and canonical Memory names intentionally share stable policy identities: search-like `memory_search`,
+  `recall`, and `reflect` use `core.memory.search` / `memory-search`; write-like `memory_write`, `retain`,
+  `update_memory`, and `restore_memory` use `core.memory.write` / `memory-write`; invalidation names
+  `memory_archive` and `invalidate_memory` use `core.memory.archive` / `memory-archive`. These cells remain the policy
+  authority; a display/tool rename never creates a new grant and never bypasses Governance.
 - **MCP:** `@ai-sdk/mcp` still owns standard transport, discovery, schema conversion, and the raw-name execution
   closure. A sidecar maps it to `mcp.tool.call` plus a stable Host-qualified subject. A sanitized-key collision removes
   the ambiguous tools fail-closed.
@@ -303,8 +309,9 @@ complete lexically sorted `cells` array. TypeScript and Rust both compute SHA-25
 - Core repository/service: migration/restart, atomic single generation increment, no-op, conflict, reset, registry
   upgrade/downgrade, immutable/second-confirm, every factory cell/level, unknown identity/revision/cell, and stored
   override validation.
-- Adapter tests: explicit Core bindings and unknown-tool denial; MCP raw-name closure preservation, sanitized-key
-  collision, exact legacy deny, no legacy allow; Skill load confinement and no grant transfer.
+- Adapter tests: execute every current Core binding, including every capability-gated canonical Memory key, assert its
+  exact stable identity/cell, and retain unknown-tool denial; MCP raw-name closure preservation, sanitized-key collision,
+  exact legacy deny, no legacy allow; Skill load confinement and no grant transfer.
 - Host/Rust: complete projection validation, canonical digest, per-capability lineage, stale generation, same-generation
   tampering, input digest recomputation, trusted cell classification, stricter composition, exact legacy deny,
   malformed legacy state, `ask` fail-closed, approved-resume final-floor recheck, exactly-one allowed/denied audit,

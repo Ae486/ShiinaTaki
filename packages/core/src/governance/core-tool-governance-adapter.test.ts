@@ -5,7 +5,7 @@ import {
   createGovernanceRegistry,
   type GovernanceRegistry,
 } from "@taki/shared";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createCoreToolGovernanceAdapter } from "./core-tool-governance-adapter.ts";
@@ -18,6 +18,12 @@ const BUILTIN_KEYS = [
   "memory_search",
   "memory_write",
   "memory_archive",
+  "recall",
+  "reflect",
+  "retain",
+  "update_memory",
+  "invalidate_memory",
+  "restore_memory",
   "avatar_set_expression",
   "avatar_play_motion",
   "read_file",
@@ -57,6 +63,27 @@ describe("createCoreToolGovernanceAdapter", () => {
     }
 
     expect(called).toEqual(BUILTIN_KEYS);
+  });
+
+  it("maps canonical memory tools onto the existing default-auto memory cells", async () => {
+    const governance = service();
+    const authorize = vi.spyOn(governance, "authorize");
+    const keys = ["recall", "reflect", "retain", "update_memory", "invalidate_memory", "restore_memory"] as const;
+    const wrapped = createCoreToolGovernanceAdapter(governance, OWNER_HOST_ID)
+      .wrap(executableTools(keys, []));
+
+    for (const key of keys) {
+      await wrapped[key]?.execute?.({}, { toolCallId: key, messages: [] } as never);
+    }
+
+    expect(authorize.mock.calls.map(([binding]) => binding)).toEqual([
+      { identity: { capabilityId: "core.memory.search", ownerHostId: OWNER_HOST_ID }, cellKey: "memory-search" },
+      { identity: { capabilityId: "core.memory.search", ownerHostId: OWNER_HOST_ID }, cellKey: "memory-search" },
+      { identity: { capabilityId: "core.memory.write", ownerHostId: OWNER_HOST_ID }, cellKey: "memory-write" },
+      { identity: { capabilityId: "core.memory.write", ownerHostId: OWNER_HOST_ID }, cellKey: "memory-write" },
+      { identity: { capabilityId: "core.memory.archive", ownerHostId: OWNER_HOST_ID }, cellKey: "memory-archive" },
+      { identity: { capabilityId: "core.memory.write", ownerHostId: OWNER_HOST_ID }, cellKey: "memory-write" },
+    ]);
   });
 
   it("fails an unknown Core tool key closed without calling its closure", async () => {

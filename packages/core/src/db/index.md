@@ -12,6 +12,11 @@
 - ../governance/governance-policy-repo.ts — governance policy SQL aggregate: durable level/generation + sparse validated overrides
 - ../approval/approval-state-repo.ts — Approval SQL aggregate: durable generation/revisions + canonical always-allow decisions
 - migrations/ — numbered TS-constant migrations + their ordered registry
+- hindsight-connection-repo.ts — singleton sanitized Hindsight setup state with optimistic revision writes
+- hindsight-bank-setup-repo.ts — deterministic per-Bank template/setup evidence repository
+- hindsight-cutover-run-repo.ts — B4 lifecycle/fencing state plus bounded operator status and verification projections
+- hindsight-replica-repo.ts — atomic logical snapshot staging, published replica records, and per-Bank checkpoint repository
+- hindsight-authority-repo.ts — synchronous precondition gate, activation receipts, and atomic Local-to-Hindsight epoch promotion
 - canonical-memory-authority-repo.ts — explicit Local authority epoch and scoped Bank persistence
 - structured-memory-block-repo.ts — revisioned Core-owned structured Memory Blocks, registry/writer enforcement, rendering
 - canonical-memory-repo.ts — canonical source/unit/policy/receipt aggregate with atomic retain and revisioned lifecycle

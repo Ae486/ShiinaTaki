@@ -1,0 +1,10 @@
+{"file":".trellis/spec/backend/index.md","reason":"Backend spec index and pre-development checklist for Core migration work."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"SQLite migration, transaction, rollback, and persistence rules for ledger and activation marker."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Typed failure, retry, sanitization, and fail-closed behavior."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Privacy-safe diagnostics and count/opaque-ID logging constraints."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Test, typecheck, lint, diff, and quality-gate conventions."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Filesystem, SQLite, runtime composition, and startup authority review."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Evidence ladder for resolving implementation details without inventing runtime contracts."}
+{"file":".trellis/tasks/08-09-memory-legacy-migration/research/current-legacy-migration-map.md","reason":"Verified legacy codec/store/Blocks and Batch 1 canonical seams."}
+{"file":".trellis/tasks/archive/2026-08/08-09-memory-provider-foundation/research/current-local-memory-seams.md","reason":"Batch 1 canonical schemas, Local retain limits, Block repository, and dormant activation boundary."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/taki-memory-integration-seams.md","reason":"Current startup, prompt, auto-memory, image, tidy, retention, and compaction seams to retire."}

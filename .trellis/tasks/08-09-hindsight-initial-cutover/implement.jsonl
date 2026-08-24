@@ -1,1 +1,14 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Authority epoch, staging replica, checkpoint publication, migration transaction, and rollback rules."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Bounded import failures, retryability, cancellation, and sanitized provider diagnostics."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Prevent source text, provider payload, credentials, and raw errors from logs."}
+{"file":".trellis/spec/backend/permission-authorization.md","reason":"Keep import and authority promotion operator-only with expected revision/epoch checks."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Required tests, typechecks, lint, file limits, and quality gates."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Trace import, snapshot, replica, and authority state across HTTP, Core, SQLite, and runtime startup."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Pin Hindsight retain, operation, document lookup, snapshot, and revision claims to accepted sources."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/hindsight-integration-gaps-and-sync.md","reason":"Accepted replication, ledger, snapshot, revision, authority, and failure-boundary research."}
+{"file":".trellis/tasks/08-09-hindsight-memory-provider/research/taki-memory-integration-seams.md","reason":"Live Taki authority, canonical Local, migration, boot, and runtime seams."}
+{"file":".trellis/tasks/08-09-hindsight-initial-cutover/research/taki-cutover-seams.md","reason":"B4-specific live seam map, missing provider/data-plane contracts, and exact cutover risks."}
+{"file":"docs/adr/0009-single-memory-authority-with-local-replica.md","reason":"Binding single-authority, replica, outage, and takeover invariants."}
+{"file":".trellis/tasks/archive/2026-08/08-09-memory-legacy-migration/prd.md","reason":"B2 migration ledger, immutable snapshot, canonical staging, and activation evidence consumed by B4."}
+{"file":".trellis/tasks/archive/2026-08/08-09-memory-legacy-migration/implement.md","reason":"B2 implementation boundaries and reusable ledger/snapshot/activation contracts."}
+{"file":".trellis/tasks/08-09-hindsight-initial-cutover/research/hindsight-cutover-contracts.md","reason":"Latest source-grounded Hindsight retain idempotency, derived-completion, fact pagination, snapshot, checkpoint, reconciliation, and fenced cutover contracts."}

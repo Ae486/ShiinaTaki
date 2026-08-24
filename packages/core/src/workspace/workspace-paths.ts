@@ -54,7 +54,7 @@ function splitExisting(target: string): { existing: string; missing: string[] } 
   return { existing, missing };
 }
 
-export function createWorkspacePaths(deps: { root: string }): WorkspacePaths {
+export function createWorkspacePaths(deps: { root: string; forbiddenPrefixes?: string[] | (() => string[]) }): WorkspacePaths {
   // Canonicalize the root ONCE (realpath resolves any symlink in the root itself, so confinement compares like-for-like).
   mkdirSync(deps.root, { recursive: true });
   const realRoot = realpathSync(deps.root);
@@ -62,6 +62,9 @@ export function createWorkspacePaths(deps: { root: string }): WorkspacePaths {
   return {
     resolve(input) {
       if (!validateLexical(input)) return { ok: false, code: "INVALID_PATH" };
+      const first = input.split(/[\\/]+/)[0] ?? "";
+      const forbiddenPrefixes = typeof deps.forbiddenPrefixes === "function" ? deps.forbiddenPrefixes() : deps.forbiddenPrefixes;
+      if (forbiddenPrefixes?.includes(first)) return { ok: false, code: "OUTSIDE_WORKSPACE" };
       let real: string;
       try {
         // Inside the try: lstat/realpath can throw on hostile-but-lexically-clean inputs (a NUL byte, a component

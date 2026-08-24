@@ -1,6 +1,6 @@
 # core/src/
 - index.ts — package public entry; empty until an external consumer exists (core runs as a process)
-- main.ts — process entry: wires config → logger → model(s) → db/store/subscriptions → governance authority + legacy MCP deny reader → memory/media/skills/MCP/capability/perception/Extension adapters → operator registries (including dev-only Run-snapshot trigger tools) → ws-server; closes MCP clients + db on SIGINT/SIGTERM
+- main.ts — process entry: marker-first memory authority selection → config/runtime adapters → operator registries (including on-demand migration) → ws-server; closes MCP clients + db on SIGINT/SIGTERM
 - config/ — env → validated boot config; plus the operator-facing settings store (knob registry, precedence source, writer, change fan-out)
 - boot/ — the composition root's config+storage phase: open the DB on the env-only data root, then resolve every other knob (env > stored > default) for the loaders
 - logging/ — pino root logger factory

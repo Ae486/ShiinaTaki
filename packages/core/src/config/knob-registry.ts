@@ -180,6 +180,23 @@ export const CONFIG_KNOBS: Knob[] = [
   { key: "TAKI_MEMORY_TIDY_MAX_STEPS", ...int({ min: 1 }), default: DEFAULT_TIDY_MAX_STEPS, apply: "restart", description: "Step ceiling for one tidy pass." },
   { key: "TAKI_MEMORY_TIDY_STALE_DAYS", ...int({ min: 1 }), default: DEFAULT_TIDY_STALE_DAYS, apply: "restart", description: "Age at which a never-recalled memory becomes a tidy candidate." },
   { key: "TAKI_MEMORY_TIDY_REPORT_CAP", ...int({ min: 1 }), default: DEFAULT_TIDY_REPORT_CAP, apply: "restart", description: "Per-class candidate cap in the tidy report." },
+
+  // --- inactive Hindsight setup plane (B3; does not select Memory Authority) ---
+  { key: "TAKI_HINDSIGHT_ENABLED", ...bool(), default: false, apply: "live", description: "Allow explicit Hindsight validation and setup actions." },
+  { key: "TAKI_HINDSIGHT_DEPLOYMENT_MODE", ...choice(["existing-instance", "managed-helper"]), default: "existing-instance", apply: "live", description: "Connection ownership mode; Core never performs managed host actions." },
+  { key: "TAKI_HINDSIGHT_ENDPOINT", ...str(), default: null, apply: "live", description: "Explicit authenticated Hindsight base endpoint." },
+  { key: "TAKI_HINDSIGHT_REQUEST_TIMEOUT_MS", ...int({ min: 250, max: 120_000 }), default: 10_000, apply: "live", description: "Deadline for one Hindsight REST request." },
+  { key: "TAKI_HINDSIGHT_SETUP_TIMEOUT_MS", ...int({ min: 250, max: 120_000 }), default: 120_000, apply: "live", description: "Total deadline for one explicit setup action." },
+  { key: "TAKI_HINDSIGHT_TEMPLATE_REVISION", ...str(), default: "taki-bank-v1", apply: "live", description: "Desired versioned Taki Bank Template revision." },
+  { key: "TAKI_HINDSIGHT_MODEL_DEFAULT_PROVIDER", ...str(), default: null, apply: "live", description: "Desired managed-deployment default provider identifier." },
+  { key: "TAKI_HINDSIGHT_MODEL_DEFAULT", ...str(), default: null, apply: "live", description: "Desired managed-deployment default model identifier." },
+  { key: "TAKI_HINDSIGHT_MODEL_RETAIN", ...str(), default: null, apply: "live", description: "Optional managed-deployment retain model override." },
+  { key: "TAKI_HINDSIGHT_MODEL_REFLECT", ...str(), default: null, apply: "live", description: "Optional managed-deployment reflect model override." },
+  { key: "TAKI_HINDSIGHT_MODEL_CONSOLIDATION", ...str(), default: null, apply: "live", description: "Optional managed-deployment consolidation model override." },
+  { key: "TAKI_HINDSIGHT_EMBEDDING_PROVIDER", ...str(), default: null, apply: "live", description: "Desired managed-deployment embedding provider identifier." },
+  { key: "TAKI_HINDSIGHT_EMBEDDING_MODEL", ...str(), default: null, apply: "live", description: "Desired managed-deployment embedding model identifier." },
+  { key: "TAKI_HINDSIGHT_RERANKER_PROVIDER", ...str(), default: null, apply: "live", description: "Desired managed-deployment reranker provider identifier." },
+  { key: "TAKI_HINDSIGHT_RERANKER_MODEL", ...str(), default: null, apply: "live", description: "Desired managed-deployment reranker model identifier." },
 ];
 
 const BY_KEY = new Map(CONFIG_KNOBS.map((knob) => [knob.key, knob]));

@@ -1,0 +1,22 @@
+# core/memory/hindsight/
+- hindsight-contracts.ts — bounded Hindsight 0.9.0 raw-wire schemas and safe projections
+- hindsight-endpoint-policy.ts — endpoint normalization and SSRF/redirect policy for explicit operator endpoints
+- hindsight-errors.ts — sanitized Hindsight setup failure code and retry projection
+- hindsight-client.ts — injected authenticated REST client with bounded/cancelled setup, import, and logical-snapshot operations
+- hindsight-secret-refs.ts — fixed provider-neutral Secret Catalog refs and connection-only trusted resolver marker
+- hindsight-compatibility-service.ts — ordered exact-build health/version/manifest gate and safe configuration fingerprint
+- hindsight-bank-identity.ts — versioned deterministic opaque Global/Character external Bank ids
+- taki-bank-template-v1.ts — fixed secret-free additive template, canonical digest, and Taki-owned read-back verification
+- hindsight-setup-service.ts — resumable validate/setup/disable/explicit LLM-health state machine; never owns Memory Authority
+- hindsight-bank-setup.ts — idempotent Bank/template application, operation polling, and verified projection
+- hindsight-setup-stages.ts — deterministic setup targets and dry-run preflight orchestration
+- hindsight-import-contracts.ts — bounded retain/operation/document/fact data-plane wire schemas
+- hindsight-import-identity.ts — deterministic UUID adapter for B2 operation identities
+- hindsight-import-ledger-repo.ts — resumable B4 operation and one-to-many fact ledger repository
+- hindsight-import-orchestrator.ts — deadline-bounded idempotent retain and derived fact mapping orchestration
+- hindsight-snapshot-contracts.ts — bounded provider wire schemas and provider-neutral logical snapshot normalization
+- hindsight-snapshot-validator.ts — page/order/count/hash/manifest and provider-lineage integrity gate
+- hindsight-replica-builder.ts — cursor-bound snapshot capture, staging, reconciliation callback, and checkpoint publication
+- hindsight-replica-reconcile.ts — exact import document/fact/revision reconciliation against a staged snapshot
+- hindsight-authority-promotion-service.ts — bounded Local quiescence and single synchronous Hindsight promotion transaction
+- hindsight-setup-errors.ts — sanitized setup error normalization shared by setup stages

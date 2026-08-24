@@ -29,6 +29,9 @@ export const ErrorCodeSchema = z.enum([
   "MCP_CONFIG_CONFLICT",
   "SKILL_REFUSED",
   "SKILL_CONFIG_CONFLICT",
+  // Operator-only Hindsight setup refuses a request before/while reaching the external service. The bounded
+  // HindsightError code rides error.data.reason; raw HTTP/provider/secret details never do.
+  "HINDSIGHT_REFUSED",
   // Tool execution outcomes are structured model-readable failures, not JSON-RPC envelope codes.
   "GOVERNANCE_DENIED",
   "APPROVAL_REQUIRED",
