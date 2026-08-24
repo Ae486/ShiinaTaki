@@ -1,0 +1,6 @@
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Migration, transaction, repository, and event integrity checks."}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "Host generation and unknown-outcome quality checks."}
+{"file": ".trellis/spec/backend/mcp-lifecycle.md", "reason": "MCP lease/generation/forced-close quality checks."}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Stale/duplicate/unknown error and redaction checks."}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Regression checks for primary chat and non-primary behavior."}
+{"file": ".trellis/tasks/08-24-slice-3-effect-lifecycle-settlement/research/implementation-seams.md", "reason": "Injection-safe formal review evidence, residual risks, and required regression anchors."}

@@ -1,0 +1,12 @@
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Primary and non-primary ToolLoopAgent, Timeline, cancel-retract, and detached Memory behavior."}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Pino versus canonical RunEvent scope and sensitive-field exclusions."}
+{"file": ".trellis/spec/backend/tool-design.md", "reason": "Tool replay hints, idempotency posture, and authority boundary."}
+{"file": ".trellis/spec/backend/permission-authorization.md", "reason": "Approval/policy generation and final enforcement ownership."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-c-persistence-recovery.md", "reason": "Crash matrix, usage/effect evidence, idempotency, and Slice 4 recovery boundary."}
+{"file": ".trellis/tasks/08-24-slice-3-effect-lifecycle-settlement/research/implementation-seams.md", "reason": "Complete injection-safe current-code seams, PI direction, Slice 3/4 boundary, and regression anchors."}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Structured settlement errors, stale/unknown outcomes, bounded diagnostics, and rollback."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-e-integration-map.md", "reason": "One owner per Run, Timeline, Memory, Host, Approval, and diagnostic path."}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "SQLite transaction, migration lineage, typed repository, and post-commit event rules."}
+{"file": ".trellis/spec/backend/mcp-lifecycle.md", "reason": "MCP generation, lease, draining, forced-close, and no-redirect contract."}
+{"file": ".trellis/tasks/archive/2026-08/08-24-slice-2-durable-event-ledger/design.md", "reason": "Existing event envelope, transaction, live, projection, and reserved effect seams."}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "Host identity, generation, broker settlement, unknown outcome, and no-replay contract."}

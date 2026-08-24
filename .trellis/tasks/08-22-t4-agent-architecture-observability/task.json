@@ -20,7 +20,8 @@
   "subtasks": [],
   "children": [
     "08-23-slice-1-harness-foundation",
-    "08-24-slice-2-durable-event-ledger"
+    "08-24-slice-2-durable-event-ledger",
+    "08-24-slice-3-effect-lifecycle-settlement"
   ],
   "parent": null,
   "relatedFiles": [],
