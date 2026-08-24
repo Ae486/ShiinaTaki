@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ConnectParams } from "@taki/shared";
-import { authenticateOperator } from "./operator-auth.ts";
+import { authenticateOperator, recoverOperatorAuth } from "./operator-auth.ts";
 import type { IdentityStorage } from "./device-identity.ts";
 
 function storage(): IdentityStorage {
@@ -30,5 +30,30 @@ describe("authenticateOperator", () => {
 
     expect(calls[0]).not.toHaveProperty("token");
     expect(calls[1]).toMatchObject({ deviceId: "device-1", deviceName: "taki-pet", token: "token-1" });
+  });
+
+  it("clears only a stale token so the next generation retries tokenless with the same device identity", async () => {
+    vi.stubGlobal("crypto", { randomUUID: () => "device-1" });
+    const identity = storage();
+    const client = {
+      connect: async () => ({ ok: true, token: "stale-token" } as const),
+    };
+
+    await authenticateOperator({ client, deviceName: "taki-home", storage: identity });
+    expect(recoverOperatorAuth(identity)).toBe(true);
+    expect(recoverOperatorAuth(identity)).toBe(false);
+
+    const calls: ConnectParams[] = [];
+    await authenticateOperator({
+      client: {
+        connect: async (params) => {
+          calls.push(params);
+          return { ok: true } as const;
+        },
+      },
+      deviceName: "taki-home",
+      storage: identity,
+    });
+    expect(calls).toEqual([{ deviceId: "device-1", deviceName: "taki-home", role: "operator", capabilities: [] }]);
   });
 });

@@ -12,7 +12,7 @@ import {
   type ConnectionGenerationContext,
   type ConnectionSnapshot,
 } from "@/lib/connection-generation-controller.js";
-import { authenticateOperator } from "@/lib/operator-auth.js";
+import { authenticateOperator, recoverOperatorAuth } from "@/lib/operator-auth.js";
 import { createTimingPolicyStore } from "@/lib/timing-policy.js";
 import { createWsClient, type WsClient } from "@/lib/ws-client.js";
 import { createBrowserTransport } from "@/lib/ws-transport.js";
@@ -54,6 +54,7 @@ export function useOperatorConnection(options: OperatorConnectionOptions): Opera
           onTimingPolicyDiagnostic: (message) => console.warn(`[${options.deviceName}] ${message}`),
         }),
       authenticate: (client) => authenticateOperator({ client, deviceName: options.deviceName, storage: localStorage }),
+      recoverAuthFailure: () => recoverOperatorAuth(localStorage),
       restore: (client, context) => restoreRef.current?.(client, context) ?? Promise.resolve(),
     });
     const unsubscribe = controller.subscribe(setConnection);

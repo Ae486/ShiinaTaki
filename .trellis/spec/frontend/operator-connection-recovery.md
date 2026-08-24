@@ -80,8 +80,12 @@ interface TimingPolicy {
 - A close or transient attempt failure retires that generation exactly once, publishes `reconnecting`, and schedules
   another attempt with capped exponential full jitter. The exponent resets only after the authenticated generation
   remains healthy for `reconnectStabilityResetMs`.
-- Pairing/auth refusals are terminal presentation states, not blind retry inputs. Disposal cancels retry/stability
-  timers and retires the current candidate.
+- `PAIRING_REQUIRED` is a terminal presentation state, not a blind retry input: the owner must wait for an explicit
+  pairing action before trying again. An `AUTH_FAILED` caused by a previously stored operator token is different: the
+  owner may clear that stale token once, preserve the stable device identity, retire the rejected candidate, and start
+  one fresh generation without a token. If the fresh generation is still rejected, publish the terminal error and do
+  not retry again. Recovery is bounded to one attempt per connected-generation lifecycle; it must never become an
+  unbounded authentication loop. Disposal cancels retry/stability timers and retires the current candidate.
 - Late callbacks from generation N must pass `isCurrent()` before changing UI state or the live scene after generation
   N+1 exists.
 
@@ -139,6 +143,7 @@ interface TimingPolicy {
 | Socket closes before open | Reject every `whenOpen` waiter; retire once; retry |
 | Open consumes the total open/auth budget | Close/retire candidate; do not send `connect` afterward |
 | Pairing is required or auth is refused | Publish the specific terminal state; do not blind-retry |
+| A stored operator token is rejected with `AUTH_FAILED` | Clear only the token, keep the stable `deviceId`, create one fresh generation, then publish terminal `AUTH_FAILED` if it is rejected again |
 | Restore report/subscribe/history fails | Retire candidate and retry; never publish a false connected state |
 | Old-generation callback arrives late | Ignore it through generation/disposal guard |
 | Native JSON-RPC timeout fires | Throw `RpcDeadlineExceededError`; library pending ID is removed |

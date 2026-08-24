@@ -61,6 +61,7 @@ class FakeClient implements ConnectionGenerationClient {
 
 interface HarnessOptions {
   authenticate?: (client: FakeClient, index: number) => Promise<ConnectOutcome>;
+  recoverAuthFailure?: () => boolean;
   restore?: (client: FakeClient, context: ConnectionGenerationContext) => Promise<void>;
   rng?: () => number;
 }
@@ -89,6 +90,7 @@ function createHarness(options: HarnessOptions = {}) {
     },
     authenticate: (client) =>
       options.authenticate?.(client, authCalls++) ?? Promise.resolve({ ok: true }),
+    recoverAuthFailure: options.recoverAuthFailure,
     restore: options.restore,
     scheduler: SCHEDULER,
     clock: CLOCK,
@@ -217,6 +219,45 @@ describe("connection generation promotion and retry", () => {
     });
     await vi.advanceTimersByTimeAsync(10_000);
     expect(refused.clients).toHaveLength(1);
+  });
+
+  it("recovers one stale operator token before presenting pairing or auth failure", async () => {
+    let recovered = 0;
+    const h = createHarness({
+      authenticate: async (_client, index) =>
+        index === 0 ? { ok: false, code: ErrorCodeSchema.enum.AUTH_FAILED, message: "stale" } : { ok: true },
+      recoverAuthFailure: () => {
+        recovered += 1;
+        return true;
+      },
+    });
+    h.controller.start();
+    await flush();
+    expect(recovered).toBe(1);
+    expect(h.clients).toHaveLength(2);
+    expect(h.controller.snapshot()).toMatchObject({ client: h.clients[1], status: { kind: "connected" } });
+  });
+
+  it("presents a repeated auth refusal after the one-shot recovery attempt", async () => {
+    let recovered = 0;
+    const h = createHarness({
+      authenticate: async () => ({ ok: false, code: ErrorCodeSchema.enum.AUTH_FAILED, message: "still refused" }),
+      recoverAuthFailure: () => {
+        recovered += 1;
+        return true;
+      },
+    });
+    h.controller.start();
+    await flush();
+    expect(recovered).toBe(1);
+    expect(h.clients).toHaveLength(2);
+    expect(h.controller.snapshot().status).toEqual({
+      kind: "error",
+      code: ErrorCodeSchema.enum.AUTH_FAILED,
+      message: "still refused",
+    });
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(h.clients).toHaveLength(2);
   });
 
   it("retires a candidate whose required restoration fails and retries with a fresh client", async () => {

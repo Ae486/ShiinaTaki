@@ -1,6 +1,7 @@
 /**
  * INPUT:  a browser-storage backend (localStorage by default); the operator identity record it holds.
- * OUTPUT: loadOrCreateIdentity(storage) -> { deviceId, token? }; saveToken(token, storage) persists the reconnect token.
+ * OUTPUT: loadOrCreateIdentity(storage) -> { deviceId, token? }; saveToken(token, storage) persists the reconnect token;
+ *         clearToken(storage) removes only the operator reconnect credential while preserving device identity.
  * POS:    ui/lib — the Pet UI's own operator device identity (mirrors the CLI's device-identity.ts). A local client
  *         credential, NOT agent-domain state (invariant 4); persisted in the webview's localStorage, not the Core DB.
  */
@@ -31,6 +32,14 @@ export function loadOrCreateIdentity(storage: IdentityStorage): OperatorIdentity
 export function saveToken(token: string, storage: IdentityStorage): void {
   const current = readIdentity(storage) ?? { deviceId: crypto.randomUUID() };
   writeIdentity(storage, { ...current, token });
+}
+
+/** Remove a stale operator credential without rotating the stable device identity. */
+export function clearToken(storage: IdentityStorage): boolean {
+  const current = readIdentity(storage);
+  if (!current?.token) return false;
+  writeIdentity(storage, { deviceId: current.deviceId });
+  return true;
 }
 
 // A corrupt identity record is not fatal here (unlike the Core's trust root): drop it and mint a fresh device — the

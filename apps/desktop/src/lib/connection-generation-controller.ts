@@ -47,6 +47,8 @@ export interface ConnectionGenerationDeps<TClient extends ConnectionGenerationCl
   transportFactory: () => WsTransport;
   clientFactory: (input: ConnectionClientFactoryInput) => TClient;
   authenticate: (client: TClient) => Promise<ConnectOutcome>;
+  /** Optional one-shot recovery for a stale operator credential. Returns true when a fresh attempt is warranted. */
+  recoverAuthFailure?: (outcome: Extract<ConnectOutcome, { ok: false }>) => boolean;
   restore?: (client: TClient, context: ConnectionGenerationContext) => Promise<void>;
   scheduler?: ConnectionScheduler;
   clock?: ConnectionClock;
@@ -92,6 +94,7 @@ class GenerationController<TClient extends ConnectionGenerationClient>
   private retryExponent = 0;
   private started = false;
   private disposed = false;
+  private authRecoveryAttempted = false;
 
   constructor(deps: ConnectionGenerationDeps<TClient>) {
     this.deps = deps;
@@ -173,6 +176,17 @@ class GenerationController<TClient extends ConnectionGenerationClient>
   }
 
   private refused(candidate: Candidate<TClient>, outcome: Extract<ConnectOutcome, { ok: false }>): void {
+    if (
+      outcome.code === ErrorCodeSchema.enum.AUTH_FAILED &&
+      !this.authRecoveryAttempted &&
+      this.deps.recoverAuthFailure?.(outcome)
+    ) {
+      this.authRecoveryAttempted = true;
+      this.retire(candidate, true);
+      this.publish({ client: null, status: { kind: "connecting" } });
+      this.beginAttempt();
+      return;
+    }
     if (!this.retire(candidate, true)) return;
     const status: ConnectionStatus =
       outcome.code === ErrorCodeSchema.enum.PAIRING_REQUIRED
@@ -182,6 +196,7 @@ class GenerationController<TClient extends ConnectionGenerationClient>
   }
 
   private promote(candidate: Candidate<TClient>): void {
+    this.authRecoveryAttempted = false;
     this.publish({ client: candidate.client, status: { kind: "connected" } });
     const stableMs = this.deps.timingPolicy.current().reconnectStabilityResetMs;
     candidate.stableAt = this.clock.now() + stableMs;
