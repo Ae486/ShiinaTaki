@@ -86,6 +86,31 @@ describe("chatSendMethod durable Harness admission", () => {
       receipt: { outcome: "completed", attemptCount: 1 } });
   });
 
+  it("keeps the mutable turn identity in sync when overflow replaces the Attempt", async () => {
+    const runs = durableRuns();
+    const seen: string[] = [];
+    const agent: ChatAgent = {
+      async *stream(_params, turn) {
+        seen.push(turn?.attemptId ?? "missing");
+        expect(turn?.onRetry?.("context_overflow")).toBe(true);
+        seen.push(turn?.attemptId ?? "missing");
+        yield "ok";
+      },
+    };
+    const { registry } = harness(agent, runs);
+    const ctx = ctxFor("operator");
+    const response = await registry.dispatch(request("chat.send", { characterId: "taki", message: "hi" }), ctx);
+    const ack = ChatSendResultSchema.parse(JsonRpcSuccessResponseSchema.parse(response).result);
+
+    await vi.waitFor(() => expect(runs.status(ack.runId).run.state).toBe("completed"));
+    expect(seen).toHaveLength(2);
+    expect(seen[0]).not.toBe(seen[1]);
+    expect(runs.status(ack.runId).attempts).toMatchObject([
+      { ordinal: 1, state: "failed" },
+      { ordinal: 2, state: "completed" },
+    ]);
+  });
+
   it("durably cancels a queued close before the second model effect can start", async () => {
     const runs = durableRuns();
     let releaseFirst!: () => void;

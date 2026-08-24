@@ -113,16 +113,14 @@ async function pump(args: PumpArgs, controller: AbortController): Promise<void> 
   let retracted = false;
   try {
     // The turn handle lets MCP tool approvals ride ctx.notify (approval.request) and deny-on-disconnect via ctx.onClose.
-    const turn = {
+    const turn: NonNullable<Parameters<ChatAgent["stream"]>[1]> = {
       connection: ctx.connection,
       notify: ctx.notify,
       onClose: ctx.onClose,
       signal: controller.signal,
       onRetract: () => (retracted = true),
-    };
-    for await (const delta of chatAgent.stream(params, {
-      ...turn,
       runId,
+      attemptId,
       turnKind: "primary",
       runContext: runs.context(runId),
       onRetry: (reason) => {
@@ -132,9 +130,13 @@ async function pump(args: PumpArgs, controller: AbortController): Promise<void> 
         const nextAttemptId = next.run.activeAttemptId;
         if (next.run.state !== "running" || !nextAttemptId || nextAttemptId === attemptId) return false;
         attemptId = nextAttemptId;
+        turn.attemptId = nextAttemptId;
         return true;
       },
-    })) {
+    };
+    // Pass the exact mutable turn object to ChatAgent. Overflow retry updates its attemptId in onRetry;
+    // spreading into a second object would leave the model-effect middleware bound to the old Attempt.
+    for await (const delta of chatAgent.stream(params, turn)) {
       ctx.notify(CHAT_METHODS.delta, { messageId, characterId, delta } satisfies ChatDelta);
     }
     if (retracted) {

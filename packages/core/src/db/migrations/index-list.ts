@@ -29,6 +29,7 @@ import { hindsightConnectionSetupMigration022 } from "./022-hindsight-connection
 import { hindsightInitialCutoverMigration023 } from "./023-hindsight-initial-cutover.ts";
 import { harnessRunsMigration024 } from "./024-harness-runs.ts";
 import { runEventsMigration025 } from "./025-run-events.ts";
+import { runEffectsMigration026 } from "./026-run-effects.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -56,4 +57,5 @@ export const MIGRATIONS: Migration[] = [
   hindsightInitialCutoverMigration023,
   harnessRunsMigration024,
   runEventsMigration025,
+  runEffectsMigration026,
 ];

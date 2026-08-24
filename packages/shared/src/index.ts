@@ -49,6 +49,8 @@ export {
 
 export { RUN_EVENT_SCHEMA_VERSION, RunEventCategorySchema, RunEventKindSchema, RunEventSourceSchema, RunEventPayloadSchema, RunEventSchema, RunEventCursorSchema, RunEventSurfaceSchema, RunEventSummarySchema, RunEventInspectorSchema } from "./run-event-schema.ts";
 export type { RunEvent, RunEventCategory, RunEventKind, RunEventPayload, RunEventCursor, RunEventSummary, RunEventInspector } from "./run-event-schema.ts";
+export { EFFECT_SCHEMA_VERSION, EffectKindSchema, EffectStateSchema, EffectReplayPostureSchema, EffectOutcomeSchema, EffectSourceRefSchema, EffectExecutorRefSchema, EffectLifecycleSchema, UsageQualitySchema, UsageRecordSchema } from "./effect-lifecycle-schema.ts";
+export type { EffectLifecycle, UsageRecord } from "./effect-lifecycle-schema.ts";
 export type {
   RunInitiator, RunProvenance, DeliveryClass, ContextMode, RunState, AttemptState, RunOutcome, Retryability,
   RunOperationPhase, TriggerRequest, SnapshotReference, RunHostReference, RunExtensionReference,

@@ -4,7 +4,8 @@ import { lifecycleProjection, replayRunEvents } from "./run-event-projection.ts"
 
 const events: RunEvent[] = [
   { eventId: "e1", runId: "r", seq: 1, schemaVersion: "run-event.v1", category: "lifecycle", kind: "run.admitted", occurredAt: "2026-08-24T00:00:00.000Z", source: "core.run-repo", payload: { kind: "run.admitted", state: "queued", initiator: "primary", deliveryClass: "class_a", attemptOrdinal: 1 } },
-  { eventId: "e2", runId: "r", seq: 2, schemaVersion: "run-event.v1", category: "lifecycle", kind: "run.settled", occurredAt: "2026-08-24T00:00:01.000Z", source: "core.run-repo", payload: { kind: "run.settled", state: "completed", outcome: "completed", retryability: "not_retryable", summary: "done" } },
+  { eventId: "e2", runId: "r", attemptId: "a", seq: 2, schemaVersion: "run-event.v1", category: "effect", kind: "effect.intent_committed", occurredAt: "2026-08-24T00:00:00.500Z", source: "core.effect-lifecycle", payload: { kind: "effect.intent_committed", state: "intent_committed", effectId: "opaque", effectKind: "model", sourceRef: { type: "model", provider: "test", modelId: "test" }, replayPosture: "never" } },
+  { eventId: "e3", runId: "r", seq: 3, schemaVersion: "run-event.v1", category: "lifecycle", kind: "run.settled", occurredAt: "2026-08-24T00:00:01.000Z", source: "core.run-repo", payload: { kind: "run.settled", state: "completed", outcome: "completed", retryability: "not_retryable", summary: "done" } },
 ];
 
 describe("Run event projection", () => {
@@ -14,6 +15,8 @@ describe("Run event projection", () => {
     expect(second).toEqual(first);
     expect(first.milestones[0]).toEqual({ label: "run admitted", phase: "run", status: "queued", surface: "current" });
     expect(first.milestones[0]).not.toHaveProperty("runId");
+    expect(first.milestones[1]).toEqual({ label: "effect intent committed", phase: "effect", status: "intent_committed", surface: "current" });
+    expect(first.milestones[1]).not.toHaveProperty("effectId");
     expect(first.terminal?.outcome).toBe("completed");
   });
 });

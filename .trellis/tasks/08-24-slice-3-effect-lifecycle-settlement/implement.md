@@ -3,6 +3,94 @@
 This plan is executable only after the Slice 3 child remains in planning, the research/design artifacts are reviewed,
 and the task is explicitly activated. It authorizes no production implementation by itself.
 
+## 0. Execution Split and Compact-Resistant Handoff
+
+Slice 3 remains one architecture theme, but it is implemented as three sequential batches. This split is authoritative
+for implementation dispatch, check dispatch, commit/archive claims, and session recovery after context compaction.
+
+```text
+Slice 3A: Effect foundation + per-provider model middleware + authoritative usage
+Slice 3B: Governed Tool + Approval wait + Host + MCP execution chain
+Slice 3C: Explicit Memory effects + cross-boundary/process acceptance
+```
+
+The batches reuse this task's PRD/design/research and the same Effect contracts. Do not duplicate the parent research or
+create one task per identifier/subsystem. Each implementation batch targets approximately two to three agent context
+windows and keeps highly coupled call-chain work together.
+
+Current execution status: Slice 3A is formally approved and pending its explicit batch commit. Slice 3B is the next
+implementation boundary. Slice 3C and whole-Slice integration acceptance remain not started; the parent task stays
+`in_progress` until both are complete.
+
+### Slice 3A - Effect Foundation, Model, and Usage
+
+Owns:
+
+- Shared bounded/versioned Effect and Usage contracts plus backward-compatible RunEvent extensions.
+- Additive `run_effects`/`run_usage` persistence, migration lineage, typed repository, CAS, duplicate/stale handling,
+  redaction, post-commit event publication, and unfinished-effect reads needed by later recovery.
+- One Core `EffectLifecycleService` boundary.
+- Installed AI SDK 7 `wrapLanguageModel`/`LanguageModelMiddleware` integration for every actual internal
+  `doStream`/`doGenerate` provider request made by ToolLoopAgent.
+- Authoritative per-request usage with `reported | estimated | unknown` quality.
+- Truthful Model abort/error/unknown semantics; preservation of streaming, primary Timeline persistence,
+  cancel/retract, partial output, non-primary behavior, and the existing clean context-overflow retry.
+- Model Effect linkage to the current Run and model Attempt. Any Run/Attempt transaction limitation must be explicit and
+  must not be represented as completed atomic coupling.
+
+Does not own Tool/Approval/Host/MCP/Memory production adapters. A 3A check must not demand those later adapters and a 3A
+completion must not be described as complete Slice 3.
+
+### Slice 3B - Governed External Effects
+
+Owns one coupled execution chain:
+
+```text
+AI SDK tool call -> canonical governance -> Approval wait -> final revalidation
+                 -> Core/Host/MCP target dispatch -> Effect settlement
+```
+
+- One logical Tool Effect; do not double-record Tool plus Host/MCP as independent Core effects for the same operation.
+- Durable Approval waiting/denied/expired/cancelled/invalidated references. A wait result never proves target execution.
+- Target intent only after Approval and final policy/generation validation.
+- Thread enclosing `(runId, attemptId, effectId)` through Host routing while preserving Host-local operation/attempt
+  identity, generation, deadline, idempotency, duplicate/late, cooperative cancel, and unsafe `OUTCOME_UNKNOWN` rules.
+- MCP outer governed generation/lease boundary, draining/forced-close uncertainty, and no generation redirect/replay.
+- Parallel-tool settlement and existing AI SDK tool-result ordering regressions.
+
+3B reuses 3A contracts/repository/service and the parent research. Its additional context is limited to governed-tool,
+Approval, Host broker/routing, MCP generation/lease, and their tests.
+
+### Slice 3C - Memory and Integration Closure
+
+Owns:
+
+- Explicit Memory tool Effects linked to stable request/effect identity, authority epoch, provider/capability snapshot,
+  and exact idempotency behavior.
+- Recall safe posture under the same captured authority; writes default `never` unless exact provider idempotency is
+  proven with the same request identity.
+- Preservation of primary detached AutoMemory/image behavior and every non-primary no-fake-Timeline,
+  no-costume-consumption, and no-conversational-watermark invariant.
+- Final cross-boundary Model/Tool/Approval/Host/MCP/Memory process tests, projection/readability closure, and complete
+  Slice 3 acceptance review.
+
+3C does not implement Slice 4 orphan scanning, automatic safe replay, durable queue/deadline/budget enforcement,
+Scheduler, Heartbeat, Child Run, monitor UI, or external telemetry.
+
+### Dispatch and Completion Rules
+
+- At most one implementation agent and one formal check agent per batch. Reuse the existing implementation agent for
+  sequential follow-ups while its context is healthy; do not create parallel replacement implementers.
+- Every implementation prompt names the exact batch and includes an acceptance matrix. The agent may report
+  `COMPLETED` only when every item in that batch is implemented and verified.
+- If a batch is incomplete, do not dispatch its formal check. Resume the same implementation agent or explicitly revise
+  the batch plan first.
+- Each formal check reviews only its batch plus regression effects on earlier batches. Passing 3A or 3B never implies
+  complete Slice 3.
+- Commit and archive records must name the batch. The parent Slice 3 may close only after the 3C integration review.
+- After context compaction or session resume, read this section, `research/implementation-evidence.md`, Git status, and
+  the latest batch-specific agent report before taking any action. Do not reconstruct progress from chat memory alone.
+
 ## 1. Preparation
 
 1. Verify `H:/TakiAgent-worktrees/t4`, branch, active task, parent task, current HEAD, dirty paths, and migration
@@ -14,7 +102,7 @@ and the task is explicitly activated. It authorizes no production implementation
    Memory coordinator, and usage callback seams before choosing exact wrapper signatures.
 5. Allocate any migration only after comparing this branch with synchronized `main`; never reserve a number in prose.
 
-## 2. Implementation Order
+## 2. Whole-Slice Technical Order
 
 ### Step 1 - Shared effect and usage contracts
 

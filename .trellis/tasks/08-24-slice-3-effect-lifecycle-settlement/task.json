@@ -3,7 +3,7 @@
   "name": "slice-3-effect-lifecycle-settlement",
   "title": "Slice 3 Effect Lifecycle and Settlement",
   "description": "Plan and implement the Core-owned intent-before-effect and settlement-after-effect lifecycle for model, tool, Host/MCP/Approval, usage, stale completion, unknown outcome, and memory-side-effect boundaries above the Slice 2 Run Event ledger.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "core-effect-lifecycle",
   "package": null,

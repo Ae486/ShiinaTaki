@@ -14,7 +14,7 @@ export function replayRunEvents<T>(events: readonly RunEvent[], projection: RunE
 
 function toSummary(event: RunEvent): RunEventSummary {
   const terminal = event.kind === "run.settled";
-  const phase = event.kind.startsWith("attempt.") ? "attempt" : event.kind.startsWith("run.") ? "run" : "lifecycle";
+  const phase = event.kind.startsWith("attempt.") ? "attempt" : event.kind.startsWith("run.") ? "run" : event.kind.startsWith("effect.") ? "effect" : event.kind.startsWith("usage.") ? "usage" : "lifecycle";
   const payload = event.payload;
   return { label: event.kind.replace(/[._]/g, " "), phase, status: "state" in payload ? payload.state : event.kind, ...("outcome" in payload && payload.outcome ? { outcome: payload.outcome } : {}), ...("summary" in payload && payload.summary ? { summary: payload.summary } : {}), surface: terminal ? "current" : event.kind === "attempt.settled" ? "shadowed" : "current" };
 }

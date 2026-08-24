@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { EffectSourceRefSchema } from "./effect-lifecycle-schema.ts";
 
 const ID = z.string().trim().min(1).max(200);
 const BOUNDED = z.string().max(1_000);
@@ -6,9 +7,9 @@ const SAFE_BOUNDED = BOUNDED.refine((value) => !/(<\/?prompt|authorization\s*[:=
 const ERROR_CODE = z.string().regex(/^[a-z0-9][a-z0-9_.-]{0,99}$/, "invalid bounded error code");
 const SHA = z.string().regex(/^[a-f0-9]{64}$/);
 export const RUN_EVENT_SCHEMA_VERSION = "run-event.v1" as const;
-export const RunEventCategorySchema = z.literal("lifecycle");
-export const RunEventKindSchema = z.enum(["run.admitted", "attempt.prepared", "run.started", "attempt.started", "attempt.settled", "run.cancel_requested", "run.settled"]);
-export const RunEventSourceSchema = z.enum(["core.run-repo"]);
+export const RunEventCategorySchema = z.enum(["lifecycle", "effect", "usage"]);
+export const RunEventKindSchema = z.enum(["run.admitted", "attempt.prepared", "run.started", "attempt.started", "attempt.settled", "run.cancel_requested", "run.settled", "effect.intent_committed", "effect.waiting", "effect.settled", "usage.settled"]);
+export const RunEventSourceSchema = z.enum(["core.run-repo", "core.effect-lifecycle"]);
 const CorrelationSchema = z.strictObject({ triggerRequestId: ID.optional(), taskId: ID.optional(), parentRunId: ID.optional() });
 const RunAdmittedPayloadSchema = z.strictObject({ kind: z.literal("run.admitted"), state: z.literal("queued"), initiator: ID, deliveryClass: ID, attemptOrdinal: z.literal(1) });
 const AttemptPreparedPayloadSchema = z.strictObject({ kind: z.literal("attempt.prepared"), state: z.literal("prepared"), attemptOrdinal: z.number().int().min(1).max(10_000) });
@@ -17,8 +18,19 @@ const AttemptStartedPayloadSchema = z.strictObject({ kind: z.literal("attempt.st
 const AttemptSettledPayloadSchema = z.strictObject({ kind: z.literal("attempt.settled"), state: z.enum(["completed", "failed", "cancelled", "deadline_exceeded", "outcome_unknown"]), outcome: z.enum(["completed", "failed", "cancelled", "skipped", "deadline_exceeded", "outcome_unknown"]), attemptOrdinal: z.number().int().min(1).max(10_000), retryability: z.enum(["retryable", "not_retryable", "unknown"]), summary: SAFE_BOUNDED.optional(), errorCode: ERROR_CODE.optional() });
 const CancelRequestedPayloadSchema = z.strictObject({ kind: z.literal("run.cancel_requested"), state: z.literal("cancel_requested"), reason: SAFE_BOUNDED });
 const RunSettledPayloadSchema = z.strictObject({ kind: z.literal("run.settled"), state: z.enum(["completed", "failed", "cancelled", "skipped", "deadline_exceeded", "outcome_unknown"]), outcome: z.enum(["completed", "failed", "cancelled", "skipped", "deadline_exceeded", "outcome_unknown"]), retryability: z.enum(["retryable", "not_retryable", "unknown"]), summary: SAFE_BOUNDED.optional(), errorCode: ERROR_CODE.optional() });
-export const RunEventPayloadSchema = z.discriminatedUnion("kind", [RunAdmittedPayloadSchema, AttemptPreparedPayloadSchema, RunStartedPayloadSchema, AttemptStartedPayloadSchema, AttemptSettledPayloadSchema, CancelRequestedPayloadSchema, RunSettledPayloadSchema]);
-export const RunEventSchema = z.strictObject({ eventId: ID, runId: ID, attemptId: ID.optional(), seq: z.number().int().min(1).max(2_000_000_000), schemaVersion: z.literal(RUN_EVENT_SCHEMA_VERSION), category: RunEventCategorySchema, kind: RunEventKindSchema, occurredAt: z.string().datetime({ offset: true }), source: RunEventSourceSchema, correlation: CorrelationSchema.optional(), payload: RunEventPayloadSchema }).superRefine((event, ctx) => { if (["attempt.prepared", "attempt.started", "attempt.settled"].includes(event.kind) && !event.attemptId) ctx.addIssue({ code: "custom", path: ["attemptId"], message: "attempt events require attemptId" }); if (event.payload.kind !== event.kind) ctx.addIssue({ code: "custom", path: ["payload", "kind"], message: "payload kind mismatch" }); });
+const EffectPayloadBase = { effectId: ID, effectKind: z.enum(["model", "tool", "host", "mcp", "approval", "memory"]), sourceRef: EffectSourceRefSchema, capturedGenerationRef: ID.optional(), replayPosture: z.enum(["safe", "never"]), summary: SAFE_BOUNDED.optional(), errorCode: ERROR_CODE.optional() } as const;
+const EffectIntentPayloadSchema = z.strictObject({ kind: z.literal("effect.intent_committed"), state: z.literal("intent_committed"), ...EffectPayloadBase });
+const EffectWaitingPayloadSchema = z.strictObject({ kind: z.literal("effect.waiting"), state: z.literal("waiting"), ...EffectPayloadBase });
+const EffectSettledPayloadSchema = z.strictObject({ kind: z.literal("effect.settled"), state: z.literal("terminal"), outcome: z.enum(["completed", "failed", "cancelled", "deadline_exceeded", "outcome_unknown", "reconciliation_required"]), ...EffectPayloadBase });
+const UsageSettledPayloadSchema = z.strictObject({ kind: z.literal("usage.settled"), state: z.literal("settled"), effectId: ID, usageId: ID, quality: z.enum(["reported", "estimated", "unknown"]), inputTokens: z.number().int().nonnegative().max(1_000_000_000).optional(), outputTokens: z.number().int().nonnegative().max(1_000_000_000).optional(), totalTokens: z.number().int().nonnegative().max(1_000_000_000).optional() });
+export const RunEventPayloadSchema = z.discriminatedUnion("kind", [RunAdmittedPayloadSchema, AttemptPreparedPayloadSchema, RunStartedPayloadSchema, AttemptStartedPayloadSchema, AttemptSettledPayloadSchema, CancelRequestedPayloadSchema, RunSettledPayloadSchema, EffectIntentPayloadSchema, EffectWaitingPayloadSchema, EffectSettledPayloadSchema, UsageSettledPayloadSchema]);
+export const RunEventSchema = z.strictObject({ eventId: ID, runId: ID, attemptId: ID.optional(), seq: z.number().int().min(1).max(2_000_000_000), schemaVersion: z.literal(RUN_EVENT_SCHEMA_VERSION), category: RunEventCategorySchema, kind: RunEventKindSchema, occurredAt: z.string().datetime({ offset: true }), source: RunEventSourceSchema, correlation: CorrelationSchema.optional(), payload: RunEventPayloadSchema }).superRefine((event, ctx) => {
+  if (["attempt.prepared", "attempt.started", "attempt.settled", "effect.intent_committed", "effect.waiting", "effect.settled", "usage.settled"].includes(event.kind) && !event.attemptId) ctx.addIssue({ code: "custom", path: ["attemptId"], message: "attempt events require attemptId" });
+  if (event.payload.kind !== event.kind) ctx.addIssue({ code: "custom", path: ["payload", "kind"], message: "payload kind mismatch" });
+  if (event.kind.startsWith("effect.") && (event.category !== "effect" || event.source !== "core.effect-lifecycle")) ctx.addIssue({ code: "custom", path: ["category"], message: "effect events require effect category/source" });
+  if (event.kind === "usage.settled" && (event.category !== "usage" || event.source !== "core.effect-lifecycle")) ctx.addIssue({ code: "custom", path: ["category"], message: "usage events require usage category/source" });
+  if (!event.kind.startsWith("effect.") && event.kind !== "usage.settled" && (event.category !== "lifecycle" || event.source !== "core.run-repo")) ctx.addIssue({ code: "custom", path: ["category"], message: "lifecycle events require lifecycle category/source" });
+});
 export type RunEvent = z.infer<typeof RunEventSchema>;
 export type RunEventPayload = z.infer<typeof RunEventPayloadSchema>;
 export type RunEventKind = z.infer<typeof RunEventKindSchema>;

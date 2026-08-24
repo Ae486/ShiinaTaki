@@ -1,4 +1,5 @@
 # shared/src/
+- effect-lifecycle-schema.ts — closed provider-neutral effect current-state and authoritative usage contracts with replay/redaction bounds
 - harness-schema.ts — strict provider-neutral Trigger Request, Run/Attempt, immutable authority/capability snapshot, Receipt, and run.status contracts
 - index.ts — package public entry; named re-exports of the protocol surface
 - ping-schema.ts — scaffold ping/pong smoke schema (desktop IPC smoke; untouched this slice)

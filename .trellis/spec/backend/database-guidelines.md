@@ -153,6 +153,94 @@ db.transaction(() => {
 liveBus.publish(committed);
 ```
 
+## Scenario: Run-Owned Effect Intent, Settlement, and Usage
+
+### 1. Scope / Trigger
+
+- Trigger: a Run starts an external, uncertain, or separately accountable model/tool/Host/MCP/Approval/Memory action.
+- The Effect row is the mutable execution authority for one action under a specific Run Attempt. RunEvents are immutable
+  evidence, and `run_usage` is the authoritative model-usage ledger. Timeline content remains a separate conversational
+  transaction and must not be described as atomically committed with Effect settlement.
+
+### 2. Signatures
+
+- Shared contract: `EffectRecord { effectId, runId, attemptId, effectKind, state, sourceRef, executorRef?,
+  capturedGenerationRef?, inputDigest?, replayPosture, resultRef?, usageRef?, outcome?, version, ... }`.
+- Repository boundary: `EffectRepo.commitIntent(input)` and `EffectRepo.settle(input)` own the short synchronous SQLite
+  transaction; `EffectLifecycleService` is the Core adapter-facing boundary.
+- Model boundary: AI SDK 7 `wrapLanguageModel` middleware wraps each real internal `doStream` / `doGenerate` request,
+  not merely the outer `ToolLoopAgent.stream()` call.
+- Durable storage: `run_effects` owns current Effect state and `run_usage` owns one accepted usage result linked to the
+  settled model Effect. Canonical events are `effect.intent_committed`, `effect.waiting`, `effect.settled`, and
+  `usage.settled`.
+
+### 3. Contracts
+
+- Commit intent and reserve identity before dispatch. If intent persistence fails, the provider/tool/Host/MCP/Memory
+  action must not start.
+- Settle with `(runId, attemptId, effectId, expectedVersion)` ownership/CAS. Exact terminal duplicates are no-ops;
+  unknown IDs, wrong Attempts, inactive/terminal Attempts, and late callbacks are stale and cannot change current truth.
+- Every terminal model Effect writes exactly one usage row and `usage.settled` event with quality
+  `reported | estimated | unknown`. Missing counts are never represented as zero. Abort, interrupted close, provider
+  ambiguity, no finish, and finish-without-usage settle truthfully, using `outcome_unknown` where acceptance is uncertain.
+- Effect state, accepted usage, Attempt version, and canonical Effect/Usage events commit in one synchronous transaction;
+  live publication occurs only after commit and observer failure cannot roll back or relabel durable truth.
+- Persist bounded typed references, closed error codes, canonical cryptographic digests, and sanitized summaries only.
+  Raw prompts, completions, effective tool arguments, provider errors, credentials, environment values, and sensor/media
+  payloads never enter Effect rows, usage rows, events, or ordinary projections.
+- Retry identity is mutable execution context: when context overflow creates a replacement Attempt, the exact
+  `TurnContext` passed to the model middleware must receive the replacement `attemptId` before the next provider request.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required result |
+| --- | --- |
+| Intent transaction rejects or rolls back | Do not invoke the external action; expose the bounded failure. |
+| Exact terminal callback repeats | Return the committed terminal truth; append no duplicate settlement or usage event. |
+| Unknown Effect, wrong Run/Attempt, stale version, or inactive Attempt callback | Classify as stale; do not mutate Effect, Attempt, usage, or events. |
+| Provider fails before a response is accepted | Settle failed or unknown according to evidence and persist `unknown` usage if counts are unavailable. |
+| Stream closes without finish, or finish has no usage | Settle `outcome_unknown` and persist one `unknown` usage row/event. |
+| Abort or transport failure leaves acceptance ambiguous | Settle `outcome_unknown`; never relabel as clean failure or replay automatically. |
+| Live observer throws after commit | Preserve the durable terminal Effect and usage; observer failure is diagnostic only. |
+| Summary/reference contains raw content, secrets, or an invalid generation/type | Reject before write; the surrounding transaction rolls back. |
+
+### 5. Good/Base/Bad Cases
+
+- Good: middleware commits one model intent, dispatches the provider, then atomically settles Effect + usage + events;
+  a tool-loop second provider request receives a second Effect under the active Attempt.
+- Base: the provider supplies no token counts; the Effect still reaches a terminal truth with an explicit `unknown`
+  usage row and no fabricated zero.
+- Bad: start the provider before intent commit, mark any finish marker as settled without examining usage, reuse the
+  failed overflow Attempt ID, publish events inside the transaction, or persist a raw prompt/provider error.
+
+### 6. Tests Required
+
+- Migration fresh/historical/reopen/no-op lineage for `run_effects` and `run_usage`.
+- Intent-before-dispatch and failed-intent/no-provider-call tests at the installed middleware seam.
+- CAS, exact duplicate, stale/wrong-attempt, inactive Attempt, event ordering, redaction, and post-commit observer
+  isolation tests at `EffectRepo`.
+- Model success, provider failure, abort, no-finish, finish-without-usage, reported/estimated/unknown usage, and
+  canonical digest collision-resistance tests.
+- Real overflow retry regression proving ordinal-1 failure, ordinal-2 completion, distinct Attempt IDs, and replacement
+  Attempt binding for subsequent provider Effects.
+- Full Shared/Core tests and typechecks, lint, E2E typecheck, migration/task validation, `git diff --check`, and a real
+  isolated Core boot whenever startup wiring changes.
+
+### 7. Wrong vs Correct
+
+```ts
+// Wrong: dispatch first, treat any finish as complete, and keep the original Attempt after retry.
+const stream = await model.doStream(request);
+settled = part.type === "finish";
+turn.onRetry?.("context_overflow");
+
+// Correct: commit identity first, settle from evidence, and mutate the shared retry context.
+const effect = effects.commitIntent(intent);
+const stream = await model.doStream(request);
+effects.settle({ effectId: effect.effectId, expectedVersion: effect.version, outcome, usage });
+turn.attemptId = replacementAttemptId;
+```
+
 ## Scenario: Legacy Memory Migration and Authority Cutover
 
 ### 1. Scope / Trigger

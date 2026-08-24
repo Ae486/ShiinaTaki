@@ -3,6 +3,10 @@ import { createCompanionFixture, type CompanionFixture } from "../testing/compan
 import { abortRejectingModel, scriptedModel, slowStreamingModel, streamingMockModel } from "../testing/mock-language-model.ts";
 import type { Connection } from "../server/connection-registry.ts";
 import { createChatAgent, type TurnContext, type TurnUsageReport } from "./chat-agent.ts";
+import { digestForModelRequest } from "./model-effect-middleware.ts";
+import { simulateReadableStream, tool } from "ai";
+import { createModelEffectMiddleware } from "./model-effect-middleware.ts";
+import { z } from "zod";
 
 const fixtures: CompanionFixture[] = [];
 const TEST_CONNECTION: Connection = {
@@ -34,6 +38,64 @@ function cancellableTurn(controller: AbortController, onRetract?: () => void): T
 }
 
 describe("chat-agent usage-capture seam (batch 6, R1 tier 2)", () => {
+  it("keeps distinct model requests distinct under equal-length strings", () => {
+    expect(digestForModelRequest({ prompt: "aa", temperature: 1 })).not.toBe(digestForModelRequest({ prompt: "bb", temperature: 1 }));
+  });
+
+  it("settles finish-without-usage as unknown", async () => {
+    const settlements: Array<{ outcome?: string }> = [];
+    const lifecycle = {
+      prepare: (input: { runId: string; attemptId: string }) => ({ schemaVersion: "effect.v1" as const, effectId: `${input.runId}-${input.attemptId}`, runId: input.runId, attemptId: input.attemptId, kind: "model" as const, state: "intent_committed" as const, version: 0, sourceRef: { type: "model" as const, provider: "test", modelId: "test" }, replayPosture: "never" as const }),
+      settle: (input: { outcome?: string }) => { settlements.push(input); return { effect: undefined as never, duplicate: false, stale: false }; },
+      get: () => undefined,
+      unfinished: () => [],
+    };
+    const middleware = createModelEffectMiddleware({ lifecycle, runId: "run-no-usage", attemptId: "attempt-no-usage" });
+    const result = await middleware.wrapStream?.({
+      doGenerate: async () => { throw new Error("unused"); },
+      doStream: async () => ({ stream: simulateReadableStream({ chunks: [{ type: "finish", finishReason: { unified: "stop", raw: undefined } }] }) }),
+      params: { prompt: [] },
+      model: { provider: "test", modelId: "test" },
+    } as never);
+    if (result) { const reader = result.stream.getReader(); while (!(await reader.read()).done) { /* drain */ } }
+    expect(settlements).toContainEqual(expect.objectContaining({ outcome: "outcome_unknown" }));
+  });
+
+  it("does not invoke a provider when intent preparation fails", async () => {
+    let providerCalls = 0;
+    const middleware = createModelEffectMiddleware({
+      lifecycle: { prepare: () => { throw new Error("intent failed"); }, settle: () => { throw new Error("unexpected settlement"); }, get: () => undefined, unfinished: () => [] },
+      runId: "run-failed-intent", attemptId: "attempt-failed-intent",
+    });
+    await expect(middleware.wrapStream?.({
+      doGenerate: async () => { throw new Error("unused"); },
+      doStream: async () => { providerCalls += 1; return { stream: simulateReadableStream({ chunks: [] }) }; },
+      params: { prompt: [] }, model: { provider: "test", modelId: "test" },
+    } as never)).rejects.toThrow("intent failed");
+    expect(providerCalls).toBe(0);
+  });
+
+  it("creates one Core effect per internal ToolLoopAgent provider request", async () => {
+    const f = fresh();
+    const prepared: string[] = [];
+    const settled: string[] = [];
+    let sequence = 0;
+    const lifecycle = {
+      prepare(input: { runId: string; attemptId: string }) {
+        const effectId = `effect-${++sequence}`;
+        prepared.push(`${input.runId}/${input.attemptId}`);
+        return { schemaVersion: "effect.v1" as const, effectId, runId: input.runId, attemptId: input.attemptId, kind: "model" as const, state: "intent_committed" as const, version: 0, sourceRef: { type: "model" as const, provider: "test", modelId: "test" }, replayPosture: "never" as const };
+      },
+      settle(input: { effectId: string }) { settled.push(input.effectId); return { effect: undefined as never, duplicate: false, stale: false }; },
+      get: () => undefined,
+      unfinished: () => [],
+    };
+    const agent = createChatAgent({ model: scriptedModel([{ kind: "tool", toolCallId: "c1", toolName: "probe", input: { value: "x" } }, { kind: "text", deltas: ["two"] }]), store: f.conversation, memory: f.memory, extraTools: { probe: tool({ description: "probe", inputSchema: z.object({ value: z.string() }), execute: async () => ({ ok: true }) }) }, effectLifecycle: lifecycle });
+    await drain(agent.stream({ characterId: "taki", message: "hi" }, { runId: "run-1", attemptId: "attempt-1" }));
+    expect(prepared).toEqual(["run-1/attempt-1", "run-1/attempt-1"]);
+    expect(settled).toHaveLength(2);
+  });
+
   it("reports the provider usage + our positive estimate, detached, after a committed turn", async () => {
     const f = fresh();
     const reports: TurnUsageReport[] = [];

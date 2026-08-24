@@ -35,6 +35,8 @@ import { createWindowStateRepo } from "./db/window-state-repo.ts";
 import { createRunRepo } from "./db/run-repo.ts";
 import { createRunEventLiveBus } from "./db/run-event-live.ts";
 import { createRunEventRepo } from "./db/run-event-repo.ts";
+import { createEffectRepo } from "./db/effect-repo.ts";
+import { createEffectLifecycleService } from "./harness/effect-lifecycle-service.ts";
 import { createRunService } from "./harness/run-service.ts";
 import { createRunSnapshotCapture } from "./harness/run-snapshot-capture.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
@@ -103,6 +105,7 @@ logger.info("Core Host identity loaded");
 const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
 const runEventRepo = createRunEventRepo(db);
 const runEventLive = createRunEventLiveBus((runId, afterSeq) => runEventRepo.list(runId, afterSeq));
+const effectLifecycle = createEffectLifecycleService(createEffectRepo(db, runEventRepo, runEventLive));
 const runRepo = createRunRepo(db, runEventRepo, runEventLive);
 const timelineRepo = createTimelineRepo(db);
 // R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
@@ -303,6 +306,7 @@ registry.register(
   chatSendMethod(
     createChatAgent({
       model,
+      effectLifecycle,
       store: conversationStore,
       memory,
        memoryPrompt: () => selectedMemory.canonical ? CANONICAL_MEMORY_SYSTEM_PROMPT : BASE_SYSTEM_PROMPT,

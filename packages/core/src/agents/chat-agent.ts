@@ -8,7 +8,7 @@
  *         with the volatile <turn-context> tail riding the outgoing user message (Q4/ADR 0008); auto-writes detached;
  *         a classified context-overflow retries ONCE against the same captured Run extension context
  */
-import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type ToolSet } from "ai";
+import { ToolLoopAgent, isStepCount, wrapLanguageModel, type LanguageModel, type ModelMessage, type StopCondition, type ToolSet } from "ai";
 import type { ChatSendParams, ImageAttachment } from "@taki/shared";
 import type { ApprovalGate } from "../approval/approval-gate.ts";
 import type { Connection } from "../server/connection-registry.ts";
@@ -22,6 +22,8 @@ import type { ConversationStore } from "./conversation-store.ts";
 import { isContextOverflowError, observedTokensOf } from "./overflow-error.ts";
 import { mergeToolSets } from "./tool-set-assembly.ts";
 import type { TurnMessage, UserImageInput } from "./turn-mapping.ts";
+import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
+import { createModelEffectMiddleware } from "./model-effect-middleware.ts";
 
 /** Per-turn execution handle. Primary chat supplies a WS connection; unattended non-primary Runs omit it. */
 export interface TurnContext {
@@ -36,6 +38,7 @@ export interface TurnContext {
   onRetract?: () => void;
   /** Durable Harness identity and input classification; omitted callers remain primary-compatible. */
   runId?: string;
+  attemptId?: string;
   turnKind?: "primary" | "non-primary";
   controlInput?: string;
   /** Admission-captured runtime bindings reused by every model retry for this durable Run. */
@@ -121,6 +124,8 @@ export interface ChatAgentDeps {
    *  input tokens (parsed from the provider error body, else our own estimate of the same request). main.ts wires
    *  the window calibrator's onOverflow + the counts-only warn. Absent = no retry, today's propagation. */
   onOverflow?: (observedInput: number) => void;
+  /** Optional Core-owned effect boundary; omitted by focused legacy callers. */
+  effectLifecycle?: EffectLifecycleService;
 }
 
 // Fallback step cap when no caller injects one (tests). Production injects AgentConfig.maxSteps (env TAKI_MAX_STEPS, D11);
@@ -210,6 +215,7 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
 // retry can re-run it under the recalibrated window (batch-6 design §3.1's named-fn relief; the machinery below is
 // the pre-batch-6 runTurn body, moved verbatim). The fresh per-attempt history() pull is the point: the retry's
 // window is computed under the budget the calibrator just shrank.
+// eslint-disable-next-line max-lines-per-function
 async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): AsyncIterable<string> {
   const { store, approval } = deps;
   const { characterId, message, attachments, images, vision, userSeq, primary, state } = attempt;
@@ -220,8 +226,12 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   // Hoisted so the batch-6 usage seam can estimate the SAME instructions string the request carries.
   const instructions = composeInstructions(deps, { characterId, message: controlMessage, runInstructions: attempt.runContext?.instructions }, now);
   // Per-turn construction: assembled instructions + characterId-bound tools (construction cost is trivial).
+  const selectedModel = vision ? vision.model : deps.model;
+  const model = deps.effectLifecycle && turn?.runId && turn.attemptId
+    ? wrapLanguageModel({ model: selectedModel as Parameters<typeof wrapLanguageModel>[0]["model"], middleware: createModelEffectMiddleware({ lifecycle: deps.effectLifecycle, runId: turn.runId, attemptId: turn.attemptId }) })
+    : selectedModel;
   const agent = new ToolLoopAgent({
-    model: vision ? vision.model : deps.model,
+    model,
     instructions,
     tools: assembleTurnTools(deps, attempt, turn),
     stopWhen: [isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS), ...(deps.stopConditions ?? [])],
