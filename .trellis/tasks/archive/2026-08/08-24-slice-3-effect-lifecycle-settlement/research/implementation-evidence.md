@@ -9,7 +9,7 @@ after session compaction; verify it against Git and the latest agent report befo
 | --- | --- | --- |
 | 3A | Effect/Usage contracts, migration/repository/service, per-provider model middleware, authoritative usage, Model/Run/Attempt truthfulness | `committed:e55a8dc` |
 | 3B | Governed Tool, Approval wait/final revalidation, Host identity threading, MCP generation/lease settlement | `committed:36a3596` |
-| 3C | Explicit Memory effects, non-primary preservation, full cross-boundary/process acceptance | `approved_pending_commit` |
+| 3C | Explicit Memory effects, non-primary preservation, full cross-boundary/process acceptance | `committed:5c26c04` |
 
 The unique Slice 3A implementation and formal-check agents have finished. The final xhigh check approved 3A only after
 repairing the real overflow replacement-Attempt binding, durable Effect event evidence, stale callback classification,

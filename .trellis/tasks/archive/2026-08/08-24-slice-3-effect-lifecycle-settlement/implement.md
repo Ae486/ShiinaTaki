@@ -18,7 +18,7 @@ The batches reuse this task's PRD/design/research and the same Effect contracts.
 create one task per identifier/subsystem. Each implementation batch targets approximately two to three agent context
 windows and keeps highly coupled call-chain work together.
 
-Current execution status: Slice 3A is committed as `e55a8dc`, Slice 3B as `36a3596`, and Slice 3C has passed the final
+Current execution status: Slice 3A is committed as `e55a8dc`, Slice 3B as `36a3596`, and Slice 3C is committed as `5c26c04` after passing the final
 whole-Slice formal check. The next action is the explicit 3C batch commit; after that the parent task may be archived and
 Slice 4 planning may begin. Do not enter Slice 4 implementation from this task.
 
