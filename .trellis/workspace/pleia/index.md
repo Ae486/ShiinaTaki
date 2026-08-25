@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 22
-- **Last Active**: 2026-08-20
+- **Total Sessions**: 27
+- **Last Active**: 2026-08-25
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1158 | Active |
+| `journal-1.md` | ~1311 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,11 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 27 | 2026-08-25 | Slice 5A Scheduled Task provider | `c692c82`, `240a040` | `task/t4-skills-mcp-productization` |
+| 26 | 2026-08-24 | Complete Slice 2 Durable Event Ledger | `8f75115` | `task/t4-skills-mcp-productization` |
+| 25 | 2026-08-24 | Complete Slice 1 Harness Foundation | `0e61111`, `10151e0`, `f59ed3e`, `73ef453` | `task/t4-skills-mcp-productization` |
+| 24 | 2026-08-21 | Complete B3 Hindsight connection setup | `331982b`, `d9173fa` | `main` |
+| 23 | 2026-08-21 | Legacy memory migration and canonical Local cutover | `474b239`, `bd80713` | `main` |
 | 22 | 2026-08-20 | Freeze Skills MCP and integrate Main | `35765a0` | `task/t4-skills-mcp-productization` |
 | 21 | 2026-08-19 | Canonical memory provider foundation Batch 1 | `dc9bee6`, `5de6ee1` | `main` |
 | 20 | 2026-08-19 | Hindsight Slice 0 acceptance and closeout | `52b5faad`, `64fa85f8`, `f700d9ac`, `7eca2056`, `30b9688`, `944ed04` | `main` |

@@ -1156,3 +1156,156 @@ Validated the merged T4/Main migration lineage with focused tests, temporary-fil
 ### Status
 
 [OK] **Completed**
+
+
+## Session 23: Legacy memory migration and canonical Local cutover
+
+**Date**: 2026-08-21
+**Task**: Legacy memory migration and canonical Local cutover
+**Branch**: `main`
+
+### Summary
+
+Migrated the live legacy Markdown memory corpus into canonical Local SQLite, activated canonical-local authority, repaired canonical Memory Governance bindings, and completed owner acceptance.
+
+### Main Changes
+
+- Created and verified a complete live-data backup, dry-run, resumable Migration Ledger, immutable snapshot, canonical records, Blocks, and atomic authority activation.
+- Bound canonical recall/retain/reflect/update/invalidate/restore tools to the existing default-auto Memory Governance identities while preserving unknown-tool fail-closed behavior.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `474b239` | (see git log) |
+| `bd80713` | (see git log) |
+
+### Testing
+
+- [OK] Shared 31 files / 319 tests and Core 232 files / 1551 tests passed; typecheck, root lint, task validation, and diff check passed.
+- [OK] Live database integrity was ok, canonical-local authority was active, and the owner confirmed real Agent recall and retain calls succeeded.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Review and activate Batch 3: 08-09-hindsight-connection-setup; do not perform Hindsight authority cutover before its gates pass.
+
+
+## Session 24: Complete B3 Hindsight connection setup
+
+**Date**: 2026-08-21
+**Task**: Complete B3 Hindsight connection setup
+**Branch**: `main`
+
+### Summary
+
+Completed and committed B3 Hindsight connection/setup control plane, passed quality gates, archived task 08-09-hindsight-connection-setup, preserved canonical-local authority and backup evidence.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `331982b` | (see git log) |
+| `d9173fa` | (see git log) |
+
+### Status
+
+[OK] **Completed**
+
+
+## Session 25: Complete Slice 1 Harness Foundation
+
+**Date**: 2026-08-24
+**Task**: Complete Slice 1 Harness Foundation
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Completed Slice 1 durable Harness foundation, owner manual acceptance, stale operator-token recovery, D64 deferral, focused quality gates, and Trellis archive.
+
+### Main Changes
+
+- Archived Slice 1 Harness Foundation after owner acceptance.
+- Preserved unrelated backend spec and workspace journal changes.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0e61111` | (see git log) |
+| `10151e0` | (see git log) |
+| `f59ed3e` | (see git log) |
+| `73ef453` | (see git log) |
+
+### Testing
+
+- [OK] Shared 24 tests, Core 50 tests, Desktop 13 tests, and all three package typechecks passed.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Review Slice 2 Durable Event Ledger entry conditions; do not widen into monitor UI or T4 provider policy.
+
+
+## Session 26: Complete Slice 2 Durable Event Ledger
+
+**Date**: 2026-08-24
+**Task**: Complete Slice 2 Durable Event Ledger
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Completed and committed Slice 2 Durable Event Ledger. Added the Core-owned immutable Run event ledger, redaction-safe shared contract, atomic lifecycle evidence, post-commit per-Run live bus with cursor/backfill, deterministic replay/projection anchor, and the roadmap/spec/deferred-decision updates. Slice 2 was verified by package typechecks, Shared/Core tests, lint, e2e typecheck, Trellis validation, diff check, and isolated runtime smoke evidence.
+
+### Main Changes
+
+- Archived Slice 2 after the implementation and automated quality gates passed.
+- Kept full monitor UI, effect intent/settlement, recovery worker, scheduler/heartbeat, Child Run, and Character-lineage aggregation deferred to later slices.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8f75115` | (see git log) |
+
+### Testing
+
+- [OK] Shared typecheck and 338 tests passed; Core typecheck and 1677 tests passed with 1 existing skip.
+- [OK] Root lint, e2e typecheck, Trellis task validation, and git diff check passed.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Create Slice 3 planning task for effect intent/settlement, Host/MCP/Approval, usage settlement, stale completion, and unknown outcome boundaries.
+- Perform focused research against current Core code and PI/DSH reference contracts before implementation; do not start Slice 3 implementation from planning alone.
+
+
+## Session 27: Slice 5A Scheduled Task provider
+
+**Date**: 2026-08-25
+**Task**: Slice 5A Scheduled Task provider
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Implemented and formally checked Phase G Slice 5A Scheduled Task provider: durable schedules and occurrence outbox, Croner at/every/cron evaluation, catch-up and DST handling, unified RunService and non-primary ChatAgent execution, operator/Agent management, migration 029-030, and boot/shutdown lifecycle. Shared/Core/Rust/typecheck/lint/migration/isolated boot checks passed; one unrelated pre-existing E2E Host Approval residual remains.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `c692c82` | (see git log) |
+| `240a040` | (see git log) |
+
+### Status
+
+[OK] **Completed**
