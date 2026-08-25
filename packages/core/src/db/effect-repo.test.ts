@@ -24,6 +24,17 @@ describe("EffectRepo", () => {
     db.close();
   });
 
+  it("atomically reserves one captured budget unit per effect intent and fails closed at the limit", () => {
+    const { db, repo } = fixture();
+    db.prepare("UPDATE runs SET budget_limit=1 WHERE run_id='r'").run();
+    const first = repo.prepareIntent({ runId: "r", attemptId: "a", kind: "tool", sourceRef: { type: "tool", toolName: "x" }, replayPosture: "never" });
+    expect(first.effectId).toBeTruthy();
+    expect(db.prepare("SELECT budget_used FROM runs WHERE run_id='r'").get()?.budget_used).toBe(1);
+    expect(() => repo.prepareIntent({ runId: "r", attemptId: "a", kind: "tool", sourceRef: { type: "tool", toolName: "y" }, replayPosture: "never" })).toThrow("RUN_BUDGET_EXHAUSTED");
+    expect(db.prepare("SELECT budget_used FROM runs WHERE run_id='r'").get()?.budget_used).toBe(1);
+    db.close();
+  });
+
   it("rejects stale callbacks without mutation", () => {
     const { db, repo } = fixture();
     const effect = repo.prepareIntent({ runId: "r", attemptId: "a", kind: "tool", sourceRef: { type: "tool", toolName: "x" }, replayPosture: "safe" });

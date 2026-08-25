@@ -53,4 +53,13 @@ describe("createTurnRegistry", () => {
     expect(active.signal.aborted).toBe(false);
     expect(registry.cancel("taki", "run-active")).toBe(true);
   });
+
+  it("drains active turns by aborting them and resolving after the bounded wait", async () => {
+    const registry = createTurnRegistry();
+    const controller = registry.begin("taki");
+    const pending = registry.drain(25);
+    expect(controller.signal.aborted).toBe(true);
+    registry.end("taki", controller);
+    await expect(pending).resolves.toBeUndefined();
+  });
 });

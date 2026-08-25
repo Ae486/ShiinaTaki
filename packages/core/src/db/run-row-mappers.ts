@@ -27,7 +27,8 @@ export function readRunRow(row: Record<string, unknown>): Run {
     stateVersion: row.state_version, operationPhase: row.operation_phase,
     snapshot: { snapshotId: row.snapshot_id, manifestDigest: snapshot.manifestDigest,
       schemaVersion: snapshot.schemaVersion }, activeAttemptId: row.active_attempt_id ?? undefined,
-    queuedAt: row.queued_at, startedAt: row.started_at ?? undefined, deadlineAt: row.deadline_at ?? undefined,
+    queuedAt: row.queued_at, budgetLimit: row.budget_limit == null ? undefined : Number(row.budget_limit),
+    budgetUsed: row.budget_used == null ? 0 : Number(row.budget_used), startedAt: row.started_at ?? undefined, deadlineAt: row.deadline_at ?? undefined,
     terminalAt: row.terminal_at ?? undefined, outcome: row.outcome ?? undefined,
     retryability: row.retryability ?? undefined, receiptId: row.receipt_id ?? undefined });
 }

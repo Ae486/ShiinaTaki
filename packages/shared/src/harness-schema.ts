@@ -12,7 +12,7 @@ const Timestamp = z.string().datetime({ offset: true });
 const Digest = z.string().regex(/^[a-f0-9]{64}$/);
 const BoundedText = z.string().max(1000);
 
-export const RUN_METHODS = { status: "run.status" } as const;
+export const RUN_METHODS = { status: "run.status", queue: "run.queue" } as const;
 
 export const RunInitiatorSchema = z.enum(["primary", "scheduled", "heartbeat", "flush", "subagent", "webhook"]);
 export type RunInitiator = z.infer<typeof RunInitiatorSchema>;
@@ -202,6 +202,8 @@ export const RunSchema = z.object({
   snapshot: SnapshotReferenceSchema,
   activeAttemptId: Id.optional(),
   queuedAt: Timestamp,
+  budgetLimit: z.number().int().nonnegative().max(10_000_000).optional(),
+  budgetUsed: z.number().int().nonnegative().max(10_000_000).default(0),
   startedAt: Timestamp.optional(),
   deadlineAt: Timestamp.optional(),
   terminalAt: Timestamp.optional(),
@@ -228,3 +230,30 @@ export const RunStatusResultSchema = z.object({
   receipt: RunReceiptSchema.optional(),
 }).strict();
 export type RunStatusResult = z.infer<typeof RunStatusResultSchema>;
+
+export const QueueStateSchema = z.enum(["queued", "running", "waiting", "recovering", "cancel_requested"]);
+export type QueueState = z.infer<typeof QueueStateSchema>;
+export const QueueListParamsSchema = z.object({
+  characterId: Id.optional(), state: QueueStateSchema.optional(), limit: z.number().int().min(1).max(100).default(50),
+  cursor: Id.optional(),
+}).strict();
+export type QueueListParams = z.infer<typeof QueueListParamsSchema>;
+export const QueueEntrySchema = z.object({
+  runId: Id, characterId: Id, state: QueueStateSchema, queuedAt: Timestamp, deadlineAt: Timestamp.optional(),
+  initiator: RunInitiatorSchema, attemptId: Id.optional(), ageMs: z.number().int().nonnegative().max(86_400_000_000),
+  provenance: RunProvenanceSchema,
+}).strict();
+export type QueueEntry = z.infer<typeof QueueEntrySchema>;
+export const QueueListResultSchema = z.object({ entries: z.array(QueueEntrySchema).max(100), nextCursor: Id.optional() }).strict();
+export type QueueListResult = z.infer<typeof QueueListResultSchema>;
+
+export const RecoveryClassificationSchema = z.enum([
+  "resumable_preparation", "waiting_for_authority", "safe_replay", "reconciliation_required",
+  "outcome_unknown", "cancelled", "deadline_exceeded", "budget_exceeded", "failed", "completed",
+]);
+export type RecoveryClassification = z.infer<typeof RecoveryClassificationSchema>;
+export const RecoveryReportSchema = z.object({
+  processGeneration: Id, scanned: z.number().int().nonnegative().max(10_000),
+  classified: z.number().int().nonnegative().max(10_000), terminal: z.number().int().nonnegative().max(10_000),
+}).strict();
+export type RecoveryReport = z.infer<typeof RecoveryReportSchema>;

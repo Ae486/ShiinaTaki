@@ -81,6 +81,8 @@ import { mediaUsageMethod } from "./server/methods/media-usage.ts";
 import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
 import { memoryStatusMethod } from "./server/methods/memory-status.ts";
 import { runStatusMethod } from "./server/methods/run-status.ts";
+import { runQueueMethod } from "./server/methods/run-queue.ts";
+import { createRecoveryCoordinator } from "./harness/recovery-coordinator.ts";
 import { createAsyncOnDemandMemoryMigrationMethods } from "./server/methods/memory-migration.ts";
 import { registerPerceptionMethods } from "./server/methods/perception-methods.ts";
 import { registerSecretMethods } from "./server/methods/secret-methods.ts";
@@ -105,8 +107,8 @@ logger.info("Core Host identity loaded");
 const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
 const runEventRepo = createRunEventRepo(db);
 const runEventLive = createRunEventLiveBus((runId, afterSeq) => runEventRepo.list(runId, afterSeq));
-const effectLifecycle = createEffectLifecycleService(createEffectRepo(db, runEventRepo, runEventLive));
 const runRepo = createRunRepo(db, runEventRepo, runEventLive);
+const effectLifecycle = createEffectLifecycleService(createEffectRepo(db, runEventRepo, runEventLive), (runId, attemptId) => runRepo.guardDispatch(runId, attemptId));
 const timelineRepo = createTimelineRepo(db);
 // R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
 // their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).
@@ -285,6 +287,9 @@ const runService = createRunService({
     effects: effectLifecycle,
   }),
 });
+// Recovery is a boot barrier: classify durable orphan work before registering/accepting trigger dispatch.
+const recovery = createRecoveryCoordinator({ db, runs: runRepo, effects: effectLifecycle });
+await recovery.scan();
 
 // Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
 const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry() };
@@ -400,6 +405,7 @@ registry.register(
   memoryStatusMethod({ windowState: windowStateRepo, summaries: summaryRepo, autoState: createMemoryAutoRepo(db) }),
 );
 registry.register(runStatusMethod(runService));
+registry.register(runQueueMethod(runService));
 // Settings store (#26 batch 1): read every knob with its provenance, store operator values, push config.changed.
 // Operator-only, NO Rust mirror; secrets are reported as set/not-set and refused on write (invariant 5).
 registerConfigMethods(registry, { ...boot.config, logger });
@@ -436,9 +442,15 @@ const server = await startWsServer({
   logger,
 });
 
+let shuttingDown = false;
 function shutdown(signal: string): void {
+  if (shuttingDown) return;
+  shuttingDown = true;
   logger.info({ signal }, "shutting down");
-  void server.close().then(async () => {
+  runService.seal();
+  recovery.close();
+  cancelDurableWorkForShutdown();
+  void turnControls.turns.drain(5_000).then(() => server.close()).then(async () => {
     skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients
     // (each exactly once), before the db handle and process go away.
@@ -446,6 +458,15 @@ function shutdown(signal: string): void {
     db.close(); // release the sqlite file handle (and checkpoint the WAL) before exit
     process.exit(0);
   });
+}
+
+function cancelDurableWorkForShutdown(): void {
+  let cursor: string | undefined;
+  do {
+    const page = runService.queue({ limit: 100, ...(cursor ? { cursor } : {}) });
+    for (const entry of page.entries) runService.requestCancel(entry.runId, "core shutdown");
+    cursor = page.nextCursor;
+  } while (cursor);
 }
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));

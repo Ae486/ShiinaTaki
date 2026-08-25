@@ -1,0 +1,12 @@
+{"file":".trellis/spec/backend/agent-runtime.md","reason":"Preserve existing ToolLoopAgent, cancellation, full tool persistence, non-primary, and privacy invariants while adding recovery."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Apply SQLite single-writer, atomic transition, migration lineage, immutable event, and post-commit rules."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Keep recovery diagnostics bounded, redacted, and separate from Run truth."}
+{"file":".trellis/spec/backend/index.md","reason":"Backend package scope and quality gates for Core recovery work."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-b-harness-contract.md","reason":"Canonical identity, admission, cancellation, deadlines, budget, snapshot, replay, and stale-completion contract."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-c-persistence-recovery.md","reason":"Crash matrix, orphan classification, idempotent recovery, and current-state authority."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-e-integration-map.md","reason":"Existing Core write-path ownership and integration seams."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-g-slices-gates.md","reason":"Slice 4 dependency, non-goal, migration, and living-plan gates."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/pi-harness.md","reason":"Primary Runtime/Harness reference for durable program counter, cancellation, effect sandwich, replay, and recovery."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/dsh-observability.md","reason":"Observability-only reference for event categories, durable/live split, trajectory, and bounded projections."}
+{"file":".trellis/tasks/archive/2026-08/08-24-slice-3-effect-lifecycle-settlement/design.md","reason":"Slice 3 Run/Attempt/Effect contract and explicit Slice 4 reconciliation boundary."}
+{"file":".trellis/tasks/archive/2026-08/08-24-slice-3-effect-lifecycle-settlement/research/implementation-evidence.md","reason":"Verified unfinished Effect behavior and separated Memory receipt/Core settlement residual risk."}

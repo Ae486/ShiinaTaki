@@ -11,6 +11,7 @@ import {
   type RunSnapshot,
   type RunStatusResult,
   type TriggerRequest,
+  type QueueListParams, type QueueListResult,
 } from "@taki/shared";
 import type { RunAdmissionInput, RunAdmissionResult, RunRepo } from "../db/run-repo.ts";
 
@@ -44,8 +45,11 @@ export interface RunService<TAdmission = unknown> {
   requestCancel(runId: string, reason?: string): boolean;
   context(runId: string): RunExecutionContext | undefined;
   status(runId: string): RunStatusResult;
+  queue(input?: Partial<QueueListParams> & { now?: string }): QueueListResult;
+  seal(): void;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createRunService<TAdmission = unknown>(deps: {
   repo: RunRepo;
   snapshot: RunSnapshotCapture<TAdmission>;
@@ -53,9 +57,13 @@ export function createRunService<TAdmission = unknown>(deps: {
   modelId: string;
 }): RunService<TAdmission> {
   const contexts = new Map<string, RunExecutionContext>();
+  let accepting = true;
   return {
     async admit(candidate, interactive) {
+      if (!accepting) throw new Error("RUN_ADMISSION_CLOSED");
       const request = TriggerRequestSchema.parse(candidate);
+      if (request.deadlineAt && Date.parse(request.deadlineAt) <= Date.now()) throw new Error("RUN_DEADLINE_EXCEEDED");
+      if (request.budgetHint === 0) throw new Error("RUN_BUDGET_EXHAUSTED");
       const proposedRunId = randomUUID();
       const captured = await deps.snapshot.capture(request, proposedRunId, interactive);
       let result: RunAdmissionResult;
@@ -95,6 +103,8 @@ export function createRunService<TAdmission = unknown>(deps: {
     },
     context: (runId) => contexts.get(runId),
     status: (runId) => deps.repo.status(runId),
+    queue: (input) => deps.repo.queue(input),
+    seal: () => { accepting = false; },
   };
 }
 

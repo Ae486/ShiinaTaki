@@ -45,6 +45,8 @@ export {
   RunMemoryReferenceSchema, RunContextDecisionSchema, RunReplayDecisionSchema, RunBudgetReferenceSchema,
   RunImplementationReferenceSchema, RunSnapshotSchema, AttemptSchema, RunReceiptSchema, RunSchema,
   RunStatusParamsSchema, RunStatusResultSchema,
+  QueueStateSchema, QueueListParamsSchema, QueueEntrySchema, QueueListResultSchema,
+  RecoveryClassificationSchema, RecoveryReportSchema,
 } from "./harness-schema.ts";
 
 export { RUN_EVENT_SCHEMA_VERSION, RunEventCategorySchema, RunEventKindSchema, RunEventSourceSchema, RunEventPayloadSchema, RunEventSchema, RunEventCursorSchema, RunEventSurfaceSchema, RunEventSummarySchema, RunEventInspectorSchema } from "./run-event-schema.ts";
@@ -56,6 +58,7 @@ export type {
   RunOperationPhase, TriggerRequest, SnapshotReference, RunHostReference, RunExtensionReference,
   RunGovernanceReference, RunMemoryReference, RunSnapshot, Attempt, RunReceipt, Run, RunStatusParams,
   RunStatusResult, RunContextDecision, RunReplayDecision, RunBudgetReference, RunImplementationReference,
+  QueueState, QueueListParams, QueueEntry, QueueListResult, RecoveryClassification, RecoveryReport,
 } from "./harness-schema.ts";
 
 export { TIMELINE_HISTORY_LIMIT_DEFAULT, TIMELINE_HISTORY_LIMIT_MAX, TIMELINE_METHODS, TimelineAppendedSchema, TimelineEntrySchema, TimelineHistoryParamsSchema, TimelineHistoryResultSchema, TimelinePartSchema, TimelineRemovedSchema, TimelineRoleSchema, TimelineSubscribeParamsSchema, TimelineSubscribeResultSchema, TimelineToolOutputSchema } from "./timeline-schema.ts";

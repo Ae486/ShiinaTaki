@@ -253,6 +253,82 @@ effects.settle({ effectId: effect.effectId, expectedVersion: effect.version, out
 turn.attemptId = replacementAttemptId;
 ```
 
+## Scenario: Run Recovery, Durable Queue, and Shutdown Admission
+
+### 1. Scope / Trigger
+
+- Trigger: Core restarts or shuts down while Runs, Attempts, or Effects are queued, waiting, executing, or unsettled.
+- The mutable Run/Attempt state remains the recovery program counter; `run_effects` remains the uncertain-effect
+  authority; RunEvents record bounded recovery evidence. A process-local queue or AbortController is never durable truth.
+
+### 2. Signatures
+
+- `RecoveryCoordinator.scan()` performs a bounded boot classification before WS admission opens.
+- `RunService.queue({ characterId?, state?, cursor?, limit?, now? })` lists durable queued/nonterminal work; `runId` is
+  the resume/cancel key and no mandatory `queueId` is introduced.
+- `RunService.seal()` rejects new admissions; shutdown requests durable cancellation, aborts active turns, waits for the
+  bounded TurnRegistry drain, then closes WS/MCP/SQLite.
+- Recovery adapter results are closed (`completed | failed | unknown | unavailable`) and cannot mutate Run truth directly.
+
+### 3. Contracts
+
+- Boot assigns a process-generation marker and scans nonterminal Runs before new trigger dispatch. Repeating the scan is
+  idempotent and refreshes the marker without duplicating classification events.
+- Safe replay requires both the stored Effect posture and the current provider/authority contract to be `safe`, with the
+  same captured generation/idempotency evidence. Missing adapters or uncertain authority fail closed as
+  `reconciliation_required`/`outcome_unknown`; unsafe effects are never silently replayed.
+- Absolute deadline and durable budget counters are checked at admission, Attempt start, Effect intent, and settlement.
+  Budget reservation is atomic with the target intent; no fabricated or negative usage is accepted.
+- Recovery classification, state mutation, and RunEvent append use one short synchronous SQLite transaction. External
+  probes never run inside that transaction; live publication occurs only after commit and observer errors are isolated.
+- Shutdown seals admission before cancelling durable queued/nonterminal work. It does not fabricate success for active
+  effects; unresolved external work retains its unknown/reconciliation semantics.
+- Canonical queue/recovery payloads contain bounded IDs, states, timestamps, counts, and closed reason codes only. Raw
+  prompts, credentials, tool/Host/MCP/Memory bodies, cwd/env, provider exceptions, and media remain excluded.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required result |
+|---|---|
+| Expired deadline or exhausted budget before dispatch | Settle bounded `deadline_exceeded`/`budget_exceeded`; do not invoke an effect. |
+| Queued Run cancelled before start | Durable cancellation wins after restart; no model/tool/Host/MCP call starts. |
+| Unfinished unsafe Effect or missing recovery adapter | Do not replay; classify reconciliation-required or unknown. |
+| Terminal Effect with nonterminal Run | Repair/continue through Run CAS; never invoke the same Effect again. |
+| Duplicate/stale/wrong-generation recovery callback | No-op for current truth; retain only bounded diagnostic classification. |
+| Observer/live publication throws | Preserve committed recovery state and events. |
+| Shutdown arrives during active work | Seal admission, request cancellation, abort active turns, bounded-drain, then close transports/db. |
+
+### 5. Good/Base/Bad Cases
+
+- Good: boot classifies an unfinished Effect, commits one recovery event, applies an explicit safe replay or unknown
+  outcome, and a second boot produces no duplicate terminal evidence.
+- Base: a queued chat Run remains inspectable and cancellable after restart, but is not replayed without a bounded payload
+  reference; raw prompt text is not copied into canonical Run state.
+- Bad: infer recovery from Pino logs, fold the entire Run Event ledger as a second state machine, replay a Host write
+  because its generation changed, or close SQLite immediately after sealing without cancelling/draining active work.
+
+### 6. Tests Required
+
+- Fresh/historical/reopen migration lineage including the recovery migration and strict budget constraints.
+- Restart fixtures for queued/prepared, approval waiting, model/tool/Host/MCP/Memory intent, safe replay, unsafe unknown,
+  terminal Effect/Run repair, cancellation, deadline/budget expiry, repeated scan, and shutdown drain.
+- Queue cursor look-ahead, durable cancellation, stale/duplicate callbacks, observer isolation, redaction, and no-dispatch
+  assertions.
+- Shared/Core typecheck, full tests, root lint, relevant process/E2E boot acceptance, task validation, and `git diff --check`.
+
+### 7. Wrong vs Correct
+
+```ts
+// Wrong: process-local state decides whether a queued Run exists after restart.
+if (!turnQueue.isBusy(characterId)) startModelCall();
+
+// Correct: durable Run state and deadline/budget guard decide; the local queue only serializes execution.
+const page = runs.queue({ characterId, limit: 1 });
+if (page.entries[0]?.runId && runs.guardDispatch(page.entries[0].runId, attemptId)) {
+  // commit/dispatch through the existing Run/Effect boundary
+}
+```
+
 ## Scenario: Legacy Memory Migration and Authority Cutover
 
 ### 1. Scope / Trigger

@@ -26,7 +26,7 @@ export function createRunServiceStub(): RunService {
       const run: Run = { runId, characterId: request.characterId, triggerRequestId: request.triggerRequestId,
         idempotencyKey: request.idempotencyKey, initiator: request.initiator, provenance: request.provenance,
         deliveryClass: request.deliveryClass, state: "queued", stateVersion: 0, operationPhase: "admitted",
-        snapshot, activeAttemptId: attempt.attemptId, queuedAt: AT };
+        snapshot, activeAttemptId: attempt.attemptId, queuedAt: AT, budgetUsed: 0 };
       statuses.set(runId, { run, attempts: [attempt] });
       return { run, attempt, eventTail: { runId: run.runId, seq: 0 }, reused: false };
     },
@@ -36,5 +36,7 @@ export function createRunServiceStub(): RunService {
     requestCancel: () => false,
     context: () => undefined,
     status: read,
+    queue: () => ({ entries: [] }),
+    seal: () => undefined,
   };
 }

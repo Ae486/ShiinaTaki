@@ -41,6 +41,22 @@ describe("RunService", () => {
     await expect(service.admit({ ...request, characterId: "other" })).rejects.toThrow(/RUN_IDEMPOTENCY_CONFLICT/);
   });
 
+  it("refuses expired and exhausted admissions before creating durable rows", async () => {
+    const { db, service } = harness();
+    await expect(service.admit({ ...request, deadlineAt: "2000-01-01T00:00:00.000Z" })).rejects.toThrow("RUN_DEADLINE_EXCEEDED");
+    await expect(service.admit({ ...request, budgetHint: 0 })).rejects.toThrow("RUN_BUDGET_EXHAUSTED");
+    expect(db.prepare("SELECT count(*) AS n FROM runs").get()?.n).toBe(0);
+  });
+
+
+  it("lists durable queue entries and seals shutdown admission", async () => {
+    const { service } = harness();
+    const admitted = await service.admit(request);
+    expect(service.queue({ characterId: "taki", now: "2026-08-25T00:00:00.000Z" })).toMatchObject({ entries: [{ runId: admitted.run.runId, state: "queued", ageMs: expect.any(Number) }] });
+    service.seal();
+    await expect(service.admit({ ...request, idempotencyKey: "after-seal" })).rejects.toThrow("RUN_ADMISSION_CLOSED");
+  });
+
   it("owns legal start/terminal settlement, creates a bounded Receipt, and keeps terminal settlement idempotent", async () => {
     const { service } = harness();
     const { run } = await service.admit(request);

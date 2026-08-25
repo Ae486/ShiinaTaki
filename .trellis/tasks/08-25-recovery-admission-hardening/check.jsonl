@@ -1,0 +1,10 @@
+{"file":".trellis/spec/backend/agent-runtime.md","reason":"Check no regression to ToolLoopAgent, tool persistence, cancellation, non-primary, and prompt/privacy boundaries."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Check atomic recovery transitions, migration lineage, immutable events, and single-writer ownership."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Check redaction, bounded diagnostics, and separation between Pino and Run truth."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-b-harness-contract.md","reason":"Check identity containment, admission, cancellation, deadlines, budgets, replay, and stale completion."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-c-persistence-recovery.md","reason":"Check crash matrix, orphan classification, idempotent settlement, and restart behavior."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-e-integration-map.md","reason":"Check one owner per queue, Run, Effect, Host, MCP, Approval, Memory, and Timeline write path."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-g-slices-gates.md","reason":"Check Slice 4 boundaries, reserved future seams, and migration/test gates."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/pi-harness.md","reason":"Check PI-derived recovery and replay semantics without importing a second runtime."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/dsh-observability.md","reason":"Check DSH-derived event/trajectory observability without exposing raw payloads or creating a second authority."}
+{"file":".trellis/tasks/archive/2026-08/08-24-slice-3-effect-lifecycle-settlement/design.md","reason":"Check compatibility with Slice 3 effect/usage and explicit Memory reconciliation seam."}

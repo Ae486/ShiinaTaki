@@ -21,7 +21,8 @@
   "children": [
     "08-23-slice-1-harness-foundation",
     "08-24-slice-2-durable-event-ledger",
-    "08-24-slice-3-effect-lifecycle-settlement"
+    "08-24-slice-3-effect-lifecycle-settlement",
+    "08-25-recovery-admission-hardening"
   ],
   "parent": null,
   "relatedFiles": [],

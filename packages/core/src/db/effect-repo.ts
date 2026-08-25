@@ -24,6 +24,7 @@ export interface EffectRepo {
   settle(input: EffectSettlementInput): { effect?: EffectLifecycle; duplicate: boolean; stale: boolean; usage?: UsageRecord };
   get(effectId: string): EffectLifecycle | undefined;
   listUnfinished(runId?: string): EffectLifecycle[];
+  list(runId: string): EffectLifecycle[];
 }
 
 const ACTIVE_ATTEMPT_STATES = new Set(["intent_committed", "effect_running", "settling"]);
@@ -58,7 +59,8 @@ export function createEffectRepo(db: Database, eventRepo: RunEventRepo, liveBus?
         reservedUsageRef: input.reservedUsageRef ?? randomUUID(), startedAt: at });
       let events: RunEvent[] = [];
       db.transaction(() => {
-      db.prepare(`INSERT INTO run_effects (effect_id,run_id,attempt_id,schema_version,kind,state,state_version,source_ref_json,executor_ref_json,approval_ref_json,input_digest,replay_posture,captured_generation_ref,idempotency_key,reserved_result_ref,reserved_usage_ref,started_at,created_at,updated_at) VALUES (:effectId,:runId,:attemptId,:schemaVersion,:kind,:state,0,:source,:executor,:approval,:digest,:replay,:generation,:idempotency,:result,:usage,:started,:at,:at)`).run({ effectId, runId: input.runId, attemptId: input.attemptId, schemaVersion: effect.schemaVersion, kind: effect.kind, state: effect.state, source: JSON.stringify(effect.sourceRef), executor: effect.executorRef ? JSON.stringify(effect.executorRef) : null, approval: effect.approvalRef ? JSON.stringify(effect.approvalRef) : null, digest: effect.inputDigest ?? null, replay: effect.replayPosture, generation: effect.capturedGenerationRef ?? null, idempotency: effect.idempotencyKey ?? null, result: effect.reservedResultRef ?? null, usage: effect.reservedUsageRef ?? null, started: at, at });
+        reserveRunBudget(db, input.runId);
+        db.prepare(`INSERT INTO run_effects (effect_id,run_id,attempt_id,schema_version,kind,state,state_version,source_ref_json,executor_ref_json,approval_ref_json,input_digest,replay_posture,captured_generation_ref,idempotency_key,reserved_result_ref,reserved_usage_ref,started_at,created_at,updated_at) VALUES (:effectId,:runId,:attemptId,:schemaVersion,:kind,:state,0,:source,:executor,:approval,:digest,:replay,:generation,:idempotency,:result,:usage,:started,:at,:at)`).run({ effectId, runId: input.runId, attemptId: input.attemptId, schemaVersion: effect.schemaVersion, kind: effect.kind, state: effect.state, source: JSON.stringify(effect.sourceRef), executor: effect.executorRef ? JSON.stringify(effect.executorRef) : null, approval: effect.approvalRef ? JSON.stringify(effect.approvalRef) : null, digest: effect.inputDigest ?? null, replay: effect.replayPosture, generation: effect.capturedGenerationRef ?? null, idempotency: effect.idempotencyKey ?? null, result: effect.reservedResultRef ?? null, usage: effect.reservedUsageRef ?? null, started: at, at });
         const attemptChanged = db.prepare("UPDATE run_attempts SET state_version=state_version+1 WHERE attempt_id=:attemptId AND run_id=:runId AND state IN ('intent_committed','effect_running')").run({ attemptId: input.attemptId, runId: input.runId });
         if (attemptChanged.changes !== 1) throw new Error("EFFECT_ATTEMPT_NOT_ACTIVE");
         events = append(effectEvent(input.runId, input.attemptId, "effect.intent_committed", at, { kind: "effect.intent_committed", state: "intent_committed", effectId, effectKind: input.kind, sourceRef: effect.sourceRef, capturedGenerationRef: effect.capturedGenerationRef, replayPosture: input.replayPosture }));
@@ -107,6 +109,7 @@ export function createEffectRepo(db: Database, eventRepo: RunEventRepo, liveBus?
       const at = input.now ?? now(); let events: RunEvent[] = [];
       let stale = false;
       try { db.transaction(() => {
+        reserveRunBudget(db, input.runId);
         const changed = db.prepare("UPDATE run_effects SET state='intent_committed',state_version=state_version+1,updated_at=:at WHERE effect_id=:effectId AND run_id=:runId AND attempt_id=:attemptId AND state='waiting' AND state_version=:version").run({ effectId: input.effectId, runId: input.runId, attemptId: input.attemptId, version: input.expectedVersion, at });
         if (changed.changes !== 1) { stale = true; throw new Error("EFFECT_WAIT_STALE_VERSION"); }
         const attemptChanged = db.prepare(`UPDATE run_attempts SET state_version=state_version+1 WHERE attempt_id=:attemptId AND run_id=:runId AND state IN (${ACTIVE_ATTEMPT_STATE_SQL})`).run({ attemptId: input.attemptId, runId: input.runId });
@@ -150,10 +153,17 @@ export function createEffectRepo(db: Database, eventRepo: RunEventRepo, liveBus?
     },
     get(effectId) { const row = db.prepare("SELECT * FROM run_effects WHERE effect_id=:effectId").get({ effectId }); return row ? read(row) : undefined; },
     listUnfinished(runId) { const rows = runId ? db.prepare("SELECT * FROM run_effects WHERE run_id=:runId AND state<>'terminal' ORDER BY created_at").all({ runId }) : db.prepare("SELECT * FROM run_effects WHERE state<>'terminal' ORDER BY created_at").all(); return rows.map(read); },
+    list(runId) { return db.prepare("SELECT * FROM run_effects WHERE run_id=:runId ORDER BY created_at").all({ runId }).map(read); },
   };
 }
 
 function isActiveAttempt(db: Database, runId: string, attemptId: string): boolean {
   const row = db.prepare("SELECT state FROM run_attempts WHERE attempt_id=:attemptId AND run_id=:runId").get({ attemptId, runId }) as { state?: unknown } | undefined;
   return row !== undefined && ACTIVE_ATTEMPT_STATES.has(String(row.state));
+}
+
+function reserveRunBudget(db: Database, runId: string): void {
+  const changed = db.prepare(`UPDATE runs SET budget_used=budget_used+1
+    WHERE run_id=:runId AND (budget_limit IS NULL OR budget_used < budget_limit)`).run({ runId });
+  if (changed.changes !== 1) throw new Error("RUN_BUDGET_EXHAUSTED");
 }

@@ -3,6 +3,7 @@
  * OUTPUT: atomic Run admission, start/retry/settlement/cancel transitions, and bounded status reads
  * POS:    core/db — sole SQLite persistence boundary for the Slice 1 Run aggregate and its child records
  */
+/* eslint-disable max-lines */
 import { randomUUID } from "node:crypto";
 import {
   RunSnapshotSchema,
@@ -13,6 +14,7 @@ import {
   type RunSnapshot,
   type RunStatusResult,
   type RunEventCursor,
+  type QueueListParams, type QueueListResult, type RecoveryClassification,
   type TriggerRequest,
 } from "@taki/shared";
 import type { Database } from "./sqlite.ts";
@@ -22,6 +24,7 @@ import { createRunEventRepo, type RunEventRepo } from "./run-event-repo.ts";
 import type { RunEvent } from "@taki/shared";
 import type { RunEventLiveBus } from "./run-event-live.ts";
 import { activeAttempt, boundNonEmptyText, boundText, legalAttemptTerminal, legalTerminalTransition, lifecycleEvent } from "./run-event-factory.ts";
+import { classifyRecovery, listQueue, listRecoverableRuns } from "./run-recovery-repo.ts";
 
 type SnapshotDraft = Omit<RunSnapshot, "snapshotId" | "runId" | "capturedAt" | "manifestDigest">;
 
@@ -60,6 +63,10 @@ export interface RunRepo {
     errorCode?: string;
   }): RunStatusResult;
   cancel(runId: string, reason?: string): RunCancelResult;
+  queue(input?: Partial<QueueListParams> & { now?: string }): QueueListResult;
+  listRecoverable(limit?: number): string[];
+  classifyRecovery(input: { runId: string; classification: RecoveryClassification; reason?: string; now?: string; generation?: string }): RunStatusResult;
+  guardDispatch(runId: string, attemptId: string): boolean;
 }
 
 const TERMINAL = new Set<Run["state"]>([
@@ -100,6 +107,16 @@ export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunE
       if (status.run.state === "cancel_requested") {
         return { started: false, status: settle({ db, eventRepo, liveBus }, status, {
           runId, attemptId, outcome: "cancelled", retryability: "not_retryable", summary: "cancelled before start", at: now(),
+        }) };
+      }
+      if (status.run.deadlineAt && Date.parse(status.run.deadlineAt) <= Date.now()) {
+        return { started: false, status: settle({ db, eventRepo, liveBus }, status, {
+          runId, attemptId, outcome: "deadline_exceeded", retryability: "not_retryable", summary: "captured deadline elapsed before dispatch", errorCode: "deadline_exceeded", at: now(),
+        }) };
+      }
+      if (status.run.budgetLimit !== undefined && status.run.budgetUsed >= status.run.budgetLimit) {
+        return { started: false, status: settle({ db, eventRepo, liveBus }, status, {
+          runId, attemptId, outcome: "failed", retryability: "not_retryable", summary: "captured budget exhausted before dispatch", errorCode: "budget_exceeded", at: now(),
         }) };
       }
       if (status.run.state === "running") return { started: false, status };
@@ -155,8 +172,13 @@ export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunE
     settle(input) {
       const status = readStatus(db, input.runId);
       if (TERMINAL.has(status.run.state) || status.run.activeAttemptId !== input.attemptId) return status;
-      return settle({ db, eventRepo, liveBus }, status, { ...input, summary: boundText(input.summary, 1000),
-        errorCode: boundNonEmptyText(input.errorCode, 100), at: now() });
+      const at = now();
+      const deadlineExpired = status.run.state !== "cancel_requested" && input.outcome === "completed"
+        && status.run.deadlineAt !== undefined && Date.parse(status.run.deadlineAt) <= Date.parse(at);
+      return settle({ db, eventRepo, liveBus }, status, { ...input,
+        outcome: deadlineExpired ? "deadline_exceeded" : input.outcome,
+        summary: boundText(deadlineExpired ? "captured deadline elapsed before settlement" : input.summary, 1000),
+        errorCode: boundNonEmptyText(deadlineExpired ? "deadline_exceeded" : input.errorCode, 100), at });
     },
     cancel(runId, reason = "cancel requested") {
       const run = readStatus(db, runId).run;
@@ -178,6 +200,26 @@ export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunE
       liveBus?.publish(committed);
       return { run: readRunById(db, runId), changed: changed === 1 };
     },
+    queue: (input) => listQueue(db, input),
+    listRecoverable: (limit) => listRecoverableRuns(db, limit),
+    classifyRecovery: (input) => classifyRecovery({ db, eventRepo, liveBus, runId: input.runId, classification: input.classification, reason: input.reason, at: input.now ?? now(), generation: input.generation ?? `classified:${input.now ?? now()}` }),
+    guardDispatch(runId, attemptId) {
+      const status = readStatus(db, runId);
+      if (status.run.activeAttemptId !== attemptId || TERMINAL.has(status.run.state)) return false;
+      if (status.run.state === "cancel_requested") {
+        settle({ db, eventRepo, liveBus }, status, { runId, attemptId, outcome: "cancelled", retryability: "not_retryable", summary: "cancelled before effect dispatch", errorCode: "cancel_requested", at: now() });
+        return false;
+      }
+      if (status.run.deadlineAt && Date.parse(status.run.deadlineAt) <= Date.now()) {
+        settle({ db, eventRepo, liveBus }, status, { runId, attemptId, outcome: "deadline_exceeded", retryability: "not_retryable", summary: "captured deadline elapsed before effect dispatch", errorCode: "deadline_exceeded", at: now() });
+        return false;
+      }
+      if (status.run.budgetLimit !== undefined && status.run.budgetUsed >= status.run.budgetLimit) {
+        settle({ db, eventRepo, liveBus }, status, { runId, attemptId, outcome: "failed", retryability: "not_retryable", summary: "captured budget exhausted before effect dispatch", errorCode: "budget_exceeded", at: now() });
+        return false;
+      }
+      return status.run.state === "running";
+    },
   };
 }
 
@@ -197,15 +239,15 @@ function insertAdmission(db: Database, input: RunAdmissionInput & {
   db.prepare(`INSERT INTO runs
     (run_id,character_id,trigger_request_id,idempotency_key,request_hash,initiator,provenance_json,task_id,
      parent_run_id,delivery_class,state,state_version,snapshot_id,active_attempt_id,queued_at,deadline_at,
-     operation_phase,created_at,updated_at)
+     operation_phase,budget_limit,budget_used,created_at,updated_at)
     VALUES (:runId,:characterId,:triggerRequestId,:idempotencyKey,:requestHash,:initiator,:provenance,:taskId,
-     :parentRunId,:deliveryClass,'queued',0,:snapshotId,:attemptId,:at,:deadlineAt,'admitted',:at,:at)`)
+     :parentRunId,:deliveryClass,'queued',0,:snapshotId,:attemptId,:at,:deadlineAt,'admitted',:budgetLimit,0,:at,:at)`)
     .run({ runId: input.runId, characterId: request.characterId, triggerRequestId: request.triggerRequestId,
       idempotencyKey: request.idempotencyKey, requestHash: input.requestHash, initiator: request.initiator,
       provenance: JSON.stringify(request.provenance), taskId: request.provenance.taskId ?? null,
       parentRunId: request.provenance.parentRunId ?? null, deliveryClass: request.deliveryClass,
       snapshotId: input.snapshotId, attemptId: input.attemptId, at: input.admittedAt,
-      deadlineAt: request.deadlineAt ?? null });
+      deadlineAt: request.deadlineAt ?? null, budgetLimit: request.budgetHint ?? null });
   db.prepare(`INSERT INTO run_attempts
     (attempt_id,run_id,ordinal,state,state_version,provider,model_id,snapshot_id,deadline_at)
     VALUES (:attemptId,:runId,1,'prepared',0,:provider,:modelId,:snapshotId,:deadlineAt)`)
@@ -260,13 +302,21 @@ function settle(deps: { db: Database; eventRepo: RunEventRepo; liveBus?: RunEven
       .run({ receiptId, runId: input.runId, state: target, outcome: target,
         retryability: input.retryability, reason: input.summary ?? null, attemptCount: status.attempts.length,
       snapshotId: status.run.snapshot.snapshotId, summary: input.summary ?? null, at });
+    const boundaryEvent = lifecycleBoundaryEvent(input, status, at);
     committed = eventRepo.appendMany([
       lifecycleEvent({ runId: input.runId, attemptId: attempt.attemptId, kind: "attempt.settled", occurredAt: at, payload: { kind: "attempt.settled", state: attemptTarget, outcome: target, attemptOrdinal: attempt.ordinal, retryability: input.retryability, summary: input.summary, errorCode: input.errorCode } }),
+      ...(boundaryEvent ? [boundaryEvent] : []),
       lifecycleEvent({ runId: input.runId, kind: "run.settled", occurredAt: at, payload: { kind: "run.settled", state: target, outcome: target, retryability: input.retryability, summary: input.summary, errorCode: input.errorCode } }),
     ]);
   });
   liveBus?.publish(committed);
   return readStatus(db, input.runId);
+}
+
+function lifecycleBoundaryEvent(input: { runId: string; errorCode?: string; summary?: string }, status: RunStatusResult, at: string): Omit<RunEvent, "eventId" | "seq"> | undefined {
+  if (input.errorCode === "deadline_exceeded") return lifecycleEvent({ runId: input.runId, kind: "run.deadline_exceeded", occurredAt: at, payload: { kind: "run.deadline_exceeded", state: "deadline_exceeded", reason: input.summary ?? "captured deadline elapsed" } });
+  if (input.errorCode === "budget_exceeded") return lifecycleEvent({ runId: input.runId, kind: "run.budget_exceeded", occurredAt: at, payload: { kind: "run.budget_exceeded", state: "failed", reason: input.summary ?? "captured budget exhausted", used: status.run.budgetUsed, ...(status.run.budgetLimit === undefined ? {} : { limit: status.run.budgetLimit }) } });
+  return undefined;
 }
 
 function updateRun(db: Database, run: Run, input: {
@@ -276,7 +326,8 @@ function updateRun(db: Database, run: Run, input: {
 }): void {
   const changed = db.prepare(`UPDATE runs SET state=:state,state_version=state_version+1,
     operation_phase=:operationPhase,started_at=CASE WHEN :state='running' AND started_at IS NULL THEN :at
-    ELSE started_at END,updated_at=:at WHERE run_id=:runId AND state_version=:version`)
+    ELSE started_at END,updated_at=:at
+    WHERE run_id=:runId AND state_version=:version`)
     .run({ ...input, runId: run.runId, version: run.stateVersion });
   if (changed.changes !== 1) throw new Error("RUN_STALE_VERSION");
 }

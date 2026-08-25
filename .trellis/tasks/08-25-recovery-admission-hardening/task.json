@@ -1,0 +1,31 @@
+{
+  "id": "recovery-admission-hardening",
+  "name": "recovery-admission-hardening",
+  "title": "Slice 4 Recovery and Admission Hardening",
+  "description": "Implement the shared Core recovery and admission hardening boundary above Slice 3: durable queue visibility, cancellation reconciliation, boot-time orphan classification, safe replay and unknown outcomes, and deadline/budget enforcement. Preserve PI-based Harness authority, one ToolLoopAgent, and provider-neutral downstream seams.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": "core-recovery-admission-hardening",
+  "package": null,
+  "priority": "P1",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-08-25",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "08-22-t4-agent-architecture-observability",
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "implementation_status": "implemented_pending_commit",
+    "runtime_reference": "pi_harness",
+    "architecture_slice": "4",
+    "observability_reference": "dsh_event_projection"
+  }
+}
