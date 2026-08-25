@@ -391,6 +391,12 @@ This is the first production batch and must finish before Scheduler or Heartbeat
 
 ### Slice 2 - Scheduled Task engine
 
+Implementation note (2026-08-25): this product slice is implemented by architecture Phase G / Slice 5A under
+`.trellis/tasks/08-25-scheduled-task-provider`. It reuses `TriggerRequest -> RunService -> Character TurnQueue ->
+ChatAgent` and migrations 029-030's occurrence outbox/immutable Character snapshot. The persisted User Timezone currently defaults to UTC; the future
+Timezone Authority Device update surface will call the injected resolver/recompute seam rather than changing task or
+Run identity.
+
 - canonical parser and schedule repository;
 - at/every/cron, timezone, DST, pause/resume/edit/delete;
 - startup/reconnect catch-up with late coalescing;

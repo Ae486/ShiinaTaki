@@ -313,6 +313,11 @@ design.
 | 0. Architecture baseline | identity, authority, ledger, context, extension, recovery vocabulary and dependency map | all future trigger and child-context seams |
 | 1. Unified Run foundation | Run lifecycle, immutable snapshot, Run Events, primary chat integration, receipt/query foundation | scheduler, heartbeat, subagent and richer projections |
 | 2. Scheduled Task | deterministic schedule definitions and fires entering Run | external triggers, generic work items, task DAG |
+
+Implementation status (2026-08-25): Slice 5A installs the first production Scheduled Task provider on the existing
+Harness path, including durable definitions/outbox, `at`/`every`/`cron`, coalesced catch-up, primary-only management,
+and non-primary ChatAgent dispatch. Heartbeat, delivery/projections, Child Runs, and Timezone Authority Device updates
+remain later consumers; they do not introduce another runtime or execution ledger.
 | 3. Heartbeat | eligibility, Class-B policy, structural silence, bounded context and delivery | future proactive providers and feedback calibration |
 | 4. Delivery/reliability | Timeline/Receipt/Pet/Home convergence, reconnect and stale-result handling | future clients and remote delivery |
 | 5. Subagent/context lineage | parent/child Run, isolated child context, bounded result return, one-shot/continuable contracts | team/task coordination |

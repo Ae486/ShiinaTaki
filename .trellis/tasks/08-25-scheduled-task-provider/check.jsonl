@@ -1,0 +1,11 @@
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Runtime and autonomous-turn review"}
+{"file": ".trellis/workspace/pleia/t4-scheduler-cron.md", "reason": "Calendar/catch-up reference"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Migration and persistence review"}
+{"file": ".trellis/tasks/08-25-scheduled-task-provider/research/pre-implementation-explore.md", "reason": "Known live seams and risks"}
+{"file": ".trellis/spec/backend/tool-design.md", "reason": "Tool governance review"}
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend quality gate"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Failure and retry review"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Privacy and evidence review"}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-f-t4-compatibility.md", "reason": "Provider and Core boundary review"}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-g-slices-gates.md", "reason": "Scope and architecture gate review"}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/pi-harness.md", "reason": "Harness authority and recovery review"}

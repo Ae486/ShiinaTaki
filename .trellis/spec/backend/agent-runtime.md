@@ -230,3 +230,103 @@ practice; the pull-only shape was rejected on evidence (models never proactively
   model NOT to call it for the date/rough time (already injected) — pull covers only precision/timezone.
 - Prompt WORDING about time discipline (awareness norms) is deliberately absent — it lands with T4's prompt-design
   pass, as one optimization, not piecemeal.
+
+## Scenario: Scheduled Task Trigger Provider
+
+### 1. Scope / Trigger
+
+Use this contract whenever a durable clock provider (`at`, `every`, or `cron`) starts an Agent turn. A Scheduled Task
+is provider policy above the existing Harness; it never owns a second model loop, queue, Run/Attempt store, event
+ledger, receipt authority, or recovery coordinator.
+
+### 2. Signatures
+
+```ts
+type ScheduledOccurrenceKey = { taskId: string; scheduledFor: string };
+
+interface ScheduledRunAdapter {
+  dispatch(taskId: string, occurrence: ScheduleOccurrence): Promise<string>; // existing runId
+  reconcile(): void;
+}
+
+interface ScheduleEngine {
+  start(): Promise<void>;
+  rearm(): void;
+  stop(): Promise<void>; // resolves only after an in-flight pass settles
+  runDue(): Promise<void>;
+}
+```
+
+The database authority is `scheduled_tasks(task_id)` plus the content-bearing outbox
+`schedule_occurrences(task_id, scheduled_for)`. The outbox captures immutable `character_id`, task revision, control
+input, fire/late metadata, and the linked `run_id`; terminal reconciliation scrubs control input.
+
+### 3. Contracts
+
+- Each `(taskId, scheduledFor)` admits or reuses exactly one Harness Run with a deterministic idempotency key.
+- The Scheduled `TriggerRequest` uses `initiator=scheduled`, `deliveryClass=class_a`, `contextMode=autonomous`,
+  `provenance.provider=scheduled-task`, and `provenance.taskId=taskId`.
+- Dispatch acquires the existing Character `TurnQueue`, registers the existing `TurnRegistry`, and invokes ChatAgent
+  with `turnKind=non-primary`, ephemeral `controlInput`, and the admission-captured Run context.
+- `schedule_task` is created for the active primary Character and is absent from non-primary Scheduled turns.
+- Croner is imported only by the calendar adapter. Core owns persisted definitions, catch-up, idempotency,
+  single-flight execution, shutdown, and recovery.
+- Raw schedule/control payloads never enter Pino, Run Events, Receipts, telemetry, or ordinary diagnostics. Bounded
+  task/run identities and closed error codes are allowed.
+- The persisted User Timezone resolver currently defaults to UTC. Later authority updates call the same resolver/rearm
+  seam and do not change task or Run identity.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required behavior |
+|---|---|
+| Invalid `at`/`every`/`cron` or IANA timezone | Refuse before persistence with `SCHEDULE_REFUSED` |
+| Stale mutation revision | Return `SCHEDULE_CONFLICT`; do not re-arm or partially mutate |
+| Unknown/deleted task | Refuse or settle the pending occurrence as missed; never fabricate a Run |
+| Duplicate timer callback or restart retry | Reuse `(taskId, scheduledFor)` and the deterministic Run idempotency key |
+| One-shot more than 24 hours late | Mark missed; do not invoke the model |
+| Recurring occurrence more than half a period late | Advance from the latest overdue slot and mark missed |
+| Run admission/dispatch failure before linkage | Keep the occurrence pending and re-arm a bounded retry |
+| Terminal linked Run | Mark occurrence terminal and scrub its control input |
+| Core shutdown during a scheduler pass | Stop new timers, await the in-flight pass, then close Run/database resources |
+
+### 5. Good / Base / Bad Cases
+
+- Good: a recurring task wakes after downtime, selects the latest eligible source slot, claims one occurrence, admits
+  one Scheduled Run, executes through the Character queue, and scrubs the outbox payload at terminal settlement.
+- Base: no enabled or pending tasks means no armed timer and no model call.
+- Bad: a timer callback invokes ChatAgent directly, reads the task's current Character after an occurrence was claimed,
+  exposes `schedule_task` recursively, logs control input, or closes SQLite before an in-flight pass settles.
+
+### 6. Tests Required
+
+- Shared schema: strict accepted forms, bounded content, invalid timezone/form rejection, closed error-code mirrors.
+- Migration/repository: fresh and historical lineage, 029 -> 030 Character backfill, reopen no-op, revision conflicts,
+  occurrence uniqueness, payload scrubbing, and immutable Character ownership after task edits.
+- Calendar: `at`/anchored `every`/`cron`, DST spring gap and fall ambiguity, latest-overdue selection, 24-hour and
+  half-period cutoffs, and backlog coalescing.
+- Runtime: canonical TriggerRequest fields, Run idempotency, Character serialization, non-primary Timeline/costume/
+  auto-memory behavior, Attempt retry, failure settlement, pending retry, and terminal reconciliation.
+- Tool/API: active-Character binding, recursion exclusion, operator-only methods, and structured conflict/refusal errors.
+- Lifecycle: single-flight timers, `unref`, re-arm, never-throw callback boundary, isolated boot, and shutdown drain.
+
+### 7. Wrong vs Correct
+
+#### Wrong
+
+```ts
+timer.onFire(() => agent.stream({ characterId: task.characterId, message: task.controlInput }));
+```
+
+This bypasses durable occurrence identity, immutable Character capture, Run admission, queueing, recovery, receipts,
+and privacy boundaries.
+
+#### Correct
+
+```ts
+const occurrence = repo.claimOccurrence({ taskId, characterId, scheduledFor, controlInput, ...evidence });
+if (occurrence) await scheduledRuns.dispatch(taskId, occurrence);
+```
+
+The adapter then admits the canonical TriggerRequest and executes through RunService, TurnQueue, TurnRegistry, and the
+ChatAgent non-primary seam.
