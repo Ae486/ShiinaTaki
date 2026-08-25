@@ -1,6 +1,7 @@
 # Slice 4 Recovery and Admission Hardening Implementation Plan
 
-This document records the implementation completed in the T4 worktree. No commit/push/archive was performed.
+This document records the implementation completed in the T4 worktree. Code is committed as `5a4b32d`; task archive
+bookkeeping remains separate. No push, reset, or rebase was performed.
 
 ## 0. Preconditions and review gate
 

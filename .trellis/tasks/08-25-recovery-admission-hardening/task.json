@@ -23,7 +23,7 @@
   "relatedFiles": [],
   "notes": "",
   "meta": {
-    "implementation_status": "implemented_pending_commit",
+    "implementation_status": "committed:5a4b32d",
     "runtime_reference": "pi_harness",
     "architecture_slice": "4",
     "observability_reference": "dsh_event_projection"
