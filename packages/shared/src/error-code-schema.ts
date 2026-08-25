@@ -29,6 +29,9 @@ export const ErrorCodeSchema = z.enum([
   "MCP_CONFIG_CONFLICT",
   "SKILL_REFUSED",
   "SKILL_CONFIG_CONFLICT",
+  // Scheduled Task management refusals/conflicts use the same app-error envelope as other operator stores.
+  "SCHEDULE_REFUSED",
+  "SCHEDULE_CONFLICT",
   // Operator-only Hindsight setup refuses a request before/while reaching the external service. The bounded
   // HindsightError code rides error.data.reason; raw HTTP/provider/secret details never do.
   "HINDSIGHT_REFUSED",

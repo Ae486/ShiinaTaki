@@ -48,6 +48,8 @@ export {
   QueueStateSchema, QueueListParamsSchema, QueueEntrySchema, QueueListResultSchema,
   RecoveryClassificationSchema, RecoveryReportSchema,
 } from "./harness-schema.ts";
+export { SCHEDULED_TASK_METHODS, ScheduleAtSchema, ScheduleEverySchema, ScheduleCronSchema, SchedulePatternSchema, ScheduleTimezoneSchema, ScheduledTaskSchema, ScheduledTaskCreateParamsSchema, ScheduledTaskUpdateParamsSchema, ScheduledTaskRevisionParamsSchema, ScheduledTaskListParamsSchema, ScheduledTaskListResultSchema, ScheduledTaskMutationResultSchema } from "./scheduled-task-schema.ts";
+export type { SchedulePattern, ScheduleTimezone, ScheduledTask, ScheduledTaskCreateParams, ScheduledTaskUpdateParams, ScheduledTaskRevisionParams, ScheduledTaskListParams, ScheduledTaskListResult, ScheduledTaskMutationResult } from "./scheduled-task-schema.ts";
 
 export { RUN_EVENT_SCHEMA_VERSION, RunEventCategorySchema, RunEventKindSchema, RunEventSourceSchema, RunEventPayloadSchema, RunEventSchema, RunEventCursorSchema, RunEventSurfaceSchema, RunEventSummarySchema, RunEventInspectorSchema } from "./run-event-schema.ts";
 export type { RunEvent, RunEventCategory, RunEventKind, RunEventPayload, RunEventCursor, RunEventSummary, RunEventInspector } from "./run-event-schema.ts";

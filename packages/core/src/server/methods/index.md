@@ -5,6 +5,7 @@
 - chat-send.ts — chat.send (operator-only): durably admit and ack { messageId, runId }, then stream chat.delta/.complete/.error; turns serialize per characterId, settle the Run, and preserve cancel-before-reply retraction
 - chat-cancel.ts — chat.cancel (operator-only): legacy character-only active-turn abort plus optional exact runId durable cancellation for queued work; idempotent ({cancelled:false} when absent/mismatched)
 - run-status.ts — run.status (operator-only): bounded Run/Attempt/Receipt status by durable runId
+- scheduled-task-methods.ts — operator-only Scheduled Task list/create/update/pause/resume/delete registration seam
 - timeline-history.ts — timeline.history (operator-only): newest-first cursor page of the conversation timeline
 - timeline-subscribe.ts — timeline.subscribe (operator-only): register a timeline.appended/removed sink; auto-unsubscribe on disconnect
 - avatar-subscribe.ts — avatar.subscribe (operator-only): register an avatar.command sink; auto-unsubscribe on disconnect

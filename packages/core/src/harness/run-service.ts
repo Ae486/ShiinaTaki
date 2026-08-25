@@ -74,7 +74,10 @@ export function createRunService<TAdmission = unknown>(deps: {
         captured.context?.dispose?.();
         throw error;
       }
-      if (result.reused) captured.context?.dispose?.();
+      // A duplicate admission must not replace the process-local context of an already admitted Run. A scheduler
+      // retry may arrive after the original context was released, in which case the new capture becomes authoritative.
+      const terminal = ["completed", "failed", "cancelled", "skipped", "deadline_exceeded", "outcome_unknown"].includes(result.run.state);
+      if (result.reused && (terminal || contexts.has(result.run.runId))) captured.context?.dispose?.();
       else if (captured.context) contexts.set(result.run.runId, captured.context);
       return result;
     },

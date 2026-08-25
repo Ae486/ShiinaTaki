@@ -82,6 +82,11 @@ const DESCRIPTORS: CapabilityGovernanceDescriptor[] = [
     cells: [cell({ key: "get-current-time", postures: levels("auto", "auto", "auto"), approvalMemory: "once-only", overrideMode: "immutable" })],
   },
   {
+    capabilityId: "core.schedule.manage", descriptorRevision: 1, subjectRequired: false,
+    classifier: { authority: "core", classifierId: "fixed-risk", classifierRevision: 1 },
+    cells: [cell({ key: "schedule-manage", postures: levels("auto", "auto", "auto"), approvalMemory: "once-only", overrideMode: "immutable" })],
+  },
+  {
     capabilityId: "core.memory.search", descriptorRevision: 1, subjectRequired: false,
     classifier: { authority: "core", classifierId: "fixed-risk", classifierRevision: 1 },
     cells: [cell({ key: "memory-search", postures: levels("auto", "auto", "auto"), approvalMemory: "once-only", overrideMode: "immutable" })],

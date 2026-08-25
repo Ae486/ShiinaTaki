@@ -97,6 +97,13 @@ import { startWsServer } from "./server/ws-server.ts";
 import { createReadFileTool } from "./workspace/read-file-tool.ts";
 import { createWorkspacePaths } from "./workspace/workspace-paths.ts";
 import { createWriteFileTool } from "./workspace/write-file-tool.ts";
+import { createScheduledTaskRepo } from "./db/scheduled-task-repo.ts";
+import { createSchedulePatternAdapter } from "./scheduler/schedule-pattern.ts";
+import { createScheduledTaskService } from "./scheduler/scheduled-task-service.ts";
+import { createScheduleTaskTool } from "./scheduler/schedule-task-tool.ts";
+import { createScheduledRunAdapter } from "./scheduler/scheduled-run-adapter.ts";
+import { createScheduleEngine } from "./scheduler/schedule-engine.ts";
+import { registerScheduledTaskMethods } from "./server/methods/scheduled-task-methods.ts";
 
 // Boot phase (batch-1 #26): the data root comes from env alone, the DB opens on it, and every other knob is then
 // resolved as env > stored > built-in default — so a value the settings panel stored takes effect at THIS boot.
@@ -293,6 +300,11 @@ await recovery.scan();
 
 // Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
 const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry() };
+const scheduleRepo = createScheduledTaskRepo(db);
+const schedulePatterns = createSchedulePatternAdapter();
+const scheduleLifecycle: { engine?: ReturnType<typeof createScheduleEngine> } = {};
+const scheduleService = createScheduledTaskService({ repo: scheduleRepo, patterns: schedulePatterns,
+  userTimezone: scheduleRepo.userTimezone, rearm: () => scheduleLifecycle.engine?.rearm() });
 // The pairing code is the one sanctioned secret-ish value in a log: short-lived, single-purpose,
 // and the operator console is the trust anchor for first pairing (prd §4). Tokens are never logged.
 const pairingLog = logger.child({ mod: "pairing" });
@@ -309,9 +321,7 @@ registry.register(
       pairingLog.info({ deviceId, deviceName, remoteAddress }, "loopback operator auto-trusted"),
   }),
 );
-registry.register(
-  chatSendMethod(
-    createChatAgent({
+const chatAgent = createChatAgent({
       model,
       effectLifecycle,
       store: conversationStore,
@@ -343,7 +353,7 @@ registry.register(
       }),
       // Admission supplies the immutable Host/Skill/MCP projection; compatibility callers may still omit it.
       // Stable Core-local tools join per-turn memory/avatar tools behind the explicit Core binding table.
-      coreTools: staticCoreTools,
+      coreTools: (primary, characterId) => primary ? mergeToolSets(staticCoreTools, createScheduleTaskTool(scheduleService, characterId)) : staticCoreTools,
       coreToolGovernance,
       // Per-character avatar tools bind their publish target (the turn's characterId) here — same lifetime as memory tools.
       // vocab makes `name` a dynamic enum of the worn costume's live names (1e), so a costume swap rejects stale names.
@@ -371,7 +381,10 @@ registry.register(
           { observedInput, effectiveWindow: windowCalibrator.onOverflow(observedInput) },
           "provider context overflow — window recalibrated, retrying once",
         ),
-    }),
+    });
+registry.register(
+  chatSendMethod(
+    chatAgent,
     logger,
     turnControls,
     runService,
@@ -409,6 +422,14 @@ registry.register(runQueueMethod(runService));
 // Settings store (#26 batch 1): read every knob with its provenance, store operator values, push config.changed.
 // Operator-only, NO Rust mirror; secrets are reported as set/not-set and refused on write (invariant 5).
 registerConfigMethods(registry, { ...boot.config, logger });
+registerScheduledTaskMethods(registry, scheduleService);
+
+const scheduledRuns = createScheduledRunAdapter({ repo: scheduleRepo, runs: runService, agent: chatAgent,
+  queue: turnControls.queue, turns: turnControls.turns, logger: logger.child({ mod: "scheduled-run" }) });
+const scheduleEngine = createScheduleEngine({ repo: scheduleRepo, patterns: schedulePatterns, runs: scheduledRuns,
+  userTimezone: scheduleRepo.userTimezone, logger: logger.child({ mod: "scheduler" }) });
+scheduleLifecycle.engine = scheduleEngine;
+await scheduleEngine.start();
 
 // Attachment GC (#17): a boot sweep + a 6h interval; only raw bytes expire, the description-memory is permanent.
 startAttachmentGc({ store: attachmentStore, ttlMs: boot.attachmentConfig.ttlMs, logger });
@@ -447,10 +468,11 @@ function shutdown(signal: string): void {
   if (shuttingDown) return;
   shuttingDown = true;
   logger.info({ signal }, "shutting down");
+  const schedulerStopped = scheduleEngine.stop();
   runService.seal();
   recovery.close();
   cancelDurableWorkForShutdown();
-  void turnControls.turns.drain(5_000).then(() => server.close()).then(async () => {
+  void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => server.close()).then(async () => {
     skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients
     // (each exactly once), before the db handle and process go away.

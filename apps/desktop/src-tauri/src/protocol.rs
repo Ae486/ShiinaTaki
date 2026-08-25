@@ -68,6 +68,8 @@ pub enum ErrorCode {
     AlreadyConnected,
     Forbidden,
     ConfigRefused,
+    ScheduleRefused,
+    ScheduleConflict,
     PolicyConflict,
     GovernanceRefused,
     GovernanceDenied,

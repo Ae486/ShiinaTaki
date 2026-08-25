@@ -32,6 +32,8 @@ import { runEventsMigration025 } from "./025-run-events.ts";
 import { runEffectsMigration026 } from "./026-run-effects.ts";
 import { effectApprovalRefMigration027 } from "./027-effect-approval-ref.ts";
 import { recoveryAdmissionMigration028 } from "./028-recovery-admission.ts";
+import { scheduledTasksMigration029 } from "./029-scheduled-tasks.ts";
+import { scheduledOccurrenceCharacterMigration030 } from "./030-scheduled-occurrence-character.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -62,4 +64,6 @@ export const MIGRATIONS: Migration[] = [
   runEffectsMigration026,
   effectApprovalRefMigration027,
   recoveryAdmissionMigration028,
+  scheduledTasksMigration029,
+  scheduledOccurrenceCharacterMigration030,
 ];

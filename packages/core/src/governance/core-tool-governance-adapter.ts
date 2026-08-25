@@ -27,6 +27,7 @@ const CORE_TOOL_BINDINGS: Record<string, Omit<GovernedToolBinding["identity"], "
   avatar_play_motion: { capabilityId: "core.avatar.motion", cellKey: "avatar-play-motion" },
   read_file: { capabilityId: "workspace.file.read", cellKey: "workspace-read" },
   write_file: { capabilityId: "fs-write", cellKey: "fs-write:in-workspace" },
+  schedule_task: { capabilityId: "core.schedule.manage", cellKey: "schedule-manage" },
 };
 
 export interface CoreToolGovernanceAdapter {

@@ -1,5 +1,6 @@
 # core/src/
 - harness/ — Core-owned Trigger admission and Run/Attempt lifecycle service above the existing ToolLoopAgent
+- scheduler/ — durable Scheduled Task definitions, calendar evaluation, occurrence outbox, and canonical Run adapter
 - index.ts — package public entry; empty until an external consumer exists (core runs as a process)
 - main.ts — process entry: marker-first memory authority selection → config/runtime adapters → operator registries (including on-demand migration) → ws-server; closes MCP clients + db on SIGINT/SIGTERM
 - config/ — env → validated boot config; plus the operator-facing settings store (knob registry, precedence source, writer, change fan-out)

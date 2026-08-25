@@ -35,6 +35,7 @@ const BUILTIN_KEYS = [
   "avatar_play_motion",
   "read_file",
   "write_file",
+  "schedule_task",
 ] as const;
 
 const dbs: Database[] = [];

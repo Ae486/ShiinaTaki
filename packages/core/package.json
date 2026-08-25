@@ -15,6 +15,7 @@
     "@ai-sdk/openai-compatible": "^3.0.5",
     "@taki/shared": "workspace:*",
     "ai": "^7.0.17",
+    "croner": "^10.0.1",
     "cross-spawn": "7.0.6",
     "fflate": "^0.8.3",
     "json-rpc-2.0": "^1.7.1",

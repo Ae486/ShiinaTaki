@@ -7,6 +7,7 @@
 - run-event-factory.ts — bounded canonical lifecycle event construction and transition predicates
 - run-readers.ts — strict Run/Attempt/Receipt aggregate reads shared by the lifecycle writer
 - run-row-mappers.ts — strict Run/Attempt/Receipt row parsing and deterministic snapshot digests
+- scheduled-task-repo.ts — revision-safe Scheduled Task definitions and occurrence outbox persistence
 - sqlite.ts — DatabaseSync wrapper (open/pragmas/transaction/close); the ONLY node:sqlite importer; toSafeInteger
 - migration-runner.ts — startup migration runner: applies version > max(applied), one transaction each, tracked
 - timeline-repo.ts — timeline_messages SQL: append / deleteEntry / pageBefore / latestAscending / latestSeq / rangeAscending (zod-parse at the row boundary)

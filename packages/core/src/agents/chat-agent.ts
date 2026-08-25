@@ -97,7 +97,7 @@ export interface ChatAgentDeps {
   /** Host/extension snapshot captured once per Run; an overflow retry reuses this exact value. */
   runContext?: (turn?: TurnContext) => AgentRunContext;
   /** Stable Core-local tools included with memory/avatar tools before the Core adapter runs. */
-  coreTools?: ToolSet;
+  coreTools?: ToolSet | ((primary: boolean, characterId: string) => ToolSet);
   /** Wraps only the Core-local per-turn ToolSet with trusted bindings; absent in focused agent tests. */
   coreToolGovernance?: { wrap(tools: ToolSet, interactive?: { connection?: Connection; signal?: AbortSignal; runId?: string; attemptId?: string; effects?: EffectLifecycleService }): ToolSet };
   /** Per-character tools built fresh each turn with the turn's characterId (avatar tools bind their publish target here). */
@@ -298,7 +298,7 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
 function assembleTurnTools(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): ToolSet {
   const coreTools = mergeToolSets(
     attempt.runContext?.memoryTools ?? deps.memory.createTools(attempt.characterId),
-    deps.coreTools ?? {},
+    typeof deps.coreTools === "function" ? deps.coreTools(attempt.primary, attempt.characterId) : deps.coreTools ?? {},
     deps.characterTools?.(attempt.characterId) ?? {},
   );
   const interactive = turn && (turn.connection || (turn.runId && turn.attemptId && deps.effectLifecycle))
