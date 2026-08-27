@@ -63,6 +63,15 @@ import type {
   TimelineHistoryResult,
   TimelineRemoved,
   TimingPolicy,
+  MonitorStateResult,
+  RunMonitorListParams,
+  RunMonitorListResult,
+  TrajectoryParams,
+  TrajectoryResult,
+  TrajectoryInspectParams,
+  TrajectoryInspector,
+  RunMonitorSubscribeParams,
+  RunMonitorEvent,
 } from "@taki/shared";
 import { requestWithDeadline } from "./rpc-deadline.ts";
 import { createTimingPolicyStore, type TimingPolicyStore } from "./timing-policy.ts";
@@ -71,6 +80,7 @@ import { handshake, requestMethods, type ConnectOutcome } from "./ws-client-meth
 import {
   addConfigChangedHandler,
   addApprovalHandler,
+  addMonitorHandler,
   bindTransport,
   createRoutes,
   installRoutes,
@@ -167,6 +177,13 @@ export interface WsClient {
   approvalList(): Promise<ApprovalListResult>;
   approvalRevoke(params: ApprovalRevokeParams): Promise<ApprovalRevokeResult>;
   onApproval(handler: (event: ApprovalPushEvent) => void): () => void;
+  monitorState(): Promise<MonitorStateResult>;
+  monitorList(params: RunMonitorListParams): Promise<RunMonitorListResult>;
+  monitorTrajectory(params: TrajectoryParams): Promise<TrajectoryResult>;
+  monitorInspect(params: TrajectoryInspectParams): Promise<TrajectoryInspector>;
+  subscribeMonitor(params: RunMonitorSubscribeParams): Promise<void>;
+  unsubscribeMonitor(): Promise<void>;
+  onMonitorEvent(handler: (event: RunMonitorEvent) => void): () => void;
   /** Registers the fire-and-forget avatar command sink (core -> operator push). Replaces any prior handler. */
   onAvatarCommand(handler: (command: AvatarCommand) => void): void;
   /** Registers the optional live-timeline sink (shared with the chat page server-side). */
@@ -264,6 +281,7 @@ export function createWsClient(deps: WsClientDeps): WsClient {
     onTimelineRemoved: (handler) => (state.push.timelineRemoved = handler),
     onConfigChanged: (handler) => addConfigChangedHandler(state, handler),
     onApproval: (handler) => addApprovalHandler(state, handler),
+    onMonitorEvent: (handler) => addMonitorHandler(state, handler),
     currentTimingPolicy: timing,
     onClose: (handler) => transport.onClose(handler),
     close: () => closeClient(timingSync, retire, transport),

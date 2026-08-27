@@ -1,0 +1,1 @@
+- observability-query-service.ts — authorized deterministic Run list with bounded filters/cursors, trajectory projection, live-row mapping, and redacted inspector service

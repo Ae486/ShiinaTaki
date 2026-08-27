@@ -3,7 +3,7 @@ import type { RunEvent } from "@taki/shared";
 export interface RunEventSubscription { readonly cursor: number; readonly overflowed: boolean; close(): void; }
 export interface RunEventLiveBus {
   publish(events: readonly RunEvent[]): void;
-  subscribe(runId: string, observer: (event: RunEvent) => void | Promise<void>, options?: { capacity?: number; afterSeq?: number }): RunEventSubscription;
+  subscribe(runId: string, observer: (event: RunEvent) => void | Promise<void>, options?: { capacity?: number; afterSeq?: number; onOverflow?: () => void }): RunEventSubscription;
 }
 
 interface Listener {
@@ -15,6 +15,7 @@ interface Listener {
   scheduled: boolean;
   overflowed: boolean;
   closed: boolean;
+  onOverflow?: () => void;
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -32,6 +33,7 @@ export function createRunEventLiveBus(backfill: (runId: string, afterSeq: number
       if (listener.queue.length > listener.capacity) {
         listener.overflowed = true;
         listener.queue.length = 0;
+        listener.onOverflow?.();
         return;
       }
     }
@@ -48,6 +50,7 @@ export function createRunEventLiveBus(backfill: (runId: string, afterSeq: number
         } catch {
           listener.overflowed = true;
           listener.queue.length = 0;
+          listener.onOverflow?.();
         }
       }
     } finally {
@@ -66,7 +69,7 @@ export function createRunEventLiveBus(backfill: (runId: string, afterSeq: number
       const afterSeq = options.afterSeq ?? 0;
       if (!Number.isSafeInteger(capacity) || capacity < 1 || capacity > 10_000) throw new Error("RUN_EVENT_INVALID_CAPACITY");
       if (!Number.isSafeInteger(afterSeq) || afterSeq < 0) throw new Error("RUN_EVENT_INVALID_CURSOR");
-      const listener: Listener = { runId, observer, capacity, cursor: afterSeq, queue: [], scheduled: false, overflowed: false, closed: false };
+      const listener: Listener = { runId, observer, capacity, cursor: afterSeq, queue: [], scheduled: false, overflowed: false, closed: false, onOverflow: options.onOverflow };
       listeners.add(listener);
       enqueue(listener, backfill(runId, afterSeq));
       return { get cursor() { return listener.cursor; }, get overflowed() { return listener.overflowed; }, close() { if (listener.closed) return; listener.closed = true; listeners.delete(listener); } };

@@ -11,6 +11,7 @@ Use this contract when changing any of the following:
 - browser WebSocket creation, authentication, retirement, or retry;
 - `WsClient` request/response methods or request timeout classes;
 - pet avatar, chat timeline, or config subscription restoration;
+- mounted pages whose server-owned data changes while the connection stays healthy;
 - connection status presentation or readiness-gated controls;
 - the shared D59/D61 timing policy consumed by a desktop window.
 
@@ -37,6 +38,17 @@ interface ConnectionGenerationController<TClient> {
   start(): void;
   snapshot(): { client: TClient | null; status: ConnectionStatus };
   subscribe(listener: (snapshot: ConnectionSnapshot<TClient>) => void): () => void;
+  dispose(): void;
+}
+
+interface ReactiveReadModel {
+  refresh(reason: "mount" | "focus" | "visibility" | "invalidation" | "reconnect" | "manual"): Promise<void>;
+  snapshot(): {
+    loading: boolean;
+    refreshing: boolean;
+    stale: boolean;
+    error: string | null;
+  };
   dispose(): void;
 }
 
@@ -122,9 +134,31 @@ interface TimingPolicy {
   later generation.
 - Shared Home publishes the replacement client to mounted pages. Idempotent reads naturally revalidate from client
   identity; mutations are never replayed.
+- The optional Run monitor owns a framework-free, in-memory controller per mounted Home page. Rebinding increments a
+  generation, removes the retired push handler, explicitly unsubscribes the retired client, rereads monitor state and
+  the bounded Run page, then restores only the selected Run's durable trajectory/live cursor. Late list, trajectory,
+  inspector, or push results from an older generation are ignored. Overflow marks the view stale and rereads from the
+  last durable cursor; monitor data is never written to `localStorage`.
 - Chat installs guarded `timeline.appended` and `timeline.removed` handlers, subscribes, then fetches the newest
   history page. Reconciliation replaces the authoritative newest coverage while preserving older pagination, live
   rows that raced with restore, and removal tombstones. A partial old stream is cleared by D29, not reconstructed.
+
+### Mounted-page revalidation
+
+- Navigation away and back is never the refresh mechanism for mutable server-owned data. A mounted page either consumes
+  a committed notification with a durable cursor, or performs bounded idempotent revalidation on a named lifecycle
+  signal such as focus, visibility restoration, config/client generation replacement, or explicit invalidation.
+- Prefer a real producer notification when Core already owns a meaningful event. Do not invent a dead subscription for
+  data that has no producer, and do not create unrelated per-page polling loops. A bounded timer is allowed only when
+  the source has no event seam and the child task defines interval, visibility pause, cancellation, and request budget.
+- A background refresh preserves last-good content and sets `refreshing`; it does not regress to first-load `loading`.
+  Failed revalidation marks the view stale/error without discarding readable last-good data. Retired-generation results
+  are ignored through the same generation guard as restoration.
+- Lazy/older-page reads preserve selection and cursor truth. Tail-following is suspended while the user inspects older
+  rows; a live append may expose a new-items affordance but must not steal scroll position.
+- Chat text, tool-call, tool-result, and approval presentation follows the actual event arrival order. A final assembled
+  timeline row reconciles/deduplicates in-flight records; it must not be the first opportunity to reveal a tool event
+  that was already delivered live.
 
 ### Honest UI behavior
 
@@ -151,6 +185,10 @@ interface TimingPolicy {
 | Timing refresh is invalid/unavailable | Keep last-good policy and report a diagnostic |
 | Core is unavailable while a page has cached data | Keep cached data visible; disable owned actions; show status |
 | Timeline row is removed during restore | Preserve the tombstone so newest history cannot re-add it |
+| Mounted page receives a committed invalidation | Revalidate in place; do not require navigation/remount |
+| Background revalidation fails | Preserve last-good content, mark stale/error, and permit explicit retry |
+| Retired-generation refresh settles late | Ignore it; it cannot replace current-generation content |
+| User is inspecting an older page when live rows arrive | Preserve scroll/selection and expose pending new content without forcing tail-follow |
 
 ## 5. Good / Base / Bad Cases
 
@@ -158,12 +196,14 @@ interface TimingPolicy {
   subscribes once, then publishes connected; one later motion and expression reach the scene once.
 - Good: Home reconnects while Chat remains healthy. Settings pages keep last-good content and revalidate from the new
   Home client without disturbing the Chat stream.
+- Good: Perception stays open while its source changes; a producer notification or bounded focus/visibility
+  revalidation updates the card in place and shows a non-blocking refreshing state.
 - Base: an interactive mutation exceeds its deadline. Busy state releases, the UI names the unknown outcome, and no
   automatic retry occurs.
 - Base: Core sends a timing change. The current operation keeps its captured timer; the next operation uses the
   validated full-policy refresh.
 - Bad: reuse the same closed `WsClient`, share one socket between windows, publish connected before restoration, queue
-  commands offline, or use `Promise.race` around bare JSON-RPC requests.
+  commands offline, use `Promise.race` around bare JSON-RPC requests, or require page remount to observe current data.
 
 ## 6. Tests Required
 
@@ -177,6 +217,12 @@ interface TimingPolicy {
   and reconnect report recovery.
 - `restore-chat-timeline.test.ts` plus store tests: subscribe-before-history, live-race dedup, removal tombstones,
   authoritative newest reconciliation, and older cursor preservation.
+- Monitor controller/view tests: retired-generation suppression, disabled-state clearing and Home-row removal,
+  list/trajectory pagination, semantic grouping without opaque labels, inspector-only copy controls, live cursor
+  continuation, overflow recovery, and explicit unsubscribe on rebind/disposal.
+- Reactive page tests: focus/visibility/invalidation revalidation, one in-flight refresh, last-good preservation,
+  stale/error recovery, disposal cancellation, lazy-page cursor/selection retention, tail-follow suspension, and
+  incremental tool-call/tool-result/approval reconciliation without final-row duplication.
 - Readiness component tests: settings, operations, perception, costume import/refresh, Home composer, and Pet bubble keep
   truthful disabled/draft behavior while their owning connection is unavailable.
 - Manual: real three-window Core stop/start, independent status surfaces, one post-recovery push per channel, Pet
@@ -198,4 +244,13 @@ const controller = createConnectionGenerationController({
   timingPolicy,
 });
 controller.start();
+```
+
+```typescript
+// Wrong: the only way to see server changes is to unmount/remount the page.
+useEffect(() => { void client.read(); }, [client]);
+
+// Correct: one disposable read model revalidates on explicit lifecycle signals and ignores retired generations.
+const model = createReactiveReadModel({ client, generation, read, subscribeInvalidation });
+void model.refresh("mount");
 ```

@@ -4,18 +4,19 @@
 >
 > Scope: post-Skills/MCP T4 - Autonomous Runs, Run Receipts, Scheduled Tasks, Heartbeat, delivery, reliability, and later Experience Review.
 >
-> Snapshot date: 2026-08-21; Slice 0 state updated 2026-08-23. Recheck every Git hash, task pointer, dependency state,
+> Snapshot date: 2026-08-27. Recheck every Git hash, task pointer, dependency state,
 > and runtime claim before use.
 
 ## 1. Executive State
 
 ### 1.0 Upstream architecture dependency
 
-The current parent planning task `.trellis/tasks/08-22-t4-agent-architecture-observability/` is the PI-based Agent
-Harness architecture and DSH-based observability task. It is not the complete T4 product implementation task. T4
-providers consume its reusable contracts (Harness admission, Run/Attempt lifecycle, event ledger, Receipts, Context
-Manifest, and Child Run compatibility); Scheduled Task, Heartbeat, proactive delivery, and later product policies
-remain downstream T4 work.
+The current parent task `.trellis/tasks/08-22-t4-agent-architecture-observability/` is the PI-based Agent Harness and
+DSH-based observability program. Its Harness foundation is implemented and Scheduled Task is the first downstream T4
+consumer. The first DSH-style query/trajectory/monitor projection is implemented, formally checked, and manually
+accepted; it is pending commit/archive. The parent remains open for producer-rich observability, client experience,
+and later integration closure; it is not the complete T4 product program. Heartbeat, proactive delivery, Child Runs,
+and later policies remain downstream work.
 
 ### 1.1 Completed foundation
 
@@ -31,16 +32,20 @@ The merged foundation includes:
 - unified host-qualified Extension Discovery, immutable per-Run snapshots, collision rejection, explicit transfer routing, reconnect generation replacement, and the two-Node process proof;
 - the reusable Core turn queue, cancellation registry, timeline persistence, perception/privacy pipeline, configuration source, model slots, and maintenance sweep primitives.
 
-The T4/MCP merge entered main as commit `36f4b50`. Main has since advanced to `9895dd3`; that committed
-Memory/Hindsight baseline is staged in T4 through a no-commit semantic merge. Production Harness implementation still
-requires a separately approved child.
+The production Harness work is implemented through archived children: Harness foundation, Durable Event Ledger,
+Effect lifecycle, and Recovery/admission hardening. Scheduled Task Provider is also implemented and archived. The
+Monitor projection child is implemented and checked in the current working tree. Current T4 HEAD is `17824ba` on
+`task/t4-skills-mcp-productization`; recheck live Git state before relying on this snapshot.
 
-### 1.2 Not implemented yet
+### 1.2 Remaining work
 
-The downstream T4 product program has not started. These remain real product work:
+The common Harness and Scheduled Task Core provider exist. These remain real product/architecture work:
 
-- Autonomous Run identity, lifecycle, execution ledger, Attempt semantics, and Run Receipt projection;
-- Scheduled Task persistence, canonical schedule parsing, timezone/DST behavior, catch-up, retry, pause/resume, mutation APIs, and Home management;
+- producer-rich DSH observability for model/tool/usage/context/timing/governance/delivery evidence and meaningful UI;
+- reactive Perception/Monitor refresh and verified incremental Chat tool-call/result/approval rendering;
+- `avatar_set_expression` versus generic ToolLoopAgent failure/repair investigation;
+- richer Run Receipt/Home projection beyond the existing minimal status/receipt foundation;
+- Scheduled Task Home management, delivery presentation, and Timezone Authority Device update surface;
 - Heartbeat eligibility, bounded context, structural silence, Class B budgets, quiet hours, busy deferral, and delivery;
 - whole-message proactive delivery through the ordinary timeline path and Pet restoration;
 - transport liveness and sleep/resume acceptance inherited from D59/D61;
@@ -63,11 +68,11 @@ Automated E2E, source inspection, and a development build must never be relabele
 
 ## 2. Repository and Worktree State
 
-Current Slice 0 observation (2026-08-23); older hashes in the surrounding narrative remain historical unless updated:
+Current observation (2026-08-27); older hashes in the surrounding narrative remain historical unless updated:
 
 | Worktree | Branch | Observed state | Rule |
 | --- | --- | --- | --- |
-| H:/TakiAgent-worktrees/t4 | task/t4-skills-mcp-productization | HEAD `c652abb`; main `9895dd3` semantic merge staged with `--no-commit`, plus architecture docs and focused migration tests | all T4 work starts here; do not treat the staged merge as committed |
+| H:/TakiAgent-worktrees/t4 | task/t4-skills-mcp-productization | HEAD `17824ba`; working tree contains the implemented Monitor child, Heartbeat documentation, and post-acceptance follow-up planning | all T4 work starts here; inspect dirty files before implementation |
 | H:/TakiAgent | main | `9895dd3`; one user-owned untracked backup directory | never edit, stage, clean, or reset these files from T4 |
 | H:/hindsight | separate repository | independently owned compatibility work | never edit from T4 |
 | H:/TakiAgent/.claude/worktrees/agent-a0b3d2f31101f184a | scratch branch | dirty legacy worktree | do not use or remove without separate ownership review |
@@ -88,9 +93,10 @@ Before implementation, run from H:/TakiAgent-worktrees/t4:
 
 Then inspect H:/TakiAgent read-only. If main advanced, merge main into the T4 branch only after checking dirty files and resolving shared seams semantically. Never use whole-file ours/theirs for main.ts, shared exports, migrations, Memory composition, or task documentation.
 
-The file `.trellis/.current-task` may still name archived Approval Productization. The current parent Codex session is
-bound to `.trellis/tasks/08-22-t4-agent-architecture-observability/`; use that session binding as the present task
-authority, and do not blindly rewrite the stale file pointer outside the normal Trellis planning/start flow.
+The file `.trellis/.current-task` may still name an archived child. `task.py current --source` is the authority and
+currently reports no active task even though `.trellis/tasks/08-27-observability-projection-ui/` remains `in_progress`.
+Treat the child artifacts and working-tree implementation as the closeout authority; do not reactivate or reimplement
+the child from a stale pointer. After commit/archive, select any follow-up only through a new reviewed child task.
 
 ## 3. Mission and Dependency Order
 
@@ -244,7 +250,13 @@ Class A is not counted against Class B budgets. Quiet hours hold/release expecte
 
 ### 5.4 Heartbeat
 
-- Heartbeat is an approximate no-user-message LLM turn and Class B judgment, not transport liveness.
+- Heartbeat is a no-user-message LLM turn and Class B judgment, not transport liveness. It may be armed by an
+  approximate cadence or by a meaningful normalized external/internal Signal.
+- A raw signal never calls the model directly. Signal Providers normalize observations, then deterministic freshness,
+  dwell, dedupe, debounce/coalescing, cooldown, optional deterministic chance, privacy, busy, quiet-hours, and budget
+  rules decide whether Wake Policy admits a Run.
+- Periodic and event-driven sources converge before `TriggerRequest`; both reuse `RunService -> ChatAgent` and the
+  existing Run/Attempt/Event/Effect authorities.
 - Deterministic pre-checks eliminate empty/no-due/no-new-signal calls before invoking the model.
 - Heartbeat v1 may use narrow Core reads, relevant Skills, already-eligible context, and Companion presentation.
 - It does not use exec, acquire fresh sensors outside the Sampling eligibility path, or cause external side effects.
@@ -254,6 +266,35 @@ Class A is not counted against Class B budgets. Quiet hours hold/release expecte
 - Starting calibration is configurable: approximately 15-minute eligibility beats, hard cap 4 beats/hour, maximum 2 delivered utterances/hour and 8/day, 10-minute minimum gap, quiet hours 23:00-08:00, busy deferral maximum 90 seconds, stale utterance TTL 10 minutes.
 - These are development defaults, not immutable constants.
 - Pure no-reason companionship is out of v1. A meaningful typed signal is required.
+
+#### Interaction Pattern and Companion evolution
+
+- Taki's product goal is not only automation: Heartbeat supports a Companion that appears to notice, form bounded
+  judgments, and interact in a Character-consistent way. The concrete wording, expression, and decision to remain
+  silent are generated per Run rather than stored as fixed response templates.
+- Keep the Character Soul/Persona stable. User/relationship models, bounded Companion State, one-shot intentions, and
+  Interaction Patterns may evolve; autonomous growth must not rewrite the Soul Prompt or core safety policy.
+- The existing typed Core-owned Heartbeat checklist evolves into the Interaction Pattern authority rather than
+  creating a second strategy/runtime system. A Pattern contains trigger conditions, interaction purpose, context
+  references, `silent | express | speak` outcomes, cooldown/cadence/expiry, optional chance, origin/provenance/evidence,
+  revision, and `proposed | active | paused | retired` lifecycle. It contains no fixed dialogue.
+- `intention` remains a one-shot unspoken thought that expires or is consumed. A recurring Interaction Pattern is a
+  reusable habit; transient thoughts must not silently become permanent rules.
+- Shipped, user-authored, and Agent-proposed Patterns use one typed Core store and API shared by the panel and Agent.
+  A Pattern-authoring Skill teaches the Agent how to propose/revise patterns but grants no permission and cannot write
+  the database, runtime code, Persona, or safety prompt directly.
+- User/relationship graphs are projected into small provider-neutral context summaries; Heartbeat does not load an
+  entire graph or compile facts directly into executable rules.
+- New wording or pattern combinations should normally require data/Skill changes only. A new signal source requires a
+  Signal Provider, a new expressive/OS action requires a governed Capability, and new safety limits require Runtime
+  code and tests.
+- Heartbeat implementation must reserve origin/provenance/revision/state, feedback association, rollback, context
+  seams for user model/relationship model/Companion State/intentions, and Run evidence for matched Signals/Patterns and
+  selected outcome. Default behaviors are seed data, not engine branches.
+- Full Companion State/self-model learning and feedback-driven long-term Pattern evolution may ship in later bounded
+  slices, but their reserved seams must remain in the global plan. A first Heartbeat batch is not the final design.
+- Long-lived Agent-authored Patterns default to reviewable candidates. Any future opt-in automatic activation remains
+  bounded by limits, version history, and one-click rollback; it is not implicit permission to self-modify.
 
 ### 5.5 User Timezone
 
@@ -406,11 +447,13 @@ Run identity.
 
 ### Slice 3 - Heartbeat engine
 
-- typed Core-owned checklist and due-commitment sources;
+- periodic plus event-driven Signal Providers converging on one deterministic Wake Policy;
+- typed Core-owned Interaction Patterns and due-commitment sources, with Agent/panel parity and provenance/revision;
 - deterministic eligibility matrix;
 - narrow provider-neutral context;
 - Class B budget, quiet hours, minimum gap, busy deferral, stale TTL, and ignore-backoff;
 - structural heartbeat_respond and dedicated stop condition;
+- Pattern-authoring Skill/Core tool boundary and feedback/revision seams without automatic Soul/Persona rewriting;
 - no Approval popup, external side effects, or fake timeline rows.
 
 ### Slice 4 - delivery and reliability convergence
@@ -567,14 +610,15 @@ Before declaring a slice complete:
 3. Read the Grill, ADR, and spec documents in Section 4.
 4. Verify the staged `9895dd3` semantic merge; if it was discarded or main advanced, repeat the semantic review before production work.
 5. Confirm no active child agent exists.
-6. Review `.trellis/tasks/08-22-t4-agent-architecture-observability/` and `docs/ARCHITECTURE-ROADMAP.md`; the formal
-   contract-planning task already exists and is `in_progress`, but no production child is authorized yet.
+6. Review `.trellis/tasks/08-22-t4-agent-architecture-observability/`,
+   `.trellis/tasks/08-27-observability-projection-ui/`, and `docs/ARCHITECTURE-ROADMAP.md`.
 7. Correct the Trellis pointer only through the normal planning/start flow; do not infer task activation from stale
    `.trellis/.current-task` metadata.
-8. Freeze Slice 1 schemas, transitions, migration version, implement context, and check context.
-9. Report the plan and first-batch boundary to the owner in Simplified Chinese.
-10. Implement only the Run/Receipt foundation after explicit implementation approval.
-11. Recheck main drift before each later slice.
+8. Preserve the recorded Heartbeat Signal/Wake/Interaction Pattern decisions; do not reopen them without new evidence.
+9. Confirm the Monitor child acceptance record, post-acceptance D67-D69 plan, and pending commit/archive state.
+10. Select the next independently verifiable child only after owner review; do not fold D67-D69 into Heartbeat by
+    default.
+11. Recheck main drift before every later slice.
 
 ## 13. Maintenance Rule
 

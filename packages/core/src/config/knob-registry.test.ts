@@ -12,6 +12,7 @@ const EXPECTED_KEYS = [
   "TAKI_DATA_DIR",
   "TAKI_PROMPT_DIR",
   "TAKI_TRUST_LOOPBACK_OPERATOR",
+  "TAKI_MONITOR_MODE",
   "TAKI_RECONNECT_BASE_MS",
   "TAKI_RECONNECT_CAP_MS",
   "TAKI_RECONNECT_STABILITY_RESET_MS",
@@ -72,7 +73,7 @@ describe("CONFIG_KNOBS", () => {
     const keys = CONFIG_KNOBS.map((knob) => knob.key);
     expect(new Set(keys).size).toBe(keys.length);
     expect([...keys].sort()).toEqual([...EXPECTED_KEYS].sort());
-    expect(CONFIG_KNOBS).toHaveLength(59);
+    expect(CONFIG_KNOBS).toHaveLength(60);
   });
 
   it("flags exactly the three API keys as secrets", () => {
@@ -86,6 +87,7 @@ describe("CONFIG_KNOBS", () => {
   it("keeps apply metadata truthful for timing rows with and without current production consumers", () => {
     expect(CONFIG_KNOBS.filter((knob) => knob.apply === "env-only").map((knob) => knob.key)).toEqual(["TAKI_DATA_DIR"]);
     expect(CONFIG_KNOBS.filter((knob) => knob.apply === "live").map((knob) => knob.key)).toEqual([
+      "TAKI_MONITOR_MODE",
       "TAKI_RECONNECT_BASE_MS",
       "TAKI_RECONNECT_CAP_MS",
       "TAKI_RECONNECT_STABILITY_RESET_MS",

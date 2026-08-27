@@ -1,0 +1,18 @@
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "One Run authority, tool evidence, and autonomous-turn invariants"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "SQLite query, index, migration, and repository rules"}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "Operator-only methods and connection-scoped live subscription pattern"}
+{"file": ".trellis/spec/backend/config-store.md", "reason": "Core-owned monitor mode configuration and change propagation"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Bounded application errors and fail-closed query behavior"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Separation of Pino diagnostics from execution evidence and secret-safe output"}
+{"file": ".trellis/spec/frontend/home-window.md", "reason": "Home registry, own connection, presentation primitives, and execution projection contract"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Disposable operator state and reconnect generation rules"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "React component boundaries and accessibility"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Shared Zod wire contracts and discriminated UI states"}
+{"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "Per-generation reconnect and restoration"}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/dsh-observability.md", "reason": "Primary DSH query and trajectory research"}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-d-observability-plane.md", "reason": "Projection, mode, privacy, and durable/live contracts"}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-e-integration-map.md", "reason": "Core and UI ownership map"}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-g-slices-gates.md", "reason": "Slice scope and gates"}
+{"file": ".trellis/tasks/archive/2026-08/08-24-slice-2-durable-event-ledger/prd.md", "reason": "Implemented ledger/live/replay boundary"}
+{"file": ".trellis/tasks/archive/2026-08/08-24-slice-2-durable-event-ledger/design.md", "reason": "Existing projection and mode layering"}
+{"file": "docs/ARCHITECTURE-ROADMAP.md", "reason": "Global architecture and observability follow-up"}

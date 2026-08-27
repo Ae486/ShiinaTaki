@@ -28,8 +28,38 @@ A Companion-initiated message to the user, driven by Heartbeat, subject to rate 
 _Avoid_: notification, push
 
 **Heartbeat**:
-A scheduled Agent Core turn with no user message (OpenClaw-style): the agent reviews a small stable checklist plus current signals and stays silent by default — the "all quiet" ack is never shown to the user. When something genuinely needs attention it acts: a Proactive Utterance, or a silent act such as choosing an avatar expression. Skipped when there is nothing to check, deferred while a real conversation turn is in flight, restricted to active hours. It is a full LLM turn — conscious action, never a reflex.
+A no-user-message Agent Core judgment opportunity (OpenClaw-style), armed either by an approximate cadence or by a
+meaningful normalized Signal. Every source still passes deterministic Wake Policy before a model call; raw activity
+changes never invoke the Agent directly. The Agent receives thin Character-aware context and stays silent by default.
+When something genuinely needs attention it may produce a Proactive Utterance or a silent act such as choosing an
+avatar expression. It is a full LLM turn — conscious action, never a transport keepalive or renderer reflex.
 _Avoid_: keepalive, ping, polling (networking liveness senses); idle animation driver
+
+**Heartbeat Signal**:
+A typed, bounded observation that may arm Heartbeat evaluation, such as a meaningful activity transition, due
+commitment, completed background work, or Privacy Pause release. A Signal is normalized, freshness-checked,
+deduplicated, debounced/coalesced, and budgeted before it may produce a Heartbeat Run; it never calls the model or
+grants permission by itself.
+_Avoid_: Heartbeat Run, raw event, trigger that directly invokes the Agent
+
+**Heartbeat Wake Policy**:
+The deterministic Core policy that decides whether current Signals and due conditions justify admitting one Heartbeat
+Run. It applies freshness, eligibility, cooldown, optional deterministic chance, quiet-hours, busy-yield, privacy, and
+Class B budget rules before the model is invoked.
+_Avoid_: gate model, prompt instruction, scheduler loop
+
+**Interaction Pattern**:
+A Character-scoped, typed and versioned rule describing when Heartbeat may consider an interaction, its purpose,
+eligible context, allowed outcomes, cooldown/chance/expiry, provenance, evidence, and lifecycle. It contains no fixed
+dialogue. Shipped, user-authored, and Agent-proposed Patterns share one Core authority and can be paused, revised, or
+retired; a Pattern never grants permission or bypasses Wake Policy.
+_Avoid_: response template, Skill, Soul Prompt, intention
+
+**Companion State**:
+A bounded, evolvable projection of the Character's current affective and relationship posture used when deciding how
+to interact. It may evolve from relationship evidence but is not the stable Character Persona, a permission source, or
+an unrestricted self-rewritten prompt.
+_Avoid_: Persona, mood string, Long-term Memory, system prompt
 
 **Scheduled Task**:
 A persisted user intent whose deterministic time trigger starts a `scheduled` Agent run. Even a simple reminder wakes

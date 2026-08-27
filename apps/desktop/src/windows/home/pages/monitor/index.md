@@ -1,0 +1,3 @@
+- monitor-page.tsx — optional DSH-style Run list/trajectory/inspector UI with filters and bounded older-page controls
+- monitor-controller.ts — disposable generation-safe WS state owner for restore, live cursors, paging and stale recovery
+- monitor-view.tsx — pure Run/Attempt grouping and inspector copy controls; grouping keys stay hidden

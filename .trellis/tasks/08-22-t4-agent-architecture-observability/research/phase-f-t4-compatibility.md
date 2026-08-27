@@ -27,13 +27,20 @@ The following are not decided or implemented by this parent architecture task:
 
 - Scheduled Task `at`/`every`/`cron`, timezone/DST, catch-up, pause/resume, and single-flight schedule policy;
 - Heartbeat eligibility, checklist/commitment sources, Class B budgets, quiet hours, minimum gaps, ignore-backoff,
-  structural silence, and context thinness;
+  structural silence, context thinness, Signal normalization/Wake Policy, Interaction Pattern lifecycle, and
+  Companion-evolution policy;
 - proactive delivery, Home/Pet UI behavior, and D59/D61 client restoration policy;
 - Procedural Knowledge and Experience Review behavior;
 - generic task DAG/mailbox coordination beyond reserving Child Run lineage and future work-item boundaries.
 
 These providers may choose whether and when to submit a request, but Core owns execution, effects, settlement, evidence,
 and recovery after admission.
+
+Heartbeat cadence and event sources must converge on one provider-owned Wake Policy before admission. Raw activity,
+background completion, privacy, or future integration events may arm evaluation but cannot call the model, grant
+permission, or create a private loop. Typed Character-scoped Interaction Patterns may guide eligibility and purpose,
+but they remain data over the common Harness path. Agent pattern authoring uses a Skill plus a validated Core API;
+stable Persona/Soul and Runtime safety policy are not self-modifiable.
 
 ## 4. Child Runs
 

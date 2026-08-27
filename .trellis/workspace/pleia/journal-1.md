@@ -1309,3 +1309,40 @@ Implemented and formally checked Phase G Slice 5A Scheduled Task provider: durab
 ### Status
 
 [OK] **Completed**
+
+## Session 28: Monitor acceptance follow-up planning
+
+**Date**: 2026-08-27
+**Task**: DSH-style observability projections and developer monitor UI (`08-27-observability-projection-ui`)
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Owner acceptance confirmed primary chat, tool use, and the first Monitor projection are functional. The accepted child
+remains read-only over the single Run/Event authority and is pending commit/archive. Three follow-up tracks were
+recorded without widening this child or entering Heartbeat implementation:
+
+1. D67 — unified reactive UI refresh/revalidation and incremental Chat tool-call/result/approval presentation;
+2. D68 — producer-first DSH observability expansion for model/tool/usage/context/timing/governance/delivery/recovery
+   facts, with real cache semantics only when an authoritative provider signal exists;
+3. D69 — reproduction and contract investigation for `avatar_set_expression` versus generic ToolLoopAgent error,
+   feedback, and repair/retry behavior.
+
+### Evidence and records
+
+- Added `.trellis/tasks/08-22-t4-agent-architecture-observability/research/post-acceptance-observability-followups-2026-08-27.md`.
+- Updated `docs/deferred-decisions.md`, `docs/ARCHITECTURE-ROADMAP.md`, `docs/T4-HANDOFF.md`, parent Phase G,
+  Monitor implementation evidence, and frontend/backend executable specs.
+- YCE remains disabled; unknown code locations were checked with `jbcontext`.
+
+### Verification
+
+- `python ./.trellis/scripts/task.py validate 08-27-observability-projection-ui` passed.
+- `python ./.trellis/scripts/task.py validate 08-22-t4-agent-architecture-observability` passed.
+- `git diff --check` passed.
+- No production code was changed in this follow-up; existing child automated and owner manual acceptance evidence is
+  preserved in `implementation-evidence.md`.
+
+### Status
+
+[OK] **Planning/documentation complete; commit and archive remain owner-authorized next steps**

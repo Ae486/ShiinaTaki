@@ -30,3 +30,4 @@
 - structured-memory-block-repo.ts — revisioned Core-owned structured Memory Blocks, registry/writer enforcement, rendering
 - canonical-memory-repo.ts — canonical source/unit/policy/receipt aggregate with atomic retain and revisioned lifecycle
 - canonical-memory-sparse-repo.ts — rebuildable canonical FTS5/BM25 projection
+- ../observability/observability-query-service.ts — read-only deterministic Run projection and redacted inspector

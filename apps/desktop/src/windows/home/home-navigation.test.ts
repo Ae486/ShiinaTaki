@@ -6,14 +6,14 @@
  */
 
 import { beforeEach, describe, expect, it } from "vitest";
-import { DEFAULT_PAGE_ID, HOME_PAGES, isPageId } from "./pages.ts";
+import { DEFAULT_PAGE_ID, HOME_PAGES, isPageId, visibleHomePages } from "./pages.ts";
 import { pageFromSearch } from "./boot-page.ts";
 import { useHomeStore } from "./home-store.ts";
 import { appendVisitedPage } from "./visited-page-ids.ts";
 
 describe("home page registry", () => {
   it("registers the home pages in menu order, chat first", () => {
-    expect(HOME_PAGES.map((page) => page.id)).toEqual(["chat", "settings", "operations", "perception", "costume", "mcp", "skills"]);
+    expect(HOME_PAGES.map((page) => page.id)).toEqual(["chat", "settings", "operations", "perception", "costume", "mcp", "skills", "monitor"]);
     expect(DEFAULT_PAGE_ID).toBe("chat");
   });
 
@@ -34,6 +34,11 @@ describe("home page registry", () => {
     expect(isPageId("chat")).toBe(true);
     expect(isPageId("nope")).toBe(false);
     expect(isPageId(undefined)).toBe(false);
+  });
+
+  it("removes the monitor entry entirely while monitoring is disabled", () => {
+    expect(visibleHomePages(false).some((page) => page.id === "monitor")).toBe(false);
+    expect(visibleHomePages(true).some((page) => page.id === "monitor")).toBe(true);
   });
 });
 

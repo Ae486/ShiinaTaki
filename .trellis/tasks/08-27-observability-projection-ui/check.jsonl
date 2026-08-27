@@ -1,0 +1,18 @@
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Review no-second-runtime and truthful effect evidence"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Review query/index/migration and ledger integrity"}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "Review authorization, backfill, subscription, and disposal"}
+{"file": ".trellis/spec/backend/config-store.md", "reason": "Review disabled default and Core-owned mode state"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Review bounded failures, corruption, and stale cursors"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Review privacy and Pino versus Run evidence separation"}
+{"file": ".trellis/spec/frontend/home-window.md", "reason": "Review conditional page and semantic fields"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Review disposable state and reconnect"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Review components and accessibility"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "Review Shared schemas and boundary parsing"}
+{"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "Review restoration and live cursor recovery"}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/dsh-observability.md", "reason": "Review DSH fidelity and adaptation"}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-d-observability-plane.md", "reason": "Review modes, privacy, retention, and export boundaries"}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-e-integration-map.md", "reason": "Review ownership and duplicate paths"}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/phase-g-slices-gates.md", "reason": "Review scope and full gate"}
+{"file": ".trellis/tasks/archive/2026-08/08-24-slice-2-durable-event-ledger/prd.md", "reason": "Review compatibility with completed ledger"}
+{"file": ".trellis/tasks/archive/2026-08/08-25-scheduled-task-provider/research/formal-check-evidence.md", "reason": "Review Scheduled Task regression and residuals"}
+{"file": "docs/ARCHITECTURE-ROADMAP.md", "reason": "Review living-plan consistency"}

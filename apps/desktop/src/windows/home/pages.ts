@@ -21,6 +21,7 @@ import { PerceptionPage } from "./pages/perception/perception-page.tsx";
 import { CostumePage } from "./pages/costume/costume-page.tsx";
 import { McpPage } from "./pages/mcp/mcp-page.tsx";
 import { SkillsPage } from "./pages/skills/skills-page.tsx";
+import { MonitorPage } from "./pages/monitor/monitor-page.tsx";
 export { DEFAULT_PAGE_ID } from "./default-page-id.ts";
 
 export interface HomePage {
@@ -38,7 +39,13 @@ export const HOME_PAGES = [
   { id: "costume", label: "换装", icon: CostumeIcon, component: CostumePage },
   { id: "mcp", label: "MCP", icon: McpIcon, component: McpPage },
   { id: "skills", label: "Skills", icon: SkillIcon, component: SkillsPage },
+  { id: "monitor", label: "运行监视", icon: OperationsIcon, component: MonitorPage },
 ] as const satisfies readonly HomePage[];
+
+/** The monitor is absent, rather than merely disabled, while the Core mode is DISABLED. */
+export function visibleHomePages(monitorEnabled: boolean) {
+  return monitorEnabled ? HOME_PAGES : HOME_PAGES.filter((page) => page.id !== "monitor");
+}
 
 /** The registered ids as a closed union — an unregistered page id cannot be navigated to at the type level. */
 export type PageId = (typeof HOME_PAGES)[number]["id"];

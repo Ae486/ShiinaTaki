@@ -780,3 +780,89 @@ clock, matching how `activity-state.ts` and `privacy-pause.ts` are already built
 - `packages/core/src/perception/privacy-pause.ts:1-20`
 - `packages/core/src/server/index.md:4,6` (connection-registry, timeline-subscriptions)
 - `.trellis/workspace/pleia/m5-proactivity-survey.md` (prior art — §0 above)
+
+---
+
+## 11. Owner clarification: event wake and evolvable interaction patterns (2026-08-27)
+
+This section records the owner discussion recovered from `C:/Users/55473/Desktop/heartbeat.md`. It corrects the
+cadence-only wording above and extends the existing typed-checklist decision without creating another Runtime.
+
+### 11.1 Product intent
+
+TakiAgent is not only an automation assistant. Heartbeat is one mechanism for a Companion that can notice meaningful
+changes, form a bounded Character-specific judgment, and decide whether to remain silent, express itself, or speak.
+Concrete wording is generated from the stable Character Persona plus current user/relationship context; it is not a
+stored response template.
+
+The stable/evolvable split is:
+
+```text
+stable Soul / Persona
+  + evolving user and relationship models
+  + bounded Companion State
+  + versioned Interaction Patterns
+  + current Signals, intentions, and memory
+  -> Heartbeat judgment
+  -> silent | express | speak
+```
+
+The Agent must not treat growth as permission to rewrite its Persona, core safety prompt, or Runtime code.
+
+### 11.2 One wake path for cadence and events
+
+```text
+cadence tick / external or internal observation
+  -> Signal Provider
+  -> normalize + freshness + dedupe + debounce/coalesce
+  -> Heartbeat Wake Policy
+  -> skip with a named reason, or emit TriggerRequest
+  -> RunService -> ChatAgent
+  -> heartbeat_respond(silent | express | speak)
+```
+
+Examples include a meaningful activity transition, return from idle, due commitment, background/Child Run completion,
+or Privacy Pause release. A raw foreground switch is only an observation. It becomes an eligible Signal only after
+dwell/freshness/context-transition rules; it never invokes the model directly.
+
+Optional chance is a Pattern-level suppression mechanism after deterministic checks. Use a reproducible decision based
+on stable event/pattern/revision inputs so tests and traces can explain the result. Chance can reduce wake frequency but
+cannot bypass privacy, quiet hours, cooldown, busy-yield, or Class B budgets.
+
+### 11.3 Interaction Pattern authority
+
+Extend the already-approved typed Core-owned checklist into a Character-scoped Interaction Pattern instead of adding a
+parallel interaction-strategy engine. The final schema is an implementation decision, but it must reserve:
+
+- lifecycle: `proposed | active | paused | retired`;
+- origin/provenance/evidence and revision;
+- Signal/condition inputs and freshness;
+- interaction purpose rather than fixed dialogue;
+- bounded context references;
+- allowed `silent | express | speak` outcomes;
+- cooldown/cadence/expiry and optional deterministic chance;
+- feedback links, limits, rollback, and Character ownership.
+
+`intention` remains one-shot and expires or is consumed. A recurring Pattern is a reusable habit. The system must not
+promote every transient thought or isolated model output into a permanent rule.
+
+Shipped, user-authored, and Agent-proposed Patterns share one typed Core store/API and panel projection. A
+Pattern-authoring Skill teaches the Agent to identify repeated evidence, propose or revise conditions/purpose, assess
+noise risk, and pause/retire ineffective Patterns. The Skill grants no permission; the Agent cannot directly edit the
+database, implementation, Persona, or safety prompt.
+
+User graphs and Hindsight mental models feed a small provider-neutral projection describing stable preferences,
+relationship posture, recent relevant changes, and prior interaction feedback. Heartbeat does not load the whole graph
+or mechanically turn facts into executable rules.
+
+### 11.4 Delivery stages and reserved evolution
+
+The Heartbeat implementation stage must include or reserve Signal/Wake contracts, typed Pattern storage and Agent/panel
+parity, Pattern provenance/revision/lifecycle, context seams for user model/relationship model/Companion State/
+intentions, and Run evidence for matched Signals/Patterns and the selected outcome. Default interaction behavior is seed
+data rather than `if` branches in the engine.
+
+Full Companion State/self-model maintenance, long-term feedback learning, and automatic Pattern evolution may be split
+into later work. They must stay visible in the roadmap so a limited first Heartbeat batch does not become the final
+architecture. Long-lived Agent-authored Patterns default to reviewable candidates; a future opt-in automatic mode must
+retain global limits, version history, and one-click rollback.

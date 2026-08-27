@@ -9,7 +9,7 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { HomeShell } from "./home-shell.tsx";
-import { DEFAULT_PAGE_ID, HOME_PAGES } from "./pages.ts";
+import { DEFAULT_PAGE_ID, HOME_PAGES, visibleHomePages } from "./pages.ts";
 import { useHomeStore } from "./home-store.ts";
 
 // zustand hands a static render its INITIAL state, so the shell under renderToStaticMarkup always shows the default
@@ -29,13 +29,14 @@ function menuRows(): string[] {
 describe("HomeShell", () => {
   it("renders one menu entry per registry row, marking the current page", () => {
     const html = shellMarkup();
-    for (const page of HOME_PAGES) expect(html).toContain(page.label);
+    for (const page of visibleHomePages(false)) expect(html).toContain(page.label);
+    expect(html).not.toContain("运行监视");
     expect(html).toContain('aria-current="page"');
   });
 
   it("draws each row's registry glyph beside its label", () => {
     const rows = menuRows();
-    expect(rows).toHaveLength(HOME_PAGES.length);
+    expect(rows).toHaveLength(visibleHomePages(false).length);
     for (const row of rows) expect(row).toContain("<svg");
   });
 

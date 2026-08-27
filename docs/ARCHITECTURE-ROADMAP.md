@@ -318,11 +318,27 @@ Implementation status (2026-08-25): Slice 5A installs the first production Sched
 Harness path, including durable definitions/outbox, `at`/`every`/`cron`, coalesced catch-up, primary-only management,
 and non-primary ChatAgent dispatch. Heartbeat, delivery/projections, Child Runs, and Timezone Authority Device updates
 remain later consumers; they do not introduce another runtime or execution ledger.
-| 3. Heartbeat | eligibility, Class-B policy, structural silence, bounded context and delivery | future proactive providers and feedback calibration |
+| 3. Heartbeat | periodic/event Signal Providers, deterministic Wake Policy, typed Interaction Patterns, Class-B policy, structural silence, bounded Character-aware context and delivery | Companion State, feedback-driven Pattern evolution, future proactive providers and calibration |
 | 4. Delivery/reliability | Timeline/Receipt/Pet/Home convergence, reconnect and stale-result handling | future clients and remote delivery |
 | 5. Subagent/context lineage | parent/child Run, isolated child context, bounded result return, one-shot/continuable contracts | team/task coordination |
 | 6. Task coordination | generic work items, dependencies, claim/revision, mailbox and multi-agent coordination | domain-specific orchestration |
 | 7. Advanced operations | cost routing, richer trajectory, procedural knowledge, experience review, policy analytics | future product features |
+
+### 8.1 Post-acceptance productization follow-ups
+
+The first DSH-style Monitor slice is a usable read-only projection, not the final observability or client-experience
+design. Owner acceptance on 2026-08-27 identified three follow-up tracks. They remain separate slices so each can be
+verified without widening the Run authority or creating a second runtime:
+
+| Follow-up | Scope | Dependency and boundary |
+|---|---|---|
+| UI/UX reactive refresh and streaming baseline | One disposable Home read-model/revalidation seam for Perception, Monitor, and Chat; normal live updates, reconnect/backfill restoration, lazy/older-page loading, stale/error states, tail-following, and incremental tool-call/tool-result/approval presentation | Reuse the existing generation-safe WS clients and page stores. Do not add one ad-hoc timer per page or change Core execution semantics. D29/D59 remain prerequisites and references, not duplicates. |
+| DSH observability expansion | Fixed Core producers and versioned payloads for model request/response, tool lifecycle, usage/tokens, context, provider/model timing, approval/governance, delivery, recovery, retry, and any real cache semantics; then extend projections, filters, inspector, and UI | Producer-first. Every displayed metric must be rebuildable from canonical Run Events. Pino remains process diagnostics; no fabricated cache/token fields and no raw secret/prompt export. |
+| Tool/loop diagnostics and avatar contract | Reproduce missing-argument and post-failure behavior across avatar, Tavily/MCP, and a local Core tool; classify schema validation, execute result/throw, model feedback, and next-step generation before choosing a repair/retry or tool-contract fix | Research/reproduction first. Preserve provider-neutral ToolLoopAgent behavior, idempotency, and step/budget limits. Do not infer a general loop defect from one tool's symptom. |
+
+These tracks may be implemented in any later order only after their dependencies are recorded in the relevant child
+plan. A passing Monitor slice does not close them, and a later slice must update this table when evidence changes the
+producer, projection, or client boundary.
 
 No later stage may silently introduce a second execution loop, second Timeline authority, second Approval authority, or
 second Memory Authority.
@@ -344,6 +360,7 @@ architecture direction.
 | Observability privacy | **Resolved at architecture level by combining PI's content-free telemetry with DSH's durable/live/query projection model, adapted to TakiAgent's stricter privacy contract:** canonical Run evidence is Core-owned and bounded; user-facing and exported views are separate redacted projections; telemetry is opt-in/non-blocking; known secrets and sensitive Host/sensor data are always excluded. Retention tables, redaction rules, and role/query matrices remain implementation policy. | 1/4 |
 | Restart and supervision | **Resolved at architecture level by adopting PI's direct program-counter restore and TakiAgent's generation-safe Host semantics:** pre-effect and explicitly safe states may resume under the captured snapshot; approval waits resume the same Run; unsettled external effects never silently replay and may become `outcome_unknown`; terminal Runs never restart; stale Host results are evidence only. The exact reconciliation worker and operator UX remain implementation work. | 1/4/5 |
 | Model/provider routing | **Resolved at architecture level by adapting PI's captured operation settings and preserving TakiAgent's owner ruling:** one global Main Model remains shared across Characters and semantic initiators; Utility Slot remains for internal maintenance; each Run captures an immutable provider/model route snapshot. Fallback, health, cost, and rate-limit policy are later routing features, not trigger-specific branches. | 1/7 |
+| Heartbeat signals and interaction evolution | **Resolved at architecture level by adapting OpenClaw/Hermes event-wake and conditional-trigger patterns to TakiAgent's Companion domain:** cadence and meaningful external/internal observations are Signal Providers, not private Agent loops; raw observations only arm a deterministic Wake Policy and every eligible wake enters the common `TriggerRequest -> RunService -> ChatAgent` path. Interaction behavior is data-driven through Character-scoped typed Interaction Patterns plus thin user/relationship/Companion context. Soul/Persona remains stable; Agent authoring occurs through a Skill and governed Core Pattern API with provenance, lifecycle, limits, feedback linkage, and rollback. One-shot intentions remain distinct from recurring Patterns. | 3/7 |
 
 Each grill item must first cite existing evidence and state what is already frozen. Questions answered by current code,
 ADR, or reference research should be resolved by reading rather than asking the owner again.

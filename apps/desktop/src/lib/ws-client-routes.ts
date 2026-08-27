@@ -19,6 +19,8 @@ import {
   ChatDeltaSchema,
   ChatErrorSchema,
   ConfigChangedSchema,
+  OBSERVABILITY_METHODS,
+  RunMonitorEventSchema,
   JsonRpcClientFrameSchema,
   TIMELINE_METHODS,
   TimelineAppendedSchema,
@@ -27,6 +29,7 @@ import {
   type ApprovalClosed,
   type CanonicalApprovalRequest,
   type ConfigChanged,
+  type RunMonitorEvent,
   type ErrorCode,
   type JsonRpcClientFrame,
   type TimelineEntry,
@@ -55,6 +58,7 @@ interface PushSlots {
   timelineRemoved: ((ref: TimelineRemoved) => void) | null;
   config: Set<(changed: ConfigChanged) => void>;
   approval: Set<(event: ApprovalPushEvent) => void>;
+  monitor: Set<(event: RunMonitorEvent) => void>;
 }
 
 export type ApprovalPushEvent =
@@ -67,7 +71,7 @@ export interface Routes {
 }
 
 export function createRoutes(): Routes {
-  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(), approval: new Set() } };
+  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(), approval: new Set(), monitor: new Set() } };
 }
 
 export function addConfigChangedHandler(state: Routes, handler: (changed: ConfigChanged) => void): () => void {
@@ -79,6 +83,13 @@ export function addApprovalHandler(state: Routes, handler: (event: ApprovalPushE
   state.push.approval.add(handler);
   return () => state.push.approval.delete(handler);
 }
+export function addMonitorHandler(state: Routes, handler: (event: RunMonitorEvent) => void): () => void { state.push.monitor.add(handler); return () => state.push.monitor.delete(handler); }
+
+function notifyMonitorHandlers(state: Routes, event: RunMonitorEvent): void {
+  for (const handler of [...state.push.monitor]) {
+    try { handler(event); } catch { console.warn("[ws-client] monitor handler failed"); }
+  }
+}
 
 /** Retires every connection-scoped push sink before queued notifications can dispatch on a closed transport. */
 function clearPushHandlers(state: Routes): void {
@@ -87,6 +98,7 @@ function clearPushHandlers(state: Routes): void {
   state.push.timelineRemoved = null;
   state.push.config.clear();
   state.push.approval.clear();
+  state.push.monitor.clear();
 }
 
 /** Routes the Core's notifications (chat stream + avatar/timeline/config pushes) to their handlers; each zod-validated. */
@@ -133,6 +145,9 @@ export function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void 
         console.warn("[ws-client] config.changed handler failed", cause);
       }
     }
+  });
+  rpc.addMethod(OBSERVABILITY_METHODS.event, (params: unknown) => {
+    notifyMonitorHandlers(state, RunMonitorEventSchema.parse(params));
   });
   installApprovalRoutes(rpc, state);
 }

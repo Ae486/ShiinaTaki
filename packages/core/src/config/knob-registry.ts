@@ -11,6 +11,7 @@ import { z, type ZodType } from "zod";
 import {
   DEFAULT_WS_HOST,
   DEFAULT_WS_PORT,
+  MONITOR_MODE_CONFIG_KEY,
   TIMING_CONFIG_KEYS,
   TIMING_POLICY_DEVELOPMENT_DEFAULTS,
   TimingDurationMsSchema,
@@ -118,6 +119,7 @@ export const CONFIG_KNOBS: Knob[] = [
   },
   { key: "TAKI_PROMPT_DIR", ...str(), default: null, apply: "restart", description: "Prompt-card library root; unset uses the bundled prompt/ tree." },
   { key: "TAKI_TRUST_LOOPBACK_OPERATOR", ...bool(), default: DEFAULT_TRUST_LOOPBACK, apply: "restart", description: "Auto-trust loopback operators (off forces pairing)." },
+  { key: MONITOR_MODE_CONFIG_KEY, ...choice(["DISABLED", "FEEDBACK_ONLY", "FULL_LOCAL"]), default: "DISABLED", apply: "live", description: "Local developer Run monitor mode; disabled hides the Home monitor." },
 
   // --- desktop connection and cross-window operation timing (development-tunable; final defaults need runtime data) ---
   timing("reconnectBaseMs", "live", "Initial reconnect backoff delay in milliseconds."),

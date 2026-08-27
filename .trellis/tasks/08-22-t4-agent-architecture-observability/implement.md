@@ -5,6 +5,29 @@ contract work can be advanced; a separate implementation child and explicit owne
 any new Harness production source, Run/Event schema, or runtime behavior is added. Slice 0's staged synchronization of
 the already committed main baseline does not grant that authorization.
 
+## Current Implementation Status (2026-08-27)
+
+The historical phase notes below describe how the architecture was reached; they are not the current production status.
+The following children are implemented, checked, committed, and archived:
+
+- Slice 1 Harness foundation;
+- Slice 2 Durable Run Event Ledger and in-process live/replay anchor;
+- Slice 3 Effect lifecycle and settlement;
+- Slice 4 Recovery and admission hardening;
+- Slice 5A Scheduled Task Provider, the first downstream T4 consumer.
+
+The child `.trellis/tasks/08-27-observability-projection-ui/` is implemented, formally checked, and manually accepted
+for primary chat/tool/Monitor correctness; it is pending documentation closeout and commit. Owner acceptance exposed
+three reserved follow-ups: a reactive UI/streaming baseline, producer-first DSH observability expansion, and an
+`avatar_set_expression`/ToolLoopAgent reproduction and contract investigation. Their planning evidence is recorded in
+`research/post-acceptance-observability-followups-2026-08-27.md`, D67-D69, and the architecture roadmap. Heartbeat
+remains downstream and unimplemented; its event-wake and evolvable Interaction Pattern decisions are recorded in
+`docs/T4-HANDOFF.md`, `docs/ARCHITECTURE-ROADMAP.md`, `CONTEXT.md`, and
+`.trellis/workspace/pleia/t4-heartbeat-engine.md`.
+
+The parent remains open because the complete observability projection/product and later integration closure are not yet
+delivered. A child count is not evidence that the parent architecture is complete.
+
 ## Stage 0 Current Readiness (2026-08-23)
 
 The initial read-only comparison is recorded in `research/main-sync-2026-08-22.md`. Main `9895dd3` commits the
@@ -111,7 +134,9 @@ These are not part of this architecture task by default. They consume the contra
 
 ## Explicitly deferred
 
-- Production UI polish for the monitor.
+- Reactive UI revalidation/streaming polish for Perception, Monitor, and Chat (D67).
+- Producer-first DSH trajectory expansion for model/tool/usage/context/timing/governance/delivery facts (D68).
+- `avatar_set_expression` versus generic ToolLoopAgent error/repair investigation (D69).
 - Arbitrary third-party plugin marketplace semantics.
 - Automatic Experience Review application.
 - Fixed heartbeat interval as a core contract.

@@ -53,6 +53,8 @@ export type { SchedulePattern, ScheduleTimezone, ScheduledTask, ScheduledTaskCre
 
 export { RUN_EVENT_SCHEMA_VERSION, RunEventCategorySchema, RunEventKindSchema, RunEventSourceSchema, RunEventPayloadSchema, RunEventSchema, RunEventCursorSchema, RunEventSurfaceSchema, RunEventSummarySchema, RunEventInspectorSchema } from "./run-event-schema.ts";
 export type { RunEvent, RunEventCategory, RunEventKind, RunEventPayload, RunEventCursor, RunEventSummary, RunEventInspector } from "./run-event-schema.ts";
+export { MONITOR_MODE_CONFIG_KEY, OBSERVABILITY_METHODS, MonitorModeSchema, MonitorStateParamsSchema, MonitorStateResultSchema, RunMonitorCursorSchema, RunMonitorListParamsSchema, RunMonitorSummarySchema, RunMonitorListResultSchema, TrajectoryRowSchema, TrajectoryParamsSchema, TrajectoryResultSchema, TrajectoryInspectParamsSchema, TrajectoryInspectorSchema, RunMonitorSubscribeParamsSchema, RunMonitorSubscribeResultSchema, RunMonitorUnsubscribeParamsSchema, RunMonitorUnsubscribeResultSchema, RunMonitorEventSchema } from "./observability-schema.ts";
+export type { MonitorMode, MonitorStateResult, RunMonitorCursor, RunMonitorListParams, RunMonitorSummary, RunMonitorListResult, TrajectoryRow, TrajectoryParams, TrajectoryResult, TrajectoryInspectParams, TrajectoryInspector, RunMonitorSubscribeParams, RunMonitorEvent } from "./observability-schema.ts";
 export { EFFECT_SCHEMA_VERSION, EffectKindSchema, EffectStateSchema, EffectReplayPostureSchema, EffectOutcomeSchema, EffectSourceRefSchema, EffectExecutorRefSchema, ApprovalEffectRefSchema, EffectLifecycleSchema, UsageQualitySchema, UsageRecordSchema } from "./effect-lifecycle-schema.ts";
 export type { EffectLifecycle, ApprovalEffectRef, UsageRecord } from "./effect-lifecycle-schema.ts";
 export type {

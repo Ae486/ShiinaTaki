@@ -1,0 +1,36 @@
+/**
+ * INPUT: operator monitor queries, durable Run projection rows, and live cursor notifications
+ * OUTPUT: strict bounded observability contracts shared by Core and the disposable Desktop monitor
+ * POS:    shared/protocol — read-only projection wire model; canonical Run/Event authority stays in Core
+ */
+import { z } from "zod";
+import { DeliveryClassSchema, RunInitiatorSchema, RunOutcomeSchema, RunStateSchema } from "./harness-schema.ts";
+import { RunEventCategorySchema, RunEventKindSchema, RunEventSurfaceSchema } from "./run-event-schema.ts";
+const Id = z.string().trim().min(1).max(200); const Timestamp = z.string().datetime({ offset: true });
+const Summary = z.string().trim().min(1).max(1_000); const Label = z.string().trim().min(1).max(120);
+const Count = z.number().int().nonnegative().max(1_000_000_000);
+export const MONITOR_MODE_CONFIG_KEY = "TAKI_MONITOR_MODE" as const;
+export const OBSERVABILITY_METHODS = { state: "observability.state", list: "observability.list", trajectory: "observability.trajectory", inspect: "observability.inspect", subscribe: "observability.subscribe", unsubscribe: "observability.unsubscribe", event: "observability.event" } as const;
+export const MonitorModeSchema = z.enum(["DISABLED", "FEEDBACK_ONLY", "FULL_LOCAL"]); export type MonitorMode = z.infer<typeof MonitorModeSchema>;
+export const MonitorStateParamsSchema = z.strictObject({});
+export const MonitorStateResultSchema = z.strictObject({ mode: MonitorModeSchema, enabled: z.boolean(), detail: z.enum(["none", "lifecycle", "safe-local"]) });
+export type MonitorStateResult = z.infer<typeof MonitorStateResultSchema>;
+export const RunMonitorCursorSchema = z.strictObject({ queuedAt: Timestamp, key: Id }); export type RunMonitorCursor = z.infer<typeof RunMonitorCursorSchema>;
+export const RunMonitorListParamsSchema = z.strictObject({ characterId: Id, initiators: z.array(RunInitiatorSchema).max(8).optional(), states: z.array(RunStateSchema).max(16).optional(), outcomes: z.array(RunOutcomeSchema).max(8).optional(), deliveryClasses: z.array(DeliveryClassSchema).max(3).optional(), categories: z.array(RunEventCategorySchema).max(3).optional(), kinds: z.array(RunEventKindSchema).max(32).optional(), provider: z.string().trim().min(1).max(100).optional(), modelId: z.string().trim().min(1).max(200).optional(), taskId: Id.optional(), parentRunId: Id.optional(), from: Timestamp.optional(), to: Timestamp.optional(), text: z.string().trim().min(1).max(100).optional(), limit: z.number().int().min(1).max(50).default(25), cursor: RunMonitorCursorSchema.optional() }).superRefine((value, ctx) => { if (value.from && value.to && Date.parse(value.from) > Date.parse(value.to)) ctx.addIssue({ code: "custom", path: ["from"], message: "from must not be later than to" }); });
+export type RunMonitorListParams = z.infer<typeof RunMonitorListParamsSchema>;
+export const RunMonitorSummarySchema = z.strictObject({ key: Id, characterId: Id, title: Label, initiator: RunInitiatorSchema, initiatorLabel: Label, triggerLabel: Label, deliveryClass: DeliveryClassSchema, deliveryLabel: Label, state: RunStateSchema, outcome: RunOutcomeSchema.optional(), queuedAt: Timestamp, startedAt: Timestamp.optional(), terminalAt: Timestamp.optional(), durationMs: Count.optional(), attemptCount: Count, effectCount: Count, usage: z.strictObject({ inputTokens: Count, outputTokens: Count, totalTokens: Count }), provider: z.string().max(100).optional(), modelId: z.string().max(200).optional(), lineageLabel: Label.optional(), summary: Summary.optional() });
+export type RunMonitorSummary = z.infer<typeof RunMonitorSummarySchema>;
+export const RunMonitorListResultSchema = z.strictObject({ runs: z.array(RunMonitorSummarySchema).max(50), nextCursor: RunMonitorCursorSchema.optional() }); export type RunMonitorListResult = z.infer<typeof RunMonitorListResultSchema>;
+const TrajectoryBaseSchema = z.strictObject({ rowKey: Id, seq: z.number().int().positive().max(2_000_000_000), groupKey: Id.optional(), label: Label, contextLabel: Label.optional(), phase: z.enum(["trigger", "run", "attempt", "effect", "usage", "recovery", "delivery", "system"]), category: RunEventCategorySchema, status: Label, outcome: Label.optional(), occurredAt: Timestamp, durationMs: Count.optional(), surface: RunEventSurfaceSchema, summary: Summary.optional(), errorReason: Summary.optional() });
+export const TrajectoryRowSchema = z.discriminatedUnion("kind", [TrajectoryBaseSchema.extend({ kind: z.literal("lifecycle"), attemptOrdinal: z.number().int().positive().max(10_000).optional() }), TrajectoryBaseSchema.extend({ kind: z.literal("attempt"), attemptOrdinal: z.number().int().positive().max(10_000) }), TrajectoryBaseSchema.extend({ kind: z.literal("effect"), effectKind: z.enum(["model", "tool", "host", "mcp", "approval", "memory"]) }), TrajectoryBaseSchema.extend({ kind: z.literal("usage"), inputTokens: Count.optional(), outputTokens: Count.optional(), totalTokens: Count.optional() }), TrajectoryBaseSchema.extend({ kind: z.literal("recovery"), classification: Label })]);
+export type TrajectoryRow = z.infer<typeof TrajectoryRowSchema>;
+export const TrajectoryParamsSchema = z.strictObject({ characterId: Id, runKey: Id, afterSeq: z.number().int().nonnegative().max(2_000_000_000).default(0), limit: z.number().int().min(1).max(200).default(100) }); export type TrajectoryParams = z.infer<typeof TrajectoryParamsSchema>;
+export const TrajectoryResultSchema = z.strictObject({ run: RunMonitorSummarySchema, rows: z.array(TrajectoryRowSchema).max(200), cursor: z.strictObject({ runKey: Id, seq: z.number().int().nonnegative().max(2_000_000_000) }), hasMore: z.boolean() }); export type TrajectoryResult = z.infer<typeof TrajectoryResultSchema>;
+export const TrajectoryInspectParamsSchema = z.strictObject({ characterId: Id, runKey: Id, rowKey: Id }); export type TrajectoryInspectParams = z.infer<typeof TrajectoryInspectParamsSchema>;
+const InspectorFieldSchema = z.strictObject({ label: Label, value: z.string().max(1_000) });
+export const TrajectoryInspectorSchema = z.strictObject({ mode: MonitorModeSchema, title: Label, technical: z.array(InspectorFieldSchema).max(16), detail: z.array(InspectorFieldSchema).max(16), redactionNotice: Summary }); export type TrajectoryInspector = z.infer<typeof TrajectoryInspectorSchema>;
+export const RunMonitorSubscribeParamsSchema = z.strictObject({ characterId: Id, runKey: Id, afterSeq: z.number().int().nonnegative().max(2_000_000_000).default(0) }); export type RunMonitorSubscribeParams = z.infer<typeof RunMonitorSubscribeParamsSchema>;
+export const RunMonitorSubscribeResultSchema = z.strictObject({ status: z.literal("ok"), cursor: z.number().int().nonnegative() });
+export const RunMonitorUnsubscribeParamsSchema = z.strictObject({});
+export const RunMonitorUnsubscribeResultSchema = z.strictObject({ status: z.literal("ok") });
+export const RunMonitorEventSchema = z.strictObject({ runKey: Id, cursor: z.number().int().nonnegative().max(2_000_000_000), row: TrajectoryRowSchema.optional(), invalidated: z.boolean().default(false), reason: z.enum(["overflow", "projection-failed", "mode-disabled"]).optional() }); export type RunMonitorEvent = z.infer<typeof RunMonitorEventSchema>;

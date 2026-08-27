@@ -39,3 +39,22 @@ are recorded residuals, not authorization to widen Slice 0 or begin production H
 When implementation evidence changes a contract, update the roadmap, affected phase report, PRD/design/implement files,
 context manifests, tests/specs, and T4 handoff in one planning change. Record deferred decisions with an explicit trigger;
 do not allow a batch label such as "v1" or "first production" to imply finality.
+
+## 4. Post-acceptance follow-up slices (2026-08-27)
+
+Owner acceptance of the first Monitor projection confirmed the ledger/query/live boundary, while exposing productization
+gaps that were intentionally outside that child. Reserve the following independently verifiable slices:
+
+1. **UI/UX reactive refresh and streaming baseline** — consolidate disposable client read-model revalidation for
+   Perception, Monitor, and Chat; restore live subscriptions after generation replacement; support lazy paging,
+   refreshing/stale/error states, tail-following, and incremental tool-call/tool-result/approval rendering.
+2. **DSH observability expansion** — add fixed Core event producers before extending the projection for model/provider
+   requests, tool lifecycle, usage/tokens, context, timings, governance/approval, delivery, recovery, retry, and any
+   provider-backed cache semantics. Extend filters/inspector/UI only from durable, replayable facts.
+3. **Tool/loop diagnostics and avatar contract** — reproduce missing-argument and failed-tool behavior across avatar,
+   Tavily/MCP, and a local Core tool; classify schema, execution, feedback, and next-step generation behavior before
+   selecting a provider-neutral repair/retry or tool-contract change.
+
+These follow-ups do not alter the single Run/Event authority, do not create a second Agent loop, and do not turn the
+current Monitor child into a final architecture. Their child PRDs must state dependencies, reserved seams, privacy
+rules, and rollback points before implementation is activated.

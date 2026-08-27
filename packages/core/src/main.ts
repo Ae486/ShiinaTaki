@@ -7,6 +7,7 @@
  */
 import { join } from "node:path";
 import type { ToolSet } from "ai";
+import { MONITOR_MODE_CONFIG_KEY, MonitorModeSchema } from "@taki/shared";
 import { CANONICAL_MEMORY_SYSTEM_PROMPT, createChatAgent } from "./agents/chat-agent.ts";
 import { BASE_SYSTEM_PROMPT } from "./agents/base-prompt.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
@@ -104,6 +105,8 @@ import { createScheduleTaskTool } from "./scheduler/schedule-task-tool.ts";
 import { createScheduledRunAdapter } from "./scheduler/scheduled-run-adapter.ts";
 import { createScheduleEngine } from "./scheduler/schedule-engine.ts";
 import { registerScheduledTaskMethods } from "./server/methods/scheduled-task-methods.ts";
+import { createObservabilityQueryService } from "./observability/observability-query-service.ts";
+import { registerObservabilityMethods } from "./server/methods/observability-methods.ts";
 
 // Boot phase (batch-1 #26): the data root comes from env alone, the DB opens on it, and every other knob is then
 // resolved as env > stored > built-in default — so a value the settings panel stored takes effect at THIS boot.
@@ -115,6 +118,7 @@ const governance = createGovernancePolicyService(createGovernancePolicyRepo(db))
 const runEventRepo = createRunEventRepo(db);
 const runEventLive = createRunEventLiveBus((runId, afterSeq) => runEventRepo.list(runId, afterSeq));
 const runRepo = createRunRepo(db, runEventRepo, runEventLive);
+const observability = createObservabilityQueryService({ db, events: runEventRepo, mode: () => MonitorModeSchema.parse(boot.config.source.resolve(MONITOR_MODE_CONFIG_KEY)?.value ?? "DISABLED") });
 const effectLifecycle = createEffectLifecycleService(createEffectRepo(db, runEventRepo, runEventLive), (runId, attemptId) => runRepo.guardDispatch(runId, attemptId));
 const timelineRepo = createTimelineRepo(db);
 // R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
@@ -422,6 +426,7 @@ registry.register(runQueueMethod(runService));
 // Settings store (#26 batch 1): read every knob with its provenance, store operator values, push config.changed.
 // Operator-only, NO Rust mirror; secrets are reported as set/not-set and refused on write (invariant 5).
 registerConfigMethods(registry, { ...boot.config, logger });
+registerObservabilityMethods(registry, { service: observability, live: runEventLive });
 registerScheduledTaskMethods(registry, scheduleService);
 
 const scheduledRuns = createScheduledRunAdapter({ repo: scheduleRepo, runs: runService, agent: chatAgent,

@@ -36,6 +36,7 @@ import {
   MediaUsageResultSchema,
   MemoryStatusResultSchema,
   MemoryTidyResultSchema,
+  MonitorStateResultSchema,
   McpGetResultSchema,
   McpListResultSchema,
   McpMutationResultSchema,
@@ -49,6 +50,7 @@ import {
   SkillRemoveResultSchema,
   SkillReconcileResultSchema,
   PERCEPTION_METHODS,
+  OBSERVABILITY_METHODS,
   SECRET_METHODS,
   SecretSetResultSchema,
   PerceptionCardSchema,
@@ -59,6 +61,11 @@ import {
   PermissionLevelStateSchema,
   TIMELINE_METHODS,
   TimelineHistoryResultSchema,
+  RunMonitorListResultSchema,
+  RunMonitorSubscribeResultSchema,
+  RunMonitorUnsubscribeResultSchema,
+  TrajectoryInspectorSchema,
+  TrajectoryResultSchema,
   type AvatarReportParams,
   type ApprovalRevokeParams,
   type CanonicalApprovalRespondParams,
@@ -78,6 +85,10 @@ import {
   type PermissionLevelSetParams,
   type TimelineHistoryParams,
   type TimingPolicy,
+  type RunMonitorListParams,
+  type RunMonitorSubscribeParams,
+  type TrajectoryInspectParams,
+  type TrajectoryParams,
 } from "@taki/shared";
 import { requestWithDeadline } from "./rpc-deadline.ts";
 
@@ -177,6 +188,7 @@ function avatarMethods(request: <T>(method: string, params: JSONRPCParams) => Pr
   };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => TimingPolicy) {
   const request = <T>(method: string, params: JSONRPCParams): Promise<T> => requestWithDeadline({ rpc, timing, method, params });
   let configSubscription: Promise<void> | null = null;
@@ -217,6 +229,12 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
     perceptionPauseSet: async (params: PerceptionPauseSetParams) =>
       PerceptionPauseStateSchema.parse(await request(PERCEPTION_METHODS.pauseSet, params)),
     perceptionCard: async () => PerceptionCardSchema.parse(await request(PERCEPTION_METHODS.card, {})),
+    monitorState: async () => MonitorStateResultSchema.parse(await request(OBSERVABILITY_METHODS.state, {})),
+    monitorList: async (params: RunMonitorListParams) => RunMonitorListResultSchema.parse(await request(OBSERVABILITY_METHODS.list, params)),
+    monitorTrajectory: async (params: TrajectoryParams) => TrajectoryResultSchema.parse(await request(OBSERVABILITY_METHODS.trajectory, params)),
+    monitorInspect: async (params: TrajectoryInspectParams) => TrajectoryInspectorSchema.parse(await request(OBSERVABILITY_METHODS.inspect, params)),
+    subscribeMonitor: async (params: RunMonitorSubscribeParams) => void RunMonitorSubscribeResultSchema.parse(await request(OBSERVABILITY_METHODS.subscribe, params)),
+    unsubscribeMonitor: async () => void RunMonitorUnsubscribeResultSchema.parse(await request(OBSERVABILITY_METHODS.unsubscribe, {})),
     ...permissionMethods(request),
     ...approvalMethods(request),
     ...extensionMethods(request),

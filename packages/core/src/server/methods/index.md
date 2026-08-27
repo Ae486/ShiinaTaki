@@ -39,3 +39,4 @@
 - skill-methods.ts — operator-only skill.* lifecycle registration seam; strict Shared schemas plus bounded conflict/refusal errors
 - hindsight-setup-methods.ts — operator-only memory.hindsight.* setup/status/disable/explicit LLM-health controllers with bounded refusals
 - hindsight-cutover-methods.ts — operator-only memory.hindsight.cutover.status/verify projections; read-only, stale-epoch-aware, and privacy-bounded
+- observability-methods.ts — operator-only monitor state/list/trajectory/inspector and connection-scoped live subscription
