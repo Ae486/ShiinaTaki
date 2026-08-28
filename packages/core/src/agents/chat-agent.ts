@@ -8,7 +8,7 @@
  *         with the volatile <turn-context> tail riding the outgoing user message (Q4/ADR 0008); auto-writes detached;
  *         a classified context-overflow retries ONCE against the same captured Run extension context
  */
-import { ToolLoopAgent, isStepCount, wrapLanguageModel, type LanguageModel, type ModelMessage, type StopCondition, type ToolSet } from "ai";
+import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type ToolSet } from "ai";
 import type { ChatSendParams, ImageAttachment } from "@taki/shared";
 import type { ApprovalGate } from "../approval/approval-gate.ts";
 import type { Connection } from "../server/connection-registry.ts";
@@ -23,7 +23,7 @@ import { isContextOverflowError, observedTokensOf } from "./overflow-error.ts";
 import { mergeToolSets } from "./tool-set-assembly.ts";
 import type { TurnMessage, UserImageInput } from "./turn-mapping.ts";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
-import { createModelEffectMiddleware } from "./model-effect-middleware.ts";
+import { createRunObservabilityModel, type ToolEffectObserver } from "./run-observability-telemetry.ts";
 
 /** Per-turn execution handle. Primary chat supplies a WS connection; unattended non-primary Runs omit it. */
 export interface TurnContext {
@@ -45,6 +45,7 @@ export interface TurnContext {
   runContext?: AgentRunContext;
   /** Records a new durable Attempt immediately before the one supported overflow retry. */
   onRetry?: (reason: string) => boolean;
+  toolObserver?: ToolEffectObserver;
 }
 
 export interface ChatAgent {
@@ -99,7 +100,7 @@ export interface ChatAgentDeps {
   /** Stable Core-local tools included with memory/avatar tools before the Core adapter runs. */
   coreTools?: ToolSet | ((primary: boolean, characterId: string) => ToolSet);
   /** Wraps only the Core-local per-turn ToolSet with trusted bindings; absent in focused agent tests. */
-  coreToolGovernance?: { wrap(tools: ToolSet, interactive?: { connection?: Connection; signal?: AbortSignal; runId?: string; attemptId?: string; effects?: EffectLifecycleService }): ToolSet };
+  coreToolGovernance?: { wrap(tools: ToolSet, interactive?: { connection?: Connection; signal?: AbortSignal; runId?: string; attemptId?: string; effects?: EffectLifecycleService; toolObserver?: ToolEffectObserver }): ToolSet };
   /** Per-character tools built fresh each turn with the turn's characterId (avatar tools bind their publish target here). */
   characterTools?: (characterId: string) => ToolSet;
   /** Extra instructions appended after the assembled memory context (skills list + avatar vocabulary); "" contributes nothing. */
@@ -223,17 +224,14 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   const history = store.history(characterId);
   // ONE clock read per attempt: the instructions' day line and the tail's time line must agree (Q4).
   const now = Date.now();
-  // Hoisted so the batch-6 usage seam can estimate the SAME instructions string the request carries.
   const instructions = composeInstructions(deps, { characterId, message: controlMessage, runInstructions: attempt.runContext?.instructions }, now);
-  // Per-turn construction: assembled instructions + characterId-bound tools (construction cost is trivial).
-  const selectedModel = vision ? vision.model : deps.model;
-  const model = deps.effectLifecycle && turn?.runId && turn.attemptId
-    ? wrapLanguageModel({ model: selectedModel as Parameters<typeof wrapLanguageModel>[0]["model"], middleware: createModelEffectMiddleware({ lifecycle: deps.effectLifecycle, runId: turn.runId, attemptId: turn.attemptId }) })
-    : selectedModel;
+  const selectedModel = vision ? vision.model : deps.model; const { model, observability } = createRunObservabilityModel({ model: selectedModel, lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId });
+  if (turn && observability) turn.toolObserver = observability.tools;
   const agent = new ToolLoopAgent({
     model,
     instructions,
     tools: assembleTurnTools(deps, attempt, turn),
+    telemetry: observability ? { isEnabled: true, recordInputs: false, recordOutputs: false, integrations: [observability.telemetry] } : undefined,
     stopWhen: [isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS), ...(deps.stopConditions ?? [])],
     // Compatibility seam for focused tests and pre-Slice-3 callers. Production Batch 1 leaves this absent because
     // MCP execution is already guarded by its canonical adapter and `ask` fails closed before the raw closure.
@@ -260,15 +258,14 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   // `abort` part or a THROWN reason (see retractIfCancelledSilent) — the retract seam below handles both endings.
   const result = await agent.stream({ messages: outgoing, abortSignal: turn?.signal });
 
-  // pendingStepText holds ONLY the in-flight step's text: finish-step clears it because that step's text is then
-  // inside its recorded response messages (persisting both would duplicate it).
-  let pendingStepText = "";
-  let streamEnded = false;
+  // finish-step clears in-flight text once that step is present in responseMessages, avoiding duplicate persistence.
+  let pendingStepText = ""; let streamEnded = false;
   try {
     try {
       // Iterate result.stream (not textStream) so a provider failure surfaces as an error part rather than being
       // swallowed. Tool/approval/abort parts flow by here — the assembled turn is persisted from responseMessages.
       for await (const part of result.stream) {
+        observability?.observeStreamPart(part);
         if (part.type === "text-delta") {
           pendingStepText += part.text;
           yield part.text;
@@ -278,7 +275,7 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
           throw part.error;
         }
       }
-      streamEnded = true;
+      observability?.assertHealthy(); streamEnded = true;
     } finally {
       // Persist whatever the turn produced — completed steps AND partial text — even on abort/error (D1 #1/#5).
       if (primary) await persistTurn(store, characterId, { result, pendingStepText, streamEnded });
@@ -302,7 +299,7 @@ function assembleTurnTools(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
     deps.characterTools?.(attempt.characterId) ?? {},
   );
   const interactive = turn && (turn.connection || (turn.runId && turn.attemptId && deps.effectLifecycle))
-    ? { connection: turn.connection, signal: turn.signal, runId: turn.runId, attemptId: turn.attemptId, effects: deps.effectLifecycle }
+    ? { connection: turn.connection, signal: turn.signal, runId: turn.runId, attemptId: turn.attemptId, effects: deps.effectLifecycle, toolObserver: turn.toolObserver }
     : undefined;
   const extra = turn?.connection && deps.turnTools
     ? deps.turnTools({ ...turn, connection: turn.connection })

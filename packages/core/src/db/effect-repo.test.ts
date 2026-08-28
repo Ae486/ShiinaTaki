@@ -17,9 +17,13 @@ describe("EffectRepo", () => {
     const { db, repo } = fixture();
     const effect = repo.prepareIntent({ runId: "r", attemptId: "a", kind: "model", sourceRef: { type: "model", provider: "p", modelId: "m" }, replayPosture: "never" });
     expect(effect.state).toBe("intent_committed");
-    const settled = repo.settle({ effectId: effect.effectId, runId: "r", attemptId: "a", expectedVersion: 0, outcome: "completed", usage: { provider: "p", modelId: "m", quality: "reported", inputTokens: 2, outputTokens: 3, totalTokens: 5 } });
+    const settled = repo.settle({ effectId: effect.effectId, runId: "r", attemptId: "a", expectedVersion: 0, outcome: "completed", usage: { provider: "p", modelId: "m", quality: "reported", inputTokens: 2, inputTokenDetails: { noCacheTokens: 1, cacheReadTokens: 1, cacheWriteTokens: 0 }, outputTokens: 3, outputTokenDetails: { textTokens: 2, reasoningTokens: 1 }, totalTokens: 5 } });
     expect(settled.effect?.outcome).toBe("completed");
     expect(db.prepare("SELECT count(*) AS n FROM run_usage").get()?.n).toBe(1);
+    expect(db.prepare("SELECT input_no_cache_tokens,cache_read_tokens,cache_write_tokens,output_text_tokens,reasoning_tokens,total_tokens FROM run_usage").get())
+      .toEqual({ input_no_cache_tokens: 1, cache_read_tokens: 1, cache_write_tokens: 0, output_text_tokens: 2, reasoning_tokens: 1, total_tokens: 5 });
+    expect(JSON.parse(String(db.prepare("SELECT payload_json FROM run_events WHERE kind='usage.settled'").get()?.payload_json)))
+      .toMatchObject({ inputTokenDetails: { noCacheTokens: 1, cacheReadTokens: 1, cacheWriteTokens: 0 }, outputTokenDetails: { textTokens: 2, reasoningTokens: 1 }, totalTokens: 5 });
     expect(repo.settle({ effectId: effect.effectId, runId: "r", attemptId: "a", expectedVersion: 1, outcome: "completed" }).duplicate).toBe(true);
     db.close();
   });

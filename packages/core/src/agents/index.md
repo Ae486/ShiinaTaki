@@ -12,3 +12,6 @@
 - turn-registry.ts — per-character active AbortController plus optional Run identity; exact cancellation cannot abort a different Run in the same Character lane
 - untrusted-fence.ts — the A1 minimal fence: fenceUntrusted({source,content}) → XML-delimited `<untrusted-observation>` block labeling content DATA-never-INSTRUCTIONS; neutralizes any literal closing tag so hostile content can't escape; reused by every untrusted-content producer (T3a activity, later T3b/screenshot/T5)
 - window-calibrator.ts — createWindowCalibrator({repo, slot, declared}): R1 tier-2 EMA correction factor over the estimator (clamped) + R2 overflow shrink (floor(observed×0.9), never above declared), persisted via window-state-repo; a lowered declaration is written back so runtime and operator status agree while an earlier overflow shrink survives; effectiveWindow() returns the estimator-unit budget
+- model-effect-middleware.ts — model effect lifecycle and bounded request/stream/settlement observability producers
+- run-observability-telemetry.ts — per-attempt AI SDK model/tool telemetry composition with authoritative usage/timing settlement and observer isolation
+- tool-observability.ts — normalized exactly-once tool call/result producer with validation, governance, stale, duration, and Effect correlation

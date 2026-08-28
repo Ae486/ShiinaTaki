@@ -1,1 +1,2 @@
-- observability-query-service.ts — authorized deterministic Run list with bounded filters/cursors, trajectory projection, live-row mapping, and redacted inspector service
+- observability-query-service.ts — authorized deterministic Run list, real-field filters, semantic model/tool/context/retry projection, and mode-gated redacted Inspector
+- tool-effect-observer.ts — narrow in-memory tool-call to governed Effect correlation contract

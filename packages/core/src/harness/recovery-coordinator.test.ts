@@ -30,6 +30,8 @@ describe("RecoveryCoordinator", () => {
     const second = createRecoveryCoordinator({ db: f.db, runs: f.runs, effects: f.effects });
     expect(await second.scan({ now: "2026-08-25T00:02:00.000Z" })).toMatchObject({ scanned: 1, classified: 1 });
     expect(f.db.prepare("SELECT count(*) AS n FROM run_events WHERE kind='recovery.classified'").get()?.n).toBe(1);
+    expect(f.db.prepare("SELECT category,source FROM run_events WHERE kind='recovery.classified'").get())
+      .toEqual({ category: "recovery", source: "core.recovery-repo" });
   });
 
   it("settles an expired queued Run before dispatch", async () => {

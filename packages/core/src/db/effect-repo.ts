@@ -1,3 +1,8 @@
+/**
+ * INPUT:  Run-owned Effect intents, waiting transitions, CAS settlements, and provider-neutral usage
+ * OUTPUT: atomic Effect current state plus immutable Effect/Usage events and detailed usage rows
+ * POS:    core/db — sole SQLite writer for Run Effects and authoritative model usage
+ */
 import { randomUUID } from "node:crypto";
 import { EffectLifecycleSchema, UsageRecordSchema, type EffectLifecycle, type RunEvent, type UsageRecord } from "@taki/shared";
 import type { Database } from "./sqlite.ts";
@@ -142,9 +147,13 @@ export function createEffectRepo(db: Database, eventRepo: RunEventRepo, liveBus?
           : undefined;
         const acceptedUsage = input.usage ?? fallbackUsage;
         if (acceptedUsage) {
-          usage = UsageRecordSchema.parse({ schemaVersion: "effect.v1", usageId: current.reservedUsageRef ?? randomUUID(), runId: input.runId, attemptId: input.attemptId, effectId: input.effectId, ...acceptedUsage, recordedAt: at });
-          db.prepare("INSERT INTO run_usage (usage_id,run_id,attempt_id,effect_id,schema_version,provider,model_id,quality,input_tokens,output_tokens,total_tokens,recorded_at) VALUES (:usageId,:runId,:attemptId,:effectId,:schemaVersion,:provider,:modelId,:quality,:inputTokens,:outputTokens,:totalTokens,:recordedAt)").run({ usageId: usage.usageId, runId: usage.runId, attemptId: usage.attemptId, effectId: usage.effectId, schemaVersion: usage.schemaVersion, provider: usage.provider, modelId: usage.modelId, quality: usage.quality, inputTokens: usage.inputTokens ?? null, outputTokens: usage.outputTokens ?? null, totalTokens: usage.totalTokens ?? null, recordedAt: usage.recordedAt });
-          events.push(...append(effectEvent(input.runId, input.attemptId, "usage.settled", at, { kind: "usage.settled", state: "settled", effectId: input.effectId, usageId: usage.usageId, quality: usage.quality, inputTokens: usage.inputTokens, outputTokens: usage.outputTokens, totalTokens: usage.totalTokens })));
+          usage = insertUsage({ db, settlement: input, effect: current, acceptedUsage, recordedAt: at });
+          events.push(...append(effectEvent(input.runId, input.attemptId, "usage.settled", at, {
+            kind: "usage.settled", state: "settled", effectId: input.effectId, usageId: usage.usageId,
+            quality: usage.quality, inputTokens: usage.inputTokens,
+            inputTokenDetails: usage.inputTokenDetails, outputTokens: usage.outputTokens,
+            outputTokenDetails: usage.outputTokenDetails, totalTokens: usage.totalTokens,
+          })));
         }
       }); } catch (error) { if (!stale) throw error; }
       if (stale) return { effect: read(db.prepare("SELECT * FROM run_effects WHERE effect_id=:effectId").get({ effectId: input.effectId }) as Record<string, unknown>), duplicate: false, stale: true };
@@ -155,6 +164,41 @@ export function createEffectRepo(db: Database, eventRepo: RunEventRepo, liveBus?
     listUnfinished(runId) { const rows = runId ? db.prepare("SELECT * FROM run_effects WHERE run_id=:runId AND state<>'terminal' ORDER BY created_at").all({ runId }) : db.prepare("SELECT * FROM run_effects WHERE state<>'terminal' ORDER BY created_at").all(); return rows.map(read); },
     list(runId) { return db.prepare("SELECT * FROM run_effects WHERE run_id=:runId ORDER BY created_at").all({ runId }).map(read); },
   };
+}
+
+function insertUsage(args: {
+  db: Database;
+  settlement: EffectSettlementInput;
+  effect: EffectLifecycle;
+  acceptedUsage: NonNullable<EffectSettlementInput["usage"]>;
+  recordedAt: string;
+}): UsageRecord {
+  const usage = UsageRecordSchema.parse({
+    schemaVersion: "effect.v1", usageId: args.effect.reservedUsageRef ?? randomUUID(),
+    runId: args.settlement.runId, attemptId: args.settlement.attemptId, effectId: args.settlement.effectId,
+    ...args.acceptedUsage, recordedAt: args.recordedAt,
+  });
+  args.db.prepare(`INSERT INTO run_usage (
+    usage_id,run_id,attempt_id,effect_id,schema_version,provider,model_id,quality,input_tokens,
+    input_no_cache_tokens,cache_read_tokens,cache_write_tokens,output_tokens,output_text_tokens,
+    reasoning_tokens,total_tokens,recorded_at
+  ) VALUES (
+    :usageId,:runId,:attemptId,:effectId,:schemaVersion,:provider,:modelId,:quality,:inputTokens,
+    :inputNoCacheTokens,:cacheReadTokens,:cacheWriteTokens,:outputTokens,:outputTextTokens,
+    :reasoningTokens,:totalTokens,:recordedAt
+  )`).run({
+    usageId: usage.usageId, runId: usage.runId, attemptId: usage.attemptId, effectId: usage.effectId,
+    schemaVersion: usage.schemaVersion, provider: usage.provider, modelId: usage.modelId, quality: usage.quality,
+    inputTokens: usage.inputTokens ?? null,
+    inputNoCacheTokens: usage.inputTokenDetails?.noCacheTokens ?? null,
+    cacheReadTokens: usage.inputTokenDetails?.cacheReadTokens ?? null,
+    cacheWriteTokens: usage.inputTokenDetails?.cacheWriteTokens ?? null,
+    outputTokens: usage.outputTokens ?? null,
+    outputTextTokens: usage.outputTokenDetails?.textTokens ?? null,
+    reasoningTokens: usage.outputTokenDetails?.reasoningTokens ?? null,
+    totalTokens: usage.totalTokens ?? null, recordedAt: usage.recordedAt,
+  });
+  return usage;
 }
 
 function isActiveAttempt(db: Database, runId: string, attemptId: string): boolean {

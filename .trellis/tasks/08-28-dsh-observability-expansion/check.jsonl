@@ -1,0 +1,11 @@
+{"file":".trellis/spec/backend/observability-projection.md","reason":"Check producer-first projection, privacy/mode contracts, cursor behavior and no-execution-mutation invariant."}
+{"file":".trellis/spec/backend/agent-runtime.md","reason":"Check model/tool loop behavior, durable facts and error/retry boundaries."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Check event durability, replay, migrations and single-writer constraints."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Check diagnostics separation and sensitive-field exclusion."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Check Home layout, client lifecycle, streaming and page integration."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Check generation-safe state, live updates, revalidation and non-authoritative cache use."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"Check accessible Chinese disclosure controls, Inspector close behavior and component boundaries."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Check responsive/performance/loading states and required Desktop quality gates."}
+{"file":".trellis/tasks/08-28-dsh-observability-expansion/research/d68-producer-first-scope-2026-08-28.md","reason":"Check implementation against verified DSH/Taki producer matrix and explicit non-goals."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/dsh-observability.md","reason":"Check fidelity to DSH event/query/trajectory patterns and TakiAgent adaptations."}
+{"file":"references/deepseek-harness-master/packages/client/ui-trajectory/README.md","reason":"Check layout, semantic rows, Inspector tabs, fold/unfold, lazy history and tail-follow parity."}

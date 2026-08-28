@@ -1,3 +1,8 @@
+/**
+ * INPUT:  provider-neutral Effect lifecycle and authoritative model usage facts
+ * OUTPUT: strict bounded Effect/Usage schemas shared by Core persistence and projections
+ * POS:    shared/protocol — raw prompts, completions, credentials, and execution payloads are unrepresentable
+ */
 import { z } from "zod";
 
 const ID = z.string().trim().min(1).max(200);
@@ -45,11 +50,22 @@ export const EffectLifecycleSchema = z.strictObject({
 export type EffectLifecycle = z.infer<typeof EffectLifecycleSchema>;
 
 export const UsageQualitySchema = z.enum(["reported", "estimated", "unknown"]);
+export const InputTokenDetailsSchema = z.strictObject({
+  noCacheTokens: z.number().int().nonnegative().max(1_000_000_000).optional(),
+  cacheReadTokens: z.number().int().nonnegative().max(1_000_000_000).optional(),
+  cacheWriteTokens: z.number().int().nonnegative().max(1_000_000_000).optional(),
+});
+export const OutputTokenDetailsSchema = z.strictObject({
+  textTokens: z.number().int().nonnegative().max(1_000_000_000).optional(),
+  reasoningTokens: z.number().int().nonnegative().max(1_000_000_000).optional(),
+});
 export const UsageRecordSchema = z.strictObject({
   schemaVersion: z.literal(EFFECT_SCHEMA_VERSION), usageId: ID, runId: ID, attemptId: ID, effectId: ID,
   provider: ID, modelId: ID, quality: UsageQualitySchema,
   inputTokens: z.number().int().nonnegative().max(1_000_000_000).optional(),
+  inputTokenDetails: InputTokenDetailsSchema.optional(),
   outputTokens: z.number().int().nonnegative().max(1_000_000_000).optional(),
+  outputTokenDetails: OutputTokenDetailsSchema.optional(),
   totalTokens: z.number().int().nonnegative().max(1_000_000_000).optional(),
   recordedAt: z.string().datetime({ offset: true }),
 });

@@ -95,6 +95,7 @@ export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunE
         committed = eventRepo.appendMany([
           lifecycleEvent({ runId: input.runId, kind: "run.admitted", occurredAt: admittedAt, payload: { kind: "run.admitted", state: "queued", initiator: input.request.initiator, deliveryClass: input.request.deliveryClass, attemptOrdinal: 1 }, request: input.request }),
           lifecycleEvent({ runId: input.runId, attemptId, kind: "attempt.prepared", occurredAt: admittedAt, payload: { kind: "attempt.prepared", state: "prepared", attemptOrdinal: 1 }, request: input.request }),
+          lifecycleEvent({ runId: input.runId, attemptId, kind: "context.snapshot", category: "context", source: "core.context-observer", occurredAt: admittedAt, payload: { kind: "context.snapshot", state: "captured", sourceCategories: manifest.contextDecision.sourceCategories, accountingQuality: manifest.contextDecision.tokenAccounting === "provider_reported" ? "reported" : manifest.contextDecision.tokenAccounting === "estimated" ? "estimated" : "unknown" } }),
         ]);
       });
       liveBus?.publish(committed);
@@ -163,6 +164,7 @@ export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunE
         if (changed.changes !== 1) throw new Error("RUN_STALE_VERSION");
         committed = eventRepo.appendMany([
           lifecycleEvent({ runId, attemptId: attempt.attemptId, kind: "attempt.settled", occurredAt: at, payload: { kind: "attempt.settled", state: "failed", outcome: "failed", attemptOrdinal: attempt.ordinal, retryability: "retryable", summary: boundedReason, errorCode: "context_overflow" } }),
+          lifecycleEvent({ runId, attemptId: nextId, kind: "run.retry", category: "recovery", source: "core.run-repo", occurredAt: at, payload: { kind: "run.retry", state: "retrying", attemptOrdinal: attempt.ordinal + 1, retryOrdinal: attempt.ordinal, reasonCode: boundedReason.toLowerCase().replace(/[^a-z0-9_.-]+/g, "_").slice(0, 100) || "retry" } }),
           lifecycleEvent({ runId, attemptId: nextId, kind: "attempt.started", occurredAt: at, payload: { kind: "attempt.started", state: "effect_running", attemptOrdinal: attempt.ordinal + 1 } }),
         ]);
       });

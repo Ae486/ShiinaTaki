@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { APPROVAL_METHODS, APPROVAL_PRESENTATION_REVISION, type CanonicalApprovalRequest } from "@taki/shared";
+import { APPROVAL_METHODS, APPROVAL_PRESENTATION_REVISION, type CanonicalApprovalRequest, type RunEvent } from "@taki/shared";
 import { createApprovalDecisionService } from "../approval/approval-decision-service.ts";
 import { createApprovalInteractionService } from "../approval/approval-interaction-service.ts";
 import { createApprovalStateRepo } from "../approval/approval-state-repo.ts";
@@ -26,7 +26,10 @@ function fixture(options: { interactive?: boolean } = {}) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
   const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
-  const approval = createApprovalInteractionService(createApprovalDecisionService(createApprovalStateRepo(db)));
+  const observed: Array<Omit<RunEvent, "eventId" | "seq">> = [];
+  const approval = createApprovalInteractionService(
+    createApprovalDecisionService(createApprovalStateRepo(db)), (event) => observed.push(event),
+  );
   const notifications: Array<{ method: string; params: unknown }> = [];
   const connection: Connection = {
     state: { status: "authenticated", deviceId: "operator", role: "operator", capabilities: [] },
@@ -57,7 +60,7 @@ function fixture(options: { interactive?: boolean } = {}) {
       },
     },
   });
-  return { approval, connection, execute, governance, notifications, wrapped, db };
+  return { approval, connection, execute, governance, notifications, observed, wrapped, db };
 }
 
 function requestOf(notifications: Array<{ method: string; params: unknown }>): CanonicalApprovalRequest {
@@ -69,15 +72,22 @@ function requestOf(notifications: Array<{ method: string; params: unknown }>): C
 describe("wrapGovernedTool interactive authority", () => {
   it("records one waiting tool effect then commits intent only after approval", async () => {
     const f = fixture();
-    const effects = createEffectLifecycleService(createEffectRepo(f.db, createRunEventRepo(f.db)));
+    const eventRepo = createRunEventRepo(f.db);
+    const effects = createEffectLifecycleService(createEffectRepo(f.db, eventRepo), undefined, { eventRepo });
+    const bindEffect = vi.fn();
     f.db.exec("INSERT INTO run_snapshots (snapshot_id,run_id,schema_version,manifest_json,manifest_digest,captured_at,created_at) VALUES ('s','r','harness.v1','{}','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z'); INSERT INTO runs (run_id,character_id,trigger_request_id,idempotency_key,request_hash,initiator,provenance_json,delivery_class,state,state_version,snapshot_id,active_attempt_id,queued_at,operation_phase,created_at,updated_at) VALUES ('r','c','t','i','h','primary','{}','class_a','running',0,'s','a','2026-08-25T00:00:00.000Z','executing','2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z'); INSERT INTO run_attempts (attempt_id,run_id,ordinal,state,state_version,provider,model_id,snapshot_id) VALUES ('a','r',1,'effect_running',0,'p','m','s');");
-    const wrapped = wrapGovernedTool(tool({ description: "echo", inputSchema: z.object({}), execute: f.execute }), { service: f.governance, binding: { identity: { capabilityId: "mcp.tool.call", ownerHostId: OWNER_HOST_ID, subject: { subjectId: "mcp.server:tool", revision: "cfg.1" } }, cellKey: "mcp-tool-call" }, interactive: { approval: f.approval, connection: f.connection, effects, runId: "r", attemptId: "a", presentation: { revision: APPROVAL_PRESENTATION_REVISION, title: "Allow", capabilityLabel: "echo", riskSummary: "risk", sections: [{ title: "Target", fields: [{ label: "Tool", value: "echo" }] }] } } });
+    const wrapped = wrapGovernedTool(tool({ description: "echo", inputSchema: z.object({}), execute: f.execute }), { service: f.governance, binding: { identity: { capabilityId: "mcp.tool.call", ownerHostId: OWNER_HOST_ID, subject: { subjectId: "mcp.server:tool", revision: "cfg.1" } }, cellKey: "mcp-tool-call" }, interactive: { approval: f.approval, connection: f.connection, effects, runId: "r", attemptId: "a", toolObserver: { bindEffect }, presentation: { revision: APPROVAL_PRESENTATION_REVISION, title: "Allow", capabilityLabel: "echo", riskSummary: "risk", sections: [{ title: "Target", fields: [{ label: "Tool", value: "echo" }] }] } } });
     const pending = wrapped.execute?.({}, { toolCallId: "call-effect", messages: [] } as never);
     const request = requestOf(f.notifications);
     expect(f.db.prepare("SELECT state FROM run_effects").get()?.state).toBe("waiting");
     f.approval.respond(f.connection, { approvalId: request.approvalId, choice: "allow_once", expectedApprovalGeneration: request.approvalGeneration });
     await expect(pending).resolves.toEqual({ ok: true });
     expect(f.db.prepare("SELECT state FROM run_effects").get()?.state).toBe("terminal");
+    expect(bindEffect).toHaveBeenCalledWith({ toolCallId: "call-effect", effectId: expect.any(String) });
+    expect(eventRepo.list("r").filter((event) => event.kind === "governance.evaluated")).toHaveLength(2);
+    expect(f.observed.map((event) => event.kind)).toEqual(["approval.requested", "approval.decided"]);
+    expect(JSON.stringify(f.observed)).not.toContain("risk");
+    expect(JSON.stringify(f.observed)).not.toContain("Run configured MCP tool");
   });
 
   it("executes the original closure exactly once after an ask is approved", async () => {

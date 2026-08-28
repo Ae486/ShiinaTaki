@@ -14,6 +14,7 @@ import { registerPermissionMethods } from "../server/methods/permission-methods.
 import { createApprovalDecisionService } from "./approval-decision-service.ts";
 import { createApprovalInteractionService } from "./approval-interaction-service.ts";
 import { createApprovalStateRepo } from "./approval-state-repo.ts";
+import type { RunEvent } from "@taki/shared";
 
 export function composeApprovalRuntime(input: {
   db: Database;
@@ -22,9 +23,10 @@ export function composeApprovalRuntime(input: {
   registry: MethodRegistry;
   connections: ConnectionRegistry;
   logger: Logger;
+  recordRunEvent?: (event: Omit<RunEvent, "eventId" | "seq">) => void;
 }) {
   const authority = createApprovalDecisionService(createApprovalStateRepo(input.db));
-  const approval = createApprovalInteractionService(authority);
+  const approval = createApprovalInteractionService(authority, input.recordRunEvent);
   registerPermissionMethods(input.registry, {
     service: input.governance,
     logger: input.logger,

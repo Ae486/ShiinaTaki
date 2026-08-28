@@ -29,7 +29,7 @@ describe("RunService", () => {
     const first = await service.admit(request);
     const second = await service.admit(request);
     expect(second).toMatchObject({ reused: true, run: { runId: first.run.runId }, attempt: { attemptId: first.attempt.attemptId } });
-    expect(second.eventTail).toEqual({ runId: first.run.runId, seq: 2 });
+    expect(second.eventTail).toEqual({ runId: first.run.runId, seq: 3 });
     expect(db.prepare("SELECT count(*) AS n FROM runs").get()?.n).toBe(1);
     expect(db.prepare("SELECT count(*) AS n FROM run_snapshots").get()?.n).toBe(1);
     expect(service.status(first.run.runId)).toMatchObject({ run: { state: "queued", operationPhase: "admitted" }, attempts: [{ state: "prepared", ordinal: 1 }] });
@@ -104,7 +104,7 @@ describe("RunService", () => {
   });
 
   it("settles a retryable overflow Attempt and starts a second Attempt inside the same Run", async () => {
-    const { service } = harness();
+    const { db, service } = harness();
     const { run } = await service.admit(request);
     const firstAttempt = service.status(run.runId).attempts[0]!.attemptId;
     expect(service.start(run.runId, firstAttempt)).toBe(true);
@@ -114,6 +114,8 @@ describe("RunService", () => {
       { ordinal: 1, state: "failed", retryability: "retryable" },
       { ordinal: 2, state: "effect_running", retryReason: "context_overflow" },
     ]);
+    expect(db.prepare("SELECT category,source,json_extract(payload_json,'$.retryOrdinal') AS retryOrdinal FROM run_events WHERE kind='run.retry'").get())
+      .toEqual({ category: "recovery", source: "core.run-repo", retryOrdinal: 1 });
     expect(service.settle(run.runId, retried.run.activeAttemptId!, "completed").receipt?.attemptCount).toBe(2);
   });
 

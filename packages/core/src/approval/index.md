@@ -14,5 +14,5 @@ SQLite. Retained legacy modules remain compatibility/test inputs only and are no
 - approval-interaction-store.ts — process-local pending/session record shapes and exact-Connection collection ownership
 - approval-interaction-state.ts — serialized request/respond/revoke/policy-invalidation/disconnect transitions with targeted close notifications
 - approval-interaction-outcomes.ts — bounded terminal decision and response helpers
-- approval-interaction-service.ts — public interactive authority facade plus final current-authority verification before raw execution
-- approval-runtime.ts — production composition of durable authority, interaction service, methods, disconnect cleanup, and Core tool adapter
+- approval-interaction-service.ts — public interactive authority facade, final current-authority verification, and isolated requested/decided Run Event observation
+- approval-runtime.ts — production composition of durable authority, interaction service, methods, disconnect cleanup, Core tool adapter, and optional Run Event sink

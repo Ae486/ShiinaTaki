@@ -19,6 +19,7 @@ import { effectApprovalRefMigration027 } from "./027-effect-approval-ref.ts";
 import { recoveryAdmissionMigration028 } from "./028-recovery-admission.ts";
 import { scheduledTasksMigration029 } from "./029-scheduled-tasks.ts";
 import { scheduledOccurrenceCharacterMigration030 } from "./030-scheduled-occurrence-character.ts";
+import { runUsageDetailsMigration031 } from "./031-run-usage-details.ts";
 
 const roots: string[] = [];
 const dbs: Database[] = [];
@@ -47,7 +48,7 @@ function close(db: Database): void {
 }
 
 function expectFinalSchema(db: Database): void {
-  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(30);
+  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(31);
   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map((row) => row.name);
   expect(tables).toEqual(expect.arrayContaining([
     "canonical_memory_units",
@@ -73,6 +74,9 @@ function expectFinalSchema(db: Database): void {
     "user_timezone",
   ]));
   expect(db.prepare("PRAGMA table_info(schedule_occurrences)").all().map((row) => row.name)).toContain("character_id");
+  expect(db.prepare("PRAGMA table_info(run_usage)").all().map((row) => row.name)).toEqual(expect.arrayContaining([
+    "input_no_cache_tokens", "cache_read_tokens", "cache_write_tokens", "output_text_tokens", "reasoning_tokens",
+  ]));
 }
 
 function expectReopenNoOp(path: string): Database {
@@ -89,10 +93,10 @@ describe("migration lineage reopen matrix", () => {
     const firstApplied: number[][] = [];
     const first = open(path, MIGRATIONS, (applied) => firstApplied.push(applied));
     expectFinalSchema(first);
-    expect(firstApplied).toEqual([Array.from({ length: 30 }, (_, index) => index + 1)]);
+    expect(firstApplied).toEqual([Array.from({ length: 31 }, (_, index) => index + 1)]);
     close(first);
     const reopened = expectReopenNoOp(path);
-    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(30);
+    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(31);
   });
 
   it("converges the historical T4 17/18 MCP-Skill lineage through 024", () => {
@@ -117,11 +121,12 @@ describe("migration lineage reopen matrix", () => {
       recoveryAdmissionMigration028,
       scheduledTasksMigration029,
       scheduledOccurrenceCharacterMigration030,
+      runUsageDetailsMigration031,
     ], (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]]);
+    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT version FROM migrations ORDER BY version").all().map((row) => row.version)).toEqual(
-      Array.from({ length: 30 }, (_, index) => index + 1),
+      Array.from({ length: 31 }, (_, index) => index + 1),
     );
     close(reopened);
     expectReopenNoOp(path);
@@ -134,7 +139,7 @@ describe("migration lineage reopen matrix", () => {
     close(first);
     const tailApplied: number[][] = [];
     const reopened = open(path, MIGRATIONS, (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30]]);
+    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT mode FROM memory_authority_selection WHERE singleton=1").get()?.mode)
       .toBe("legacy-markdown");

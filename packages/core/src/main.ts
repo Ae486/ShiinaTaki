@@ -119,7 +119,11 @@ const runEventRepo = createRunEventRepo(db);
 const runEventLive = createRunEventLiveBus((runId, afterSeq) => runEventRepo.list(runId, afterSeq));
 const runRepo = createRunRepo(db, runEventRepo, runEventLive);
 const observability = createObservabilityQueryService({ db, events: runEventRepo, mode: () => MonitorModeSchema.parse(boot.config.source.resolve(MONITOR_MODE_CONFIG_KEY)?.value ?? "DISABLED") });
-const effectLifecycle = createEffectLifecycleService(createEffectRepo(db, runEventRepo, runEventLive), (runId, attemptId) => runRepo.guardDispatch(runId, attemptId));
+const effectLifecycle = createEffectLifecycleService(
+  createEffectRepo(db, runEventRepo, runEventLive),
+  (runId, attemptId) => runRepo.guardDispatch(runId, attemptId),
+  { eventRepo: runEventRepo, liveBus: runEventLive },
+);
 const timelineRepo = createTimelineRepo(db);
 // R1 tier 2: the MAIN slot's window calibrator (vision/utility declare windows but stay uncalibrated in v1 —
 // their traffic is rare and their windows generous; batch-6 design §2.5 records the gap).
@@ -179,7 +183,10 @@ const deviceRegistry = createDeviceRegistry({
 const connectionRegistry = createConnectionRegistry();
 const hostCatalogs = createHostCatalogStore();
 const registry = createMethodRegistry();
-const { approval, coreToolGovernance } = composeApprovalRuntime({ db, governance, coreHostId, registry, connections: connectionRegistry, logger });
+const { approval, coreToolGovernance } = composeApprovalRuntime({
+  db, governance, coreHostId, registry, connections: connectionRegistry, logger,
+  recordRunEvent: effectLifecycle.record,
+});
 
 // Skills: durable lifecycle rows plus an immutable runtime catalog. Legacy files are read once as a seed and never written.
 const skillBoot = await bootSkillLifecycle({ db, dataDir: serverConfig.dataDir, ownerHostId: coreHostId, logger });

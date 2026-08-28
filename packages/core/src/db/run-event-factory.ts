@@ -1,3 +1,8 @@
+/**
+ * INPUT:  bounded Run transition facts and optional trigger correlation
+ * OUTPUT: canonical Run Event envelopes plus shared transition/text helpers
+ * POS:    core/db — construction helper used by transactional Run and recovery writers
+ */
 import type { Attempt, Run, RunEvent, RunOutcome, RunStatusResult, TriggerRequest } from "@taki/shared";
 
 export function lifecycleEvent(input: {
@@ -7,9 +12,11 @@ export function lifecycleEvent(input: {
   occurredAt: string;
   payload: RunEvent["payload"];
   request?: TriggerRequest;
+  category?: RunEvent["category"];
+  source?: RunEvent["source"];
 }): Omit<RunEvent, "eventId" | "seq"> {
   const { runId, attemptId, kind, occurredAt, payload, request } = input;
-  return { runId, ...(attemptId ? { attemptId } : {}), schemaVersion: "run-event.v1", category: "lifecycle", kind, occurredAt, source: "core.run-repo", ...(request ? { correlation: { triggerRequestId: request.triggerRequestId, ...(request.provenance.taskId ? { taskId: request.provenance.taskId } : {}), ...(request.provenance.parentRunId ? { parentRunId: request.provenance.parentRunId } : {}) } } : {}), payload };
+  return { runId, ...(attemptId ? { attemptId } : {}), schemaVersion: "run-event.v1", category: input.category ?? "lifecycle", kind, occurredAt, source: input.source ?? "core.run-repo", ...(request ? { correlation: { triggerRequestId: request.triggerRequestId, ...(request.provenance.taskId ? { taskId: request.provenance.taskId } : {}), ...(request.provenance.parentRunId ? { parentRunId: request.provenance.parentRunId } : {}) } } : {}), payload };
 }
 
 export function boundText(value: string, max: number): string;

@@ -1,3 +1,8 @@
+/**
+ * INPUT:  durable nonterminal Run state, process generation, and bounded recovery classification
+ * OUTPUT: atomic recovery state changes plus canonical recovery events and queue projections
+ * POS:    core/db — recovery-specific writer above the Run aggregate; external probes stay outside transactions
+ */
 import { QueueListResultSchema, type QueueListParams, type QueueListResult, type RecoveryClassification, type RunEvent, type RunStatusResult } from "@taki/shared";
 import type { Database } from "./sqlite.ts";
 import type { RunEventRepo } from "./run-event-repo.ts";
@@ -35,7 +40,7 @@ export function classifyRecovery(input: { db: Database; eventRepo: RunEventRepo;
   let committed: RunEvent[] = [];
   input.db.transaction(() => {
     const changed = input.db.prepare("UPDATE runs SET state=:state,operation_phase=:phase,state_version=state_version+1,recovery_generation=:generation,recovery_classification=:classification,recovered_at=:at,updated_at=:at WHERE run_id=:runId AND state_version=:version AND state NOT IN ('completed','failed','cancelled','skipped','deadline_exceeded','outcome_unknown')").run({ runId: input.runId, version: status.run.stateVersion, state: target, phase: target === "waiting" ? "waiting" : target === "recovering" ? "recovering" : "admitted", generation: input.generation, classification: input.classification, at: input.at });
-    if (changed.changes === 1) committed = [input.eventRepo.append(lifecycleEvent({ runId: input.runId, kind: "recovery.classified", occurredAt: input.at, payload: { kind: "recovery.classified", state: target, classification: input.classification, ...(input.reason ? { reason: boundText(input.reason, 1000) } : {}), ...(code ? { errorCode: code } : {}) } }))];
+    if (changed.changes === 1) committed = [input.eventRepo.append(lifecycleEvent({ runId: input.runId, kind: "recovery.classified", category: "recovery", source: "core.recovery-repo", occurredAt: input.at, payload: { kind: "recovery.classified", state: target, classification: input.classification, ...(input.reason ? { reason: boundText(input.reason, 1000) } : {}), ...(code ? { errorCode: code } : {}) } }))];
   });
   if (committed.length > 0) {
     try { input.liveBus?.publish(committed); } catch { /* observers cannot alter committed recovery truth */ }

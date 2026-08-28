@@ -1,89 +1,218 @@
+/**
+ * INPUT:  AI SDK v7 provider calls plus a Run-owned Effect lifecycle and optional model observer
+ * OUTPUT: intent-before-dispatch middleware with exactly-once failure/interruption settlement
+ * POS:    core/agents — raw provider boundary; successful normalized usage/timing settles through SDK telemetry
+ */
 import { createHash } from "node:crypto";
 import type { LanguageModelMiddleware } from "ai";
+import type { EffectLifecycle, UsageRecord } from "@taki/shared";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 
 interface ModelEffectContext {
   lifecycle: EffectLifecycleService;
   runId: string;
   attemptId: string;
+  observer?: ModelEffectObserver;
 }
-type ProviderStreamPart = { type: string; usage?: { inputTokens: { total?: number }; outputTokens: { total?: number } } };
+
+type WrapStreamArgs = Parameters<NonNullable<LanguageModelMiddleware["wrapStream"]>>[0];
+type ProviderStreamPart = Awaited<ReturnType<WrapStreamArgs["doStream"]>>["stream"] extends ReadableStream<infer Part>
+  ? Part
+  : never;
+
+export interface ModelEffectBinding {
+  effect: EffectLifecycle;
+  callId: string;
+}
+
+export interface ModelEffectObserver {
+  bindEffect(input: { effect: EffectLifecycle; provider: string; modelId: string }): ModelEffectBinding;
+  firstOutput(input: ModelEffectBinding & { outputKind: "text" | "reasoning" | "tool" }): void;
+  fail(input: ModelEffectBinding & { errorCode: string; outcome: "failed" | "outcome_unknown" }): void;
+}
 
 export function createModelEffectMiddleware(context: ModelEffectContext): LanguageModelMiddleware {
   return {
     specificationVersion: "v4",
     async wrapGenerate({ doGenerate, params, model }) {
-      const effect = context.lifecycle.prepare({
-        runId: context.runId,
-        attemptId: context.attemptId,
-        kind: "model",
-        sourceRef: { type: "model", provider: model.provider, modelId: model.modelId },
-        executorRef: { type: "provider", provider: model.provider },
-        inputDigest: digestForModelRequest(params),
-        replayPosture: "never",
-      });
+      const binding = prepareBinding(context, model, params);
       try {
         const result = await doGenerate();
-        const inputTokens = result.usage.inputTokens.total;
-        const outputTokens = result.usage.outputTokens.total;
-        context.lifecycle.settle({ effectId: effect.effectId, runId: context.runId, attemptId: context.attemptId, expectedVersion: effect.version, outcome: "completed", usage: usageFor({ provider: model.provider, modelId: model.modelId, inputTokens, outputTokens, prompt: params.prompt }) });
+        if (!context.observer) settleDirect({ context, effect: binding.effect, model, usage: result.usage });
         return result;
       } catch (error) {
-        context.lifecycle.settle({ effectId: effect.effectId, runId: context.runId, attemptId: context.attemptId, expectedVersion: effect.version, outcome: params.abortSignal?.aborted ? "outcome_unknown" : "failed", errorCode: params.abortSignal?.aborted ? "provider_abort" : "provider_error" });
+        fail(context, binding, params.abortSignal?.aborted ? "provider_abort" : "provider_error");
         throw error;
       }
     },
     async wrapStream({ doStream, params, model }) {
-      const effect = context.lifecycle.prepare({
-        runId: context.runId,
-        attemptId: context.attemptId,
-        kind: "model",
-        sourceRef: { type: "model", provider: model.provider, modelId: model.modelId },
-        executorRef: { type: "provider", provider: model.provider },
-        inputDigest: digestForModelRequest(params),
-        replayPosture: "never",
-      });
+      const binding = prepareBinding(context, model, params);
       let result;
       try {
         result = await doStream();
       } catch (error) {
-        context.lifecycle.settle({ effectId: effect.effectId, runId: context.runId, attemptId: context.attemptId, expectedVersion: effect.version, outcome: params.abortSignal?.aborted ? "outcome_unknown" : "failed", errorCode: params.abortSignal?.aborted ? "provider_abort" : "provider_error" });
+        fail(context, binding, params.abortSignal?.aborted ? "provider_abort" : "provider_error");
         throw error;
       }
-      return { ...result, stream: settleStream(result.stream as ReadableStream<ProviderStreamPart>, (part) => settlePart({ context, effect, provider: model.provider, modelId: model.modelId, part }), () => context.lifecycle.settle({ effectId: effect.effectId, runId: context.runId, attemptId: context.attemptId, expectedVersion: effect.version, outcome: "outcome_unknown", errorCode: "provider_stream_interrupted" })) as typeof result.stream };
+      return {
+        ...result,
+        stream: observeStream({
+          stream: result.stream,
+          binding,
+          context,
+          model,
+        }) as typeof result.stream,
+      };
     },
   };
 }
 
-function settlePart(input: { context: ModelEffectContext; effect: ReturnType<EffectLifecycleService["prepare"]>; provider: string; modelId: string; part: ProviderStreamPart }): void {
-  const { context, effect, provider, modelId, part } = input;
-  if (part.type === "error") { context.lifecycle.settle({ effectId: effect.effectId, runId: context.runId, attemptId: context.attemptId, expectedVersion: effect.version, outcome: "outcome_unknown", errorCode: "provider_stream_error" }); return; }
-  if (part.type !== "finish") return;
-  if (!part.usage) { context.lifecycle.settle({ effectId: effect.effectId, runId: context.runId, attemptId: context.attemptId, expectedVersion: effect.version, outcome: "outcome_unknown", errorCode: "provider_usage_missing" }); return; }
-  const inputTokens = part.usage.inputTokens.total;
-  const outputTokens = part.usage.outputTokens.total;
-  context.lifecycle.settle({ effectId: effect.effectId, runId: context.runId, attemptId: context.attemptId, expectedVersion: effect.version, outcome: "completed", usage: usageFor({ provider, modelId, inputTokens, outputTokens }) });
+function prepareBinding(
+  context: ModelEffectContext,
+  model: { provider: string; modelId: string },
+  params: unknown,
+): ModelEffectBinding {
+  const effect = context.lifecycle.prepare({
+    runId: context.runId,
+    attemptId: context.attemptId,
+    kind: "model",
+    sourceRef: { type: "model", provider: model.provider, modelId: model.modelId },
+    executorRef: { type: "provider", provider: model.provider },
+    inputDigest: digestForModelRequest(params),
+    replayPosture: "never",
+  });
+  return context.observer?.bindEffect({ effect, provider: model.provider, modelId: model.modelId })
+    ?? { effect, callId: effect.effectId };
 }
 
-function usageFor(input: { provider: string; modelId: string; inputTokens?: number; outputTokens?: number; prompt?: unknown }) {
-  const estimated = input.inputTokens === undefined && input.outputTokens === undefined ? Math.max(1, Math.ceil(JSON.stringify(input.prompt ?? "").length / 4)) : undefined;
-  return { provider: input.provider, modelId: input.modelId, quality: input.inputTokens === undefined && input.outputTokens === undefined ? "estimated" as const : "reported" as const, inputTokens: input.inputTokens ?? estimated, outputTokens: input.outputTokens, totalTokens: input.inputTokens !== undefined || input.outputTokens !== undefined ? (input.inputTokens ?? 0) + (input.outputTokens ?? 0) : estimated };
-}
-
-function settleStream<T extends ProviderStreamPart>(stream: ReadableStream<T>, onPart: (part: T) => void, onInterrupted: () => void): ReadableStream<T> {
-  const reader = stream.getReader();
-  let settled = false;
-  const onceInterrupted = () => { if (!settled) { settled = true; onInterrupted(); } };
+function observeStream(input: {
+  stream: ReadableStream<ProviderStreamPart>;
+  binding: ModelEffectBinding;
+  context: ModelEffectContext;
+  model: { provider: string; modelId: string };
+}): ReadableStream<ProviderStreamPart> {
+  const reader = input.stream.getReader();
+  let firstOutput = false;
+  let terminal = false;
+  const interrupt = (errorCode: string): void => {
+    if (terminal) return;
+    terminal = true;
+    fail(input.context, input.binding, errorCode);
+  };
   return new ReadableStream({
     async pull(controller) {
       try {
         const next = await reader.read();
-        if (next.done) { if (!settled) { settled = true; onInterrupted(); } controller.close(); return; }
-        onPart(next.value); if (next.value.type === "finish") settled = true; controller.enqueue(next.value);
-      } catch (error) { onceInterrupted(); controller.error(error); }
+        if (next.done) {
+          interrupt("provider_stream_interrupted");
+          controller.close();
+          return;
+        }
+        const part = next.value;
+        const outputKind = meaningfulOutput(part);
+        if (!firstOutput && outputKind) {
+          firstOutput = true;
+          input.context.observer?.firstOutput({ ...input.binding, outputKind });
+        }
+        if (part.type === "error") interrupt("provider_stream_error");
+        if (part.type === "finish") {
+          terminal = true;
+          if (!input.context.observer) {
+            settleDirect({ context: input.context, effect: input.binding.effect, model: input.model, usage: part.usage });
+          }
+        }
+        controller.enqueue(part);
+      } catch (error) {
+        interrupt("provider_stream_interrupted");
+        controller.error(error);
+      }
     },
-    async cancel(reason) { onceInterrupted(); await reader.cancel(reason); },
+    async cancel(reason) {
+      interrupt("provider_stream_interrupted");
+      await reader.cancel(reason);
+    },
   });
+}
+
+function meaningfulOutput(part: ProviderStreamPart): "text" | "reasoning" | "tool" | undefined {
+  if (part.type === "text-delta") return "text";
+  if (part.type === "reasoning-delta") return "reasoning";
+  if (part.type === "tool-call") return "tool";
+  return undefined;
+}
+
+function fail(context: ModelEffectContext, binding: ModelEffectBinding, errorCode: string): void {
+  const outcome = errorCode === "provider_error" ? "failed" as const : "outcome_unknown" as const;
+  if (context.observer) {
+    context.observer.fail({ ...binding, errorCode, outcome });
+    return;
+  }
+  context.lifecycle.settle({
+    effectId: binding.effect.effectId,
+    runId: binding.effect.runId,
+    attemptId: binding.effect.attemptId,
+    expectedVersion: binding.effect.version,
+    outcome,
+    errorCode,
+  });
+}
+
+function settleDirect(input: {
+  context: ModelEffectContext;
+  effect: EffectLifecycle;
+  model: { provider: string; modelId: string };
+  usage: ProviderUsage | undefined;
+}): void {
+  const accepted = usageRecord(input.model, input.usage);
+  const hasUsage = accepted.quality === "reported";
+  input.context.lifecycle.settle({
+    effectId: input.effect.effectId,
+    runId: input.effect.runId,
+    attemptId: input.effect.attemptId,
+    expectedVersion: input.effect.version,
+    outcome: hasUsage ? "completed" : "outcome_unknown",
+    ...(hasUsage ? {} : { errorCode: "provider_usage_missing" }),
+    usage: accepted,
+  });
+}
+
+interface ProviderUsage {
+  inputTokens: { total?: number; noCache?: number; cacheRead?: number; cacheWrite?: number };
+  outputTokens: { total?: number; text?: number; reasoning?: number };
+}
+
+function usageRecord(
+  model: { provider: string; modelId: string },
+  usage: ProviderUsage | undefined,
+): Omit<UsageRecord, "usageId" | "schemaVersion" | "runId" | "attemptId" | "effectId" | "recordedAt"> {
+  const normalized = usage ?? { inputTokens: {}, outputTokens: {} };
+  const counts = [normalized.inputTokens.total, normalized.inputTokens.noCache, normalized.inputTokens.cacheRead,
+    normalized.inputTokens.cacheWrite, normalized.outputTokens.total, normalized.outputTokens.text, normalized.outputTokens.reasoning];
+  return {
+    provider: model.provider,
+    modelId: model.modelId,
+    quality: counts.some((value) => value !== undefined) ? "reported" : "unknown",
+    inputTokens: normalized.inputTokens.total,
+    inputTokenDetails: compactDetails({
+      noCacheTokens: normalized.inputTokens.noCache,
+      cacheReadTokens: normalized.inputTokens.cacheRead,
+      cacheWriteTokens: normalized.inputTokens.cacheWrite,
+    }),
+    outputTokens: normalized.outputTokens.total,
+    outputTokenDetails: compactDetails({
+      textTokens: normalized.outputTokens.text,
+      reasoningTokens: normalized.outputTokens.reasoning,
+    }),
+    totalTokens: sumKnown(normalized.inputTokens.total, normalized.outputTokens.total),
+  };
+}
+
+function compactDetails<T extends Record<string, number | undefined>>(value: T): T | undefined {
+  return Object.values(value).some((item) => item !== undefined) ? value : undefined;
+}
+
+function sumKnown(left: number | undefined, right: number | undefined): number | undefined {
+  return left === undefined && right === undefined ? undefined : (left ?? 0) + (right ?? 0);
 }
 
 export function digestForModelRequest(value: unknown): string {

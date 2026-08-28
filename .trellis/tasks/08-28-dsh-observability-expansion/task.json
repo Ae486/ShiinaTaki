@@ -1,0 +1,37 @@
+{
+  "id": "dsh-observability-expansion",
+  "name": "dsh-observability-expansion",
+  "title": "DSH observability producer expansion",
+  "description": "Producer-first expansion of the DSH-style observability plane plus a DSH-shaped Chinese Monitor UI: add replayable Core Run Event facts for model/tool/usage/context/timing/governance/retry/recovery, then extend projections and a dismissible semantic Inspector without a second authority or runtime.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": "packages/shared + packages/core + apps/desktop Monitor projection/UI + observability planning docs; no second runtime or authority",
+  "package": "full-stack",
+  "priority": "P1",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-08-28",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "08-28-harness-prompt-cache-stability"
+  ],
+  "parent": "08-22-t4-agent-architecture-observability",
+  "relatedFiles": [
+    "packages/shared/src/run-event-schema.ts",
+    "packages/shared/src/observability-schema.ts",
+    "packages/core/src/agents/model-effect-middleware.ts",
+    "packages/core/src/observability/observability-query-service.ts",
+    "apps/desktop/src/windows/home/pages/monitor/monitor-page.tsx",
+    "apps/desktop/src/windows/home/pages/monitor/monitor-view.tsx",
+    "docs/deferred-decisions.md",
+    "docs/ARCHITECTURE-ROADMAP.md"
+  ],
+  "notes": "D68-A producer, durable usage, projection, query, and semantic Inspector data are implemented, formally checked, and manually accepted. The prompt-cache stability child is complete and must be archived now. D68-B remains pending: DSH-shaped Desktop layout, disclosures, tail/history interaction, responsive behavior, and visual polish. D67 remains the separate cross-Home reactive/disclosure follow-up.",
+  "meta": {}
+}

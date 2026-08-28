@@ -10,6 +10,7 @@ import {
   type ApprovalRevokeResult,
   type CanonicalApprovalRespondParams,
   type CanonicalApprovalRespondResult,
+  type RunEvent,
 } from "@taki/shared";
 import type { Connection } from "../server/connection-registry.ts";
 import type { ApprovalDecisionService } from "./approval-decision-service.ts";
@@ -39,6 +40,7 @@ export interface ApprovalInteractionRequest {
   binding: ApprovalDecisionBinding;
   presentation: ApprovalPresentation;
   timeoutMs?: number;
+  observation?: { runId: string; attemptId: string; capabilityId: string };
 }
 
 export interface ApprovalRequestHandle {
@@ -67,7 +69,10 @@ export interface ApprovalInteractionService {
   }): boolean;
 }
 
-export function createApprovalInteractionService(authority: ApprovalDecisionService): ApprovalInteractionService {
+export function createApprovalInteractionService(
+  authority: ApprovalDecisionService,
+  record?: (event: Omit<RunEvent, "eventId" | "seq">) => void,
+): ApprovalInteractionService {
   const state: ApprovalInteractionState = createApprovalInteractionState();
   const generationListeners: Array<(approvalGeneration: number) => void> = [];
   const policyListeners: Array<(policyGeneration: number) => void> = [];
@@ -76,7 +81,11 @@ export function createApprovalInteractionService(authority: ApprovalDecisionServ
     if (after !== before) for (const listener of generationListeners) listener(after);
   };
   return {
-    request: (input) => requestInteraction({ state, authority, input }),
+    request(input) {
+      const handle = requestInteraction({ state, authority, input });
+      observeApproval(record, input.observation, handle);
+      return handle;
+    },
     respond(connection, params) {
       const before = authority.snapshot().approvalGeneration;
       const result = respondInteraction({ state, authority, connection, params });
@@ -106,6 +115,48 @@ export function createApprovalInteractionService(authority: ApprovalDecisionServ
     onPolicyInvalidated: (listener) => policyListeners.push(listener),
     isCurrentAuthority: (input) => isCurrentAuthority(state, authority, input),
   };
+}
+
+function observeApproval(
+  record: ((event: Omit<RunEvent, "eventId" | "seq">) => void) | undefined,
+  observation: ApprovalInteractionRequest["observation"],
+  handle: ApprovalRequestHandle,
+): void {
+  if (!record || !observation) return;
+  if (handle.approvalId) {
+    recordSafely(record, approvalEvent(observation, "approval.requested", {
+      kind: "approval.requested", state: "pending", approvalId: handle.approvalId,
+      capabilityId: observation.capabilityId,
+    }));
+  }
+  void handle.result.then((decision) => {
+    const state = decision.allowed ? "approved" as const : decision.reason;
+    recordSafely(record, approvalEvent(observation, "approval.decided", {
+      kind: "approval.decided", state,
+      ...(handle.approvalId ? { approvalId: handle.approvalId } : {}),
+      capabilityId: observation.capabilityId,
+      ...(decision.allowed ? { scope: decision.scope } : { reasonCode: `approval_${decision.reason}` }),
+    }));
+  }).catch(() => { /* Approval result observation never changes Approval authority */ });
+}
+
+function approvalEvent(
+  observation: NonNullable<ApprovalInteractionRequest["observation"]>,
+  kind: "approval.requested" | "approval.decided",
+  payload: Extract<RunEvent["payload"], { kind: "approval.requested" | "approval.decided" }>,
+): Omit<RunEvent, "eventId" | "seq"> {
+  return {
+    runId: observation.runId, attemptId: observation.attemptId, schemaVersion: "run-event.v1",
+    category: "governance", kind, occurredAt: new Date().toISOString(),
+    source: "core.approval-authority", payload,
+  };
+}
+
+function recordSafely(
+  record: (event: Omit<RunEvent, "eventId" | "seq">) => void,
+  event: Omit<RunEvent, "eventId" | "seq">,
+): void {
+  try { record(event); } catch { /* approval truth is independent from observer evidence */ }
 }
 
 function isCurrentAuthority(

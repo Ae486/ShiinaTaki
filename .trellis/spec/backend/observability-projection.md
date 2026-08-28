@@ -24,6 +24,12 @@ const OBSERVABILITY_METHODS = {
 
 type MonitorMode = "DISABLED" | "FEEDBACK_ONLY" | "FULL_LOCAL";
 type RunMonitorCursor = { queuedAt: string; key: string };
+
+type RunObservabilitySession = {
+  middleware: LanguageModelMiddleware; // commits Effect intent before provider dispatch
+  telemetry: Telemetry;                // supplies normalized usage and measured performance
+  assertHealthy(): void;               // rethrows an authoritative settlement failure at the owning stream boundary
+};
 ```
 
 Core composition owns one `ObservabilityQueryService` over the existing Run/Event repositories and one connection-
@@ -47,6 +53,10 @@ applied, and defaults to `DISABLED`.
   enter Shared contracts/UI only after a fixed Core lifecycle boundary emits a versioned, bounded fact that can rebuild
   the same projection after restart. Missing/unknown facts remain absent or explicitly unknown; the UI never infers
   them from Pino text, hashes, elapsed wall time, final messages, or zero defaults.
+- AI SDK telemetry callbacks are an isolation boundary: `notify()` catches callback exceptions. Optional bounded event
+  append failures therefore stay contained, but authoritative Effect/usage settlement failures must be captured by the
+  per-call observer and rethrown by `assertHealthy()` before the owning stream is accepted as complete. Never rely on a
+  thrown telemetry callback to fail the Agent turn.
 - Cache metrics require a provider/runtime-owned cache definition and authoritative hit/miss/unknown producer. A model
   provider that exposes no cache signal must not be reported as `miss` and must not receive a provider-specific branch
   merely to populate the Monitor.
@@ -67,6 +77,8 @@ applied, and defaults to `DISABLED`.
 | Page/filter exceeds schema bounds | Zod application error; do not coerce or widen it |
 | Projection scan budget is reached | Return current matches plus a continuation cursor from the last scanned Run |
 | Observer overflows or throws | Isolate/close that observer and notify invalidation; Run correctness is unchanged |
+| Optional model/tool event append throws | Contain it; provider/tool execution and authoritative Effect truth continue |
+| Authoritative Effect/usage settlement throws inside an AI SDK telemetry callback | Capture it and fail at the owning stream boundary; do not let SDK callback isolation silently leave a successful turn |
 | Connection closes or client unsubscribes | Remove the exact connection-scoped subscription idempotently |
 | Projection requests a field with no durable producer | Omit/mark unknown; do not fabricate or derive from Pino/UI state |
 | Provider exposes no authoritative cache signal | Cache status is unavailable, never a synthetic miss |
@@ -77,12 +89,16 @@ applied, and defaults to `DISABLED`.
   then the next request resumes without gaps or duplicates.
 - Good: reconnect reads a durable trajectory page, subscribes after its returned sequence, and receives each later
   committed event once.
+- Good: normalized telemetry supplies usage/performance, settlement commits, and `assertHealthy()` returns before the
+  Chat loop accepts the stream as complete.
 - Base: `FEEDBACK_ONLY` displays lifecycle/effect/usage summaries while the inspector omits optional local detail.
 - Base: a provider reports token usage but no cache information. The trajectory shows the token fact and omits cache
   totals without degrading the Run.
 - Bad: filter only the newest 500 Runs in memory and omit `nextCursor` when none match; this silently hides older
   matches. Also bad: expose raw event JSON as the primary UI, keep a subscription after socket close, or calculate a
   "cache miss" from the absence of a cache field.
+- Bad: perform authoritative settlement only inside `onLanguageModelCallEnd` and assume throwing will fail the turn;
+  AI SDK telemetry notification catches that exception.
 
 ## 6. Tests Required
 
@@ -92,6 +108,9 @@ applied, and defaults to `DISABLED`.
   disabled behavior, semantic field projection, producer-absent/unknown handling, and inspector redaction.
 - Producer coverage: every displayed model/tool/usage/context/timing/governance/delivery/recovery field has a focused
   producer test plus restart/replay equality; provider-neutral absence remains absent.
+- Model telemetry: success/provider failure/interruption settle exactly once; detailed cache/reasoning/total usage and
+  measured timing survive DB replay; optional event-writer failure is isolated; authoritative settlement failure is
+  observed by `assertHealthy()` and rejects the owning stream.
 - Core methods/live: operator role, backfill-before-live order, one membership per connection, explicit unsubscribe,
   close cleanup, overflow/mode invalidation, and observer isolation.
 - Integration: isolated real Core boot in default-disabled and enabled modes plus an authenticated operator
@@ -120,4 +139,14 @@ const cacheStatus = response.cacheHit ?? false;
 
 // Correct: emit and project only an authoritative provider/runtime fact; absence stays unknown.
 const cacheStatus = response.cacheUsage?.status; // "hit" | "miss" | "unknown" | undefined
+```
+
+```typescript
+// Wrong: AI SDK notify() catches this callback failure, so the Agent turn can appear successful.
+telemetry.onLanguageModelCallEnd = (event) => effects.settle(usageFrom(event));
+
+// Correct: keep optional event append best-effort, but carry settlement failure back to the stream owner.
+telemetry.onLanguageModelCallEnd = (event) => observer.settleOrCapture(event);
+for await (const part of result.stream) consume(part);
+observer.assertHealthy();
 ```

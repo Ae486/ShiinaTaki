@@ -11,6 +11,7 @@ import { wrapGovernedTool, type GovernedEffectContext, type GovernedToolBinding 
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { memoryEffectMetadata } from "../memory/canonical-tools/memory-effect-tool.ts";
 import { createHash } from "node:crypto";
+import type { ToolEffectObserver } from "../observability/tool-effect-observer.ts";
 
 const CORE_TOOL_BINDINGS: Record<string, Omit<GovernedToolBinding["identity"], "ownerHostId"> & { cellKey: string }> = {
   get_current_time: { capabilityId: "core.time.read", cellKey: "get-current-time" },
@@ -31,7 +32,7 @@ const CORE_TOOL_BINDINGS: Record<string, Omit<GovernedToolBinding["identity"], "
 };
 
 export interface CoreToolGovernanceAdapter {
-  wrap(tools: ToolSet, interactive?: { connection?: Connection; signal?: AbortSignal; runId?: string; attemptId?: string; effects?: EffectLifecycleService }): ToolSet;
+  wrap(tools: ToolSet, interactive?: { connection?: Connection; signal?: AbortSignal; runId?: string; attemptId?: string; effects?: EffectLifecycleService; toolObserver?: ToolEffectObserver }): ToolSet;
 }
 
 export function createCoreToolGovernanceAdapter(
@@ -56,7 +57,8 @@ export function createCoreToolGovernanceAdapter(
               effect: effectContext(interactive),
               interactive: interactive?.connection && approval
                 ? { connection: interactive.connection, signal: interactive.signal, runId: interactive.runId,
-                    attemptId: interactive.attemptId, effects: interactive.effects, approval, presentation: corePresentation(key) }
+                    attemptId: interactive.attemptId, effects: interactive.effects, approval,
+                    toolObserver: interactive.toolObserver, presentation: corePresentation(key) }
                 : undefined,
             })
           : closeUnknownCoreTool(tool, key);
@@ -66,9 +68,9 @@ export function createCoreToolGovernanceAdapter(
   };
 }
 
-function effectContext(interactive: { runId?: string; attemptId?: string; effects?: EffectLifecycleService } | undefined): GovernedEffectContext | undefined {
+function effectContext(interactive: { runId?: string; attemptId?: string; effects?: EffectLifecycleService; toolObserver?: ToolEffectObserver } | undefined): GovernedEffectContext | undefined {
   return interactive?.runId && interactive.attemptId && interactive.effects
-    ? { runId: interactive.runId, attemptId: interactive.attemptId, effects: interactive.effects }
+    ? { runId: interactive.runId, attemptId: interactive.attemptId, effects: interactive.effects, toolObserver: interactive.toolObserver }
     : undefined;
 }
 

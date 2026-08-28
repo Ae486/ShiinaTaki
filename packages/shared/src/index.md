@@ -1,7 +1,8 @@
 # shared/src/
-- effect-lifecycle-schema.ts — closed provider-neutral effect current-state and authoritative usage contracts with replay/redaction bounds
+- effect-lifecycle-schema.ts — closed provider-neutral effect current-state and authoritative aggregate/cache/reasoning usage contracts with replay/redaction bounds
 - harness-schema.ts — strict provider-neutral Trigger Request, Run/Attempt, immutable authority/capability snapshot, Receipt, and run.status contracts
-- observability-schema.ts — bounded monitor mode, Run query, readable trajectory, inspector, and live notification contracts
+- observability-schema.ts — bounded monitor mode, real-field Run query, Chinese semantic trajectory, inspector, and live notification contracts
+- observability-presentation.ts — closed English-wire to Simplified-Chinese Monitor presentation mapper
 - scheduled-task-schema.ts — canonical durable schedule definitions and operator management protocol
 - index.ts — package public entry; named re-exports of the protocol surface
 - ping-schema.ts — scaffold ping/pong smoke schema (desktop IPC smoke; untouched this slice)
@@ -42,3 +43,4 @@
 - memory-provider-envelope-schema.ts — validated success/error envelopes for canonical provider operations
 - memory-migration-schema.ts — strict operator-only migration control and bounded report contracts
 - hindsight-cutover-schema.ts — strict B4 import, logical snapshot/page/record, staging checkpoint, fact mapping, activation, and operator status/verification contracts
+- run-event-schema.ts — versioned durable Run/Event contracts, including model/tool/context/governance observability facts

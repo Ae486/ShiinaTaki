@@ -1,0 +1,11 @@
+{"file":".trellis/spec/backend/observability-projection.md","reason":"Canonical Run/Event projection, producer-first, privacy, mode, cursor and live-subscription contract."}
+{"file":".trellis/spec/backend/agent-runtime.md","reason":"Agent loop, tool-call persistence, stream/error boundaries and privacy requirements."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"SQLite single-writer, append-only event persistence and migration/index rules."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Keep Pino process diagnostics separate from durable Run observability and avoid sensitive payloads."}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Home page topology, disposable client, page registry and streaming/read-model constraints."}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Disposable UI state, generation guards, no authoritative local cache and revalidation rules."}
+{"file":".trellis/spec/frontend/component-guidelines.md","reason":"React component/disclosure composition and accessible control conventions."}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Desktop size, performance, loading-state and test quality requirements."}
+{"file":".trellis/tasks/08-28-dsh-observability-expansion/research/d68-producer-first-scope-2026-08-28.md","reason":"Verified DSH fields, current producer inventory, cache assessment and bounded implementation scope."}
+{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/dsh-observability.md","reason":"Detailed DSH event, telemetry, query, privacy and trajectory reference decisions."}
+{"file":"references/deepseek-harness-master/packages/client/ui-trajectory/README.md","reason":"Reference layout, Inspector, folding, lazy history, virtualization and tail-follow behavior."}

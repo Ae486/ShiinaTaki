@@ -13,6 +13,7 @@ import { approvalDecisionScopeDigest } from "../approval/approval-binding.ts";
 import type { EffectLifecycle } from "@taki/shared";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { randomUUID } from "node:crypto";
+import type { ToolEffectObserver } from "../observability/tool-effect-observer.ts";
 
 export interface GovernedToolBinding {
   identity: CanonicalCapabilityIdentity;
@@ -44,6 +45,7 @@ export interface InteractiveGovernanceContext {
   runId?: string;
   attemptId?: string;
   effects?: EffectLifecycleService;
+  toolObserver?: ToolEffectObserver;
 }
 
 /** Run-owned Effect authority for turns that have no operator socket (for example non-primary Runs). */
@@ -51,6 +53,7 @@ export interface GovernedEffectContext {
   runId: string;
   attemptId: string;
   effects: EffectLifecycleService;
+  toolObserver?: ToolEffectObserver;
 }
 
 export interface GovernedToolContext {
@@ -103,15 +106,11 @@ async function executeGoverned(args: ExecuteGovernedArgs) {
   const { execute, context, input, options } = args;
   const { service, binding, interactive } = context;
   const decision = service.authorize(binding);
+  recordGovernance(context, decision, options);
   if (decision.allowed) return executeWithEffect({ execute, context, input, options });
   if (decision.code !== "APPROVAL_REQUIRED" || !interactive) return denied(decision, binding);
   const requestedBinding = approvalBinding(binding, decision.evaluation);
-  const handle = interactive.approval.request({
-    owner: interactive.connection,
-    policyGeneration: decision.evaluation.policyGeneration,
-    binding: requestedBinding,
-    presentation: interactive.presentation,
-  });
+  const handle = requestApproval({ interactive, binding, decision, requestedBinding });
   // A durable waiting Effect represents a real operator prompt. Session/always authority is already resolved and has
   // no canonical Approval ID, so it must proceed directly to target intent instead of creating an untraceable wait.
   let waiting: ReturnType<NonNullable<EffectLifecycleService["prepareWaiting"]>> | undefined;
@@ -134,6 +133,7 @@ async function executeGoverned(args: ExecuteGovernedArgs) {
       return { ok: false, code: "APPROVAL_REQUIRED", message: "approval was not granted" };
     }
     const current = service.authorize(binding);
+    recordGovernance(context, current, options);
     if (current.allowed) return executeWithEffect({ execute, context, input, options, waiting });
     const currentBinding = approvalBinding(binding, current.evaluation);
     if (current.code === "APPROVAL_REQUIRED" && interactive.approval.isCurrentAuthority({
@@ -149,6 +149,23 @@ async function executeGoverned(args: ExecuteGovernedArgs) {
   } finally {
     interactive.signal?.removeEventListener("abort", cancel);
   }
+}
+
+function requestApproval(args: {
+  interactive: InteractiveGovernanceContext;
+  binding: GovernedToolBinding;
+  decision: Exclude<ReturnType<GovernancePolicyService["authorize"]>, { allowed: true }>;
+  requestedBinding: ReturnType<typeof approvalBinding>;
+}) {
+  return args.interactive.approval.request({
+    owner: args.interactive.connection,
+    policyGeneration: args.decision.evaluation.policyGeneration,
+    binding: args.requestedBinding,
+    presentation: args.interactive.presentation,
+    observation: args.interactive.runId && args.interactive.attemptId
+      ? { runId: args.interactive.runId, attemptId: args.interactive.attemptId, capabilityId: args.binding.identity.capabilityId }
+      : undefined,
+  });
 }
 
 async function executeWithEffect(args: ExecuteGovernedArgs & { waiting?: ReturnType<NonNullable<EffectLifecycleService["prepareWaiting"]>> }) {
@@ -174,6 +191,8 @@ async function executeWithEffect(args: ExecuteGovernedArgs & { waiting?: ReturnT
     const effectId = randomUUID();
     const effect = committed?.effect ?? (effects && runId && attemptId ? effects.prepare({ ...effectIntent(context, runId, attemptId, effectId, input), effectId }) : undefined);
     if (waiting && (committed?.stale || !effect)) return { ok: false, code: "STALE_EFFECT", message: "tool authorization became stale" };
+    const toolCallId = toolCallIdOf(options);
+    if (effect && toolCallId) (context.effect?.toolObserver ?? interactive?.toolObserver)?.bindEffect({ toolCallId, effectId: effect.effectId });
     context.binding.effect?.onIntent?.(effect!, input);
     const executionOptions = effect ? withEffectContext(options, effect) : options;
     const raw = await Promise.resolve(execute(input, executionOptions as Parameters<NonNullable<Tool["execute"]>>[1])).catch((error: unknown) => {
@@ -232,6 +251,38 @@ function toolFailure(result: unknown) {
       : failure.code === "MEMORY_OUTCOME_UNKNOWN" ? "outcome_unknown" as const : "failed" as const;
   const errorCode = typeof failure.code === "string" ? failure.code.toLowerCase().slice(0, 100) : "tool_failed";
   return { outcome, errorCode };
+}
+
+function recordGovernance(
+  context: GovernedToolContext,
+  decision: ReturnType<GovernancePolicyService["authorize"]>,
+  options: unknown,
+): void {
+  const effects = context.effect?.effects ?? context.interactive?.effects;
+  const runId = context.effect?.runId ?? context.interactive?.runId;
+  const attemptId = context.effect?.attemptId ?? context.interactive?.attemptId;
+  if (!effects?.record || !runId || !attemptId) return;
+  const posture = decision.evaluation.posture;
+  try {
+    effects.record({
+      runId, attemptId, schemaVersion: "run-event.v1", category: "governance",
+      kind: "governance.evaluated", occurredAt: new Date().toISOString(), source: "core.governance-policy",
+      payload: {
+        kind: "governance.evaluated",
+        state: posture === "auto" ? "allowed" : posture === "ask" ? "approval_required" : "denied",
+        capabilityId: context.binding.identity.capabilityId,
+        ...(toolCallIdOf(options) ? { toolCallId: toolCallIdOf(options) } : {}),
+        decision: posture === "auto" ? "allow" : posture,
+        ...(!decision.allowed ? { reasonCode: decision.code.toLowerCase() } : {}),
+      },
+    });
+  } catch { /* governance truth remains authoritative when observer recording fails */ }
+}
+
+function toolCallIdOf(options: unknown): string | undefined {
+  if (typeof options !== "object" || options === null) return undefined;
+  const value = (options as { toolCallId?: unknown }).toolCallId;
+  return typeof value === "string" && value.length > 0 ? value.slice(0, 200) : undefined;
 }
 
 function denied(

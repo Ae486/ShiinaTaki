@@ -8,10 +8,75 @@ import { createObservabilityQueryService } from "./observability-query-service.t
 const dbs: Database[] = []; afterEach(() => { for (const db of dbs.splice(0)) db.close(); });
 function fixture() { const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); dbs.push(db); const events = createRunEventRepo(db); const runs = createRunRepo(db, events); const request = { triggerRequestId: "trigger", idempotencyKey: "idem", characterId: "taki", initiator: "scheduled" as const, provenance: { provider: "scheduled-task", taskId: "task" }, deliveryClass: "class_b" as const, contextMode: "autonomous" as const }; const capabilities = { providerId: "local", contractVersion: 1 as const, retain: true, recall: true, reflect: true, edit: true, invalidate: true, restore: true, conditionalMutation: true, idempotentWrites: true, sparseRetrieval: true, vectorRetrieval: "unavailable" as const, derivedMemoryRead: true }; const snapshot = { schemaVersion: "run-snapshot.v1", characterId: "taki", initiator: request.initiator, provenance: request.provenance, deliveryClass: request.deliveryClass, contextMode: request.contextMode, modelProvider: "provider", modelId: "model", primaryHostId: "core", hosts: [], extensions: [], extensionSnapshotDigest: "a".repeat(64), governance: { policyGeneration: 1, registryRevision: 1, approvalGeneration: 1 }, memory: { providerId: "local", contractVersion: 1, capabilities, capabilityDigest: "b".repeat(64) }, contextDecision: { sourceCategories: [], tokenAccounting: "unknown" as const }, replayDecision: { status: "not_captured" as const }, budget: {}, implementation: { runtimeVersion: "test", schemaVersion: "v1" }, sourceRefs: [] }; const admitted = runs.admit({ runId: "run", request, snapshot, provider: "provider", modelId: "model", now: "2026-08-27T00:00:00.000Z" }); runs.start(admitted.run.runId, admitted.attempt.attemptId); runs.settle({ runId: admitted.run.runId, attemptId: admitted.attempt.attemptId, outcome: "completed", retryability: "not_retryable", summary: "Delivered safely" }); return { db, events }; }
 
+function appendDetailedEvents(f: ReturnType<typeof fixture>): void {
+  const attemptId = String(f.db.prepare("SELECT attempt_id FROM run_attempts WHERE run_id='run'").get()?.attempt_id);
+  const base = { runId: "run", attemptId, schemaVersion: "run-event.v1" as const, occurredAt: "2026-08-27T00:00:01.000Z" };
+  f.events.appendMany([
+    { ...base, category: "model", kind: "model.request.started", source: "core.model-observer", payload: { kind: "model.request.started", state: "running", effectId: "model-effect", callId: "model-call", provider: "provider-alt", modelId: "model-alt", startedAt: base.occurredAt } },
+    { ...base, category: "model", kind: "model.response.settled", source: "core.model-observer", payload: { kind: "model.response.settled", state: "failed", effectId: "model-effect", callId: "model-call", provider: "provider-alt", modelId: "model-alt", outcome: "failed", finishReason: "error", durationMs: 20, timeToFirstOutputMs: 5, errorCode: "provider_finish_error" } },
+    { ...base, category: "tool", kind: "tool.call.started", source: "core.tool-observer", payload: { kind: "tool.call.started", state: "running", effectId: "tool-effect-1", toolName: "echo", toolCallId: "tool-call-1", validationState: "accepted" } },
+    { ...base, category: "tool", kind: "tool.result.settled", source: "core.tool-observer", payload: { kind: "tool.result.settled", state: "completed", effectId: "tool-effect-1", toolName: "echo", toolCallId: "tool-call-1", outcome: "completed", durationMs: 10 } },
+    { ...base, category: "tool", kind: "tool.call.started", source: "core.tool-observer", payload: { kind: "tool.call.started", state: "running", effectId: "tool-effect-2", toolName: "broken", toolCallId: "tool-call-2", validationState: "accepted" } },
+    { ...base, category: "tool", kind: "tool.result.settled", source: "core.tool-observer", payload: { kind: "tool.result.settled", state: "failed", effectId: "tool-effect-2", toolName: "broken", toolCallId: "tool-call-2", outcome: "failed", durationMs: 11, errorClass: "execution", errorCode: "tool_failed" } },
+    { ...base, category: "usage", kind: "usage.settled", source: "core.effect-lifecycle", payload: { kind: "usage.settled", state: "settled", effectId: "model-effect", usageId: "usage", quality: "reported", inputTokens: 13, inputTokenDetails: { noCacheTokens: 8, cacheReadTokens: 5 }, outputTokens: 7, outputTokenDetails: { textTokens: 4, reasoningTokens: 3 }, totalTokens: 20 } },
+    { ...base, category: "recovery", kind: "run.retry", source: "core.run-repo", payload: { kind: "run.retry", state: "retrying", attemptOrdinal: 2, retryOrdinal: 1, reasonCode: "context_overflow" } },
+  ]);
+}
+
 describe("ObservabilityQueryService", () => {
-  it("returns semantic summaries and deterministic trajectory without opaque ids in primary labels", () => { const f = fixture(); const service = createObservabilityQueryService({ ...f, mode: () => "FEEDBACK_ONLY" }); const page = service.list({ characterId: "taki", limit: 25 }); expect(page.runs[0]).toMatchObject({ initiatorLabel: "Scheduled Task", deliveryLabel: "Class B delivery", summary: "Delivered safely" }); expect(page.runs[0]?.title).not.toContain("run"); const first = service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 0, limit: 100 }); const second = service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 0, limit: 100 }); expect(first.rows).toEqual(second.rows); });
-  it("fails closed across Character boundaries and hides optional detail outside FULL_LOCAL", () => { const f = fixture(); const service = createObservabilityQueryService({ ...f, mode: () => "FEEDBACK_ONLY" }); expect(() => service.trajectory({ characterId: "other", runKey: "run", afterSeq: 0, limit: 10 })).toThrow(/FORBIDDEN/); const row = service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 0, limit: 10 }).rows[0]!; expect(service.inspect({ characterId: "taki", runKey: "run", rowKey: row.rowKey }).detail).toEqual([]); });
+  it("returns semantic summaries and deterministic trajectory without opaque ids in primary labels", () => { const f = fixture(); const service = createObservabilityQueryService({ ...f, mode: () => "FEEDBACK_ONLY" }); const page = service.list({ characterId: "taki", limit: 25 }); expect(page.runs[0]).toMatchObject({ initiatorLabel: "定时任务", deliveryLabel: "B 类交付", summary: "Delivered safely" }); expect(page.runs[0]?.title).not.toContain("run"); const first = service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 0, limit: 100 }); const second = service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 0, limit: 100 }); expect(first.rows).toEqual(second.rows); });
+  it("fails closed across Character boundaries and hides technical detail outside FULL_LOCAL", () => { const f = fixture(); const service = createObservabilityQueryService({ ...f, mode: () => "FEEDBACK_ONLY" }); expect(() => service.trajectory({ characterId: "other", runKey: "run", afterSeq: 0, limit: 10 })).toThrow(/FORBIDDEN/); const row = service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 0, limit: 10 }).rows[0]!; const inspector = service.inspect({ characterId: "taki", runKey: "run", rowKey: row.rowKey }); expect(inspector.detail).toEqual([{ label: "状态", value: "排队中" }]); expect(inspector.technical).toEqual([]); });
   it("returns no monitor list while disabled without altering durable events", () => { const f = fixture(); const before = f.events.list("run"); const service = createObservabilityQueryService({ ...f }); expect(service.list({ characterId: "taki", limit: 25 }).runs).toEqual([]); expect(f.events.list("run")).toEqual(before); });
+  it("reports unavailable cache information instead of a synthetic miss or zero", () => {
+    const f = fixture();
+    const attemptId = String(f.db.prepare("SELECT attempt_id FROM run_attempts WHERE run_id='run'").get()?.attempt_id);
+    const usage = f.events.append({
+      runId: "run", attemptId, schemaVersion: "run-event.v1", category: "usage", kind: "usage.settled",
+      occurredAt: "2026-08-27T00:00:01.000Z", source: "core.effect-lifecycle",
+      payload: { kind: "usage.settled", state: "settled", effectId: "effect", usageId: "usage", quality: "unknown" },
+    });
+    const inspector = createObservabilityQueryService({ ...f, mode: () => "FEEDBACK_ONLY" })
+      .inspect({ characterId: "taki", runKey: "run", rowKey: usage.eventId });
+    expect(inspector.detail).toContainEqual({ label: "缓存信息", value: "缓存信息未提供" });
+    expect(inspector.detail).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({ label: expect.stringMatching(/命中|未命中/u) }),
+    ]));
+    expect(inspector.technical).toEqual([]);
+  });
+  it("projects detailed usage, real model/tool filters, failures, retry, and FULL_LOCAL technical disclosure", () => {
+    const f = fixture(); appendDetailedEvents(f);
+    const service = createObservabilityQueryService({ ...f, mode: () => "FULL_LOCAL" });
+    const summary = service.list({ characterId: "taki", limit: 25 }).runs[0]!;
+    expect(summary).toMatchObject({
+      modelRequestCount: 1, toolCallCount: 2, toolResultCount: 2, toolSuccessCount: 1,
+      toolFailureCount: 1, failureCount: 2, retryCount: 1,
+      usage: {
+        inputTokens: 13, inputTokenDetails: { noCacheTokens: 8, cacheReadTokens: 5 },
+        outputTokens: 7, outputTokenDetails: { textTokens: 4, reasoningTokens: 3 }, totalTokens: 20,
+        quality: "reported",
+      },
+    });
+    for (const filter of [
+      { provider: "provider-alt" }, { modelId: "model-alt" }, { toolName: "broken" },
+      { errorCode: "tool_failed" }, { hasRetry: true }, { hasFailure: true }, { categories: ["tool"] as Array<"tool"> },
+      { text: "PROVIDER_FINISH_ERROR" },
+    ]) expect(service.list({ characterId: "taki", limit: 25, ...filter }).runs.map((run) => run.key)).toEqual(["run"]);
+    const first = service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 0, limit: 100 });
+    const second = service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 0, limit: 100 });
+    expect(second.rows).toEqual(first.rows);
+    expect(first.rows).toEqual(expect.arrayContaining([
+      expect.objectContaining({ kind: "model", label: "模型响应结束", categoryLabel: "模型请求", outcome: "失败" }),
+      expect.objectContaining({ kind: "tool", toolName: "broken", errorClass: "执行错误" }),
+      expect.objectContaining({ kind: "usage", quality: "上游报告", totalTokens: 20 }),
+    ]));
+    const usageRow = first.rows.find((row) => row.kind === "usage")!;
+    const inspector = service.inspect({ characterId: "taki", runKey: "run", rowKey: usageRow.rowKey });
+    expect(inspector.technicalCollapsed).toBe(true);
+    expect(inspector.technical).toEqual(expect.arrayContaining([expect.objectContaining({ label: "事件 ID" })]));
+    expect(inspector.detail).toEqual(expect.arrayContaining([
+      { label: "缓存读取", value: "5" }, { label: "推理 Token", value: "3" }, { label: "总 Token", value: "20" },
+    ]));
+  });
   it("rejects stale list and trajectory cursors instead of silently returning a misleading empty page", () => { const f = fixture(); const service = createObservabilityQueryService({ ...f, mode: () => "FEEDBACK_ONLY" }); expect(() => service.list({ characterId: "taki", cursor: { queuedAt: "2026-08-27T00:00:01.000Z", key: "run" }, limit: 25 })).toThrow(/CURSOR_STALE/); expect(() => service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 99, limit: 10 })).toThrow(/CURSOR_STALE/); });
   it("returns a continuation cursor when a sparse filter reaches the bounded scan limit", () => {
     const f = fixture();

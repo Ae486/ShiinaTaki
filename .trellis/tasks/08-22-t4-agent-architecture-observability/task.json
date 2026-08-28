@@ -24,7 +24,8 @@
     "08-24-slice-3-effect-lifecycle-settlement",
     "08-25-recovery-admission-hardening",
     "08-25-scheduled-task-provider",
-    "08-27-observability-projection-ui"
+    "08-27-observability-projection-ui",
+    "08-28-dsh-observability-expansion"
   ],
   "parent": null,
   "relatedFiles": [],

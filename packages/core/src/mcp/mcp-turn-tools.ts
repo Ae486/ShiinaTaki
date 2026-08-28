@@ -60,6 +60,7 @@ function lateBoundInteractive(
     get runId() { return interactive.runId; },
     get attemptId() { return interactive.attemptId; },
     get effects() { return interactive.effects; },
+    get toolObserver() { return interactive.toolObserver; },
   };
 }
 
