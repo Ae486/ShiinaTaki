@@ -12,6 +12,7 @@ import { createAutoMemory, type AutoMemoryCompact, type AutoMemoryLogger, type A
 import { createEpisodicWriter } from "./episodic-writer.ts";
 import type { EpisodicWriter } from "./episodic-writer.ts";
 import type { FlushWriter } from "./flush-writer.ts";
+import type { UtilitySlot } from "./utility-slot.ts";
 
 const fixtures: CompanionFixture[] = [];
 function fresh(): CompanionFixture {
@@ -108,6 +109,7 @@ function wire(
     tidy?: AutoMemoryTidy;
     compact?: AutoMemoryCompact;
     windowStart?: (characterId: string) => number;
+    utility?: UtilitySlot;
   },
 ) {
   const timeline = createTimelineRepo(f.db);
@@ -393,6 +395,52 @@ describe("auto-memory mutex (T8)", () => {
     await auto.onTurnCompleted("taki");
     expect(ep.calls).toHaveLength(2);
     expect(ep.calls[1]?.segment.map((e) => e.seq)).toEqual(Array.from({ length: 20 }, (_, i) => i + 21));
+  });
+});
+
+describe("auto-memory Utility Slot composition (Slice 2)", () => {
+  it("routes Legacy episodic work through the shared process-wide queue across Characters", async () => {
+    const f = fresh();
+    const ep = spyEpisodic();
+    let chain: Promise<unknown> = Promise.resolve();
+    let active = 0;
+    let maxActive = 0;
+    const labels: string[] = [];
+    const utility: UtilitySlot = {
+      model: generatingModel("unused"),
+      run: (label, task) => {
+        const next = chain.then(async () => {
+          labels.push(label);
+          active += 1;
+          maxActive = Math.max(maxActive, active);
+          try {
+            await new Promise((resolve) => setTimeout(resolve, 1));
+            return await task();
+          } finally {
+            active -= 1;
+          }
+        });
+        chain = next.catch(() => undefined);
+        return next;
+      },
+      usage: () => ({ calls: 0, inputTokens: 0, outputTokens: 0, usageUnknown: 0 }),
+    };
+    const { auto } = wire(f, {
+      episodic: ep.writer,
+      flush: spyFlush().writer,
+      logger: captureLogger().logger,
+      utility,
+      windowStart: () => 1,
+    });
+    for (let i = 0; i < 20; i += 1) {
+      f.conversation.appendUser("taki", `taki-${i}`);
+      f.conversation.appendUser("miko", `miko-${i}`);
+    }
+
+    await Promise.all([auto.onTurnCompleted("taki"), auto.onTurnCompleted("miko")]);
+
+    expect(labels).toEqual(["episodic", "episodic"]);
+    expect(maxActive).toBe(1);
   });
 });
 

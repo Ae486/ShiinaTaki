@@ -10,6 +10,7 @@ import type { MemoryEventsRepo } from "../db/memory-events-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import type { EpisodicWriter } from "./episodic-writer.ts";
 import type { FlushWriter } from "./flush-writer.ts";
+import type { UtilitySlot } from "./utility-slot.ts";
 
 // Summarize into episodes once this many new messages have accrued since the last summary (config-later per prd §3).
 const EPISODIC_EVERY_N = 20;
@@ -44,12 +45,19 @@ export interface AutoMemory {
   onTurnCompleted(characterId: string, origin?: TurnOrigin): Promise<void>;
 }
 
+/** Provider-specific memory work that runs before provider-neutral Compaction in the shared Character chain. */
+export interface AutoMemoryMaintenance {
+  run(characterId: string, origin: TurnOrigin): Promise<void>;
+}
+
 export interface AutoMemoryDeps {
   timeline: TimelineRepo;
   autoState: MemoryAutoRepo;
   events: MemoryEventsRepo;
   episodic: EpisodicWriter;
   flush: FlushWriter;
+  /** Optional process-wide queue for provider calls; production injects the shared Utility Slot. */
+  utility?: UtilitySlot;
   logger: AutoMemoryLogger;
   /**
    * The conversation store's window boundary (seq of the oldest replayed entry): the flush treats every row below
@@ -71,6 +79,19 @@ export interface AutoMemoryDeps {
 }
 
 export function createAutoMemory(deps: AutoMemoryDeps): AutoMemory {
+  const maintenance = createAutoMemoryMaintenance(deps);
+  return createMaintenanceAutoMemory({ maintenance: () => maintenance, compact: deps.compact, logger: deps.logger });
+}
+
+export function createAutoMemoryMaintenance(deps: Omit<AutoMemoryDeps, "compact">): AutoMemoryMaintenance {
+  return { run: (characterId, origin) => runMaintenancePass(deps, characterId, origin) };
+}
+
+export function createMaintenanceAutoMemory(input: {
+  maintenance: () => AutoMemoryMaintenance | undefined;
+  compact?: AutoMemoryCompact;
+  logger: AutoMemoryLogger;
+}): AutoMemory {
   // Per-character promise chain: a second trigger waits for the first, so it reads the advanced watermark (no double-fire).
   const chains = new Map<string, Promise<void>>();
 
@@ -78,7 +99,7 @@ export function createAutoMemory(deps: AutoMemoryDeps): AutoMemory {
     const prev = chains.get(characterId) ?? Promise.resolve();
     // Defer to a macrotask so the just-finished chat turn returns to the caller before any auto-write work begins.
     const next = prev.then(() => new Promise<void>((resolve) => {
-      setImmediate(() => void runPass(deps, characterId, origin).then(resolve, resolve));
+      setImmediate(() => void runMaintenanceChain(input, characterId, origin).then(resolve, resolve));
     }));
     chains.set(characterId, next);
     void next.finally(() => {
@@ -90,13 +111,27 @@ export function createAutoMemory(deps: AutoMemoryDeps): AutoMemory {
   return { onTurnCompleted };
 }
 
-// A pass never throws (each sub-path is guarded) so the chain's catch is unreachable and the core never crashes.
-async function runPass(deps: AutoMemoryDeps, characterId: string, origin: TurnOrigin): Promise<void> {
+async function runMaintenanceChain(
+  input: { maintenance: () => AutoMemoryMaintenance | undefined; compact?: AutoMemoryCompact; logger: AutoMemoryLogger },
+  characterId: string,
+  origin: TurnOrigin,
+): Promise<void> {
+  try {
+    await input.maintenance()?.run(characterId, origin);
+  } catch (error) {
+    // The provider pass is detached; keep this outer guard bounded even if a future adapter throws an unsanitized
+    // exception outside its own sub-path.
+    input.logger.warn({ kind: "provider", characterId, code: maintenanceFailureCode(error) }, "memory provider maintenance failed; will retry");
+  }
+  await maybeCompact({ compact: input.compact, logger: input.logger }, characterId);
+}
+
+// A provider pass never throws (each sub-path is guarded) so the outer coordinator remains detached and reusable.
+async function runMaintenancePass(deps: Omit<AutoMemoryDeps, "compact">, characterId: string, origin: TurnOrigin): Promise<void> {
   const latest = deps.timeline.latestSeq(characterId);
   await maybeEpisodic(deps, { characterId, origin, latest }); // episodic before flush (prd §3); both may fire in one pass
   await maybeFlush(deps, { characterId, origin, latest });
   await maybeTidy(deps, characterId);
-  await maybeCompact(deps, characterId);
 }
 
 // Maintenance runs LAST: it judges the store this pass just wrote into. Its own failure is swallowed here for the
@@ -112,7 +147,10 @@ async function maybeTidy(deps: AutoMemoryDeps, characterId: string): Promise<voi
 
 // Compaction runs after even tidy (batch 7): it retires conversation the flush above has finished judging, and its
 // own flush-before-retire step must read the watermark this pass just advanced. Failure = warn + retry next trigger.
-async function maybeCompact(deps: AutoMemoryDeps, characterId: string): Promise<void> {
+async function maybeCompact(
+  deps: { compact?: AutoMemoryCompact; logger: AutoMemoryLogger },
+  characterId: string,
+): Promise<void> {
   if (!deps.compact) return;
   try {
     await deps.compact.maybeRun(characterId);
@@ -135,7 +173,11 @@ async function maybeEpisodic(deps: AutoMemoryDeps, ctx: PassContext): Promise<vo
   const segment = timeline.rangeAscending(characterId, lastEpisodicSeq, latest);
   try {
     // Count only, never entryIds: their slugs are content-derived (memory-content leakage into logs — logging-guidelines).
-    const { entryIds } = await episodic.summarize({ characterId, segment });
+    const result = deps.utility
+      ? await deps.utility.run("episodic", () => episodic.summarize({ characterId, segment }))
+      : await episodic.summarize({ characterId, segment });
+    if (!result) throw new Error("MEMORY_PROVIDER_MAINTENANCE_FAILED");
+    const { entryIds } = result;
     autoState.setEpisodic(characterId, latest); // advance ONLY on success -> failure retries next trigger
     // T5-R15 makes silence the normal outcome, so a silent skip MUST leave a trace — otherwise "nothing was worth
     // writing" and "the writer is broken" look identical (mem0 issue #3009).
@@ -169,4 +211,10 @@ async function maybeFlush(deps: AutoMemoryDeps, ctx: PassContext): Promise<void>
 
 function readable(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function maintenanceFailureCode(error: unknown): "MEMORY_AUTHORITY_FENCED" | "MEMORY_PROVIDER_MAINTENANCE_FAILED" {
+  return error instanceof Error && error.message === "MEMORY_AUTHORITY_FENCED"
+    ? "MEMORY_AUTHORITY_FENCED"
+    : "MEMORY_PROVIDER_MAINTENANCE_FAILED";
 }

@@ -22,6 +22,7 @@ describe("memory runtime selector", () => {
     expect(selected.memory.assemble({ characterId: "taki", currentMessage: "" })).toBe("legacy");
     selected.bindCanonical("epoch");
     expect(selected.memory.assemble({ characterId: "taki", currentMessage: "" })).toBe("canonical");
+    expect(selected.legacy).toBeNull();
   });
   it("fails closed for a missing marker instead of silently selecting legacy", () => { const db = open(); db.exec("DELETE FROM memory_authority_selection"); expect(() => selectMemoryRuntime({ db, createLegacy: () => ({ engine: engine() } as never), createCanonical: engine })).toThrow("MEMORY_INTEGRITY_ERROR"); });
   it("fails closed for Hindsight authority before runtime integration without constructing either Local runtime", () => {

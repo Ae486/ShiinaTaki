@@ -5,6 +5,7 @@ import type { TimelineEntry } from "@taki/shared";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
 import { scriptedGenerateModel } from "../testing/mock-language-model.ts";
 import { createFlushWriter } from "./flush-writer.ts";
+import type { UtilitySlot } from "./utility-slot.ts";
 
 const fixtures: CompanionFixture[] = [];
 function fresh(): CompanionFixture {
@@ -85,5 +86,24 @@ describe("createFlushWriter (T6)", () => {
     expect(writes).toBe(0);
     expect(memoryFiles(f.root)).toEqual([]);
     expect(f.conversation.history("taki")).toEqual([]);
+  });
+
+  it("routes the silent model turn through the shared Utility Slot when provided", async () => {
+    const f = fresh();
+    const model = scriptedGenerateModel([{ kind: "text", deltas: ["DONE"] }]);
+    const labels: string[] = [];
+    const slot: UtilitySlot = {
+      model,
+      run: async (label, task) => {
+        labels.push(label);
+        return task();
+      },
+      usage: () => ({ calls: 0, inputTokens: 0, outputTokens: 0, usageUnknown: 0 }),
+    };
+    const writer = createFlushWriter({ model, createTools: (id) => f.memory.createBackgroundTools(id), slot });
+
+    await writer.run({ characterId: "taki", segment: seg("闲聊") });
+
+    expect(labels).toEqual(["flush"]);
   });
 });

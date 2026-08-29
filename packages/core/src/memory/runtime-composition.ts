@@ -5,31 +5,45 @@
  */
 import type { LanguageModel } from "ai";
 import { join } from "node:path";
+import { createCompactionPass } from "../agents/compaction-pass.ts";
+import { loadUtilityConfig } from "../config/utility-config.ts";
 import type { Database } from "../db/sqlite.ts";
 import type { SummaryRepo } from "../db/summary-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import type { Logger } from "../logging/logger.ts";
 import type { MemoryProviderCapabilities } from "@taki/shared";
-import { authorityAwareAutoMemory, authorityAwareTidy, authorityAwareWrite } from "./authority-aware-legacy-surfaces.ts";
-import { createMemorySubsystem } from "./bootstrap.ts";
+import { authorityAwareTidy, authorityAwareWrite } from "./authority-aware-legacy-surfaces.ts";
+import { createMaintenanceAutoMemory, type AutoMemoryMaintenance } from "./auto-memory.ts";
+import { createMemorySubsystem, type MemorySubsystem } from "./bootstrap.ts";
 import { createCanonicalLocalRuntime } from "./canonical-local-runtime.ts";
+import { canonicalLocalMemoryFlushPort, createMemoryFlushBinding } from "./memory-flush-port.ts";
 import { createMemoryAuthorityFence } from "./legacy-migration/memory-authority-fence.ts";
 import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
 import { selectMemoryRuntime } from "./runtime-selector.ts";
+import { createUtilitySlot, type UtilitySlot } from "./utility-slot.ts";
 
-export function composeMemoryRuntime(input: {
+interface MemoryRuntimeInput {
   db: Database; dataDir: string; promptDir: string; model: LanguageModel; timeline: TimelineRepo;
   windowStart: (characterId: string) => number; summaries: SummaryRepo; estimatedTokens: (characterId: string) => number;
   budget: () => number; compact: { triggerRatio: number; keepMessages: number }; env: Record<string, string | undefined>; logger: Logger;
-}) {
+}
+
+export function composeMemoryRuntime(input: MemoryRuntimeInput) {
   const fence = createMemoryAuthorityFence(); let activated = false;
+  const utility = createUtilitySlot({ mainModel: input.model, config: loadUtilityConfig(input.env), logger: input.logger });
+  let retireLegacyMaintenance = (): void => undefined;
   const selected = selectMemoryRuntime({ db: input.db,
-    createLegacy: () => createMemorySubsystem({ db: input.db, dataDir: input.dataDir, promptDir: input.promptDir, model: input.model, timeline: input.timeline, windowStart: input.windowStart, compaction: { summaries: input.summaries, view: { estimatedTokens: input.estimatedTokens, budget: input.budget }, config: input.compact }, env: input.env, logger: input.logger, authorityFence: fence, isCanonical: () => activated }),
+    createLegacy: () => createMemorySubsystem({ db: input.db, dataDir: input.dataDir, promptDir: input.promptDir, model: input.model, utility, timeline: input.timeline, windowStart: input.windowStart, env: input.env, logger: input.logger, authorityFence: fence, isCanonical: () => activated }),
     createCanonical: (epochId) => createCanonicalLocalRuntime({ db: input.db, epochId, promptDir: input.promptDir }),
+    onCanonicalBound: () => retireLegacyMaintenance(),
   });
   activated = selected.canonical;
   const legacy = selected.legacy; const isCanonical = () => selected.canonical;
-  const bindCanonical = (epochId: string): void => { selected.bindCanonical(epochId); activated = true; };
+  const compaction = createCompactionMaintenance(input, utility, legacy);
+  retireLegacyMaintenance = () => {
+    activated = true;
+    compaction.retireLegacy();
+  };
   return {
     selected, memory: selected.memory, fence,
     snapshot: () => {
@@ -43,13 +57,39 @@ export function composeMemoryRuntime(input: {
         capabilities,
       };
     },
-    autoMemory: legacy?.autoMemory ? authorityAwareAutoMemory(legacy.autoMemory, isCanonical) : undefined,
+    autoMemory: compaction.autoMemory,
     tidy: legacy?.tidy ? authorityAwareTidy(legacy.tidy, isCanonical) : undefined,
     writeMemory: legacy?.writeMemory ? authorityAwareWrite(legacy.writeMemory, isCanonical) : undefined,
     memoryRoot: legacy?.memoryRoot ?? join(input.dataDir, "workspace", "memory"),
     migrationRunner: async () => {
       const { createLegacyMigrationRunner } = await import("./legacy-migration/legacy-migration-runner.ts");
-      return createLegacyMigrationRunner({ db: input.db, destinationRoot: join(input.dataDir, "workspace", "memory-migration"), fence, onActivated: bindCanonical });
+      return createLegacyMigrationRunner({ db: input.db, destinationRoot: join(input.dataDir, "workspace", "memory-migration"), fence, onActivated: selected.bindCanonical });
+    },
+  };
+}
+
+function createCompactionMaintenance(input: MemoryRuntimeInput, utility: UtilitySlot, legacy: MemorySubsystem | null) {
+  let maintenance: AutoMemoryMaintenance | undefined = legacy?.maintenance;
+  const flush = createMemoryFlushBinding(legacy?.memoryFlush ?? canonicalLocalMemoryFlushPort());
+  const compact = createCompactionPass({
+    view: { estimatedTokens: input.estimatedTokens, budget: input.budget },
+    timeline: input.timeline,
+    summaries: input.summaries,
+    flush: flush.port,
+    slot: utility,
+    config: input.compact,
+    logger: input.logger.child({ mod: "compaction" }),
+  });
+  const autoMemory = createMaintenanceAutoMemory({
+    maintenance: () => maintenance,
+    compact,
+    logger: input.logger.child({ mod: "memory-auto" }),
+  });
+  return {
+    autoMemory,
+    retireLegacy: () => {
+      maintenance = undefined;
+      flush.bind(canonicalLocalMemoryFlushPort());
     },
   };
 }

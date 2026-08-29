@@ -14,23 +14,36 @@ export interface SelectedMemoryRuntime {
   readonly canonical: boolean;
   bindCanonical(epochId: string): void;
 }
-export function selectMemoryRuntime(input: { db: Database; createLegacy: () => MemorySubsystem; createCanonical: (epochId: string) => MemoryEngine }): SelectedMemoryRuntime {
+export function selectMemoryRuntime(input: {
+  db: Database;
+  createLegacy: () => MemorySubsystem;
+  createCanonical: (epochId: string) => MemoryEngine;
+  onCanonicalBound?: () => void;
+}): SelectedMemoryRuntime {
   const selection = readMemoryAuthoritySelection(input.db);
   if (selection.mode === "hindsight") {
     throw new Error("MEMORY_INTEGRITY_ERROR: Hindsight authority runtime is not installed");
   }
   let canonical = selection.mode === "canonical-local";
-  const legacy = canonical ? null : input.createLegacy();
-  let current = canonical ? input.createCanonical(selection.epochId as string) : legacy!.engine;
+  let legacy: MemorySubsystem | null = null;
+  let current: MemoryEngine;
+  if (canonical) {
+    current = input.createCanonical(selection.epochId as string);
+  } else {
+    legacy = input.createLegacy();
+    current = legacy.engine;
+  }
   const memory = delegatingEngine(() => current);
   return {
     memory,
-    legacy,
+    get legacy() { return legacy; },
     get canonical() { return canonical; },
     bindCanonical(epochId) {
       if (canonical) return;
       current = input.createCanonical(epochId);
       canonical = true;
+      legacy = null;
+      input.onCanonicalBound?.();
     },
   };
 }

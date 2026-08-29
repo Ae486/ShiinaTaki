@@ -1,5 +1,5 @@
 /**
- * INPUT:  the replay view's size/budget, timeline + summary + auto-state repos, the flush writer, the UtilitySlot,
+ * INPUT:  the replay view's size/budget, timeline + summary repos, the MemoryFlushPort, the UtilitySlot,
  *         the compaction knobs (context-config), a Logger; maybeRun(characterId) per completed turn
  * OUTPUT: createCompactionPass(deps) -> { maybeRun }; buildCompactionPrompt; COMPACTION_SUMMARY_REMINDER
  * POS:    core/agents — T5-R5's background compactor: an EXTERNAL summarizer on the utility slot (never the chat
@@ -7,11 +7,10 @@
  *         full success; the chat turn never waits
  */
 import { generateText } from "ai";
-import type { MemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import type { SummaryRepo } from "../db/summary-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import type { AutoMemoryCompact } from "../memory/auto-memory.ts";
-import type { FlushWriter } from "../memory/flush-writer.ts";
+import type { MemoryFlushOutcome, MemoryFlushPort } from "../memory/memory-flush-port.ts";
 import { renderTranscript } from "../memory/render-transcript.ts";
 import type { UtilitySlot } from "../memory/utility-slot.ts";
 import { MEMORY_VOICE_RULE } from "../memory/write-convention.ts";
@@ -116,9 +115,8 @@ export interface CompactionPassDeps {
   view: CompactionView;
   timeline: TimelineRepo;
   summaries: SummaryRepo;
-  autoState: MemoryAutoRepo;
-  /** The SAME flush writer auto-memory drives — its watermark is what prevents double-writes. */
-  flush: FlushWriter;
+  /** Provider-selected flush contract. Legacy owns the watermark; canonical Local explicitly needs no flush. */
+  flush: MemoryFlushPort;
   slot: UtilitySlot;
   config: { triggerRatio: number; keepMessages: number };
   logger: CompactionLogger;
@@ -129,7 +127,7 @@ export function createCompactionPass(deps: CompactionPassDeps): AutoMemoryCompac
     async maybeRun(characterId) {
       const boundary = retirementBoundary(deps, characterId);
       if (boundary === null) return;
-      if (!(await flushRetiringSpan(deps, characterId, boundary.newThrough))) return;
+      if (!(await flushRetiringSpan(deps, characterId, boundary))) return;
       await summarize(deps, characterId, boundary);
     },
   };
@@ -178,31 +176,40 @@ function retirementBoundary(deps: CompactionPassDeps, characterId: string): Boun
   return { newThrough, oldThrough, before };
 }
 
-// §3.2 step 2 (flush-first): important content enters long-term memory BEFORE it leaves the view. The flush
-// watermark is the double-write guard — rows at or below lastFlushSeq were already judged by an earlier flush.
-async function flushRetiringSpan(deps: CompactionPassDeps, characterId: string, newThrough: number): Promise<boolean> {
-  const { lastFlushSeq } = deps.autoState.get(characterId);
-  if (newThrough > lastFlushSeq) {
-    const leaving = deps.timeline.rangeAscending(characterId, lastFlushSeq, newThrough);
-    try {
-      await deps.flush.run({ characterId, segment: leaving });
-      deps.autoState.setFlush(characterId, newThrough);
-    } catch (error) {
-      deps.logger.warn(
-        { characterId, from: lastFlushSeq, through: newThrough, err: readable(error) },
-        "pre-retire flush failed; compaction deferred",
-      );
-      return false;
-    }
-  }
-  // Monotonicity (design §2.3): through_seq must never pass the flush watermark — windowStart's "retired rows have
-  // left the flush window too" semantics depend on it. Guaranteed by the block above; asserted so a future
-  // regression warns instead of silently uncoupling the boundaries.
-  if (newThrough > deps.autoState.get(characterId).lastFlushSeq) {
-    deps.logger.warn({ characterId, through: newThrough }, "flush watermark behind retirement boundary; compaction deferred");
+// §3.2 step 2 (flush-first): the active provider must explicitly approve retirement before summary coverage advances.
+async function flushRetiringSpan(deps: CompactionPassDeps, characterId: string, boundary: Boundary): Promise<boolean> {
+  let outcome: MemoryFlushOutcome;
+  try {
+    outcome = await deps.flush.prepareRetirement({
+      characterId,
+      fromSeq: boundary.oldThrough + 1,
+      throughSeq: boundary.newThrough,
+      operationId: flushOperationId(characterId, boundary),
+    });
+  } catch {
+    // A provider adapter that violates the outcome contract is still a retryable boundary failure. Do not let a raw
+    // provider exception reach logs or advance summary coverage.
+    warnFlushDeferred(deps, {
+      characterId,
+      throughSeq: boundary.newThrough,
+      outcome: { status: "retryable_failure", code: "MEMORY_FLUSH_FAILED" },
+    });
     return false;
   }
-  return true;
+  if (outcome.status === "not_required") return true;
+  if (outcome.status === "success") {
+    // A provider may report a committed watermark beyond the requested range when an earlier flush covered it, but a
+    // lower/non-finite value is not safe evidence for retiring this boundary. Keep the prior summary authoritative.
+    if (Number.isInteger(outcome.throughSeq) && outcome.throughSeq >= boundary.newThrough) return true;
+    warnFlushDeferred(deps, {
+      characterId,
+      throughSeq: boundary.newThrough,
+      outcome: { status: "retryable_failure", code: "MEMORY_FLUSH_INCOMPLETE" },
+    });
+    return false;
+  }
+  warnFlushDeferred(deps, { characterId, throughSeq: boundary.newThrough, outcome });
+  return false;
 }
 
 // ONE generateText on the utility slot (falls back to the main model — R11); the chat agent is never asked to
@@ -228,6 +235,21 @@ async function summarize(deps: CompactionPassDeps, characterId: string, boundary
   );
 }
 
-function readable(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+function flushOperationId(characterId: string, boundary: Boundary): string {
+  return `compact:${characterId}:${boundary.oldThrough + 1}:${boundary.newThrough}`;
+}
+
+function warnFlushDeferred(
+  deps: CompactionPassDeps,
+  input: {
+    characterId: string;
+    throughSeq: number;
+    outcome: Extract<MemoryFlushOutcome, { status: "retryable_failure" | "permanent_unavailable" }>;
+  },
+): void {
+  const { characterId, throughSeq, outcome } = input;
+  deps.logger.warn(
+    { characterId, throughSeq, status: outcome.status, code: outcome.code },
+    "pre-retire memory flush unavailable; compaction deferred",
+  );
 }

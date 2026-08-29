@@ -1,13 +1,14 @@
 /**
  * INPUT:  a timeline segment (about to leave the replay window) + characterId, a model, and characterId-bound tools
  *         (the BACKGROUND set — its memory_write cannot reach the always-visible rung, Q11-1)
- * OUTPUT: createFlushWriter({model, createTools}) -> { run } — one SILENT tool-enabled turn; prose discarded, only
- *         the successful memory_write count returned
+ * OUTPUT: createFlushWriter({model, createTools, slot?}) -> { run } — one SILENT tool-enabled turn; prose discarded,
+ *         only the successful memory_write count returned; an injected slot serializes the model call process-wide
  * POS:    core/memory — auto-write path 3 (pre-compaction flush, OpenClaw pattern); no timeline rows, no WS, no fs
  */
 import { ToolLoopAgent, isStepCount, type LanguageModel, type ToolSet } from "ai";
 import type { TimelineEntry } from "@taki/shared";
 import { renderTranscript } from "./render-transcript.ts";
+import type { UtilitySlot } from "./utility-slot.ts";
 import { MEMORY_VOICE_RULE, WRITE_GATE_RULE } from "./write-convention.ts";
 
 export interface FlushWriter {
@@ -38,24 +39,31 @@ const WRITE_TOOL_NAME = "memory_write";
 export function createFlushWriter(deps: {
   model: LanguageModel;
   createTools: (characterId: string) => ToolSet;
+  /** Optional process-wide queue; production injects the shared Utility Slot used by all background model calls. */
+  slot?: UtilitySlot;
 }): FlushWriter {
   return {
     async run({ characterId, segment }) {
-      const agent = new ToolLoopAgent({
-        model: deps.model,
-        instructions: FLUSH_PROMPT,
-        tools: deps.createTools(characterId),
-        stopWhen: isStepCount(MAX_STEPS),
-      });
-      // generate() runs the tool loop to completion; the only thing read off the result is the SUCCESSFUL-write count
-      // (the prose reply stays discarded — this is a silent turn). Counting `toolResults` rather than `toolCalls` is
-      // deliberate: a schema-rejected call (a layer the background tool forbids) lands in `toolCalls` as an invalid
-      // DynamicToolCall and produces no result, so counting calls would read a rejection as a write.
-      const result = await agent.generate({ prompt: renderTranscript(segment) });
-      const writes = result.toolResults.filter(
-        (entry) => entry.toolName === WRITE_TOOL_NAME && isOkResult(entry.output),
-      );
-      return { writes: writes.length };
+      const execute = async () => {
+        const agent = new ToolLoopAgent({
+          model: deps.model,
+          instructions: FLUSH_PROMPT,
+          tools: deps.createTools(characterId),
+          stopWhen: isStepCount(MAX_STEPS),
+        });
+        // generate() runs the tool loop to completion; the only thing read off the result is the SUCCESSFUL-write count
+        // (the prose reply stays discarded — this is a silent turn). Counting `toolResults` rather than `toolCalls` is
+        // deliberate: a schema-rejected call (a layer the background tool forbids) lands in `toolCalls` as an invalid
+        // DynamicToolCall and produces no result, so counting calls would read a rejection as a write.
+        const result = await agent.generate({ prompt: renderTranscript(segment) });
+        const writes = result.toolResults.filter(
+          (entry) => entry.toolName === WRITE_TOOL_NAME && isOkResult(entry.output),
+        );
+        return { writes: writes.length };
+      };
+      const result = deps.slot ? await deps.slot.run("flush", execute) : await execute();
+      if (!result) throw new Error("UTILITY_TASK_FAILED");
+      return result;
     },
   };
 }

@@ -8,6 +8,7 @@ import { createSummaryRepo } from "../db/summary-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
 import { estimateMessageTokens } from "../memory/token-estimator.ts";
 import type { FlushWriter } from "../memory/flush-writer.ts";
+import { createLegacyMemoryFlushPort, type MemoryFlushPort } from "../memory/memory-flush-port.ts";
 import type { UtilitySlot } from "../memory/utility-slot.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { failingGenerateModel, generatingModel } from "../testing/mock-language-model.ts";
@@ -84,7 +85,7 @@ function spyFlush(): { calls: SegmentCall[]; failNext: { value: boolean }; write
   };
 }
 
-function fixture(opts: { estimated?: number; wall?: number; keep?: number; model?: LanguageModel } = {}) {
+function fixture(opts: { estimated?: number; wall?: number; keep?: number; model?: LanguageModel; flushPort?: MemoryFlushPort } = {}) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
   const timeline = createTimelineRepo(db);
@@ -98,8 +99,7 @@ function fixture(opts: { estimated?: number; wall?: number; keep?: number; model
     view: { estimatedTokens: () => estimated.value, budget: () => opts.wall ?? 100 },
     timeline,
     summaries,
-    autoState,
-    flush: flush.writer,
+    flush: opts.flushPort ?? createLegacyMemoryFlushPort({ timeline, autoState, writer: flush.writer }),
     slot,
     config: { triggerRatio: 0.8, keepMessages: opts.keep ?? 3 },
     logger: logger.child({ mod: "compaction" }),
@@ -176,11 +176,73 @@ describe("compaction sequencing (row 8 — flush first, success-only advance, re
     expect(f.ran).toHaveLength(0);
     expect(f.summaries.get("taki")).toBeNull();
     expect(f.autoState.get("taki").lastFlushSeq).toBe(0);
-    expect(f.records.some((r) => r.level === "warn" && r.msg === "pre-retire flush failed; compaction deferred")).toBe(true);
+    expect(f.records.some((r) => r.level === "warn" && r.msg === "pre-retire memory flush unavailable; compaction deferred")).toBe(true);
 
     f.flush.failNext.value = false;
     await f.pass.maybeRun("taki");
     expect(f.summaries.get("taki")?.throughSeq).toBe(6);
+  });
+
+  it("advances after an explicit not-required outcome", async () => {
+    const f = fixture({
+      flushPort: { prepareRetirement: async () => ({ status: "not_required", reason: "canonical_local_records_are_authoritative" }) },
+    });
+    seed(f.timeline, 10);
+
+    await f.pass.maybeRun("taki");
+
+    expect(f.summaries.get("taki")?.throughSeq).toBe(6);
+    expect(f.flush.calls).toHaveLength(0);
+  });
+
+  it("does not advance when a provider reports a successful flush below the retiring boundary", async () => {
+    const f = fixture({
+      flushPort: { prepareRetirement: async () => ({ status: "success", writes: 1, throughSeq: 2 }) },
+    });
+    seed(f.timeline, 10);
+
+    await f.pass.maybeRun("taki");
+
+    expect(f.summaries.get("taki")).toBeNull();
+    expect(f.ran).toHaveLength(0);
+    expect(f.records).toContainEqual(expect.objectContaining({
+      level: "warn",
+      obj: expect.objectContaining({ status: "retryable_failure", code: "MEMORY_FLUSH_INCOMPLETE" }),
+    }));
+  });
+
+  it("contains a throwing flush adapter as a bounded retryable failure", async () => {
+    const f = fixture({
+      flushPort: { prepareRetirement: async () => { throw new Error("provider secret must stay out of logs"); } },
+    });
+    seed(f.timeline, 10);
+
+    await f.pass.maybeRun("taki");
+
+    expect(f.summaries.get("taki")).toBeNull();
+    expect(f.ran).toHaveLength(0);
+    expect(f.records).toContainEqual(expect.objectContaining({
+      level: "warn",
+      obj: expect.objectContaining({ status: "retryable_failure", code: "MEMORY_FLUSH_FAILED" }),
+    }));
+    expect(JSON.stringify(f.records)).not.toContain("provider secret");
+  });
+
+  it("keeps the old summary authoritative when the provider is permanently unavailable", async () => {
+    const f = fixture({
+      flushPort: { prepareRetirement: async () => ({ status: "permanent_unavailable", code: "HINDSIGHT_RUNTIME_UNAVAILABLE" }) },
+    });
+    seed(f.timeline, 10);
+    f.summaries.upsert({ characterId: "taki", throughSeq: 1, text: "authoritative old summary" });
+
+    await f.pass.maybeRun("taki");
+
+    expect(f.summaries.get("taki")).toEqual({ throughSeq: 1, text: "authoritative old summary" });
+    expect(f.ran).toHaveLength(0);
+    expect(f.records).toContainEqual(expect.objectContaining({
+      level: "warn",
+      obj: expect.objectContaining({ status: "permanent_unavailable", code: "HINDSIGHT_RUNTIME_UNAVAILABLE" }),
+    }));
   });
 
   it("a generate failure warns, leaves through_seq unchanged, and the next trigger retries WITHOUT re-flushing", async () => {
@@ -370,12 +432,12 @@ describe("compaction on the real utility slot (row 11 — slot model used; main-
     dbs.push(db);
     const timeline = createTimelineRepo(db);
     const summaries = createSummaryRepo(db);
+    const autoState = createMemoryAutoRepo(db);
     const pass = createCompactionPass({
       view: { estimatedTokens: () => 90, budget: () => 100 },
       timeline,
       summaries,
-      autoState: createMemoryAutoRepo(db),
-      flush: spyFlush().writer,
+      flush: createLegacyMemoryFlushPort({ timeline, autoState, writer: spyFlush().writer }),
       slot,
       config: { triggerRatio: 0.8, keepMessages: 3 },
       logger: createCaptureLogger().logger.child({ mod: "compaction" }),

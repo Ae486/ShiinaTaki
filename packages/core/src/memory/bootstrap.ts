@@ -1,26 +1,25 @@
 /**
  * INPUT:  the open Database, the data/prompt dirs, the MAIN model, the timeline repo, the window boundary, the
- *         optional compaction wiring (summary repo + view numbers + knobs), process env, a Logger
- * OUTPUT: createMemorySubsystem(deps) -> { engine, autoMemory, utility, tidy, memoryRoot, writeMemory }
+ *         optional shared Utility Slot, process env, a Logger
+ * OUTPUT: createMemorySubsystem(deps) -> Legacy engine, provider maintenance, flush adapter, tidy/write surfaces
  * POS:    core/memory — the subsystem's BOOT wiring, lifted out of the composition root: memory config, persona
  *         cards, block store, engine + startup reconcile, the utility slot every background pass runs on, the
- *         auto-write orchestrator, the tidy pass, the compactor and the retention sweeper. main.ts keeps one call
+ *         provider maintenance, the tidy pass, flush adapter and retention sweeper. Core owns Compaction composition
  */
 import { join } from "node:path";
 import type { LanguageModel } from "ai";
-import { createCompactionPass, type CompactionView } from "../agents/compaction-pass.ts";
 import { loadMemoryConfig } from "../config/memory-config.ts";
 import { loadUtilityConfig } from "../config/utility-config.ts";
 import { createMemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import { createMemoryEventsRepo } from "../db/memory-events-repo.ts";
 import type { Database } from "../db/sqlite.ts";
-import type { SummaryRepo } from "../db/summary-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import type { Logger } from "../logging/logger.ts";
-import { createAutoMemory, type AutoMemory } from "./auto-memory.ts";
+import { createAutoMemoryMaintenance, type AutoMemoryMaintenance } from "./auto-memory.ts";
 import { createBlockStore } from "./block-store.ts";
 import { createEpisodicWriter, type MemoryWriteOp } from "./episodic-writer.ts";
 import { createFlushWriter } from "./flush-writer.ts";
+import { createLegacyMemoryFlushPort, type MemoryFlushPort } from "./memory-flush-port.ts";
 import { createMemoryEngine, type MemoryEngine } from "./memory-engine.ts";
 import { createPersonaProvider } from "./persona-provider.ts";
 import { startRetentionSweeper } from "./retention-sweeper.ts";
@@ -29,24 +28,17 @@ import { createUtilitySlot, type UtilitySlot } from "./utility-slot.ts";
 import { fenceMemoryEngine } from "./legacy-migration/fenced-memory-engine.ts";
 import type { MemoryAuthorityFence } from "./legacy-migration/memory-authority-fence.ts";
 
-/** Batch-7 compaction wiring: the summary record + the store's view numbers + the context-config knobs. */
-export interface CompactionWiring {
-  summaries: SummaryRepo;
-  view: CompactionView;
-  config: { triggerRatio: number; keepMessages: number };
-}
-
 export interface MemorySubsystemDeps {
   db: Database;
   dataDir: string;
   promptDir: string;
   /** The MAIN chat model — the utility slot's fallback when no separate background slot is configured. */
   model: LanguageModel;
+  /** Core composition injects the one process-wide Utility Slot; tests may omit it and use the legacy factory. */
+  utility?: UtilitySlot;
   timeline: TimelineRepo;
   /** The conversation store's replay boundary — the flush computes "leaving the window" from it (batch 6). */
   windowStart: (characterId: string) => number;
-  /** Absent = no compactor (tests/legacy); production wires it so long chats retire into the rolling summary. */
-  compaction?: CompactionWiring;
   env: Record<string, string | undefined>;
   logger: Logger;
   authorityFence?: MemoryAuthorityFence;
@@ -56,7 +48,10 @@ export interface MemorySubsystemDeps {
 
 export interface MemorySubsystem {
   engine: MemoryEngine;
-  autoMemory: AutoMemory;
+  /** Legacy-only episodic/flush/tidy work; Core schedules it before provider-neutral Compaction. */
+  maintenance: AutoMemoryMaintenance;
+  /** Legacy pre-retirement adapter over the same watermark-guarded FlushWriter used by ordinary maintenance. */
+  memoryFlush: MemoryFlushPort;
   /** The background model slot + its serial queue and cumulative spend (T5-R11). */
   utility: UtilitySlot;
   /** The store-maintenance pass (batch 4b); runNow is the WS memory.tidy surface. */
@@ -71,7 +66,7 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
   const { db, logger, timeline } = deps;
   const config = loadMemoryConfig(deps.env);
   // Every background pass takes this model, so moving background work onto a cheaper provider is ONE env change.
-  const utility = createUtilitySlot({ mainModel: deps.model, config: loadUtilityConfig(deps.env), logger });
+  const utility = deps.utility ?? createUtilitySlot({ mainModel: deps.model, config: loadUtilityConfig(deps.env), logger });
   const rawEngine = buildEngine(deps, config);
   const engine = deps.authorityFence ? fenceMemoryEngine(rawEngine, deps.authorityFence) : rawEngine;
   const autoState = createMemoryAutoRepo(db);
@@ -94,31 +89,28 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
   const writeMemory: MemoryWriteOp = ({ layer, ...rest }) => engine.writeEntry({ ...rest, type: layer });
   // ONE flush writer instance: auto-memory's leaving-the-window trigger and the compactor's flush-before-retire
   // step must share the watermark-guarded path, or the same span could be judged twice (batch 7 §3.2).
-  const flush = createFlushWriter({ model: utility.model, createTools: (id) => engine.createBackgroundTools(id) });
-  // The compactor (batch 7b): retires everything but the newest tail into the rolling summary, on the utility
-  // slot, LAST in the per-character chain. Wiring absent = no compaction (legacy behavior byte-identical).
-  const compact = deps.compaction
-    ? createCompactionPass({
-        view: deps.compaction.view,
-        timeline,
-        summaries: deps.compaction.summaries,
-        autoState,
-        flush,
-        slot: utility,
-        config: deps.compaction.config,
-        logger: logger.child({ mod: "compaction" }),
-      })
-    : undefined;
-  const autoMemory = createAutoMemory({
+  const flush = createFlushWriter({ model: utility.model, createTools: (id) => engine.createBackgroundTools(id), slot: utility });
+  const rawMaintenance = createAutoMemoryMaintenance({
     timeline,
     autoState,
     events,
     episodic: createEpisodicWriter({ model: utility.model, writeMemory }),
     flush,
+    utility,
     tidy,
-    compact,
     windowStart: deps.windowStart,
     logger: logger.child({ mod: "memory-auto" }),
+  });
+  const authorityFence = deps.authorityFence;
+  const maintenance = authorityFence
+    ? { run: (characterId: string, origin: Parameters<AutoMemoryMaintenance["run"]>[1]) =>
+        authorityFence.admit(() => rawMaintenance.run(characterId, origin)) }
+    : rawMaintenance;
+  const memoryFlush = createLegacyMemoryFlushPort({
+    timeline,
+    autoState,
+    writer: flush,
+    fence: deps.authorityFence,
   });
 
   // T5-R8: the layer registry's `retention` field finally gets its consumer — boot sweep + 6h, counts-only log.
@@ -129,7 +121,7 @@ export function createMemorySubsystem(deps: MemorySubsystemDeps): MemorySubsyste
     enabled: () => !(deps.isCanonical?.() ?? false),
   });
 
-  return { engine, autoMemory, utility, tidy, memoryRoot: memoryRootOf(deps.dataDir), writeMemory };
+  return { engine, maintenance, memoryFlush, utility, tidy, memoryRoot: memoryRootOf(deps.dataDir), writeMemory };
 }
 
 // The Workspace's memory tree: markdown files under the app data root (beside the db, NOT in it — invariant 1).

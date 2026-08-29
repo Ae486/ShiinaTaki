@@ -15,7 +15,7 @@ must consume the resulting semantic context facts rather than invent a page-loca
 | Slice | Status | Evidence |
 | --- | --- | --- |
 | Slice 1 | Implemented and formally checked on 2026-08-29 | Core full suite: 284 files, 1789 passed, 1 skipped; workspace typecheck and root lint passed; isolated Core boot smoke passed; task validation and `git diff --check` passed apart from the pre-existing parent-task CRLF warning; deterministic 10,000-row source probes stayed below 100 ms and surfaced the explicit backstop. |
-| Slice 2 | Pending | Provider-independent Compaction composition and `MemoryFlushPort`. |
+| Slice 2 | Implemented and formally checked on 2026-08-29 | Provider-independent Core composition now constructs one Utility Slot and one detached per-Character maintenance chain for Legacy and canonical Local; all Legacy episodic/flush/tidy/compaction calls share the Utility Slot queue; typed `MemoryFlushPort` outcomes and activation retirement are covered. Focused tests: 70 passed. Core full suite: 286 files, 1804 passed, 1 skipped. Workspace typecheck, root lint, isolated Core boot, task validation, and `git diff --check` passed. |
 | Slice 3 | Pending | Durable summary transaction and recovery evidence. |
 | Slice 4 | Pending | DSH-informed pruning, summary quality, and recovery hardening. |
 
@@ -29,8 +29,8 @@ Before each implementation or check dispatch, the main session must:
    `Active task: .trellis/tasks/08-29-compaction-harness`.
 3. Use English prompts, explicitly state that YCE is disabled and must not be used, require `jbcontext` for semantic
    search, and forbid secondary agent dispatch, commit, push, reset, rebase, or archive.
-4. Dispatch at most one `trellis-implement` and one `trellis-check` for each slice. A healthy child is not interrupted;
-   wait in the established ten-minute cadence.
+4. Dispatch at most one `trellis-implement` and one `trellis-check` for each slice. All remaining implementation and
+   check agents use `xhigh` effort. A healthy child is not interrupted; wait in the established ten-minute cadence.
 5. Keep ownership at slice boundaries. Do not split a slice into repetitive prompts unless measured scope exceeds the
    two-to-three-context-window target and the plan is updated first.
 
@@ -117,6 +117,22 @@ Utility Slot and maintenance chain are proven by tests and a boot smoke.
 
 Composition changes can fall back to the old Legacy wiring behind an explicit compatibility adapter, but a provider mode
 must never silently claim Compaction support when its flush contract is unavailable.
+
+### Execution notes — 2026-08-29
+
+- Core composition owns Compaction and the only production `AutoMemory` serialization chain. Legacy provider work is a
+  maintenance pass inside that chain, and every Legacy model call enters the one process-wide Utility Slot queue;
+  canonical Local skips provider maintenance but still runs the same Compaction pass.
+- `MemoryFlushPort` returns `success`, `not_required`, `retryable_failure`, or `permanent_unavailable`. Legacy reuses the
+  existing `memory_auto.last_flush_seq` plus `FlushWriter`; canonical Local returns the verified no-flush-required result;
+  the unavailable Hindsight runtime returns a bounded permanent-unavailable result and startup remains fail-closed.
+- In-process canonical activation drains Legacy flush work through the existing authority fence, clears the selected
+  Legacy subsystem reference, removes Legacy maintenance from the chain, and switches the flush binding before later
+  compaction attempts. Failed or unavailable flush outcomes leave the prior summary authoritative.
+- Verification completed: 70 focused tests; Core full suite 286 files / 1804 passed / 1 skipped; `pnpm -r typecheck`;
+  root `pnpm lint`; task context validation; `git diff --check`; and a real isolated Core boot through `ws server
+  listening` followed by clean SIGINT shutdown. The first boot probe intentionally had no provider configuration and
+  failed at the existing fail-fast config boundary; the isolated placeholder-provider rerun passed without external calls.
 
 ## Slice 3 — Durable summary transaction and recovery evidence
 

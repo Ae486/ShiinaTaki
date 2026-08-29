@@ -113,7 +113,7 @@ describe("memory subsystem boot wiring (batch 4a extraction)", () => {
     const conversation = createConversationStore({ repo: createTimelineRepo(db) });
     for (let i = 0; i < 20; i += 1) conversation.appendUser("taki", `m${i + 1}`);
 
-    await subsystem.autoMemory.onTurnCompleted("taki");
+    await subsystem.maintenance.run("taki", "primary");
 
     expect(mainModel.doGenerateCalls.length).toBeGreaterThan(0);
   });
