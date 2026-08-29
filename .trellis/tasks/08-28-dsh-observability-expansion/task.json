@@ -19,7 +19,8 @@
   "pr_url": null,
   "subtasks": [],
   "children": [
-    "08-28-harness-prompt-cache-stability"
+    "08-28-harness-prompt-cache-stability",
+    "08-29-compaction-harness"
   ],
   "parent": "08-22-t4-agent-architecture-observability",
   "relatedFiles": [
@@ -32,6 +33,6 @@
     "docs/deferred-decisions.md",
     "docs/ARCHITECTURE-ROADMAP.md"
   ],
-  "notes": "D68-A producer, durable usage, projection, query, and semantic Inspector data are implemented, formally checked, and manually accepted. The prompt-cache stability child is complete and must be archived now. D68-B remains pending: DSH-shaped Desktop layout, disclosures, tail/history interaction, responsive behavior, and visual polish. D67 remains the separate cross-Home reactive/disclosure follow-up.",
+  "notes": "D68-A producer, durable usage, projection, query, and semantic Inspector data are implemented, formally checked, and manually accepted. Prompt Cache child 08-28-harness-prompt-cache-stability is archived and passed. Compaction Harness child 08-29-compaction-harness is the next context-management gate before D68-B. D68-B remains pending: DSH-shaped Desktop layout, disclosures, tail/history interaction, responsive behavior, and visual polish. D67 remains the separate cross-Home reactive/disclosure follow-up.",
   "meta": {}
 }

@@ -10,9 +10,14 @@ references the outcome, **fabricates that it already acted**. This surfaces only
 
 - Persist the full turn tail (`await result.responseMessages` in AI SDK v7 — assistant-with-tool-calls + tool-result
   messages + text), never text-only. The store's `content` string may stay a readable projection, but structured
-  `parts` (tool-call `input`, tool-result `output`) must survive the DB round-trip for faithful model replay.
+  `parts` (tool-call identity/name and tool-result output) must survive the DB round-trip for faithful model replay.
+  Raw tool-call input is privacy-excluded from durable Timeline rows and replays as `{}`; never weaken the identity,
+  ordering, or result fidelity to achieve that minimization.
 - `history()` reconstructs the full multi-part `ModelMessage[]`. A window cut that strands a leading `tool` row
   (its assistant tool-call fell outside the window) is invalid replay input — drop leading orphan tool rows.
+- Token-window selection treats one assistant call group and every matching result row as an atomic unit. Multiple
+  calls, split result rows, and overlapping call/result spans stay together; orphan, duplicate, reversed, or
+  name-mismatched tool evidence never enters provider replay.
 - Any storage model that can't hold tool messages is a latent hallucination bug. If you defer tool fidelity, it goes
   in `docs/deferred-decisions.md` with a trigger — a bare code comment is exactly how D1 became a permanent defect.
 

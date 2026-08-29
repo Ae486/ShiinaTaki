@@ -81,9 +81,9 @@ Exit gate: producer tests prove event order, bounded payloads, non-blocking beha
 
 Exit gate: projection tests cover sparse filters, absent fields, deterministic replay, authorization and privacy.
 
-## Stage 4.5 — Harness prompt-prefix cache stability gate
+## Stage 4.5 — Harness prompt-prefix cache stability gate (complete)
 
-Complete child task `08-28-harness-prompt-cache-stability` before starting Desktop Monitor layout work. The child owns
+Archived child task `08-28-harness-prompt-cache-stability` completed before any Desktop Monitor layout work. The child owned
 the request-prefix audit, removal or relocation of non-semantic per-Run volatility ahead of replayed history,
 authority-preserving regression tests, and a real configured DeepSeek before/after probe. Its live acceptance must show
 material improvement over the reproduced approximately 10.1% cache-read ratio on comparable long-history follow-ups;
@@ -92,6 +92,18 @@ non-zero cache reads alone are insufficient.
 Exit gate: the child task is checked and committed, normal chat plus a tool path remain correct, and real provider usage
 proves that the long reusable history prefix is being cached. If the evidence reveals another volatile prefix component,
 update the child design rather than beginning D68-B with a known cost defect.
+
+## Stage 4.75 — Compaction Harness gate
+
+Complete child task `08-29-compaction-harness` before starting Desktop Monitor layout work. This child owns the read-only
+current-compaction audit, DSH comparison, token-first boundary design, separation from Memory Provider lifecycle,
+durable summary/replay/overflow contracts, and its staged implementation plan. Its implementation gate must cover long
+histories beyond the legacy 200-row backstop, tool-dense and canonical Local paths, concurrent appends, restart/recovery,
+and failed or empty summary attempts. The child may revise the plan as implementation evidence improves it, but must
+not silently turn the first slice into a final architecture.
+
+Exit gate: the design is reviewed, implementation slices are bounded, and D68-B's UI scope explicitly depends on the
+resulting context contract rather than inventing a page-local workaround.
 
 ## Stage 5 — DSH-shaped Desktop Monitor
 
@@ -122,13 +134,15 @@ close/reopen behavior, live updates and no technical-field dump.
 |---|---|---:|
 | Explore | Runtime seam and exact stream/tool observation mapping; research only | 1 context window |
 | D68-A | Shared event contracts, redaction/unknown rules, fixtures, Core producers, projection and semantic Inspector data | 2–3 context windows |
-| Prefix-cache child | Stable Harness request prefix plus deterministic and real-provider verification | 1–2 context windows |
+| Prefix-cache child (complete) | Stable Harness request prefix plus deterministic and real-provider verification | 1–2 context windows |
+| Compaction Harness child | Current-design audit, DSH comparison, token-first/Memory-independent redesign, and staged implementation plan | 2–3 context windows for planning; implementation split by the approved slices |
 | D68-B | DSH-shaped Monitor layout, Chinese labels, disclosures, close behavior and responsive UI | 2–3 context windows |
 | D68-C (conditional) | Provider-neutral cache semantics or delivery facts after an authority exists | separate task, only if evidence supports it |
 
 D68-A and D68-B share the same research/design context but have independent acceptance gates and ownership. The
-prefix-cache child consumes D68-A's real usage evidence and must close before D68-B. Do not combine these into one
-implementation prompt: producer/projection correctness and Harness request stability must be proven before the UI is
+prefix-cache child consumed D68-A's real usage evidence and is closed; the Compaction Harness child consumes the
+long-history/window evidence and must close before D68-B. Do not combine these into one implementation prompt:
+producer/projection correctness, request stability, and context-management correctness must be proven before the UI is
 reshaped. Do not split a slice into smaller repetitive prompts unless explore evidence proves the stated budget is
 exceeded.
 

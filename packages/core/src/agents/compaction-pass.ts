@@ -16,6 +16,8 @@ import { renderTranscript } from "../memory/render-transcript.ts";
 import type { UtilitySlot } from "../memory/utility-slot.ts";
 import { MEMORY_VOICE_RULE } from "../memory/write-convention.ts";
 import { renderDayDate } from "../time/time-context.ts";
+import { COMPACTION_RETAIN_RATIO, selectRetirementRange } from "./retirement-selector.ts";
+import { loadReplaySource } from "./replay-source-loader.ts";
 
 /*
  * The summary prompt is research/re-compaction-prompts.md Part D (the owner-reviewed draft), transcribed with the
@@ -149,11 +151,29 @@ function retirementBoundary(deps: CompactionPassDeps, characterId: string): Boun
   // R5: pre-compact at ~80% of the history WALL — the budget the view is cut against. The raw provider window
   // cannot be the denominator: the view never exceeds historyRatio × window, so that trigger would never fire.
   if (!Number.isFinite(wall) || before <= wall * deps.config.triggerRatio) return null;
-  // Retire-all-but-tail (owner 2026-08-02): everything except the newest keepMessages MESSAGE ROWS retires.
-  const tail = deps.timeline.latestAscending(characterId, deps.config.keepMessages);
-  if (tail.length < deps.config.keepMessages) return null;
-  const newThrough = tail[0]!.seq - 1;
   const oldThrough = deps.summaries.get(characterId)?.throughSeq ?? 0;
+  // DSH's checked retainRatio (0.16) is adapted to this Replay View's history wall. The row count remains only a
+  // minimum-tail/emergency guard and is never the ordinary capacity metric.
+  const retainTokens = Math.floor(wall * COMPACTION_RETAIN_RATIO);
+  const source = loadReplaySource({
+    repo: deps.timeline,
+    characterId,
+    throughSeq: oldThrough,
+    candidateBudget: retainTokens,
+    minimumRows: deps.config.keepMessages + 1,
+  });
+  // A bounded source with unresolved/unknown older evidence cannot prove a balanced retirement edge. Leave the
+  // summary authoritative and retry on a later trigger rather than advancing through an uncertain range.
+  if (source.backstopHit) {
+    deps.logger.warn(
+      { characterId, loadedRows: source.loadedRows, oldestLoadedSeq: source.oldestLoadedSeq },
+      "retirement source backstop reached; compaction deferred",
+    );
+    return null;
+  }
+  const selection = selectRetirementRange(source.entries, retainTokens, deps.config.keepMessages);
+  if (selection === null) return null;
+  const newThrough = selection.newThroughSeq;
   if (newThrough <= oldThrough) return null;
   return { newThrough, oldThrough, before };
 }

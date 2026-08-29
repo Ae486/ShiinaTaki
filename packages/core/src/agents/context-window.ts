@@ -1,6 +1,6 @@
 /**
- * INPUT:  ascending TimelineEntry[] (the backstop-capped fetch), a token budget in estimator units, maxMessages
- * OUTPUT: selectWindow(entries, budgetTokens, maxMessages) -> { entries, windowStartSeq, estimatedTokens }
+ * INPUT:  ascending TimelineEntry[] from the bounded source loader + a token budget in estimator units
+ * OUTPUT: selectWindow(entries, budgetTokens) -> { entries, windowStartSeq, estimatedTokens }
  * POS:    core/agents — THE window boundary (T5-R1): history() replays exactly this selection and the flush treats
  *         windowStartSeq as the context edge (coupling point 2); pure — no repo, no clock, no config
  */
@@ -21,45 +21,150 @@ export interface WindowSelection {
 }
 
 /**
- * Walk newest -> oldest accumulating estimateMessageTokens until the budget, cap at maxMessages (the R1 hard
- * backstop against a broken estimator), then apply the leading-tool-drop. An infinite budget degrades to the
- * legacy message-count window — same code path, no estimation cost.
+ * Walk newest -> oldest by balanced tool-call/result units until the token budget. Source row bounding happens
+ * earlier and emits its own explicit fact; this selector never silently applies another count boundary.
  */
-export function selectWindow(entries: TimelineEntry[], budgetTokens: number, maxMessages: number): WindowSelection {
-  const backstop = entries.slice(Math.max(0, entries.length - maxMessages));
+export function selectWindow(entries: TimelineEntry[], budgetTokens: number): WindowSelection {
   const measured = Number.isFinite(budgetTokens);
-  // A row whose model projection is null replays nothing, so it costs nothing (it still occupies a backstop slot).
-  const costs = backstop.map((entry) => {
+  const costs = entries.map((entry) => {
     if (!measured) return 0;
     const message = toModelMessage(entry);
     return message === null ? 0 : estimateMessageTokens(message);
   });
-  const cut = measured ? tokenCut(costs, budgetTokens) : 0;
-  // The hard window cut can strand tool rows whose assistant tool-call fell outside the window; a leading tool
-  // message is invalid replay input for providers, so drop rows until the first non-tool one (D1 contract).
-  const windowed = backstop.slice(cut);
-  const firstNonTool = windowed.findIndex((entry) => entry.role !== "tool");
-  const kept = firstNonTool === -1 ? [] : windowed.slice(firstNonTool);
-  const dropped = firstNonTool === -1 ? windowed.length : firstNonTool;
+  const units = replayUnits(entries, costs);
+  const selected = measured ? selectUnits(units, budgetTokens) : units.filter((unit) => unit.valid);
+  const kept = selected.flatMap((unit) => entries.slice(unit.start, unit.end + 1));
   return {
     entries: kept,
     windowStartSeq: startSeqOf(kept, entries),
-    estimatedTokens: costs.slice(cut + dropped).reduce((sum, cost) => sum + cost, 0),
+    estimatedTokens: selected.reduce((sum, unit) => sum + unit.cost, 0),
   };
 }
 
-// Newest -> oldest accumulation; the newest entry is ALWAYS kept even when it alone exceeds the budget (an
-// oversized single message degrades to a window of one, never an empty replay — fitToBudget's first-item rule).
-function tokenCut(costs: number[], budget: number): number {
-  let cut = costs.length;
-  let used = 0;
-  for (let i = costs.length - 1; i >= 0; i -= 1) {
-    const cost = costs[i]!;
-    if (used + cost > budget && cut < costs.length) break;
-    used += cost;
-    cut = i;
+/** A contiguous replay unit whose tool-call/result evidence must move together. */
+export interface ReplayUnit { start: number; end: number; cost: number; valid: boolean }
+interface ReplayIndex {
+  resultIndexes: Map<string, number[]>;
+  callIndexes: Map<string, number[]>;
+  callNames: Map<string, Set<string>>;
+  resultNames: Map<string, Set<string>>;
+}
+
+// Calls and all matching results are one atomic selection unit. A cut may drop the whole unit, never strand either
+// side. The helper is shared by replay selection and compaction retirement so the two boundaries cannot disagree.
+export function replayUnits(entries: TimelineEntry[], costs: number[]): ReplayUnit[] {
+  const replayIndex = createReplayIndex(entries);
+  const spans = entries.flatMap((entry, start) => {
+    const calls = entry.parts?.filter((part) => part.type === "tool-call") ?? [];
+    if (calls.length === 0) return [];
+    const ends = calls.map((call) => {
+      const matches = replayIndex.resultIndexes.get(call.toolCallId)?.filter((index) => index > start) ?? [];
+      return matches.length > 0 ? Math.max(...matches) : undefined;
+    });
+    const matchedEnds = ends.filter((end): end is number => end !== undefined && end > start);
+    // A partially matched assistant row is still one indivisible evidence span, but remains invalid for provider
+    // replay. This preserves all call/result rows together while keeping the existing corrupt-row drop behavior.
+    if (matchedEnds.length === 0) return [];
+    return [{ start, end: Math.max(...matchedEnds), valid: matchedEnds.length === calls.length }];
+  });
+  const merged = mergeSpans(spans);
+  const spanByStart = new Map(merged.map((span) => [span.start, span]));
+  const units: ReplayUnit[] = [];
+  for (let index = 0; index < entries.length;) {
+    const span = spanByStart.get(index);
+    const end = span?.end ?? index;
+    const valid = span === undefined
+      ? isReplayableEntry({ entries, index, replayIndex })
+      : span.valid && rangeIsReplayable({ entries, start: index, end, replayIndex });
+    units.push({ start: index, end, valid, cost: costs.slice(index, end + 1).reduce((sum, cost) => sum + cost, 0) });
+    index = end + 1;
   }
-  return cut;
+  return units;
+}
+
+function createReplayIndex(entries: TimelineEntry[]): ReplayIndex {
+  const replayIndex: ReplayIndex = {
+    resultIndexes: new Map(),
+    callIndexes: new Map(),
+    callNames: new Map(),
+    resultNames: new Map(),
+  };
+  entries.forEach((entry, index) => entry.parts?.forEach((part) => {
+    if (part.type === "tool-result") {
+      const indexes = replayIndex.resultIndexes.get(part.toolCallId) ?? [];
+      indexes.push(index);
+      replayIndex.resultIndexes.set(part.toolCallId, indexes);
+      const names = replayIndex.resultNames.get(part.toolCallId) ?? new Set<string>();
+      names.add(part.toolName);
+      replayIndex.resultNames.set(part.toolCallId, names);
+    } else if (part.type === "tool-call") {
+      const indexes = replayIndex.callIndexes.get(part.toolCallId) ?? [];
+      indexes.push(index);
+      replayIndex.callIndexes.set(part.toolCallId, indexes);
+      const names = replayIndex.callNames.get(part.toolCallId) ?? new Set<string>();
+      names.add(part.toolName);
+      replayIndex.callNames.set(part.toolCallId, names);
+    }
+  }));
+  return replayIndex;
+}
+
+function rangeIsReplayable(input: { entries: TimelineEntry[]; start: number; end: number; replayIndex: ReplayIndex }): boolean {
+  for (let index = input.start; index <= input.end; index += 1) {
+    if (!isReplayableEntry({ entries: input.entries, index, replayIndex: input.replayIndex })) return false;
+  }
+  return true;
+}
+
+function isReplayableEntry(input: { entries: TimelineEntry[]; index: number; replayIndex: ReplayIndex }): boolean {
+  const { entries, index, replayIndex } = input;
+  const entry = entries[index];
+  if (entry === undefined) return false;
+  const parts = entry.parts ?? [];
+  if (entry.role === "tool") {
+    return parts.length > 0 && parts.every((part) =>
+      part.type === "tool-result"
+      && (replayIndex.callIndexes.get(part.toolCallId) ?? []).some((callIndex) => callIndex < index)
+      && (replayIndex.resultIndexes.get(part.toolCallId) ?? []).length === 1
+      && replayIndex.callNames.get(part.toolCallId)?.has(part.toolName) === true,
+    );
+  }
+  if (entry.role !== "assistant") return true;
+  const calls = parts.filter((part) => part.type === "tool-call");
+  return calls.every((call) =>
+    ((replayIndex.resultIndexes.get(call.toolCallId) ?? []).length === 0
+      && replayIndex.resultIndexes.size === 0
+      && (replayIndex.callIndexes.get(call.toolCallId) ?? []).length === 1)
+    || ((replayIndex.callIndexes.get(call.toolCallId) ?? []).length === 1
+      && (replayIndex.resultIndexes.get(call.toolCallId) ?? []).some((resultIndex) => resultIndex > index)
+      && replayIndex.resultNames.get(call.toolCallId)?.has(call.toolName) === true),
+  );
+}
+
+function mergeSpans(spans: Array<{ start: number; end: number; valid: boolean }>): Array<{ start: number; end: number; valid: boolean }> {
+  const merged: Array<{ start: number; end: number; valid: boolean }> = [];
+  for (const span of spans.sort((left, right) => left.start - right.start)) {
+    const last = merged.at(-1);
+    if (last && span.start <= last.end) {
+      last.end = Math.max(last.end, span.end);
+      last.valid &&= span.valid;
+    } else merged.push({ ...span });
+  }
+  return merged;
+}
+
+// Newest -> oldest by atomic units; the newest valid unit is always kept even when oversized.
+function selectUnits(units: ReplayUnit[], budget: number): ReplayUnit[] {
+  const selected: ReplayUnit[] = [];
+  let used = 0;
+  for (let index = units.length - 1; index >= 0; index -= 1) {
+    const unit = units[index]!;
+    if (!unit.valid) continue;
+    if (used + unit.cost > budget && selected.length > 0) break;
+    selected.unshift(unit);
+    used += unit.cost;
+  }
+  return selected;
 }
 
 function startSeqOf(kept: TimelineEntry[], entries: TimelineEntry[]): number {

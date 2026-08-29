@@ -1,0 +1,19 @@
+{"file":".trellis/spec/backend/index.md","reason":"Backend quality-check routing and cross-layer Core requirements."}
+{"file":".trellis/spec/backend/agent-runtime.md","reason":"Replay validity, tool pairing, side-effect safety and context invariants to audit."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Migration, transaction, single-writer and restart/reopen checks."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Failure, cancellation, retry and unknown-outcome audit rules."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Privacy-safe bounded lifecycle evidence and logging checks."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Size caps, boot smoke, test and whitespace quality gate."}
+{"file":".trellis/spec/backend/e2e-harness.md","reason":"Long-history, restart and real-provider validation standards."}
+{"file":".trellis/spec/backend/observability-projection.md","reason":"Future semantic compaction evidence, unknown-value and projection privacy contract."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Cross-layer consistency review checklist."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Evidence-first review rule for installed SDK and reference behavior."}
+{"file":".trellis/tasks/08-29-compaction-harness/research/current-compaction-design.md","reason":"Live implementation evidence and defect list to verify against all changes."}
+{"file":".trellis/tasks/08-29-compaction-harness/research/compaction-design-brief.md","reason":"Compact source-linked DSH/current-design comparison and review checklist."}
+{"file":".trellis/tasks/archive/2026-08/07-28-memory-context/batch-6-design.md","reason":"Existing token and overflow contracts; detect accidental regressions."}
+{"file":".trellis/tasks/archive/2026-08/07-28-memory-context/batch-7-design.md","reason":"Existing summary/fold/background contracts; detect silent policy drift."}
+{"file":".trellis/tasks/archive/2026-08/07-28-memory-context/research/re-compaction-prompts.md","reason":"Summary quality and truncation lessons for review."}
+{"file":"docs/adr/0005-continuous-timeline-no-sessions.md","reason":"Timeline immutability and user-visible history boundary."}
+{"file":"docs/adr/0008-replay-view-context-seam.md","reason":"Replay idempotence, projection-only mutation and cache-shaped context rules."}
+{"file":"docs/adr/0009-single-memory-authority-with-local-replica.md","reason":"Provider authority and canonical-mode lifecycle constraints."}
+{"file":"docs/ARCHITECTURE-ROADMAP.md","reason":"Global Runtime/Harness and recovery architecture consistency."}

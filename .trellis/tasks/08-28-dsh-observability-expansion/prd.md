@@ -77,9 +77,10 @@ hierarchy must follow the checked-in DSH Trajectory design rather than the curre
 
 - Monitor-specific layout, Chinese labels, Inspector disclosure/close behavior, meaningful observability fields, and
   Monitor tail/backfill behavior belong in D68.
-- The D68-A real usage evidence exposed a Harness prefix-cache defect. Child task
-  `08-28-harness-prompt-cache-stability` must complete before D68-B UI work so the Monitor does not become the next
-  priority while a measured provider-cost regression remains open.
+- The D68-A real usage evidence exposed a Harness prefix-cache defect. Archived child task
+  `08-28-harness-prompt-cache-stability` closed that measured provider-cost regression. Child task
+  `08-29-compaction-harness` must now complete its design and approved implementation slices before D68-B UI work so
+  long-history context loss and Memory-lifecycle coupling are not hidden behind the Monitor.
 - The cross-Home reactive read-model contract, Chat in-flight tool/approval presentation, and the disclosure audit for
   every non-Monitor page (including Skills/MCP) remain D67 follow-up work. D68 must not introduce a competing page-local
   refresh protocol.

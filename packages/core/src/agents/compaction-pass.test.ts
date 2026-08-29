@@ -6,12 +6,15 @@ import { createMemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createSummaryRepo } from "../db/summary-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
+import { estimateMessageTokens } from "../memory/token-estimator.ts";
 import type { FlushWriter } from "../memory/flush-writer.ts";
 import type { UtilitySlot } from "../memory/utility-slot.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { failingGenerateModel, generatingModel } from "../testing/mock-language-model.ts";
 import { createUtilitySlot } from "../memory/utility-slot.ts";
+import { toModelMessage } from "./turn-mapping.ts";
 import { buildCompactionPrompt, createCompactionPass, type CompactionPassDeps } from "./compaction-pass.ts";
+import { selectRetirementRange } from "./retirement-selector.ts";
 
 const dbs: Database[] = [];
 afterEach(() => {
@@ -121,13 +124,13 @@ describe("compaction trigger math (row 7 — fires above the ratio, never at or 
     }
   });
 
-  it("fires strictly above the ratio and retires everything but the newest keepMessages rows", async () => {
+  it("fires strictly above the ratio and prices the retained tail instead of using keepMessages as the boundary", async () => {
     const f = fixture({ estimated: 81 });
     seed(f.timeline, 10);
     await f.pass.maybeRun("taki");
 
-    // 10 rows, keep 3 -> the protected tail is seqs 8..10; everything through 7 retires.
-    expect(f.summaries.get("taki")).toEqual({ throughSeq: 7, text: "那段时间我们聊了很多。" });
+    // Each short row costs about 5 estimator units; retainRatio=0.16 of the 100-token wall keeps seqs 7..10.
+    expect(f.summaries.get("taki")).toEqual({ throughSeq: 6, text: "那段时间我们聊了很多。" });
   });
 
   it("does nothing when fewer rows than the protected tail exist, even over the ratio", async () => {
@@ -157,9 +160,9 @@ describe("compaction sequencing (row 8 — flush first, success-only advance, re
     seed(f.timeline, 10);
     await f.pass.maybeRun("taki");
 
-    expect(f.flush.calls).toEqual([{ characterId: "taki", seqs: [1, 2, 3, 4, 5, 6, 7] }]);
+    expect(f.flush.calls).toEqual([{ characterId: "taki", seqs: [1, 2, 3, 4, 5, 6] }]);
     expect(f.ran).toEqual(["compact"]); // slot ran once, after the flush recorded its call
-    expect(f.autoState.get("taki").lastFlushSeq).toBe(7);
+    expect(f.autoState.get("taki").lastFlushSeq).toBe(6);
     // Monotonicity (design §2.3): the summary never covers rows the flush has not seen.
     expect(f.summaries.get("taki")!.throughSeq).toBeLessThanOrEqual(f.autoState.get("taki").lastFlushSeq);
   });
@@ -177,7 +180,7 @@ describe("compaction sequencing (row 8 — flush first, success-only advance, re
 
     f.flush.failNext.value = false;
     await f.pass.maybeRun("taki");
-    expect(f.summaries.get("taki")?.throughSeq).toBe(7);
+    expect(f.summaries.get("taki")?.throughSeq).toBe(6);
   });
 
   it("a generate failure warns, leaves through_seq unchanged, and the next trigger retries WITHOUT re-flushing", async () => {
@@ -186,12 +189,12 @@ describe("compaction sequencing (row 8 — flush first, success-only advance, re
     await f.pass.maybeRun("taki");
 
     expect(f.summaries.get("taki")).toBeNull(); // through advanced ONLY on full success
-    expect(f.autoState.get("taki").lastFlushSeq).toBe(7); // the flush half did land — its own watermark holds it
+    expect(f.autoState.get("taki").lastFlushSeq).toBe(6); // the flush half did land — its own watermark holds it
     expect(f.records.some((r) => r.level === "warn" && r.msg === "summary generation failed; will retry")).toBe(true);
 
     f.model.value = generatingModel("恢复后的记录") as LanguageModel;
     await f.pass.maybeRun("taki");
-    expect(f.summaries.get("taki")).toEqual({ throughSeq: 7, text: "恢复后的记录" });
+    expect(f.summaries.get("taki")).toEqual({ throughSeq: 6, text: "恢复后的记录" });
     expect(f.flush.calls).toHaveLength(1); // the watermark guard prevented a double flush of the same span
   });
 
@@ -210,8 +213,91 @@ describe("compaction sequencing (row 8 — flush first, success-only advance, re
     await f.pass.maybeRun("taki");
 
     const line = f.records.find((r) => r.msg === "conversation compacted");
-    expect(line?.obj).toMatchObject({ characterId: "taki", throughSeq: 7, before: 90, after: 90 });
+    expect(line?.obj).toMatchObject({ characterId: "taki", throughSeq: 6, before: 90, after: 90 });
     expect(JSON.stringify(line)).not.toContain("那段时间");
+  });
+});
+
+describe("token-priced retirement selection", () => {
+  it("does not move the ordinary boundary when only the minimum-tail row guard changes", () => {
+    const f = fixture();
+    seed(f.timeline, 10);
+    const entries = f.timeline.latestAscending("taki", 20);
+
+    expect(selectRetirementRange(entries, 16, 1)?.newThroughSeq).toBe(6);
+    expect(selectRetirementRange(entries, 16, 3)?.newThroughSeq).toBe(6);
+  });
+
+  it("keeps a complete multi-call and multi-result span together", () => {
+    const f = fixture();
+    f.timeline.append({ characterId: "taki", role: "user", content: "old" });
+    f.timeline.append({
+      characterId: "taki",
+      role: "assistant",
+      content: "[tool-call: exec]",
+      parts: [
+        { type: "tool-call", toolCallId: "c1", toolName: "exec" },
+        { type: "tool-call", toolCallId: "c2", toolName: "exec" },
+      ],
+    });
+    f.timeline.append({
+      characterId: "taki",
+      role: "tool",
+      content: "[tool-result: exec -> text]",
+      parts: [{ type: "tool-result", toolCallId: "c1", toolName: "exec", output: { type: "text", value: "one" } }],
+    });
+    f.timeline.append({
+      characterId: "taki",
+      role: "tool",
+      content: "[tool-result: exec -> text]",
+      parts: [{ type: "tool-result", toolCallId: "c2", toolName: "exec", output: { type: "text", value: "two" } }],
+    });
+    f.timeline.append({ characterId: "taki", role: "user", content: "new" });
+
+    const entries = f.timeline.latestAscending("taki", 20);
+    const newestCost = entryEstimate(entries.at(-1)!);
+    const selection = selectRetirementRange(entries, newestCost + 1, 1);
+
+    expect(selection?.newThroughSeq).toBe(1);
+    expect(selection?.retainedEntries.map((entry) => entry.seq)).toEqual([2, 3, 4, 5]);
+  });
+
+  it("keeps duplicate or name-mismatched results atomic instead of cutting after the first result", () => {
+    const f = fixture();
+    f.timeline.append({ characterId: "taki", role: "user", content: "old" });
+    f.timeline.append({
+      characterId: "taki",
+      role: "assistant",
+      content: "[tool-call: exec]",
+      parts: [{ type: "tool-call", toolCallId: "c1", toolName: "exec" }],
+    });
+    for (const toolName of ["exec", "other"]) {
+      f.timeline.append({
+        characterId: "taki",
+        role: "tool",
+        content: `[tool-result: ${toolName} -> text]`,
+        parts: [{ type: "tool-result", toolCallId: "c1", toolName, output: { type: "text", value: toolName } }],
+      });
+    }
+    f.timeline.append({ characterId: "taki", role: "user", content: "new" });
+
+    const entries = f.timeline.latestAscending("taki", 20);
+    const newestCost = entryEstimate(entries.at(-1)!);
+    const selection = selectRetirementRange(entries, newestCost + 1, 1);
+
+    expect(selection?.newThroughSeq).toBe(1);
+    expect(selection?.retainedEntries.map((entry) => entry.seq)).toEqual([2, 3, 4, 5]);
+  });
+
+  it("retains an oversized newest unit while still retiring older rows", () => {
+    const f = fixture();
+    f.timeline.append({ characterId: "taki", role: "user", content: "old" });
+    f.timeline.append({ characterId: "taki", role: "user", content: "x".repeat(2_000) });
+
+    const selection = selectRetirementRange(f.timeline.latestAscending("taki", 20), 1, 1);
+
+    expect(selection?.newThroughSeq).toBe(1);
+    expect(selection?.retainedEntries.map((entry) => entry.seq)).toEqual([2]);
   });
 });
 
@@ -230,12 +316,12 @@ describe("compaction rolling input (row 9 — old summary + retiring span, tail 
     expect(prompt.indexOf("Today is")).toBeLessThan(prompt.indexOf("EARLIER RECORD:"));
     expect(prompt).toContain("旧的记录：他答应过请我吃拉面");
     expect(prompt).toContain("WHAT HAPPENED SINCE:");
-    // Span = (oldThrough 2, newThrough 7]: m3..m7 — nothing before, nothing from the protected tail m8..m10.
+    // Span = (oldThrough 2, newThrough 6]: m3..m6 — nothing before, nothing from the retained tail m7..m10.
     expect(prompt).toContain("user: m3");
-    expect(prompt).toContain("user: m7");
+    expect(prompt).toContain("user: m6");
     expect(prompt).not.toContain("user: m2");
-    expect(prompt).not.toContain("user: m8");
-    expect(f.summaries.get("taki")).toEqual({ throughSeq: 7, text: "新的合并记录" });
+    expect(prompt).not.toContain("user: m7");
+    expect(f.summaries.get("taki")).toEqual({ throughSeq: 6, text: "新的合并记录" });
   });
 
   it("a first compaction states there is no earlier record", async () => {
@@ -271,6 +357,11 @@ describe("compaction rolling input (row 9 — old summary + retiring span, tail 
   });
 });
 
+function entryEstimate(entry: Parameters<typeof toModelMessage>[0]): number {
+  const message = toModelMessage(entry);
+  return message === null ? 0 : estimateMessageTokens(message);
+}
+
 describe("compaction on the real utility slot (row 11 — slot model used; main-model fallback)", () => {
   it("with no utility provider configured the pass generates on the MAIN model via the slot", async () => {
     const { logger } = createCaptureLogger();
@@ -292,7 +383,7 @@ describe("compaction on the real utility slot (row 11 — slot model used; main-
     seed(timeline, 10);
     await pass.maybeRun("taki");
 
-    expect(summaries.get("taki")).toEqual({ throughSeq: 7, text: "主模型写下的记录" });
+    expect(summaries.get("taki")).toEqual({ throughSeq: 6, text: "主模型写下的记录" });
     expect(slot.usage().calls).toBe(1); // the generation ran THROUGH the slot (serial chain + accounting)
   });
 });

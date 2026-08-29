@@ -23,8 +23,8 @@ export const DEFAULT_HISTORY_RATIO = 0.7;
 // larger window above, never from moving the ratio.
 export const DEFAULT_COMPACT_TRIGGER_RATIO = 0.8;
 
-// The single retention knob (owner-corrected shape 2026-08-02, no target-ratio knob exists): compaction retires
-// every timeline MESSAGE ROW older than the newest this-many.
+// Compatibility guard only: token-priced compaction retains the DSH-grounded 0.16 history-wall tail; this value keeps
+// at least this many recent rows (and one older candidate for boundary discovery) when estimates are unusually cheap.
 export const DEFAULT_COMPACT_KEEP_MESSAGES = 40;
 
 // Coerce + int + positive: "abc"/"0"/"-1"/"3.5" all throw at boot (the memory-config budget discipline — a garbage

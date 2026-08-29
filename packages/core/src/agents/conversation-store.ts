@@ -1,12 +1,7 @@
 /**
- * INPUT:  appendUser(characterId, text, images?)/appendAssistant(characterId, text) + appendTurn(characterId, ModelMessage[]) +
- *         removeEntry(characterId, seq) + an injected TimelineRepo, onAppend/onRemove sinks, an optional window budget,
- *         an optional SummaryReader (R3) and an optional wall-hit sink (R5)
- * OUTPUT: createConversationStore(deps) -> { appendUser, appendAssistant, appendTurn, removeEntry, history, windowStart,
- *         estimatedTokens }
- * POS:    core/agents — SQLite-backed conversation store; persists safe turn projections (tool calls are names-only), replays the
- *         Replay View (ADR 0008: summary substitution → R4 folds → emergency token cut, all inside the ONE select
- *         closure the flush boundary also rides — batch 6/7)
+ * INPUT:  TimelineRepo, append/remove sinks, optional token budget + SummaryReader, and wall/backstop observers
+ * OUTPUT: append/remove APIs plus one project() source for history(), windowStart(), and estimatedTokens()
+ * POS:    core/agents — names-only persistence and the Character-scoped Replay View projection boundary (ADR 0008)
  */
 import type { ModelMessage } from "ai";
 import type { TimelineEntry } from "@taki/shared";
@@ -14,11 +9,29 @@ import type { TimelineRepo } from "../db/timeline-repo.ts";
 import { estimateMessageTokens } from "../memory/token-estimator.ts";
 import { selectWindow } from "./context-window.ts";
 import { foldUnderPressure } from "./replay-folds.ts";
+import { loadReplaySource, REPLAY_SOURCE_BACKSTOP, type ReplaySource } from "./replay-source-loader.ts";
 import { toEntryInput, toModelMessage, toUserEntryInput, type TurnEntryInput, type TurnMessage, type UserImageInput } from "./turn-mapping.ts";
 
-// The HARD BACKSTOP on replayed messages (T5-R1: context is measured in tokens; a message count survives ONLY as
-// the guard against a broken estimator). Without an injected window budget it is also the whole window (legacy).
+// Legacy no-budget compatibility only. Measured production replay uses the separately observable source backstop.
 export const REPLAY_WINDOW = 200;
+
+export interface ReplayMeasurement {
+  sourceRows: number;
+  liveRows: number;
+  selectedRows: number;
+  summaryTokens: number;
+  liveTokensBeforeFolds: number;
+  foldedTokensSaved: number;
+  historyTokens: number;
+  tokenBoundaryHit: boolean;
+  sourceBackstopHit: boolean;
+}
+
+export interface ReplayProjection {
+  messages: ModelMessage[];
+  windowStartSeq: number;
+  measurement: ReplayMeasurement;
+}
 
 /** The compaction summary's read seam (summary-repo satisfies it); null = the character was never compacted. */
 export interface SummaryReader {
@@ -34,6 +47,15 @@ export interface WallHit {
   throughSeq: number;
   /** Live (non-retired) rows the cut dropped. */
   dropped: number;
+}
+
+export interface SourceBackstopHit {
+  characterId: string;
+  loadedRows: number;
+  limit: number;
+  throughSeq: number;
+  oldestLoadedSeq?: number;
+  newestLoadedSeq?: number;
 }
 
 export interface ConversationStore {
@@ -60,6 +82,8 @@ export interface ConversationStore {
   windowStart(characterId: string): number;
   /** Estimator-unit size of the current replay view (summary head + kept rows) — the compaction trigger's input. */
   estimatedTokens(characterId: string): number;
+  /** One immutable Replay View result for request construction and pressure/summary measurement. */
+  project(characterId: string): ReplayProjection;
 }
 
 export interface ConversationStoreDeps {
@@ -80,10 +104,14 @@ export interface ConversationStoreDeps {
    * Deduped per advancing cut boundary so a sustained overrun warns once, not once per render.
    */
   onWallHit?: (hit: WallHit) => void;
+  /** Explicit degraded-source fact; distinct from ordinary token exhaustion. */
+  onSourceBackstopHit?: (hit: SourceBackstopHit) => void;
+  /** Focused-test override; production uses the documented local policy. */
+  source?: { maxRows?: number; pageSize?: number };
 }
 
 export function createConversationStore(deps: ConversationStoreDeps): ConversationStore {
-  const { repo, onAppend, onRemove, window, summaries, onWallHit } = deps;
+  const { repo, onAppend, onRemove, window, summaries, onWallHit, onSourceBackstopHit, source } = deps;
   const commit = (characterId: string, input: TurnEntryInput): TimelineEntry => {
     const entry = repo.append({ characterId, ...input });
     onAppend?.(entry);
@@ -95,9 +123,18 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
     wallWarnedAt.set(hit.characterId, hit.windowStartSeq);
     onWallHit(hit);
   };
-  // history(), windowStart() and estimatedTokens() MUST go through this one call — a second boundary computation
-  // is how the flush and the replay drift apart (prd coupling point 2).
-  const select = (characterId: string) => selectView({ repo, window, summaries, reportWallHit }, characterId);
+  const sourceWarnedAt = new Map<string, number>();
+  const reportSourceBackstopHit = (hit: SourceBackstopHit): void => {
+    if (!onSourceBackstopHit || (sourceWarnedAt.get(hit.characterId) ?? 0) >= (hit.newestLoadedSeq ?? 0)) return;
+    sourceWarnedAt.set(hit.characterId, hit.newestLoadedSeq ?? 0);
+    onSourceBackstopHit(hit);
+  };
+  // history(), windowStart(), pressure measurement and request construction all derive from this one projection.
+  const project = (characterId: string): ReplayProjection => {
+    const view = selectView({ repo, window, summaries, reportWallHit, reportSourceBackstopHit, source }, characterId);
+    const messages = view.entries.map(toModelMessage).filter((message): message is ModelMessage => message !== null);
+    return { messages: view.head === null ? messages : [view.head, ...messages], windowStartSeq: view.windowStartSeq, measurement: view.measurement };
+  };
   return {
     // No images = toUserEntryInput returns the legacy `{role:"user", content}` row (byte-identical to before #17).
     appendUser: (characterId, text, images = []) => commit(characterId, toUserEntryInput(text, images)),
@@ -114,14 +151,11 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
     },
     // Legacy text-only rows reconstruct via content; tool calls replay with empty input placeholders, never raw args.
     history: (characterId) => {
-      const view = select(characterId);
-      const messages = view.entries
-        .map(toModelMessage)
-        .filter((message): message is ModelMessage => message !== null);
-      return view.head === null ? messages : [view.head, ...messages];
+      return project(characterId).messages;
     },
-    windowStart: (characterId) => select(characterId).windowStartSeq,
-    estimatedTokens: (characterId) => select(characterId).estimatedTokens,
+    windowStart: (characterId) => project(characterId).windowStartSeq,
+    estimatedTokens: (characterId) => project(characterId).measurement.historyTokens,
+    project,
   };
 }
 
@@ -130,36 +164,70 @@ interface ViewContext {
   window?: { budget(): number };
   summaries?: SummaryReader;
   reportWallHit: (hit: WallHit) => void;
+  reportSourceBackstopHit?: (hit: SourceBackstopHit) => void;
+  source?: { maxRows?: number; pageSize?: number };
 }
 
 // The Replay View pipeline (ADR 0008): summary substitution → R4 folds under pressure → the emergency token cut.
 // Every stage is pure, so re-rendering the view from the same rows reproduces it byte-for-byte.
 function selectView(ctx: ViewContext, characterId: string) {
-  const rows = ctx.repo.latestAscending(characterId, REPLAY_WINDOW);
   const summary = ctx.summaries?.get(characterId) ?? null;
   const through = summary?.throughSeq ?? 0;
-  const live = through > 0 ? rows.filter((entry) => entry.seq > through) : rows;
+  const measured = ctx.window !== undefined;
+  const budget = ctx.window?.budget() ?? Number.POSITIVE_INFINITY;
+  const source = measured
+    ? loadReplaySource({ repo: ctx.repo, characterId, throughSeq: through, candidateBudget: budget, ...ctx.source })
+    : legacySource(ctx.repo, characterId, through);
+  if (source.backstopHit) ctx.reportSourceBackstopHit?.({ characterId, loadedRows: source.loadedRows,
+    limit: ctx.source?.maxRows ?? REPLAY_SOURCE_BACKSTOP, throughSeq: through,
+    oldestLoadedSeq: source.oldestLoadedSeq, newestLoadedSeq: source.newestLoadedSeq });
+  const live = source.entries;
   // The head renders only while the view still reaches covered territory: if the backstop fetch already starts
   // past through_seq, the summary bridges nothing (rows fell off UNsummarized) and pretending continuity would lie.
-  const head = summary !== null && live.length < rows.length ? summaryHead(summary.text) : null;
-  const budget = ctx.window?.budget() ?? Number.POSITIVE_INFINITY;
+  const head = summary !== null && source.summaryBridgeReached ? summaryHead(summary.text) : null;
   // The head occupies the same budget the rows compete for; unmeasured mode keeps the 0-cost convention.
   const headCost = head !== null && Number.isFinite(budget) ? estimateMessageTokens(head) : 0;
   const entryBudget = budget - headCost;
+  const liveTokensBeforeFolds = measured ? estimateEntries(live) : 0;
   const folded = foldUnderPressure(live, entryBudget);
-  const selection = selectWindow(folded.entries, entryBudget, REPLAY_WINDOW);
+  const selection = selectWindow(folded.entries, entryBudget);
   const cutDropped = folded.entries.length - selection.entries.length;
+  const tokenBoundaryHit = cutDropped > 0 && folded.estimatedTokens > entryBudget;
   // The wall (R5): every fold applied and the live rows STILL exceed the budget — the cut is now dropping
   // un-retired rows (hard truncation, the accepted fallback; the warn is what makes it observable).
-  if (cutDropped > 0 && folded.estimatedTokens > entryBudget)
+  if (tokenBoundaryHit)
     ctx.reportWallHit({ characterId, windowStartSeq: selection.windowStartSeq, throughSeq: through, dropped: cutDropped });
   return {
     entries: selection.entries,
     head,
     // Substitution can retire every loaded row; then everything through `through` has left the window.
     windowStartSeq: live.length === 0 && head !== null ? through + 1 : selection.windowStartSeq,
-    estimatedTokens: selection.estimatedTokens + headCost,
+    measurement: {
+      sourceRows: source.loadedRows,
+      liveRows: live.length,
+      selectedRows: selection.entries.length,
+      summaryTokens: headCost,
+      liveTokensBeforeFolds,
+      foldedTokensSaved: Math.max(0, liveTokensBeforeFolds - folded.estimatedTokens),
+      historyTokens: selection.estimatedTokens + headCost,
+      tokenBoundaryHit,
+      sourceBackstopHit: source.backstopHit,
+    },
   };
+}
+
+function legacySource(repo: TimelineRepo, characterId: string, throughSeq: number): ReplaySource {
+  const rows = repo.latestAscending(characterId, REPLAY_WINDOW);
+  const entries = throughSeq > 0 ? rows.filter((entry) => entry.seq > throughSeq) : rows;
+  return { entries, summaryBridgeReached: throughSeq > 0 && entries.length < rows.length, backstopHit: false,
+    loadedRows: rows.length, oldestLoadedSeq: rows[0]?.seq, newestLoadedSeq: rows.at(-1)?.seq };
+}
+
+function estimateEntries(entries: TimelineEntry[]): number {
+  return entries.reduce((sum, entry) => {
+    const message = toModelMessage(entry);
+    return sum + (message === null ? 0 : estimateMessageTokens(message));
+  }, 0);
 }
 
 // The head message is PROJECTION ONLY — never persisted, never a timeline row (R3; the user must never see a

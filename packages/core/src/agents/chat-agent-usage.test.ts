@@ -104,6 +104,7 @@ describe("chat-agent usage-capture seam (batch 6, R1 tier 2)", () => {
       store: f.conversation,
       memory: f.memory,
       onUsage: (report) => reports.push(report),
+      requestEnvelopeReserve: () => 200,
     });
 
     await drain(agent.stream({ characterId: "taki", message: "hi" }));
@@ -113,6 +114,14 @@ describe("chat-agent usage-capture seam (batch 6, R1 tier 2)", () => {
     expect(reports[0]).toMatchObject({ inputTokens: 3, outputTokens: 5 });
     expect(reports[0]?.estimatedInput).toBeGreaterThan(0);
     expect(Number.isInteger(reports[0]?.estimatedInput)).toBe(true);
+    expect(reports[0]?.measurement).toMatchObject({ accountingQuality: "estimated", sourceBackstopHit: false });
+    expect(reports[0]!.measurement.summaryTokens).toBe(0);
+    expect(reports[0]!.measurement.instructionTokens).toBeGreaterThan(0);
+    expect(reports[0]!.measurement.toolSchemaTokens).toBeGreaterThan(0);
+    expect(reports[0]!.measurement.responseReserveTokens).toBeGreaterThanOrEqual(0);
+    expect(reports[0]!.measurement.projectedRequestTokens).toBe(
+      reports[0]!.measurement.estimatedInputTokens + reports[0]!.measurement.responseReserveTokens,
+    );
   });
 
   it("reports the ALL-STEPS usage sum on a multi-step tool turn (4b-verified result.usage semantics)", async () => {

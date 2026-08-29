@@ -1,0 +1,18 @@
+{"file":".trellis/spec/backend/index.md","reason":"Backend package routing, protocol and database boundaries, and mandatory quality gates for Core changes."}
+{"file":".trellis/spec/backend/agent-runtime.md","reason":"Replay, tool-call persistence, context seam, side-effect and retry invariants."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"SQLite single-writer, typed repository, migration, transaction and reopen requirements."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Fail-closed errors, cancellation, retry and durable outcome rules."}
+{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Bounded lifecycle logging and prohibition on prompt, secret and raw payload leakage."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Module size, file headers, test and runtime-boot requirements."}
+{"file":".trellis/spec/backend/e2e-harness.md","reason":"Deterministic and real-agent evidence rules for long-history and recovery scenarios."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Required boundary mapping across Timeline, projector, database, runtime composition and future Monitor projection."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Rules for resolving implementation gaps from named source code and installed APIs rather than invention."}
+{"file":".trellis/tasks/08-29-compaction-harness/research/current-compaction-design.md","reason":"Verified live TakiAgent compaction/replay behavior, tests, and known defects."}
+{"file":".trellis/tasks/08-29-compaction-harness/research/compaction-design-brief.md","reason":"Compact, source-linked execution summary of current defects, DSH transfer decisions, T5 constraints and planned slices."}
+{"file":".trellis/tasks/archive/2026-08/07-28-memory-context/batch-6-design.md","reason":"Ratified token-window, calibration and overflow baseline that implementation must preserve or explicitly revise."}
+{"file":".trellis/tasks/archive/2026-08/07-28-memory-context/batch-7-design.md","reason":"Ratified summary projection, folds, detached compaction and flush-before-retire behavior."}
+{"file":".trellis/tasks/archive/2026-08/07-28-memory-context/research/re-compaction-prompts.md","reason":"Reviewed companion summary prompt, quality, date and no-hard-cap decisions."}
+{"file":"docs/adr/0005-continuous-timeline-no-sessions.md","reason":"Append-only Character relationship timeline and no user-visible parallel sessions."}
+{"file":"docs/adr/0008-replay-view-context-seam.md","reason":"Single idempotent storage-to-model Replay View seam and ephemeral context rules."}
+{"file":"docs/adr/0009-single-memory-authority-with-local-replica.md","reason":"Memory authority/provider-switch constraints and canonical Local behavior."}
+{"file":"docs/ARCHITECTURE-ROADMAP.md","reason":"PI-shaped Runtime/Harness boundary and planned compaction/resume markers."}

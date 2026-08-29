@@ -143,6 +143,7 @@ const conversationStore = createConversationStore({
   // R3: the rolling summary substitutes as the replay head; the wall-hit warn means the compactor is being outrun.
   summaries: summaryRepo,
   onWallHit: (hit) => chatLog.warn(hit, "context wall hit — live rows truncated past the summary boundary"),
+  onSourceBackstopHit: (hit) => chatLog.warn(hit, "replay source backstop hit — token selection used a bounded partial source"),
 });
 
 // Avatar channel (#16): LLM-driven expression/motion commands fan out to subscribed Pet UI operators (mirrors the
@@ -385,6 +386,7 @@ const chatAgent = createChatAgent({
       // Batch-6 usage seam: each committed turn's real usage calibrates the main slot's window (the calibrator
       // ignores the 0 that stands in for an absent inputTokens field).
       onUsage: (report) => windowCalibrator.onUsage(report.inputTokens ?? 0, report.estimatedInput),
+      requestEnvelopeReserve: () => Math.max(0, windowCalibrator.effectiveWindow() - historyBudget()),
       // R2 (batch 6): a classified overflow shrinks the persisted window — the retry then re-windows through the
       // store's budget closure above. Counts-only warn: sizes and the new window, never content (logging-guidelines).
       onOverflow: (observedInput) =>

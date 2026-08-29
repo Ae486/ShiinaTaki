@@ -5,7 +5,7 @@ import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { createSummaryRepo } from "../db/summary-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
 import { estimateMessageTokens } from "../memory/token-estimator.ts";
-import { createConversationStore, REPLAY_WINDOW, type WallHit } from "./conversation-store.ts";
+import { createConversationStore, REPLAY_WINDOW, type SourceBackstopHit, type WallHit } from "./conversation-store.ts";
 
 const dbs: Database[] = [];
 
@@ -221,14 +221,14 @@ describe("token-windowed history (batch 6 — R1)", () => {
     expect(store.history("taki")[0]).toEqual({ role: "user", content: "m27" });
   });
 
-  it("REPLAY_WINDOW stays the hard backstop when the budget is huge (broken-estimator guard)", () => {
+  it("does not silently truncate long measured history at the legacy 200-row boundary", () => {
     const store = makeWindowedStore(1_000_000_000);
     seedUsers(store, REPLAY_WINDOW + 5);
 
     const history = store.history("taki");
-    expect(history).toHaveLength(REPLAY_WINDOW);
-    expect(history[0]).toEqual({ role: "user", content: "m6" });
-    expect(store.windowStart("taki")).toBe(6);
+    expect(history).toHaveLength(REPLAY_WINDOW + 5);
+    expect(history[0]).toEqual({ role: "user", content: "m1" });
+    expect(store.windowStart("taki")).toBe(1);
   });
 
   it("keeps a single oversized newest message rather than replaying nothing", () => {
@@ -273,7 +273,8 @@ describe("token-windowed history (batch 6 — R1)", () => {
 });
 
 // A store with the batch-7 summary seam wired over the SAME db (production shape: summary-repo + optional budget).
-function makeSummaryStore(opts: { budget?: number; onWallHit?: (hit: WallHit) => void } = {}) {
+function makeSummaryStore(opts: { budget?: number; onWallHit?: (hit: WallHit) => void;
+  onSourceBackstopHit?: (hit: SourceBackstopHit) => void; source?: { maxRows?: number; pageSize?: number } } = {}) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
   const repo = createTimelineRepo(db);
@@ -283,6 +284,8 @@ function makeSummaryStore(opts: { budget?: number; onWallHit?: (hit: WallHit) =>
     summaries,
     window: opts.budget === undefined ? undefined : { budget: () => opts.budget! },
     onWallHit: opts.onWallHit,
+    onSourceBackstopHit: opts.onSourceBackstopHit,
+    source: opts.source,
   });
   return { store, summaries, repo };
 }
@@ -325,6 +328,31 @@ describe("summary substitution (batch 7 — R3 head message)", () => {
     expect(history).toHaveLength(REPLAY_WINDOW);
     expect(history[0]).toEqual({ role: "user", content: "m16" });
     expect(store.windowStart("taki")).toBe(16);
+  });
+
+  it("reaches an older summary through more than 200 unretired rows under token-first selection", () => {
+    const { store, summaries } = makeSummaryStore({ budget: 1_000_000_000 });
+    seedUsers(store, REPLAY_WINDOW + 15);
+    summaries.upsert({ characterId: "taki", throughSeq: 5, text: HEAD_TEXT });
+
+    const projection = store.project("taki");
+    expect(projection.messages[0]).toEqual({ role: "user", content: HEAD_CONTENT });
+    expect(projection.messages).toHaveLength(1 + REPLAY_WINDOW + 10);
+    expect(projection.windowStartSeq).toBe(6);
+    expect(projection.measurement).toMatchObject({ sourceRows: REPLAY_WINDOW + 10, sourceBackstopHit: false });
+  });
+
+  it("emits a distinct source-backstop fact instead of masquerading as token exhaustion", () => {
+    const hits: SourceBackstopHit[] = [];
+    const { store } = makeSummaryStore({ budget: 1_000_000, source: { maxRows: 3, pageSize: 2 },
+      onSourceBackstopHit: (hit) => hits.push(hit) });
+    seedUsers(store, 8);
+
+    const projection = store.project("taki");
+    expect(projection.messages.map((message) => message.content)).toEqual(["m6", "m7", "m8"]);
+    expect(projection.measurement).toMatchObject({ sourceBackstopHit: true, tokenBoundaryHit: false });
+    store.history("taki");
+    expect(hits).toEqual([expect.objectContaining({ characterId: "taki", loadedRows: 3, limit: 3, throughSeq: 0 })]);
   });
 
   it("when the summary covers every loaded row the view is the head alone and windowStart is through+1", () => {
@@ -374,6 +402,40 @@ describe("summary substitution (batch 7 — R3 head message)", () => {
     const unmeasured = makeSummaryStore();
     seedUsers(unmeasured.store, 6);
     expect(unmeasured.store.estimatedTokens("taki")).toBe(0);
+  });
+
+  it("exposes messages, windowStart and token pressure from one immutable projection", () => {
+    const { store, summaries } = makeSummaryStore({ budget: ROW_COST * 4 + 100 });
+    seedUsers(store, 8);
+    summaries.upsert({ characterId: "taki", throughSeq: 4, text: HEAD_TEXT });
+
+    const projection = store.project("taki");
+    expect(JSON.stringify(projection.messages)).toBe(JSON.stringify(store.history("taki")));
+    expect(projection.windowStartSeq).toBe(store.windowStart("taki"));
+    expect(projection.measurement.historyTokens).toBe(store.estimatedTokens("taki"));
+    expect(projection.measurement.summaryTokens).toBeGreaterThan(0);
+  });
+
+  it("projects CJK, image references and dense balanced tool pairs without orphaned replay", () => {
+    const { store, repo } = makeSummaryStore({ budget: 20_000 });
+    store.appendUser("taki", "看这张图里的拉面", [{ mediaType: "image/png", ref: `attachments/${"a".repeat(64)}.png` }]);
+    for (let index = 0; index < 6; index += 1) store.appendTurn("taki", [
+      { role: "assistant", content: [{ type: "tool-call", toolCallId: `c${index}`, toolName: "inspect", input: {} }] },
+      { role: "tool", content: [{ type: "tool-result", toolCallId: `c${index}`, toolName: "inspect",
+        output: { type: "json", value: { capturedAt: `2026-08-29T00:0${index}:00.000Z`, detail: "面".repeat(100) } } }] },
+    ]);
+
+    const projection = store.project("taki");
+    const serialized = JSON.stringify(projection.messages);
+    expect(projection.messages[0]).toEqual({ role: "user", content: "看这张图里的拉面" });
+    expect(repo.latestAscending("taki", 20)[0]?.parts).toContainEqual(
+      expect.objectContaining({ type: "image", ref: `attachments/${"a".repeat(64)}.png` }),
+    );
+    for (let index = 0; index < 6; index += 1) {
+      expect(serialized).toContain(`"toolCallId":"c${index}"`);
+    }
+    // Persisted image references stay text-authoritative on replay; the source still carries the ref for UI display.
+    expect(projection.measurement.historyTokens).toBeGreaterThan(600);
   });
 });
 

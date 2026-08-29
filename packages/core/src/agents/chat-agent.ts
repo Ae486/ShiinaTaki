@@ -8,7 +8,7 @@
  *         with the volatile <turn-context> tail riding the outgoing user message (Q4/ADR 0008); auto-writes detached;
  *         a classified context-overflow retries ONCE against the same captured Run extension context
  */
-import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type ToolSet } from "ai";
+import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type Telemetry, type ToolSet } from "ai";
 import type { ChatSendParams, ImageAttachment } from "@taki/shared";
 import type { ApprovalGate } from "../approval/approval-gate.ts";
 import type { Connection } from "../server/connection-registry.ts";
@@ -21,6 +21,7 @@ import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
 import type { ConversationStore } from "./conversation-store.ts";
 import { isContextOverflowError, observedTokensOf } from "./overflow-error.ts";
 import { mergeToolSets } from "./tool-set-assembly.ts";
+import { fireUsageReport, type TurnUsageReport } from "./turn-usage-report.ts";
 import type { TurnMessage, UserImageInput } from "./turn-mapping.ts";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { createRunObservabilityModel, type ToolEffectObserver } from "./run-observability-telemetry.ts";
@@ -60,12 +61,7 @@ export const CANONICAL_MEMORY_SYSTEM_PROMPT = BASE_SYSTEM_PROMPT
   .replaceAll("memory_archive", "invalidate_memory");
 
 /** One committed turn's usage sample: the provider's post-hoc numbers + our estimate for the SAME request. */
-export interface TurnUsageReport {
-  inputTokens?: number;
-  outputTokens?: number;
-  /** estimateTokens(instructions) + estimateMessagesTokens(outgoing) — the calibration denominator (R1 tier 2). */
-  estimatedInput: number;
-}
+export type { TurnUsageReport } from "./turn-usage-report.ts";
 
 /** Immutable-by-contract resources captured once before a Run's first model attempt and shared by every retry. */
 export interface AgentRunContext {
@@ -121,6 +117,8 @@ export interface ChatAgentDeps {
   /** Usage-capture seam (batch 6, R1 tier 2): fired DETACHED on committed turns only, alongside the auto-memory
    *  fire (same never-adds-latency contract); a retract or a thrown ending fires nothing. Absent = today's behavior. */
   onUsage?: (report: TurnUsageReport) => void;
+  /** The configured non-history share of the calibrated context window; actual stable costs consume it first. */
+  requestEnvelopeReserve?: () => number;
   /** R2 overflow seam (batch 6): fired ONCE per turn, right before the single classified retry, with the observed
    *  input tokens (parsed from the provider error body, else our own estimate of the same request). main.ts wires
    *  the window calibrator's onOverflow + the counts-only warn. Absent = no retry, today's propagation. */
@@ -220,19 +218,22 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
 async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): AsyncIterable<string> {
   const { store, approval } = deps;
   const { characterId, message, attachments, images, vision, userSeq, primary, state } = attempt;
-  const controlMessage = turn?.controlInput ?? message; const history = store.history(characterId);
+  const controlMessage = turn?.controlInput ?? message; const replay = store.project(characterId); const history = replay.messages;
   // ONE clock read per attempt: the instructions' day line and the tail's time line must agree (Q4).
   const now = Date.now();
   const instructions = composeInstructions(deps, { characterId, message: controlMessage, runInstructions: attempt.runContext?.instructions }, now);
   const selectedModel = vision ? vision.model : deps.model; const { model, observability } = createRunObservabilityModel({ model: selectedModel, lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId });
   if (turn && observability) turn.toolObserver = observability.tools;
   const tools = assembleTurnTools(deps, attempt, turn); const toolOrder = Object.keys(tools).sort((left, right) => left < right ? -1 : left > right ? 1 : 0);
+  let preparedTools: ReadonlyArray<Record<string, unknown>> | undefined;
+  const requestTelemetry: Telemetry = { onLanguageModelCallStart: (event) => { preparedTools = event.tools ?? []; } };
   const agent = new ToolLoopAgent({
     model,
     instructions,
     tools,
     toolOrder,
-    telemetry: observability ? { isEnabled: true, recordInputs: false, recordOutputs: false, integrations: [observability.telemetry] } : undefined,
+    telemetry: { isEnabled: true, recordInputs: false, recordOutputs: false,
+      integrations: observability ? [observability.telemetry, requestTelemetry] : [requestTelemetry] },
     stopWhen: [isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS), ...(deps.stopConditions ?? [])],
     // Compatibility seam for focused tests and pre-Slice-3 callers. Production Batch 1 leaves this absent because
     // MCP execution is already guarded by its canonical adapter and `ask` fails closed before the raw closure.
@@ -290,7 +291,7 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   // Graceful ending (the SDK emitted an `abort` part then closed): the same retract check on the clean path.
   if (primary && userSeq !== undefined && await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
   if (primary) fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
-  if (primary) fireUsageReport(deps, { usage: result.usage, instructions, outgoing });
+  if (primary) fireUsageReport(deps, { usage: result.usage, instructions, outgoing, tools, toolOrder, preparedTools, replay: replay.measurement });
 }
 
 function assembleTurnTools(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): ToolSet {
@@ -330,24 +331,6 @@ function fireDetachedTurnWrites(deps: ChatAgentDeps, ctx: { characterId: string;
   if (ctx.imageRefs.length > 0) {
     void deps.imageMemory?.onImageTurn({ characterId: ctx.characterId, refs: ctx.imageRefs, caption: ctx.message });
   }
-}
-
-// Batch-6 usage-capture seam (R1 tier 2), committed path only: `result.usage` is a PromiseLike settled after stream
-// end (the all-steps sum, verified against ai@7.0.17 dist). Fired void with the rejection swallowed — a usage
-// promise that rejects (abort during step 0) reports nothing; no sample beats a fabricated one. The estimate is
-// computed HERE (off the turn's critical path) from the exact strings/messages the request carried; tool schemas
-// deliberately ride the historyRatio reserve instead of the estimate (batch-6 design §2.1).
-function fireUsageReport(
-  deps: ChatAgentDeps,
-  ctx: { usage: PromiseLike<{ inputTokens: number | undefined; outputTokens: number | undefined }>; instructions: string; outgoing: ModelMessage[] },
-): void {
-  const report = deps.onUsage;
-  if (!report) return;
-  const estimatedInput = estimateTokens(ctx.instructions) + estimateMessagesTokens(ctx.outgoing);
-  void Promise.resolve(ctx.usage).then(
-    (usage) => report({ inputTokens: usage.inputTokens, outputTokens: usage.outputTokens, estimatedInput }),
-    () => undefined,
-  );
 }
 
 interface RetractInput {
