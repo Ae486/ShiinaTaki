@@ -60,6 +60,12 @@ export interface StackOptions {
   seedMcpServers?: Record<string, unknown>;
   /** Test-only hook to prepare the migrated SQLite data directory immediately before Core starts. */
   prepareCoreData?: (coreDataDir: string) => void;
+  /** Bounded isolated context/cache env for one scenario; credentials and transport identity are not overridable. */
+  coreEnv?: Partial<Record<
+    "TAKI_PROVIDER_INCLUDE_USAGE" | "TAKI_PROVIDER_CONTEXT_TOKENS" | "TAKI_CONTEXT_HISTORY_RATIO" |
+    "TAKI_COMPACT_TRIGGER_RATIO",
+    string
+  >>;
 }
 
 /** One node-side gate decision from <node dataDir>/audit.jsonl (names-only except exec's command). */
@@ -157,7 +163,7 @@ async function bootParts(options: StackOptions): Promise<Parts> {
   const coreDataDir = mkdtempSync(join(tmpdir(), "taki-e2e-core-"));
   const nodeDataDir = mkdtempSync(join(tmpdir(), "taki-e2e-node-"));
   const secondNodeDataDir = options.secondNode ? mkdtempSync(join(tmpdir(), "taki-e2e-node-b-")) : null;
-  const coreEnv = baseCoreEnv(port, coreDataDir, provider);
+  const coreEnv: Record<string, string> = { ...baseCoreEnv(port, coreDataDir, provider), ...options.coreEnv };
   // The dev L1 drive is env double-gated: the core only registers capability.trigger when this is exactly "1".
   if (options.devTrigger) coreEnv.TAKI_DEV_TRIGGER = "1";
   // Pre-boot seeding must land BEFORE the core opens the db / reads its config files (sequential single-writer).

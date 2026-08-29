@@ -4,6 +4,7 @@ import { createExtensionRegistry, type ExtensionCandidate } from "./extension-re
 import { createExtensionTools } from "./extension-tools.ts";
 
 const RUN = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+const OTHER_RUN = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const HOST_A = "11111111-1111-4111-8111-111111111111";
 const HOST_B = "22222222-2222-4222-8222-222222222222";
 const options = { toolCallId: "call-1", messages: [] } as unknown as ToolExecutionOptions<unknown>;
@@ -26,9 +27,9 @@ function candidate(overrides: Partial<ExtensionCandidate> = {}): ExtensionCandid
   };
 }
 
-function registry(candidates: ExtensionCandidate[], budget = { maxEntries: 8, maxDescriptionChars: 128, maxSearchResults: 4, maxCalls: 2 }) {
+function registry(candidates: ExtensionCandidate[], budget = { maxEntries: 8, maxDescriptionChars: 128, maxSearchResults: 4, maxCalls: 2 }, runId = RUN) {
   return createExtensionRegistry({
-    runId: RUN,
+    runId,
     primaryHostId: HOST_A,
     hosts: [{ hostId: HOST_A, available: true, connectionGeneration: 2, catalogGeneration: 3, extensionCount: candidates.length }],
     candidates,
@@ -37,6 +38,29 @@ function registry(candidates: ExtensionCandidate[], budget = { maxEntries: 8, ma
 }
 
 describe("extension registry", () => {
+  it("keeps model context stable across Runs while preserving each captured authority", async () => {
+    const firstCall = vi.fn(async () => ({ binding: "first" }));
+    const secondCall = vi.fn(async () => ({ binding: "second" }));
+    const first = registry([candidate({ call: firstCall })], undefined, RUN);
+    const second = registry([candidate({ call: secondCall })], undefined, OTHER_RUN);
+    const extensionId = first.snapshot.entries[0]!.identity.extensionId;
+
+    expect(first.renderContext()).toBe(second.renderContext());
+    expect(first.renderContext()).not.toContain(RUN);
+    expect(second.renderContext()).not.toContain(OTHER_RUN);
+    expect(first.snapshot.runId).toBe(RUN);
+    expect(second.snapshot.runId).toBe(OTHER_RUN);
+    expect(first.discover({}).runId).toBe(RUN);
+    expect(second.describe({ extensionId }).runId).toBe(OTHER_RUN);
+
+    await expect(first.call({ extensionId, input: { registry: "first" } }, options))
+      .resolves.toMatchObject({ ok: true, output: { binding: "first" } });
+    await expect(second.call({ extensionId, input: { registry: "second" } }, options))
+      .resolves.toMatchObject({ ok: true, output: { binding: "second" } });
+    expect(firstCall).toHaveBeenCalledOnce();
+    expect(secondCall).toHaveBeenCalledOnce();
+  });
+
   it("builds deterministic host-qualified ids and rejects every colliding candidate", () => {
     const first = candidate();
     const duplicate = candidate({ displayName: "Duplicate" });

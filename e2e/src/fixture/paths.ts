@@ -1,10 +1,10 @@
 /**
- * INPUT:  this file's repo location (fixed layout) + optional <repo>/.env.local for real provider credentials
+ * INPUT:  this file's repo location + optional TAKI_E2E_REAL_ENV_FILE or <repo>/.env.local provider credentials
  * OUTPUT: CORE_DIR / TAKI_NODE_BIN paths + dummyProviderEnv() / realProviderEnv() builders
  * POS:    e2e/fixture — the single place the harness knows the repo layout; test scope only
  */
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseEnv } from "node:util";
 
@@ -25,7 +25,9 @@ export const TAKI_NODE_BIN = join(
 const PROVIDER_KEYS = ["TAKI_PROVIDER_BASE_URL", "TAKI_PROVIDER_API_KEY", "TAKI_PROVIDER_MODEL"] as const;
 
 function envLocal(): Record<string, string | undefined> {
-  const path = join(REPO_ROOT, ".env.local");
+  const path = process.env.TAKI_E2E_REAL_ENV_FILE
+    ? resolve(process.env.TAKI_E2E_REAL_ENV_FILE)
+    : join(REPO_ROOT, ".env.local");
   if (!existsSync(path)) return {};
   return parseEnv(readFileSync(path, "utf8"));
 }

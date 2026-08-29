@@ -231,6 +231,19 @@ practice; the pull-only shape was rejected on evidence (models never proactively
 - Prompt WORDING about time discipline (awareness norms) is deliberately absent — it lands with T4's prompt-design
   pass, as one optimization, not piecemeal.
 
+## Provider request prefixes are semantic and canonical
+
+- Fresh Run/Attempt/effect/correlation identities remain in Core state, events, telemetry, governance, approvals, and
+  execution closures. They never enter model-visible system instructions or tool schemas solely for correlation.
+- ChatAgent assembles one ToolSet per Attempt and supplies a complete provider-facing `toolOrder`, sorted by the
+  locale-independent comparator `a < b ? -1 : a > b ? 1 : 0`. Execution lookup continues to use the same captured
+  ToolSet and closures.
+- Within one tool-loop Run, each continuation strictly append-extends the prior provider messages. Across ordinary
+  Turns, the stable prefix reaches the prior plain user text; its old non-persisted `<turn-context>` tail is
+  intentionally absent and is an explained boundary, not a persistence target.
+- Regression tests compare structured system/tool request values without logging prompt content. Real cache acceptance
+  reads provider-neutral normalized usage per request and keeps compaction/window movement outside the fixture.
+
 ## Scenario: Scheduled Task Trigger Provider
 
 ### 1. Scope / Trigger

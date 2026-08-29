@@ -220,17 +220,18 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
 async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): AsyncIterable<string> {
   const { store, approval } = deps;
   const { characterId, message, attachments, images, vision, userSeq, primary, state } = attempt;
-  const controlMessage = turn?.controlInput ?? message;
-  const history = store.history(characterId);
+  const controlMessage = turn?.controlInput ?? message; const history = store.history(characterId);
   // ONE clock read per attempt: the instructions' day line and the tail's time line must agree (Q4).
   const now = Date.now();
   const instructions = composeInstructions(deps, { characterId, message: controlMessage, runInstructions: attempt.runContext?.instructions }, now);
   const selectedModel = vision ? vision.model : deps.model; const { model, observability } = createRunObservabilityModel({ model: selectedModel, lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId });
   if (turn && observability) turn.toolObserver = observability.tools;
+  const tools = assembleTurnTools(deps, attempt, turn); const toolOrder = Object.keys(tools).sort((left, right) => left < right ? -1 : left > right ? 1 : 0);
   const agent = new ToolLoopAgent({
     model,
     instructions,
-    tools: assembleTurnTools(deps, attempt, turn),
+    tools,
+    toolOrder,
     telemetry: observability ? { isEnabled: true, recordInputs: false, recordOutputs: false, integrations: [observability.telemetry] } : undefined,
     stopWhen: [isStepCount(deps.maxSteps ?? DEFAULT_MAX_STEPS), ...(deps.stopConditions ?? [])],
     // Compatibility seam for focused tests and pre-Slice-3 callers. Production Batch 1 leaves this absent because

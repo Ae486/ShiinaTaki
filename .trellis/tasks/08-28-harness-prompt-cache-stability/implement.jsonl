@@ -1,0 +1,7 @@
+{"file":".trellis/spec/backend/agent-runtime.md","reason":"Stable-early/volatile-late Replay View, tool persistence and installed AI SDK verification contracts."}
+{"file":".trellis/spec/backend/extension-discovery.md","reason":"Immutable per-Run extension snapshot and sealed extensionId routing; prompt prose is not authority."}
+{"file":".trellis/spec/backend/mcp-lifecycle.md","reason":"Captured MCP generation leases must remain sealed and never redirect after prompt stabilization."}
+{"file":".trellis/spec/backend/e2e-harness.md","reason":"Key-gated real-agent test shape, isolated withStack lifecycle and no-content evidence rules."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Core size, header/index, focused tests, boot and full quality gates."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Resolve missing AI SDK and DSH details from installed/reference source rather than memory."}
+{"file":".trellis/tasks/08-28-harness-prompt-cache-stability/research/prompt-prefix-cache-implementation-brief-2026-08-28.md","reason":"Dispatch-sized root cause, exact source routing, required fix, prefix caveat and real-provider threshold."}

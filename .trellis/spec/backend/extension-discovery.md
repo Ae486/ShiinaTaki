@@ -102,6 +102,8 @@ authenticated opaque id, never a display label or filesystem path.
   same owner identity when the extension was found; cancellation and unknown outcome are explicit state values.
 - The Run snapshot is frozen and captures direct MCP tools, Skill read leases, Host routing bindings, host generations,
   and a bounded discovery budget. Reload/reconnect affects later Runs only.
+- Model-visible extension context states the eligible count and immutable-snapshot/routing/permission rules, but never
+  renders the snapshot Run UUID. Snapshot/result schemas and private registry bindings retain the UUID internally.
 - Transfer calls require both the sealed target Host id and an advertised transfer capability. Missing, stale,
   disconnected, or unknown-outcome transfers fail closed and are never queued or replayed.
 
@@ -131,8 +133,9 @@ authenticated opaque id, never a display label or filesystem path.
 ### 6. Tests Required
 
 - Shared schema tests: strict round-trips, bounded fields, collision diagnostics, and rejection of secrets/paths.
-- Core registry/context tests: deterministic identity, duplicate exclusion, immutable snapshot, stale generation,
-  call budgets, explicit transfer refusal, and overflow retry reuse.
+- Core registry/context tests: deterministic identity, Run-id-free byte-stable rendered context across different Runs,
+  per-registry captured call binding, duplicate exclusion, immutable snapshot, stale generation, call budgets,
+  explicit transfer refusal, and overflow retry reuse.
 - Desktop tests: current-client suppression, reconnect refetch, owner/generation rendering, and no local cache/replay.
 - Real-process E2E: two isolated Nodes, same-capability refusal, explicit A/B routing, reconnect generation replacement,
   catalog replacement, stale response rejection, Host B isolation, cooperative cancellation, effect unknown outcome,

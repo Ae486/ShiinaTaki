@@ -26,6 +26,7 @@ Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pn
 - exec-audit-command.e2e.test.ts — #22 audit records `command` for exec, absent for non-exec
 - hallucination-l2.e2e.test.ts — D1 multi-turn hallucination reproduction: seeded verbal-success pollution; the next turn must really invoke the tool AND persist tool rows (red pre-fix, green post agent-harness-improve)
 - name-recall-l2.e2e.test.ts — T5 batch 5 flagship: the user's name exists ONLY in the seeded memory store (never in the timeline); the agent must memory_search and answer it (retention proof — green pre- AND post-5b overhaul, guards the post-R6 recall path)
+- prompt-prefix-cache.e2e.test.ts — key-gated isolated real-provider acceptance over stable long history; proves one names-only Core tool path, per-request normalized usage arithmetic, positive post-cold cache reads, and the >=50% follow-up prefix-reuse gate without logging content or ids
 
 L2 dual-track (real-LLM, key-gated via it.skipIf; MAY red until agent-tool-timeline — the red catches the H2/tool-call
 hallucination, do not weaken). Each asserts the agent really invoked the tool (core log) AND the end-to-end result is

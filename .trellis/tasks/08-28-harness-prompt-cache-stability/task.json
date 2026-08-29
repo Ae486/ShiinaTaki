@@ -1,0 +1,33 @@
+{
+  "id": "harness-prompt-cache-stability",
+  "name": "harness-prompt-cache-stability",
+  "title": "Harness prompt-prefix cache stability",
+  "description": "Stabilize the model-visible request prefix across adjacent Runs without weakening per-Run extension authority, then prove materially higher DeepSeek cache reuse with deterministic request-shape tests and a real upstream probe.",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": "Core ChatAgent request assembly, extension Run context rendering, prefix-stability tests, DSH comparison research, and real DeepSeek cache verification; no Monitor UI work",
+  "package": "core",
+  "priority": "P1",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-08-28",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "08-28-dsh-observability-expansion",
+  "relatedFiles": [
+    "packages/core/src/agents/chat-agent.ts",
+    "packages/core/src/extensions/extension-registry.ts",
+    "packages/core/src/extensions/extension-run-context.ts",
+    "packages/core/src/harness/run-snapshot-capture.ts",
+    "references/deepseek-harness-master/packages/core/agent-loop/tests/request-cache.e2e.ts",
+    "references/deepseek-harness-master/packages/llm/llm-deepseek/README.md"
+  ],
+  "notes": "Implementation, formal check, two isolated real DeepSeek probes, and owner manual acceptance passed. Follow-up cache reuse reached 99.46% and 99.45% versus the 10.1% baseline while sealed per-Run authority remained intact. Complete and archive before D68-B Monitor UI.",
+  "meta": {}
+}
