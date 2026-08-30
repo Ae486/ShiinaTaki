@@ -30,11 +30,12 @@ reopen the architecture decision or modify production code.
 After explore, D68 is executed as producer/projection work followed by the DSH-shaped Desktop layout. The real D68-A
 usage evidence exposed an avoidable Harness prefix-cache defect; archived child task `08-28-harness-prompt-cache-stability`
 closed that gate and proved materially improved real-provider cache reuse. A second child task,
-`08-29-compaction-harness`, now owns the token-first, Memory-provider-independent context-management redesign and is a
-required gate before D68-B UI work. The UI must not become the next priority while a known long-history/compaction defect
-can still invalidate context or provider cost. Each executable task/slice has one impl and one check, with no secondary
-agent dispatch. Before each dispatch, the main session sets the session-scoped task pointer. The prompt starts with the
-exact `Active task:` path and requires child-side `task.py current --source` verification/correction before work begins.
+`08-29-compaction-harness`, now owns token-first Replay, complete-request pressure, general Context Reduction,
+Memory-provider-independent composition, and durable summary lifecycle. It is a required gate before D68-B UI work. The
+UI must not become the next priority while a known long-history/compaction defect can still invalidate context or provider
+cost. Each executable task/slice has one impl and one check, with no secondary agent dispatch. Before each dispatch, the
+main session sets the session-scoped task pointer. The prompt starts with the exact `Active task:` path and requires
+child-side `task.py current --source` verification/correction before work begins.
 
 ## 2. Reference mapping: copy DSH, adapt only domain boundaries
 

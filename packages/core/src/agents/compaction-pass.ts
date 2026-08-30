@@ -1,22 +1,18 @@
 /**
  * INPUT:  the replay view's size/budget, timeline + summary repos, the MemoryFlushPort, the UtilitySlot,
  *         the compaction knobs (context-config), a Logger; maybeRun(characterId) per completed turn
- * OUTPUT: createCompactionPass(deps) -> { maybeRun }; buildCompactionPrompt; COMPACTION_SUMMARY_REMINDER
+ * OUTPUT: createCompactionPass(deps) -> durable coordinator plus the reviewed prompt contract
  * POS:    core/agents — T5-R5's background compactor: an EXTERNAL summarizer on the utility slot (never the chat
  *         agent), riding auto-memory's per-character chain LAST; flush-before-retire, through_seq advances only on
  *         full success; the chat turn never waits
  */
-import { generateText } from "ai";
-import type { SummaryRepo } from "../db/summary-repo.ts";
-import type { TimelineRepo } from "../db/timeline-repo.ts";
-import type { AutoMemoryCompact } from "../memory/auto-memory.ts";
-import type { MemoryFlushOutcome, MemoryFlushPort } from "../memory/memory-flush-port.ts";
-import { renderTranscript } from "../memory/render-transcript.ts";
-import type { UtilitySlot } from "../memory/utility-slot.ts";
 import { MEMORY_VOICE_RULE } from "../memory/write-convention.ts";
 import { renderDayDate } from "../time/time-context.ts";
-import { COMPACTION_RETAIN_RATIO, selectRetirementRange } from "./retirement-selector.ts";
-import { loadReplaySource } from "./replay-source-loader.ts";
+import {
+  createCompactionCoordinator,
+  type CompactionCoordinator,
+  type CompactionCoordinatorDeps,
+} from "./compaction-coordinator.ts";
 
 /*
  * The summary prompt is research/re-compaction-prompts.md Part D (the owner-reviewed draft), transcribed with the
@@ -97,159 +93,9 @@ export function buildCompactionPrompt(previousSummary: string | null, retiringSp
   ].join("\n\n");
 }
 
-/** The conversation store's select-derived numbers — the trigger check is free (batch-7 design §3.1). */
-export interface CompactionView {
-  /** Post-pipeline size of the current replay view. */
-  estimatedTokens(characterId: string): number;
-  /** The history-token wall the view is cut against (the SAME budget closure the store rides). */
-  budget(): number;
-}
+export type CompactionPassDeps = Omit<CompactionCoordinatorDeps, "buildPrompt">;
+export type { CompactionCoordinator, CompactionLogger, CompactionView } from "./compaction-coordinator.ts";
 
-/** Narrow logger seam (auto-memory precedent); counts/ids only — summary text never enters a log line. */
-export interface CompactionLogger {
-  info(obj: object, msg: string): void;
-  warn(obj: object, msg: string): void;
-}
-
-export interface CompactionPassDeps {
-  view: CompactionView;
-  timeline: TimelineRepo;
-  summaries: SummaryRepo;
-  /** Provider-selected flush contract. Legacy owns the watermark; canonical Local explicitly needs no flush. */
-  flush: MemoryFlushPort;
-  slot: UtilitySlot;
-  config: { triggerRatio: number; keepMessages: number };
-  logger: CompactionLogger;
-}
-
-export function createCompactionPass(deps: CompactionPassDeps): AutoMemoryCompact {
-  return {
-    async maybeRun(characterId) {
-      const boundary = retirementBoundary(deps, characterId);
-      if (boundary === null) return;
-      if (!(await flushRetiringSpan(deps, characterId, boundary))) return;
-      await summarize(deps, characterId, boundary);
-    },
-  };
-}
-
-interface Boundary {
-  newThrough: number;
-  oldThrough: number;
-  /** The view size that tripped the trigger (the counts-only log's `before`). */
-  before: number;
-}
-
-// Trigger + boundary, both computed at pass start (race safety: a turn landing DURING the pass only extends the
-// live tail — newThrough covers exclusively rows that existed when the pass began, and that turn reads the OLD
-// view until the upsert lands).
-function retirementBoundary(deps: CompactionPassDeps, characterId: string): Boundary | null {
-  const before = deps.view.estimatedTokens(characterId);
-  const wall = deps.view.budget();
-  // R5: pre-compact at ~80% of the history WALL — the budget the view is cut against. The raw provider window
-  // cannot be the denominator: the view never exceeds historyRatio × window, so that trigger would never fire.
-  if (!Number.isFinite(wall) || before <= wall * deps.config.triggerRatio) return null;
-  const oldThrough = deps.summaries.get(characterId)?.throughSeq ?? 0;
-  // DSH's checked retainRatio (0.16) is adapted to this Replay View's history wall. The row count remains only a
-  // minimum-tail/emergency guard and is never the ordinary capacity metric.
-  const retainTokens = Math.floor(wall * COMPACTION_RETAIN_RATIO);
-  const source = loadReplaySource({
-    repo: deps.timeline,
-    characterId,
-    throughSeq: oldThrough,
-    candidateBudget: retainTokens,
-    minimumRows: deps.config.keepMessages + 1,
-  });
-  // A bounded source with unresolved/unknown older evidence cannot prove a balanced retirement edge. Leave the
-  // summary authoritative and retry on a later trigger rather than advancing through an uncertain range.
-  if (source.backstopHit) {
-    deps.logger.warn(
-      { characterId, loadedRows: source.loadedRows, oldestLoadedSeq: source.oldestLoadedSeq },
-      "retirement source backstop reached; compaction deferred",
-    );
-    return null;
-  }
-  const selection = selectRetirementRange(source.entries, retainTokens, deps.config.keepMessages);
-  if (selection === null) return null;
-  const newThrough = selection.newThroughSeq;
-  if (newThrough <= oldThrough) return null;
-  return { newThrough, oldThrough, before };
-}
-
-// §3.2 step 2 (flush-first): the active provider must explicitly approve retirement before summary coverage advances.
-async function flushRetiringSpan(deps: CompactionPassDeps, characterId: string, boundary: Boundary): Promise<boolean> {
-  let outcome: MemoryFlushOutcome;
-  try {
-    outcome = await deps.flush.prepareRetirement({
-      characterId,
-      fromSeq: boundary.oldThrough + 1,
-      throughSeq: boundary.newThrough,
-      operationId: flushOperationId(characterId, boundary),
-    });
-  } catch {
-    // A provider adapter that violates the outcome contract is still a retryable boundary failure. Do not let a raw
-    // provider exception reach logs or advance summary coverage.
-    warnFlushDeferred(deps, {
-      characterId,
-      throughSeq: boundary.newThrough,
-      outcome: { status: "retryable_failure", code: "MEMORY_FLUSH_FAILED" },
-    });
-    return false;
-  }
-  if (outcome.status === "not_required") return true;
-  if (outcome.status === "success") {
-    // A provider may report a committed watermark beyond the requested range when an earlier flush covered it, but a
-    // lower/non-finite value is not safe evidence for retiring this boundary. Keep the prior summary authoritative.
-    if (Number.isInteger(outcome.throughSeq) && outcome.throughSeq >= boundary.newThrough) return true;
-    warnFlushDeferred(deps, {
-      characterId,
-      throughSeq: boundary.newThrough,
-      outcome: { status: "retryable_failure", code: "MEMORY_FLUSH_INCOMPLETE" },
-    });
-    return false;
-  }
-  warnFlushDeferred(deps, { characterId, throughSeq: boundary.newThrough, outcome });
-  return false;
-}
-
-// ONE generateText on the utility slot (falls back to the main model — R11); the chat agent is never asked to
-// summarize and no user-visible turn exists (the async half of R5).
-async function summarize(deps: CompactionPassDeps, characterId: string, boundary: Boundary): Promise<void> {
-  const span = deps.timeline.rangeAscending(characterId, boundary.oldThrough, boundary.newThrough);
-  if (span.length === 0) return;
-  const previous = deps.summaries.get(characterId)?.text ?? null;
-  const prompt = buildCompactionPrompt(previous, renderTranscript(span), Date.now());
-  const result = await deps.slot.run("compact", () => generateText({ model: deps.slot.model, prompt }));
-  if (result === undefined || result.text.trim().length === 0) {
-    // A thrown failure was already warned by the slot; empty text is the Hermes reject-empty guard. Either way
-    // the record stays put and the next trigger retries (auto-memory's failure convention).
-    deps.logger.warn({ characterId, through: boundary.newThrough }, "summary generation failed; will retry");
-    return;
-  }
-  // Stored VERBATIM — no length cut exists anywhere on this path (owner ruling 2026-08-02: quality over length;
-  // a silently truncated rolling summary would propagate its damage into every future merge).
-  deps.summaries.upsert({ characterId, throughSeq: boundary.newThrough, text: result.text });
-  deps.logger.info(
-    { characterId, throughSeq: boundary.newThrough, before: boundary.before, after: deps.view.estimatedTokens(characterId) },
-    "conversation compacted",
-  );
-}
-
-function flushOperationId(characterId: string, boundary: Boundary): string {
-  return `compact:${characterId}:${boundary.oldThrough + 1}:${boundary.newThrough}`;
-}
-
-function warnFlushDeferred(
-  deps: CompactionPassDeps,
-  input: {
-    characterId: string;
-    throughSeq: number;
-    outcome: Extract<MemoryFlushOutcome, { status: "retryable_failure" | "permanent_unavailable" }>;
-  },
-): void {
-  const { characterId, throughSeq, outcome } = input;
-  deps.logger.warn(
-    { characterId, throughSeq, status: outcome.status, code: outcome.code },
-    "pre-retire memory flush unavailable; compaction deferred",
-  );
+export function createCompactionPass(deps: CompactionPassDeps): CompactionCoordinator {
+  return createCompactionCoordinator({ ...deps, buildPrompt: buildCompactionPrompt });
 }

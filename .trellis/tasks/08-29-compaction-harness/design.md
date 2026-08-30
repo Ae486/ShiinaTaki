@@ -2,10 +2,9 @@
 
 ## 0. Status and decision boundary
 
-This document records the design gate for `08-29-compaction-harness`. It is based on the live TakiAgent source,
-ratified T5 decisions, ADR 0005/0008/0009, and the checked-in DeepSeek Harness (DSH) `0.1.1-rc.2` reference. It does
-not authorize production edits. Implementation starts only after this design and `implement.md` are reviewed and the
-task is explicitly activated.
+This document is the active design contract for `08-29-compaction-harness`. It is based on the live TakiAgent source,
+ratified T5 decisions, ADR 0005/0008/0009, and the checked-in DeepSeek Harness (DSH) `0.1.1-rc.2` reference. Slices 1-3
+are implemented and checked; this revision records the pressure/reduction contract that governs pending Slice 4.
 
 The design is intentionally evolutionary. The first implementation slice establishes stable seams and evidence; it is
 not a claim that the first release is the final context architecture. Later slices may revise contracts when tests or
@@ -96,7 +95,7 @@ boundary design, not its package names or defaults.
 | Separate `CompactionEngine` with `compactIfNeeded`, `compactNow`, `compactRegion` (`packages/compaction/compaction/src/index.ts:87-169`) | Keeps compaction out of the privileged agent loop and gives all triggers one operation path | **Adopt the boundary.** Implement a Core-owned coordinator; reserve manual operation for a later slice. |
 | Separate Token Meter service (`packages/llm/token-meter/README.md:5-20`) | One immutable measurement is reused by pressure, range selection, and projections | **Adopt and adapt.** Use TakiAgent's estimator and provider usage anchors, not DSH char/4. |
 | Pressure listener plus canonical overflow listener (`compaction-basic/src/index.ts:132-223`) | Proactive maintenance and reactive recovery | **Adopt pressure. Preserve T5 R2 overflow behavior initially.** Request-local overflow recovery may be enabled only after SDK evidence proves tool effects are not replayed. |
-| Model-free tool-result pruner, then remeasure (`compaction-basic/src/index.ts:278-325`; pruner package) | Avoids an auxiliary model call when deterministic reduction is sufficient | **Adopt the order.** Keep TakiAgent's semantic, projection-only folds and add safe single-result head/tail reduction only where evidence requires it. |
+| Model-free tool-result pruner, then remeasure (`compaction-basic/src/index.ts:278-325`; pruner package) | Avoids an auxiliary model call when deterministic reduction is sufficient | **Adopt and generalize the order.** Tool-result pruning is one `ContextReducer`; TakiAgent applies the same deterministic-reduce/remeasure contract to other safely reducible request components. |
 | Token-priced head range with tool-pair balance (`compaction-basic/src/region.ts:90-133,314-335`) | Prevents orphan calls/results at replacement boundaries | **Adopt.** Make pair balance a shared predicate for replay, retirement, and recovery. |
 | Prefix replay + final compaction instruction (`compaction-basic/src/region.ts:488-513`; `summarizer.ts:72-164`) | Preserves provider cacheable prefix for the auxiliary call | **Optional optimization.** Use only for same-route calls after privacy and real-provider measurements; correctness must not depend on it. |
 | Empty/aborted/truncated/non-shrinking summary rejection (`summarizer.ts:164-224`) | Prevents silent corruption and compaction loops | **Adopt.** Keep no hard summary cap, but reject invalid or non-shrinking output and retain the previous checkpoint. |
@@ -140,7 +139,8 @@ boundary design, not its package names or defaults.
 
 - Token-first context budgeting; provider usage is a calibration anchor, with a deterministic estimator fallback.
 - One immutable request/context measurement shared by trigger, replay projection, compaction selection, and observability.
-- Deterministic tool-result pruning/folding before an auxiliary summary call, followed by immediate remeasurement.
+- Deterministic Context Reduction before an auxiliary summary call, followed by immediate remeasurement. DSH's
+  tool-result pruner is the proven first reducer; TakiAgent's pipeline also admits bounded non-tool reducers.
 - Balanced tool-call/result boundaries, including a single oversized unit rule that is explicit and observable.
 - Append-only evidence plus a recomputed, replaceable Replay View.
 - A separate Utility Slot summarizer, with same-route cache-shaped input as an optimization only.
@@ -170,7 +170,7 @@ Core composition root
   │    ├─ full candidate loader (paged; bounded emergency row guard)
   │    ├─ token meter / provider usage anchor
   │    ├─ summary substitution
-  │    ├─ semantic folds and safe tool-result pruning
+  │    ├─ ContextReductionPipeline (tool and non-tool reducers)
   │    ├─ balanced tool-pair selection
   │    └─ ModelMessage request projection
   ├─ CompactionCoordinator (independent of Memory Provider)
@@ -207,17 +207,20 @@ field, the adapter maps it to the existing Run or Character scope.
 
 ### 4.2 Context and token contract
 
-`ContextProjector` remains pure with respect to durable state. Its input is Timeline + SummaryRepo + captured config;
-its output contains the ModelMessage projection and a bounded measurement:
+`ContextProjector` remains pure with respect to durable state. Its input is Timeline + SummaryRepo + the complete
+captured request envelope; its output contains the ModelMessage projection and a bounded measurement:
 
 ```text
 historyTokens
 summaryTokens
-foldedTokensSaved
 instructionTokens
+characterPromptTokens
+memoryTokens
 toolSchemaTokens
-responseReserveTokens
-projectedRequestTokens
+currentTurnTokens
+dynamicContextTokens
+reductionTokensSaved
+projectedInputTokens
 accountingQuality (provider | calibrated | estimated | unknown)
 sourceRevision / summaryRevision
 ```
@@ -228,13 +231,65 @@ pathological database result; hitting it emits a durable/diagnostic `backstop_hi
 token exhaustion. The exact emergency default is a local policy to be selected from benchmark evidence in Slice 1,
 not a new silent constant.
 
-The existing `historyRatio` remains a conservative fallback for request construction. Full request pressure uses the
-actual stable instructions and tool schemas when available, and provider usage anchors the estimator after a successful
-call. Missing upstream usage remains `estimated`/`unknown`; no synthetic cache or usage values are created.
+`projectedInputTokens` means the complete projected input sent on the next model request: system/governance
+instructions, Character persona/soul prompt, Memory injection, tool/MCP schemas, rolling summary, replay history, the
+current user message, and request-local dynamic context. Provider-reported `inputTokens`, when authoritative, calibrates
+this whole envelope after a successful call. Cache-read tokens still occupy context capacity and are never subtracted
+from pressure. Missing upstream usage remains `estimated`/`unknown`; no synthetic cache or usage values are created.
+
+Normal proactive pressure is one ratio:
+
+```text
+projectedInputTokens >= effectiveContextWindowTokens * 0.8
+```
+
+`0.8` is a TakiAgent-local initial policy that leaves headroom for output, estimator error, and one continuing turn. It
+is configurable and observable, but it is not multiplied by `historyRatio` or a second `triggerRatio`. Component token
+counts remain diagnostics and reducer-selection inputs, not separate pressure authorities. Effective-window calibration
+from provider usage remains valid. The post-overflow 90% shrink is a recovery calibration rule, not this trigger.
+
+Configuration migration is explicit. The existing `TAKI_COMPACT_TRIGGER_RATIO` may remain as the compatibility input
+for the new pressure ratio, but its denominator changes from the replay-history budget to the effective context window.
+`TAKI_CONTEXT_HISTORY_RATIO` must not participate in the normal trigger once complete-input measurement is active; it may
+remain temporarily only for legacy/unmeasured request admission and should be deprecated or removed through a tested
+compatibility step rather than silently reinterpreted.
+
+#### 4.2.1 Context Reduction contract
+
+Context Reduction is a pure, deterministic projection stage and is not synonymous with tool-result pruning. Reducers
+operate on typed candidates, preserve source evidence, report measured savings, and cannot mutate Timeline, SummaryRepo,
+Memory, or completed tool effects.
+
+Default reducible candidates include:
+
+- older dialogue and replaceable rolling-summary material;
+- Tool/MCP/search/file-read results, including bounded head/tail or semantic fact projections;
+- stale or repeated state snapshots and duplicate observations;
+- reasoning and bounded media descriptions that are no longer needed verbatim.
+
+Default protected candidates include core system/security/governance instructions, Character identity/persona, current
+authoritative Memory, the current user message, and recent dialogue with continuity value. A reducer may omit or fold a
+protected class only through an explicit future policy change recorded in this task/spec, never by generic size pressure.
+
+The order is:
+
+```text
+measure complete request
+  -> apply deterministic reducers in stable priority order
+  -> remeasure complete request
+  -> below 0.8: skip model-backed compaction
+  -> still at/above 0.8: schedule detached rolling compaction
+  -> after durable commit: a later request uses the replacement summary
+```
+
+The turn that detects pressure continues against its admitted projection; it does not wait for the Utility Slot. An
+in-flight compaction never changes the current request. Same-ToolLoop `prepareStep` reduction remains a Slice 4 safety
+investigation because it must not replay or invalidate completed effects.
 
 ### 4.3 Summary and retirement transaction
 
-The coordinator captures a source snapshot before generation:
+After deterministic reduction and remeasurement still prove pressure, the coordinator captures a source snapshot before
+generation:
 
 ```text
 operationId
@@ -259,10 +314,10 @@ It then:
 8. commits `SummaryRepo` replacement and terminal success evidence in one short SQLite transaction using CAS;
 9. releases the lock and exposes bounded counts/quality to logs and future Monitor projections.
 
-The existing summary row remains the model projection checkpoint. A new append-only `conversation_compaction_log`
-(provisional name) may hold lifecycle rows (`started`, `flush_completed`, `summary_generated`, `committed`, `failed`,
-`cancelled`, `abandoned`) and the active-lock uniqueness constraint. It is evidence, not a second conversation or Run
-authority. The exact migration shape may be simplified during implementation if the same invariants are preserved.
+The existing summary row remains the model projection checkpoint. Migration 032 implements a mutable
+`conversation_compaction_operations` recovery/lease cursor plus append-only `conversation_compaction_events` lifecycle
+rows (`started`, `flush_completed`, `summary_generated`, `committed`, `failed`, `cancelled`, `abandoned`). These tables
+are coordination/evidence, not a second conversation or Run authority.
 
 ### 4.4 Memory Provider boundary
 
@@ -317,18 +372,22 @@ enough.
    support is explicit; absent support produces a visible deferred operation rather than a missing capability.
 4. Add lifecycle evidence and future Monitor mapping additively. Do not place summary text, prompts, credentials, raw
    tool payloads, or provider exceptions in Run Events or ordinary logs.
-5. Keep D68-B Monitor UI blocked until the context contract, long-history behavior, and canonical-provider path pass the
-   compaction acceptance gates. The UI must consume semantic facts from this coordinator, not invent page-local metrics.
+5. Keep D68-B Monitor UI blocked until complete projected-input pressure, Context Reduction, long-history behavior, durable
+   lifecycle, and canonical-provider path pass the compaction acceptance gates. The UI must consume semantic facts from
+   this coordinator, not invent page-local metrics.
 
 ## 6. Open decisions deliberately deferred
 
-- The exact emergency row guard and paging batch size: choose from Slice 1 benchmark/SQLite behavior and record the
-  local policy with tests.
+- The emergency source guard is currently an explicit 10,000-row backstop selected and benchmarked in Slice 1. Paging
+  batch size and the guard may be tuned later from measured SQLite behavior, but neither may become an ordinary context
+  boundary.
 - Whether the compaction lifecycle is represented by one append-only table or an additive Run Event category for
   Run-linked operations. The invariant is one durable evidence source; no duplicate event authority.
 - Whether a same-route cache-shaped summarizer is economically beneficial for each provider. Correctness is independent.
 - Whether a semantic summary audit needs a second utility call. Start with deterministic guards; add an audit/retry pass
   only when real quality probes show omissions.
+- The exact reducer priority/retention policies beyond the protected classes above. Slice 4 must derive them from current
+  request shapes and DSH's prune/remeasure behavior, then record any TakiAgent-specific adaptation before implementation.
 - Manual compaction and request-local overflow recovery remain reserved APIs, not first-slice product features.
 
 ## 7. Design acceptance mapping
@@ -338,9 +397,9 @@ enough.
 | Current data flow and hard-cap defect | 1.1, 1.3 |
 | DSH evidence and transfer decisions | 2 |
 | Taki-specific vs general vs defective classification | 3 |
-| Token-first, Memory-independent target | 4.2-4.4 |
+| Token-first, complete projected-input pressure and Memory-independent target | 4.2-4.4 |
+| General Context Reduction and asynchronous visibility | 4.2.1 |
 | Snapshot/CAS, pairing, retry, cancellation, restart | 4.3, 4.5-4.6 |
 | One common Run/Turn/ToolLoop | 4 |
 | Future slices can revise the plan | 0, 6 |
 | D68-B dependency | 5 |
-

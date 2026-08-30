@@ -79,8 +79,9 @@ hierarchy must follow the checked-in DSH Trajectory design rather than the curre
   Monitor tail/backfill behavior belong in D68.
 - The D68-A real usage evidence exposed a Harness prefix-cache defect. Archived child task
   `08-28-harness-prompt-cache-stability` closed that measured provider-cost regression. Child task
-  `08-29-compaction-harness` must now complete its design and approved implementation slices before D68-B UI work so
-  long-history context loss and Memory-lifecycle coupling are not hidden behind the Monitor.
+  `08-29-compaction-harness` must now complete its approved implementation slices before D68-B UI work so long-history
+  context loss, incomplete projected-input pressure accounting, missing general Context Reduction, and Memory-lifecycle
+  coupling are not hidden behind the Monitor.
 - The cross-Home reactive read-model contract, Chat in-flight tool/approval presentation, and the disclosure audit for
   every non-Monitor page (including Skills/MCP) remain D67 follow-up work. D68 must not introduce a competing page-local
   refresh protocol.

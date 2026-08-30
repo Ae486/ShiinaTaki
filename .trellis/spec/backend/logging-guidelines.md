@@ -6,6 +6,8 @@
 - One logger per module via child loggers: `logger.child({ mod: "server" })`.
 - Levels: `error` (broken invariant / lost data), `warn` (degraded but recovered), `info` (lifecycle: start/stop, client pair/connect, task fire), `debug` (per-message detail — default off).
 - Never log: API keys, full LLM prompts/responses (log token counts + ids instead), screenshot bytes, clipboard contents.
+- Model/provider/Utility exceptions may embed request content or credentials. Log a closed internal failure code and a
+  bounded operation label; never pass raw `error.message`, response bodies, or serialized exceptions to ordinary logs.
 
 ## Rust (Shell)
 

@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { createCanonicalMemoryAuthorityRepo } from "../db/canonical-memory-authority-repo.ts";
+import { createCompactionOperationRepo } from "../db/compaction-operation-repo.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createSummaryRepo } from "../db/summary-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
@@ -25,7 +26,7 @@ afterEach(() => {
   }
 });
 
-function boot(canonical: boolean) {
+function boot(canonical: boolean, beforeCompose?: (db: Database) => void) {
   const dataDir = mkdtempSync(join(tmpdir(), "taki-runtime-composition-"));
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   opened.push({ db, dataDir });
@@ -35,6 +36,7 @@ function boot(canonical: boolean) {
   const { logger, records } = createCaptureLogger();
   const epoch = createCanonicalMemoryAuthorityRepo(db).initializeLocalAuthority("2026-08-29T00:00:00.000Z");
   if (canonical) activateMarker(db, epoch.epochId);
+  beforeCompose?.(db);
   const runtime = composeMemoryRuntime({
     db,
     dataDir,
@@ -114,5 +116,34 @@ describe("provider-independent Compaction composition", () => {
 
     expect(fixture.model.doGenerateCalls).toHaveLength(1);
     expect(fixture.summaries.get("taki")?.throughSeq).toBe(6);
+  });
+
+  it("exposes the internal typed cancel/reconcile lifecycle and reconciles expired work at composition", () => {
+    const fixture = boot(true, (db) => {
+      createCompactionOperationRepo(db).begin({
+        operationId: "compact:" + "a".repeat(64),
+        characterId: "taki",
+        reason: "pressure",
+        selectedFromSeq: 1,
+        selectedThroughSeq: 6,
+        capturedTailSeq: 10,
+        expectedSummaryRevision: 0,
+        expectedSummaryThrough: 0,
+        sourceDigest: "b".repeat(64),
+        beforeTokens: 90,
+        provider: "mock-provider",
+        modelId: "mock-model",
+        owner: "expired-generation",
+        now: "2000-01-01T00:00:00.000Z",
+        expiresAt: "2000-01-01T00:10:00.000Z",
+      });
+    });
+
+    expect(fixture.runtime.compaction.cancel("taki")).toBe(false);
+    expect(fixture.runtime.compaction.reconcile()).toBe(0);
+    expect(fixture.db.prepare("SELECT state,failure_code FROM conversation_compaction_operations").get()).toEqual({
+      state: "abandoned",
+      failure_code: "LEASE_EXPIRED",
+    });
   });
 });

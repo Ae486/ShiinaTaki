@@ -52,11 +52,12 @@ export function createUtilitySlot(deps: UtilitySlotDeps): UtilitySlot {
         const value = await task();
         account(totals, value);
         return value;
-      } catch (error) {
+      } catch {
         // Background work is never load-bearing for a chat turn, so a failure is a warn + a skipped pass; the label
-        // is what makes the line diagnosable (content never enters a log — logging-guidelines).
+        // is what makes the line diagnosable. Provider exceptions may contain prompts, payloads, or credentials, so
+        // only the closed failure class crosses the logging boundary.
         totals.usageUnknown += 1;
-        log.warn({ label, err: readable(error) }, "utility task failed");
+        log.warn({ label, code: "UTILITY_TASK_FAILED" }, "utility task failed");
         return undefined;
       }
     });
@@ -98,8 +99,4 @@ function reported(value: unknown): { input: number | undefined; output: number |
 
 function finite(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-
-function readable(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }

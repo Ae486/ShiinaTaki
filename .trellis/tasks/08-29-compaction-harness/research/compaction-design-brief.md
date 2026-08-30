@@ -1,27 +1,30 @@
 # Compaction Harness design brief
 
-This is a compact execution-context summary of the two full research reports in this directory. The full reports remain
-the source of detail; every item below points to a live source or an archived decision.
+This is the compact execution context injected into implementation and check agents. The two full research reports remain
+the source of baseline detail; this brief also records the checked Slice 1/2 state and the approved Slice 3/4 target so a
+later agent does not act on superseded planning.
 
 ## Current TakiAgent facts
 
-- `conversation-store.ts` computes one Replay View closure for `history`, `windowStart`, and `estimatedTokens`
-  (`packages/core/src/agents/conversation-store.ts:98-124`). The order is timeline load -> summary substitution ->
-  pressure folds -> token cut -> ModelMessage projection.
-- The first load is `latestAscending(characterId, REPLAY_WINDOW)` with `REPLAY_WINDOW = 200`
-  (`conversation-store.ts:19-21,137-150`). This happens before token selection, so a summary older than 200 loaded rows
-  disappears even when the token budget has room. `selectWindow` applies the cap again (`context-window.ts:28-30`).
-- The current compactor triggers when projected history estimate is strictly above `budget * triggerRatio` (default
-  `0.8`), retains a DSH-grounded `0.16` token-priced tail plus the explicit `keepMessages` minimum-tail guard (default
-  `40`), flushes first, generates one Utility Slot summary, and advances `throughSeq` only after non-empty output
-  (`compaction-pass.ts:125-224`, `retirement-selector.ts:23-64`, `context-config.ts:49-73`).
+- `conversation-store.ts` computes one Replay View projection for `history`, `windowStart`, and `estimatedTokens`. In
+  measured production mode, Slice 1 now pages through `replay-source-loader.ts` until the token candidate is complete,
+  a summary bridge is reached, history ends, or the explicit 10,000-row emergency backstop is hit. The old 200-row path
+  remains legacy no-budget compatibility only (`conversation-store.ts:15-16,132-157,173-223`;
+  `replay-source-loader.ts:11-21,44-95`).
+- The current Slice 2 compactor still triggers from replay-history pressure strictly above
+  `historyBudget * triggerRatio` and therefore does not yet implement the approved complete-input pressure contract
+  (`compaction-pass.ts:100-106,143-155`). It retains a DSH-grounded `0.16` token-priced tail plus the explicit
+  `keepMessages` minimum-tail guard, flushes first, generates one Utility Slot summary, and advances `throughSeq` only
+  after non-empty output (`compaction-pass.ts:146-235`; `retirement-selector.ts:11-29`). This trigger is a remaining
+  Slice 4 defect, not the target meaning of `0.8`.
 - The user turn is never blocked: `createAutoMemory` runs detached and serializes maintenance per Character
   (`memory/auto-memory.ts:73-121`).
 - Migration 012 stores one overwritable summary row per Character: `through_seq`, text, timestamp; it is not a Timeline
   row (`db/migrations/012-conversation-summary.ts`, `db/summary-repo.ts`).
-- Canonical Local boot does not construct Legacy Memory (`memory/runtime-selector.ts:17-25`), and
-  `runtime-composition.ts` exposes `autoMemory` only from the Legacy object (`memory/runtime-composition.ts:31-48`).
-  Therefore the summary reader remains available but the compaction writer disappears in canonical mode.
+- Slice 2 constructs the Utility Slot and detached Compaction maintenance from Core runtime composition for both Legacy
+  and canonical Local. Canonical activation retires Legacy maintenance and rebinds flush to explicit `not_required`;
+  Hindsight selection still fails explicitly because that authority runtime is not installed
+  (`memory/runtime-composition.ts:31-60,71-99`; `memory/memory-flush-port.ts:18-22,44-50`).
 - TakiAgent's estimator is CJK/image/tool-aware (`memory/token-estimator.ts:10-66`). Provider usage calibrates it, but
   the current replay estimate does not fully price instructions, tool schemas, and response reserve.
 - Current overflow behavior is ratified T5 R2: recalibrate the effective window and retry once only for a clean,
@@ -39,13 +42,13 @@ the source of detail; every item below points to a live source or an archived de
 ## Current defects to address
 
 1. The pre-token 200-row source cliff.
-2. Row-count retention and possible tool-pair splits (resolved by Slice 1; remaining lifecycle/quality work is open).
-3. Legacy-only compactor construction.
-4. No durable compaction lifecycle/lock/restart evidence or source revision CAS.
-5. History-only pressure accounting.
-6. Empty-only summary validation; no strict shrink, truncation, protected-content, or quality guard.
-7. Structured tool-result payloads are absent from `renderTranscript`; argument folding is inert for names-only rows.
-8. Failed utility calls can be retried on every trigger without a durable cooldown/budget.
+2. No durable compaction lifecycle/lock/restart evidence or source revision CAS (Slice 3).
+3. History-budget pressure is still used as the trigger instead of complete projected input (Slice 4).
+4. Deterministic reduction is still tool/history-specific rather than one general measured Context Reduction pipeline
+   with tool and non-tool reducers (Slice 4).
+5. Empty-only summary validation; no strict shrink, truncation, protected-content, or quality guard (Slice 4).
+6. Structured tool-result payloads are absent from `renderTranscript`; argument folding is inert for names-only rows.
+7. Failed utility calls can be retried on every trigger without a durable cooldown/budget.
 
 ## DSH mechanisms verified and transfer decisions
 
@@ -58,7 +61,7 @@ Its Token Meter prefers a provider-usage anchor and applies immutable replay del
 Adopt/adapt:
 
 - independent compaction coordinator and Token Meter;
-- prune -> remeasure -> summarize;
+- deterministic Context Reduction -> remeasure -> summarize, generalizing DSH's tool-result pruner into one reducer;
 - token-priced balanced ranges;
 - durable operation identity, lock, lifecycle, revision/progress proof and restart classification;
 - empty/truncated/non-shrinking summary rejection;
@@ -83,26 +86,42 @@ Reject/defer:
 - Keep detached post-turn operation and pre-retirement memory flush. Make flush a narrow provider adapter; canonical or
   future Hindsight absence must be explicit (`not_required`, retryable, or unavailable), never silent disappearance.
 - Keep T5 R2 overflow semantics until a separately tested request-local recovery seam is proven.
+- Define normal proactive pressure as
+  `projectedInputTokens >= effectiveContextWindowTokens * 0.8`. `projectedInputTokens` covers the complete input envelope:
+  system/governance instructions, Character persona/soul prompt, Memory, tool/MCP schemas, summary, replay history, the
+  current message, and request-local dynamic context. Cache-read tokens still occupy context capacity. The overflow
+  recovery 90% shrink remains calibration, not the trigger.
+- `TAKI_COMPACT_TRIGGER_RATIO` may remain the compatibility input for the new ratio, but its denominator changes to the
+  effective window. `TAKI_CONTEXT_HISTORY_RATIO` is not a normal trigger authority after Slice 4; any temporary
+  legacy/unmeasured admission role must be explicit and tested.
+- Treat Context Reduction as a general projection stage. Tool/MCP/search/file results, old dialogue/summary material,
+  repeated snapshots/observations, reasoning, and bounded media descriptions may be reduced by typed policies; core
+  governance, Character identity, authoritative Memory, the current message, and recent continuity are protected.
 
 ## Target contract
 
 ```text
-TimelineRepo -> pure ContextProjector (paged candidates, token meter, folds, balanced cuts)
-             -> ModelMessage Replay View + bounded ContextMeasurement
+Complete input envelope + TimelineRepo + SummaryRepo
+             -> pure ContextProjector + ContextReductionPipeline
+             -> ModelMessage Replay View + complete projected-input measurement
 CompactionCoordinator -> MemoryFlushPort + Utility Slot + SummaryRepo CAS
                       -> durable lifecycle evidence and restart-safe terminal state
 ```
 
 Ordinary selection is token-first. A row cap is only an explicit emergency estimator/database guard and emits a
-`backstop_hit` fact. Summary replacement remains projection-only; the Timeline is never rewritten. The coordinator is
-constructed for Legacy, canonical Local, and future Hindsight modes. D68-B Monitor UI waits for this contract.
+`backstop_hit` fact. The target order is complete-input measurement -> deterministic reduction -> remeasurement -> skip
+the Utility Slot call when below `0.8`, otherwise detached rolling compaction -> durable commit -> later-request summary
+visibility. Summary replacement remains projection-only; the Timeline is never rewritten. The coordinator is constructed
+independently of Legacy/canonical/future Hindsight Memory selection. D68-B Monitor UI waits for this contract.
 
 ## Planned slices
 
-1. Token-first Replay View/source loading and full request measurement.
-2. Provider-independent coordinator composition and MemoryFlushPort.
-3. Durable summary revision/CAS, lock, lifecycle log, and restart recovery.
-4. DSH-informed pruning, summary quality/retry/cooldown, and end-to-end hardening.
+1. **Complete:** token-first Replay View/source loading with balanced units and the explicit 10,000-row backstop.
+2. **Complete:** provider-independent coordinator composition, one Utility Slot, and MemoryFlushPort.
+3. **Complete:** durable summary revision/CAS, per-Character fenced lease, append-only lifecycle evidence,
+   cancellation/idempotency, atomic commit, and restart recovery. Slice 3 did not add reducers or change the trigger.
+4. **Pending:** complete projected-input pressure, general Context Reduction and remeasurement, summary
+   quality/retry/cooldown, same-ToolLoop safety decision, and end-to-end hardening.
 
 Each slice has one implementation agent and one check agent, targets 2-3 context windows, and may update later slices
 only after recording evidence in task artifacts.

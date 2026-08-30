@@ -95,15 +95,17 @@ update the child design rather than beginning D68-B with a known cost defect.
 
 ## Stage 4.75 — Compaction Harness gate
 
-Complete child task `08-29-compaction-harness` before starting Desktop Monitor layout work. This child owns the read-only
-current-compaction audit, DSH comparison, token-first boundary design, separation from Memory Provider lifecycle,
-durable summary/replay/overflow contracts, and its staged implementation plan. Its implementation gate must cover long
-histories beyond the legacy 200-row backstop, tool-dense and canonical Local paths, concurrent appends, restart/recovery,
-and failed or empty summary attempts. The child may revise the plan as implementation evidence improves it, but must
-not silently turn the first slice into a final architecture.
+Complete child task `08-29-compaction-harness` before starting Desktop Monitor layout work. This child owns the verified
+current-compaction/DSH comparison, token-first Replay, complete projected-input pressure at the configurable `0.8`
+effective-window threshold, general Context Reduction, separation from Memory Provider lifecycle, and durable
+summary/replay/overflow contracts. Its implementation gate must cover long histories beyond the legacy 200-row cliff,
+tool-dense and non-tool reduction, canonical Local paths, concurrent appends, restart/recovery, and failed or empty
+summary attempts. The child may revise the plan as implementation evidence improves it, but must not silently turn the
+first slice into a final architecture.
 
-Exit gate: the design is reviewed, implementation slices are bounded, and D68-B's UI scope explicitly depends on the
-resulting context contract rather than inventing a page-local workaround.
+Exit gate: all Compaction slices are checked; complete projected-input pressure, deterministic reduction/remeasurement, durable
+summary lifecycle, and provider-independent composition are proven; D68-B consumes their semantic facts rather than
+inventing a page-local workaround.
 
 ## Stage 5 — DSH-shaped Desktop Monitor
 

@@ -35,6 +35,7 @@ import { recoveryAdmissionMigration028 } from "./028-recovery-admission.ts";
 import { scheduledTasksMigration029 } from "./029-scheduled-tasks.ts";
 import { scheduledOccurrenceCharacterMigration030 } from "./030-scheduled-occurrence-character.ts";
 import { runUsageDetailsMigration031 } from "./031-run-usage-details.ts";
+import { conversationCompactionLifecycleMigration032 } from "./032-conversation-compaction-lifecycle.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -68,4 +69,5 @@ export const MIGRATIONS: Migration[] = [
   scheduledTasksMigration029,
   scheduledOccurrenceCharacterMigration030,
   runUsageDetailsMigration031,
+  conversationCompactionLifecycleMigration032,
 ];

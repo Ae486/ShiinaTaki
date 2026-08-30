@@ -50,10 +50,15 @@ describe("utility slot serialization (R11: background tasks run serially)", () =
   it("a failing task resolves undefined, warns, and leaves the chain usable", async () => {
     const h = slot();
     const failed = await h.slot.run("boom", async () => {
-      throw new Error("provider down");
+      throw new Error("provider down with sk-secret and raw prompt");
     });
     expect(failed).toBeUndefined();
     expect(h.records.some((r) => r.level === "warn" && r.msg === "utility task failed")).toBe(true);
+    expect(h.records).toContainEqual(expect.objectContaining({
+      obj: { label: "boom", code: "UTILITY_TASK_FAILED" },
+    }));
+    expect(JSON.stringify(h.records)).not.toContain("sk-secret");
+    expect(JSON.stringify(h.records)).not.toContain("raw prompt");
 
     // The next task must still run: a wedged chain would silently stop every later background pass.
     expect(await h.slot.run("after", async () => "ok")).toBe("ok");

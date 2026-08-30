@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import type { LanguageModel } from "ai";
 import { MockLanguageModelV4 } from "ai/test";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
+import { createCompactionOperationRepo } from "../db/compaction-operation-repo.ts";
 import { createMemoryAutoRepo } from "../db/memory-auto-repo.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createSummaryRepo } from "../db/summary-repo.ts";
@@ -14,6 +15,7 @@ import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { failingGenerateModel, generatingModel } from "../testing/mock-language-model.ts";
 import { createUtilitySlot } from "../memory/utility-slot.ts";
 import { toModelMessage } from "./turn-mapping.ts";
+import { createConversationStore } from "./conversation-store.ts";
 import { buildCompactionPrompt, createCompactionPass, type CompactionPassDeps } from "./compaction-pass.ts";
 import { selectRetirementRange } from "./retirement-selector.ts";
 
@@ -40,6 +42,37 @@ function recordingModel(text: string): { model: LanguageModel; prompts: string[]
     },
   });
   return { model: model as LanguageModel, prompts };
+}
+
+function controlledGenerateModel(text: string) {
+  let startedResolve!: () => void;
+  let releaseResolve!: () => void;
+  let abortedResolve!: () => void;
+  const started = new Promise<void>((resolve) => { startedResolve = resolve; });
+  const release = new Promise<void>((resolve) => { releaseResolve = resolve; });
+  const aborted = new Promise<void>((resolve) => { abortedResolve = resolve; });
+  const model = new MockLanguageModelV4({
+    doGenerate: async ({ abortSignal }) => {
+      startedResolve();
+      await new Promise<void>((resolve, reject) => {
+        release.then(resolve);
+        abortSignal?.addEventListener("abort", () => {
+          abortedResolve();
+          reject(abortSignal.reason);
+        }, { once: true });
+      });
+      return {
+        content: [{ type: "text", text }],
+        finishReason: { unified: "stop" as const, raw: undefined },
+        usage: {
+          inputTokens: { total: 3, noCache: 3, cacheRead: undefined, cacheWrite: undefined },
+          outputTokens: { total: 5, text: 5, reasoning: undefined },
+        },
+        warnings: [],
+      } as Awaited<ReturnType<MockLanguageModelV4["doGenerate"]>>;
+    },
+  });
+  return { model: model as LanguageModel, started, release: releaseResolve, aborted };
 }
 
 // A minimal slot double with a SWAPPABLE model and the never-rejects contract; `ran` records slot.run labels so
@@ -85,12 +118,16 @@ function spyFlush(): { calls: SegmentCall[]; failNext: { value: boolean }; write
   };
 }
 
-function fixture(opts: { estimated?: number; wall?: number; keep?: number; model?: LanguageModel; flushPort?: MemoryFlushPort } = {}) {
+function fixture(opts: {
+  estimated?: number; wall?: number; keep?: number; model?: LanguageModel; flushPort?: MemoryFlushPort;
+  now?: () => Date; leaseMs?: number;
+} = {}) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   dbs.push(db);
   const timeline = createTimelineRepo(db);
   const summaries = createSummaryRepo(db);
   const autoState = createMemoryAutoRepo(db);
+  const operations = createCompactionOperationRepo(db);
   const estimated = { value: opts.estimated ?? 90 };
   const flush = spyFlush();
   const { slot, model, ran } = fakeSlot(opts.model ?? (generatingModel("那段时间我们聊了很多。") as LanguageModel));
@@ -99,12 +136,15 @@ function fixture(opts: { estimated?: number; wall?: number; keep?: number; model
     view: { estimatedTokens: () => estimated.value, budget: () => opts.wall ?? 100 },
     timeline,
     summaries,
+    operations,
     flush: opts.flushPort ?? createLegacyMemoryFlushPort({ timeline, autoState, writer: flush.writer }),
     slot,
     config: { triggerRatio: 0.8, keepMessages: opts.keep ?? 3 },
     logger: logger.child({ mod: "compaction" }),
+    ...(opts.now ? { now: opts.now } : {}),
+    ...(opts.leaseMs === undefined ? {} : { leaseMs: opts.leaseMs }),
   };
-  return { pass: createCompactionPass(deps), timeline, summaries, autoState, estimated, flush, model, ran, records };
+  return { db, pass: createCompactionPass(deps), timeline, summaries, operations, autoState, estimated, flush, model, ran, records };
 }
 
 function seed(timeline: ReturnType<typeof createTimelineRepo>, n: number): void {
@@ -280,6 +320,156 @@ describe("compaction sequencing (row 8 — flush first, success-only advance, re
   });
 });
 
+describe("durable compaction coordination (Slice 3)", () => {
+  it("accepts a concurrent append strictly after the captured retiring range", async () => {
+    const controlled = controlledGenerateModel("captured range summary");
+    const f = fixture({ model: controlled.model });
+    seed(f.timeline, 10);
+
+    const running = f.pass.maybeRun("taki");
+    await controlled.started;
+    const appended = f.timeline.append({ characterId: "taki", role: "user", content: "arrived during summary" });
+    controlled.release();
+    await running;
+
+    expect(appended.seq).toBe(11);
+    expect(f.summaries.get("taki")).toEqual({ throughSeq: 6, text: "captured range summary" });
+    expect(f.timeline.latestSeq("taki")).toBe(11);
+    expect(f.timeline.rangeAscending("taki", 6, 11).map((entry) => entry.seq)).toEqual([7, 8, 9, 10, 11]);
+  });
+
+  it("rejects a generated summary when the captured source range changes", async () => {
+    const controlled = controlledGenerateModel("must be discarded");
+    const f = fixture({ model: controlled.model });
+    seed(f.timeline, 10);
+
+    const running = f.pass.maybeRun("taki");
+    await controlled.started;
+    f.timeline.deleteEntry("taki", 3);
+    controlled.release();
+    await running;
+
+    expect(f.summaries.get("taki")).toBeNull();
+    const operation = f.db.prepare("SELECT operation_id FROM conversation_compaction_operations").get();
+    expect(f.operations.get(String(operation?.operation_id))).toMatchObject({ state: "failed", failureCode: "SOURCE_STALE" });
+  });
+
+  it("rejects a competing summary revision and preserves the newer checkpoint", async () => {
+    const controlled = controlledGenerateModel("stale generated summary");
+    const f = fixture({ model: controlled.model });
+    seed(f.timeline, 10);
+
+    const running = f.pass.maybeRun("taki");
+    await controlled.started;
+    f.summaries.upsert({ characterId: "taki", throughSeq: 2, text: "competing summary" });
+    controlled.release();
+    await running;
+
+    expect(f.summaries.get("taki")).toEqual({ throughSeq: 2, text: "competing summary" });
+    expect(f.db.prepare("SELECT state,failure_code FROM conversation_compaction_operations").get()).toEqual({
+      state: "failed",
+      failure_code: "SUMMARY_CONFLICT",
+    });
+  });
+
+  it("deduplicates direct competing triggers with the durable Character lease", async () => {
+    const controlled = controlledGenerateModel("only once");
+    const f = fixture({ model: controlled.model });
+    seed(f.timeline, 10);
+
+    const first = f.pass.maybeRun("taki");
+    await controlled.started;
+    const duplicate = f.pass.maybeRun("taki");
+    await duplicate;
+    controlled.release();
+    await first;
+
+    expect(f.ran).toEqual(["compact"]);
+    expect(f.db.prepare("SELECT count(*) AS count FROM conversation_compaction_operations").get()?.count).toBe(1);
+    expect(f.summaries.get("taki")?.throughSeq).toBe(6);
+  });
+
+  it("durably cancels the auxiliary model call without advancing throughSeq", async () => {
+    const controlled = controlledGenerateModel("late summary");
+    const f = fixture({ model: controlled.model });
+    seed(f.timeline, 10);
+
+    const running = f.pass.maybeRun("taki");
+    await controlled.started;
+    expect(f.pass.cancel("taki")).toBe(true);
+    await running;
+
+    expect(f.summaries.get("taki")).toBeNull();
+    expect(f.autoState.get("taki").lastFlushSeq).toBe(6);
+    expect(f.db.prepare("SELECT state FROM conversation_compaction_operations").get()?.state).toBe("cancelled");
+    expect(f.db.prepare("SELECT kind FROM conversation_compaction_events ORDER BY operation_seq").all().map((row) => row.kind))
+      .toEqual(["started", "flush_completed", "cancelled"]);
+  });
+
+  it("keeps the replacement attempt's cancellation controller when a stale same-operation attempt settles", async () => {
+    let clock = new Date("2026-08-30T00:00:00.000Z");
+    const firstModel = controlledGenerateModel("stale first result");
+    const secondModel = controlledGenerateModel("cancelled replacement result");
+    const f = fixture({ model: firstModel.model, now: () => clock, leaseMs: 1_000 });
+    seed(f.timeline, 10);
+
+    const first = f.pass.maybeRun("taki");
+    await firstModel.started;
+    clock = new Date("2026-08-30T00:00:02.000Z");
+    f.model.value = secondModel.model;
+    const replacement = f.pass.maybeRun("taki");
+    await secondModel.started;
+
+    firstModel.release();
+    await first;
+    expect(f.pass.cancel("taki")).toBe(true);
+    const aborted = await Promise.race([
+      secondModel.aborted.then(() => true),
+      new Promise<false>((resolve) => setTimeout(() => resolve(false), 100)),
+    ]);
+    secondModel.release();
+    await replacement;
+
+    expect(aborted).toBe(true);
+    expect(f.summaries.get("taki")).toBeNull();
+    expect(f.db.prepare("SELECT state,attempt_no,lease_fence FROM conversation_compaction_operations").get()).toEqual({
+      state: "cancelled",
+      attempt_no: 2,
+      lease_fence: 2,
+    });
+  });
+
+  it("keeps Timeline scroll-back byte-equal and makes the replacement Replay View deterministic", async () => {
+    const f = fixture();
+    seed(f.timeline, 10);
+    const before = f.timeline.latestAscending("taki", 20);
+
+    await f.pass.maybeRun("taki");
+
+    expect(f.timeline.latestAscending("taki", 20)).toEqual(before);
+    const store = createConversationStore({ repo: f.timeline, summaries: f.summaries, window: { budget: () => 100 } });
+    const first = store.history("taki");
+    expect(store.history("taki")).toEqual(first);
+    expect(JSON.stringify(first)).toContain("<conversation-summary>");
+  });
+
+  it("keeps durable checkpoints and operation evidence isolated by Character", async () => {
+    const f = fixture();
+    seed(f.timeline, 10);
+    for (let index = 1; index <= 10; index += 1) {
+      f.timeline.append({ characterId: "yui", role: "user", content: `y${index}` });
+    }
+
+    await f.pass.maybeRun("taki");
+
+    expect(f.summaries.get("taki")?.throughSeq).toBe(6);
+    expect(f.summaries.get("yui")).toBeNull();
+    expect(f.operations.active("yui")).toBeNull();
+    expect(f.db.prepare("SELECT DISTINCT character_id FROM conversation_compaction_operations").all())
+      .toEqual([{ character_id: "taki" }]);
+  });
+});
+
 describe("token-priced retirement selection", () => {
   it("does not move the ordinary boundary when only the minimum-tail row guard changes", () => {
     const f = fixture();
@@ -437,6 +627,7 @@ describe("compaction on the real utility slot (row 11 — slot model used; main-
       view: { estimatedTokens: () => 90, budget: () => 100 },
       timeline,
       summaries,
+      operations: createCompactionOperationRepo(db),
       flush: createLegacyMemoryFlushPort({ timeline, autoState, writer: spyFlush().writer }),
       slot,
       config: { triggerRatio: 0.8, keepMessages: 3 },

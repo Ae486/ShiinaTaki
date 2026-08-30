@@ -33,6 +33,6 @@
     "docs/deferred-decisions.md",
     "docs/ARCHITECTURE-ROADMAP.md"
   ],
-  "notes": "D68-A producer, durable usage, projection, query, and semantic Inspector data are implemented, formally checked, and manually accepted. Prompt Cache child 08-28-harness-prompt-cache-stability is archived and passed. Compaction Harness child 08-29-compaction-harness is the next context-management gate before D68-B. D68-B remains pending: DSH-shaped Desktop layout, disclosures, tail/history interaction, responsive behavior, and visual polish. D67 remains the separate cross-Home reactive/disclosure follow-up.",
+  "notes": "D68-A producer, durable usage, projection, query, and semantic Inspector data are implemented, formally checked, and manually accepted. Prompt Cache child 08-28-harness-prompt-cache-stability is archived and passed. Compaction Harness child 08-29-compaction-harness remains the context-management gate before D68-B: Slices 1-3 are complete and formally checked; Slice 4 must prove complete projected-input pressure at configurable effectiveWindow * 0.8, general Context Reduction, remeasurement, summary quality, and end-to-end recovery. D68-B remains pending: DSH-shaped Desktop layout, disclosures, tail/history interaction, responsive behavior, and visual polish. D67 remains the separate cross-Home reactive/disclosure follow-up.",
   "meta": {}
 }

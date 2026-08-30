@@ -8,8 +8,9 @@ must preserve Character-scoped companion continuity, the append-only user-facing
 execution, and the existing Replay View contract while adapting the proven parts of DSH's compaction and token-meter
 design.
 
-This task begins as a read-only architecture/design task. Production implementation is not authorized until the current
-design, DSH comparison, scope boundaries, and migration slices are documented and reviewed.
+The planning gate is complete. Slices 1-3 are implemented and formally checked; Slice 4 remains active. The
+task artifacts remain the global contract and must be updated before a later slice changes pressure semantics, lifecycle
+ownership, or reduction policy. A completed first slice is not treated as the final context architecture.
 
 ## Requirements
 
@@ -38,13 +39,14 @@ The design document must explicitly classify each major behavior as one of:
 
 - **TakiAgent-specific**: Character isolation, companion/relationship continuity, global-vs-Character memory authority,
   projection-only summaries hidden from scroll-back, detached background work, and existing privacy/governance rules.
-- **Proven general design to retain/adapt**: token-pressure accounting, provider usage as a calibration anchor, a
-  separate utility summarizer, model-free tool-result reduction before summarization, balanced tool-call/result cuts,
-  append-only evidence plus a replay projection, cache-shaped summarizer requests, explicit overflow recovery, and
-  quality/empty-result guards.
+- **Proven general design to retain/adapt**: full-request token-pressure accounting, provider usage as a calibration
+  anchor, deterministic Context Reduction before summarization, a separate utility summarizer, balanced
+  tool-call/result cuts, append-only evidence plus a replay projection, cache-shaped summarizer requests, explicit
+  overflow recovery, and quality/empty-result guards. DSH's tool-result pruner is one reducer reference, not the limit
+  of TakiAgent's reduction scope.
 - **Current defect or weak choice**: fixed message-count selection as the effective source boundary, compaction being
   constructed only inside the legacy Memory subsystem, absence of a durable compaction lifecycle/compare-and-swap
-  contract, and insufficient full-request pressure accounting.
+  contract, and insufficient complete projected-input pressure accounting.
 
 ### 4. Define the target architecture and migration slices
 
@@ -59,6 +61,18 @@ The design document must explicitly classify each major behavior as one of:
   represented in Run Events/Monitor projections.
 - Define model/provider routing for the Utility Slot and a provider-neutral usage/pressure contract, with explicit
   fallbacks when upstream usage is absent.
+- Define normal compaction pressure as the complete projected next-request input crossing a TakiAgent-local threshold:
+  `projectedInputTokens >= effectiveContextWindowTokens * 0.8`. The projection includes stable instructions, Character
+  persona/soul prompt, Memory injection, tool/MCP schemas, the rolling summary, replay history, the current user message,
+  and other request-local dynamic context. It is not `historyRatio * triggerRatio`, and cache-read tokens still consume
+  context capacity.
+- Define Context Reduction as a general projection pipeline rather than a tool-only optimization. Reducible candidates
+  include old dialogue/summary material, Tool/MCP/search/file results, stale or repeated snapshots, reasoning, bounded
+  media descriptions, and duplicate observations. Core governance instructions, Character identity, authoritative Memory,
+  the current user message, and recent continuity-bearing dialogue are protected by policy.
+- Preserve detached asynchronous behavior: the turn that observes pressure does not wait for model-backed compaction;
+  deterministic reduction is measured first, a still-over-threshold view schedules rolling compaction, and only a
+  durably committed replacement is visible to a later request.
 - Split implementation into independently verifiable slices sized for approximately 2-3 context windows each, with
   later slices allowed to revise the plan when evidence changes.
 
@@ -72,6 +86,8 @@ The design document must explicitly classify each major behavior as one of:
   provider overflow, and retry boundaries.
 - Replay equality, balanced tool-call/result boundaries, timeline immutability, summary replacement accounting, and
   token-budget arithmetic.
+- Full request-envelope accounting, the `0.8` trigger boundary, cache-read pressure semantics, deterministic reduction
+  followed by remeasurement, and both tool and non-tool reducers.
 - Existing normal chat, tool execution, Character isolation, memory authority, cache-prefix stability, and Monitor
   projections remain green.
 
@@ -89,44 +105,55 @@ The following decisions are already ratified elsewhere and are inputs to this ta
   Any request-local overflow recovery must be separately proven and recorded before it can replace that behavior.
 - The first implementation is a staged foundation, not a final architecture. Later slices may revise the plan when
   implementation or provider evidence changes the trade-off.
+- Normal proactive compaction is triggered by complete projected input pressure at
+  `effectiveContextWindowTokens * 0.8`. The existing effective-window calibration remains authoritative; the overflow
+  recovery shrink to 90% is a post-overflow calibration/retry rule, not the proactive compaction trigger.
+- Token component breakdowns remain useful diagnostics and reducer inputs, but they do not create separate budgets or
+  multiply the trigger. Upstream `inputTokens`, when authoritative, calibrates the whole request envelope.
+- Context Reduction is broader than tool-result pruning. The common order is measure -> deterministic reduction ->
+  remeasure -> skip the auxiliary model if safe -> otherwise schedule detached rolling compaction -> use the committed
+  summary on a later request.
 
 ## Planning Decision
 
-The recommended direction is a Core-owned Compaction Coordinator plus one pure token-first Context Projector. The
-coordinator is constructed independently of Legacy/Canonical/Hindsight Memory selection and receives a narrow optional
-Memory Flush port. DSH contributes token-meter, prune-first, balanced-range, lifecycle, revision, and progress-proof
-patterns; its Cordis plugin tree, char/4 estimator, coding-agent prompt, raw-output persistence, and broad outer-loop
-retry are not copied. No new framework is required.
+The selected direction is a Core-owned Compaction Coordinator plus one pure token-first Context Projector and one
+deterministic Context Reduction pipeline. The coordinator is constructed independently of Legacy/Canonical/Hindsight
+Memory selection and receives a narrow optional Memory Flush port. DSH contributes token-meter, prune-first/remeasure,
+balanced-range, lifecycle, revision, and progress-proof patterns; its Cordis plugin tree, char/4 estimator, coding-agent
+prompt, raw-output persistence, and broad outer-loop retry are not copied. No new framework is required.
 
 Only `characterId`, a compaction `operationId`, and optional originating `runId`/`attemptId` correlation are needed for
 this operation. Revisions and sequence watermarks are versions, not additional session/task authorities.
 
 ## Acceptance Criteria
 
-- [ ] `research/current-compaction-design.md` documents the live implementation with file/line evidence and no inferred
-  behavior presented as fact.
-- [ ] `research/dsh-compaction-design.md` documents the relevant DSH source and clearly marks verified facts,
-  adaptations, and unresolved gaps.
-- [ ] `design.md` compares strengths/weaknesses and classifies TakiAgent-specific, retained general, and defective
-  choices; it names the token-first and Memory-independent target contracts.
-- [ ] `implement.md` defines ordered implementation slices, ownership boundaries, tests, gates, rollback points, and
-  an explicit dependency on D68-B UI remaining after this task.
-- [ ] Parent DSH planning docs point to this task as the Compaction gate before D68-B and no longer rely on the archived
-  Prompt Cache child as the only context-management follow-up.
-- [ ] No production code is changed during this planning phase.
+- [x] The current implementation and DSH reference are documented with verified source evidence.
+- [x] Slice 1 removes the ordinary 200-row source cliff, keeps an explicit 10,000-row emergency backstop, and preserves
+  balanced Replay View semantics.
+- [x] Slice 2 makes Compaction Core-owned and available independently of Legacy/Canonical Local Memory composition,
+  with one Utility Slot and explicit Memory Flush outcomes.
+- [x] Slice 3 provides a durable per-Character operation lifecycle, lease, revision/CAS summary transaction,
+  restart/cancellation reconciliation, and idempotent terminal evidence without becoming a second Run authority.
+- [ ] Slice 4 implements complete projected-input pressure at the `0.8` threshold, general Context Reduction and
+  remeasurement, summary-quality guards, retry/cooldown, and end-to-end regression coverage.
+- [ ] Legacy, canonical Local, and Hindsight-compatible provider modes retain one compaction path; unsupported Memory
+  flush behavior is explicit and cannot silently disable compaction.
+- [ ] Parent D68 planning docs keep this task as the completed context-management gate before D68-B.
 
 ## Definition of Done
 
-- Research artifacts, PRD, technical design, execution plan, and context manifests are complete and validated.
+- Slices 1-4 are implemented, formally checked, and recorded in the task artifacts.
 - Every numerical threshold or lifecycle claim has a cited source or is marked as a TakiAgent-local policy choice.
-- The user has a clear comparison and migration recommendation before implementation activation.
+- Full-request pressure, Context Reduction, durable summary replacement, and provider-independent composition are
+  proven without regressing normal chat, tools, Character isolation, Memory authority, cache stability, or Monitor facts.
 
 ## Out of Scope
 
-- Implementing the Compaction redesign in this planning phase.
 - Replacing the Memory Provider, redesigning semantic memory extraction, or changing Character/Memory authority.
 - Building D68-B Monitor UI, general Home refresh, or Chat streaming UI.
 - Introducing a local KV cache, provider-specific production branches, fabricated cache metrics, or a second agent loop.
+- Adding a user-facing manual compact command or enabling unsafe mid-ToolLoop model-backed recovery without proof that
+  completed tool effects cannot be replayed.
 
 ## Technical Notes
 

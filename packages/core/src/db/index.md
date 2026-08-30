@@ -17,6 +17,7 @@
 - memory-events-repo.ts — memory_events SQL: record / listByCharacter (the memory system's decision log — skips, reinforcements, searches, tidy passes; ids/counts only, never memory content or a query)
 - privacy-pause-repo.ts — privacy_pause_state SQL: load / save (the single global Privacy Pause row; a consent withdrawal must survive a restart)
 - summary-repo.ts — conversation_summary SQL: get / upsert / getMeta (the per-character rolling compaction summary + its through_seq coverage — T5-R3, batch 7; getMeta returns the text LENGTH only, for the operator status read)
+- compaction-operation-repo.ts — fenced per-Character compaction cursor, immutable bounded lifecycle evidence, cancellation/restart reconciliation, and atomic summary CAS commit
 - window-state-repo.ts — slot_window_state SQL: get / set / list (per-model-slot effective window + EMA factor — the window calibrator's persistence, batch 6; list feeds memory.status)
 - config-repo.ts — config SQL: get / all / upsert / delete (the sparse operator-set settings store; a row that is not a JSON primitive throws at the boundary)
 - ../governance/governance-policy-repo.ts — governance policy SQL aggregate: durable level/generation + sparse validated overrides

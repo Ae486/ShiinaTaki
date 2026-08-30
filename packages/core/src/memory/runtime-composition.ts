@@ -7,6 +7,7 @@ import type { LanguageModel } from "ai";
 import { join } from "node:path";
 import { createCompactionPass } from "../agents/compaction-pass.ts";
 import { loadUtilityConfig } from "../config/utility-config.ts";
+import { createCompactionOperationRepo } from "../db/compaction-operation-repo.ts";
 import type { Database } from "../db/sqlite.ts";
 import type { SummaryRepo } from "../db/summary-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
@@ -58,6 +59,7 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
       };
     },
     autoMemory: compaction.autoMemory,
+    compaction: compaction.compact,
     tidy: legacy?.tidy ? authorityAwareTidy(legacy.tidy, isCanonical) : undefined,
     writeMemory: legacy?.writeMemory ? authorityAwareWrite(legacy.writeMemory, isCanonical) : undefined,
     memoryRoot: legacy?.memoryRoot ?? join(input.dataDir, "workspace", "memory"),
@@ -71,10 +73,12 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
 function createCompactionMaintenance(input: MemoryRuntimeInput, utility: UtilitySlot, legacy: MemorySubsystem | null) {
   let maintenance: AutoMemoryMaintenance | undefined = legacy?.maintenance;
   const flush = createMemoryFlushBinding(legacy?.memoryFlush ?? canonicalLocalMemoryFlushPort());
+  const operations = createCompactionOperationRepo(input.db);
   const compact = createCompactionPass({
     view: { estimatedTokens: input.estimatedTokens, budget: input.budget },
     timeline: input.timeline,
     summaries: input.summaries,
+    operations,
     flush: flush.port,
     slot: utility,
     config: input.compact,
@@ -86,7 +90,7 @@ function createCompactionMaintenance(input: MemoryRuntimeInput, utility: Utility
     logger: input.logger.child({ mod: "memory-auto" }),
   });
   return {
-    autoMemory,
+    autoMemory, compact,
     retireLegacy: () => {
       maintenance = undefined;
       flush.bind(canonicalLocalMemoryFlushPort());

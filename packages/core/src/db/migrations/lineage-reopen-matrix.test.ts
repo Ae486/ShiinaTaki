@@ -20,6 +20,7 @@ import { recoveryAdmissionMigration028 } from "./028-recovery-admission.ts";
 import { scheduledTasksMigration029 } from "./029-scheduled-tasks.ts";
 import { scheduledOccurrenceCharacterMigration030 } from "./030-scheduled-occurrence-character.ts";
 import { runUsageDetailsMigration031 } from "./031-run-usage-details.ts";
+import { conversationCompactionLifecycleMigration032 } from "./032-conversation-compaction-lifecycle.ts";
 
 const roots: string[] = [];
 const dbs: Database[] = [];
@@ -48,7 +49,7 @@ function close(db: Database): void {
 }
 
 function expectFinalSchema(db: Database): void {
-  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(31);
+  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(32);
   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map((row) => row.name);
   expect(tables).toEqual(expect.arrayContaining([
     "canonical_memory_units",
@@ -72,10 +73,15 @@ function expectFinalSchema(db: Database): void {
     "scheduled_tasks",
     "schedule_occurrences",
     "user_timezone",
+    "conversation_compaction_operations",
+    "conversation_compaction_events",
   ]));
   expect(db.prepare("PRAGMA table_info(schedule_occurrences)").all().map((row) => row.name)).toContain("character_id");
   expect(db.prepare("PRAGMA table_info(run_usage)").all().map((row) => row.name)).toEqual(expect.arrayContaining([
     "input_no_cache_tokens", "cache_read_tokens", "cache_write_tokens", "output_text_tokens", "reasoning_tokens",
+  ]));
+  expect(db.prepare("PRAGMA table_info(conversation_summary)").all().map((row) => row.name)).toEqual(expect.arrayContaining([
+    "revision", "last_operation_id", "source_from_seq", "source_through_seq", "source_digest", "captured_tail_seq",
   ]));
 }
 
@@ -93,10 +99,10 @@ describe("migration lineage reopen matrix", () => {
     const firstApplied: number[][] = [];
     const first = open(path, MIGRATIONS, (applied) => firstApplied.push(applied));
     expectFinalSchema(first);
-    expect(firstApplied).toEqual([Array.from({ length: 31 }, (_, index) => index + 1)]);
+    expect(firstApplied).toEqual([Array.from({ length: 32 }, (_, index) => index + 1)]);
     close(first);
     const reopened = expectReopenNoOp(path);
-    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(31);
+    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(32);
   });
 
   it("converges the historical T4 17/18 MCP-Skill lineage through 024", () => {
@@ -122,11 +128,12 @@ describe("migration lineage reopen matrix", () => {
       scheduledTasksMigration029,
       scheduledOccurrenceCharacterMigration030,
       runUsageDetailsMigration031,
+      conversationCompactionLifecycleMigration032,
     ], (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]]);
+    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT version FROM migrations ORDER BY version").all().map((row) => row.version)).toEqual(
-      Array.from({ length: 31 }, (_, index) => index + 1),
+      Array.from({ length: 32 }, (_, index) => index + 1),
     );
     close(reopened);
     expectReopenNoOp(path);
@@ -139,11 +146,36 @@ describe("migration lineage reopen matrix", () => {
     close(first);
     const tailApplied: number[][] = [];
     const reopened = open(path, MIGRATIONS, (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31]]);
+    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT mode FROM memory_authority_selection WHERE singleton=1").get()?.mode)
       .toBe("legacy-markdown");
     close(reopened);
+    expectReopenNoOp(path);
+  });
+
+  it("upgrades a version-31 database with an existing summary and reopens as a no-op", () => {
+    const path = createPath();
+    const first = open(path, MIGRATIONS.slice(0, 31));
+    first.prepare(`INSERT INTO conversation_summary (character_id,through_seq,text,updated_at)
+      VALUES ('taki',12,'historical summary','2026-08-30T00:00:00.000Z')`).run();
+    close(first);
+
+    const applied: number[][] = [];
+    const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
+    expect(applied).toEqual([[32]]);
+    expect(upgraded.prepare(`SELECT through_seq,text,revision,last_operation_id,source_from_seq,source_through_seq,
+      source_digest,captured_tail_seq FROM conversation_summary WHERE character_id='taki'`).get()).toEqual({
+      through_seq: 12,
+      text: "historical summary",
+      revision: 1,
+      last_operation_id: null,
+      source_from_seq: null,
+      source_through_seq: null,
+      source_digest: null,
+      captured_tail_seq: null,
+    });
+    close(upgraded);
     expectReopenNoOp(path);
   });
 
