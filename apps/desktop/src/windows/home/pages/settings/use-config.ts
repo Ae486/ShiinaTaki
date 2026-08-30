@@ -22,6 +22,8 @@ export interface ConfigView {
   /** Per-key outcome of the last save: the apply verdict, or the refusal explanation. */
   notices: Record<string, { ok: boolean; message: string }>;
   save: (key: string, value: ConfigValue | null) => Promise<void>;
+  /** Re-reads the list after a load failure (batch-2 U5: every failed read gets a retry). */
+  refresh: () => Promise<void>;
 }
 
 export function useConfig(): ConfigView {
@@ -65,5 +67,6 @@ export function useConfig(): ConfigView {
     refreshing: list.refreshing,
     notices,
     save,
+    refresh: list.refresh,
   };
 }

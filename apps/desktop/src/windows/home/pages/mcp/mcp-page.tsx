@@ -10,6 +10,9 @@ import { ActionButton } from "../../action-button.tsx";
 import { ExtensionConvergenceStrip, useExtensionConvergence } from "../../extension-convergence.tsx";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { PageCard } from "../../page-card.tsx";
+import { EmptyState } from "@/components/ui/empty-state.js";
+import { FeedbackLine } from "@/components/ui/feedback-line.js";
+import { Skeleton } from "@/components/ui/skeleton.js";
 import { draftFromView, emptyDraft, validateDraft, type McpFeedback, type McpServerDraft } from "./mcp-state.ts";
 import { useMcpServers } from "./use-mcp.ts";
 import { McpServerCard } from "./mcp-server-card.tsx";
@@ -81,10 +84,14 @@ function McpPageBody({ input }: { input: McpPageBodyInput }) {
   const busy = mcp.state.kind === "ready" && mcp.state.pending !== null;
   return (
     <PageBody>
-      {mcp.state.kind === "failure" && <PageAlert>{mcp.state.failureKind === "validation" ? "Core 返回的 MCP 快照校验失败" : `读取 MCP 服务器失败：${mcp.state.message}`}</PageAlert>}
+      {mcp.state.kind === "failure" && (
+        <PageAlert action={{ label: "重试", onClick: () => void mcp.refresh() }}>
+          {mcp.state.failureKind === "validation" ? "Core 返回的 MCP 快照校验失败" : `读取 MCP 服务器失败：${mcp.state.message}`}
+        </PageAlert>
+      )}
       {mcp.state.kind === "ready" && mcp.state.feedback && <FeedbackBanner feedback={mcp.state.feedback} />}
-      {servers === null && mcp.state.kind === "loading" && <p className="text-xs text-slate-400">载入中…</p>}
-      {servers !== null && servers.length === 0 && draft === null && <EmptyState disabled={!mcp.connectionReady} onAdd={input.startAdd} />}
+      {servers === null && mcp.state.kind === "loading" && <Skeleton lines={4} />}
+      {servers !== null && servers.length === 0 && draft === null && <EmptyServerState disabled={!mcp.connectionReady} onAdd={input.startAdd} />}
       {draft !== null && <McpServerEditor
         draft={draft}
         onChange={input.setDraft}
@@ -96,6 +103,7 @@ function McpPageBody({ input }: { input: McpPageBodyInput }) {
         })}
         error={input.formError}
         editing={input.editingRevision !== null}
+        saving={busy}
       />}
       <ServerList
         servers={servers}
@@ -145,18 +153,19 @@ async function saveDraft(draft: McpServerDraft, input: SaveInput): Promise<void>
 
 function FeedbackBanner({ feedback }: { feedback: McpFeedback }) {
   const tone = feedback.kind === "saved" || feedback.kind === "tested"
-    ? "bg-emerald-50 text-emerald-700 ring-emerald-100"
-    : feedback.kind === "conflict"
-      ? "bg-amber-50 text-amber-700 ring-amber-100"
-      : "bg-rose-50 text-rose-700 ring-rose-100";
-  return <p className={`rounded-lg px-3 py-2 text-xs ring-1 ${tone}`}>{feedback.message}</p>;
+    ? "ok"
+    : feedback.kind === "conflict" ? "warn" : "danger";
+  return <FeedbackLine tone={tone}>{feedback.message}</FeedbackLine>;
 }
 
-function EmptyState({ disabled, onAdd }: { disabled: boolean; onAdd(): void }) {
+function EmptyServerState({ disabled, onAdd }: { disabled: boolean; onAdd(): void }) {
   return (
     <PageCard title="尚未配置 MCP 服务器">
-      <p className="text-xs text-slate-500">添加第一个服务器后，Core 会连接它并把工具纳入治理管控。</p>
-      <div className="mt-3"><ActionButton tone="primary" disabled={disabled} onClick={onAdd}>添加服务器</ActionButton></div>
+      <EmptyState
+        title="尚未配置 MCP 服务器"
+        hint="添加第一个服务器后，Core 会连接它并把工具纳入治理管控。"
+        action={<ActionButton tone="primary" disabled={disabled} onClick={onAdd}>添加服务器</ActionButton>}
+      />
     </PageCard>
   );
 }

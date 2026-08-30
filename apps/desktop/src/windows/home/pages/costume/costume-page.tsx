@@ -12,6 +12,9 @@ import { useCharacterImport, type CharacterImport } from "@/features/character-i
 import { ActionButton } from "../../action-button.tsx";
 import { PageCard } from "../../page-card.tsx";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
+import { EmptyState } from "@/components/ui/empty-state.js";
+import { FeedbackLine } from "@/components/ui/feedback-line.js";
+import { Skeleton } from "@/components/ui/skeleton.js";
 import { useHomeClient } from "../../home-client-context.ts";
 import { CostumeRow } from "./costume-row.tsx";
 import { useCostumePage, type CostumePageView } from "./use-costume-page.ts";
@@ -51,8 +54,8 @@ function ImportRow({
 }
 
 function CostumeList({ costume }: { costume: CostumePageView }) {
-  if (costume.loading) return <p className="text-xs text-slate-400">载入中…</p>;
-  if (costume.view.rows.length === 0) return <p className="text-xs text-slate-400">尚未导入角色（开发环境使用内置模型）</p>;
+  if (costume.loading) return <Skeleton lines={4} />;
+  if (costume.view.rows.length === 0) return <EmptyState title="尚未导入角色" hint="开发环境使用内置模型。" />;
   return (
     <div className="flex flex-col gap-0.5">
       {costume.view.rows.map((row) => (
@@ -73,12 +76,14 @@ function ImportFeedback({ state }: { state: CharacterImport }) {
   return (
     <>
       {state.result && (
-        <p className="mt-2 text-xs text-emerald-700">
-          已导入 {state.result.characterId}（{state.result.costumes.length} 套服装）
-        </p>
+        <div className="mt-2">
+          <FeedbackLine tone="ok">已导入 {state.result.characterId}（{state.result.costumes.length} 套服装）</FeedbackLine>
+        </div>
       )}
       {state.warnings.length > 0 && (
-        <p className="mt-1 text-xs text-amber-600">{state.warnings.length} 条可选资源警告（加载时容错）</p>
+        <div className="mt-1">
+          <FeedbackLine tone="warn">{state.warnings.length} 条可选资源警告（加载时容错）</FeedbackLine>
+        </div>
       )}
     </>
   );
@@ -99,7 +104,11 @@ export function CostumePage() {
       />
       <PageBody>
         {error && <PageAlert>{error}</PageAlert>}
-        {costume.listError && <PageAlert>服装列表读取失败（下方为上次结果）：{costume.listError}</PageAlert>}
+        {costume.listError && (
+          <PageAlert action={{ label: "重试", onClick: () => void costume.refresh() }}>
+            服装列表读取失败（下方为上次结果）：{costume.listError}
+          </PageAlert>
+        )}
 
         <PageCard title="导入模型">
           <ImportRow
@@ -123,9 +132,9 @@ export function CostumePage() {
         >
           <CostumeList costume={costume} />
           {costume.view.missingPacks.length > 0 && (
-            <p className="mt-3 text-[11px] leading-snug text-amber-600">
-              ⚠ 需导入其他角色包可解锁/补全动作：{costume.view.missingPacks.join("、")}
-            </p>
+            <div className="mt-3">
+              <FeedbackLine tone="warn">需导入其他角色包可解锁/补全动作：{costume.view.missingPacks.join("、")}</FeedbackLine>
+            </div>
           )}
         </PageCard>
       </PageBody>

@@ -8,6 +8,8 @@
 import type { MediaUsageResult } from "@taki/shared";
 import { ActionButton } from "../../action-button.tsx";
 import { LabeledRows, PageCard } from "../../page-card.tsx";
+import { FeedbackLine } from "@/components/ui/feedback-line.js";
+import { Skeleton } from "@/components/ui/skeleton.js";
 import { formatBytes } from "./operations-state.ts";
 import type { MediaClearControl } from "./use-media-clear.ts";
 
@@ -30,7 +32,7 @@ export function StorageCard({
           ]}
         />
       ) : (
-        <p className="text-xs text-slate-400">载入中…</p>
+        <Skeleton lines={2} />
       )}
       <div className="mt-4 flex flex-wrap items-center gap-2">
         {clear.phase === "idle" ? (
@@ -39,9 +41,10 @@ export function StorageCard({
           </ActionButton>
         ) : (
           <>
-            <span className="text-xs text-rose-700">确认清除？此操作不可撤销（记忆中的图片描述会保留）。</span>
+            <FeedbackLine tone="warn">确认清除？此操作不可撤销（记忆中的图片描述会保留）。</FeedbackLine>
             <ActionButton
               tone="danger"
+              busy={clear.phase === "clearing"}
               onClick={() => clear.onEvent("confirm")}
               disabled={!connectionReady || clear.phase === "clearing"}
             >
@@ -53,8 +56,8 @@ export function StorageCard({
           </>
         )}
       </div>
-      {clear.notice && <p className="mt-2 text-xs text-emerald-700">{clear.notice}</p>}
-      {clear.error && <p className="mt-2 text-xs text-rose-600">{clear.error}</p>}
+      {clear.notice && <div className="mt-2"><FeedbackLine tone="ok">{clear.notice}</FeedbackLine></div>}
+      {clear.error && <div className="mt-2"><FeedbackLine tone="danger">{clear.error}</FeedbackLine></div>}
     </PageCard>
   );
 }

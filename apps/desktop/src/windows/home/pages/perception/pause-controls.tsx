@@ -20,7 +20,7 @@ export function PauseControls({ pause, connectionReady, onSet }: PauseControlsPr
   const paused = pause?.paused ?? false;
   return (
     <PageCard title="隐私暂停">
-      <p className="mb-3 text-xs text-slate-600">{pause ? pauseLabel(pause) : "读取中…"}</p>
+      <p className="mb-3 text-xs text-text-body">{pause ? pauseLabel(pause) : "读取中…"}</p>
       <div className="flex flex-wrap gap-2">
         <ActionButton
           tone="primary"

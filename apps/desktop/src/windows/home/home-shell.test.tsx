@@ -31,7 +31,7 @@ describe("HomeShell", () => {
     const html = shellMarkup();
     for (const page of visibleHomePages(false)) expect(html).toContain(page.label);
     expect(html).not.toContain("运行监视");
-    expect(html).toContain('aria-current="page"');
+    expect(html).toContain('aria-current="true"');
   });
 
   it("draws each row's registry glyph beside its label", () => {
@@ -41,10 +41,10 @@ describe("HomeShell", () => {
   });
 
   it("gives exactly one row — the current one — the accent highlight", () => {
-    const active = menuRows().filter((row) => row.includes('aria-current="page"'));
+    const active = menuRows().filter((row) => row.includes('aria-current="true"'));
 
     expect(active).toHaveLength(1);
     expect(active[0]).toContain(DEFAULT_PAGE.label);
-    expect(active[0]).toContain("text-rose-700");
+    expect(active[0]).toContain("text-accent-text");
   });
 });

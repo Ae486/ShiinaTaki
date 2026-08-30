@@ -7,13 +7,13 @@
 import { connectionStatusNotice, type ConnectionStatus } from "@/lib/connection-status.js";
 
 const BANNER_TONE = {
-  attention: "bg-amber-50 text-amber-700",
-  error: "bg-rose-50 text-rose-700",
+  attention: "bg-warn-soft text-warn-strong",
+  error: "bg-danger-soft text-danger-strong",
 } as const;
 
 const PET_TONE = {
-  attention: "bg-amber-950/80 text-amber-100",
-  error: "bg-rose-950/80 text-rose-100",
+  attention: "bg-warn-strong/80 text-white",
+  error: "bg-danger-deep/80 text-danger-soft",
 } as const;
 
 export function ConnectionStatusBanner({ status }: { status: ConnectionStatus }) {

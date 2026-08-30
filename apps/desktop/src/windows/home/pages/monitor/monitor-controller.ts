@@ -25,6 +25,8 @@ export interface MonitorViewState {
   selectedRunKey?: string;
   trajectory?: TrajectoryResult;
   inspector?: TrajectoryInspector;
+  /** The trajectory row whose inspector is open; clicking it again closes (U1 two-way disclosure). */
+  inspectedRowKey?: string;
   loadingRuns: boolean;
   loadingTrajectory: boolean;
   loadingInspector: boolean;
@@ -47,6 +49,8 @@ export interface MonitorController {
   select(runKey: string): Promise<void>;
   loadMoreTrajectory(): Promise<void>;
   inspect(rowKey: string): Promise<void>;
+  /** U1: the inspector is an explicitly opened surface — it must be explicitly closable. */
+  closeInspector(): void;
 }
 
 class MonitorControllerImpl implements MonitorController {
@@ -104,7 +108,7 @@ class MonitorControllerImpl implements MonitorController {
     this.publish({ mode });
     if (!enabled) {
       this.publish({ runs: [], nextCursor: undefined, selectedRunKey: undefined, trajectory: undefined,
-        inspector: undefined, loadingRuns: false, stale: false });
+        inspector: undefined, inspectedRowKey: undefined, loadingRuns: false, stale: false });
       return;
     }
     await this.refresh();
@@ -121,7 +125,7 @@ class MonitorControllerImpl implements MonitorController {
 
   async applyFilters(filters: MonitorFilters): Promise<void> {
     this.publish({ filters: { ...filters, text: filters.text.slice(0, 100) }, selectedRunKey: undefined,
-      trajectory: undefined, inspector: undefined, stale: false });
+      trajectory: undefined, inspector: undefined, inspectedRowKey: undefined, stale: false });
     await this.refresh();
   }
 
@@ -136,7 +140,7 @@ class MonitorControllerImpl implements MonitorController {
       const selectedRunKey = this.state.selectedRunKey && result.runs.some((run) => run.key === this.state.selectedRunKey)
         ? this.state.selectedRunKey : undefined;
       this.publish({ runs: result.runs, nextCursor: result.nextCursor, selectedRunKey, loadingRuns: false,
-        ...(selectedRunKey ? {} : { trajectory: undefined, inspector: undefined }) });
+        ...(selectedRunKey ? {} : { trajectory: undefined, inspector: undefined, inspectedRowKey: undefined }) });
       if (selectedRunKey) await this.refreshTrajectory(target, candidate);
     } catch (cause) { if (this.current(candidate, target)) this.report(cause); }
   }
@@ -157,7 +161,15 @@ class MonitorControllerImpl implements MonitorController {
 
   async select(runKey: string): Promise<void> {
     if (!this.state.runs.some((run) => run.key === runKey)) return;
-    this.publish({ selectedRunKey: runKey, trajectory: undefined, inspector: undefined, stale: false });
+    // U1: clicking the selected run again deselects it — a disclosure that opens both ways.
+    if (this.state.selectedRunKey === runKey) {
+      const target = this.client;
+      if (target) void target.unsubscribeMonitor?.().catch(() => undefined);
+      this.publish({ selectedRunKey: undefined, trajectory: undefined, inspector: undefined,
+        inspectedRowKey: undefined, stale: false });
+      return;
+    }
+    this.publish({ selectedRunKey: runKey, trajectory: undefined, inspector: undefined, inspectedRowKey: undefined, stale: false });
     if (this.client) await this.refreshTrajectory(this.client, this.generation);
   }
 
@@ -169,7 +181,7 @@ class MonitorControllerImpl implements MonitorController {
       const trajectory = await target.monitorTrajectory({ characterId: this.state.filters.characterId,
         runKey, afterSeq: 0, limit: 100 });
       if (!this.current(candidate, target) || this.state.selectedRunKey !== runKey) return;
-      this.publish({ trajectory, loadingTrajectory: false, stale: false, inspector: undefined });
+      this.publish({ trajectory, loadingTrajectory: false, stale: false, inspector: undefined, inspectedRowKey: undefined });
       await target.subscribeMonitor({ characterId: this.state.filters.characterId, runKey,
         afterSeq: trajectory.cursor.seq });
     } catch (cause) { if (this.current(candidate, target)) this.report(cause); }
@@ -207,21 +219,30 @@ class MonitorControllerImpl implements MonitorController {
   async inspect(rowKey: string): Promise<void> {
     const target = this.client; const runKey = this.state.selectedRunKey;
     if (!target || !runKey) return;
+    // U1: the inspector is an explicitly opened disclosure — clicking the inspected row again closes it.
+    if (this.state.inspectedRowKey === rowKey) {
+      this.closeInspector();
+      return;
+    }
     const candidate = this.generation;
     this.publish({ loadingInspector: true, error: null });
     try {
       const inspector = await target.monitorInspect({ characterId: this.state.filters.characterId, runKey, rowKey });
       if (this.current(candidate, target) && this.state.selectedRunKey === runKey) {
-        this.publish({ inspector, loadingInspector: false });
+        this.publish({ inspector, inspectedRowKey: rowKey, loadingInspector: false });
       }
     } catch (cause) { if (this.current(candidate, target)) this.report(cause); }
+  }
+
+  closeInspector(): void {
+    this.publish({ inspector: undefined, inspectedRowKey: undefined });
   }
 
   private onLive(event: RunMonitorEvent): void {
     if (event.runKey !== this.state.selectedRunKey) return;
     if (event.invalidated) {
       this.publish({ stale: true, error: event.reason === "mode-disabled" ? "Monitoring was disabled." : null });
-      if (event.reason === "mode-disabled") this.publish({ mode: "DISABLED", runs: [], trajectory: undefined, inspector: undefined });
+      if (event.reason === "mode-disabled") this.publish({ mode: "DISABLED", runs: [], trajectory: undefined, inspector: undefined, inspectedRowKey: undefined });
       else if (this.client) void this.recoverLive(this.client, this.generation);
       return;
     }

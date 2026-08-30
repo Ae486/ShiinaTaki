@@ -2,16 +2,18 @@
  * INPUT:  none (page root); reads Core permission policy and every generic knob through focused hooks.
  * OUTPUT: <SettingsPage> — permission governance first, followed by config.list metadata in server order.
  * POS:    ui/windows/home/pages/settings — the Settings composition root; neither section owns durable authority.
+ *         Loading rides the shared Skeleton and the failed list read carries a retry (batch-2 U5).
  */
 
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
+import { Skeleton } from "@/components/ui/skeleton.js";
 import { useConfig } from "./use-config.ts";
 import { KnobField } from "./knob-field.tsx";
 import { PermissionSection } from "./permission-section.tsx";
 import { ApprovalDecisionsSection } from "./approval-decisions-section.tsx";
 
 export function SettingsPage() {
-  const { entries, connectionReady, error, refreshing, notices, save } = useConfig();
+  const { entries, connectionReady, error, refreshing, notices, save, refresh } = useConfig();
 
   return (
     <>
@@ -19,17 +21,17 @@ export function SettingsPage() {
       <PageBody>
         <PermissionSection />
         <ApprovalDecisionsSection />
-        {error && <PageAlert>读取配置失败：{error}</PageAlert>}
-        {entries.length === 0 && !error && <p className="text-xs text-slate-400">载入中…</p>}
+        {error && <PageAlert action={{ label: "重试", onClick: () => void refresh() }}>读取配置失败：{error}</PageAlert>}
+        {entries.length === 0 && !error && <Skeleton lines={6} />}
         {entries.length > 0 && (
-          <div className="mt-4 divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="mt-4 divide-y divide-border-subtle overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
             {entries.map((entry) => (
               <KnobField
                 key={entry.key}
                 entry={entry}
                 connectionReady={connectionReady}
                 notice={notices[entry.key]}
-                onSave={(key, value) => void save(key, value)}
+                onSave={save}
               />
             ))}
           </div>

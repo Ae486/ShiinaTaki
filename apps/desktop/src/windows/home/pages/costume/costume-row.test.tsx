@@ -20,8 +20,8 @@ const markup = (props: Partial<Parameters<typeof CostumeRow>[0]> = {}): string =
 
 describe("CostumeRow", () => {
   it("marks the worn costume with the accent (#74: it follows the pet, not the click)", () => {
-    expect(markup({ current: true })).toContain("text-rose-700");
-    expect(markup()).not.toContain("text-rose-700");
+    expect(markup({ current: true })).toContain("text-accent-text");
+    expect(markup()).not.toContain("text-accent-text");
   });
 
   it("shows a busy indicator and a Cancel control on the row being switched (#75)", () => {

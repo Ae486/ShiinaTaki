@@ -1,9 +1,15 @@
 /**
  * INPUT:  one socket-local canonical Approval request plus a response callback
  * OUTPUT: <ApprovalDialog> — bounded redacted modal with explicit once/session/always/deny choices
- * POS:    ui/components/approval — ephemeral operator prompt; never writes navigation, events, stores, or localStorage
+ * POS:    ui/components/approval — ephemeral operator prompt; never writes navigation, events, stores, or localStorage.
+ *         Batch-2: the modal shell/keyboard contract (trap, initial focus, restore) rides the shared ui/ Dialog with
+ *         escapePolicy="none" — fail-closed, so there is NO close affordance and Escape dismisses nothing (A1).
  */
+import { useId } from "react";
 import type { ApprovalChoice, CanonicalApprovalRequest } from "@taki/shared";
+import { Dialog } from "@/components/ui/dialog.js";
+import { FeedbackLine } from "@/components/ui/feedback-line.js";
+import { ActionButton } from "@/windows/home/action-button.js";
 import type { ApprovalDialogStatus } from "./approval-dialog-controller.ts";
 
 export interface ApprovalDialogProps {
@@ -32,6 +38,7 @@ export function ApprovalDialog({
   onChoose,
   onDismiss,
 }: ApprovalDialogProps) {
+  const titleId = useId();
   const choicesDisabled = status.kind === "responding" || (status.kind === "error" && status.dismissible);
   const disclosureRevision = request.allowedChoices.includes("allow_always") ? request.disclosureRevision : undefined;
   const disclosure = disclosureRevision !== undefined
@@ -43,33 +50,31 @@ export function ApprovalDialog({
       />
     : null;
   return (
-    <div data-keep-interactive className="fixed inset-0 z-50 grid place-items-center bg-slate-950/35 p-4" role="dialog" aria-modal="true" aria-label="操作审批">
-      <div className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
-        <h2 className="text-base font-semibold text-slate-900">{request.presentation.title}</h2>
-        <p className="mt-2 text-sm text-slate-600">{request.presentation.riskSummary}</p>
-        {queued > 0 && <p className="mt-2 text-xs text-slate-500">另有 {queued} 个请求等待处理。</p>}
-        <ApprovalSections request={request} />
-        {disclosure}
-        {status.kind === "error" && <p className="mt-4 text-sm text-danger" role="alert">{status.message}</p>}
-        {status.kind === "responding" && <p className="mt-4 text-sm text-slate-500" role="status">正在提交审批…</p>}
-        <div className="mt-5 flex flex-wrap justify-end gap-2">
-          {status.kind === "error" && status.dismissible && (
-            <button type="button" onClick={onDismiss} className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">
-              关闭
-            </button>
-          )}
-          {/* C3: allow choices carry the primary tone (ActionButton's primary — granting is not a danger act);
-              deny carries the soft danger tone (border + danger text on white), matching ActionButton's danger-soft. */}
-          {request.allowedChoices.map((choice) => (
-            <button key={choice} type="button" disabled={choicesDisabled || (choice === "allow_always" && !disclosureAcknowledged)} onClick={() => onChoose(choice)} className={choice === "deny"
-              ? "rounded-lg border border-danger-border bg-white px-3 py-2 text-sm font-medium text-danger hover:bg-danger-soft"
-              : "rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"}>
-              {LABELS[choice]}
-            </button>
-          ))}
-        </div>
+    <Dialog open onClose={onDismiss} escapePolicy="none" labelledBy={titleId} ariaLabel="操作审批">
+      <h2 id={titleId} className="text-base font-semibold text-text-strong">{request.presentation.title}</h2>
+      <p className="mt-2 text-sm text-text-body">{request.presentation.riskSummary}</p>
+      {queued > 0 && <p className="mt-2 text-xs text-text-secondary">另有 {queued} 个请求等待处理。</p>}
+      <ApprovalSections request={request} />
+      {disclosure}
+      {status.kind === "error" && <div className="mt-4"><FeedbackLine tone="danger">{status.message}</FeedbackLine></div>}
+      {status.kind === "responding" && <div className="mt-4"><FeedbackLine tone="info">正在提交审批…</FeedbackLine></div>}
+      <div className="mt-5 flex flex-wrap justify-end gap-2">
+        {status.kind === "error" && status.dismissible && (
+          <ActionButton onClick={onDismiss}>关闭</ActionButton>
+        )}
+        {/* C3: allow choices carry the primary tone (granting is not a danger act); deny carries danger-soft. */}
+        {request.allowedChoices.map((choice) => (
+          <ActionButton
+            key={choice}
+            tone={choice === "deny" ? "danger-soft" : "primary"}
+            disabled={choicesDisabled || (choice === "allow_always" && !disclosureAcknowledged)}
+            onClick={() => onChoose(choice)}
+          >
+            {LABELS[choice]}
+          </ActionButton>
+        ))}
       </div>
-    </div>
+    </Dialog>
   );
 }
 
@@ -77,10 +82,10 @@ function ApprovalSections({ request }: { request: CanonicalApprovalRequest }) {
   return (
     <div className="mt-4 space-y-3">
       {request.presentation.sections.map((section) => (
-        <section key={section.title} className="rounded-xl bg-slate-50 p-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{section.title}</h3>
+        <section key={section.title} className="rounded-xl bg-surface-muted p-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">{section.title}</h3>
           {section.fields.map((field) => (
-            <p key={field.label} className="mt-1 text-sm text-slate-700"><span className="font-medium">{field.label}：</span>{field.value}</p>
+            <p key={field.label} className="mt-1 text-sm text-text-body"><span className="font-medium">{field.label}：</span>{field.value}</p>
           ))}
         </section>
       ))}
@@ -100,7 +105,7 @@ function DisclosureAck({
   onChange(accepted: boolean): void;
 }) {
   return (
-    <label className="mt-4 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+    <label className="mt-4 flex items-start gap-2 rounded-lg border border-warn-border bg-warn-soft p-3 text-sm text-warn-strong">
       <input
         type="checkbox"
         checked={accepted}

@@ -1,14 +1,18 @@
 /**
  * INPUT:  typed draft/attachments, connection readiness, current send/cancel state, and a retracted draft hand-back.
  * OUTPUT: <Composer> — textarea (Enter=send, Shift+Enter=newline, IME-safe), attach button, thumbnail previews, and a dual-state
- *         action button: 发送 while idle, 中断 (abort the in-flight turn) while sending. Attach-pick problems toast (D34).
+ *         pill: 发送 while idle (accent), 中断 (abort the in-flight turn) while sending. Attach-pick problems toast (D34).
  * POS:    ui/windows/home/pages/chat — presentational; owns the image-attach hook. The attach button stays enabled even without a
- *         vision slot (decision 5, v1) — a no-vision send returns chat.error rendered as a toast.
+ *         vision slot (decision 5, v1) — a no-vision send returns chat.error rendered as a toast. Buttons ride the shared
+ *         ui/ primitives (batch-2: the private ActionButton is gone; hit targets ≥32px per A7).
  */
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import type { ImageAttachment } from "@taki/shared";
 import { pushToast } from "@/components/toast/toast-store.js";
+import { ActionButton } from "../../action-button.tsx";
+import { IconButton } from "@/components/ui/icon-button.js";
+import { ImagePlusIcon } from "@/lib/icons/image-plus-icon.js";
 import { useImageAttach, type PickedAttachment } from "./use-image-attach.ts";
 
 interface ComposerProps {
@@ -36,20 +40,9 @@ function AttachButton({ onPick }: { onPick: (files: FileList | null) => void }) 
           event.target.value = ""; // let the same file be re-picked after a remove
         }}
       />
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        className="rounded-full p-2 text-slate-500 hover:bg-slate-100"
-        aria-label="Attach image"
-        title="添加图片"
-      >
-        {/* Inline SVG, not an emoji glyph: WebView2's fallback fonts can render pictographs invisibly. */}
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-          <circle cx="8.5" cy="8.5" r="1.5" />
-          <path d="m21 15-5-5L5 21" />
-        </svg>
-      </button>
+      <IconButton label="添加图片" onClick={() => inputRef.current?.click()}>
+        <ImagePlusIcon className="h-5 w-5" />
+      </IconButton>
     </>
   );
 }
@@ -60,42 +53,18 @@ function Thumbnails({ attachments, onRemove }: { attachments: PickedAttachment[]
       {attachments.map((attachment) => (
         <div key={attachment.id} className="relative">
           <img src={attachment.previewUrl} alt="" className="h-16 w-16 rounded-lg object-cover ring-1 ring-black/10" />
-          <button
-            type="button"
+          {/* A7: the remove hit target grows to the 32px IconButton; it hangs over the thumbnail corner. */}
+          <IconButton
+            label="移除图片"
+            tone="solid"
+            className="absolute -right-3 -top-3"
             onClick={() => onRemove(attachment.id)}
-            className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-slate-700 text-xs text-white"
-            aria-label="Remove image"
           >
-            ×
-          </button>
+            <span className="text-xs leading-none">×</span>
+          </IconButton>
         </div>
       ))}
     </div>
-  );
-}
-
-// The action slot: 发送 while idle, 中断 (abort via chat.cancel) while a turn streams — same position, two states.
-function ActionButton({ isSending, canSend, onSubmit, onCancel }: { isSending: boolean; canSend: boolean; onSubmit: () => void; onCancel: () => void }) {
-  if (isSending) {
-    return (
-      <button
-        type="button"
-        onClick={onCancel}
-        className="rounded-full border border-rose-300 px-4 py-2 text-sm font-medium text-rose-500 transition-colors hover:bg-rose-50"
-      >
-        中断
-      </button>
-    );
-  }
-  return (
-    <button
-      type="button"
-      onClick={onSubmit}
-      disabled={!canSend}
-      className="rounded-full bg-rose-400 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-rose-500 disabled:opacity-40"
-    >
-      发送
-    </button>
   );
 }
 
@@ -141,7 +110,7 @@ export function Composer({ onSend, onCancel, isSending, retractedDraft, consumeR
   };
 
   return (
-    <div className="border-t border-slate-200 bg-white p-3">
+    <div className="border-t border-border bg-surface p-3">
       {attachments.length > 0 && <Thumbnails attachments={attachments} onRemove={remove} />}
       <div className="flex items-end gap-2">
         <AttachButton onPick={(files) => void pick(files)} />
@@ -151,9 +120,12 @@ export function Composer({ onSend, onCancel, isSending, retractedDraft, consumeR
           onKeyDown={onKeyDown}
           rows={1}
           placeholder="跟 taki 说点什么…"
-          className="max-h-40 min-h-[2.5rem] flex-1 resize-none rounded-2xl bg-slate-100 px-3.5 py-2 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-rose-300"
+          className="max-h-40 min-h-[2.5rem] flex-1 resize-none rounded-2xl bg-surface-sunken px-3.5 py-2 text-sm text-text-strong"
         />
-        <ActionButton isSending={isSending} canSend={canSend} onSubmit={submit} onCancel={onCancel} />
+        {/* The action slot: 发送 while idle (accent pill), 中断 (abort via chat.cancel) while streaming — same position. */}
+        {isSending
+          ? <ActionButton shape="pill" size="lg" onClick={onCancel}>中断</ActionButton>
+          : <ActionButton tone="accent" shape="pill" size="lg" disabled={!canSend} onClick={submit}>发送</ActionButton>}
       </div>
     </div>
   );

@@ -12,10 +12,10 @@ in pages.ts. Holds no state of record (invariant 4); every page talks to the Cor
 - use-home-navigate-event.ts — listens for the home:navigate Tauri event (openHome on an already-open window)
 - use-home-connection.ts — the shared settings-family connection owner using fresh authenticated generations plus one stable last-good timing accessor; independent from Pet and Chat
 - home-client-context.ts — React context exposing the client, status, and window-owned timing accessor to settings pages (chat keeps its own socket)
-- page-chrome.tsx — shared page frame: <PageHeader> (title, hint, background-refresh marker) + <PageBody> (scrolling, width-capped column) + <PageAlert>
+- page-chrome.tsx — shared page frame: <PageHeader> (title, hint, background-refresh marker) + <PageBody> (scrolling, keyboard-scrollable, width-capped column) + <PageAlert> (delegates to the ui/ FeedbackLine in the danger tone, with an optional retry action)
 - page-card.tsx — shared page chrome: <PageCard> (title + optional header control) + <LabeledRows> (the label/value list the settings-family pages render)
 - badge.tsx — the one status-chip look, in four tones (warn / ok / neutral / muted)
-- action-button.tsx — the one button look, in four tones (primary / secondary / danger-soft / danger)
+- action-button.tsx — the one button look, in tones (primary / secondary / ghost / link / accent / danger-soft / danger) plus shape="pill" and a busy marker; 32px base hit target
 - extension-convergence-controller.ts / extension-convergence.tsx — current-client-only extension owner/generation read and compact shared status band
 - pages/ — one directory per page (see each page's own index.md)
 - Skills is registered in pages.ts and uses the same disposable Home-client state boundary as MCP.

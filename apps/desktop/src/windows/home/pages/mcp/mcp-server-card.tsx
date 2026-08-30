@@ -8,6 +8,7 @@ import type { McpServerView } from "@taki/shared";
 import { Badge } from "../../badge.tsx";
 import { ActionButton } from "../../action-button.tsx";
 import { PageCard } from "../../page-card.tsx";
+import { FeedbackLine } from "@/components/ui/feedback-line.js";
 
 const PHASE_LABEL: Record<McpServerView["status"]["phase"], { text: string; tone: "ok" | "warn" | "neutral" | "muted" }> = {
   connected: { text: "已连接", tone: "ok" },
@@ -54,9 +55,9 @@ export function McpServerCard(input: McpServerCardActions) {
         </div>
       }
     >
-      <p className="text-xs text-slate-500">{transportLine(server)}</p>
-      <p className="mt-1 text-[11px] text-slate-400">Owner {server.ownerHostId} · Runtime generation {server.status.runtimeGeneration ?? "—"}</p>
-      {server.selectedTools.length > 0 && <p className="mt-1 text-xs text-slate-500">选定工具：{server.selectedTools.join("、")}</p>}
+      <p className="text-xs text-text-secondary">{transportLine(server)}</p>
+      <p className="mt-1 text-xs text-text-faint">Owner {server.ownerHostId} · Runtime generation {server.status.runtimeGeneration ?? "—"}</p>
+      {server.selectedTools.length > 0 && <p className="mt-1 text-xs text-text-secondary">选定工具：{server.selectedTools.join("、")}</p>}
       <Diagnostics outcome={server.status.lastOutcome} />
       <Actions {...input} />
     </PageCard>
@@ -75,13 +76,15 @@ function Diagnostics({ outcome }: { outcome: McpServerView["status"]["lastOutcom
   if (outcome === null) return null;
   if (outcome.status === "failed") {
     return (
-      <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 ring-1 ring-amber-100">
-        最近一次候选失败：{FAILURE_REASON_LABEL[outcome.reason] ?? outcome.reason} — {outcome.message}（上一次良好代次继续服务）
-      </p>
+      <div className="mt-2">
+        <FeedbackLine tone="warn">
+          最近一次候选失败：{FAILURE_REASON_LABEL[outcome.reason] ?? outcome.reason} — {outcome.message}（上一次良好代次继续服务）
+        </FeedbackLine>
+      </div>
     );
   }
   if (outcome.status === "published") {
-    return <p className="mt-2 text-xs text-slate-400">最近发布：{outcome.toolNames.length} 个工具 / {outcome.pages} 页列举 / {outcome.durationMs}ms</p>;
+    return <p className="mt-2 text-xs text-text-faint">最近发布：{outcome.toolNames.length} 个工具 / {outcome.pages} 页列举 / {outcome.durationMs}ms</p>;
   }
   return null;
 }

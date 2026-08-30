@@ -2,12 +2,13 @@
 
 /*
  * Theme layer (Tailwind v4 @theme): the wheel one-shot appear plus the C1/C2 semantic token set
- * (docs/UIUX-OPTIMIZATION.md). Pages and shared primitives use these ROLE names instead of raw
- * rose/red/green/sky literals: rose stays the one brand accent, danger/ok/warn/link carry their
- * own hues so the roles can never drift back together. Values reference the default Tailwind
- * scale (pinning the palette in effect today), so a later theme or hue change is an edit HERE,
- * not in the pages. Deliberately deferred to the batch-2 adoption pass (PRD items 1/16): neutral
- * slate steps, the font-size scale collapse, and radius/spacing tokens.
+ * (docs/UIUX-OPTIMIZATION.md batch 1) extended with the batch-2 additions (neutral surface/border/
+ * text steps, accent extras, font-size collapse 8→4, radius/z/duration scales). Pages and shared
+ * primitives use these ROLE names instead of raw rose/red/slate literals: rose stays the one brand
+ * accent, danger/ok/warn/link carry their own hues so the roles can never drift back together, and
+ * neutral surfaces, borders and text step through the surface/border/text tokens. Values reference the default
+ * Tailwind scale (pinning the palette in effect today), so a later theme or hue change is an edit
+ * HERE, not in the pages.
  */
 @theme {
   --animate-wheel-appear: wheel-appear 120ms ease-out;
@@ -22,10 +23,20 @@
   /* C5: pinned UI font stack — system UI first, then Microsoft YaHei for zh-CN Windows text. */
   --font-sans: system-ui, "Microsoft YaHei", sans-serif;
 
+  /* Font-size collapse (C5/C16): 8 sizes → 4 (xs/sm/md/base). xs absorbs the old 10/11px literals. */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-md: 0.9375rem;
+  --text-md--line-height: 1.25rem;
+
   /* Brand/interactive tone (chat send, selection identity). */
   --color-accent: var(--color-rose-500);
   --color-accent-strong: var(--color-rose-600);
   --color-accent-soft: var(--color-rose-50);
+  --color-accent-text: var(--color-rose-700);
+  --color-accent-border: var(--color-rose-200);
+  --color-accent-border-strong: var(--color-rose-300);
+  --color-accent-deep: var(--color-rose-900);
 
   /* Failure/destructive. The soft step doubles as the readable text on the deep surface. */
   --color-danger: var(--color-red-600);
@@ -49,11 +60,54 @@
 
   /* Hyperlinks in markdown text (centralized; a hue change later is this one line). */
   --color-link: var(--color-sky-600);
+
+  /* Neutral surfaces: page canvas (muted), inset wells (sunken), dark fills (strong/deep). */
+  --color-surface: var(--color-white);
+  --color-surface-muted: var(--color-slate-50);
+  --color-surface-sunken: var(--color-slate-100);
+  --color-surface-strong: var(--color-slate-800);
+  --color-surface-deep: var(--color-slate-900);
+  --color-backdrop: color-mix(in oklab, var(--color-slate-950) 35%, transparent);
+
+  /* Neutral borders, three steps. */
+  --color-border: var(--color-slate-200);
+  --color-border-subtle: var(--color-slate-100);
+  --color-border-strong: var(--color-slate-300);
+
+  /* Neutral text, four steps. */
+  --color-text-strong: var(--color-slate-800);
+  --color-text-body: var(--color-slate-600);
+  --color-text-secondary: var(--color-slate-500);
+  --color-text-faint: var(--color-slate-400);
+
+  /* Radius steps: re-indexed one step up from the Tailwind defaults so `rounded-md` lands on the
+     size cards/buttons actually want and the bare `rounded` drift disappears (batch-2 §1). */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Z tiers: inline notices < pet-wheel overlays < dialog/toast. Referenced via z-(--z-*) */
+  --z-notice: 10;
+  --z-wheel: 20;
+  --z-dialog: 50;
+  --z-toast: 50;
+
+  /* Motion: the two durations the UI actually uses (explicit, was implicit). */
+  --duration-fast: 120ms;
+  --duration-base: 150ms;
 }
 
 @layer base {
   /* A3: Tailwind v4 preflight dropped the button hand cursor; restore it for every enabled button. */
   button:not(:disabled) {
     cursor: pointer;
+  }
+
+  /* A5: the ONE keyboard focus indicator — an accent outline at zero specificity (:where), so any
+     utility can still opt out and every primitive/control gets the same token for free. */
+  :where(button, a, summary, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-accent-border-strong);
+    outline-offset: 1px;
   }
 }

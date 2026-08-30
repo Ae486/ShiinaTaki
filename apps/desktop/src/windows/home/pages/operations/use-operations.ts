@@ -22,6 +22,8 @@ export interface OperationsView {
   refreshing: boolean;
   clear: MediaClearControl;
   error: string | null;
+  /** Re-reads both snapshots after a load failure (batch-2 U5: every failed read gets a retry). */
+  refresh: () => Promise<void>;
   runTidy: () => Promise<void>;
 }
 
@@ -70,6 +72,7 @@ export function useOperations(): OperationsView {
     refreshing: status.refreshing || usage.refreshing,
     clear,
     error: error ?? status.error ?? usage.error,
+    refresh,
     runTidy,
   };
 }

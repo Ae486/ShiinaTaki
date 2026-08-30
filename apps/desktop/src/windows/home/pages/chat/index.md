@@ -9,13 +9,13 @@ attachments. One continuous timeline, NO session list.
 - use-chat-timeline.ts — connected-client actions and store selectors: streamed sends/cancel, older paging, grouped rows, retracted-draft hand-back
 - chat-timeline-store.ts — seq-keyed timeline + reconnect reconciliation/tombstones + in-flight streaming row (zustand); errors toast via components/toast (D34)
 - date-group.ts — pure: chronological entries → consecutive local-date groups (date dividers)
-- timeline-view.tsx — the scrollable conversation: date dividers, rows, streaming bubble; sticks to bottom, loads older on top-reach
+- timeline-view.tsx — the scrollable conversation: date dividers, rows, streaming bubble; sticks to bottom, loads older on top-reach; keyboard-scrollable (tabIndex) with an EmptyState for the empty timeline
 - use-timeline-scroll.ts — scroll behavior: stick-to-bottom, top-reach load-older, position hold on prepend
 - timeline-message.tsx — one role-styled row (React.memo); dispatches parts (text→markdown, tool→card, image→thumb)
 - markdown-view.tsx — react-markdown@10 + remark-gfm wrapper, default-safe, with prose utilities (Tailwind v4)
 - tool-card.tsx — a compact tool-call/tool-result card (name + status label)
-- image-attachment.tsx — image part renderer (presentational): shimmer / "图片已过期" / resolved thumbnail
+- image-attachment.tsx — image part renderer (presentational): Skeleton pulse block / "图片已过期" (image-off glyph) / resolved thumbnail
 - use-attachment-image.ts — lazy media.get + module ref→dataURL cache (the ws touchpoint for image parts)
-- composer.tsx — draft/attachments remain editable during reconnect; send is readiness-gated; in-flight state still owns chat.cancel and retracted-draft recovery
+- composer.tsx — draft/attachments remain editable during reconnect; send is readiness-gated; in-flight state still owns chat.cancel and retracted-draft recovery; buttons ride the shared ActionButton pill and IconButton (≥32px hit targets)
 - use-image-attach.ts — file-pick → normalize (downscale/JPEG) → { mediaType, raw base64, preview }, capped at 4
 - image-attach-decode.ts — pure size-gate verdict + data-URL split (the node-testable core of use-image-attach)

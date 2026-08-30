@@ -1,10 +1,12 @@
 /**
  * INPUT:  usePermissions generation-safe Core state and mutation actions.
  * OUTPUT: <PermissionSection> — truthful loading/reconnecting/failure/saved/conflict/refusal permission surface.
- * POS:    ui/windows/home/pages/settings — policy section placed before generic config knobs.
+ * POS:    ui/windows/home/pages/settings — policy section placed before generic config knobs. Loading rides the
+ *         shared Skeleton and outcome lines ride FeedbackLine (batch-2); the failed read keeps its retry.
  */
-import { ActionButton } from "../../action-button.tsx";
+import { FeedbackLine } from "@/components/ui/feedback-line.js";
 import { PageAlert } from "../../page-chrome.tsx";
+import { Skeleton } from "@/components/ui/skeleton.js";
 import { PermissionCellsCard } from "./permission-cells-card.tsx";
 import { PermissionLevelCard } from "./permission-level-card.tsx";
 import { previousData } from "./permission-state.ts";
@@ -19,19 +21,18 @@ export function PermissionSection() {
 
   return (
     <section className="space-y-4" aria-label="权限治理">
-      {disconnected && <PageAlert>正在重新连接。保留当前窗口内的最后一次视图，但不会重放任何权限修改。</PageAlert>}
-      {permissions.state.kind === "loading" && !data && <p className="text-xs text-slate-400">正在从 Core 读取权限策略…</p>}
-      {permissions.state.kind === "loading" && data && <p className="text-xs text-slate-400">正在刷新 Core 权限策略…</p>}
+      {disconnected && <FeedbackLine tone="warn">正在重新连接。保留当前窗口内的最后一次视图，但不会重放任何权限修改。</FeedbackLine>}
+      {permissions.state.kind === "loading" && !data && <Skeleton lines={4} />}
+      {permissions.state.kind === "loading" && data && <FeedbackLine tone="info">正在刷新 Core 权限策略…</FeedbackLine>}
       {permissions.state.kind === "failure" && (
-        <PageAlert>
+        <PageAlert action={{ label: "重试", onClick: () => void permissions.refresh() }}>
           权限策略{permissions.state.failureKind === "validation" ? "校验" : "读取"}失败：{permissions.state.message}
-          <span className="ml-2"><ActionButton tone="secondary" disabled={disconnected} onClick={() => void permissions.refresh()}>重试</ActionButton></span>
         </PageAlert>
       )}
       {feedback && (
-        <p className={`text-xs ${feedback.kind === "saved" ? "text-emerald-700" : feedback.kind === "conflict" ? "text-amber-700" : "text-rose-700"}`}>
+        <FeedbackLine tone={feedback.kind === "saved" ? "ok" : feedback.kind === "conflict" ? "warn" : "danger"}>
           {feedback.message}
-        </p>
+        </FeedbackLine>
       )}
       {data && (
         <>

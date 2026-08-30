@@ -8,12 +8,13 @@
 import type { ChatTimeline } from "./use-chat-timeline.ts";
 import { TimelineMessage } from "./timeline-message.tsx";
 import { MarkdownView } from "./markdown-view.tsx";
+import { EmptyState } from "@/components/ui/empty-state.js";
 import { useTimelineScroll } from "./use-timeline-scroll.ts";
 
 function DateDivider({ label }: { label: string }) {
   return (
     <div className="flex items-center justify-center py-1">
-      <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-[11px] text-slate-500">{label}</span>
+      <span className="rounded-full bg-surface-sunken px-2.5 py-0.5 text-xs text-text-secondary">{label}</span>
     </div>
   );
 }
@@ -21,9 +22,9 @@ function DateDivider({ label }: { label: string }) {
 function TypingDots() {
   return (
     <span className="flex items-center gap-1 px-1 py-1.5">
-      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-slate-400" />
-      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-slate-400 [animation-delay:200ms]" />
-      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-slate-400 [animation-delay:400ms]" />
+      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-text-faint" />
+      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-text-faint [animation-delay:200ms]" />
+      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-text-faint [animation-delay:400ms]" />
     </span>
   );
 }
@@ -33,7 +34,7 @@ function TypingDots() {
 function InflightBubble({ text }: { text: string }) {
   return (
     <div className="flex flex-col items-start">
-      <div className="max-w-[85%] rounded-2xl bg-white px-3.5 py-2 text-slate-800 shadow-sm ring-1 ring-black/5">
+      <div className="max-w-[85%] rounded-2xl bg-surface px-3.5 py-2 text-text-strong shadow-sm ring-1 ring-black/5">
         {text.length > 0 ? <MarkdownView text={text} /> : <TypingDots />}
       </div>
     </div>
@@ -51,10 +52,11 @@ export function TimelineView({ timeline }: { timeline: ChatTimeline }) {
   });
 
   return (
-    <div ref={scrollRef} onScroll={onScroll} className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
-      {hasMore && <div className="py-1 text-center text-[11px] text-slate-400">上滑查看更早的消息</div>}
+    // A8: tabIndex=0 keeps the timeline keyboard-scrollable; the global focus-visible rule shows the ring.
+    <div ref={scrollRef} onScroll={onScroll} tabIndex={0} aria-label="聊天记录" className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
+      {hasMore && <div className="py-1 text-center text-xs text-text-faint">滚动查看更早消息</div>}
       {loaded && entryCount === 0 && !inflight && (
-        <div className="py-10 text-center text-sm text-slate-400">还没有对话，说点什么开始吧</div>
+        <EmptyState title="还没有对话" hint="说点什么开始吧。" />
       )}
       {groups.map((group) => (
         <div key={group.dateKey} className="space-y-2">

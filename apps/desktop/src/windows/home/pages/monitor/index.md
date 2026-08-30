@@ -1,3 +1,3 @@
-- monitor-page.tsx — optional DSH-style Run list/trajectory/inspector UI with filters and bounded older-page controls
-- monitor-controller.ts — disposable generation-safe WS state owner for restore, live cursors, paging and stale recovery
-- monitor-view.tsx — pure Run/Attempt grouping and inspector copy controls; grouping keys stay hidden
+- monitor-page.tsx — optional DSH-style Run list/trajectory/inspector UI with filters, bounded older-page controls, and an explicitly closable inspector (tiles ride SelectionTile, filters ride Field, loading/empty/error ride Skeleton/EmptyState/FeedbackLine with retry)
+- monitor-controller.ts — disposable generation-safe WS state owner for restore, live cursors, paging and stale recovery; the selected run and the inspected row close on a second click (U1 two-way disclosure)
+- monitor-view.tsx — pure Run/Attempt grouping and inspector fields; technical values ride the shared CopyableRow and the detail list clamps min-w-0 (grouping keys stay hidden)

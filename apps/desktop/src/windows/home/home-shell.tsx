@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { MONITOR_MODE_CONFIG_KEY } from "@taki/shared";
 import { ToastHost } from "@/components/toast/toast-host.js";
 import { ConnectionStatusBanner } from "@/components/connection-status/connection-status.js";
+import { SelectionTile } from "@/components/ui/selection-tile.js";
 import { useHomeStore } from "./home-store.ts";
 import { useHomeNavigateEvent } from "./use-home-navigate-event.ts";
 import { useHomeConnection } from "./use-home-connection.ts";
@@ -18,8 +19,7 @@ import { HOME_PAGES, visibleHomePages } from "./pages.ts";
 import { useApprovalDialog } from "@/components/approval/use-approval-dialog.js";
 import { appendVisitedPage } from "./visited-page-ids.ts";
 
-const ACTIVE_ROW = "bg-white text-rose-700 shadow-sm ring-1 ring-rose-200/70";
-const IDLE_ROW = "text-slate-500 ring-1 ring-transparent hover:bg-white/70 hover:text-slate-700";
+const BRAND_MARK = "flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-xs font-semibold text-white";
 
 // The registry row type, not the wider HomePage interface: it keeps the literal id navigate() expects.
 type MenuRow = (typeof HOME_PAGES)[number];
@@ -46,28 +46,26 @@ function MenuItem({ page, active, disabled }: { page: MenuRow; active: boolean; 
   const navigate = useHomeStore((state) => state.navigate);
   const Icon = page.icon;
   return (
-    <button
-      type="button"
-      onClick={() => { if (!disabled) navigate(page.id); }}
+    // Batch-2: the nav row is the 6th SelectionTile site — the ONE accent recipe (ring emphasis, aria-current).
+    <SelectionTile
+      selected={active}
+      stateAttr="aria-current"
+      layout="row"
       disabled={disabled}
-      aria-current={active ? "page" : undefined}
-      className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-        active ? ACTIVE_ROW : IDLE_ROW
-      } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
+      onSelect={() => navigate(page.id)}
+      className="gap-2.5 text-sm"
     >
-      <Icon className={`h-[18px] w-[18px] shrink-0 ${active ? "text-rose-500" : "text-slate-400"}`} />
+      <Icon className={`h-[18px] w-[18px] shrink-0 ${active ? "text-accent" : "text-text-faint"}`} />
       <span className="truncate">{page.label}</span>
-    </button>
+    </SelectionTile>
   );
 }
 
 function Brand() {
   return (
     <div className="mb-4 flex items-center gap-2.5 px-2">
-      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-500 text-xs font-semibold text-white">
-        T
-      </span>
-      <span className="text-sm font-semibold tracking-tight text-slate-700">TakiAgent</span>
+      <span className={BRAND_MARK}>T</span>
+      <span className="text-sm font-semibold tracking-tight text-text-body">TakiAgent</span>
     </div>
   );
 }
@@ -92,14 +90,14 @@ export function HomeShell() {
 
   return (
     <HomeClientContext.Provider value={connection}>
-      <div className="flex h-full bg-slate-100 text-slate-800">
-        <nav className="flex w-56 shrink-0 flex-col gap-1 border-r border-slate-200 bg-slate-100 px-3 py-4">
+      <div className="flex h-full bg-surface-sunken text-text-strong">
+        <nav className="flex w-56 shrink-0 flex-col gap-1 border-r border-border bg-surface-sunken px-3 py-4">
           <Brand />
           {visiblePages.map((entry) => (
             <MenuItem key={entry.id} page={entry} active={entry.id === currentPage} />
           ))}
         </nav>
-        <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
+        <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-surface">
           {visiblePage.id !== "chat" && <ConnectionStatusBanner status={connection.status} />}
           {visibleMountedPages.map((entry) => {
             const PageComponent = entry.component;

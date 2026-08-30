@@ -10,6 +10,11 @@ const run = {
   attemptCount: 1, effectCount: 0, usage: { inputTokens: 0, outputTokens: 0, totalTokens: 0 },
 };
 const trajectory = { run, rows: [], cursor: { runKey: "run-1", seq: 2 }, hasMore: false };
+const row = { rowKey: "row-1", seq: 1, label: "Tool call", phase: "tool", category: "tool", categoryLabel: "Tool",
+  status: "ok", occurredAt: "2026-08-27T00:00:00.500Z", surface: "current", surfaceLabel: "Current",
+  kind: "tool", toolName: "browser" } as const;
+const inspector = { mode: "FEEDBACK_ONLY", title: "Tool call", detail: [],
+  technical: [{ label: "Row key", value: "row-1" }], technicalCollapsed: true, redactionNotice: "已脱敏。" } as const;
 
 function client(overrides: Record<string, unknown> = {}): WsClient {
   return {
@@ -52,5 +57,40 @@ describe("monitor controller", () => {
     controller.bind(client({ monitorState: vi.fn().mockResolvedValue({ mode: "DISABLED", enabled: false, detail: "none" }) }));
     await vi.waitFor(() => expect(states.at(-1)?.mode).toBe("DISABLED"));
     expect(states.at(-1)?.runs).toEqual(INITIAL_MONITOR_STATE.runs);
+  });
+
+  it("deselects the selected run when clicked again and unsubscribes the live stream (U1)", async () => {
+    const unsubscribeMonitor = vi.fn().mockResolvedValue(undefined);
+    const states: MonitorViewState[] = [];
+    const controller = createMonitorController((state) => states.push(state));
+    controller.bind(client({ unsubscribeMonitor }));
+    await vi.waitFor(() => expect(states.at(-1)?.runs).toEqual([run]));
+    await controller.select("run-1");
+    await vi.waitFor(() => expect(states.at(-1)?.trajectory).toEqual(trajectory));
+    await controller.select("run-1"); // second click on the selected run closes the disclosure
+    const last = states.at(-1)!;
+    expect(last.selectedRunKey).toBeUndefined();
+    expect(last.trajectory).toBeUndefined();
+    expect(last.inspectedRowKey).toBeUndefined();
+    expect(unsubscribeMonitor).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes the inspector when the inspected trajectory row is clicked again (U1)", async () => {
+    const states: MonitorViewState[] = [];
+    const controller = createMonitorController((state) => states.push(state));
+    controller.bind(client({
+      monitorTrajectory: vi.fn().mockResolvedValue({ ...trajectory, rows: [row] }),
+      monitorInspect: vi.fn().mockResolvedValue(inspector),
+    }));
+    await vi.waitFor(() => expect(states.at(-1)?.runs).toEqual([run]));
+    await controller.select("run-1");
+    await vi.waitFor(() => expect(states.at(-1)?.trajectory?.rows).toEqual([row]));
+    await controller.inspect("row-1");
+    await vi.waitFor(() => expect(states.at(-1)?.inspector).toEqual(inspector));
+    expect(states.at(-1)?.inspectedRowKey).toBe("row-1");
+    await controller.inspect("row-1"); // second click on the inspected row closes the inspector
+    const last = states.at(-1)!;
+    expect(last.inspector).toBeUndefined();
+    expect(last.inspectedRowKey).toBeUndefined();
   });
 });

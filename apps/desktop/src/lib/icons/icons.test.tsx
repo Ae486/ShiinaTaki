@@ -15,6 +15,14 @@ import { HomeIcon } from "./home-icon.tsx";
 import { OperationsIcon } from "./operations-icon.tsx";
 import { PerceptionIcon } from "./perception-icon.tsx";
 import { ToolIcon } from "./tool-icon.tsx";
+import { XIcon } from "./x-icon.tsx";
+import { CopyIcon } from "./copy-icon.tsx";
+import { CheckIcon } from "./check-icon.tsx";
+import { AlertTriangleIcon } from "./alert-triangle-icon.tsx";
+import { ChevronDownIcon } from "./chevron-down-icon.tsx";
+import { ExternalLinkIcon } from "./external-link-icon.tsx";
+import { ImageOffIcon } from "./image-off-icon.tsx";
+import { ImagePlusIcon } from "./image-plus-icon.tsx";
 
 const ICONS: Array<[string, IconComponent]> = [
   ["chat", ChatIcon],
@@ -24,6 +32,14 @@ const ICONS: Array<[string, IconComponent]> = [
   ["operations", OperationsIcon],
   ["perception", PerceptionIcon],
   ["tool", ToolIcon],
+  ["x", XIcon],
+  ["copy", CopyIcon],
+  ["check", CheckIcon],
+  ["alert-triangle", AlertTriangleIcon],
+  ["chevron-down", ChevronDownIcon],
+  ["external-link", ExternalLinkIcon],
+  ["image-off", ImageOffIcon],
+  ["image-plus", ImagePlusIcon],
 ];
 
 describe.each(ICONS)("%s icon", (_name, Icon) => {

@@ -16,7 +16,8 @@ describe("ExtensionConvergenceStrip", () => {
         collisions: [],
       },
     }} />);
-    expect(html).toContain("Core 11111111…1111");
+    expect(html).toContain("11111111…1111"); // short form displays
+    expect(html).toContain('aria-label="复制 Core"'); // copy affordance rides the id
     expect(html).toContain("Hosts 1/1");
     expect(html).toContain("Extensions 0");
     expect(html).toContain("Collisions 0");

@@ -16,16 +16,17 @@ export function PermissionCellsCard(props: {
   const activeCells = props.data.cells.filter((cell) => cell.level === props.data.level);
   const groups = groupCells(activeCells);
   return (
-    <details className="rounded-xl border border-slate-200 bg-white shadow-sm">
-      <summary className="cursor-pointer list-none px-5 py-4 text-sm font-semibold text-slate-700">
+    <details className="rounded-xl border border-border bg-surface shadow-sm">
+      <summary className="cursor-pointer list-none px-5 py-4 text-sm font-semibold text-text-body">
         高级权限单元
-        <span className="ml-2 text-xs font-normal text-slate-400">默认折叠 · 注册表 {props.data.registryRevision}</span>
+        <span className="ml-2 text-xs font-normal text-text-faint">默认折叠 · 注册表 {props.data.registryRevision}</span>
       </summary>
-      <div className="border-t border-slate-200 px-4 pb-4">
+      <div className="border-t border-border px-4 pb-4">
         {[...groups].map(([capabilityId, cells]) => (
           <div key={capabilityId} className="mt-4">
             <PageCard title={capabilityId}>
-              <div className="-mx-4 -my-3">
+              {/* Batch-2 §1: the bleed now matches the shared CARD_ROW step the knob rows use. */}
+              <div className="-mx-5 -my-3.5">
               {cells.map((cell) => (
                 <PermissionCellRow
                   key={cell.key}
