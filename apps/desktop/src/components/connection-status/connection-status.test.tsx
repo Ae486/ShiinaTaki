@@ -21,4 +21,11 @@ describe("connection status presentation", () => {
     expect(html).toContain('role="status"');
     expect(html).toContain("需要完成配对");
   });
+
+  it("renders the Home/Chat banner as a non-shifting overlay strip (U6)", () => {
+    const html = renderToStaticMarkup(<ConnectionStatusBanner status={{ kind: "reconnecting" }} />);
+    expect(html).toContain("absolute");
+    expect(html).toContain("z-(--z-notice)");
+    expect(html).toContain("shadow-overlay");
+  });
 });

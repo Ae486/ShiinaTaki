@@ -87,6 +87,12 @@ export function previousMcpData(state: McpViewState): McpServerView[] | null {
   return state.kind === "ready" ? state.data : state.previous;
 }
 
+/** Batch-4 L2: the detail-pane target — the operator's selection, else the first row; null when no list is shown. */
+export function resolveSelectedServer(servers: McpServerView[] | null, selectedId: string | null): McpServerView | null {
+  if (servers === null || servers.length === 0) return null;
+  return servers.find((server) => server.serverId === selectedId) ?? servers[0]!;
+}
+
 // --- editor draft model ---
 
 export interface McpFieldDraft {

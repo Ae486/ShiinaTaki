@@ -22,16 +22,7 @@ import {
   type MonitorController, type MonitorFilters, type MonitorViewState,
 } from "./monitor-controller.ts";
 import { groupTrajectoryRows, InspectorFields } from "./monitor-view.tsx";
-
-const INITIATORS: Array<[RunInitiator, string]> = [
-  ["primary", "Primary"], ["scheduled", "Scheduled Task"], ["heartbeat", "Heartbeat"],
-  ["flush", "Maintenance"], ["subagent", "Subagent"], ["webhook", "Webhook"],
-];
-const STATES: Array<[RunState, string]> = [
-  ["queued", "Queued"], ["running", "Running"], ["waiting", "Waiting"], ["recovering", "Recovering"],
-  ["completed", "Completed"], ["failed", "Failed"], ["cancelled", "Cancelled"], ["skipped", "Skipped"],
-  ["deadline_exceeded", "Deadline exceeded"], ["outcome_unknown", "Outcome unknown"],
-];
+import { INITIATOR_OPTIONS, STATE_OPTIONS, connectionKindLabel, wireLabel } from "./monitor-labels.ts";
 
 function readableTime(value: string): string {
   const date = new Date(value);
@@ -54,13 +45,13 @@ function FiltersCard({ draft, setDraft, onApply, applying }: {
         <Field label="发起方">
           <select value={draft.initiator} className={FIELD_CONTROL}
             onChange={(event) => setDraft({ ...draft, initiator: event.target.value as RunInitiator | "" })}>
-            <option value="">全部</option>{INITIATORS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            <option value="">全部</option>{INITIATOR_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
         </Field>
         <Field label="状态">
           <select value={draft.state} className={FIELD_CONTROL}
             onChange={(event) => setDraft({ ...draft, state: event.target.value as RunState | "" })}>
-            <option value="">全部</option>{STATES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            <option value="">全部</option>{STATE_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
         </Field>
       </div>
@@ -73,7 +64,9 @@ function RunTile({ run, selected, onSelect }: { run: RunMonitorSummary; selected
     <SelectionTile selected={selected} onSelect={onSelect}>
       <p className="text-sm font-medium text-text-strong">{run.title}</p>
       <p className="text-xs text-text-secondary">角色：{run.characterId} · {run.initiatorLabel} · {run.triggerLabel} · {run.deliveryLabel}</p>
-      <p className="mt-1 text-xs text-text-secondary">{run.outcome ? `${run.state} / ${run.outcome}` : run.state} · {readableTime(run.queuedAt)} · {run.attemptCount} attempts / {run.effectCount} effects</p>
+      <p className="mt-1 text-xs text-text-secondary">
+        {run.outcome ? `${wireLabel(run.state)} / ${wireLabel(run.outcome)}` : wireLabel(run.state)} · {readableTime(run.queuedAt)} · {run.attemptCount} 次尝试 / {run.effectCount} 个效果
+      </p>
     </SelectionTile>
   );
 }
@@ -83,14 +76,14 @@ function TrajectoryRowTile({ row, selected, onSelect }: { row: TrajectoryRow; se
     <SelectionTile selected={selected} onSelect={onSelect}>
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-medium text-text-body">{row.label}</p>
-        <span className="text-xs text-text-secondary">{row.surface}</span>
+        <span className="text-xs text-text-secondary">{wireLabel(row.surface)}</span>
       </div>
       <LabeledRows rows={[
-        { label: "阶段", value: row.phase },
+        { label: "阶段", value: wireLabel(row.phase) },
         { label: "状态", value: row.outcome ? `${row.status} / ${row.outcome}` : row.status },
         ...(row.contextLabel ? [{ label: "上下文", value: row.contextLabel }] : []),
-        ...(row.kind === "attempt" ? [{ label: "Attempt", value: String(row.attemptOrdinal) }] : []),
-        ...(row.kind === "effect" ? [{ label: "Effect", value: row.effectKind }] : []),
+        ...(row.kind === "attempt" ? [{ label: "尝试", value: String(row.attemptOrdinal) }] : []),
+        ...(row.kind === "effect" ? [{ label: "效果", value: wireLabel(row.effectKind) }] : []),
         { label: "时间", value: readableTime(row.occurredAt) },
         ...(row.summary ? [{ label: "摘要", value: row.summary }] : []),
         ...(row.errorReason ? [{ label: "原因", value: row.errorReason }] : []),
@@ -122,7 +115,7 @@ function TrajectoryCard({ view, controller }: { view: MonitorViewState; controll
 
 function RunsCard({ view, controller }: { view: MonitorViewState; controller: MonitorController }) {
   return (
-    <PageCard title="Runs" action={view.nextCursor ? <ActionButton onClick={() => void controller.loadOlderRuns()} disabled={view.loadingRuns}>加载更早记录</ActionButton> : undefined}>
+    <PageCard title="Run 记录" action={view.nextCursor ? <ActionButton onClick={() => void controller.loadOlderRuns()} disabled={view.loadingRuns}>加载更早记录</ActionButton> : undefined}>
       <div className="flex flex-col gap-2">
         {view.loadingRuns && view.runs.length === 0 && <Skeleton lines={4} />}
         {view.runs.map((run) => (
@@ -175,7 +168,7 @@ export function MonitorPage() {
             <InspectorCard view={view} onClose={() => controller.closeInspector()} />
           </>
         )}
-        <p className="text-xs text-text-secondary">连接：{status.kind}{view.loadingInspector ? " · 检查器读取中…" : ""}</p>
+        <p className="text-xs text-text-secondary">连接：{connectionKindLabel(status.kind)}{view.loadingInspector ? " · 检查器读取中…" : ""}</p>
       </PageBody>
     </>
   );

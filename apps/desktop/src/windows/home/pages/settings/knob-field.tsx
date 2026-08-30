@@ -1,7 +1,8 @@
 /**
- * INPUT:  one config.list entry + the page's save callback and last-save notice.
- * OUTPUT: <KnobField> — the row for one knob: description, badges (env 锁定 / 重启生效 / 密钥), the editor its
- *         metadata prescribes (rendered by knob-input), and the save outcome (FeedbackLine).
+ * INPUT:  one config.list entry + the optional Chinese group label (U7), the page's save callback and last-save notice.
+ * OUTPUT: <KnobField> — the row for one knob: Chinese primary label with the raw key as a secondary code line
+ *         (unknown keys keep the key primary), badges (env 锁定 / 重启生效 / 密钥), the editor its metadata
+ *         prescribes (rendered by knob-input), and the save outcome (FeedbackLine).
  * POS:    ui/windows/home/pages/settings — presentational; the metadata→editor decision lives in knob-editor.ts.
  *         Row padding rides the shared CARD_ROW step (batch-2 §1).
  */
@@ -16,6 +17,8 @@ import { KnobInput } from "./knob-input.tsx";
 
 export interface KnobFieldProps {
   entry: ConfigEntry;
+  /** Client-side Chinese label from config-groups; undefined = unknown key renders the raw key primary. */
+  chineseLabel?: string;
   connectionReady: boolean;
   notice: { ok: boolean; message: string } | undefined;
   /** May return the in-flight save promise so the row can show its pending state (A6). */
@@ -32,7 +35,7 @@ function badgesFor(entry: ConfigEntry): Array<{ label: string; tone: BadgeTone }
   return badges;
 }
 
-export function KnobField({ entry, connectionReady, notice, onSave }: KnobFieldProps) {
+export function KnobField({ entry, chineseLabel, connectionReady, notice, onSave }: KnobFieldProps) {
   const editor = editorFor(entry);
   const availableEditor = connectionReady || editor.disabled ? editor : { ...editor, disabled: true };
   const [draft, setDraft] = useState(editor.display);
@@ -54,7 +57,16 @@ export function KnobField({ entry, connectionReady, notice, onSave }: KnobFieldP
   return (
     <div className={`flex flex-col gap-1.5 transition-colors hover:bg-surface-muted/60 ${CARD_ROW}`}>
       <div className="flex items-baseline justify-between gap-3">
-        <code className="text-xs font-semibold text-text-body">{entry.key}</code>
+        <div className="min-w-0">
+          {chineseLabel === undefined ? (
+            <code className="text-xs font-semibold text-text-body">{entry.key}</code>
+          ) : (
+            <>
+              <span className="block text-xs font-semibold text-text-body">{chineseLabel}</span>
+              <code className="block truncate text-xs font-normal text-text-secondary">{entry.key}</code>
+            </>
+          )}
+        </div>
         <span className="flex flex-wrap justify-end gap-1">
           {badgesFor(entry).map((badge) => (
             <Badge key={badge.label} tone={badge.tone}>

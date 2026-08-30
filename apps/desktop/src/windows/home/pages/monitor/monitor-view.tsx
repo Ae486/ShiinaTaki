@@ -1,12 +1,14 @@
 /**
  * INPUT:  projected trajectory rows and inspector fields
- * OUTPUT: semantic Run/Attempt groups plus labeled copy controls for the explicitly opened developer inspector
+ * OUTPUT: semantic Run/Attempt groups (Chinese group headers, N4) plus labeled copy controls for the explicitly
+ *         opened developer inspector
  * POS:    ui/windows/home/pages/monitor — pure presentation helpers; opaque grouping keys are never rendered.
  *         Technical fields ride the shared CopyableRow (min-w-0 + truncate + labelled copy); the detail list
  *         clamps with min-w-0 so long values cannot blow the inspector layout (U4).
  */
 import type { TrajectoryInspector, TrajectoryRow } from "@taki/shared";
 import { CopyableRow } from "@/components/ui/copyable-row.js";
+import { ATTEMPT_GROUP_LABEL, RUN_GROUP_LABEL, attemptGroupLabel } from "./monitor-labels.ts";
 
 export interface TrajectoryGroup {
   key: string;
@@ -20,10 +22,14 @@ export function groupTrajectoryRows(rows: TrajectoryRow[]): TrajectoryGroup[] {
     const key = row.groupKey ?? "run";
     let group = groups.find((candidate) => candidate.key === key);
     if (!group) {
-      group = { key, label: row.kind === "attempt" ? `Attempt ${row.attemptOrdinal}` : key === "run" ? "Run" : "Attempt", rows: [] };
+      group = {
+        key,
+        label: row.kind === "attempt" ? attemptGroupLabel(row.attemptOrdinal) : key === "run" ? RUN_GROUP_LABEL : ATTEMPT_GROUP_LABEL,
+        rows: [],
+      };
       groups.push(group);
-    } else if (group.label === "Attempt" && row.kind === "attempt") {
-      group.label = `Attempt ${row.attemptOrdinal}`;
+    } else if (group.label === ATTEMPT_GROUP_LABEL && row.kind === "attempt") {
+      group.label = attemptGroupLabel(row.attemptOrdinal);
     }
     group.rows.push(row);
   }

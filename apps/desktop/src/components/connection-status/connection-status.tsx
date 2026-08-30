@@ -1,7 +1,9 @@
 /**
  * INPUT:  a desktop operator ConnectionStatus and the shared semantic notice mapping.
- * OUTPUT: persistent Home/Chat banner and compact pointer-transparent Pet notice; connected renders nothing.
- * POS:    ui/components — presentation-only connection state surfaces; no transport/client ownership.
+ * OUTPUT: Home/Chat banner as a NON-SHIFTING overlay strip (absolute top, z-notice, shadowed — U6) plus the compact
+ *         pointer-transparent Pet notice; connected renders nothing, so the overlay can never park over content.
+ * POS:    ui/components — presentation-only connection state surfaces; no transport/client ownership. The banner
+ *         anchors to the nearest positioned ancestor (home-shell's <main>).
  */
 
 import { connectionStatusNotice, type ConnectionStatus } from "@/lib/connection-status.js";
@@ -20,7 +22,10 @@ export function ConnectionStatusBanner({ status }: { status: ConnectionStatus })
   const notice = connectionStatusNotice(status);
   if (!notice) return null;
   return (
-    <div role="status" className={`${BANNER_TONE[notice.tone]} px-4 py-1.5 text-center text-xs`}>
+    <div
+      role="status"
+      className={`${BANNER_TONE[notice.tone]} absolute inset-x-0 top-0 z-(--z-notice) px-4 py-1.5 text-center text-xs shadow-overlay`}
+    >
       {notice.text}
     </div>
   );

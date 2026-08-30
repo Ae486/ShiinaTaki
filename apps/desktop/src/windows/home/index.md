@@ -2,7 +2,7 @@
 The home window: one instance, left menu / right page content. Pages are registry-driven — adding a page is one row
 in pages.ts. Holds no state of record (invariant 4); every page talks to the Core over the window's own operator WS.
 - main.tsx — React root mounting <HomeShell> into home.html #root, on the page named by the `?page=` boot param
-- home-shell.tsx — two-pane shell + lazy visited-page keep-alive host, shared Home-client provider, and that socket's single Approval modal owner; Chat keeps a separate socket/modal
+- home-shell.tsx — two-pane shell + lazy visited-page keep-alive host, shared Home-client provider, and that socket's single Approval modal owner; <main> anchors the shared connection-status overlay banner (U6); Chat keeps a separate socket/modal
 - pages.ts — THE page registry (id/label/icon/component rows) + the derived PageId union + isPageId
 - pages/monitor/ — conditionally visible read-only Run monitor with semantic filters, durable/live cursor recovery and inspector-only technical metadata
 - default-page-id.ts — dependency-leaf default page id shared by navigation consumers without loading page components

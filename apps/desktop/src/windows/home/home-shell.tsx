@@ -97,7 +97,8 @@ export function HomeShell() {
             <MenuItem key={entry.id} page={entry} active={entry.id === currentPage} />
           ))}
         </nav>
-        <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-surface">
+        {/* relative anchors the ConnectionStatusBanner overlay (U6): it floats over the page instead of shifting it. */}
+        <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-surface">
           {visiblePage.id !== "chat" && <ConnectionStatusBanner status={connection.status} />}
           {visibleMountedPages.map((entry) => {
             const PageComponent = entry.component;

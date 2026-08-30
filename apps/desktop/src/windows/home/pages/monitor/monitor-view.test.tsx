@@ -15,7 +15,7 @@ describe("monitor view", () => {
       { ...base, rowKey: "effect-row", seq: 3, groupKey: "opaque-attempt-id", kind: "effect", effectKind: "tool" },
     ];
     expect(groupTrajectoryRows(rows).map((group) => ({ label: group.label, size: group.rows.length })))
-      .toEqual([{ label: "Run", size: 1 }, { label: "Attempt 2", size: 2 }]);
+      .toEqual([{ label: "运行", size: 1 }, { label: "尝试 2", size: 2 }]);
   });
 
   it("gives every inspector technical field a labeled copy control", () => {

@@ -1,10 +1,11 @@
 /**
- * INPUT: Core-authoritative MCP view state and page-local editor drafts
- * OUTPUT: lifecycle management page with complete states, server actions, and write-only-secret editing
- * POS: Home MCP presentation; controller owns mutations, no MCP truth is persisted locally or echoed
+ * INPUT: Core-authoritative MCP view state, page-local editor drafts, selection memory and dismissed diagnostics
+ * OUTPUT: master-detail lifecycle page (L2): server list pane + detail/editor pane, complete states and actions
+ * POS: Home MCP presentation; the controller owns mutations, selection/drafts/dismissals are component memory,
+ *      no MCP truth is persisted locally or echoed. Panes stack vertically in narrow containers (container query).
  */
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { McpServerView } from "@taki/shared";
 import { ActionButton } from "../../action-button.tsx";
 import { ExtensionConvergenceStrip, useExtensionConvergence } from "../../extension-convergence.tsx";
@@ -13,10 +14,12 @@ import { PageCard } from "../../page-card.tsx";
 import { EmptyState } from "@/components/ui/empty-state.js";
 import { FeedbackLine } from "@/components/ui/feedback-line.js";
 import { Skeleton } from "@/components/ui/skeleton.js";
-import { draftFromView, emptyDraft, validateDraft, type McpFeedback, type McpServerDraft } from "./mcp-state.ts";
+import { draftFromView, emptyDraft, resolveSelectedServer, validateDraft, type McpFeedback, type McpServerDraft } from "./mcp-state.ts";
 import { useMcpServers } from "./use-mcp.ts";
 import { McpServerCard } from "./mcp-server-card.tsx";
 import { McpServerEditor } from "./mcp-server-editor.tsx";
+import { McpServerList } from "./mcp-server-list.tsx";
+import { mcpDiagnosticKey } from "./mcp-labels.ts";
 import type { McpEditorMutationResult } from "./mcp-controller.ts";
 
 export function McpPage() {
@@ -26,6 +29,8 @@ export function McpPage() {
   const [editingRevision, setEditingRevision] = useState<number | null>(null);
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [dismissedDiagnostics, setDismissedDiagnostics] = useState<ReadonlySet<string>>(new Set());
   const clearEditor = (): void => {
     setDraft(null);
     setEditingRevision(null);
@@ -35,6 +40,9 @@ export function McpPage() {
     setDraft(emptyDraft());
     setEditingRevision(null);
     setFormError(null);
+  };
+  const dismissDiagnostics = (key: string): void => {
+    setDismissedDiagnostics((previous) => new Set(previous).add(key));
   };
 
   return (
@@ -46,9 +54,9 @@ export function McpPage() {
       />
       <ExtensionConvergenceStrip state={convergence} />
       <McpPageBody input={{
-        mcp, draft, editingRevision, confirmRemove, formError,
+        mcp, draft, editingRevision, confirmRemove, formError, selectedId, dismissedDiagnostics,
         setDraft, setEditingRevision, setConfirmRemove, setFormError,
-        clearEditor, startAdd,
+        setSelectedId, clearEditor, startAdd, dismissDiagnostics,
       }} />
     </>
   );
@@ -70,18 +78,25 @@ interface McpPageBodyInput {
   editingRevision: number | null;
   confirmRemove: string | null;
   formError: string | null;
+  selectedId: string | null;
+  dismissedDiagnostics: ReadonlySet<string>;
   setDraft(draft: McpServerDraft | null): void;
   setEditingRevision(revision: number | null): void;
   setConfirmRemove(id: string | null): void;
   setFormError(error: string | null): void;
+  setSelectedId(id: string | null): void;
   clearEditor(): void;
   startAdd(): void;
+  dismissDiagnostics(key: string): void;
 }
 
 function McpPageBody({ input }: { input: McpPageBodyInput }) {
   const { mcp, draft } = input;
   const servers = mcp.state.kind === "ready" ? mcp.state.data : mcp.state.kind === "failure" ? mcp.state.previous : null;
   const busy = mcp.state.kind === "ready" && mcp.state.pending !== null;
+  const selected = resolveSelectedServer(servers, input.selectedId);
+  const hasServers = servers !== null && servers.length > 0;
+  const editorElement = draft !== null && <EditorForm draft={draft} input={input} mcp={mcp} busy={busy} />;
   return (
     <PageBody>
       {mcp.state.kind === "failure" && (
@@ -92,31 +107,91 @@ function McpPageBody({ input }: { input: McpPageBodyInput }) {
       {mcp.state.kind === "ready" && mcp.state.feedback && <FeedbackBanner feedback={mcp.state.feedback} />}
       {servers === null && mcp.state.kind === "loading" && <Skeleton lines={4} />}
       {servers !== null && servers.length === 0 && draft === null && <EmptyServerState disabled={!mcp.connectionReady} onAdd={input.startAdd} />}
-      {draft !== null && <McpServerEditor
-        draft={draft}
-        onChange={input.setDraft}
-        onCancel={input.clearEditor}
-        onSave={() => void saveDraft(draft, {
-          editingRevision: input.editingRevision, servers, add: mcp.add, edit: mcp.edit,
-          setEditingRevision: input.setEditingRevision, setFormError: input.setFormError,
-          clearEditor: input.clearEditor,
-        })}
-        error={input.formError}
-        editing={input.editingRevision !== null}
-        saving={busy}
-      />}
-      <ServerList
-        servers={servers}
-        disabled={!mcp.connectionReady || busy}
-        editingServerId={input.editingRevision !== null ? draft?.serverId ?? null : null}
-        confirmRemove={input.confirmRemove}
-        hooks={{ ...input, setEnabled: mcp.setEnabled, remove: mcp.remove, reconnect: mcp.reconnect, test: mcp.test }}
-      />
-      {servers !== null && servers.length > 0 && draft === null && <div className="flex justify-end gap-2">
-        <ActionButton disabled={!mcp.connectionReady} onClick={() => void mcp.refresh()}>刷新</ActionButton>
-        <ActionButton tone="primary" disabled={!mcp.connectionReady} onClick={input.startAdd}>添加服务器</ActionButton>
-      </div>}
+      {hasServers && (
+        <McpMasterDetail
+          servers={servers}
+          selectedServerId={draft?.serverId ?? selected?.serverId ?? null}
+          onSelect={input.setSelectedId}
+          editorElement={editorElement}
+          detailElement={selected !== null && draft === null && (
+            <SelectedServerCard selected={selected} disabled={!mcp.connectionReady || busy} hooks={input} />
+          )}
+        />
+      )}
+      {editorElement !== false && !hasServers && <div className="flex flex-col gap-4">{editorElement}</div>}
+      {hasServers && draft === null && (
+        <div className="flex justify-end gap-2">
+          <ActionButton disabled={!mcp.connectionReady} onClick={() => void mcp.refresh()}>刷新</ActionButton>
+          <ActionButton tone="primary" disabled={!mcp.connectionReady} onClick={input.startAdd}>添加服务器</ActionButton>
+        </div>
+      )}
     </PageBody>
+  );
+}
+
+interface MasterDetailInput {
+  servers: McpServerView[];
+  selectedServerId: string | null;
+  onSelect(serverId: string): void;
+  /** The editor form while creating/editing, else false — it replaces the detail card in the right pane. */
+  editorElement: false | ReactNode;
+  detailElement: false | ReactNode;
+}
+
+/** The L2 two-pane layout: list left, detail/editor right; stacks vertically under a narrow container. */
+function McpMasterDetail(input: MasterDetailInput) {
+  return (
+    <div className="@container flex flex-col gap-4 @xl:flex-row @xl:items-start">
+      <aside className="@xl:w-60 @xl:shrink-0">
+        <McpServerList servers={input.servers} selectedId={input.selectedServerId} onSelect={input.onSelect} />
+      </aside>
+      <div className="flex min-w-0 flex-1 flex-col gap-4">{input.editorElement !== false ? input.editorElement : input.detailElement}</div>
+    </div>
+  );
+}
+
+/** The editor pane form: client-side validation gate, then the controller write (add or edit). */
+function EditorForm({ draft, input, mcp, busy }: { draft: McpServerDraft; input: McpPageBodyInput; mcp: ReturnType<typeof useMcpServers>; busy: boolean }) {
+  return (
+    <McpServerEditor
+      draft={draft}
+      onChange={input.setDraft}
+      onCancel={input.clearEditor}
+      onSave={() => void saveDraft(draft, {
+        editingRevision: input.editingRevision, servers: mcpServersOf(mcp), add: mcp.add, edit: mcp.edit,
+        setEditingRevision: input.setEditingRevision, setFormError: input.setFormError, clearEditor: input.clearEditor,
+      })}
+      error={input.formError}
+      editing={input.editingRevision !== null}
+      saving={busy}
+    />
+  );
+}
+
+function mcpServersOf(mcp: ReturnType<typeof useMcpServers>): McpServerView[] | null {
+  return mcp.state.kind === "ready" ? mcp.state.data : mcp.state.kind === "failure" ? mcp.state.previous : null;
+}
+
+/** The right-pane detail card for the selected server, wired to the page's action hooks. */
+function SelectedServerCard({ selected, disabled, hooks }: { selected: McpServerView; disabled: boolean; hooks: McpPageBodyInput }) {
+  return (
+    <McpServerCard
+      server={selected}
+      disabled={disabled}
+      confirmRemove={hooks.confirmRemove === selected.serverId}
+      diagnosticsDismissed={hooks.dismissedDiagnostics.has(mcpDiagnosticKey(selected))}
+      onDismissDiagnostics={() => hooks.dismissDiagnostics(mcpDiagnosticKey(selected))}
+      onAskRemove={() => hooks.setConfirmRemove(selected.serverId)}
+      onCancelRemove={() => hooks.setConfirmRemove(null)}
+      onConfirmRemove={() => {
+        hooks.setConfirmRemove(null);
+        void hooks.mcp.remove({ serverId: selected.serverId, expectedRevision: selected.configRevision });
+      }}
+      onToggleEnabled={() => void hooks.mcp.setEnabled({ serverId: selected.serverId, enabled: !selected.enabled, expectedRevision: selected.configRevision })}
+      onEdit={() => { hooks.setDraft(draftFromView(selected)); hooks.setEditingRevision(selected.configRevision); hooks.setFormError(null); }}
+      onReconnect={() => void hooks.mcp.reconnect(selected.serverId)}
+      onTest={() => void hooks.mcp.test(selected.serverId)}
+    />
   );
 }
 
@@ -168,47 +243,4 @@ function EmptyServerState({ disabled, onAdd }: { disabled: boolean; onAdd(): voi
       />
     </PageCard>
   );
-}
-
-interface ServerListHooks {
-  setConfirmRemove(id: string | null): void;
-  setDraft(draft: McpServerDraft | null): void;
-  setEditingRevision(revision: number | null): void;
-  setFormError(error: string | null): void;
-  setEnabled(input: { serverId: string; enabled: boolean; expectedRevision: number }): Promise<void>;
-  remove(input: { serverId: string; expectedRevision: number }): Promise<void>;
-  reconnect(serverId: string): Promise<void>;
-  test(serverId: string): Promise<void>;
-}
-
-/** The per-server cards plus the page-level list actions; kept out of McpPage for the size caps. */
-function ServerList(input: { servers: McpServerView[] | null; disabled: boolean; editingServerId: string | null; confirmRemove: string | null; hooks: ServerListHooks }) {
-  const { servers, disabled, confirmRemove, hooks } = input;
-  if (servers === null) return null;
-  return (
-    <>
-      {visibleMcpServers(servers, input.editingServerId).map((server) => (
-        <McpServerCard
-          key={server.serverId}
-          server={server}
-          disabled={disabled}
-          confirmRemove={confirmRemove === server.serverId}
-          onAskRemove={() => hooks.setConfirmRemove(server.serverId)}
-          onCancelRemove={() => hooks.setConfirmRemove(null)}
-          onConfirmRemove={() => {
-            hooks.setConfirmRemove(null);
-            void hooks.remove({ serverId: server.serverId, expectedRevision: server.configRevision });
-          }}
-          onToggleEnabled={() => void hooks.setEnabled({ serverId: server.serverId, enabled: !server.enabled, expectedRevision: server.configRevision })}
-          onEdit={() => { hooks.setDraft(draftFromView(server)); hooks.setEditingRevision(server.configRevision); hooks.setFormError(null); }}
-          onReconnect={() => void hooks.reconnect(server.serverId)}
-          onTest={() => void hooks.test(server.serverId)}
-        />
-      ))}
-    </>
-  );
-}
-
-export function visibleMcpServers(servers: McpServerView[], editingServerId: string | null): McpServerView[] {
-  return editingServerId === null ? servers : servers.filter((server) => server.serverId !== editingServerId);
 }
