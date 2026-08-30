@@ -50,7 +50,7 @@ export function ApprovalDialog({
         {queued > 0 && <p className="mt-2 text-xs text-slate-500">另有 {queued} 个请求等待处理。</p>}
         <ApprovalSections request={request} />
         {disclosure}
-        {status.kind === "error" && <p className="mt-4 text-sm text-red-600" role="alert">{status.message}</p>}
+        {status.kind === "error" && <p className="mt-4 text-sm text-danger" role="alert">{status.message}</p>}
         {status.kind === "responding" && <p className="mt-4 text-sm text-slate-500" role="status">正在提交审批…</p>}
         <div className="mt-5 flex flex-wrap justify-end gap-2">
           {status.kind === "error" && status.dismissible && (
@@ -58,10 +58,12 @@ export function ApprovalDialog({
               关闭
             </button>
           )}
+          {/* C3: allow choices carry the primary tone (ActionButton's primary — granting is not a danger act);
+              deny carries the soft danger tone (border + danger text on white), matching ActionButton's danger-soft. */}
           {request.allowedChoices.map((choice) => (
             <button key={choice} type="button" disabled={choicesDisabled || (choice === "allow_always" && !disclosureAcknowledged)} onClick={() => onChoose(choice)} className={choice === "deny"
-              ? "rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50"
-              : "rounded-lg bg-rose-500 px-3 py-2 text-sm font-medium text-white hover:bg-rose-600"}>
+              ? "rounded-lg border border-danger-border bg-white px-3 py-2 text-sm font-medium text-danger hover:bg-danger-soft"
+              : "rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700"}>
               {LABELS[choice]}
             </button>
           ))}

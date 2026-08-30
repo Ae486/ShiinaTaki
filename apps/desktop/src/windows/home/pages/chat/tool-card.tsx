@@ -5,15 +5,16 @@
  */
 
 import type { TimelineToolOutput } from "@taki/shared";
+import { ToolIcon } from "@/lib/icons/tool-icon.js";
 
 type ToolState = "call" | "done" | "denied" | "error";
 
 const LABEL: Record<ToolState, string> = { call: "调用中", done: "完成", denied: "已拒绝", error: "失败" };
 const TONE: Record<ToolState, string> = {
   call: "text-slate-500",
-  done: "text-emerald-600",
-  denied: "text-amber-600",
-  error: "text-rose-600",
+  done: "text-ok",
+  denied: "text-warn",
+  error: "text-danger",
 };
 
 // A tool-result's output.type (AI SDK v7 tagged union) → a coarse UI state; unknown variants read as a plain result.
@@ -25,7 +26,7 @@ export function outputState(output: TimelineToolOutput): ToolState {
 export function ToolCard({ name, state }: { name: string; state: ToolState }) {
   return (
     <div className="my-1 flex items-center gap-2 rounded-md bg-slate-100 px-2.5 py-1 text-xs">
-      <span aria-hidden>🔧</span>
+      <ToolIcon className="h-3.5 w-3.5 shrink-0 text-slate-400" />
       <span className="font-mono text-slate-600">{name}</span>
       <span className={TONE[state]}>{LABEL[state]}</span>
     </div>

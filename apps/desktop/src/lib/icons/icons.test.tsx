@@ -14,6 +14,7 @@ import { CostumeIcon } from "./costume-icon.tsx";
 import { HomeIcon } from "./home-icon.tsx";
 import { OperationsIcon } from "./operations-icon.tsx";
 import { PerceptionIcon } from "./perception-icon.tsx";
+import { ToolIcon } from "./tool-icon.tsx";
 
 const ICONS: Array<[string, IconComponent]> = [
   ["chat", ChatIcon],
@@ -22,6 +23,7 @@ const ICONS: Array<[string, IconComponent]> = [
   ["home", HomeIcon],
   ["operations", OperationsIcon],
   ["perception", PerceptionIcon],
+  ["tool", ToolIcon],
 ];
 
 describe.each(ICONS)("%s icon", (_name, Icon) => {

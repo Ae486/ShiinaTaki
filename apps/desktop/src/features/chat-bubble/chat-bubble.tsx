@@ -1,13 +1,14 @@
 /**
  * INPUT:  the useChatBubble hook (open/readiness state, streamed reply, send/close) + local input draft.
  * OUTPUT: <ChatBubble> — the small on-pet input + streaming reply bubble; opens on a body click (see use-pet-drag).
+ *         Enter submits (IME-safe: a composition's Enter never submits), Escape closes.
  * POS:    ui/features/chat-bubble — presentational; reaches ws-client/stores ONLY through useChatBubble. Sits over the
  *         transparent overlay (the window stays interactive while open via the interaction store's bubbleOpen flag).
  *         Bubble/typing/input styling echoes BANDORI-PET-REV's look (clean-room, look only; the user restyles later).
  */
 
 import { useEffect, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, KeyboardEvent } from "react";
 import { openHome } from "@/lib/open-home-window.js";
 import { pushToast } from "@/components/toast/toast-store.js";
 import { useChatBubble } from "./use-chat-bubble.ts";
@@ -71,6 +72,17 @@ export function bubbleSubmission(
   return message.length > 0 && !isPending && connectionReady ? message : null;
 }
 
+// A2 IME safety: an IME composition's Enter (candidate confirmation) must never submit the bubble.
+// Exported so the regression test rides the real decision.
+export function enterSubmits(key: string, isComposing: boolean): boolean {
+  return !isComposing && key === "Enter";
+}
+
+// Escape closes the bubble — but not while an IME composition is active (the IME may consume it).
+export function escapeCloses(key: string, isComposing: boolean): boolean {
+  return key === "Escape" && !isComposing;
+}
+
 interface BubbleFormProps {
   isPending: boolean;
   connectionReady: boolean;
@@ -84,12 +96,27 @@ function BubbleForm({ isPending, connectionReady, send, close }: BubbleFormProps
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => inputRef.current?.focus(), []);
 
-  const onSubmit = (event: FormEvent) => {
-    event.preventDefault();
+  const submitDraft = () => {
     const message = bubbleSubmission(draft, isPending, connectionReady);
     if (message === null) return;
     setDraft("");
     void send(message);
+  };
+
+  const onSubmit = (event: FormEvent) => {
+    event.preventDefault();
+    submitDraft();
+  };
+
+  // Keydown owns the Enter path (A2 IME guard); preventDefault also suppresses the form's implicit
+  // submission so a physical Enter submits exactly once. Escape closes only outside a composition.
+  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (enterSubmits(event.key, event.nativeEvent.isComposing)) {
+      event.preventDefault();
+      submitDraft();
+      return;
+    }
+    if (escapeCloses(event.key, event.nativeEvent.isComposing)) close();
   };
 
   return (
@@ -101,7 +128,7 @@ function BubbleForm({ isPending, connectionReady, send, close }: BubbleFormProps
         ref={inputRef}
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
-        onKeyDown={(event) => event.key === "Escape" && close()}
+        onKeyDown={onKeyDown}
         placeholder="跟 taki 说点什么…"
         className="min-w-0 flex-1 bg-transparent px-2 py-1 text-sm text-slate-800 outline-none"
       />

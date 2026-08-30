@@ -45,7 +45,7 @@ export function App() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
       <h1 className="text-2xl font-bold">TakiAgent</h1>
-      <p className={status === "connected" ? "text-green-600" : "text-slate-500"}>{LABELS[status]}</p>
+      <p className={status === "connected" ? "text-ok" : "text-slate-500"}>{LABELS[status]}</p>
 
       {status === "pairing-required" && (
         <div className="flex flex-col items-center gap-2">
@@ -63,7 +63,7 @@ export function App() {
           >
             Pair
           </button>
-          {error && <p className="text-red-600">{error}</p>}
+          {error && <p className="text-danger">{error}</p>}
         </div>
       )}
     </main>

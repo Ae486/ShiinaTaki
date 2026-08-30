@@ -15,8 +15,8 @@ const BASE =
 const TONE: Record<ButtonTone, string> = {
   primary: "bg-slate-800 text-white hover:bg-slate-700",
   secondary: "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
-  danger: "bg-rose-600 text-white hover:bg-rose-500",
-  "danger-soft": "border border-rose-200 bg-white text-rose-600 hover:bg-rose-50",
+  danger: "bg-danger text-white hover:bg-danger-hover",
+  "danger-soft": "border border-danger-border bg-white text-danger hover:bg-danger-soft",
 };
 
 export interface ActionButtonProps {

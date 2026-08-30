@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
-/* The wheel's one-shot appear (no JS timer — the overlay must stay at ~0% idle CPU). */
+/*
+ * Theme layer (Tailwind v4 @theme): the wheel one-shot appear plus the C1/C2 semantic token set
+ * (docs/UIUX-OPTIMIZATION.md). Pages and shared primitives use these ROLE names instead of raw
+ * rose/red/green/sky literals: rose stays the one brand accent, danger/ok/warn/link carry their
+ * own hues so the roles can never drift back together. Values reference the default Tailwind
+ * scale (pinning the palette in effect today), so a later theme or hue change is an edit HERE,
+ * not in the pages. Deliberately deferred to the batch-2 adoption pass (PRD items 1/16): neutral
+ * slate steps, the font-size scale collapse, and radius/spacing tokens.
+ */
 @theme {
   --animate-wheel-appear: wheel-appear 120ms ease-out;
 
@@ -9,5 +17,43 @@
       opacity: 0;
       transform: scale(0.94);
     }
+  }
+
+  /* C5: pinned UI font stack — system UI first, then Microsoft YaHei for zh-CN Windows text. */
+  --font-sans: system-ui, "Microsoft YaHei", sans-serif;
+
+  /* Brand/interactive tone (chat send, selection identity). */
+  --color-accent: var(--color-rose-500);
+  --color-accent-strong: var(--color-rose-600);
+  --color-accent-soft: var(--color-rose-50);
+
+  /* Failure/destructive. The soft step doubles as the readable text on the deep surface. */
+  --color-danger: var(--color-red-600);
+  --color-danger-hover: var(--color-red-500);
+  --color-danger-strong: var(--color-red-700);
+  --color-danger-soft: var(--color-red-50);
+  --color-danger-border: var(--color-red-200);
+  --color-danger-deep: var(--color-red-900);
+
+  /* Confirmed / in effect. */
+  --color-ok: var(--color-emerald-600);
+  --color-ok-strong: var(--color-emerald-700);
+  --color-ok-soft: var(--color-emerald-50);
+  --color-ok-border: var(--color-emerald-200);
+
+  /* Needs operator attention. */
+  --color-warn: var(--color-amber-600);
+  --color-warn-strong: var(--color-amber-700);
+  --color-warn-soft: var(--color-amber-50);
+  --color-warn-border: var(--color-amber-200);
+
+  /* Hyperlinks in markdown text (centralized; a hue change later is this one line). */
+  --color-link: var(--color-sky-600);
+}
+
+@layer base {
+  /* A3: Tailwind v4 preflight dropped the button hand cursor; restore it for every enabled button. */
+  button:not(:disabled) {
+    cursor: pointer;
   }
 }

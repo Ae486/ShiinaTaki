@@ -31,6 +31,6 @@ export function PageBody({ children }: { children: ReactNode }) {
 
 export function PageAlert({ children }: { children: ReactNode }) {
   return (
-    <p className="rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700 ring-1 ring-rose-100">{children}</p>
+    <p className="rounded-lg bg-danger-soft px-3 py-2 text-xs text-danger-strong ring-1 ring-danger-border/60">{children}</p>
   );
 }

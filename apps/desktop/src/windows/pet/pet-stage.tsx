@@ -62,7 +62,7 @@ export function PetStage() {
       {(sceneError ?? clickThrough.error ?? (connectionStatus.kind === "connected" ? null : connectionStatus.kind)) && (
         <div className="absolute left-2 top-2 z-10 flex max-w-[90%] flex-col gap-1">
           <PetConnectionStatusNotice status={connectionStatus} />
-          {sceneError && <div className="rounded bg-red-900/80 px-2 py-1 text-xs text-red-100">渲染初始化失败: {sceneError}</div>}
+          {sceneError && <div className="rounded bg-danger-deep/80 px-2 py-1 text-xs text-danger-soft">渲染初始化失败: {sceneError}</div>}
           {clickThrough.error && (
             <div className="rounded bg-amber-900/80 px-2 py-1 text-xs text-amber-100">穿透轮询错误: {clickThrough.error}</div>
           )}

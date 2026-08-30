@@ -10,3 +10,4 @@ owner's hand-drawn replacements land file by file; the page and wheel registries
 - perception-icon.tsx — eye (perception + privacy page)
 - mcp-icon.tsx — a plug and cord (the MCP lifecycle page)
 - skill-icon.tsx — an instruction sheet and spark (the Skill lifecycle page)
+- tool-icon.tsx — open-end wrench (the chat tool-activity card)
