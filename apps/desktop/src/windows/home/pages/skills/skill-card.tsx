@@ -7,6 +7,7 @@
  *         bytes never render, and a rejected package keeps its truthful 未通过验证 title.
  */
 
+import { useState } from "react";
 import type { SkillInspectResult, SkillPackageView, SkillStandardMetadata } from "@taki/shared";
 import { Badge } from "../../badge.tsx";
 import { ActionButton } from "../../action-button.tsx";
@@ -87,15 +88,27 @@ function DetailsDisclosure({ row }: { row: SkillPackageView }) {
   );
 }
 
-/** Validated standard metadata plus the bounded relative-file inventory — never absolute paths or package bytes. */
+/** Validated standard metadata plus the bounded relative-file inventory — never absolute paths or package bytes.
+    Self-collapsible (U1: every disclosure closes both ways); re-opening rides the 检查 refetch. */
 function InspectSection({ inspected }: { inspected: SkillInspectResult }) {
+  const [collapsed, setCollapsed] = useState(false);
   return (
     <div className="mt-3 border-t border-border-subtle pt-3">
-      {inspected.metadata && <LabeledRows rows={metadataRows(inspected.metadata)} />}
-      <p className="mb-1 mt-3 text-xs font-medium text-text-body">包文件（{inspected.files.length}）</p>
-      <p className="max-h-24 overflow-auto whitespace-pre-wrap text-xs text-text-secondary">
-        {inspected.files.length ? inspected.files.join("\n") : "无可展示文件"}
-      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-medium text-text-body">检查结果</p>
+        <ActionButton tone="ghost" onClick={() => setCollapsed((value) => !value)}>
+          {collapsed ? "展开" : "收起"}
+        </ActionButton>
+      </div>
+      {!collapsed && (
+        <>
+          {inspected.metadata && <LabeledRows rows={metadataRows(inspected.metadata)} />}
+          <p className="mb-1 mt-3 text-xs font-medium text-text-body">包文件（{inspected.files.length}）</p>
+          <p className="max-h-24 overflow-auto whitespace-pre-wrap text-xs text-text-secondary">
+            {inspected.files.length ? inspected.files.join("\n") : "无可展示文件"}
+          </p>
+        </>
+      )}
     </div>
   );
 }

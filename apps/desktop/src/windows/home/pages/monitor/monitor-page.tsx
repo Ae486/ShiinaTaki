@@ -4,7 +4,8 @@
  *         with a drag-adjustable width; filters live in the browser pane; stacks under a narrow container
  * POS:    ui/windows/home/pages/monitor — operator-only developer surface; no technical identifiers in primary rows.
  *         Tiles ride SelectionTile (U1: the selected run and the inspected row close on a second click), filters ride
- *         Field, and loading/empty/error ride Skeleton/EmptyState/FeedbackLine with a retry action. Hidden pages stop
+ *         Field, and loading/empty/error ride Skeleton/EmptyState/FeedbackLine with a retry action. The ledger
+ *         bottom-pins with pause-on-scroll-up (use-trajectory-follow, reset per selection via the ledger key). Hidden pages stop
  *         working (P1e): the controller unsubscribes + stops publishing while hidden and refetches on reactivation.
  */
 import { useEffect, useMemo, useState } from "react";
@@ -23,6 +24,7 @@ import {
   type MonitorController, type MonitorFilters, type MonitorViewState,
 } from "./monitor-controller.ts";
 import { groupTrajectoryRows } from "./monitor-view.tsx";
+import { useTrajectoryFollow } from "./use-trajectory-follow.ts";
 import { InspectorPane, INSPECTOR_WIDTH_DEFAULT, MonitorThreeZones } from "./monitor-layout.tsx";
 import { usePageVisible } from "../../page-visibility-store.ts";
 import { INITIATOR_OPTIONS, STATE_OPTIONS, connectionKindLabel, wireLabel } from "./monitor-labels.ts";
@@ -113,10 +115,17 @@ function TrajectoryRowTile({ row, selected, onSelect }: { row: TrajectoryRow; se
 
 function TrajectoryCard({ view, controller }: { view: MonitorViewState; controller: MonitorController }) {
   const trajectory = view.trajectory;
+  // The follow hook runs before the null return (hook order is unconditional); while no trajectory is mounted the
+  // scroll element does not exist and the follow is dormant.
+  const follow = useTrajectoryFollow(trajectory ? trajectory.rows.length : 0);
   if (!trajectory) return null;
   return (
     <PageCard title={`轨迹 · ${trajectory.run.title}`} action={trajectory.hasMore ? <ActionButton onClick={() => void controller.loadMoreTrajectory()} disabled={view.loadingTrajectory}>加载更多</ActionButton> : undefined}>
-      <div className="flex flex-col gap-2">
+      {/* The ledger owns its scroll (reactive-read-models.md §f): rows append at the bottom, so the view bottom-pins
+        while the operator sits at the bottom and pauses on scroll-up. The resume control renders only while genuinely
+        paused-from-bottom and is a real control (resume() scrolls back and re-pins). */}
+      <div ref={follow.scrollRef} onScroll={follow.onScroll} tabIndex={0} aria-label="轨迹事件"
+        className="flex max-h-[60vh] flex-col gap-2 overflow-y-auto">
         {view.loadingTrajectory && trajectory.rows.length === 0 && <Skeleton lines={4} />}
         {groupTrajectoryRows(trajectory.rows).map((group) => (
           <section key={group.key} aria-label={group.label} className="flex flex-col gap-1.5">
@@ -128,6 +137,11 @@ function TrajectoryCard({ view, controller }: { view: MonitorViewState; controll
         ))}
         {trajectory.rows.length === 0 && !view.loadingTrajectory && <EmptyState title="该 Run 暂无轨迹事件" />}
       </div>
+      {!follow.following && (
+        <div className="mt-2 flex justify-center">
+          <ActionButton tone="ghost" onClick={follow.resume}>已暂停跟随 · 回到底部</ActionButton>
+        </div>
+      )}
     </PageCard>
   );
 }
@@ -163,7 +177,9 @@ export function MonitorPage() {
         {view.mode === "DISABLED" ? <PageCard title="监控未启用"><p className="text-xs text-text-secondary">请在 Core 配置中启用 FEEDBACK_ONLY 或 FULL_LOCAL。</p></PageCard> : (
           <MonitorThreeZones
             browser={<><FiltersCard draft={draft} setDraft={setDraft} onApply={() => void controller.applyFilters(draft)} applying={view.loadingRuns} /><RunsCard view={view} controller={controller} /></>}
-            ledger={<TrajectoryCard view={view} controller={controller} />}
+            // Keyed on the selection: a newly selected run remounts the ledger, resetting the tail-follow to
+            // bottom-pinned for the fresh trajectory instead of inheriting the previous run's scroll position.
+            ledger={<TrajectoryCard key={view.selectedRunKey ?? "none"} view={view} controller={controller} />}
             inspector={view.inspector && (
               <InspectorPane
                 inspector={view.inspector}

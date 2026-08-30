@@ -37,7 +37,8 @@ Each window opens its OWN operator socket via `lib/ws-client.ts` (concurrent sam
 Every owner replaces whole authenticated client generations after an observed close/failure; it never reuses a closed
 client, buffers offline commands, or replays mutations. Connected status is published only after that owner's required
 restoration. The complete lifecycle, deadline, timing-policy, timeline-reconciliation, and readiness contract lives in
-[`operator-connection-recovery.md`](./operator-connection-recovery.md).
+[`operator-connection-recovery.md`](./operator-connection-recovery.md); what each page updates from pushes, refetches per
+generation, and gates while hidden is codified in [`reactive-read-models.md`](./reactive-read-models.md).
 
 ### Settings permission governance
 
@@ -215,6 +216,7 @@ The persisted timeline and the live stream are two sources merged in one store (
 - The streaming assistant reply is a SEPARATE **in-flight row keyed by `chat.send`'s `messageId`** (which is NOT the persisted entry's uuid — do not try to id-match them). `chat.delta` grows it; the assistant's `timeline.appended` (the persisted version) **drops the in-flight row and inserts the entry in ONE atomic `set()`** — this ordering (Core sends `persistTurn` fan-out just before `chat.complete`) is what prevents a duplicate flash. `chat.complete` → `clearInflight` is the safety net, not the primary path.
 - Only an **assistant**-role `appended` drops the in-flight row; user/tool appended rows must not. `chat.error` mid-stream clears the in-flight row and pushes an inline notice atomically. A new `messageId` replaces a stale in-flight row.
 - The in-flight bubble uses identical assistant-row styling for a seamless swap.
+- Scroll discipline (bottom-pinning, pause-on-scroll-up, the load-older hold, and the truthful paused-follow affordance rule) is codified in [`reactive-read-models.md`](./reactive-read-models.md) §(f).
 
 ## Rendering server-owned binary refs (images)
 

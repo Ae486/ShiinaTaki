@@ -127,3 +127,30 @@ Owner ruling: no settings entry yet, but the layer must accept one at any time. 
   refresh/loading states, owner lines, monitor connection line, subject lines, badge muted tone,
   scroll hint, 切换中 pending); decorative icons and disabled states keep faint.
 - Gate evidence: desktop typecheck/test(487)/eslint clean, vite build with token emission verified.
+
+## 9. Batch 7 — D67 reactive read-model consolidation (final frontend batch)
+
+Owner framing: after batches 1-6-FE most of D67's acceptance already exists piecemeal. This batch
+consolidates it into ONE contract and closes the remaining cheap gaps; it explicitly does NOT wait
+for D76 Core events (tool-arrival order stays out of scope — cross-layer residual).
+
+1. **Contract doc** (new `.trellis/spec/frontend/reactive-read-models.md`, linked from home-window.md):
+   codify the rules the app now actually follows — (a) push-driven pages update from WS events with
+   generation-guarded handlers; (b) request/response pages refetch per authenticated client generation
+   and never replay writes; (c) NO polling intervals in home windows (quality-guidelines); (d) hidden
+   keep-alive pages gate expensive live work (monitor) while additive-delta listeners (config.changed)
+   stay live; (e) reconnect recovery = per-page restore seam (chat timeline restore, monitor
+   restore+refresh, perception reactivation refetch, mcp/skills generation refetch); (f) scroll
+   discipline: bottom-pinning + pause-on-scroll-up + load-older hold; (g) stale/busy indications from
+   real signals only (PageHeader busy; monitor stale from cursor lag) — never invented states.
+2. **Settings-family hidden gating, the cheap correct shape**: `config.changed` deltas are full-value —
+   while a settings page is hidden, SKIP the local apply (state can't be observed) and mark stale;
+   on reactivation, refetch instead of replaying a delta queue. Applies to `use-config`; permissions
+   listeners stay live (rare, small, correctness-sensitive).
+3. **Monitor ledger tail-follow**: trajectory ledger gains bottom-pinning with pause-on-scroll-up and
+   resume-at-bottom (the chat hook pattern, reused — extract `useTailFollow` only if ≥2 consumers
+   materialize, else inline) + a live activity affordance only when Core actually streams run events
+   (no fake "live" pill when nothing pushes).
+4. **Expandable audit**: re-verify every disclosure/details added across batches collapses both ways
+   (batch-2 U1 rule) — report as a checklist, no new UI.
+5. Out of scope: any Core/shared change; tool-arrival ordering (D76); polling; invented stale states.

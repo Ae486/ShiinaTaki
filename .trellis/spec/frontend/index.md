@@ -17,6 +17,7 @@
 | [Component Guidelines](./component-guidelines.md) | Component patterns, props, composition |
 | [Hook Guidelines](./hook-guidelines.md) | Custom hooks, WS subscription patterns |
 | [State Management](./state-management.md) | Zustand stores, state ownership, guarded SWR page snapshots |
+| [Reactive Read-Models](./reactive-read-models.md) | WS push handlers + generation guards, per-generation refetch (no write replay), no polling, hidden-page gating, per-page restore seams, scroll discipline, real-signal-only stale/busy |
 | [Type Safety](./type-safety.md) | zod boundaries, no-any policy |
 | [Quality Guidelines](./quality-guidelines.md) | Size caps, perf rules (this window is always-on), tests |
 | [Operator Connection Recovery & Request Deadlines](./operator-connection-recovery.md) | Independent Pet/Home/Chat generations, native JSON-RPC deadlines, restoration ordering, timing policy, and honest reconnect UX |
