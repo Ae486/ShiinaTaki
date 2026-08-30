@@ -6,7 +6,9 @@
  *         abortSwitch (mark an in-flight switch stale so a late model self-discards),
  *         and idempotent dispose (Live2D child before Pixi ticker). The scene may boot MODEL-LESS (initial source unreachable —
  *         normal in a packaged build, where the dev route does not exist): the stage runs empty, avatar methods no-op,
- *         and the first switchCostume (initial-costume promotion) attaches a model.
+ *         and the first switchCostume (initial-costume promotion) attaches a model. The click-through alpha mask
+ *         refreshes every MASK_REFRESH_FRAME_INTERVAL-th governed frame and is forced at silhouette jumps
+ *         (attach/switch, rebuild, canvas resize) — see the P1c staleness note below.
  * POS:    ui/renderer — framework-free (ZERO React/Tauri imports). The single assembly point the React bridge
  *         (windows/pet/pet-stage.tsx) mounts; keeps all Pixi/Live2D ownership out of the React tree.
  */
@@ -23,7 +25,15 @@ import { reloadModel } from "./live2d/costume-switch.ts";
 import { readVocabulary, type AvatarVocabulary } from "./live2d/model-vocabulary.ts";
 import type { ClickRegion } from "./live2d/click-regions.ts";
 import { createAlphaMaskSource } from "./alpha-mask-source.ts";
+import { createFrameGatedRefresher } from "./frame-gated-refresher.ts";
 import type { AvatarCommand } from "@taki/shared";
+
+// Mask refresh cadence (P1c): the readback (RenderTexture render + synchronous extract.pixels) is the most expensive
+// per-frame work in the overlay, so it runs every Nth governed frame instead of every frame. The bitmap may lag the
+// live silhouette by up to N frames — an accepted tradeoff at 0.25 res (invisible for hit-testing); force-points cover
+// the moments the silhouette can JUMP so attach/switch/rebuild/resize are never stale. Manual check after changing N:
+// click-through during fast motions must still track the character.
+const MASK_REFRESH_FRAME_INTERVAL = 4;
 
 export type PetSceneOptions = {
   // The `renderThrottling` config flag, read locally with a default (real config wiring is deferred to M5 #24, D19).
@@ -38,7 +48,8 @@ export type PetScene = {
   governor: RenderGovernor;
   setAvatarState: (state: AvatarState) => void;
   // Whether the character's opaque body is under a point given in logical canvas px (top-left origin). The pet
-  // window's click-through hook queries this per cursor poll; the mask tracks the live silhouette per frame.
+  // window's click-through hook queries this per cursor poll; the mask tracks the live silhouette at the gated
+  // cadence (up to MASK_REFRESH_FRAME_INTERVAL frames behind) and is force-refreshed at silhouette jumps.
   isOpaqueAt: (x: number, y: number) => boolean;
   // The loaded model's motion/expression names — reported to the Core (avatar.report) for Option A prompt injection.
  // Empty while the scene is model-less; the promotion path re-reports the real vocabulary after attach.
@@ -79,6 +90,8 @@ interface SwitchContext {
   characterId: string;
   slot: { current: SceneModel | null }; // mutated in place so the scene's delegating methods see the new costume
   seq: { current: number }; // monotonically increasing switch ticket — a late-resolving load must not clobber a newer one
+  // Forces an immediate alpha-mask refresh (silhouette jump: a model just attached). Assigned before the first attach.
+  forceMaskRefresh: () => void;
 }
 
 export async function createPetScene(host: HTMLElement, options: PetSceneOptions = {}): Promise<PetScene> {
@@ -91,7 +104,39 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
   // Stable across costume swaps (the pet window is fixed-size); the avatar controller needs it for gaze + click math.
   const center = { x: app.screen.width / 2, y: app.screen.height / 2 };
   const slot: { current: SceneModel | null } = { current: null };
-  const ctx: SwitchContext = { app, center, characterId, slot, seq: { current: 0 } };
+
+  // Snapshot the stage (the on-screen composition) into a low-res alpha mask for click-through hit-testing, on the
+  // GATED cadence above instead of every painted frame (P1c). It still rides the SAME governed ticker — no separate
+  // loop, so throttling/pausing applies unchanged: when the governor stops the ticker (hidden/asleep) no refresh
+  // runs, and a paused model is static so the stale mask stays valid. Reads app.stage each refresh, so a costume
+  // swap (removeChild+addChild) is tracked with no mask rewiring; force() covers the silhouette-jump moments.
+  const mask = createAlphaMaskSource(app.renderer, app.stage, { width: app.screen.width, height: app.screen.height });
+  const maskRefresher = createFrameGatedRefresher(() => mask.refresh(), MASK_REFRESH_FRAME_INTERVAL);
+  app.ticker.add(maskRefresher.tick);
+
+  const ctx: SwitchContext = { app, center, characterId, slot, seq: { current: 0 }, forceMaskRefresh: () => maskRefresher.force() };
+
+  // Prime the bitmap at scene (re)build so samples never wait N frames for the first gated refresh. The initial
+  // attach below (when the model loads) forces again with the model on stage — one extra boot readback, negligible.
+  maskRefresher.force();
+
+  // A canvas resize re-frames the silhouette, so refresh immediately. (Today the pet window is fixed-size — the
+  // observer is for safety and for the future model-scale window resize, L4. The mask TEXTURE keeps its creation
+  // size, so after a real resize sampling stays correct inside the captured logical rect and reads pass-through
+  // outside it; texture re-creation lands with L4 if resizing becomes real.) Disconnected on dispose — no leak.
+  let resizeObserver: ResizeObserver | null = null;
+  if (typeof ResizeObserver !== "undefined" && app.canvas) {
+    resizeObserver = new ResizeObserver(() => maskRefresher.force());
+    resizeObserver.observe(app.canvas);
+  }
+
+  // Mask teardown mirrors its setup exactly: remove the gated tick callback from the ticker, disconnect the resize
+  // observer, then dispose the texture (the texture dies last).
+  const teardownMask = () => {
+    app.ticker.remove(maskRefresher.tick);
+    resizeObserver?.disconnect();
+    mask.dispose();
+  };
 
   // The initial model is best-effort: the dev route exists only under `pnpm tauri dev`, and even there a transient
   // fetch failure must not kill the stage. A model-less scene stays alive; the initial-costume promotion (or a
@@ -101,12 +146,6 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
   } catch (error) {
     console.warn("[pet-scene] initial model unavailable; stage runs model-less until a costume attaches", error);
   }
-
-  // Snapshot the stage (the on-screen composition) into a low-res alpha mask once per painted frame. Hooking it to
-  // the governed ticker means it throttles/pauses with rendering; a paused model is static, so the mask stays valid.
-  // It reads app.stage each frame, so a costume swap (removeChild+addChild) is tracked with no mask rewiring.
-  const mask = createAlphaMaskSource(app.renderer, app.stage, { width: app.screen.width, height: app.screen.height });
-  app.ticker.add(mask.refresh);
 
   return {
     governor,
@@ -125,22 +164,22 @@ export async function createPetScene(host: HTMLElement, options: PetSceneOptions
     handleProximity: (x, y) => slot.current?.avatar.handleProximity(x, y),
     switchCostume: (source) => switchCostume(ctx, source),
     abortSwitch: () => abortSwitch(ctx),
-    dispose: createSceneDisposer(ctx, mask),
+    dispose: createSceneDisposer(ctx, teardownMask),
   };
 }
 
 // Pixi destroys Application plugins (including its ticker) before stage children. A Live2D child unregisters its
 // Automator from that ticker during model.destroy(), so the model must leave the stage while the ticker is still live.
 // This also makes React StrictMode's development mount probe harmless instead of leaving a dead canvas above the real one.
-function createSceneDisposer(ctx: SwitchContext, mask: ReturnType<typeof createAlphaMaskSource>): () => void {
+// teardownMask removes the gated tick from the ticker, disconnects the resize observer, and disposes the mask texture.
+function createSceneDisposer(ctx: SwitchContext, teardownMask: () => void): () => void {
   let disposed = false;
   return () => {
     if (disposed) return;
     disposed = true;
     abortSwitch(ctx);
     ctx.slot.current?.idle.dispose();
-    ctx.app.ticker.remove(mask.refresh);
-    mask.dispose();
+    teardownMask();
     const current = ctx.slot.current;
     ctx.slot.current = null;
     if (current !== null) {
@@ -174,6 +213,8 @@ function abortSwitch(ctx: SwitchContext): void {
 
 // One attach site for both the initial best-effort load and every costume swap: dispose the outgoing scheduler, then
 // rebuild the controller + idle scheduler. The scheduler goes stale (and self-disposes) once a newer switch bumps seq.
+// A model just attached is a silhouette JUMP, so the alpha mask refreshes immediately — it must not wait for the next
+// gated tick (P1c force-point).
 function attachModel(ctx: SwitchContext, model: Live2DModel, costume: string | null): void {
   ctx.slot.current?.idle.dispose();
   const ticket = ctx.seq.current;
@@ -183,4 +224,5 @@ function attachModel(ctx: SwitchContext, model: Live2DModel, costume: string | n
     idle: createIdleMotionScheduler({ model, isStale: () => ctx.seq.current !== ticket }),
     costume,
   };
+  ctx.forceMaskRefresh();
 }

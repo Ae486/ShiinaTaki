@@ -3,7 +3,14 @@
  * OUTPUT: an AlphaMaskSource — refresh() renders the container into a persistent low-res RenderTexture and caches
  *         its alpha readback; sampleAlpha/isOpaque read the cached bitmap (a plain array index, ~free per call).
  * POS:    ui/renderer — framework-free (ZERO React imports). The Pixi half of the click-through mask; refresh is
- *         driven by the governed ticker in pet-scene.ts so it rides the frame governor, never a separate loop.
+ *         driven by the governed ticker in pet-scene.ts (via the frame-gated refresher, P1c: every 4th governed
+ *         frame + forced at attach/rebuild/resize), never a separate loop.
+ *
+ * Accepted staleness tradeoff (P1c): refresh costs a RenderTexture render + a SYNCHRONOUS GPU→CPU readback, so it
+ * runs at a gated cadence rather than every frame — the cached bitmap may lag the live silhouette by up to the
+ * gating interval (4 frames) while a motion plays. At 0.25 res the lag is imperceptible for hit-testing; the
+ * manual check to repeat after touching the cadence is click-through during FAST motions (the silhouette edges
+ * trail a few frames, e.g. mid-wave or mid-drag). Sampling itself is unchanged: it never touches the GPU.
  */
 
 import { RenderTexture } from "pixi.js";

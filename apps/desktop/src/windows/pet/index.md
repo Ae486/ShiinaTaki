@@ -13,5 +13,6 @@ Transparent, borderless, always-on-top pet overlay window (#14/#15/#16).
 - initial-costume-promotion.ts — scene-lifetime promotion controller; interrupted pre-commit work retries on a replacement generation while an attached costume stays latched
 - use-initial-costume.ts — once connected, promotes the dev scene through the D61 whole-attempt and never reloads an already attached imported costume (#18)
 - use-render-governor.ts — wires Tauri onFocusChanged + DOM visibilitychange into the render governor
-- use-click-through.ts — one global-cursor poll drives per-pixel click-through (toggle on change), gaze follow, AND the proximity reflex (#15/#16/D17)
+- use-click-through.ts — one global-cursor poll (~31Hz, interval stopped while hidden) drives per-pixel click-through (toggle on change), gaze follow, AND the proximity reflex (#15/#16/D17); the window-origin IPC is cached and refreshed only on drag end / window moved / window resized / a ~2s TTL backstop, so an idle tick costs one IPC
+- cursor-poll.ts — pure poll-economy decisions behind that hook: run-while-visible gate, origin-cache staleness (dirty flag + TTL backstop), and the physical→logical cursor transform; also owns the 32ms interval constant
 - click-through-toggle.ts — pure toggle formula: ignore = !dragging && !buttonDown && !overUi && !opaque; also exports the keep-interactive attribute/selector overlays mark themselves with

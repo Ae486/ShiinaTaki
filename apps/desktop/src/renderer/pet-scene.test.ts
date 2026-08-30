@@ -10,7 +10,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { idleDisposers, lifecycle } = vi.hoisted(() => ({
+const { idleDisposers, lifecycle, tickerHooks, maskHooks } = vi.hoisted(() => ({
   idleDisposers: [] as Array<ReturnType<typeof vi.fn>>,
   lifecycle: {
     order: [] as string[],
@@ -18,11 +18,13 @@ const { idleDisposers, lifecycle } = vi.hoisted(() => ({
     destroyModel: vi.fn(),
     destroyApp: vi.fn(),
   },
+  tickerHooks: { add: vi.fn(), remove: vi.fn() },
+  maskHooks: { refresh: vi.fn() },
 }));
 
 vi.mock("./stage.ts", () => ({
   createStage: vi.fn(async () => ({
-    ticker: { add: vi.fn(), remove: vi.fn(), start: vi.fn(), stop: vi.fn(), maxFPS: 0, started: false },
+    ticker: { ...tickerHooks, start: vi.fn(), stop: vi.fn(), maxFPS: 0, started: false },
     screen: { width: 400, height: 600 },
     renderer: {},
     stage: { removeChild: lifecycle.removeModel },
@@ -30,7 +32,7 @@ vi.mock("./stage.ts", () => ({
   })),
 }));
 vi.mock("./alpha-mask-source.ts", () => ({
-  createAlphaMaskSource: () => ({ refresh: vi.fn(), isOpaque: () => false, dispose: vi.fn() }),
+  createAlphaMaskSource: () => ({ refresh: maskHooks.refresh, isOpaque: () => false, dispose: vi.fn() }),
 }));
 vi.mock("./live2d/load-character-model.ts", () => ({
   loadCharacterModel: vi.fn(async () => ({ tag: "model", destroy: lifecycle.destroyModel })),
@@ -67,6 +69,9 @@ beforeEach(() => {
   lifecycle.removeModel.mockReset();
   lifecycle.destroyModel.mockReset();
   lifecycle.destroyApp.mockReset();
+  tickerHooks.add.mockReset();
+  tickerHooks.remove.mockReset();
+  maskHooks.refresh.mockReset();
   lifecycle.removeModel.mockImplementation(() => {
     lifecycle.order.push("remove-model");
   });
@@ -120,6 +125,30 @@ describe("createPetScene idle scheduler lifecycle", () => {
     expect(lifecycle.removeModel).toHaveBeenCalledTimes(1);
     expect(lifecycle.destroyModel).toHaveBeenCalledTimes(1);
     expect(lifecycle.destroyApp).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("createPetScene mask refresh wiring (P1c)", () => {
+  it("registers exactly one gated ticker callback and removes that same callback on dispose", async () => {
+    const scene = await createPetScene(host, { renderThrottling: false });
+    expect(tickerHooks.add).toHaveBeenCalledTimes(1);
+    const [registered] = tickerHooks.add.mock.calls[0] ?? [];
+    expect(typeof registered).toBe("function");
+    scene.dispose();
+    expect(tickerHooks.remove).toHaveBeenCalledTimes(1);
+    expect(tickerHooks.remove).toHaveBeenCalledWith(registered);
+  });
+
+  it("forces a mask refresh at scene build and again when the initial model attaches", async () => {
+    await createPetScene(host, { renderThrottling: false });
+    expect(maskHooks.refresh).toHaveBeenCalledTimes(2); // rebuild prime + initial-attach force
+  });
+
+  it("forces a mask refresh when a costume switch attaches its model", async () => {
+    const scene = await createPetScene(host, { renderThrottling: false });
+    maskHooks.refresh.mockClear();
+    await scene.switchCostume({ settingsUrl: "asset://x", resolve: () => null, costumeId: "arbeit" });
+    expect(maskHooks.refresh).toHaveBeenCalledTimes(1);
   });
 });
 
