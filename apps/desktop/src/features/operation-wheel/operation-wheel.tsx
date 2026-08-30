@@ -20,7 +20,7 @@ const RING_RADIUS_PX = 66;
 
 const CHIP_CLASS =
   "absolute flex w-14 -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1 rounded-2xl bg-white/95 px-1 py-2" +
-  " text-[11px] text-slate-600 shadow-lg ring-1 ring-black/5 transition-colors hover:bg-rose-50 hover:text-rose-600";
+  " text-xs text-text-body shadow-overlay ring-1 ring-black/5 transition-colors hover:bg-accent-soft hover:text-accent-strong";
 
 // Rows sit on a ring starting at 12 o'clock, clockwise, so a row's angle only depends on its registry index.
 function chipStyle(index: number, total: number): CSSProperties {
@@ -53,7 +53,7 @@ export function OperationWheel({ point, onClose }: OperationWheelProps) {
       role="menu"
       aria-label="操作轮盘"
       {...{ [KEEP_INTERACTIVE_ATTR]: "" }}
-      className="pointer-events-auto absolute z-20 animate-wheel-appear"
+      className="pointer-events-auto absolute z-(--z-wheel) animate-wheel-appear"
       style={{ left: position.x, top: position.y, width: WHEEL_SIZE_PX, height: WHEEL_SIZE_PX }}
       // Keep wheel pointer events out of the pet drag/click seam (the host div behind it owns those handlers).
       onPointerDown={(event) => event.stopPropagation()}
@@ -63,7 +63,7 @@ export function OperationWheel({ point, onClose }: OperationWheelProps) {
     >
       <span
         aria-hidden="true"
-        className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/80 shadow"
+        className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/80 shadow-card"
       />
       {WHEEL_ITEMS.map((item, index) => {
         const Icon = item.icon;

@@ -31,7 +31,7 @@ export function ExtensionConvergenceStrip({ state }: { state: ExtensionConvergen
   if (!data) {
     return state.kind === "failure"
       ? <p role="status" className="border-y border-warn-border bg-warn-soft px-3 py-2 text-xs text-warn-strong">扩展收敛状态不可用：{state.message}</p>
-      : <p role="status" className="border-y border-border px-3 py-2 text-xs text-text-faint">正在读取扩展收敛状态…</p>;
+      : <p role="status" className="border-y border-border px-3 py-2 text-xs text-text-secondary">正在读取扩展收敛状态…</p>;
   }
   const readyHosts = data.hosts.filter((host) => host.available).length;
   return (
@@ -42,7 +42,7 @@ export function ExtensionConvergenceStrip({ state }: { state: ExtensionConvergen
       <span>Hosts {readyHosts}/{data.hosts.length}</span>
       <span>Extensions {data.entries.length}</span>
       <span className={data.collisions.length ? "text-warn-strong" : "text-text-secondary"}>Collisions {data.collisions.length}</span>
-      {state.kind === "loading" && <span className="text-text-faint">刷新中</span>}
+      {state.kind === "loading" && <span className="text-text-secondary">刷新中</span>}
       {state.kind === "failure" && <span className="text-warn-strong">刷新失败，显示上次结果</span>}
     </section>
   );

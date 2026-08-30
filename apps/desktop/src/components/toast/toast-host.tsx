@@ -48,7 +48,7 @@ function ToastCard({ toast }: { toast: Toast }) {
       }}
       onMouseEnter={pause}
       onMouseLeave={arm}
-      className={`pointer-events-auto flex select-text items-start gap-2 rounded-lg py-2 pl-3 pr-1.5 text-xs shadow-lg ring-1 ${TONE_CLASSES[toast.tone]}`}
+      className={`pointer-events-auto flex select-text items-start gap-2 rounded-lg py-2 pl-3 pr-1.5 text-xs shadow-overlay ring-1 ${TONE_CLASSES[toast.tone]}`}
     >
       <span className="min-w-0">{toast.message}</span>
       <IconButton label="关闭通知" size="sm" tone="onDark" onClick={() => useToastStore.getState().dismiss(toast.id)}>

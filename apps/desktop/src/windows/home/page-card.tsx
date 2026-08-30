@@ -18,7 +18,7 @@ export interface LabeledRow {
 
 export function PageCard({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <section className="rounded-xl border border-border bg-surface p-5 shadow-sm">
+    <section className="rounded-xl border border-border bg-surface p-5 shadow-card">
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-sm font-semibold text-text-strong">{title}</h2>
         {action}
@@ -29,7 +29,7 @@ export function PageCard({ title, action, children }: { title: string; action?: 
 }
 
 export function LabeledRows({ rows, empty }: { rows: LabeledRow[]; empty?: string }) {
-  if (rows.length === 0) return empty === undefined ? null : <p className="text-xs text-text-faint">{empty}</p>;
+  if (rows.length === 0) return empty === undefined ? null : <p className="text-xs text-text-secondary">{empty}</p>;
   return (
     <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1.5 text-xs">
       {rows.map((row) => (

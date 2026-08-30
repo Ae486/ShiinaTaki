@@ -1,14 +1,23 @@
 @import "tailwindcss";
 
 /*
- * Theme layer (Tailwind v4 @theme): the wheel one-shot appear plus the C1/C2 semantic token set
- * (docs/UIUX-OPTIMIZATION.md batch 1) extended with the batch-2 additions (neutral surface/border/
- * text steps, accent extras, font-size collapse 8→4, radius/z/duration scales). Pages and shared
+ * Theme layer (Tailwind v4 @theme): the wheel one-shot appear plus the semantic token set
+ * (docs/UIUX-OPTIMIZATION.md batches 1-2, entry-readiness sweep batch 2.5). Pages and shared
  * primitives use these ROLE names instead of raw rose/red/slate literals: rose stays the one brand
  * accent, danger/ok/warn/link carry their own hues so the roles can never drift back together, and
  * neutral surfaces, borders and text step through the surface/border/text tokens. Values reference the default
  * Tailwind scale (pinning the palette in effect today), so a later theme or hue change is an edit
  * HERE, not in the pages.
+ *
+ * ENTRY SEAMS (no settings UI exists yet — the layer must accept one at any time):
+ * - Theme switch: every visual value resolves to a --color-* / --shadow-* / --radius-* / --z-* var,
+ *   and every utility references the var. A future theme applies by redefining the SAME variable
+ *   names under a scope (e.g. `html[data-theme="dark"] { --color-surface: …; }`) — zero page edits.
+ * - Font-size scaling: every --text-* is `calc(<rem> * var(--text-scale, 1))`, so a future
+ *   `html { --text-scale: 1.1 }` scales all four steps at once. The var may be tree-shaken from the
+ *   emitted CSS until referenced; the var() fallback keeps the value correct either way.
+ * Sweep rule (batch 2.5): a raw hue/slate literal in a tsx file is a review finding —
+ * alpha-black/alpha-white over token surfaces are the only sanctioned literals.
  */
 @theme {
   --animate-wheel-appear: wheel-appear 120ms ease-out;
@@ -23,11 +32,12 @@
   /* C5: pinned UI font stack — system UI first, then Microsoft YaHei for zh-CN Windows text. */
   --font-sans: system-ui, "Microsoft YaHei", sans-serif;
 
-  /* Font-size collapse (C5/C16): 8 sizes → 4 (xs/sm/md/base). xs absorbs the old 10/11px literals. */
-  --text-xs: 0.75rem;
-  --text-sm: 0.8125rem;
-  --text-md: 0.9375rem;
-  --text-md--line-height: 1.25rem;
+  /* Font-size collapse (C5/C16): 8 sizes → 4 (xs/sm/md/base). xs absorbs the old 10/11px literals.
+     Every step rides --text-scale so a future font-size setting scales the whole UI from one var. */
+  --text-xs: calc(0.75rem * var(--text-scale, 1));
+  --text-sm: calc(0.8125rem * var(--text-scale, 1));
+  --text-md: calc(0.9375rem * var(--text-scale, 1));
+  --text-md--line-height: calc(1.25rem * var(--text-scale, 1));
 
   /* Brand/interactive tone (chat send, selection identity). */
   --color-accent: var(--color-rose-500);
@@ -36,6 +46,7 @@
   --color-accent-text: var(--color-rose-700);
   --color-accent-border: var(--color-rose-200);
   --color-accent-border-strong: var(--color-rose-300);
+  --color-accent-muted: var(--color-rose-100);
   --color-accent-deep: var(--color-rose-900);
 
   /* Failure/destructive. The soft step doubles as the readable text on the deep surface. */
@@ -57,6 +68,7 @@
   --color-warn-strong: var(--color-amber-700);
   --color-warn-soft: var(--color-amber-50);
   --color-warn-border: var(--color-amber-200);
+  --color-warn-deep: var(--color-amber-900);
 
   /* Hyperlinks in markdown text (centralized; a hue change later is this one line). */
   --color-link: var(--color-sky-600);
@@ -96,6 +108,11 @@
   /* Motion: the two durations the UI actually uses (explicit, was implicit). */
   --duration-fast: 120ms;
   --duration-base: 150ms;
+
+  /* Shadow steps: card chrome < floating overlays (toast/wheel/bubble) < modal. */
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-overlay: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-modal: 0 25px 50px -12px rgb(0 0 0 / 0.25);
 }
 
 @layer base {
@@ -109,5 +126,17 @@
   :where(button, a, summary, input, select, textarea, [tabindex]):focus-visible {
     outline: 2px solid var(--color-accent-border-strong);
     outline-offset: 1px;
+  }
+
+  /* Accessibility: honour the OS reduce-motion setting — the wheel appear, typing dots and
+     shimmer skeleton all collapse to their end state instead of animating. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

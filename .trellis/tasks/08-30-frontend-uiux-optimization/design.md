@@ -108,3 +108,22 @@ TypingDots, DateDivider, Brand all stay bespoke.
 - Each primitive: at least one behavior test (selected state attr, escape policy, copy feedback,
   toast cap/pause). Spec §home-window "Streaming timeline" and markdown XSS tests must stay green.
 - Do not commit; leave the tree for Leader review + formal check.
+
+## 8. Batch 2.5 — entry-readiness sweep (2026-08-30, committed separately)
+
+Owner ruling: no settings entry yet, but the layer must accept one at any time. Delivered:
+
+- **Font-scale seam**: every `--text-*` is `calc(<rem> * var(--text-scale, 1))` — a future
+  `html { --text-scale: … }` scales all four steps; `--text-scale` verified present in emitted CSS.
+- **Theme seam documented + enforced**: styles.css header documents the `[data-theme]` override
+  pattern and the sweep rule (raw hue/slate literal in tsx = review finding; alpha-black/white over
+  token surfaces are the only sanctioned literals). ALL remaining literals swept: app.tsx, pet-stage,
+  operation-wheel (incl. `z-(--z-wheel)`, text-xs), markdown PROSE, tool-card, timeline-message
+  (user bubble → `accent-muted`).
+- **New tokens**: `accent-muted`(rose-100), `warn-deep`(amber-900), `shadow-card/overlay/modal`
+  (all shadow-sm/lg/2xl sites swapped; zero bare `shadow` left).
+- **prefers-reduced-motion** base rule (wheel appear, typing dots, shimmer collapse to end state).
+- **Contrast pass**: 15 meaningful `text-faint` sites → `text-secondary` (page hints, empty texts,
+  refresh/loading states, owner lines, monitor connection line, subject lines, badge muted tone,
+  scroll hint, 切换中 pending); decorative icons and disabled states keep faint.
+- Gate evidence: desktop typecheck/test(487)/eslint clean, vite build with token emission verified.

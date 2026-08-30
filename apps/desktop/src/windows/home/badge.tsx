@@ -14,7 +14,7 @@ const TONE: Record<BadgeTone, string> = {
   neutral: "bg-surface-sunken text-text-body ring-border/70",
   warn: "bg-warn-soft text-warn-strong ring-warn-border/70",
   ok: "bg-ok-soft text-ok-strong ring-ok-border/70",
-  muted: "bg-surface text-text-faint ring-border/70",
+  muted: "bg-surface text-text-secondary ring-border/70",
 };
 
 export function Badge({ tone = "neutral", children }: { tone?: BadgeTone; children: ReactNode }) {

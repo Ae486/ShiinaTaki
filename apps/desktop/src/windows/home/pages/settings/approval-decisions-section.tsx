@@ -45,7 +45,7 @@ export function ApprovalDecisionsSection() {
         <div key={decision.decisionId} className="flex items-center justify-between rounded-xl border border-border bg-surface p-3">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-text-body">{decision.labels?.capability ?? decision.binding.identity.capabilityId}</p>
-            <p className="truncate text-xs text-text-faint">{decision.labels?.subject ?? decision.binding.cellKey}</p>
+            <p className="truncate text-xs text-text-secondary">{decision.labels?.subject ?? decision.binding.cellKey}</p>
           </div>
           <ActionButton
             tone="secondary"

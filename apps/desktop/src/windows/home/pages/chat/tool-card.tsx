@@ -11,7 +11,7 @@ type ToolState = "call" | "done" | "denied" | "error";
 
 const LABEL: Record<ToolState, string> = { call: "调用中", done: "完成", denied: "已拒绝", error: "失败" };
 const TONE: Record<ToolState, string> = {
-  call: "text-slate-500",
+  call: "text-text-secondary",
   done: "text-ok",
   denied: "text-warn",
   error: "text-danger",
@@ -25,9 +25,9 @@ export function outputState(output: TimelineToolOutput): ToolState {
 
 export function ToolCard({ name, state }: { name: string; state: ToolState }) {
   return (
-    <div className="my-1 flex items-center gap-2 rounded-md bg-slate-100 px-2.5 py-1 text-xs">
-      <ToolIcon className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-      <span className="font-mono text-slate-600">{name}</span>
+    <div className="my-1 flex items-center gap-2 rounded-md bg-surface-sunken px-2.5 py-1 text-xs">
+      <ToolIcon className="h-3.5 w-3.5 shrink-0 text-text-faint" />
+      <span className="font-mono text-text-body">{name}</span>
       <span className={TONE[state]}>{LABEL[state]}</span>
     </div>
   );

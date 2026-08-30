@@ -17,7 +17,7 @@ export function PageHeader({ title, hint, busy }: { title: string; hint?: string
       <div className="flex items-baseline gap-2">
         <h1 className="text-md font-semibold text-text-strong">{title}</h1>
         {/* Cached content is shown immediately, so the operator must be able to see that a fresher answer is coming. */}
-        {busy && <span className="text-xs text-text-faint">刷新中…</span>}
+        {busy && <span className="text-xs text-text-secondary">刷新中…</span>}
       </div>
       {hint && <p className="mt-0.5 text-xs leading-snug text-text-secondary">{hint}</p>}
     </header>

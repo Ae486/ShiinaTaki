@@ -34,7 +34,7 @@ function TypingDots() {
 function InflightBubble({ text }: { text: string }) {
   return (
     <div className="flex flex-col items-start">
-      <div className="max-w-[85%] rounded-2xl bg-surface px-3.5 py-2 text-text-strong shadow-sm ring-1 ring-black/5">
+      <div className="max-w-[85%] rounded-2xl bg-surface px-3.5 py-2 text-text-strong shadow-card ring-1 ring-black/5">
         {text.length > 0 ? <MarkdownView text={text} /> : <TypingDots />}
       </div>
     </div>
@@ -54,7 +54,7 @@ export function TimelineView({ timeline }: { timeline: ChatTimeline }) {
   return (
     // A8: tabIndex=0 keeps the timeline keyboard-scrollable; the global focus-visible rule shows the ring.
     <div ref={scrollRef} onScroll={onScroll} tabIndex={0} aria-label="聊天记录" className="flex-1 space-y-2 overflow-y-auto px-4 py-3">
-      {hasMore && <div className="py-1 text-center text-xs text-text-faint">滚动查看更早消息</div>}
+      {hasMore && <div className="py-1 text-center text-xs text-text-secondary">滚动查看更早消息</div>}
       {loaded && entryCount === 0 && !inflight && (
         <EmptyState title="还没有对话" hint="说点什么开始吧。" />
       )}

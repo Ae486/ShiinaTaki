@@ -16,10 +16,10 @@ export function PermissionCellsCard(props: {
   const activeCells = props.data.cells.filter((cell) => cell.level === props.data.level);
   const groups = groupCells(activeCells);
   return (
-    <details className="rounded-xl border border-border bg-surface shadow-sm">
+    <details className="rounded-xl border border-border bg-surface shadow-card">
       <summary className="cursor-pointer list-none px-5 py-4 text-sm font-semibold text-text-body">
         高级权限单元
-        <span className="ml-2 text-xs font-normal text-text-faint">默认折叠 · 注册表 {props.data.registryRevision}</span>
+        <span className="ml-2 text-xs font-normal text-text-secondary">默认折叠 · 注册表 {props.data.registryRevision}</span>
       </summary>
       <div className="border-t border-border px-4 pb-4">
         {[...groups].map(([capabilityId, cells]) => (

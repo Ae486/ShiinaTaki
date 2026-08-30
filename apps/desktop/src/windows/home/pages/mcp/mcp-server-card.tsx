@@ -56,7 +56,7 @@ export function McpServerCard(input: McpServerCardActions) {
       }
     >
       <p className="text-xs text-text-secondary">{transportLine(server)}</p>
-      <p className="mt-1 text-xs text-text-faint">Owner {server.ownerHostId} · Runtime generation {server.status.runtimeGeneration ?? "—"}</p>
+      <p className="mt-1 text-xs text-text-secondary">Owner {server.ownerHostId} · Runtime generation {server.status.runtimeGeneration ?? "—"}</p>
       {server.selectedTools.length > 0 && <p className="mt-1 text-xs text-text-secondary">选定工具：{server.selectedTools.join("、")}</p>}
       <Diagnostics outcome={server.status.lastOutcome} />
       <Actions {...input} />
@@ -84,7 +84,7 @@ function Diagnostics({ outcome }: { outcome: McpServerView["status"]["lastOutcom
     );
   }
   if (outcome.status === "published") {
-    return <p className="mt-2 text-xs text-text-faint">最近发布：{outcome.toolNames.length} 个工具 / {outcome.pages} 页列举 / {outcome.durationMs}ms</p>;
+    return <p className="mt-2 text-xs text-text-secondary">最近发布：{outcome.toolNames.length} 个工具 / {outcome.pages} 页列举 / {outcome.durationMs}ms</p>;
   }
   return null;
 }

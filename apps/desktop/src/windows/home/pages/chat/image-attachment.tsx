@@ -15,7 +15,7 @@ export function ImageAttachment({ imageRef }: { imageRef: string }) {
 
   if (state.kind === "error") {
     return (
-      <div className="my-1 flex items-center gap-1.5 rounded-lg bg-surface-sunken px-3 py-2 text-xs text-text-faint">
+      <div className="my-1 flex items-center gap-1.5 rounded-lg bg-surface-sunken px-3 py-2 text-xs text-text-secondary">
         <ImageOffIcon className="h-4 w-4 shrink-0" />
         图片已过期
       </div>

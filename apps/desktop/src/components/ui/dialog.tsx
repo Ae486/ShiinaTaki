@@ -110,7 +110,7 @@ export function Dialog({
       <div
         ref={cardRef}
         tabIndex={-1}
-        className={`relative w-full ${SIZE[size]} rounded-2xl border border-border bg-surface p-5 shadow-2xl focus:outline-none`}
+        className={`relative w-full ${SIZE[size]} rounded-2xl border border-border bg-surface p-5 shadow-modal focus:outline-none`}
       >
         {escapePolicy === "close" && (
           <div className="absolute right-2.5 top-2.5">

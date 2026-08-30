@@ -21,7 +21,7 @@ export function EmptyState({ icon: Icon, title, hint, action }: EmptyStateProps)
     <div className="flex flex-col items-center gap-1.5 px-4 py-8 text-center">
       {Icon && <Icon className="h-6 w-6 text-text-faint" />}
       <p className="text-sm text-text-secondary">{title}</p>
-      {hint && <p className="max-w-sm text-xs leading-snug text-text-faint">{hint}</p>}
+      {hint && <p className="max-w-sm text-xs leading-snug text-text-secondary">{hint}</p>}
       {action && <div className="mt-2">{action}</div>}
     </div>
   );

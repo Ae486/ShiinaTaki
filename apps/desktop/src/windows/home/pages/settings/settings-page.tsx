@@ -24,7 +24,7 @@ export function SettingsPage() {
         {error && <PageAlert action={{ label: "重试", onClick: () => void refresh() }}>读取配置失败：{error}</PageAlert>}
         {entries.length === 0 && !error && <Skeleton lines={6} />}
         {entries.length > 0 && (
-          <div className="mt-4 divide-y divide-border-subtle overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
+          <div className="mt-4 divide-y divide-border-subtle overflow-hidden rounded-xl border border-border bg-surface shadow-card">
             {entries.map((entry) => (
               <KnobField
                 key={entry.key}

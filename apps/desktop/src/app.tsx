@@ -45,12 +45,12 @@ export function App() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
       <h1 className="text-2xl font-bold">TakiAgent</h1>
-      <p className={status === "connected" ? "text-ok" : "text-slate-500"}>{LABELS[status]}</p>
+      <p className={status === "connected" ? "text-ok" : "text-text-secondary"}>{LABELS[status]}</p>
 
       {status === "pairing-required" && (
         <div className="flex flex-col items-center gap-2">
           <input
-            className="rounded border border-slate-300 px-3 py-2 text-center"
+            className="rounded-md border border-border-strong px-3 py-2 text-center"
             placeholder="Pairing code"
             value={code}
             onChange={(event) => setCode(event.target.value)}
@@ -59,7 +59,7 @@ export function App() {
             type="button"
             onClick={submit}
             disabled={code.length === 0}
-            className="rounded bg-slate-800 px-4 py-2 text-white disabled:opacity-50"
+            className="rounded-md bg-surface-strong px-4 py-2 text-white disabled:opacity-50"
           >
             Pair
           </button>

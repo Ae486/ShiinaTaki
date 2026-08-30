@@ -32,10 +32,10 @@ function Row({ entry }: { entry: TimelineEntry }) {
   // Tool-result rows render bare (the card is its own subtle surface); user/assistant rows sit in a chat bubble.
   if (entry.role === "tool") return <div className="px-1">{rendered}</div>;
   const align = entry.role === "user" ? "items-end" : "items-start";
-  const tone = entry.role === "user" ? "bg-rose-100" : "bg-white ring-1 ring-black/5";
+  const tone = entry.role === "user" ? "bg-accent-muted" : "bg-surface ring-1 ring-black/5";
   return (
     <div className={`flex flex-col ${align}`}>
-      <div className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-slate-800 shadow-sm ${tone}`}>{rendered}</div>
+      <div className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-text-strong shadow-card ${tone}`}>{rendered}</div>
     </div>
   );
 }

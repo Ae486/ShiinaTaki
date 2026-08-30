@@ -83,7 +83,7 @@ function TrajectoryRowTile({ row, selected, onSelect }: { row: TrajectoryRow; se
     <SelectionTile selected={selected} onSelect={onSelect}>
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-medium text-text-body">{row.label}</p>
-        <span className="text-xs text-text-faint">{row.surface}</span>
+        <span className="text-xs text-text-secondary">{row.surface}</span>
       </div>
       <LabeledRows rows={[
         { label: "阶段", value: row.phase },
@@ -175,7 +175,7 @@ export function MonitorPage() {
             <InspectorCard view={view} onClose={() => controller.closeInspector()} />
           </>
         )}
-        <p className="text-xs text-text-faint">连接：{status.kind}{view.loadingInspector ? " · 检查器读取中…" : ""}</p>
+        <p className="text-xs text-text-secondary">连接：{status.kind}{view.loadingInspector ? " · 检查器读取中…" : ""}</p>
       </PageBody>
     </>
   );

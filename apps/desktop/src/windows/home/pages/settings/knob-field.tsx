@@ -65,7 +65,7 @@ export function KnobField({ entry, connectionReady, notice, onSave }: KnobFieldP
       </div>
       <p className="text-xs leading-snug text-text-secondary">{entry.description}</p>
       <KnobInput entry={entry} editor={availableEditor} draft={draft} onDraft={setDraft} onCommit={commit} />
-      {editor.disabledReason && <p className="text-xs text-text-faint">{editor.disabledReason}</p>}
+      {editor.disabledReason && <p className="text-xs text-text-secondary">{editor.disabledReason}</p>}
       {saving && <FeedbackLine tone="info">保存中…</FeedbackLine>}
       {localError && <FeedbackLine tone="danger">{localError}</FeedbackLine>}
       {notice && <FeedbackLine tone={notice.ok ? "ok" : "danger"}>{notice.message}</FeedbackLine>}

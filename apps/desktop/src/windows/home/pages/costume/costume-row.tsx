@@ -26,7 +26,7 @@ export function CostumeRow({ row, current, pending, onSelect, onCancel }: Costum
         <span className="flex min-w-0 items-center gap-2">
           <span className="inline-block h-3 w-3 shrink-0 animate-spin rounded-full border-2 border-border-strong border-t-text-secondary" />
           <span className="truncate font-medium">{row.id}</span>
-          <span className="shrink-0 text-text-faint">切换中…</span>
+          <span className="shrink-0 text-text-secondary">切换中…</span>
         </span>
         <ActionButton onClick={onCancel}>取消</ActionButton>
       </div>

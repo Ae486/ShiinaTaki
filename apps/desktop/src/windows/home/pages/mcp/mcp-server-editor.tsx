@@ -28,7 +28,7 @@ export function McpServerEditor(input: {
   const { draft } = input;
   const patch = (next: Partial<McpServerDraft>): void => input.onChange({ ...draft, ...next });
   return (
-    <section className="rounded-xl border border-accent-border bg-surface p-5 shadow-sm">
+    <section className="rounded-xl border border-accent-border bg-surface p-5 shadow-card">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-text-strong">{input.editing ? `编辑 ${draft.serverId}` : "添加 MCP 服务器"}</h2>
         <Badge tone="muted">期望状态（保存后立即生效）</Badge>

@@ -37,7 +37,7 @@ function BubbleReplyView({ reply }: { reply: BubbleReply }) {
   // Assistant-bubble palette echoing BANDORI: near-white fill, dark text, a soft 1px ring; an error reply rides danger.
   const tone = isError ? "bg-danger-soft text-danger-strong ring-danger-border" : "bg-surface/95 text-text-strong ring-black/5";
   return (
-    <div className={`max-h-40 overflow-y-auto rounded-2xl rounded-bl-md px-4 py-2 text-sm shadow-lg ring-1 ${tone}`}>
+    <div className={`max-h-40 overflow-y-auto rounded-2xl rounded-bl-md px-4 py-2 text-sm shadow-overlay ring-1 ${tone}`}>
       {reply.kind === "streaming" && text.length === 0 ? <TypingDots /> : text}
     </div>
   );
@@ -117,7 +117,7 @@ function BubbleForm({ isPending, connectionReady, send, close }: BubbleFormProps
   return (
     <form
       onSubmit={onSubmit}
-      className="flex items-center gap-1 rounded-full bg-surface/95 px-2 py-1 shadow-lg ring-1 ring-black/5"
+      className="flex items-center gap-1 rounded-full bg-surface/95 px-2 py-1 shadow-overlay ring-1 ring-black/5"
     >
       <input
         ref={inputRef}

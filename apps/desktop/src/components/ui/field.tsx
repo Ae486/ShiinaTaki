@@ -38,7 +38,7 @@ export function Field({ label, hint, invalid, children }: FieldProps) {
         {label}
       </label>
       {hint && (
-        <p id={hintId} className="text-xs text-text-faint">
+        <p id={hintId} className="text-xs text-text-secondary">
           {hint}
         </p>
       )}

@@ -32,7 +32,7 @@ export function PetConnectionStatusNotice({ status }: { status: ConnectionStatus
   return (
     <div
       role="status"
-      className={`${PET_TONE[notice.tone]} pointer-events-none max-w-[90%] rounded px-2 py-1 text-xs shadow-sm`}
+      className={`${PET_TONE[notice.tone]} pointer-events-none max-w-[90%] rounded px-2 py-1 text-xs shadow-card`}
     >
       {notice.text}
     </div>
