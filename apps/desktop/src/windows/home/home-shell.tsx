@@ -18,6 +18,7 @@ import { HomeClientContext } from "./home-client-context.ts";
 import { HOME_PAGES, visibleHomePages } from "./pages.ts";
 import { useApprovalDialog } from "@/components/approval/use-approval-dialog.js";
 import { appendVisitedPage } from "./visited-page-ids.ts";
+import { usePageVisibilityStore } from "./page-visibility-store.ts";
 
 const BRAND_MARK = "flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-xs font-semibold text-white";
 
@@ -87,6 +88,10 @@ export function HomeShell() {
     setVisitedPages((previous) => appendVisitedPage(previous, currentPage));
   }, [currentPage]);
   useEffect(() => { if (currentPage === "monitor" && !monitorEnabled) useHomeStore.getState().navigate("chat"); }, [currentPage, monitorEnabled]);
+  // P1e: publish the ACTUALLY-shown page so keep-alive page instances can stop working while hidden (the chat page
+  // ignores the signal by contract). Written from visiblePage, not currentPage, so the monitor-disabled fallback is truth.
+  const setActivePage = usePageVisibilityStore((state) => state.setActivePage);
+  useEffect(() => { setActivePage(visiblePage.id); }, [visiblePage.id, setActivePage]);
 
   return (
     <HomeClientContext.Provider value={connection}>

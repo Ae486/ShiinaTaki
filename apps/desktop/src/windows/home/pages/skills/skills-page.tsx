@@ -11,6 +11,7 @@ import { ActionButton } from "../../action-button.tsx";
 import { ExtensionConvergenceStrip, useExtensionConvergence } from "../../extension-convergence.tsx";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { PageCard } from "../../page-card.tsx";
+import { MasterDetail } from "@/components/ui/master-detail.js";
 import { EmptyState } from "@/components/ui/empty-state.js";
 import { Skeleton } from "@/components/ui/skeleton.js";
 import { readDirectorySource, readZipSource, snapshotFileList } from "./skill-import-files.ts";
@@ -105,15 +106,13 @@ function SkillsBody({ input }: { input: SkillsBodyInput }) {
   );
 }
 
-/** The L2 two-pane layout: list left, detail right; stacks vertically under a narrow container. */
+/** The L2 two-pane layout (shared MasterDetail primitive): list left, detail right; stacks under a narrow container. */
 function SkillsMasterDetail(input: { rows: SkillPackageView[]; selectedId: string | null; onSelect(packageId: string): void; detailElement: ReactNode }) {
   return (
-    <div className="@container flex flex-col gap-4 @xl:flex-row @xl:items-start">
-      <aside className="@xl:w-60 @xl:shrink-0">
-        <SkillList rows={input.rows} selectedId={input.selectedId} onSelect={input.onSelect} />
-      </aside>
-      <div className="flex min-w-0 flex-1 flex-col gap-4">{input.detailElement}</div>
-    </div>
+    <MasterDetail
+      list={<SkillList rows={input.rows} selectedId={input.selectedId} onSelect={input.onSelect} />}
+      detail={input.detailElement}
+    />
   );
 }
 

@@ -42,6 +42,9 @@ export const INITIAL_MONITOR_STATE: MonitorViewState = {
 
 export interface MonitorController {
   bind(client: WsClient | null): void;
+  /** P1e hidden-page gate: while hidden, dispose the live subscription and suppress re-publishing; reactivation
+   *  rebinds the live handler and refetches (monitorState → restore) with all generation guards intact. */
+  setVisible(visible: boolean): void;
   dispose(): void;
   applyFilters(filters: MonitorFilters): Promise<void>;
   refresh(): Promise<void>;
@@ -58,12 +61,16 @@ class MonitorControllerImpl implements MonitorController {
   private client: WsClient | null = null;
   private generation = 0;
   private removeLiveHandler: (() => void) | null = null;
+  private visible = true;
   private readonly emit: (state: MonitorViewState) => void;
 
   constructor(emit: (state: MonitorViewState) => void) { this.emit = emit; }
 
   private publish(patch: Partial<MonitorViewState>): void {
     this.state = { ...this.state, ...patch };
+    // P1e: a hidden page must not drive React renders — internal page memory still advances so a reactivation
+    // can reconcile from it, but nothing is emitted until the page is shown again.
+    if (!this.visible) return;
     this.emit(this.state);
   }
 
@@ -90,16 +97,38 @@ class MonitorControllerImpl implements MonitorController {
     this.removeLiveHandler = null;
     if (previous && previous !== next) void previous.unsubscribeMonitor?.().catch(() => undefined);
     this.client = next;
-    if (!next) {
+    if (!next || !this.visible) {
       this.publish({ loadingRuns: false, loadingTrajectory: false, loadingInspector: false,
         stale: this.state.runs.length > 0 });
       return;
     }
+    this.attach(next);
+  }
+
+  /** The shared bind/reactivation tail: live handler back on, then the monitorState → restore pass re-reads mode,
+   *  list and the selected run's trajectory (selection memory survives hide/show and client swaps). */
+  private attach(target: WsClient): void {
     const candidate = this.generation;
-    this.removeLiveHandler = next.onMonitorEvent((event) => this.onLive(event));
+    this.removeLiveHandler = target.onMonitorEvent((event) => this.onLive(event));
     this.publish({ loadingRuns: true, error: null });
-    void next.monitorState().then((monitor) => this.restore({ target: next, candidate, ...monitor }),
-      (cause) => { if (this.current(candidate, next)) this.report(cause); });
+    void target.monitorState().then((monitor) => this.restore({ target, candidate, ...monitor }),
+      (cause) => { if (this.current(candidate, target)) this.report(cause); });
+  }
+
+  setVisible(visible: boolean): void {
+    if (visible === this.visible) return;
+    this.visible = visible;
+    if (!visible) {
+      // Same teardown seam as deselect: retire in-flight work (generation bump), drop the live handler, and tell
+      // Core to stop streaming. State stays in page memory for the reactivation refetch.
+      this.generation += 1;
+      this.removeLiveHandler?.();
+      this.removeLiveHandler = null;
+      const target = this.client;
+      if (target) void target.unsubscribeMonitor?.().catch(() => undefined);
+      return;
+    }
+    if (this.client) this.attach(this.client);
   }
 
   private async restore(input: { target: WsClient; candidate: number; mode: MonitorMode; enabled: boolean }): Promise<void> {
@@ -120,6 +149,8 @@ class MonitorControllerImpl implements MonitorController {
     this.client = null;
     this.removeLiveHandler?.();
     this.removeLiveHandler = null;
+    // P1e: visibility truth survives dispose — a reconnect-while-hidden must rebind DEFERRED
+    // (bind's !visible branch), not re-attach; a fresh instance still initializes visible = true.
     if (previous) void previous.unsubscribeMonitor?.().catch(() => undefined);
   }
 

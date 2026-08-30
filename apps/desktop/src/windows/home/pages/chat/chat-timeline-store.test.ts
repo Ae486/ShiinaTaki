@@ -1,13 +1,15 @@
 /**
- * INPUT:  reducer calls (mergeHistory/prependOlder/appendLive/growInflight/clearInflight) on the singleton.
+ * INPUT:  reducer calls (mergeHistory/prependOlder/appendLive/growInflight/growInflightIfCurrent/clearInflight/
+ *         widenWindow/settleRestore) on the singleton.
  * OUTPUT: assertions that a history page renders chronologically, live rows append, deltas grow the in-flight row,
- *         and an appended assistant row (or clearInflight) finalizes it.
+ *         an appended assistant row (or clearInflight) finalizes it, the mounted window trims oldest-first (P1b),
+ *         and the coalesced-flush append cannot resurrect a dropped row (P1a).
  * POS:    unit test for the chat timeline store (T10). Zustand in node (no DOM). Exempt from size caps.
  */
 
 import { beforeEach, describe, expect, it } from "vitest";
 import type { TimelineEntry, TimelineRole } from "@taki/shared";
-import { useChatTimelineStore } from "./chat-timeline-store.ts";
+import { TIMELINE_MOUNT_CAP, TIMELINE_RESTORE_STEP, useChatTimelineStore } from "./chat-timeline-store.ts";
 
 function entry(seq: number, role: TimelineRole, content: string): TimelineEntry {
   return { seq, id: `id-${seq}`, characterId: "taki", role, content, createdAt: "2026-07-15T10:00:00.000Z" };
@@ -139,6 +141,111 @@ describe("chat timeline store", () => {
     });
 
     expect(useChatTimelineStore.getState().entries.map((value) => value.seq)).toEqual([1]);
+  });
+
+  describe("P1a coalesced-flush append (growInflightIfCurrent)", () => {
+    it("appends the accumulated text while the streamed row still exists", () => {
+      const store = useChatTimelineStore.getState();
+      store.growInflight("m1", "Hel");
+      store.growInflightIfCurrent("m1", "lo ");
+      store.growInflightIfCurrent("m1", "world");
+      expect(useChatTimelineStore.getState().inflight).toEqual({ messageId: "m1", text: "Hello world" });
+    });
+
+    it("is a no-op once the persisted assistant entry swapped the row out (atomic handoff stays clean)", () => {
+      const store = useChatTimelineStore.getState();
+      store.growInflight("m1", "streaming");
+      store.appendLive(entry(1, "assistant", "full persisted text"));
+      store.growInflightIfCurrent("m1", " late buffered delta");
+      const state = useChatTimelineStore.getState();
+      expect(state.inflight).toBeNull();
+      expect(state.entries.map((e) => e.seq)).toEqual([1]);
+    });
+
+    it("is a no-op after the chat.complete safety net cleared the row", () => {
+      const store = useChatTimelineStore.getState();
+      store.growInflight("m1", "streaming");
+      store.clearInflight();
+      store.growInflightIfCurrent("m1", " late");
+      expect(useChatTimelineStore.getState().inflight).toBeNull();
+    });
+
+    it("is a no-op for a stale turn's flush after a newer turn replaced the row", () => {
+      const store = useChatTimelineStore.getState();
+      store.growInflight("m1", "old");
+      store.growInflight("m2", "new turn");
+      store.growInflightIfCurrent("m1", " stale buffer");
+      expect(useChatTimelineStore.getState().inflight).toEqual({ messageId: "m2", text: "new turn" });
+    });
+  });
+
+  describe("P1b mounted-window cap", () => {
+    const fullPage = (count: number) =>
+      Array.from({ length: count }, (_, index) => entry(index + 1, "user", `m${index + 1}`));
+
+    it("trims the OLDEST rows down to the cap, keeping the newest, and re-points the older-page cursor", () => {
+      const store = useChatTimelineStore.getState();
+      store.mergeHistory({ entries: fullPage(TIMELINE_MOUNT_CAP + 5), nextBefore: 1 });
+      const state = useChatTimelineStore.getState();
+      expect(state.entries).toHaveLength(TIMELINE_MOUNT_CAP);
+      expect(state.entries[0]!.seq).toBe(6);
+      expect(state.entries.at(-1)!.seq).toBe(TIMELINE_MOUNT_CAP + 5);
+      // The trimmed rows (seqs 1..5) sit strictly below the new window edge, so before=edge refetches exactly them.
+      expect(state.nextBefore).toBe(6);
+      expect(state.truncated).toBe(true);
+    });
+
+    it("keeps the newest row and slides the window when a live append pushes past the cap", () => {
+      const store = useChatTimelineStore.getState();
+      store.mergeHistory({ entries: fullPage(TIMELINE_MOUNT_CAP), nextBefore: null });
+      store.appendLive(entry(TIMELINE_MOUNT_CAP + 1, "assistant", "live"));
+      const state = useChatTimelineStore.getState();
+      expect(state.entries).toHaveLength(TIMELINE_MOUNT_CAP);
+      expect(state.entries[0]!.seq).toBe(2);
+      expect(state.entries.at(-1)!.seq).toBe(TIMELINE_MOUNT_CAP + 1);
+      expect(state.truncated).toBe(true);
+    });
+
+    it("restores a larger window on demand: widening the window lets older pages remount without re-trim", () => {
+      const store = useChatTimelineStore.getState();
+      store.mergeHistory({ entries: fullPage(TIMELINE_MOUNT_CAP + 50), nextBefore: 1 });
+      expect(useChatTimelineStore.getState().truncated).toBe(true);
+
+      store.widenWindow();
+      expect(useChatTimelineStore.getState().windowLimit).toBe(TIMELINE_MOUNT_CAP + TIMELINE_RESTORE_STEP);
+
+      // The jump-restore refetches pages across the trim boundary (before = the window edge).
+      store.prependOlder({ entries: fullPage(5).map((value) => ({ ...value, content: `refetched ${value.seq}` })), nextBefore: 1 });
+      const state = useChatTimelineStore.getState();
+      expect(state.entries).toHaveLength(TIMELINE_MOUNT_CAP + 5); // no re-trim inside the widened window
+      expect(state.entries[0]!.seq).toBe(1);
+    });
+
+    it("keeps the jump control only while older rows are still missing after a restore settles", () => {
+      const store = useChatTimelineStore.getState();
+      store.mergeHistory({ entries: fullPage(TIMELINE_MOUNT_CAP + 5), nextBefore: 1 });
+      expect(useChatTimelineStore.getState().truncated).toBe(true);
+
+      store.settleRestore(true); // the widened window filled (or history exhausted): nothing missing
+      expect(useChatTimelineStore.getState().truncated).toBe(false);
+
+      store.settleRestore(false); // a failed restore: the control stays for a retry
+      expect(useChatTimelineStore.getState().truncated).toBe(true);
+
+      store.settleRestore(true);
+      expect(useChatTimelineStore.getState().truncated).toBe(false);
+      expect(useChatTimelineStore.getState().nextBefore).toBe(6);
+    });
+
+    it("resets the window with the rest of the store", () => {
+      const store = useChatTimelineStore.getState();
+      store.mergeHistory({ entries: fullPage(TIMELINE_MOUNT_CAP + 5), nextBefore: 1 });
+      store.reset();
+      const state = useChatTimelineStore.getState();
+      expect(state.entries).toEqual([]);
+      expect(state.windowLimit).toBe(TIMELINE_MOUNT_CAP);
+      expect(state.truncated).toBe(false);
+    });
   });
 
 });

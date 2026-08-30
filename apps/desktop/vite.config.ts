@@ -32,31 +32,40 @@ function spikeAssets(): Plugin {
 }
 
 // Tauri expects a fixed port and no clearing of the screen on error.
-export default defineConfig({
-  plugins: [react(), tailwindcss(), spikeAssets()],
-  resolve: {
-    alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
-    },
-  },
-  build: {
-    rollupOptions: {
-      input: {
-        main: fileURLToPath(new URL("./index.html", import.meta.url)),
-        pet: fileURLToPath(new URL("./pet.html", import.meta.url)),
-        home: fileURLToPath(new URL("./home.html", import.meta.url)),
-        spike: fileURLToPath(new URL("./spike.html", import.meta.url)),
+export default defineConfig(({ command }) => {
+  const input: Record<string, string> = {
+    main: fileURLToPath(new URL("./index.html", import.meta.url)),
+    pet: fileURLToPath(new URL("./pet.html", import.meta.url)),
+    home: fileURLToPath(new URL("./home.html", import.meta.url)),
+  };
+  // P1g (D18-A): the #13 renderer spike is a dev-only surface. `vite build` (production packaging, incl. the tauri
+  // bundle) never emits spike.html/spike-*.js; `vite dev` keeps serving it (dev serves root .html files regardless
+  // of the rollup input list — the entry stays listed so the dev graph remains explicit).
+  if (command === "serve") {
+    input.spike = fileURLToPath(new URL("./spike.html", import.meta.url));
+  }
+  return {
+    plugins: [react(), tailwindcss(), spikeAssets()],
+    resolve: {
+      alias: {
+        "@": fileURLToPath(new URL("./src", import.meta.url)),
       },
     },
-  },
-  clearScreen: false,
-  server: {
-    port: 1420,
-    strictPort: true,
-    // Rust build output churns and Windows exclusively locks the .dll while cargo writes it; watching
-    // src-tauri makes Vite's file watcher crash with EBUSY. The Rust side has its own watcher (tauri dev).
-    watch: {
-      ignored: ["**/src-tauri/**"],
+    build: {
+      target: "esnext",
+      rollupOptions: {
+        input,
+      },
     },
-  },
+    clearScreen: false,
+    server: {
+      port: 1420,
+      strictPort: true,
+      // Rust build output churns and Windows exclusively locks the .dll while cargo writes it; watching
+      // src-tauri makes Vite's file watcher crash with EBUSY. The Rust side has its own watcher (tauri dev).
+      watch: {
+        ignored: ["**/src-tauri/**"],
+      },
+    },
+  };
 });

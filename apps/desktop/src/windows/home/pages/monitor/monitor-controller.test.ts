@@ -93,4 +93,50 @@ describe("monitor controller", () => {
     expect(last.inspector).toBeUndefined();
     expect(last.inspectedRowKey).toBeUndefined();
   });
+
+  it("stops working while hidden (P1e): unsubscribes, suppresses re-publishing, keeps page memory", async () => {
+    const unsubscribeMonitor = vi.fn().mockResolvedValue(undefined);
+    const onMonitorEvent = vi.fn().mockReturnValue(() => undefined);
+    const ws = client({ unsubscribeMonitor, onMonitorEvent });
+    const states: MonitorViewState[] = [];
+    const controller = createMonitorController((state) => states.push(state));
+    controller.bind(ws);
+    await vi.waitFor(() => expect(states.at(-1)?.runs).toEqual([run]));
+    await controller.select("run-1");
+    await vi.waitFor(() => expect(states.at(-1)?.trajectory).toEqual(trajectory));
+
+    controller.setVisible(false);
+    await vi.waitFor(() => expect(unsubscribeMonitor).toHaveBeenCalledTimes(1));
+    const emitsAtHide = states.length;
+    await controller.refresh(); // work may still run against the client, but a hidden page must not emit
+    expect(ws.monitorList).toHaveBeenCalledTimes(2);
+    expect(states.length).toBe(emitsAtHide);
+    expect(states.at(-1)?.selectedRunKey).toBe("run-1"); // selection memory untouched by the gate
+  });
+
+  it("rebinds and refetches on reactivation (P1e)", async () => {
+    const onMonitorEvent = vi.fn().mockReturnValue(() => undefined);
+    const ws = client({ onMonitorEvent });
+    const states: MonitorViewState[] = [];
+    const controller = createMonitorController((state) => states.push(state));
+    controller.bind(ws);
+    await vi.waitFor(() => expect(states.at(-1)?.runs).toEqual([run]));
+    controller.setVisible(false);
+    controller.setVisible(true);
+    await vi.waitFor(() => expect(states.at(-1)?.runs).toEqual([run]));
+    expect(onMonitorEvent).toHaveBeenCalledTimes(2); // live handler re-registered
+    expect(ws.monitorState).toHaveBeenCalledTimes(2); // restore pass re-ran (mode check + refetch)
+  });
+
+  it("defers a bind's fetches while hidden and catches up on reactivation", async () => {
+    const ws = client();
+    const states: MonitorViewState[] = [];
+    const controller = createMonitorController((state) => states.push(state));
+    controller.setVisible(false);
+    controller.bind(ws);
+    await vi.waitFor(() => expect(ws.monitorState).toHaveBeenCalledTimes(0));
+    expect(states).toHaveLength(0);
+    controller.setVisible(true);
+    await vi.waitFor(() => expect(states.at(-1)?.runs).toEqual([run]));
+  });
 });

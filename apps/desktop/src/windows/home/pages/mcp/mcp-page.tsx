@@ -11,6 +11,7 @@ import { ActionButton } from "../../action-button.tsx";
 import { ExtensionConvergenceStrip, useExtensionConvergence } from "../../extension-convergence.tsx";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { PageCard } from "../../page-card.tsx";
+import { MasterDetail } from "@/components/ui/master-detail.js";
 import { EmptyState } from "@/components/ui/empty-state.js";
 import { FeedbackLine } from "@/components/ui/feedback-line.js";
 import { Skeleton } from "@/components/ui/skeleton.js";
@@ -138,15 +139,13 @@ interface MasterDetailInput {
   detailElement: false | ReactNode;
 }
 
-/** The L2 two-pane layout: list left, detail/editor right; stacks vertically under a narrow container. */
+/** The L2 two-pane layout (shared MasterDetail primitive): list left, detail/editor right; stacks under a narrow container. */
 function McpMasterDetail(input: MasterDetailInput) {
   return (
-    <div className="@container flex flex-col gap-4 @xl:flex-row @xl:items-start">
-      <aside className="@xl:w-60 @xl:shrink-0">
-        <McpServerList servers={input.servers} selectedId={input.selectedServerId} onSelect={input.onSelect} />
-      </aside>
-      <div className="flex min-w-0 flex-1 flex-col gap-4">{input.editorElement !== false ? input.editorElement : input.detailElement}</div>
-    </div>
+    <MasterDetail
+      list={<McpServerList servers={input.servers} selectedId={input.selectedServerId} onSelect={input.onSelect} />}
+      detail={input.editorElement !== false ? input.editorElement : input.detailElement}
+    />
   );
 }
 

@@ -4,7 +4,8 @@
  * POS:    ui/windows/home/pages/perception — the ONLY ws touchpoint of the page (hook-guidelines). Every write echoes
  *         the resulting server state; nothing is optimistically assumed (a lapsed deadline self-resumes core-side).
  *         The card is cached in MEMORY ONLY (its activity rows are foreground-window titles) and the pause state is not
- *         cached at all: a stale "not paused" is a privacy claim this page must never make.
+ *         cached at all: a stale "not paused" is a privacy claim this page must never make. P1e: reads are SKIPPED while the
+ *         page is hidden and rerun on reactivation (page-visibility-store).
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -12,6 +13,7 @@ import { PerceptionCardSchema, type PerceptionCard, type PerceptionPauseSetParam
 import { useCachedFetch } from "@/lib/use-cached-fetch.js";
 import type { WsClient } from "@/lib/ws-client.js";
 import { useHomeClient } from "../../home-client-context.ts";
+import { usePageVisible } from "../../page-visibility-store.ts";
 
 export interface PerceptionView {
   card: PerceptionCard | null;
@@ -37,23 +39,25 @@ export async function readPauseReplacement(
 export function usePerception(): PerceptionView {
   const { client, status } = useHomeClient();
   const ready = client && status.kind === "connected" ? client : null;
+  // P1e: a hidden page does no Core reads — card and pause reads key on visibility too and rerun on reactivation.
+  const visible = usePageVisible("perception");
   const [pause, setPauseState] = useState<PerceptionPauseState | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fail = useCallback((cause: unknown) => setError(cause instanceof Error ? cause.message : String(cause)), []);
 
-  const cardLoad = useMemo(() => (ready ? () => ready.perceptionCard() : null), [ready]);
+  const cardLoad = useMemo(() => (ready && visible ? () => ready.perceptionCard() : null), [ready, visible]);
   const card = useCachedFetch("perception-card", cardLoad, { schema: PerceptionCardSchema });
   const refreshCard = card.refresh;
 
   const refreshPause = useCallback(async () => {
-    if (!ready) return;
+    if (!ready || !visible) return;
     try {
       await readPauseReplacement(ready, setPauseState, () => setError(null));
     } catch (cause) {
       fail(cause);
     }
-  }, [ready, fail]);
+  }, [ready, visible, fail]);
 
   const refresh = useCallback(async () => {
     await Promise.all([refreshCard(), refreshPause()]);

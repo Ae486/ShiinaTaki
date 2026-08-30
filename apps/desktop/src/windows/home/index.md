@@ -2,11 +2,12 @@
 The home window: one instance, left menu / right page content. Pages are registry-driven — adding a page is one row
 in pages.ts. Holds no state of record (invariant 4); every page talks to the Core over the window's own operator WS.
 - main.tsx — React root mounting <HomeShell> into home.html #root, on the page named by the `?page=` boot param
-- home-shell.tsx — two-pane shell + lazy visited-page keep-alive host, shared Home-client provider, and that socket's single Approval modal owner; <main> anchors the shared connection-status overlay banner (U6); Chat keeps a separate socket/modal
+- home-shell.tsx — two-pane shell + lazy visited-page keep-alive host, shared Home-client provider, and that socket's single Approval modal owner; <main> anchors the shared connection-status overlay banner (U6); publishes the shown page to the visibility store (P1e) so hidden keep-alive pages stop working; Chat keeps a separate socket/modal
 - pages.ts — THE page registry (id/label/icon/component rows) + the derived PageId union + isPageId
-- pages/monitor/ — conditionally visible read-only Run monitor with semantic filters, durable/live cursor recovery and inspector-only technical metadata
+- pages/monitor/ — conditionally visible read-only Run monitor: three-zone DSH scaffold (Run browser / grouped ledger / closable drag-adjustable inspector) with semantic filters, durable/live cursor recovery and inspector-only technical metadata
 - default-page-id.ts — dependency-leaf default page id shared by navigation consumers without loading page components
 - visited-page-ids.ts — dependency-leaf visited-page sequence used by the Home keep-alive host
+- page-visibility-store.ts — zustand gate signal (P1e): the shell writes the shown page; hidden keep-alive pages stop subscriptions/fetches/re-publishes and reactivate on show (the chat page deliberately stays live)
 - home-store.ts — zustand nav store: currentPage + navigate(id)
 - boot-page.ts — pure `?page=` parse with a fallback to the default page
 - use-home-navigate-event.ts — listens for the home:navigate Tauri event (openHome on an already-open window)

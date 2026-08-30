@@ -1,10 +1,11 @@
 /**
  * INPUT:  Home's disposable operator WsClient generation
- * OUTPUT: readable DSH-style Run list/trajectory monitor with filters, paging, live/reconnect and an explicitly
- *         closable inspector
+ * OUTPUT: DSH-shaped three-zone monitor (L1): compact Run browser | grouped ledger | on-demand closable inspector
+ *         with a drag-adjustable width; filters live in the browser pane; stacks under a narrow container
  * POS:    ui/windows/home/pages/monitor — operator-only developer surface; no technical identifiers in primary rows.
- *         Batch-2: tiles ride SelectionTile (U1: the selected run and the inspected row close on a second click),
- *         filters ride Field, and loading/empty/error ride Skeleton/EmptyState/FeedbackLine with a retry action.
+ *         Tiles ride SelectionTile (U1: the selected run and the inspected row close on a second click), filters ride
+ *         Field, and loading/empty/error ride Skeleton/EmptyState/FeedbackLine with a retry action. Hidden pages stop
+ *         working (P1e): the controller unsubscribes + stops publishing while hidden and refetches on reactivation.
  */
 import { useEffect, useMemo, useState } from "react";
 import type { MonitorMode, RunInitiator, RunMonitorSummary, RunState, TrajectoryRow } from "@taki/shared";
@@ -21,7 +22,9 @@ import {
   createMonitorController, INITIAL_MONITOR_STATE,
   type MonitorController, type MonitorFilters, type MonitorViewState,
 } from "./monitor-controller.ts";
-import { groupTrajectoryRows, InspectorFields } from "./monitor-view.tsx";
+import { groupTrajectoryRows } from "./monitor-view.tsx";
+import { InspectorPane, INSPECTOR_WIDTH_DEFAULT, MonitorThreeZones } from "./monitor-layout.tsx";
+import { usePageVisible } from "../../page-visibility-store.ts";
 import { INITIATOR_OPTIONS, STATE_OPTIONS, connectionKindLabel, wireLabel } from "./monitor-labels.ts";
 
 function readableTime(value: string): string {
@@ -37,7 +40,7 @@ function FiltersCard({ draft, setDraft, onApply, applying }: {
 }) {
   return (
     <PageCard title="筛选" action={<ActionButton tone="primary" busy={applying} disabled={applying} onClick={onApply}>应用</ActionButton>}>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <div className="flex flex-col gap-2">
         <Field label="搜索">
           <input value={draft.text} maxLength={100} placeholder="触发器 / 摘要" className={FIELD_CONTROL}
             onChange={(event) => setDraft({ ...draft, text: event.target.value })} />
@@ -59,15 +62,31 @@ function FiltersCard({ draft, setDraft, onApply, applying }: {
   );
 }
 
+// Compact browser tile (L1): readable label first, one outcome line, one time/counts line — the technical joins
+// stay in the inspector. The character line is dropped (the controller pins the filter to the active character).
 function RunTile({ run, selected, onSelect }: { run: RunMonitorSummary; selected: boolean; onSelect(): void }) {
   return (
     <SelectionTile selected={selected} onSelect={onSelect}>
-      <p className="text-sm font-medium text-text-strong">{run.title}</p>
-      <p className="text-xs text-text-secondary">角色：{run.characterId} · {run.initiatorLabel} · {run.triggerLabel} · {run.deliveryLabel}</p>
-      <p className="mt-1 text-xs text-text-secondary">
-        {run.outcome ? `${wireLabel(run.state)} / ${wireLabel(run.outcome)}` : wireLabel(run.state)} · {readableTime(run.queuedAt)} · {run.attemptCount} 次尝试 / {run.effectCount} 个效果
+      <p className="truncate text-sm font-medium text-text-strong">{run.title}</p>
+      <p className="truncate text-xs text-text-secondary">
+        {run.initiatorLabel} · {run.outcome ? `${wireLabel(run.state)} / ${wireLabel(run.outcome)}` : wireLabel(run.state)}
       </p>
+      <p className="truncate text-xs text-text-secondary">{readableTime(run.queuedAt)} · {run.attemptCount} 次尝试 / {run.effectCount} 个效果</p>
     </SelectionTile>
+  );
+}
+
+function RunsCard({ view, controller }: { view: MonitorViewState; controller: MonitorController }) {
+  return (
+    <PageCard title="Run 记录" action={view.nextCursor ? <ActionButton onClick={() => void controller.loadOlderRuns()} disabled={view.loadingRuns}>加载更早记录</ActionButton> : undefined}>
+      <div className="flex flex-col gap-2">
+        {view.loadingRuns && view.runs.length === 0 && <Skeleton lines={4} />}
+        {view.runs.map((run) => (
+          <RunTile key={run.key} run={run} selected={run.key === view.selectedRunKey} onSelect={() => void controller.select(run.key)} />
+        ))}
+        {!view.loadingRuns && view.runs.length === 0 && <EmptyState title="没有符合条件的 Run" hint="调整筛选条件后重新应用。" />}
+      </div>
+    </PageCard>
   );
 }
 
@@ -113,40 +132,21 @@ function TrajectoryCard({ view, controller }: { view: MonitorViewState; controll
   );
 }
 
-function RunsCard({ view, controller }: { view: MonitorViewState; controller: MonitorController }) {
-  return (
-    <PageCard title="Run 记录" action={view.nextCursor ? <ActionButton onClick={() => void controller.loadOlderRuns()} disabled={view.loadingRuns}>加载更早记录</ActionButton> : undefined}>
-      <div className="flex flex-col gap-2">
-        {view.loadingRuns && view.runs.length === 0 && <Skeleton lines={4} />}
-        {view.runs.map((run) => (
-          <RunTile key={run.key} run={run} selected={run.key === view.selectedRunKey} onSelect={() => void controller.select(run.key)} />
-        ))}
-        {!view.loadingRuns && view.runs.length === 0 && <EmptyState title="没有符合条件的 Run" hint="调整筛选条件后重新应用。" />}
-      </div>
-    </PageCard>
-  );
-}
-
-function InspectorCard({ view, onClose }: { view: MonitorViewState; onClose(): void }) {
-  if (!view.inspector) return null;
-  return (
-    <PageCard title={`开发检查器 · ${view.inspector.title}`} action={<ActionButton tone="ghost" onClick={onClose}>关闭</ActionButton>}>
-      <p className="mb-3 text-xs text-text-secondary">{view.inspector.redactionNotice}</p>
-      <InspectorFields inspector={view.inspector} />
-    </PageCard>
-  );
-}
-
 export function MonitorPage() {
   const { client, status } = useHomeClient();
   const [view, setView] = useState<MonitorViewState>(INITIAL_MONITOR_STATE);
   const controller = useMemo(() => createMonitorController(setView), []);
   const [draft, setDraft] = useState<MonitorFilters>(INITIAL_MONITOR_STATE.filters);
+  const [inspectorWidth, setInspectorWidth] = useState(INSPECTOR_WIDTH_DEFAULT);
+  const visible = usePageVisible("monitor");
 
   useEffect(() => {
     controller.bind(client);
     return () => controller.dispose();
   }, [client, controller]);
+  // P1e: while hidden the controller tears its live subscription down and stops re-publishing; reactivation
+  // re-attaches and refetches (monitorState → restore) with the selection kept in page memory.
+  useEffect(() => { controller.setVisible(visible); }, [controller, visible]);
 
   const modeHint: Record<MonitorMode, string> = {
     DISABLED: "开发监控已关闭；Run 正确性证据仍由 Core 保留。",
@@ -161,12 +161,18 @@ export function MonitorPage() {
         {view.error && <PageAlert action={{ label: "重试", onClick: () => void controller.refresh() }}>{view.error}</PageAlert>}
         {view.stale && <FeedbackLine tone="warn">实时流已落后，正在从 durable cursor 重新读取。</FeedbackLine>}
         {view.mode === "DISABLED" ? <PageCard title="监控未启用"><p className="text-xs text-text-secondary">请在 Core 配置中启用 FEEDBACK_ONLY 或 FULL_LOCAL。</p></PageCard> : (
-          <>
-            <FiltersCard draft={draft} setDraft={setDraft} onApply={() => void controller.applyFilters(draft)} applying={view.loadingRuns} />
-            <RunsCard view={view} controller={controller} />
-            <TrajectoryCard view={view} controller={controller} />
-            <InspectorCard view={view} onClose={() => controller.closeInspector()} />
-          </>
+          <MonitorThreeZones
+            browser={<><FiltersCard draft={draft} setDraft={setDraft} onApply={() => void controller.applyFilters(draft)} applying={view.loadingRuns} /><RunsCard view={view} controller={controller} /></>}
+            ledger={<TrajectoryCard view={view} controller={controller} />}
+            inspector={view.inspector && (
+              <InspectorPane
+                inspector={view.inspector}
+                width={inspectorWidth}
+                onWidthChange={setInspectorWidth}
+                onClose={() => controller.closeInspector()}
+              />
+            )}
+          />
         )}
         <p className="text-xs text-text-secondary">连接：{connectionKindLabel(status.kind)}{view.loadingInspector ? " · 检查器读取中…" : ""}</p>
       </PageBody>

@@ -1,4 +1,10 @@
-- monitor-page.tsx — optional DSH-style Run list/trajectory/inspector UI with Chinese filter/state/outcome/phase labels (N4), bounded older-page controls, and an explicitly closable inspector (tiles ride SelectionTile, filters ride Field, loading/empty/error ride Skeleton/EmptyState/FeedbackLine with retry)
+# windows/home/pages/monitor/
+Optional operator/developer monitor (DSH-shaped, L1): three zones against the CURRENT projections — left Run browser
+(compact tiles + filters), central grouped trajectory ledger, and an on-demand closable inspector whose width is
+drag-adjustable (320-440px clamp) when side-by-side; under a narrow container everything stacks (browser → ledger →
+inspector inline section, never a modal). D68 producer events enhance it later.
+- monitor-page.tsx — page root + zone composition: filters live in the browser pane, tiles ride SelectionTile (U1 second-click closes), the P1e gate calls controller.setVisible (hidden = unsubscribe + no re-publishing; reactivation rebinds + refetches), inspector width rides page memory
+- monitor-layout.tsx — the three-zone scaffold: shared MasterDetail row for browser|ledger with the inspector as a conditional right column (inner @container query); InspectorPane (closable PageCard + ResizeDivider with pointer drag + separator keyboard contract)
 - monitor-labels.ts — the page's single presentation-label seam (N4): Chinese initiator/state/outcome/phase/effect labels, Run/Attempt group headers and connection kinds; wire vocabulary delegates to the shared observabilityLabel map, unknown values fall back to the raw string
-- monitor-controller.ts — disposable generation-safe WS state owner for restore, live cursors, paging and stale recovery; the selected run and the inspected row close on a second click (U1 two-way disclosure)
+- monitor-controller.ts — disposable generation-safe WS state owner for restore, live cursors, paging and stale recovery; setVisible (P1e) disposes the live subscription and suppresses publishes while hidden; the selected run and the inspected row close on a second click (U1 two-way disclosure)
 - monitor-view.tsx — pure Run/Attempt grouping (Chinese group headers) and inspector fields; technical values ride the shared CopyableRow and the detail list clamps min-w-0 (grouping keys stay hidden)
