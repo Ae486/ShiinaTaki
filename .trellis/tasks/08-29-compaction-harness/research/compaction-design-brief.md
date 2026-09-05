@@ -1,8 +1,8 @@
 # Compaction Harness design brief
 
-This is the compact execution context injected into implementation and check agents. The two full research reports remain
-the source of baseline detail; this brief also records the checked Slice 1/2 state and the approved Slice 3/4 target so a
-later agent does not act on superseded planning.
+This is the compact execution context injected into implementation and check agents. All four slices are implemented
+and formally checked. The two full research reports preserve the pre-redesign baseline; this brief and the final
+execution notes in `implement.md` describe the shipped contract so a later agent does not act on superseded planning.
 
 ## Current TakiAgent facts
 
@@ -11,22 +11,30 @@ later agent does not act on superseded planning.
   a summary bridge is reached, history ends, or the explicit 10,000-row emergency backstop is hit. The old 200-row path
   remains legacy no-budget compatibility only (`conversation-store.ts:15-16,132-157,173-223`;
   `replay-source-loader.ts:11-21,44-95`).
-- The current Slice 2 compactor still triggers from replay-history pressure strictly above
-  `historyBudget * triggerRatio` and therefore does not yet implement the approved complete-input pressure contract
-  (`compaction-pass.ts:100-106,143-155`). It retains a DSH-grounded `0.16` token-priced tail plus the explicit
-  `keepMessages` minimum-tail guard, flushes first, generates one Utility Slot summary, and advances `throughSeq` only
-  after non-empty output (`compaction-pass.ts:146-235`; `retirement-selector.ts:11-29`). This trigger is a remaining
-  Slice 4 defect, not the target meaning of `0.8`.
+- Request preparation measures the exact instructions, outgoing messages, and tool schemas at
+  `projectedInputTokens >= effectiveContextWindowTokens * compactPressureRatio` (default `0.8`). Typed tool-result and
+  rolling-summary-head reduction change the actual provider projection before remeasurement. Post-turn measurement
+  runs after assistant/tool persistence and before detached maintenance (`request-preparation.ts`,
+  `request-measurement.ts`, `context-reduction.ts`, `chat-agent.ts`).
+- Retirement keeps a DSH-grounded `0.16` token-priced tail plus the explicit `keepMessages` minimum-tail guard, flushes
+  first, and generates one Utility Slot summary. The tail ratio is not a summary compression target. Blank, truncated,
+  protected-content, or non-shrinking output cannot advance the checkpoint (`retirement-selector.ts`,
+  `compaction-coordinator.ts`, `summary-quality.ts`).
 - The user turn is never blocked: `createAutoMemory` runs detached and serializes maintenance per Character
   (`memory/auto-memory.ts:73-121`).
-- Migration 012 stores one overwritable summary row per Character: `through_seq`, text, timestamp; it is not a Timeline
-  row (`db/migrations/012-conversation-summary.ts`, `db/summary-repo.ts`).
+- Migration 032 adds revision/source-aware summary checkpoints, one fenced per-Character operation cursor, and
+  append-only lifecycle evidence. Summary replacement, operation commit, and terminal evidence share one SQLite CAS
+  transaction. Source changes, cancellation, and stale leases preserve the old checkpoint; later appends outside the
+  selected range are allowed (`db/compaction-operation-repo.ts`, `db/summary-repo.ts`).
 - Slice 2 constructs the Utility Slot and detached Compaction maintenance from Core runtime composition for both Legacy
   and canonical Local. Canonical activation retires Legacy maintenance and rebinds flush to explicit `not_required`;
   Hindsight selection still fails explicitly because that authority runtime is not installed
   (`memory/runtime-composition.ts:31-60,71-99`; `memory/memory-flush-port.ts:18-22,44-50`).
-- TakiAgent's estimator is CJK/image/tool-aware (`memory/token-estimator.ts:10-66`). Provider usage calibrates it, but
-  the current replay estimate does not fully price instructions, tool schemas, and response reserve.
+- TakiAgent's estimator is CJK/image/tool-aware. Positive provider input usage calibrates the complete request envelope;
+  cache-read tokens still occupy capacity, and absent/zero usage preserves the local estimate. A completed-request
+  usage report cannot overwrite the measured next-Replay pressure (`memory/token-estimator.ts`, `turn-usage-report.ts`).
+- Retry budgets and Character-wide cooldown use durable operation rows, including across restart or changed source
+  identity. Failed summaries retain the prior checkpoint (`compaction-policy.ts`, `db/compaction-operation-repo.ts`).
 - Current overflow behavior is ratified T5 R2: recalibrate the effective window and retry once only for a clean,
   side-effect-free outer attempt (`agents/chat-agent.ts:178-208`); overflow does not silently become model-backed
   compaction.
@@ -39,16 +47,15 @@ later agent does not act on superseded planning.
 4. Detached maintenance protects chat latency.
 5. Summary and tool folds are idempotent, copy-on-write, and privacy-aware.
 
-## Current defects to address
+## Remaining boundaries
 
-1. The pre-token 200-row source cliff.
-2. No durable compaction lifecycle/lock/restart evidence or source revision CAS (Slice 3).
-3. History-budget pressure is still used as the trigger instead of complete projected input (Slice 4).
-4. Deterministic reduction is still tool/history-specific rather than one general measured Context Reduction pipeline
-   with tool and non-tool reducers (Slice 4).
-5. Empty-only summary validation; no strict shrink, truncation, protected-content, or quality guard (Slice 4).
-6. Structured tool-result payloads are absent from `renderTranscript`; argument folding is inert for names-only rows.
-7. Failed utility calls can be retried on every trigger without a durable cooldown/budget.
+- Same-ToolLoop `prepareStep` reduction stays disabled until a transport-faithful test proves exactly-once completed
+  Tool Effects. Initial request and post-turn reduction do not enable mid-loop effect replay (D70).
+- Summary/source token ratios and reduction savings are not yet persisted for Monitor comparison. Character counts
+  are only proxies, and a rolling-summary denominator must include the prior summary plus newly retired material (D75).
+- Prompt versioning, fidelity benchmarks, and Character/tool/MCP/CJK A/B evaluation remain later quality work (D76).
+- Real-provider acceptance on 2026-09-02 covered long history, summary replacement/recovery, ordinary turns, Core and
+  avatar tools, MCP discovery/calls, and cache reuse. See `implement.md` for measured results and limitations.
 
 ## DSH mechanisms verified and transfer decisions
 
@@ -112,16 +119,17 @@ Ordinary selection is token-first. A row cap is only an explicit emergency estim
 `backstop_hit` fact. The target order is complete-input measurement -> deterministic reduction -> remeasurement -> skip
 the Utility Slot call when below `0.8`, otherwise detached rolling compaction -> durable commit -> later-request summary
 visibility. Summary replacement remains projection-only; the Timeline is never rewritten. The coordinator is constructed
-independently of Legacy/canonical/future Hindsight Memory selection. D68-B Monitor UI waits for this contract.
+independently of Legacy/canonical/future Hindsight Memory selection. The context-management gate for D68-B has passed;
+its Monitor UI remains a separate pending stage.
 
-## Planned slices
+## Implemented slices
 
 1. **Complete:** token-first Replay View/source loading with balanced units and the explicit 10,000-row backstop.
 2. **Complete:** provider-independent coordinator composition, one Utility Slot, and MemoryFlushPort.
 3. **Complete:** durable summary revision/CAS, per-Character fenced lease, append-only lifecycle evidence,
    cancellation/idempotency, atomic commit, and restart recovery. Slice 3 did not add reducers or change the trigger.
-4. **Pending:** complete projected-input pressure, general Context Reduction and remeasurement, summary
-   quality/retry/cooldown, same-ToolLoop safety decision, and end-to-end hardening.
+4. **Complete:** complete projected-input pressure, typed tool and rolling-summary Context Reduction and remeasurement,
+   summary quality/retry/cooldown, the explicit same-ToolLoop safety limitation, and end-to-end hardening.
 
 Each slice has one implementation agent and one check agent, targets 2-3 context windows, and may update later slices
 only after recording evidence in task artifacts.

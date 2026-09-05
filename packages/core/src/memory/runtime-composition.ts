@@ -6,6 +6,7 @@
 import type { LanguageModel } from "ai";
 import { join } from "node:path";
 import { createCompactionPass } from "../agents/compaction-pass.ts";
+import type { RequestMeasurement } from "../agents/request-measurement.ts";
 import { loadUtilityConfig } from "../config/utility-config.ts";
 import { createCompactionOperationRepo } from "../db/compaction-operation-repo.ts";
 import type { Database } from "../db/sqlite.ts";
@@ -22,11 +23,14 @@ import { createMemoryAuthorityFence } from "./legacy-migration/memory-authority-
 import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
 import { selectMemoryRuntime } from "./runtime-selector.ts";
 import { createUtilitySlot, type UtilitySlot } from "./utility-slot.ts";
+import { MEMORY_VOICE_RULE } from "./write-convention.ts";
 
 interface MemoryRuntimeInput {
   db: Database; dataDir: string; promptDir: string; model: LanguageModel; timeline: TimelineRepo;
   windowStart: (characterId: string) => number; summaries: SummaryRepo; estimatedTokens: (characterId: string) => number;
   budget: () => number; compact: { triggerRatio: number; keepMessages: number }; env: Record<string, string | undefined>; logger: Logger;
+  measureRequest?: (characterId: string) => RequestMeasurement | undefined;
+  effectiveWindowTokens?: () => number;
 }
 
 export function composeMemoryRuntime(input: MemoryRuntimeInput) {
@@ -75,13 +79,16 @@ function createCompactionMaintenance(input: MemoryRuntimeInput, utility: Utility
   const flush = createMemoryFlushBinding(legacy?.memoryFlush ?? canonicalLocalMemoryFlushPort());
   const operations = createCompactionOperationRepo(input.db);
   const compact = createCompactionPass({
-    view: { estimatedTokens: input.estimatedTokens, budget: input.budget },
+    view: { estimatedTokens: input.estimatedTokens, budget: input.budget,
+      measureRequest: input.measureRequest ? (characterId) => input.measureRequest?.(characterId) : undefined,
+      effectiveWindowTokens: input.effectiveWindowTokens },
     timeline: input.timeline,
     summaries: input.summaries,
     operations,
     flush: flush.port,
     slot: utility,
-    config: input.compact,
+    config: { ...input.compact, summaryQuality: true, retryBudget: 3, retryCooldownMs: 30_000 },
+    protectedContent: () => [MEMORY_VOICE_RULE],
     logger: input.logger.child({ mod: "compaction" }),
   });
   const autoMemory = createMaintenanceAutoMemory({

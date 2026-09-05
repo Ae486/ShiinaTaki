@@ -107,6 +107,10 @@ Exit gate: all Compaction slices are checked; complete projected-input pressure,
 summary lifecycle, and provider-independent composition are proven; D68-B consumes their semantic facts rather than
 inventing a page-local workaround.
 
+Gate result (2026-08-31): child `08-29-compaction-harness` completed all four slices and passed focused/full Core tests,
+workspace typecheck, root lint, task validation, diff check, and isolated Core boot. D68-B may proceed as a separate
+implementation stage; this gate completion does not itself start Desktop work.
+
 ## Stage 5 — DSH-shaped Desktop Monitor
 
 1. Replace the vertical PageCard composition with a full-height three-region workspace.

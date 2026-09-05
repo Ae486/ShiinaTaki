@@ -89,4 +89,27 @@ describe("request measurement", () => {
     await new Promise((resolve) => setImmediate(resolve));
     expect(reports).toEqual([]);
   });
+
+  it("counts cache-read tokens toward projected pressure even when total usage is absent", () => {
+    const measured = measureRequest({ replay, messages: [], instructions: "x", toolSchemaTokens: 0,
+      envelopeReserveTokens: 0, cacheReadTokens: 500 });
+    expect(measured.projectedInputTokens).toBeGreaterThanOrEqual(500);
+    expect(measured.cacheReadTokens).toBe(500);
+  });
+
+  it("falls back to the local envelope estimate for a zero provider sample", () => {
+    const estimated = measureRequest({ replay, messages: [{ role: "user", content: "x" }], instructions: "stable",
+      toolSchemaTokens: 1, envelopeReserveTokens: 0 });
+    const zero = measureRequest({ replay, messages: [{ role: "user", content: "x" }], instructions: "stable",
+      toolSchemaTokens: 1, envelopeReserveTokens: 0, providerInputTokens: 0 });
+    expect(zero.projectedInputTokens).toBe(estimated.projectedInputTokens);
+    expect(zero.accountingQuality).toBe("estimated");
+  });
+
+  it("uses a positive provider input sample as the complete-envelope calibration anchor", () => {
+    const measured = measureRequest({ replay, messages: [{ role: "user", content: "x" }], instructions: "stable",
+      toolSchemaTokens: 1, envelopeReserveTokens: 0, providerInputTokens: 900 });
+    expect(measured.projectedInputTokens).toBe(900);
+    expect(measured.accountingQuality).toBe("provider");
+  });
 });

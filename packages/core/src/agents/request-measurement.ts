@@ -14,6 +14,10 @@ export interface RequestMeasurement extends ReplayMeasurement {
   responseReserveTokens: number;
   estimatedInputTokens: number;
   projectedRequestTokens: number;
+  /** Complete-input pressure value. Unlike projectedRequestTokens this excludes the response reserve. */
+  projectedInputTokens: number;
+  reductionTokensSaved: number;
+  cacheReadTokens?: number;
   accountingQuality: "provider" | "calibrated" | "estimated" | "unknown";
 }
 
@@ -23,6 +27,11 @@ export interface RequestMeasurementInput {
   instructions: string;
   toolSchemaTokens: number;
   envelopeReserveTokens: number;
+  reductionTokensSaved?: number;
+  /** Authoritative provider input usage for the same request, when available. */
+  providerInputTokens?: number;
+  /** Cache reads consume the context window and are retained as diagnostics. */
+  cacheReadTokens?: number;
 }
 
 export function measureRequest(input: RequestMeasurementInput): RequestMeasurement {
@@ -30,12 +39,18 @@ export function measureRequest(input: RequestMeasurementInput): RequestMeasureme
   const envelopeReserveTokens = finiteNonNegative(input.envelopeReserveTokens, "envelopeReserveTokens");
   const requestMessageTokens = estimateMessagesTokens(input.messages);
   const instructionTokens = estimateTokens(input.instructions);
+  const reductionTokensSaved = finiteNonNegative(input.reductionTokensSaved ?? 0, "reductionTokensSaved");
   const estimatedInputTokens = requestMessageTokens + instructionTokens + toolSchemaTokens;
   const requestTailTokens = Math.max(0, requestMessageTokens - input.replay.historyTokens);
   const responseReserveTokens = Math.max(
     0,
     envelopeReserveTokens - requestTailTokens - instructionTokens - toolSchemaTokens,
   );
+  const providerInputTokens = positiveOrUndefined(input.providerInputTokens);
+  const cacheReadTokens = positiveOrUndefined(input.cacheReadTokens);
+  // Cache reads are still context occupancy. When a provider omits total input usage, retain the known cache
+  // component as a conservative lower bound rather than treating cached prefixes as free.
+  const projectedInputTokens = Math.max(providerInputTokens ?? estimatedInputTokens, cacheReadTokens ?? 0);
   return {
     ...input.replay,
     requestMessageTokens,
@@ -44,13 +59,22 @@ export function measureRequest(input: RequestMeasurementInput): RequestMeasureme
     responseReserveTokens,
     estimatedInputTokens,
     projectedRequestTokens: estimatedInputTokens + responseReserveTokens,
-    accountingQuality: "estimated",
+    projectedInputTokens,
+    reductionTokensSaved,
+    ...(cacheReadTokens === undefined ? {} : { cacheReadTokens }),
+    accountingQuality: providerInputTokens === undefined ? "estimated" : "provider",
   };
 }
 
 function finiteNonNegative(value: number, label: string): number {
   if (!Number.isFinite(value)) throw new Error(`request measurement ${label} is not finite`);
   return Math.max(0, value);
+}
+
+function positiveOrUndefined(value: number | undefined): number | undefined {
+  // A zero provider sample is the SDK's absent-usage shape for this contract. Keep the local estimator authoritative
+  // until a positive input count arrives; otherwise one incomplete callback could erase complete-request pressure.
+  return value !== undefined && Number.isFinite(value) && value > 0 ? Math.floor(value) : undefined;
 }
 
 /** Mirrors AI SDK v7's checked-in provider-tool preparation fields without serializing execute closures. */

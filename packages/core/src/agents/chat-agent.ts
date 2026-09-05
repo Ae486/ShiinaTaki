@@ -15,13 +15,15 @@ import type { Connection } from "../server/connection-registry.ts";
 import { COSTUME_CHANGE_NOTICE } from "../avatar/costume-notice.ts";
 import type { AutoMemory } from "../memory/auto-memory.ts";
 import type { MemoryEngine } from "../memory/memory-engine.ts";
-import { estimateMessagesTokens, estimateTokens } from "../memory/token-estimator.ts";
 import { renderCurrentTime, renderDayDate } from "../time/time-context.ts";
 import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
 import type { ConversationStore } from "./conversation-store.ts";
 import { isContextOverflowError, observedTokensOf } from "./overflow-error.ts";
 import { mergeToolSets } from "./tool-set-assembly.ts";
 import { fireUsageReport, type TurnUsageReport } from "./turn-usage-report.ts";
+import { estimateMessagesTokens, estimateTokens } from "../memory/token-estimator.ts";
+import type { RequestMeasurement } from "./request-measurement.ts";
+import { measurePostTurnRequest, prepareOutgoingRequest, type RequestPreparationDeps } from "./request-preparation.ts";
 import type { TurnMessage, UserImageInput } from "./turn-mapping.ts";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { createRunObservabilityModel, type ToolEffectObserver } from "./run-observability-telemetry.ts";
@@ -119,6 +121,12 @@ export interface ChatAgentDeps {
   onUsage?: (report: TurnUsageReport) => void;
   /** The configured non-history share of the calibrated context window; actual stable costs consume it first. */
   requestEnvelopeReserve?: () => number;
+  /** Production enables provider usage as the complete-envelope calibration anchor. */
+  useProviderUsage?: boolean;
+  /** Captures primary relationship pressure before detached maintenance; ephemeral controls never replace it. */
+  onRequestMeasured?: (characterId: string, measurement: RequestMeasurement) => void;
+  /** Applies only safe typed reductions to the admitted request and returns the valid reduced projection. */
+  requestReduction?: RequestPreparationDeps["requestReduction"];
   /** R2 overflow seam (batch 6): fired ONCE per turn, right before the single classified retry, with the observed
    *  input tokens (parsed from the provider error body, else our own estimate of the same request). main.ts wires
    *  the window calibrator's onOverflow + the counts-only warn. Absent = no retry, today's propagation. */
@@ -252,7 +260,12 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   // consumeCostumeChanged fires here even if the turn is later cancelled/retracted or R2-retried (baseline advances
   // anyway, and a retry attempt carries no second notice → a rare skipped notice, backstopped by the 1e enum;
   // accepted narrow edge).
-  const outgoing = buildOutgoing({ history, isImageTurn: vision !== null, message: controlMessage, attachments, changed: primary ? (deps.costumeChanged?.(characterId) ?? false) : false, tail: buildTurnTail(now, deps.volatileContext), primary });
+  const initialOutgoing = buildOutgoing({ history, isImageTurn: vision !== null, message: controlMessage, attachments, changed: primary ? (deps.costumeChanged?.(characterId) ?? false) : false, tail: buildTurnTail(now, deps.volatileContext), primary });
+  // Provider maintenance may still be pending when an autonomous Run starts. Its ephemeral control envelope must
+  // not replace the last primary pressure snapshot used to decide whether the relationship Timeline needs compaction.
+  const preparationDeps = primary ? deps : { ...deps, onRequestMeasured: undefined };
+  const prepared = await prepareOutgoingRequest(preparationDeps, { characterId, instructions, outgoing: initialOutgoing, replay: replay.measurement, tools, toolOrder });
+  const outgoing = prepared.messages;
   // Exposed for the R2 estimate fallback — read only on the retry path, never on the hot path.
   state.instructions = instructions;
   state.outgoing = outgoing;
@@ -290,8 +303,9 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   }
   // Graceful ending (the SDK emitted an `abort` part then closed): the same retract check on the clean path.
   if (primary && userSeq !== undefined && await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
+  if (primary) measurePostTurnRequest(deps, { characterId, instructions, tools, toolOrder, toolSchemaTokens: prepared.toolSchemaTokens, store });
   if (primary) fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
-  if (primary) fireUsageReport(deps, { usage: result.usage, instructions, outgoing, tools, toolOrder, preparedTools, replay: replay.measurement });
+  if (primary) fireUsageReport(deps, { characterId, usage: result.usage, instructions, outgoing, tools, toolOrder, preparedTools, replay: replay.measurement });
 }
 
 function assembleTurnTools(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): ToolSet {

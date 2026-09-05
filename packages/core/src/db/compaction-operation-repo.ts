@@ -37,7 +37,7 @@ export interface CompactionOperation {
   state: CompactionOperationState; attemptNo: number; selectedFromSeq: number; selectedThroughSeq: number;
   capturedTailSeq: number; expectedSummaryRevision: number; expectedSummaryThrough: number; sourceDigest: string;
   beforeTokens: number; provider: string; modelId: string; leaseFence: number; leaseExpiresAt: string | null;
-  failureCode: CompactionFailureCode | null; committedSummaryRevision: number | null;
+  failureCode: CompactionFailureCode | null; committedSummaryRevision: number | null; updatedAt: string; terminalAt: string | null;
 }
 
 export interface CompactionEvent {
@@ -69,6 +69,7 @@ export interface CompactionOperationRepo {
   reconcileExpired(now: string): number;
   get(operationId: string): CompactionOperation | null;
   active(characterId: string): CompactionOperation | null;
+  latestFailure(characterId: string): CompactionOperation | null;
   events(operationId: string): CompactionEvent[];
 }
 
@@ -90,6 +91,7 @@ const OperationRowSchema = z.object({
   expected_summary_through: z.int().nonnegative(), source_digest: Digest, before_tokens: z.int().nonnegative(),
   provider: z.string().min(1).max(100), model_id: z.string().min(1).max(200), lease_fence: z.int().positive(),
   lease_expires_at: Timestamp.nullable(), failure_code: FailureCodeSchema.nullable(), committed_summary_revision: z.int().positive().nullable(),
+  updated_at: Timestamp, terminal_at: Timestamp.nullable(),
 });
 
 const EventRowSchema = z.object({
@@ -109,6 +111,7 @@ export function createCompactionOperationRepo(db: Database): CompactionOperation
     reconcileExpired: (now) => reconcileExpired(db, Timestamp.parse(now)),
     get: (operationId) => readOperation(db, operationId),
     active: (characterId) => readActive(db, CharacterIdSchema.parse(characterId)),
+    latestFailure: (characterId) => readLatestFailure(db, CharacterIdSchema.parse(characterId)),
     events: (operationId) => db.prepare("SELECT * FROM conversation_compaction_events WHERE operation_id=:id ORDER BY operation_seq")
       .all({ id: BoundedId.parse(operationId) }).map(toEvent),
   };
@@ -305,8 +308,20 @@ function leaseIsCurrent(db: Database, lease: CompactionLease, now: string): bool
       characterId: lease.characterId, owner: lease.owner, fence: lease.fence, now }) !== undefined;
 }
 
-function readOperation(db: Database, operationId: string): CompactionOperation | null { const row = db.prepare("SELECT * FROM conversation_compaction_operations WHERE operation_id=:id").get({ id: operationId }); return row ? toOperation(row) : null; }
-function readActive(db: Database, characterId: string): CompactionOperation | null { const row = db.prepare("SELECT * FROM conversation_compaction_operations WHERE character_id=:characterId AND state='open'").get({ characterId }); return row ? toOperation(row) : null; }
+function readOperation(db: Database, operationId: string): CompactionOperation | null {
+  const row = db.prepare("SELECT * FROM conversation_compaction_operations WHERE operation_id=:id").get({ id: operationId });
+  return row ? toOperation(row) : null;
+}
+
+function readActive(db: Database, characterId: string): CompactionOperation | null {
+  const row = db.prepare("SELECT * FROM conversation_compaction_operations WHERE character_id=:characterId AND state='open'").get({ characterId });
+  return row ? toOperation(row) : null;
+}
+
+function readLatestFailure(db: Database, characterId: string): CompactionOperation | null {
+  const row = db.prepare("SELECT * FROM conversation_compaction_operations WHERE character_id=:characterId AND state IN ('failed','abandoned') ORDER BY updated_at DESC LIMIT 1").get({ characterId });
+  return row ? toOperation(row) : null;
+}
 function toOperation(row: SqlRow): CompactionOperation { const value = OperationRowSchema.parse(row); return {
   operationId: value.operation_id, characterId: value.character_id, runId: value.run_id, attemptId: value.attempt_id,
   state: value.state, attemptNo: value.attempt_no, selectedFromSeq: value.selected_from_seq,
@@ -314,7 +329,7 @@ function toOperation(row: SqlRow): CompactionOperation { const value = Operation
   expectedSummaryRevision: value.expected_summary_revision, expectedSummaryThrough: value.expected_summary_through,
   sourceDigest: value.source_digest, beforeTokens: value.before_tokens, provider: value.provider, modelId: value.model_id,
   leaseFence: value.lease_fence, leaseExpiresAt: value.lease_expires_at, failureCode: value.failure_code,
-  committedSummaryRevision: value.committed_summary_revision,
+  committedSummaryRevision: value.committed_summary_revision, updatedAt: value.updated_at, terminalAt: value.terminal_at,
 }; }
 function toEvent(row: SqlRow): CompactionEvent { const value = EventRowSchema.parse(row); return {
   operationId: value.operation_id, operationSeq: value.operation_seq, characterId: value.character_id,

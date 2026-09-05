@@ -132,6 +132,7 @@ describe("CompactionOperationRepo", () => {
       now: "2026-08-30T00:01:00.000Z" })).toBe("conflict");
     expect(f.summaries.get("taki")).toEqual({ throughSeq: 2, text: "newer authority" });
     expect(f.repo.get(lease.operationId)).toMatchObject({ state: "failed", failureCode: "SUMMARY_CONFLICT" });
+    expect(f.repo.get(lease.operationId)).toMatchObject({ updatedAt: "2026-08-30T00:01:00.000Z", terminalAt: "2026-08-30T00:01:00.000Z" });
   });
 
   it("persists cancellation before abort and never turns it into a checkpoint", () => {

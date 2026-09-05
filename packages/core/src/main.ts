@@ -15,6 +15,9 @@ import { mergeToolSets } from "./agents/tool-set-assembly.ts";
 import { createTurnQueue } from "./agents/turn-queue.ts";
 import { createTurnRegistry } from "./agents/turn-registry.ts";
 import { createWindowCalibrator } from "./agents/window-calibrator.ts";
+import type { RequestMeasurement } from "./agents/request-measurement.ts";
+import { reduceMessages } from "./agents/context-reduction.ts";
+import { reductionTargetTokens } from "./agents/request-preparation.ts";
 import { createAvatarSubscriptions } from "./avatar/avatar-subscriptions.ts";
 import { createAvatarTools } from "./avatar/avatar-tools.ts";
 import { createAvatarVocabulary } from "./avatar/avatar-vocabulary.ts";
@@ -131,10 +134,11 @@ const windowStateRepo = createWindowStateRepo(db);
 const windowCalibrator = createWindowCalibrator({ repo: windowStateRepo, slot: "main", declared: contextConfig.contextTokens.main });
 const timelineSubscriptions = createTimelineSubscriptions();
 const chatLog = logger.child({ mod: "chat" });
-// History replays historyRatio × the calibrated window; the remainder covers instructions + tools + the response.
-// The compaction trigger measures against this SAME wall (batch 7 — the replay view can never exceed it).
+// Replay View admission uses historyRatio × the calibrated window. Proactive compaction separately measures the
+// complete assembled request against effectiveWindow × compact.triggerRatio.
 const historyBudget = () => Math.floor(windowCalibrator.effectiveWindow() * contextConfig.historyRatio);
 const summaryRepo = createSummaryRepo(db);
+const latestRequestMeasurements = new Map<string, RequestMeasurement>();
 const conversationStore = createConversationStore({
   repo: timelineRepo,
   onAppend: (entry) => timelineSubscriptions.publish(entry),
@@ -154,7 +158,10 @@ const avatarVocabulary = createAvatarVocabulary();
 // Marker-first composition owns every legacy/canonical reader, writer, prompt, scheduler, and migration cutover seam.
 const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, promptDir: serverConfig.promptDir, model,
   timeline: timelineRepo, windowStart: conversationStore.windowStart, summaries: summaryRepo,
-  estimatedTokens: conversationStore.estimatedTokens, budget: historyBudget, compact: contextConfig.compact, env: boot.env, logger });
+  estimatedTokens: conversationStore.estimatedTokens, budget: historyBudget,
+  measureRequest: (characterId) => latestRequestMeasurements.get(characterId),
+  effectiveWindowTokens: () => windowCalibrator.effectiveWindow(),
+  compact: contextConfig.compact, env: boot.env, logger });
 const { selected: selectedMemory, memory, autoMemory, tidy, memoryRoot, writeMemory } = memoryRuntime;
 
 // Attachment store (#17): the sanctioned content-addressed Workspace R/W site for chat image attachments — the DB never
@@ -386,6 +393,17 @@ const chatAgent = createChatAgent({
       // Batch-6 usage seam: each committed turn's real usage calibrates the main slot's window (the calibrator
       // ignores the 0 that stands in for an absent inputTokens field).
       onUsage: (report) => windowCalibrator.onUsage(report.inputTokens ?? 0, report.estimatedInput),
+      useProviderUsage: true,
+      onRequestMeasured: (characterId, measurement) => latestRequestMeasurements.set(characterId, measurement),
+      requestReduction: ({ outgoing, measurement }) => {
+        if (measurement.projectedInputTokens < windowCalibrator.effectiveWindow() * contextConfig.compact.triggerRatio) return undefined;
+        const threshold = windowCalibrator.effectiveWindow() * contextConfig.compact.triggerRatio;
+        const reduced = reduceMessages({ messages: outgoing,
+          targetTokens: reductionTargetTokens({ thresholdTokens: threshold,
+            projectedInputTokens: measurement.projectedInputTokens, requestMessageTokens: measurement.requestMessageTokens }), recentMessages: 4,
+          summaryHead: measurement.summaryTokens > 0 });
+        return reduced.tokensSaved > 0 ? reduced.messages : undefined;
+      },
       requestEnvelopeReserve: () => Math.max(0, windowCalibrator.effectiveWindow() - historyBudget()),
       // R2 (batch 6): a classified overflow shrinks the persisted window — the retry then re-windows through the
       // store's budget closure above. Counts-only warn: sizes and the new window, never content (logging-guidelines).

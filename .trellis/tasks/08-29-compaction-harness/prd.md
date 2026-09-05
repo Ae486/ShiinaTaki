@@ -8,7 +8,7 @@ must preserve Character-scoped companion continuity, the append-only user-facing
 execution, and the existing Replay View contract while adapting the proven parts of DSH's compaction and token-meter
 design.
 
-The planning gate is complete. Slices 1-3 are implemented and formally checked; Slice 4 remains active. The
+The planning gate is complete. Slices 1-4 are implemented and formally checked. The
 task artifacts remain the global contract and must be updated before a later slice changes pressure semantics, lifecycle
 ownership, or reduction policy. A completed first slice is not treated as the final context architecture.
 
@@ -134,11 +134,11 @@ this operation. Revisions and sequence watermarks are versions, not additional s
   with one Utility Slot and explicit Memory Flush outcomes.
 - [x] Slice 3 provides a durable per-Character operation lifecycle, lease, revision/CAS summary transaction,
   restart/cancellation reconciliation, and idempotent terminal evidence without becoming a second Run authority.
-- [ ] Slice 4 implements complete projected-input pressure at the `0.8` threshold, general Context Reduction and
+- [x] Slice 4 implements complete projected-input pressure at the `0.8` threshold, general Context Reduction and
   remeasurement, summary-quality guards, retry/cooldown, and end-to-end regression coverage.
-- [ ] Legacy, canonical Local, and Hindsight-compatible provider modes retain one compaction path; unsupported Memory
+- [x] Legacy, canonical Local, and Hindsight-compatible provider modes retain one compaction path; unsupported Memory
   flush behavior is explicit and cannot silently disable compaction.
-- [ ] Parent D68 planning docs keep this task as the completed context-management gate before D68-B.
+- [x] Parent D68 planning docs keep this task as the completed context-management gate before D68-B.
 
 ## Definition of Done
 

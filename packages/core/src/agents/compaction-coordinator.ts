@@ -15,18 +15,23 @@ import type { SummaryRepo } from "../db/summary-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import type { AutoMemoryCompact } from "../memory/auto-memory.ts";
 import type { MemoryFlushOutcome, MemoryFlushPort } from "../memory/memory-flush-port.ts";
-import { renderTranscript } from "../memory/render-transcript.ts";
+import { renderSafeTranscript, sanitizeCompactionText } from "./context-reduction.ts";
 import type { UtilitySlot } from "../memory/utility-slot.ts";
 import { COMPACTION_RETAIN_RATIO, selectRetirementRange } from "./retirement-selector.ts";
 import { loadReplaySource } from "./replay-source-loader.ts";
+import type { RequestMeasurement } from "./request-measurement.ts";
+import { evaluateSummaryQuality, isCharacterCooldownElapsed } from "./compaction-policy.ts";
+import type { SummaryQualityResult } from "./summary-quality.ts";
 
-// The established migration runner uses the same ten-minute lease for model-backed offline work. A pass that outlives
-// this bound loses its fence and cannot commit; Slice 4 may add policy-driven retry/cooldown without changing that truth.
+// The established migration runner uses the same ten-minute lease for model-backed offline work. A pass that outlives this bound loses its fence.
 const COMPACTION_LEASE_MS = 600_000;
 
 export interface CompactionView {
   estimatedTokens(characterId: string): number;
   budget(): number;
+  /** Complete projected-input measurement for Slice 4; omitted callers use legacy history-only compatibility. */
+  measureRequest?(characterId: string): RequestMeasurement | undefined;
+  effectiveWindowTokens?(): number;
 }
 
 /** Counts/ids/codes only. Summary text, prompts, provider exceptions, and payloads never cross this seam. */
@@ -42,12 +47,25 @@ export interface CompactionCoordinatorDeps {
   operations: CompactionOperationRepo;
   flush: MemoryFlushPort;
   slot: UtilitySlot;
-  config: { triggerRatio: number; keepMessages: number };
+  config: {
+    triggerRatio: number;
+    keepMessages: number;
+    summaryQuality?: boolean;
+    retryBudget?: number;
+    retryCooldownMs?: number;
+  };
   logger: CompactionLogger;
   buildPrompt(previousSummary: string | null, retiringSpan: string, at: number | Date): string;
   now?: () => Date;
   owner?: string;
   leaseMs?: number;
+  validateSummary?: (input: {
+    text: string;
+    sourceText: string;
+    finishReason?: string;
+    protectedContent?: string[];
+  }) => SummaryQualityResult;
+  protectedContent?: () => string[];
 }
 
 export interface CompactionCorrelation {
@@ -89,10 +107,13 @@ export function createCompactionCoordinator(deps: CompactionCoordinatorDeps): Co
   async function maybeRun(characterId: string, correlation: CompactionCorrelation = {}): Promise<void> {
     let lease: CompactionLease | null = null;
     try {
-      const captured = capture(deps, characterId);
+      const captured = capture({ deps, characterId });
       if (!captured) return;
-      const startedAt = now();
       const operationId = operationIdOf(captured);
+      deps.operations.reconcileExpired(now().toISOString());
+      const attemptAt = now();
+      if (!attemptAllowed({ deps, characterId, operationId, at: attemptAt })) return;
+      const startedAt = now();
       const route = modelRoute(deps.slot.model);
       const begun = deps.operations.begin({
         operationId, characterId, ...correlation, reason: "pressure",
@@ -112,9 +133,7 @@ export function createCompactionCoordinator(deps: CompactionCoordinatorDeps): Co
       deps.logger.warn({ characterId, code: "COMPACTION_INTERNAL_ERROR" }, "compaction pass failed; will retry");
     } finally {
       const active = controllers.get(characterId);
-      if (active && active.operationId === lease?.operationId && active.fence === lease.fence) {
-        controllers.delete(characterId);
-      }
+      if (active && active.operationId === lease?.operationId && active.fence === lease.fence) controllers.delete(characterId);
     }
   }
 
@@ -135,20 +154,45 @@ async function execute(input: {
 }): Promise<void> {
   const { deps, captured, controller, now, leaseMs } = input;
   const flushed = await flushRetiringSpan(deps, { captured, lease: input.lease, now });
-  if (!flushed || controller.signal.aborted) return;
+  if (!flushed) return;
+  if (controller.signal.aborted) return;
   const renewedAt = now();
   const lease = deps.operations.recordFlush({ lease: input.lease, status: flushed.status, writes: flushed.writes,
     now: renewedAt.toISOString(), expiresAt: future(renewedAt, leaseMs) });
   if (!lease || controller.signal.aborted) return;
 
-  const prompt = deps.buildPrompt(captured.previousSummary, renderTranscript(captured.span), now());
+  const previousSummary = captured.previousSummary === null ? null : sanitizeCompactionText(captured.previousSummary);
+  const prompt = deps.buildPrompt(previousSummary, renderSafeTranscript(captured.span), now());
   const result = await deps.slot.run("compact", () => generateText({ model: deps.slot.model, prompt, abortSignal: controller.signal }));
   if (controller.signal.aborted) return;
   if (result === undefined) {
-    failSummary(deps, { lease, code: "SUMMARY_GENERATION_FAILED", captured, now }); return;
+    failSummary(deps, { lease, code: "SUMMARY_GENERATION_FAILED", captured, now });
+    return;
   }
-  if (result.text.trim().length === 0) {
-    failSummary(deps, { lease, code: "SUMMARY_EMPTY", captured, now }); return;
+  settleSummary({ deps, captured, lease, result, now });
+}
+
+function settleSummary(input: {
+  deps: CompactionCoordinatorDeps;
+  captured: CapturedCompaction;
+  lease: CompactionLease;
+  result: { text: string; finishReason?: string };
+  now: () => Date;
+}): void {
+  const { deps, captured, lease, result, now } = input;
+  const quality = evaluateSummaryQuality({
+    text: result.text,
+    finishReason: result.finishReason,
+    span: captured.span,
+    previousSummary: captured.previousSummary,
+    protectedContent: deps.protectedContent?.(),
+    strict: deps.config.summaryQuality ?? deps.view.measureRequest !== undefined,
+    validate: deps.validateSummary,
+  });
+  if (!quality.accepted) {
+    const code = quality.code === "blank" ? "SUMMARY_EMPTY" : "SUMMARY_GENERATION_FAILED";
+    failSummary(deps, { lease, code, captured, now });
+    return;
   }
   if (!deps.operations.recordSummaryGenerated({ lease, outputChars: result.text.length, now: now().toISOString() })) return;
   const currentDigest = sourceDigest(deps.timeline.rangeAscending(captured.characterId, captured.oldThrough, captured.newThrough));
@@ -170,12 +214,16 @@ async function execute(input: {
     after: deps.view.estimatedTokens(captured.characterId) }, "conversation compacted");
 }
 
-function capture(deps: CompactionCoordinatorDeps, characterId: string): CapturedCompaction | null {
+function capture(input: { deps: CompactionCoordinatorDeps; characterId: string }): CapturedCompaction | null {
+  const { deps, characterId } = input;
   const before = deps.view.estimatedTokens(characterId);
   const wall = deps.view.budget();
-  // Slice 3 preserves the shipped history-wall trigger exactly. Slice 4 owns complete-envelope pressure and >= 0.8.
-  if (!Number.isFinite(before) || before < 0 || !Number.isFinite(wall)
-    || before <= wall * deps.config.triggerRatio) return null;
+  const measured = deps.view.measureRequest?.(characterId);
+  const effective = deps.view.effectiveWindowTokens?.() ?? wall;
+  const pressure = measured?.projectedInputTokens ?? before;
+  const threshold = effective * deps.config.triggerRatio;
+  const atBoundary = measured !== undefined ? pressure >= threshold : pressure > threshold;
+  if (!Number.isFinite(pressure) || pressure < 0 || !Number.isFinite(effective) || !Number.isFinite(wall) || !atBoundary) return null;
   const checkpoint = deps.summaries.getCheckpoint(characterId);
   const oldThrough = checkpoint?.throughSeq ?? 0;
   const retainTokens = Math.floor(wall * COMPACTION_RETAIN_RATIO);
@@ -192,7 +240,38 @@ function capture(deps: CompactionCoordinatorDeps, characterId: string): Captured
   if (span.length === 0) return null;
   return { characterId, oldThrough, newThrough: selection.newThroughSeq,
     expectedSummaryRevision: checkpoint?.revision ?? 0, previousSummary: checkpoint?.text ?? null,
-    capturedTailSeq: deps.timeline.latestSeq(characterId), sourceDigest: sourceDigest(span), span, before: Math.floor(before) };
+    capturedTailSeq: deps.timeline.latestSeq(characterId), sourceDigest: sourceDigest(span), span,
+    before: Math.floor(measured?.projectedInputTokens ?? before) };
+}
+
+function retryAllowed(deps: CompactionCoordinatorDeps, operationId: string, now: Date): boolean {
+  const operation = deps.operations.get(operationId);
+  if (!operation) return true;
+  if (operation.state === "committed") return false;
+  if (operation.state === "open") return false;
+  if (operation.state === "cancelled" && operation.failureCode === null) return true;
+  const budget = deps.config.retryBudget ?? (deps.config.summaryQuality ? 3 : Number.MAX_SAFE_INTEGER);
+  if (operation.attemptNo >= budget) return false;
+  const cooldown = Math.max(0, deps.config.retryCooldownMs ?? (deps.config.summaryQuality ? 30_000 : 0));
+  if (cooldown === 0) return true;
+  const terminalMs = Date.parse(operation.terminalAt ?? operation.updatedAt);
+  return !Number.isFinite(terminalMs) || now.getTime() >= terminalMs + cooldown;
+}
+
+function attemptAllowed(input: {
+  deps: CompactionCoordinatorDeps;
+  characterId: string;
+  operationId: string;
+  at: Date;
+}): boolean {
+  const cooldownMs = Math.max(0, input.deps.config.retryCooldownMs
+    ?? (input.deps.config.summaryQuality ? 30_000 : 0));
+  return isCharacterCooldownElapsed({
+    latestFailure: input.deps.operations.latestFailure(input.characterId),
+    operationId: input.operationId,
+    now: input.at,
+    cooldownMs,
+  }) && retryAllowed(input.deps, input.operationId, input.at);
 }
 
 async function flushRetiringSpan(

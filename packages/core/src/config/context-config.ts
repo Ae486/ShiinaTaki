@@ -14,13 +14,13 @@ import { z } from "zod";
 // moved 32768 -> 131072).
 export const DEFAULT_CONTEXT_TOKENS = 131072;
 
-// LOCAL choice: the slice of the effective window granted to replayed history; the remainder covers instructions +
-// tool schemas + the response. One knob on purpose — per-component reserves would be speculative config (KISS).
+// LOCAL choice: the slice of the effective window granted to replayed history; it sizes Replay View admission only.
+// Proactive compaction uses the complete projected request and TAKI_COMPACT_TRIGGER_RATIO independently.
 // Raised 0.55 -> 0.7 with the batch-7 optimistic-budget rider (same owner directive as above).
 export const DEFAULT_HISTORY_RATIO = 0.7;
 
-// T5-R5's ruled number: pre-compact in the background at ~80% of the history wall — generosity comes from the
-// larger window above, never from moving the ratio.
+// T5-R5's ruled number: pre-compact in the background at ~80% of the effective context window. This divides the
+// calibrated window directly; it is not multiplied by historyRatio.
 export const DEFAULT_COMPACT_TRIGGER_RATIO = 0.8;
 
 // Compatibility guard only: token-priced compaction retains the DSH-grounded 0.16 history-wall tail; this value keeps

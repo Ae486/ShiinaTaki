@@ -1,5 +1,8 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
+> Continuation checkpoint (2026-09-05): the current Compaction Harness state, final verification, and closeout boundary
+> are recorded in Section 0 of `docs/T4-HANDOFF.md`. The Skills/MCP snapshot below is historical context.
+>
 > Updated 2026-08-19 after the Slice 8 automated convergence check. T4 remains isolated in its dedicated worktree.
 > Secure MCP, Standard Skill, Governance/Approval, Secret Catalog, and Extension Discovery contracts are implemented;
 > the reusable Slice 8 contract is `.trellis/spec/backend/extension-discovery.md`. Slice 7 is checkpointed at `4031ba7`;

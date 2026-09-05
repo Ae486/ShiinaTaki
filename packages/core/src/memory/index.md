@@ -38,7 +38,7 @@
 - local-memory-provider.ts — dormant structured Local provider with atomic retain, sparse recall, and CAS mutations
 - canonical-local-runtime.ts — post-activation SQLite-only runtime with canonical tools/assembly and no Markdown dependency
 - runtime-selector.ts — marker-first startup routing that never constructs legacy memory after canonical activation
-- runtime-composition.ts — marker-first Core composition for one Utility Slot, provider-independent Compaction/maintenance, Legacy retirement, Canonical Local activation, and on-demand migration cutover
+- runtime-composition.ts — marker-first Core composition for one Utility Slot, provider-independent Compaction/maintenance with complete-pressure measurement, Legacy retirement, Canonical Local activation, and on-demand migration cutover
 - authority-aware-legacy-surfaces.ts — mutable authority wrappers that retire legacy auto-memory, tidy, and direct writes after canonical activation
 - memory-coordinator.ts — persisted-authority dispatch, capability checks, cancellation, and no-fallback envelopes
 - hindsight/ — inactive B3 Hindsight connection/setup client, compatibility, persistence, and operator orchestration; never wired into Memory Authority

@@ -52,6 +52,13 @@ describe("loadContextConfig (T5-R1 tier 1 / R5 / R13)", () => {
     expect(loadContextConfig({ TAKI_COMPACT_TRIGGER_RATIO: "1" }).compact.triggerRatio).toBe(1);
   });
 
+  it("keeps the proactive trigger ratio independent from replay history sizing", () => {
+    const narrowReplay = loadContextConfig({ TAKI_CONTEXT_HISTORY_RATIO: "0.2", TAKI_COMPACT_TRIGGER_RATIO: "0.8" });
+    const wideReplay = loadContextConfig({ TAKI_CONTEXT_HISTORY_RATIO: "0.9", TAKI_COMPACT_TRIGGER_RATIO: "0.8" });
+    expect(narrowReplay.compact.triggerRatio).toBe(wideReplay.compact.triggerRatio);
+    expect(narrowReplay.historyRatio).not.toBe(wideReplay.historyRatio);
+  });
+
   it.each([
     ["TAKI_PROVIDER_CONTEXT_TOKENS", "abc"],
     ["TAKI_PROVIDER_CONTEXT_TOKENS", "0"],

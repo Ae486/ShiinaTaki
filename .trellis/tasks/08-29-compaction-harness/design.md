@@ -3,15 +3,18 @@
 ## 0. Status and decision boundary
 
 This document is the active design contract for `08-29-compaction-harness`. It is based on the live TakiAgent source,
-ratified T5 decisions, ADR 0005/0008/0009, and the checked-in DeepSeek Harness (DSH) `0.1.1-rc.2` reference. Slices 1-3
-are implemented and checked; this revision records the pressure/reduction contract that governs pending Slice 4.
+ratified T5 decisions, ADR 0005/0008/0009, and the checked-in DeepSeek Harness (DSH) `0.1.1-rc.2` reference. Slices 1-4
+are implemented and checked; this revision records the shipped pressure/reduction contract.
 
 The design is intentionally evolutionary. The first implementation slice establishes stable seams and evidence; it is
 not a claim that the first release is the final context architecture. Later slices may revise contracts when tests or
 provider observations reveal a better implementation, but such changes must be recorded in the task artifacts before
 the next slice.
 
-## 1. Current TakiAgent design (verified)
+## 1. Pre-redesign baseline (verified during planning)
+
+This section preserves the source-grounded starting point. Its defects describe the implementation before Slices 1-4;
+the shipped contract is in Section 4, the Compaction Harness spec, and the execution notes in `implement.md`.
 
 ### 1.1 Data flow
 
@@ -325,7 +328,7 @@ are coordination/evidence, not a second conversation or Run authority.
 
 ```text
 prepareRetirement({ characterId, fromSeq, throughSeq, operationId, signal })
-  -> committed | not_required | retryable_failure | permanent_unavailable
+  -> success | not_required | retryable_failure | permanent_unavailable
 ```
 
 Legacy Markdown wraps the current watermark-guarded `FlushWriter`. Canonical Local and future Hindsight supply their own
@@ -381,13 +384,11 @@ enough.
 - The emergency source guard is currently an explicit 10,000-row backstop selected and benchmarked in Slice 1. Paging
   batch size and the guard may be tuned later from measured SQLite behavior, but neither may become an ordinary context
   boundary.
-- Whether the compaction lifecycle is represented by one append-only table or an additive Run Event category for
-  Run-linked operations. The invariant is one durable evidence source; no duplicate event authority.
 - Whether a same-route cache-shaped summarizer is economically beneficial for each provider. Correctness is independent.
 - Whether a semantic summary audit needs a second utility call. Start with deterministic guards; add an audit/retry pass
   only when real quality probes show omissions.
-- The exact reducer priority/retention policies beyond the protected classes above. Slice 4 must derive them from current
-  request shapes and DSH's prune/remeasure behavior, then record any TakiAgent-specific adaptation before implementation.
+- Future reducer priority/retention policies beyond the shipped typed tool-result and rolling-summary-head reducers.
+  Generic semantic dialogue remains protected until a separately recorded policy supplies stronger continuity proof.
 - Manual compaction and request-local overflow recovery remain reserved APIs, not first-slice product features.
 
 ## 7. Design acceptance mapping

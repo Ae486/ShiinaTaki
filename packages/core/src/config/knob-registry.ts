@@ -150,7 +150,7 @@ export const CONFIG_KNOBS: Knob[] = [
   { key: "TAKI_UTILITY_CONTEXT_TOKENS", ...int({ min: 1 }), default: DEFAULT_CONTEXT_TOKENS, apply: "restart", description: "Declared context window of the utility slot." },
   { key: "TAKI_CONTEXT_HISTORY_RATIO", ...ratio(), default: DEFAULT_HISTORY_RATIO, apply: "restart", description: "Share of the window replayed as history." },
   { key: "TAKI_PROVIDER_INCLUDE_USAGE", ...bool(), default: false, apply: "restart", description: "Ask the provider for streaming usage numbers." },
-  { key: "TAKI_COMPACT_TRIGGER_RATIO", ...ratio(), default: DEFAULT_COMPACT_TRIGGER_RATIO, apply: "restart", description: "History fill that triggers compaction." },
+  { key: "TAKI_COMPACT_TRIGGER_RATIO", ...ratio(), default: DEFAULT_COMPACT_TRIGGER_RATIO, apply: "restart", description: "Complete projected-input fill that triggers compaction." },
   { key: "TAKI_COMPACT_KEEP_MESSAGES", ...int({ min: 1 }), default: DEFAULT_COMPACT_KEEP_MESSAGES, apply: "restart", description: "Newest messages compaction keeps live." },
 
   // --- agent loop + media ---
