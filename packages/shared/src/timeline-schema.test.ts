@@ -73,6 +73,27 @@ describe("TimelinePartSchema", () => {
     ).toBe(false);
   });
 
+  it("round-trips bounded display names without changing tool identity or business output", () => {
+    const displayName = "🛠".repeat(120);
+    const parts = [
+      { type: "tool-call", toolCallId: "c1", toolName: "opaque_key", displayName },
+      { type: "tool-result", toolCallId: "c1", toolName: "opaque_key", displayName,
+        output: { type: "json", value: { displayName: "x".repeat(300), input: "business data" }, hash: "business-hash" } },
+    ];
+    for (const part of parts) expect(TimelinePartSchema.parse(part)).toEqual(part);
+  });
+
+  it("omits invalid optional display metadata while retaining strict canonical validation", () => {
+    for (const displayName of [null, 7, {}, "", " \t\n", "x".repeat(241), "🛠".repeat(121)]) {
+      for (const type of ["tool-call", "tool-result"] as const) {
+        const part = { type, toolCallId: "c1", toolName: "opaque_key", displayName, output: { type: "text", value: "done" } };
+        const parsed = TimelinePartSchema.parse(part);
+        expect("displayName" in parsed ? parsed.displayName : undefined).toBeUndefined();
+        expect(TimelinePartSchema.safeParse({ ...part, toolName: "" }).success).toBe(false);
+      }
+    }
+  });
+
   it("round-trips an image part (#17) and rejects an unsupported media type / empty ref", () => {
     const image = { type: "image", mediaType: "image/png", ref: "attachments/abc.png" };
     expect(TimelinePartSchema.parse(image)).toEqual(image);

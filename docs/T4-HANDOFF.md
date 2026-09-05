@@ -4,8 +4,58 @@
 >
 > Scope: post-Skills/MCP T4 - Autonomous Runs, Run Receipts, Scheduled Tasks, Heartbeat, delivery, reliability, and later Experience Review.
 >
-> Snapshot date: 2026-08-27. Recheck every Git hash, task pointer, dependency state,
-> and runtime claim before use.
+> Latest checkpoint: 2026-09-06. Older sections retain their historical dates. Recheck every Git hash,
+> task pointer, dependency state, and runtime claim before use.
+
+## Current UI/UX checkpoint - 2026-09-06
+
+Stay in `H:/TakiAgent-worktrees/t4`, branch `task/t4-skills-mcp-productization`, base HEAD `3c67fd5`.
+The main session's current task is `.trellis/tasks/09-05-uiux-readable-operations`, source
+`session:codex_01a070e4-3a27-7562-ab12-14cc42cbea98`. Verify it with `task.py current --source`;
+never reactivate the stale legacy Compaction pointer. No UI/UX commit, push, finish or archive has
+been performed, and manual acceptance remains explicit.
+
+Latest authorization: the owner activated an execution goal to complete the planned work without
+further confirmations and to manage task commits. See
+[the delegation record](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-execution-delegation-2026-09-06.md).
+The no-commit statement above describes the preceding validation checkpoint; checked local commits
+are now authorized. Use the live Git log for checkpoint hashes. Do not claim unobserved owner review.
+
+- G4 information cleanup is implemented and checked. Its isolated frontend-only WebView2 QA passed
+  12/12 interaction groups with synthetic responses; this does not certify normal Shell/Core startup
+  or owner visual acceptance. See the [G4 evidence](../.trellis/tasks/08-30-frontend-uiux-optimization/implementation-evidence-g4-2026-09-05.md).
+- A1/A2 readable names, permissions/approvals and immutable captured tool names are implemented.
+  One combined `gpt-6-astra/xhigh` review passed: Shared 402, Core 1,889 and Desktop 612 tests;
+  Core retains one conditional real-ZST-sample skip. Workspace typecheck, root lint and Desktop build
+  passed, with one existing lint warning. The focused final-build WebView2 check passed 6/6 groups
+  with synthetic data, no page/console errors, exact production CSP and verified assets. Owned test
+  processes/listeners are cleaned up; owner manual acceptance remains open.
+  [A1/A2 evidence](../.trellis/tasks/09-05-uiux-readable-operations/implementation-evidence-a1-a2-2026-09-06.md)
+  records exact gates and remaining acceptance.
+- The combined review fixed long-name wrapping and excluded only new tool `displayName` metadata
+  from canonical Compaction source identity. Legacy v1 hashes and real-content stale detection are
+  covered. This is a metadata compatibility fix in the naming task; it does not reopen Compaction.
+- D64/B command disclosure uses policy A selected by main under that delegation, as recorded in
+  [the policy proposal](../.trellis/tasks/09-05-uiux-readable-operations/research/d64-disclosure-policy-proposal-2026-09-05.md).
+  Current adapter/compatibility research is the remaining pre-implementation gate, not owner approval.
+- The next main delivery is D68's DSH Monitor port, then Chat and Pet. The
+  [current DSH source/adapter map](../.trellis/tasks/08-28-dsh-observability-expansion/research/d68-b-ui-port-adapter-map-2026-09-06.md)
+  identifies real projection/history/client gaps. `@tanstack/react-virtual@3.14.9` is proposed to retain
+  DSH's measured-row behavior and is compatible with React 19; main has adopted it under delegated
+  authority. Install it in the reviewed D68-B slice. No D68-B production implementation has started.
+- User process refinement: simple changes may skip a separate check agent or join a related check;
+  retain focused verification and independent review for authorization/protocol/streaming consistency.
+  Implement agents use `gpt-6-astra/high`, check agents `gpt-6-astra/xhigh`, no recursive delegation.
+  Semantic discovery uses jbcontext only; YCE is prohibited in every agent prompt.
+- Preserve unrelated work. The post-review comparison found 36/37 older protected-file hashes equal;
+  the existing Avatar Lab `param-access.test.ts` differs from the old checkpoint and was left untouched.
+  Its write timestamp precedes the full gates. The deferred registry is unchanged at 77,280 bytes.
+
+The decision source remains the parent
+[UI/UX grill](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-grill-2026-09-05.md).
+The new [Operation Presentation spec](../.trellis/spec/backend/operation-presentation.md) is shared by
+the naming task and downstream Monitor/live-feedback contexts. D75 scope is unchosen; D77 error
+taxonomy and real T4 initiative/heartbeat/cross-device work remain later work.
 
 ## 0. Compaction checkpoint - 2026-09-05
 

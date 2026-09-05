@@ -1,7 +1,7 @@
 /**
  * INPUT:  one Run id, Core/Host/MCP/Skill live authorities, interactive context, and canonical Host route
- * OUTPUT: createExtensionRunContext() -> captured tools/instructions/snapshot reused by every model retry
- * POS:    core/extensions — Run assembly seam; projections are process-local and never persisted or replayed
+ * OUTPUT: captured tools/names/instructions/snapshot reused by every model retry
+ * POS:    core/extensions — process-local Run assembly; only captured display labels may enter timeline records
  */
 import type { ToolSet } from "ai";
 import type { ExtensionRunSnapshot } from "@taki/shared";
@@ -24,6 +24,7 @@ import { createExtensionTools } from "./extension-tools.ts";
 
 export interface ExtensionRunContext {
   readonly tools: ToolSet;
+  readonly toolDisplayNames?: Readonly<Record<string, string>>;
   readonly instructions: string;
   readonly snapshot: ExtensionRunSnapshot;
 }
@@ -53,6 +54,7 @@ export function createExtensionRunContext(input: {
   const hostContext = renderHostContext(createHostContext(input.coreHostId, catalogs));
   return Object.freeze({
     tools: Object.freeze(mergeToolSets(mcp.directTools, createExtensionTools(registry))),
+    toolDisplayNames: mcp.toolDisplayNames,
     instructions: `${hostContext}\n\n${registry.renderContext()}`,
     snapshot: registry.snapshot,
   });

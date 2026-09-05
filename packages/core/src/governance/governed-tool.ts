@@ -1,6 +1,6 @@
 /**
  * INPUT:  trusted canonical identity/cell sidecar, GovernancePolicyService, and an existing AI SDK Tool closure
- * OUTPUT: wrapGovernedTool(...) — execution-time common policy guard preserving the original tool protocol/closure
+ * OUTPUT: common policy/approval guards using service-owned classifier metadata and the original tool closure
  * POS:    core/governance — explicit Core/MCP/Skill adapter primitive; presentation keys and tool metadata grant nothing
  */
 import type { Tool } from "ai";
@@ -109,7 +109,7 @@ async function executeGoverned(args: ExecuteGovernedArgs) {
   recordGovernance(context, decision, options);
   if (decision.allowed) return executeWithEffect({ execute, context, input, options });
   if (decision.code !== "APPROVAL_REQUIRED" || !interactive) return denied(decision, binding);
-  const requestedBinding = approvalBinding(binding, decision.evaluation);
+  const requestedBinding = approvalBinding(binding, decision.evaluation, service);
   const handle = requestApproval({ interactive, binding, decision, requestedBinding });
   // A durable waiting Effect represents a real operator prompt. Session/always authority is already resolved and has
   // no canonical Approval ID, so it must proceed directly to target intent instead of creating an untraceable wait.
@@ -135,11 +135,10 @@ async function executeGoverned(args: ExecuteGovernedArgs) {
     const current = service.authorize(binding);
     recordGovernance(context, current, options);
     if (current.allowed) return executeWithEffect({ execute, context, input, options, waiting });
-    const currentBinding = approvalBinding(binding, current.evaluation);
     if (current.code === "APPROVAL_REQUIRED" && interactive.approval.isCurrentAuthority({
       connection: interactive.connection,
       decision: approved,
-      binding: currentBinding,
+      binding: approvalBinding(binding, current.evaluation, service),
       approvedBinding: requestedBinding,
       policyGeneration: current.evaluation.policyGeneration,
       approvedPolicyGeneration: decision.evaluation.policyGeneration,
@@ -301,19 +300,16 @@ function denied(
 function approvalBinding(
   binding: GovernedToolBinding,
   evaluation: ReturnType<GovernancePolicyService["evaluate"]>,
+  service: GovernancePolicyService,
 ) {
+  const classifier = service.classifierMetadata(binding.identity.capabilityId);
   const scope = {
     bindingRevision: 1 as const,
     identity: binding.identity,
     descriptorRevision: evaluation.descriptorRevision,
-    classifierId: classifierId(binding.identity.capabilityId),
-    classifierRevision: 1,
+    classifierId: classifier.classifierId,
+    classifierRevision: classifier.classifierRevision,
     cellKey: binding.cellKey,
   };
   return { ...scope, decisionScopeDigest: approvalDecisionScopeDigest(scope) };
-}
-
-function classifierId(capabilityId: string): string {
-  if (capabilityId === "mcp.tool.call") return "mcp-tool-call";
-  return "fixed-risk";
 }

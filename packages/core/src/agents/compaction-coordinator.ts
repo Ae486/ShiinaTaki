@@ -1,6 +1,6 @@
 /**
  * INPUT:  replay pressure, captured Timeline/Summary state, MemoryFlushPort, Utility Slot, and durable operation repo
- * OUTPUT: restart-reconciled maybeRun/cancel coordinator with fenced, CAS-protected summary replacement
+ * OUTPUT: fenced, CAS-protected summary replacement with presentation-independent canonical source identity
  * POS:    core/agents — detached Slice 3 compaction lifecycle; one operation per Character, never a Run/Timeline authority
  */
 import { createHash, randomUUID } from "node:crypto";
@@ -318,8 +318,18 @@ function sourceDigest(entries: TimelineEntry[]): string {
   const hash = createHash("sha256");
   hash.update("taki/conversation-compaction-source/v1\0");
   for (const entry of entries) hash.update(JSON.stringify({ seq: entry.seq, id: entry.id, role: entry.role,
-    content: entry.content, parts: entry.parts ?? null, createdAt: entry.createdAt })).update("\0");
+    content: entry.content, parts: canonicalSourceParts(entry.parts) ?? null, createdAt: entry.createdAt })).update("\0");
   return hash.digest("hex");
+}
+
+function canonicalSourceParts(parts: TimelineEntry["parts"]): TimelineEntry["parts"] {
+  return parts?.map((part) => {
+    if (part.type !== "tool-call" && part.type !== "tool-result") return part;
+    // UI labels cannot change retry/source identity. Preserve every other field and its legacy serialization order.
+    const canonical = { ...part };
+    delete canonical.displayName;
+    return canonical;
+  });
 }
 
 function operationIdOf(captured: CapturedCompaction): string {

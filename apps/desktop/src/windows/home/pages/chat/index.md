@@ -12,9 +12,9 @@ attachments. One continuous timeline, NO session list.
 - date-group.ts — pure: chronological entries → consecutive local-date groups (date dividers)
 - timeline-view.tsx — the scrollable conversation: date dividers, rows, streaming bubble; sticks to bottom, loads older on top-reach, shows the "加载更早消息" jump while the mounted window is trimmed; keyboard-scrollable (tabIndex) with an EmptyState for the empty timeline
 - use-timeline-scroll.ts — scroll behavior: stick-to-bottom, top-reach load-older, position hold on prepend (keyed on the oldest mounted seq so the hold survives the P1b window trim)
-- timeline-message.tsx — one role-styled row (React.memo); dispatches parts (text→lazy markdown, tool→card, image→thumb)
+- timeline-message.tsx — one role-styled row (React.memo); dispatches text/images and forwards captured tool names to cards
 - markdown-view.tsx — react-markdown@10 + remark-gfm wrapper, default-safe, with prose utilities (Tailwind v4); lazy-loaded by its consumers (P1f) so the markdown stack rides an async chunk
-- tool-card.tsx — a compact tool-call/tool-result card (name + status label)
+- tool-card.tsx — compact tool cards with captured-name/fixed-name/generic Chinese fallbacks, wrapped long names, and existing result status
 - image-attachment.tsx — image part renderer (presentational): Skeleton pulse block / "图片已过期" (image-off glyph) / resolved thumbnail
 - use-attachment-image.ts — lazy media.get + module ref→dataURL cache (the ws touchpoint for image parts); P1b LRU-bounded at 40 resolved entries (in-flight fetches never evicted, failures self-evict for retry)
 - composer.tsx — draft/attachments remain editable during reconnect; send is readiness-gated; in-flight state still owns chat.cancel and retracted-draft recovery; buttons ride the shared ActionButton pill and IconButton (≥32px hit targets)

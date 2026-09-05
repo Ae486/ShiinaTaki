@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { TriggerRequest } from "@taki/shared";
 import type { ExtensionRunContext } from "../extensions/extension-run-context.ts";
 import { createRunSnapshotCapture } from "./run-snapshot-capture.ts";
 
@@ -11,7 +12,8 @@ const memoryCapabilities = { providerId: "local", contractVersion: 1 as const, r
 describe("createRunSnapshotCapture", () => {
   it("persists only reduced authority references while returning the exact executable context", async () => {
     const memoryTools = { captured_memory_tool: {} as never };
-    const context: ExtensionRunContext = { tools: {}, instructions: "secret prompt instructions", snapshot: {
+    const names = { direct_mcp: "Actual server · operation" };
+    const context: ExtensionRunContext = { tools: {}, toolDisplayNames: names, instructions: "secret prompt instructions", snapshot: {
       runId: "550e8400-e29b-41d4-a716-446655440001", primaryHostId: hostId,
       hosts: [{ hostId, available: true, connectionGeneration: 2, catalogGeneration: 3, extensionCount: 1 }],
       entries: [{ identity: { extensionId, kind: "skill", ownerHostId: hostId, subjectId: "skill.pkg",
@@ -29,11 +31,14 @@ describe("createRunSnapshotCapture", () => {
       provider: "openai-compatible",
       modelId: "model",
     });
-    const result = await capture.capture({ triggerRequestId: "trigger", idempotencyKey: "idem",
+    const request: TriggerRequest = { triggerRequestId: "trigger", idempotencyKey: "idem",
       characterId: "taki", initiator: "primary", provenance: { provider: "chat" },
-      deliveryClass: "class_a", contextMode: "primary" }, context.snapshot.runId);
+      deliveryClass: "class_a", contextMode: "primary" };
+    const result = await capture.capture(request, context.snapshot.runId);
     expect(result.context).toMatchObject({ tools: context.tools, instructions: context.instructions });
     expect(result.context?.memoryTools).toBe(memoryTools);
+    expect(result.context?.toolDisplayNames).toEqual(names);
+    expect(Object.isFrozen(result.context?.toolDisplayNames)).toBe(true);
     expect(result.snapshot).toMatchObject({ primaryHostId: hostId,
       hosts: [{ hostId, connectionGeneration: 2, catalogGeneration: 3 }],
       extensions: [{ extensionId, subjectRevision: "rev" }],
@@ -47,5 +52,12 @@ describe("createRunSnapshotCapture", () => {
     expect(persisted).not.toContain("secret prompt instructions");
     expect(persisted).not.toContain("Secret display");
     expect(persisted).not.toContain("Secret description");
+    expect(persisted).not.toContain("Actual server");
+
+    names.direct_mcp = "Changed display only";
+    expect(result.context?.toolDisplayNames?.direct_mcp).toBe("Actual server · operation");
+    const renamed = await capture.capture(request, context.snapshot.runId);
+    expect(renamed.context?.toolDisplayNames?.direct_mcp).toBe("Changed display only");
+    expect(JSON.stringify(renamed.snapshot)).toBe(persisted);
   });
 });

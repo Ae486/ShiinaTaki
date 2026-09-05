@@ -1,12 +1,12 @@
 /**
  * INPUT:  live Skill/MCP catalogs, authenticated Host catalogs, and existing governed tool/route adapters
- * OUTPUT: host-qualified ExtensionCandidate snapshots plus captured direct MCP compatibility tools
+ * OUTPUT: host-qualified candidates plus direct MCP tools and names captured in the same snapshot iteration
  * POS:    core/extensions — adapter layer; it reuses lifecycle/governance authority and adds no execution path
  */
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { Tool, ToolExecutionOptions, ToolSet } from "ai";
-import type { ExtensionHostSnapshot } from "@taki/shared";
+import { captureToolDisplayNames, formatMcpToolDisplayName, type ExtensionHostSnapshot } from "@taki/shared";
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
 import type { HostCatalogStore, LiveHostCatalog } from "../hosts/host-catalog.ts";
 import type { McpManager, McpToolSnapshot } from "../mcp/mcp-manager.ts";
@@ -23,6 +23,7 @@ type CapabilityRoute = (request: { capabilityId: string; input: unknown; targetH
 export interface McpExtensionSnapshot {
   readonly candidates: readonly ExtensionCandidate[];
   readonly directTools: ToolSet;
+  readonly toolDisplayNames?: Readonly<Record<string, string>>;
 }
 
 export function snapshotSkillExtensions(input: {
@@ -68,11 +69,17 @@ export function snapshotSkillExtensions(input: {
 export function snapshotMcpExtensions(manager: McpManager, interactive?: TurnInteractive): McpExtensionSnapshot {
   const snapshots = manager.snapshot(interactive);
   const directTools: ToolSet = {};
+  const names: [string, string][] = [];
   const candidates = snapshots.map((entry) => {
     directTools[entry.toolKey] = entry.tool;
+    names.push([entry.toolKey, formatMcpToolDisplayName(entry.ref)]);
     return mcpCandidate(entry);
   });
-  return Object.freeze({ candidates: Object.freeze(candidates), directTools: Object.freeze(directTools) });
+  return Object.freeze({
+    candidates: Object.freeze(candidates),
+    directTools: Object.freeze(directTools),
+    toolDisplayNames: captureToolDisplayNames(Object.fromEntries(names)),
+  });
 }
 
 export function snapshotHostCapabilityExtensions(

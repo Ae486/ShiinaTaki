@@ -44,7 +44,7 @@ export function SkillsPage() {
   const convergence = useExtensionConvergence(skillConvergenceKey(skills.state.packages));
   return (
     <>
-      <PageHeader title="Skills" hint="导入标准 SKILL.md 包；Core 验证、持久化并即时更新 Agent 可用目录。" busy={busy} />
+      <PageHeader title="Skills" hint="导入标准 SKILL.md 技能包；通过验证并启用后即可供助手使用，无需重启。" busy={busy} />
       <ExtensionConvergenceStrip state={convergence} />
       <SkillsBody input={{
         skills, selectedId, setSelectedId, confirmRemove, setConfirmRemove, fileError, busy,
@@ -84,7 +84,7 @@ function SkillsBody({ input }: { input: SkillsBodyInput }) {
   const failedListRead = input.fileError === null && skills.state.kind === "failure";
   return (
     <PageBody>
-      {skills.status.kind === "reconnecting" && <PageAlert>正在重新连接 Core；当前写操作已停用，未确认的写入不会重放。</PageAlert>}
+      {skills.status.kind === "reconnecting" && <PageAlert>正在重新连接，暂时无法更改技能；未确认的操作不会自动重试，恢复后请核对结果并按需手动重试。</PageAlert>}
       {(skills.state.message || input.fileError) && (
         <PageAlert action={failedListRead ? { label: "重试", onClick: () => void skills.controller.refresh() } : undefined}>
           Skill 操作失败：{input.fileError ?? skills.state.message}

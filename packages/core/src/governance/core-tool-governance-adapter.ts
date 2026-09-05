@@ -1,9 +1,10 @@
 /**
  * INPUT:  trusted Core ToolSet keys, stable Core Host identity, and GovernancePolicyService
- * OUTPUT: createCoreToolGovernanceAdapter(...).wrap(tools) with explicit canonical bindings for Core-local tools
+ * OUTPUT: explicitly bound Core-local tools with shared readable approval names
  * POS:    core/governance — Core adapter only; MCP/Skill/Host adapters retain their own trusted identity sidecars
  */
 import type { ToolSet } from "ai";
+import { APPROVAL_PRESENTATION_REVISION, getKnownToolDisplayName, type ApprovalPresentation } from "@taki/shared";
 import type { GovernancePolicyService } from "./governance-policy-service.ts";
 import type { ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
 import type { Connection } from "../server/connection-registry.ts";
@@ -86,13 +87,14 @@ function canonicalJson(value: unknown): string {
   throw new Error("memory input is not JSON-compatible");
 }
 
-function corePresentation(key: string) {
+function corePresentation(key: string): ApprovalPresentation {
+  const name = getKnownToolDisplayName(key) ?? "内置工具";
   return {
-    revision: 1 as const,
-    title: "Allow Core tool",
-    capabilityLabel: key,
-    riskSummary: "This Core tool requires operator approval under the active governance policy.",
-    sections: [{ title: "Action", fields: [{ label: "Tool", value: key }] }],
+    revision: APPROVAL_PRESENTATION_REVISION,
+    title: "确认使用内置工具",
+    capabilityLabel: name,
+    riskSummary: "此内置工具将执行所请求的操作，当前权限设置要求先获得你的确认。",
+    sections: [{ title: "操作内容", fields: [{ label: "工具", value: name }] }],
   };
 }
 

@@ -50,9 +50,10 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
   `localStorage` write. Home is a disposable operator view, not a policy replica.
 - Only one permission mutation may be active. Late reads/mutations from a retired client are ignored; a conflict
   refetches; timeout/reconnect never replays a write.
-- The UI renders Core facts only: factory/override/effective posture, override mode, generation, reset, second-confirm,
+- The UI renders Core facts only: factory/override/effective posture, override mode, reset, second-confirm,
   immutable, loading/reconnecting/read/validation/saved/conflict states. It may disclose that Hosts can tighten, but it
-  must not invent a per-row Host constraint not present in the Core response.
+  must not invent a per-row Host constraint not present in the Core response. Policy/registry generations remain
+  internal concurrency inputs and are not displayed, including expanded or accessible content.
 
 ### Secure MCP management
 
@@ -198,17 +199,70 @@ await requestCostumeSwitch(costumeId);
 
 - A monitor or trajectory page is a presentation projection over Core facts, not a direct ledger/database viewer. Ordinary
   rows lead with readable event labels, phase/category, status, outcome, duration, counts, and bounded error summaries.
-- Opaque protocol fields such as `runId`, `attemptId`, `serverId`, hashes/digests, generations, revisions,
-  `ownerHostId`, and catalog/config identifiers are internal join or diagnostic fields. Keep them out of ordinary rows;
-  expose them only in an explicitly opened developer inspector with clear labels and copy-diagnostic affordances.
+- **Owner clarification, 2026-09-05 (G4):** remove meaningless internal information from user-facing surfaces,
+  including expanded details and the Monitor Inspector. Moving it into a second disclosure or adding a copy control
+  is not an acceptable fallback. This supersedes the earlier general developer-inspector allowance.
+- Internal `runId`/`attemptId`/effect/call/correlation IDs, hashes/digests, config/catalog/policy generations and
+  revisions, schema bookkeeping and opaque Host IDs are not presentation content. Keep the values needed for keys,
+  joins, authorization, CAS, requests and generation guards internally; remove their user-visible rows, titles,
+  tooltips, copy affordances and accessible-name fallbacks. `FULL_LOCAL` does not waive this rule.
+- Curate fields that explain an operation, input/result/error, useful state/timing/usage or an action the user can take.
+  Actual commands, file paths/diffs, tool results, user-edited MCP namespaces and actionable config keys can be useful.
+  Do not strip arbitrary result text because it contains a hash or version: a requested checksum is a valid result,
+  and a real package version can inform compatibility. Internal config revisions are not package versions.
+- Do not dump `Object.entries(metadata)` or `inspector.technical` into a generic details section. Keep only meaningful
+  fields and remove a disclosure if nothing useful remains. Do not replace removed UI with a new raw-metadata panel.
 - Adapt DSH's `current`/`shadowed`/`log-only` classification so superseded or internal evidence remains queryable without
   producing duplicate or meaningless user-facing rows. Category/severity/Run/Attempt/tool/trigger/delivery filters are
   preferred over exposing raw event JSON.
-- The current MCP and Skills pages have known presentation debt where technical identifiers and generation/revision/hash
-  fields are shown in primary cards. Record their cleanup as a separate UI task; do not expand Slice 2's backend ledger
-  implementation to modify those pages.
+- MCP/Skills details, shared extension status, permission settings, Monitor and import feedback have concrete G4 cleanup
+  targets. See [the reference study and field inventory](../../tasks/08-22-t4-agent-architecture-observability/research/uiux-useful-information-2026-09-05.md).
+  The first pure-frontend cleanup has automated evidence in the frontend task; cross-layer labels and Monitor remain
+  separate work. A target contract or static test does not certify actual-window visual acceptance.
+- Availability copy follows the actual lifecycle state, not the existence of an internal identifier. MCP can expose a
+  draining runtime generation while not connected; continued-service wording requires a connected snapshot with a
+  runtime. A disconnected/idle extension snapshot must be identified as previous data, never current availability.
+
+Field-selection example (illustrative; retain the original snapshot for actions):
+
+```typescript
+const snapshot = { name: "GitHub", configRevision: 7, contentHash: "internal-digest" };
+// Wrong: serialize every available field into user-visible rows.
+const dumpedRows = Object.entries(snapshot);
+// Correct: choose information needed for this view; the revision still exists for concurrency checks.
+const visibleRows = [{ label: "名称", value: snapshot.name }];
+```
+
+Verification: open every affected disclosure/Inspector and assert absence of internal bookkeeping from visible and
+accessible content. Assert that meaningful names, configuration, results, errors and actions remain. Preserve CAS/
+generation behavior and selection through updates. Existing tests that require hashes/IDs/counters in details must
+change with the implementation; an old presentation assertion does not override the owner requirement.
+
+### Monitor product baseline (G5, owner 2026-09-05)
+
+The existing Monitor is a trace-validation prototype, not an accepted product UI. It is excluded from
+the owner's acceptance of the other pages' visual direction. Port/rebuild Monitor primarily from
+`references/deepseek-harness-master/packages/client/ui-trajectory`: its Toolbar/Overview/Table/Inspector
+composition, styles, density, grouped information and interaction. Use the
+[D68 source-to-target plan](../../tasks/08-28-dsh-observability-expansion/design.md).
+
+Adapt the view to TakiAgent's real Core projections, React/window integration, Chinese system labels,
+G4 useful-field selection and privacy. Preserve the single execution authority. Complete UI localization
+includes status/filter/tab/tooltip/loading/error/empty/accessibility copy; actual tool/model names,
+commands, paths and content retain their identity. Retain MIT source attribution for substantial copies.
+
+Acceptance compares representative default, selected/expanded, live-tail, older-history and narrow
+states against DSH and exercises the actual WebView2 UI. A working trace, a nominal three-region grid,
+or old screenshot/test acceptance does not establish G5 completion. This is the target contract;
+the source prototype still requires implementation work.
 
 ## Streaming timeline: the in-flight assistant row lifecycle
+
+Tool names follow [Operation Presentation](../backend/operation-presentation.md): valid captured
+`displayName` -> known fixed-tool Chinese name -> generic Chinese tool text. Never expose an unknown
+canonical key or reconstruct an MCP name from it. The optional Timeline field is captured with the
+Run's actual tools, survives persistence, and does not change model replay or call/result identity.
+This name contract does not itself implement live tool delivery or completed-call reconciliation.
 
 The persisted timeline and the live stream are two sources merged in one store (`pages/chat/chat-timeline-store.ts`), keyed by `seq`:
 

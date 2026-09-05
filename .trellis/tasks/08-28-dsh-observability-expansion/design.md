@@ -6,6 +6,16 @@ The existing Core Run state and append-only `run_events` ledger remain the only 
 at fixed Core seams and projects them into a DSH-shaped developer view. It does not add a DSH Session, a second Agent
 loop, a monitor database, or a relationship-timeline writer.
 
+G5 product baseline (owner, 2026-09-05): the current Monitor is only a trace-validation prototype and
+has no visual/interaction acceptance. Rebuild the presentation primarily by porting DSH Trajectory's
+composition, styles and interactions. Preserve useful Core/data work; do not make the old PageCard
+scaffold or the accepted non-Monitor visual baseline a constraint on this rebuild.
+
+G4 presentation clarification (2026-09-05): remove meaningless IDs/hashes/internal generations and
+revisions from user-facing details, including the Monitor Inspector in local mode. Preserve required
+wire/internal identities. The [reference study and field inventory](../08-22-t4-agent-architecture-observability/research/uiux-useful-information-2026-09-05.md)
+supersedes the earlier generic technical-disclosure recommendation.
+
 ```text
 Run/Attempt/Effect/Model/Tool/Governance transitions
   -> versioned durable Run Events + post-commit live bus
@@ -22,6 +32,9 @@ optimization for UI responsiveness and are never required for correctness.
 
 ## 1.1 Preflight and delegation boundary
 
+The following captures the original stage ordering. As of 2026-09-05, the prompt-cache and compaction
+children are archived and their gates are complete; the G4 presentation work does not reopen them.
+
 Existing DSH research is sufficient for the architecture and presentation direction. One additional targeted explore is
 required before coding because the live TakiAgent adapter still needs verified AI SDK v7 stream-part shapes and exact
 model/tool observation seams. The explore is read-only and records concrete symbols, payload inputs, and tests; it does not
@@ -37,14 +50,52 @@ cost. Each executable task/slice has one impl and one check, with no secondary a
 main session sets the session-scoped task pointer. The prompt starts with the exact `Active task:` path and requires
 child-side `task.py current --source` verification/correction before work begins.
 
-## 2. Reference mapping: copy DSH, adapt only domain boundaries
+## 2. Direct DSH presentation port and necessary TakiAgent adapters
+
+The [2026-09-06 adapter preflight](research/d68-b-ui-port-adapter-map-2026-09-06.md) records the
+current source/style comparison, existing durable facts, exact client/projection gaps and the proposed
+virtualizer dependency. Main adopted that dependency under the owner's 2026-09-06 execution delegation.
+Finalize the additive adapter contract before activating D68-B; do not reopen completed stages.
+
+Default to reuse/port of the local MIT source, not a newly invented dashboard inspired only by the
+idea of a trajectory. The reference package is
+`references/deepseek-harness-master/packages/client/ui-trajectory`. Its README describes the full
+interaction target. `TrajectoryView.tsx:447-502` composes Toolbar -> Timeline -> Table, and the Table
+owns its conditional record Inspector; TakiAgent's Run selection replaces the source conversation
+selection boundary without introducing a second Session/runtime.
+
+| Source under `src/client/` | Port target |
+|---|---|
+| `TrajectoryView.tsx`, `views.module.css` | Full-height composition, relative density/spacing, search/grouping state and Overview/ledger coordination |
+| `TrajectoryToolbar.tsx` | Search, grouping controls, meaningful request totals and time/duration controls with Chinese captions |
+| `TrajectoryTimeline.tsx`, `TrajectoryTimeline.module.css`, `timeline.ts` | Timing Overview, record/range focus, zoom/pan and truthful missing-history/start-only rendering |
+| `TrajectoryTable.tsx`, `TrajectoryTable.module.css` | Compact semantic rows, turn/request/tool grouping, selected/detail states, resizable Inspector and content presentation |
+| `trajectory-virtual-rows.ts` and Table history/follow logic | Bounded mounted rows, older-page loading, stable keys/measurements, initial tail placement and pause-on-scroll-up |
+| `trajectory-record.ts`, `layout.ts` | Adapt presentation records to TakiAgent's Run/Attempt/model/tool facts; do not copy the source runtime/state authority |
+
+Read the matching styles and behavior with each component; copying structure without its density,
+state treatment and scroll behavior does not meet G5. Keep source attribution and the DeepSeek MIT
+copyright/license notice for substantial copies. This source includes React, `@tanstack/react-virtual`,
+`diff` and DSH-specific primitives/runtime imports; inventory compatibility and minimal adapters in
+the executable slice plan rather than importing the whole DSH workspace or assuming those dependencies
+already exist in Desktop. Resolve any needed dependency changes before implementation begins.
+
+Necessary adaptations are limited to the local React/window/styling integration, existing Core/query
+facts, Chinese UI labels, G4 useful-field selection, privacy and actual responsive constraints. Reuse
+project foundations where compatible with DSH's target appearance; do not wrap the port back into the
+old vertically stacked cards. Detailed timeline spans require real timing facts; missing information
+stays absent/unknown instead of being invented to resemble a reference screenshot.
+
+DSH's composer-overlay hooks belong to its conversation shell. TakiAgent Monitor is read-only: omit
+that composer integration and unused reserved composer space. A visible row ordinal or step count may
+support navigation; it must not expose a canonical event sequence or opaque identity as metadata.
 
 ### Adopt directly from DSH
 
 - One chronological ledger with grouped Turn/Step-like execution boundaries.
 - A wide-screen split view: compact browser/list, central trajectory table, right-side selected-record Inspector.
 - Fixed Overview time strip above the trajectory.
-- Semantic main rows; detail tabs for usage, timing, input/output, schema and context.
+- Semantic rows and useful detail for usage, timing, input/output and context; G4 excludes internal bookkeeping dumps.
 - Explicit close button for the Inspector; selection is replaceable and does not permanently append cards.
 - Turn and Assistant tool groups have independent expand/collapse controls with `aria-expanded`.
 - Older-history loading, virtualization when volume warrants it, stable row keys, tail-follow at the current end, and
@@ -60,7 +111,7 @@ child-side `task.py current --source` verification/correction before work begins
 | Step | One model request plus its tool work | Do not call every Attempt a Step |
 | Tool/Subtool | model-requested Tool, MCP, Host, or future child execution | Preserve effect and lineage semantics |
 | Session query | Character-authorized Run query | Authorization is Character/role based |
-| Raw local inspector | bounded redacted developer detail | Mandatory secret/sensor/authorization exclusion |
+| Local operation inspection | Useful bounded redacted operation detail | G4 field relevance plus mandatory secret/sensor/authorization exclusion; no generic metadata fallback |
 
 ## 3. Durable producer model
 
@@ -125,7 +176,7 @@ follow existing transaction/ordering rules.
 - retry, approval, recovery and delivery summaries when facts exist;
 - optional cache read/write totals only when authoritative.
 
-The wire model may retain opaque selection keys, but they are never rendered as ordinary content.
+The wire model may retain opaque selection keys, but they are not rendered in user-facing content or expanded details.
 
 ### 4.2 Trajectory rows
 
@@ -161,10 +212,10 @@ conditional and Chinese:
 | Approval | 概览、决定、耗时 |
 | Retry/recovery | 概览、原因、关联重试 |
 
-The default tab leads with status, provider/model or tool name, outcome, duration, usage and bounded summary. Long content
-uses independently collapsible sections. A final `技术关联` disclosure is collapsed by default and is available only in
-an authorized local mode; it may contain IDs, sequence, schema version and digest for targeted debugging. The default
-Inspector contains no such fields.
+Tabs lead with status, provider/model or tool name, outcome, duration, usage and bounded operation content. Long useful
+content may use independently collapsible sections. G4 removes IDs, sequence/schema bookkeeping, digest and internal
+revision/generation fields from this user-facing Inspector, including local mode. Do not add a `技术关联` panel or copy
+fallback for those values. Internal identities remain available to query/replay logic and canonical evidence.
 
 ### 4.4 Chinese presentation map
 
@@ -191,14 +242,16 @@ the same Chinese-only rule.
 
 ### 5.1 Wide screens
 
-Use a full-height three-region workspace:
+Use the DSH composition and visual hierarchy inside TakiAgent's full-height workspace. Integrate the
+Run browser at the source conversation-selection boundary; the ledger/Overview/Inspector are the
+reference-led main surface. The existing page-width wrapper must not make the right Inspector unreachable.
 
 ```text
 ┌────────────────────────────────────────────────────────────┐
 │ 筛选 / 搜索 / 实时状态 / 尾部跟随                         │
 ├───────────────┬──────────────────────────┬─────────────────┤
-│ Run 浏览器     │ Overview + 轨迹账本       │ Inspector   ×   │
-│ 标题/状态/耗时 │ Attempt / Model / Tool   │ 概览 用量 耗时  │
+│ 执行记录       │ 时间概览 + 执行轨迹        │ 详情        ×   │
+│ 标题/状态/耗时 │ 执行尝试 / 模型 / 工具     │ 概览 用量 耗时  │
 │ 模型/用量      │ 折叠、分页、尾部跟随      │ 输入 输出 定义  │
 └───────────────┴──────────────────────────┴─────────────────┘
 ```
@@ -226,13 +279,14 @@ bottom drawer with a visible close button. No information is moved into an opaqu
 |---|---|---|---|
 | `DISABLED` | retained for correctness | hidden/rejected | none |
 | `FEEDBACK_ONLY` | retained | semantic lifecycle/effect/usage | no content-bearing detail |
-| `FULL_LOCAL` | retained | full bounded semantic trace | redacted, authorized detail; technical linkage collapsed |
+| `FULL_LOCAL` | retained | full bounded semantic trace | useful redacted authorized detail; G4 internal metadata excluded from UI |
 
 Mandatory exclusions apply in all modes. Pino remains process diagnostics and is not a producer source.
 
 ## 7. Compatibility and migration
 
-- No new framework or observability dependency is required; use existing TypeScript, Zod, SQLite, WS and React.
+- Keep the existing Core/WS/React architecture. The source component dependency inventory determines minimal UI
+  adapters or separately reviewed library additions; direct reuse does not authorize a DSH runtime dependency.
 - Additive JSON payload kinds fit the existing `run_events` storage. Add indexes/materialized counters only after measured
   query volume demonstrates a need.
 - Existing clients must continue parsing older events. Unknown required event kinds must fail closed according to the
@@ -248,4 +302,9 @@ Mandatory exclusions apply in all modes. Pino remains process diagnostics and is
 - Query tests: summary counts/totals, filters, current/shadowed/log-only, missing-field omission, Character authorization.
 - Desktop tests: three-region rendering, Chinese labels, Inspector open/close, each disclosure toggles both ways,
   responsive fallback, live update, tail suspension, older-page loading and reconnect restoration.
+- G5 visual/interaction gate: compare default, selection, grouped/collapsed, input/output detail, live-tail,
+  historical-scroll, empty/error and narrow states against DSH at representative window sizes. Record deliberate
+  domain/privacy/G4 differences and verify actual WebView2 interaction. Existing traceability evidence is not UI approval.
+- Chinese-copy audit includes toolbar/Overview/Inspector tabs, statuses, tooltips, empty/error/loading text and
+  accessible labels. UI-owned English fallback text is a defect; real model/tool names and content retain their identity.
 - Full gates: Shared/Core/Desktop typecheck, tests, lint, Desktop build, task validation and `git diff --check`.

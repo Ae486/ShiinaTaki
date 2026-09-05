@@ -1,6 +1,7 @@
 import { tool, type ToolExecutionOptions } from "ai";
 import { z } from "zod";
 import { describe, expect, it, vi } from "vitest";
+import { EXTENSION_DISCOVERY_BUDGET } from "@taki/shared";
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
 import { createHostCatalogStore } from "../hosts/host-catalog.ts";
 import type { McpManager } from "../mcp/mcp-manager.ts";
@@ -20,12 +21,14 @@ describe("extension Run context", () => {
     let skillGeneration = 2;
     const loader = skillLoader();
     const route = vi.fn(async (request) => ({ ok: true, output: { routedTo: request.targetHostId } }));
+    const mcp = mcpManager();
+    const snapshot = vi.spyOn(mcp, "snapshot");
     const context = createExtensionRunContext({
       runId: RUN,
       coreHostId: CORE,
       catalogs,
       skills: { catalog: skillCatalog(() => skillGeneration), loader, governance: allowGovernance() },
-      mcp: mcpManager(),
+      mcp,
       route,
     });
 
@@ -38,6 +41,9 @@ describe("extension Run context", () => {
       "server_echo",
     ]);
     expect(context.instructions).toContain("Cross-Host movement requires");
+    expect(snapshot).toHaveBeenCalledOnce();
+    expect(context.toolDisplayNames).toEqual({ server_echo: "server · echo" });
+    expect(Object.isFrozen(context.toolDisplayNames)).toBe(true);
 
     const skill = context.snapshot.entries.find((entry) => entry.identity.kind === "skill")!;
     await expect(callExtension(context.tools, skill.identity.extensionId, {})).resolves.toMatchObject({
@@ -65,6 +71,34 @@ describe("extension Run context", () => {
       code: "EXTENSION_STALE_GENERATION",
       owner: skill.identity,
     });
+  });
+
+  it("captures every direct MCP name from the same snapshot even when discovery budgets omit entries", () => {
+    const seed = mcpManager().snapshot()[0]!;
+    const entries = Array.from({ length: EXTENSION_DISCOVERY_BUDGET.maxEntries + 1 }, (_, index) => ({
+      ...seed,
+      toolKey: `direct_route_${index}`,
+      ref: { ...seed.ref, subjectId: `mcp.subject.${index}`, toolName: `actual.tool.${index}` },
+    }));
+    const snapshot = vi.fn(() => entries);
+    const context = createExtensionRunContext({
+      runId: RUN,
+      coreHostId: CORE,
+      catalogs: createHostCatalogStore(),
+      skills: { catalog: skillCatalog(() => 1), loader: skillLoader(), governance: allowGovernance() },
+      mcp: { snapshot } as unknown as McpManager,
+      route: async () => ({ ok: true }),
+    });
+
+    expect(snapshot).toHaveBeenCalledOnce();
+    expect(context.snapshot.entries).toHaveLength(EXTENSION_DISCOVERY_BUDGET.maxEntries);
+    expect(Object.keys(context.toolDisplayNames ?? {})).toHaveLength(entries.length);
+    const selected = new Set(context.snapshot.entries.map((entry) => entry.identity.subjectId));
+    expect(entries.some((entry) => !selected.has(entry.ref.subjectId))).toBe(true);
+    for (const entry of entries) {
+      expect(context.tools[entry.toolKey]).toBe(entry.tool);
+      expect(context.toolDisplayNames?.[entry.toolKey]).toBe(`server · ${entry.ref.toolName}`);
+    }
   });
 });
 

@@ -1,10 +1,11 @@
 /**
  * INPUT:  candidate timeline.* params/event payloads (parsed WS frames + repo rows)
- * OUTPUT: TIMELINE_METHODS + TimelineEntry/Part/History/Subscribe/Appended/Removed schemas (append-only conversation log)
+ * OUTPUT: timeline schemas with canonical replay fields and optional bounded tool display names
  * POS:    shared/protocol — the timeline persistence contract (ADR 0005, invariants 3, 7); core repo + server + CLI
  */
 import { z } from "zod";
 import { IMAGE_MEDIA_TYPES } from "./chat-schema.ts";
+import { getValidToolDisplayName } from "./tool-presentation.ts";
 
 export const TIMELINE_METHODS = {
   history: "timeline.history",
@@ -26,6 +27,9 @@ export const TimelineToolOutputSchema = z.looseObject({
 });
 export type TimelineToolOutput = z.infer<typeof TimelineToolOutputSchema>;
 
+// Old rows and malformed optional labels remain readable; canonical tool identity/output still validate strictly.
+const OptionalToolDisplayNameSchema = z.preprocess(getValidToolDisplayName, z.string().optional());
+
 // Structured multi-part fidelity for model replay + the M4 chat-window tool cards. Mirrors AI SDK v7 part shapes
 // (v7 field names: `input` on the call, `output` on the result). A row's `parts` replaces its text projection when
 // replayed to the model; null/absent = a legacy text-only row (read via `content`).
@@ -35,12 +39,14 @@ export const TimelinePartSchema = z.discriminatedUnion("type", [
     type: z.literal("tool-call"),
     toolCallId: z.string().min(1),
     toolName: z.string().min(1),
+    displayName: OptionalToolDisplayNameSchema,
     input: z.unknown().optional(),
   }),
   z.object({
     type: z.literal("tool-result"),
     toolCallId: z.string().min(1),
     toolName: z.string().min(1),
+    displayName: OptionalToolDisplayNameSchema,
     output: TimelineToolOutputSchema,
   }),
   // The image/file part (#17, advances D14): `ref` is a workspace-relative attachment path (attachments/<sha256>.<ext>),

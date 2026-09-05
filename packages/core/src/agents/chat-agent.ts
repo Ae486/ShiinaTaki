@@ -2,14 +2,14 @@
  * INPUT:  ChatSendParams (+optional attachments) + an injected LanguageModel (AI SDK v7), ConversationStore,
  *         MemoryEngine, optional AutoMemory/visionModel/attachment store/imageMemory/onUsage hooks
  * OUTPUT: createChatAgent({model, store, memory, ...}) -> ChatAgent whose stream() yields text deltas; persists the
- *         FULL turn (tool-calls + tool-results + text) after the loop; abort-aware, partial text never lost;
+ *         FULL turn with captured display names after the loop; abort-aware, partial text never lost;
  *         a cancel before any output retracts the just-appended user row (deletes it + skips the memory writes)
  * POS:    core/agents — the streaming chat loop; DAY-STABLE instructions (base prompt + day line + memory context)
  *         with the volatile <turn-context> tail riding the outgoing user message (Q4/ADR 0008); auto-writes detached;
  *         a classified context-overflow retries ONCE against the same captured Run extension context
  */
 import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type Telemetry, type ToolSet } from "ai";
-import type { ChatSendParams, ImageAttachment } from "@taki/shared";
+import { captureToolDisplayNames, type ChatSendParams, type ImageAttachment } from "@taki/shared";
 import type { ApprovalGate } from "../approval/approval-gate.ts";
 import type { Connection } from "../server/connection-registry.ts";
 import { COSTUME_CHANGE_NOTICE } from "../avatar/costume-notice.ts";
@@ -68,6 +68,8 @@ export type { TurnUsageReport } from "./turn-usage-report.ts";
 /** Immutable-by-contract resources captured once before a Run's first model attempt and shared by every retry. */
 export interface AgentRunContext {
   readonly tools?: ToolSet;
+  /** Presentation only; copied before the first attempt so injected mutable tables cannot rename a finished turn. */
+  readonly toolDisplayNames?: Readonly<Record<string, string>>;
   /** Memory authority tool closures captured at Admission so a queued Run cannot switch epochs before execution. */
   readonly memoryTools?: ToolSet;
   readonly instructions?: string;
@@ -156,6 +158,7 @@ interface TurnAttempt {
   userSeq?: number;
   primary: boolean;
   runContext?: AgentRunContext;
+  toolDisplayNames?: Readonly<Record<string, string>>;
   state: AttemptState;
 }
 
@@ -185,7 +188,8 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   if (approval && turn) wireApprovalDenial(approval, turn);
   const runContext = turn?.runContext ?? deps.runContext?.(turn);
   const ownsRunContext = turn?.runContext === undefined;
-  const base = { characterId, message, attachments, images, vision, userSeq: userEntry?.seq, primary, runContext };
+  const base = { characterId, message, attachments, images, vision, userSeq: userEntry?.seq, primary, runContext,
+    toolDisplayNames: captureToolDisplayNames(runContext?.toolDisplayNames) };
   // R2 retry seam (batch 6): ONE overflow-classified retry around the whole attempt. Retry ONLY when the failed
   // attempt was provably side-effect-free — zero text yielded (nothing user-visible lost) AND zero completed steps
   // (no tool can have acted; re-running the model after a completed tool step could act twice — the error-handling
@@ -293,7 +297,9 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
       observability?.assertHealthy(); streamEnded = true;
     } finally {
       // Persist whatever the turn produced — completed steps AND partial text — even on abort/error (D1 #1/#5).
-      if (primary) await persistTurn(store, characterId, { result, pendingStepText, streamEnded });
+      if (primary) await persistTurn(store, characterId, {
+        result, pendingStepText, streamEnded, toolDisplayNames: attempt.toolDisplayNames,
+      });
     }
   } catch (error) {
     // Throw ending of a cancel: the transport rejects the read with our string reason (fails isAbortError), so the
@@ -424,6 +430,7 @@ interface TurnOutcome {
   result: { responseMessages: PromiseLike<TurnMessage[]> };
   pendingStepText: string;
   streamEnded: boolean;
+  toolDisplayNames?: Readonly<Record<string, string>>;
 }
 
 // On a clean end (including a graceful abort) the stream was fully consumed, so responseMessages settles: it
@@ -435,7 +442,7 @@ async function persistTurn(store: ConversationStore, characterId: string, outcom
       (messages) => messages,
       () => [] as TurnMessage[],
     );
-    if (completed.length > 0) store.appendTurn(characterId, completed);
+    if (completed.length > 0) store.appendTurn(characterId, completed, outcome.toolDisplayNames);
   }
   // The interrupted step's partial text exists only in our accumulator (the SDK never finalizes that step); the
   // transcript must never lose what the user already saw — on abort AND on a thrown mid-stream error (D1 #5).

@@ -1,9 +1,8 @@
 /**
  * INPUT:  one socket-local canonical Approval request plus a response callback
- * OUTPUT: <ApprovalDialog> — bounded redacted modal with explicit once/session/always/deny choices
- * POS:    ui/components/approval — ephemeral operator prompt; never writes navigation, events, stores, or localStorage.
- *         Batch-2: the modal shell/keyboard contract (trap, initial focus, restore) rides the shared ui/ Dialog with
- *         escapePolicy="none" — fail-closed, so there is NO close affordance and Escape dismisses nothing (A1).
+ * OUTPUT: <ApprovalDialog> — sealed presentation, explicit choices, and future-background-use acknowledgement.
+ * POS:    ui/components/approval — ephemeral operator prompt; disclosure revisions stay in the controller binding.
+ *         The shared Dialog traps/restores focus and keeps escapePolicy="none" for fail-closed approval.
  */
 import { useId } from "react";
 import type { ApprovalChoice, CanonicalApprovalRequest } from "@taki/shared";
@@ -43,7 +42,6 @@ export function ApprovalDialog({
   const disclosureRevision = request.allowedChoices.includes("allow_always") ? request.disclosureRevision : undefined;
   const disclosure = disclosureRevision !== undefined
     ? <DisclosureAck
-        revision={disclosureRevision}
         accepted={disclosureAcknowledged}
         disabled={status.kind === "responding"}
         onChange={onDisclosureAcknowledged}
@@ -85,7 +83,7 @@ function ApprovalSections({ request }: { request: CanonicalApprovalRequest }) {
         <section key={section.title} className="rounded-xl bg-surface-muted p-3">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">{section.title}</h3>
           {section.fields.map((field) => (
-            <p key={field.label} className="mt-1 text-sm text-text-body"><span className="font-medium">{field.label}：</span>{field.value}</p>
+            <p key={field.label} className="mt-1 break-words text-sm text-text-body"><span className="font-medium">{field.label}：</span>{field.value}</p>
           ))}
         </section>
       ))}
@@ -94,12 +92,10 @@ function ApprovalSections({ request }: { request: CanonicalApprovalRequest }) {
 }
 
 function DisclosureAck({
-  revision,
   accepted,
   disabled,
   onChange,
 }: {
-  revision: number;
   accepted: boolean;
   disabled: boolean;
   onChange(accepted: boolean): void;
@@ -113,7 +109,7 @@ function DisclosureAck({
         onChange={(event) => onChange(event.currentTarget.checked)}
         className="mt-0.5 h-4 w-4"
       />
-      <span>我明确同意此长期允许也适用于未来后台运行（披露版本 {revision}）。</span>
+      <span>我明确同意此长期允许也适用于未来后台运行。</span>
     </label>
   );
 }

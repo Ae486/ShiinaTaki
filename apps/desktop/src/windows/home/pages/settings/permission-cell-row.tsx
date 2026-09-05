@@ -1,10 +1,17 @@
 /**
  * INPUT:  one Core-returned permission cell, connection/pending state, and an exact cell mutation callback.
- * OUTPUT: <PermissionCellRow> — factory/override/effective/mode facts plus reset and second-confirm editing.
+ * OUTPUT: <PermissionCellRow> — Shared Chinese category/posture labels, reset, and generation-bound second confirmation.
  * POS:    ui/windows/home/pages/settings — presentational row; it never classifies capability risk or invents authority.
  */
 import { useState } from "react";
-import { PermissionPostureSchema, type PermissionCellState, type PermissionPosture } from "@taki/shared";
+import {
+  getPermissionCellDisplay,
+  PERMISSION_OVERRIDE_LABELS,
+  PERMISSION_POSTURE_LABELS,
+  PermissionPostureSchema,
+  type PermissionCellState,
+  type PermissionPosture,
+} from "@taki/shared";
 import { ActionButton } from "../../action-button.tsx";
 import { CARD_ROW } from "../../page-card.tsx";
 import { Badge, type BadgeTone } from "../../badge.tsx";
@@ -42,7 +49,7 @@ export function PermissionCellRow(props: PermissionCellRowProps) {
         <CellSummary cell={props.cell} />
         <CellControls {...props} onChoose={choose} />
       </div>
-      {props.cell.overrideMode === "immutable" && <p className="mt-2 text-xs text-text-secondary">不可变：Core 拒绝任何实质覆盖。</p>}
+      {props.cell.overrideMode === "immutable" && <p className="mt-2 text-xs text-text-secondary">固定安全规则，不能修改此项。</p>}
       <SecondConfirm
         choice={confirmation?.generation === props.policyGeneration ? confirmation : null}
         confirmDisabled={props.disabled || props.pending}
@@ -54,15 +61,17 @@ export function PermissionCellRow(props: PermissionCellRowProps) {
 }
 
 function CellSummary({ cell }: { cell: PermissionCellState }) {
+  const display = getPermissionCellDisplay(cell.key);
   const modeTone = cell.overrideMode === "immutable" ? "neutral" : cell.overrideMode === "second-confirm" ? "warn" : "muted";
   return (
-    <div>
-      <code className="text-xs font-semibold text-text-body">{cell.key}</code>
+    <div className="min-w-0 flex-1">
+      <p className="text-xs font-semibold text-text-body">{display.label}</p>
+      <p className="mt-1 text-xs leading-relaxed text-text-secondary">{display.description}</p>
       <div className="mt-1 flex flex-wrap gap-1">
-        <Badge tone={TONE[cell.factoryPosture]}>factory {cell.factoryPosture}</Badge>
-        <Badge tone={cell.overridePosture ? TONE[cell.overridePosture] : "muted"}>override {cell.overridePosture ?? "none"}</Badge>
-        <Badge tone={TONE[cell.effectivePosture]}>effective {cell.effectivePosture}</Badge>
-        <Badge tone={modeTone}>{cell.overrideMode}</Badge>
+        <Badge tone={TONE[cell.factoryPosture]}>默认：{PERMISSION_POSTURE_LABELS[cell.factoryPosture]}</Badge>
+        <Badge tone={cell.overridePosture ? TONE[cell.overridePosture] : "muted"}>自定义：{cell.overridePosture ? PERMISSION_POSTURE_LABELS[cell.overridePosture] : "未设置"}</Badge>
+        <Badge tone={TONE[cell.effectivePosture]}>生效：{PERMISSION_POSTURE_LABELS[cell.effectivePosture]}</Badge>
+        <Badge tone={modeTone}>{PERMISSION_OVERRIDE_LABELS[cell.overrideMode]}</Badge>
       </div>
     </div>
   );
@@ -74,13 +83,13 @@ function CellControls(props: PermissionCellRowProps & { onChoose(posture: Permis
   return (
     <div className="flex flex-wrap items-center justify-end gap-1.5">
       <select
-        aria-label={`${props.cell.key} posture`}
+        aria-label={`${getPermissionCellDisplay(props.cell.key).label}权限设置`}
         value={props.cell.overridePosture ?? props.cell.factoryPosture}
         disabled={disabled}
         onChange={(event) => props.onChoose(PermissionPostureSchema.parse(event.target.value))}
         className="rounded-lg border border-border bg-white px-2 py-1.5 text-xs text-text-body focus:border-accent-border-strong disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {POSTURES.map((posture) => <option key={posture} value={posture}>{posture}</option>)}
+        {POSTURES.map((posture) => <option key={posture} value={posture}>{PERMISSION_POSTURE_LABELS[posture]}</option>)}
       </select>
       <ActionButton tone="secondary" disabled={disabled || props.cell.overridePosture === null} onClick={() => props.onSet(null)}>
         重置
@@ -99,7 +108,7 @@ function SecondConfirm(props: {
   if (!choice) return null;
   return (
     <div className="mt-3 rounded-lg border border-warn-border bg-warn-soft p-3 text-xs text-warn-strong">
-      <p>此修改会放宽工厂保护。请再次确认；Host 仍可拒绝或进一步收紧。</p>
+      <p>此修改会放宽默认保护。请再次确认；设备本地限制和固定安全规则仍然生效。</p>
       <div className="mt-2 flex gap-2">
         <ActionButton tone="danger-soft" disabled={props.confirmDisabled} onClick={() => { props.onConfirm(choice.posture); props.onClose(); }}>
           再次确认

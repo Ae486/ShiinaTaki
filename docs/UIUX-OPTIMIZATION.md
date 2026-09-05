@@ -4,10 +4,46 @@
 > Sources: three code audits (accessibility, visual consistency, performance), DSH trajectory UI study
 > (`H:/TakiAgent/references/deepseek-harness-master/packages/client/ui-trajectory`), BANDORI-PET-REV
 > costume/display study, and owner directives on naming truthfulness, card UX, and collapse affordances.
-> This document is the working task list for the UI/UX effort. It complements — does not replace —
-> `docs/deferred-decisions.md`; items already registered there are cross-referenced (Dxx). New items are
-> proposed as D70+ registrations in §9 for merging into the registry when their batches are scheduled.
+> This is the original audit and candidate work map, not a current list of unfinished defects. Several
+> frontend batches have since shipped; see [the implementation report](UIUX-FRONTEND-REPORT.md).
+> It complements `docs/deferred-decisions.md`; §9 maps audit items to their actual ownership rather
+> than reserving new Dxx numbers.
 > Verify every file:line against the live tree before implementing.
+
+**Scope refresh, 2026-09-05:** the owner accepts the existing non-Monitor visual direction and defers
+its small visual details. Monitor is explicitly excluded under G5 and requires a DSH-led rebuild.
+The next stage covers Monitor, Chat/Pet live tool feedback, and readable tool/capability/
+approval information. Follow the [G1 decision record](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-grill-2026-09-05.md)
+for current evidence and boundaries. The owner has approved the six-batch sequence: G4 frontend
+cleanup has passed automated review, and the naming/approval child has entered A1. Unresolved D64
+disclosure policy and later source-backed slices retain their explicit gates; the original candidate
+designs below are not automatically approved. The existing frontend task
+retains its pure-frontend scope. Live2D configuration and theme/font settings entries remain later work.
+
+**Shared interaction requirement, 2026-09-05:** preserve layout stability and motion continuity during
+insert/remove, disclosure, live update, and loading-state changes. Existing reading targets, scroll
+anchors, and controls must not jump when adjacent content changes. The owner delegated detailed
+motion design; see [the coordinated transition design](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-motion-continuity-2026-09-05.md)
+for Pet bubble handoff and the corresponding Monitor/card/dialog/feedback rules. This is a requirement
+for relevant work, not a claim that current surfaces already satisfy it. The Monitor rebuild is
+separately required by G5; other pages retain their accepted visual direction.
+
+**Error follow-up, 2026-09-05:** G3c uses a single Pet error bubble containing the error message.
+Broader cause/code preservation and readable error copy are owner-deferred as D77; see
+[the error-contract follow-up](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/error-code-message-followup-2026-09-05.md).
+Do not silently add this cross-layer cleanup to the existing pure-frontend task.
+
+**G4 clarification, 2026-09-05:** remove meaningless hashes, internal revisions/generations and opaque
+identifiers from user-facing MCP/Skills, Settings, Monitor and related pages, including expanded
+details. A second disclosure/copy control is not the default destination for such fields. Follow the
+[reference study and concrete removal inventory](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-useful-information-2026-09-05.md).
+Preserve useful operation inputs/results/configuration and the internal fields required by actions.
+
+**G5 Monitor baseline, 2026-09-05:** the current Monitor is a functional trace-validation prototype.
+Its appearance, information organization, localization and interaction are not accepted. Port/rebuild
+the surface primarily from DSH Trajectory components, styles and behavior; follow
+[D68's source mapping](../.trellis/tasks/08-28-dsh-observability-expansion/design.md). Traceability alone
+does not pass UI/UX acceptance. Chinese system labels and G4 field selection apply throughout the port.
 
 Priorities: **P1** = correctness/safety/trust or user-visible defect; **P2** = clear UX/consistency debt;
 **P3** = polish. Batches are the suggested execution order (§10).
@@ -28,14 +64,15 @@ concrete entry name (server/tool/command), never an undifferentiated technical i
   (`decision.labels?.capability ?? binding.identity.capabilityId`).
   Fix: populate `ApprovalSafeLabels` (capability + subject) at decision time from the canonical binding
   (`binding.identity.subject` already carries serverName/toolName for MCP; tool key for Core tools; target
-  class for exec), join in `list()`, and keep the raw id as secondary/inspector text. UI labels stay Chinese.
+  class for exec), join in `list()`, and render the readable operation/target labels. Internal binding ids
+  remain in logic rather than becoming secondary/Inspector text. UI labels stay Chinese.
   Shared schema: `packages/shared/src/approval-decision-schema.ts:91`.
 
 - **N2 (P1) Permission advanced cells render raw capability ids as card titles.**
   Evidence: `permission-cells-card.tsx:27` `<PageCard title={capabilityId}>` — operators see
   `mcp.tool.call`, `workspace.file.read`, `core.avatar.motion` with no Chinese label.
   Fix: one shared capabilityId → Chinese label map (single source, e.g. beside the governance registry in
-  `@taki/shared` so Core and UI agree), raw id demoted to a muted secondary line.
+  `@taki/shared` so Core and UI agree); remove redundant raw capability-id display.
 
 - **N3 (P1, D64) exec approval card does not show the actual command.**
   Registered as D64; the approval dialog renders only redacted classification sections
@@ -54,15 +91,18 @@ concrete entry name (server/tool/command), never an undifferentiated technical i
   emoji rendering hazards in `composer.tsx:46`), `:29` raw `name` in mono font. For MCP tools the model-facing
   key comes from the MCP client listing — verify what it renders as (prefixed? namespaced?) and display a
   readable `server · tool` pair using the same identity data N1 introduces.
-  Fix: replace emoji with a `lib/icons` glyph; readable name + raw key as secondary.
+  Fix: replace emoji with a `lib/icons` glyph and show a readable server/tool name; do not add a
+  duplicate routing-key line merely because the key exists.
 
-- **N6 (P2, D65) MCP/Skills cards surface technical fields as primary content.**
+- **N6 (P2, D65/G4) MCP/Skills still expose meaningless internal fields.**
   Evidence: `mcp-server-card.tsx:51-52` 修订/代次 badges, `:58` `Owner … Runtime generation …` line in
-  11px slate-400; `skills-page.tsx` 哈希/Owner/Metadata rows (D65). DSH evidence: technical ids, hashes,
-  revisions live in the inspector only (`ui-trajectory/TrajectoryTable.tsx`), never in rows.
-  Fix: card shows display name, status, transport line, tool count, last-outcome; revision/generation/hash/
-  owner move into a "详情" disclosure or inspector with copy buttons (the `InspectorFields` copy pattern in
-  `monitor-view.tsx:36-41` is the in-repo precedent).
+  11px slate-400; `skills-page.tsx` 哈希/Owner/Metadata rows (D65). The delivered frontend phase moved
+  these into disclosures; G4 requires their removal from expanded details as well.
+  Fix: keep name, status, actionable connection/configuration, selected tools and meaningful outcomes.
+  Remove internal revision/generation/hash/opaque-owner fields and empty technical sections; curate
+  useful package metadata instead of dumping every key. The shared status strip and Settings/Monitor
+  have matching removal targets in the linked inventory. Ordinary DSH/Pi tool views inform useful
+  input/output content; their dedicated debug views are not a generic user-page template.
 
 - **N7 (P3) Governance presentation copy is English in an all-Chinese UI.**
   Evidence: `core-tool-governance-adapter.ts:90-97` ("Allow Core tool"), `mcp-turn-tools.ts:120-131`
@@ -128,15 +168,18 @@ theme change today means touching dozens of files.
   D67/D68 must collapse both ways (registry rule already says "审计所有可展开内容均可再次收起").
 - **U2 (P2) MCP server card redesign.** Evidence: `mcp-server-card.tsx:46-63` — title is the raw serverId,
   4 badges crammed in the header (status + 修订 + 代次 + 工具数), an 11px low-contrast owner line, 6 equal-tone
-  action buttons in one wrap row. Fix: display name as title (serverId secondary), status badge + tool count
+  action buttons in one wrap row. Fix: readable server name as title, user-edited namespace where needed
+  for configuration without a redundant identifier row, status badge + tool count
   only, transport line, primary action (测试), overflow menu or grouped row for 重连/停用/编辑/移除, diagnostics
   as a dismissible banner, technical fields per N6.
-- **U3 (P2) Skills card redesign** — same treatment: name/status/trust/actions primary; hash/owner/paths into
-  the inspector (D65); inspect dialog shows bounded metadata only (already contracted).
+- **U3 (P2) Skills card redesign** — name/status/trust/actions primary; remove internal hash/owner/revision
+  fields from details under D65/G4. Inspection shows useful description, compatibility/license, declared
+  tools and bounded relative files as applicable, not an arbitrary metadata map.
 - **U4 (P2) Shared value rows need copy/expand.** `LabeledRows` truncates values with no tooltip or copy
   (`page-card.tsx:34`) and skills/monitor pass hashes and unbounded strings into it; the monitor detail `dl`
   lacks `min-w-0` so a long unbreakable value can overflow the card (`monitor-view.tsx:33-34`).
-  Fix: CopyableRow primitive (U1's copy pattern), `min-w-0` on the grid.
+  Fix: CopyableRow for meaningful values and `min-w-0` on the grid; remove meaningless internal rows
+  under G4 instead of making them easier to copy.
 - **U5 (P2) Loading/empty/error unification.** Every page hand-rolls a bare `text-slate-400` line
   (`mcp-page.tsx:86`, `skills-page.tsx:26`, `settings-page.tsx:23`, `monitor-page.tsx:80,89`); no skeletons,
   no designed empty states, retries only on some pages (`approval-decisions-section.tsx:40` has one,
@@ -195,16 +238,17 @@ right inspector** (`clamp(320px, 38%, 440px)`); T4's own D68 notes prescribe lef
 ledger + dismissible right inspector. Home window is 900×800 (`open-home-window.ts:36-37`); inspector math
 must degrade gracefully (drawer on narrow width).
 
-- **L1 (P2) Monitor → DSH-style 3-zone** (D68 UI side): left Run browser, central grouped ledger (turn/step
+- **L1 (D68/G5) Monitor → direct DSH Trajectory presentation port/rebuild**: left Run browser, central grouped ledger (turn/step
   grouping, semantic rows per DSH: kind tag + readable text + metrics lane), right closable inspector (N6/U1).
-  Prerequisite: D68 producer-side events; UI can be scaffolded against existing projections first.
+  Use the existing proven Core projections and explicitly identify missing facts. The current scaffold
+  is test evidence only; it is not the accepted visual/product baseline for the DSH port.
   **Owner ruling 2026-08-30: porting DSH trajectory UI components and page layout is authorized.** License
   verified: `references/deepseek-harness-master/LICENSE` is MIT (Copyright (c) 2026 DeepSeek) — copying and
   modification are permitted; substantially ported files carry an attribution header
   (`Adapted from DeepSeek Harness (MIT), <path>`). This overrides the earlier "adapt, don't transcribe"
   caution for DSH specifically (BANDORI remains GPLv3 layout-reference-only).
 - **L2 (P2) MCP/Skills → master-detail**: list pane + detail/editor pane instead of full-width stacked cards;
-  editors stop stretching the page; technical inspector lives in the detail pane.
+  editors stop stretching the page; details contain useful server/package information under G4.
 - **L3 (P2) Costume page → 3 columns** (owner directive, BANDORI-informed): left = existing home nav
   (unchanged); middle = character header + costume rows (keep the existing per-row click-to-wear +
   result-deadline contract — do NOT adopt BANDORI's select-then-Apply two-step); right = Live2D config card
@@ -227,6 +271,9 @@ must degrade gracefully (drawer on narrow width).
   (`markdown-view.tsx`, store `set` per delta via `use-chat-timeline.ts:32`; no rAF/coalescing anywhere).
   Fix: coalesce `growInflight` to a 30-60ms flush; move the scroll-follow effect (`use-timeline-scroll.ts:45-56`)
   onto the coalesced update. Risk: low; tail-follow must key on the flush, not the raw delta.
+  Status clarification (2026-09-05): the delivered 40ms coalescer reduces update/parse frequency;
+  accumulated Markdown is still reparsed per flush. It does not establish incremental parsing or
+  prove the absence of long-reply stutter without profiling.
 - **P1b (P2) Timeline memory growth** — unbounded `loadOlder` mounting full markdown trees
   (`timeline-view.tsx:59-66`, 50-row pages) + module-level data-URL image cache with no eviction
   (`use-attachment-image.ts:14`). Fix: cap mounted rows (evict above N with a "加载更早" jump point) and add an
@@ -273,18 +320,28 @@ must degrade gracefully (drawer on narrow width).
 - No rewrite of the pet overlay interaction model (drag/click-through/proximity stay).
 - No Taki-only skill format / permission semantics changes (frozen decisions).
 
-## 9. Proposed new deferred-decisions entries (merge into the registry when scheduled)
+## 9. Deferred-decision crosswalk (corrected 2026-09-05)
 
-- **D70** approval/decision/governance surfaces show generic capability ids instead of entry names (N1/N2/N7).
-- **D71** chat tool card emoji icon + raw tool key (N5).
-- **D72** toast stack lacks click-pause (D34 deviation), stacking cap, close button, aria-live (A4).
-- **D73** monitor inspector and similar disclosures cannot be collapsed (U1; fold into D68 when scheduled).
-- **D74** render-governor hidden-pause bypass when `renderThrottling=false` (P1h).
-- **D75** hidden keep-alive pages keep subscriptions/rendering (P1e; fold into D67).
-- **D76** chat tool activity is invisible until turn end — no tool-level WS event, text-only in-flight row,
-  frozen "executing" gap (U8/U9/U10; the live plane is additive over the turn-granular D1 persistence).
+The original provisional D70–D76 numbers were never safe to treat as registrations. The actual registry
+assigns D70 to `prepareStep` safety, D71–D74 to OpenBiliClaw, D75 to compaction token/benefit measurement,
+and D76 to compaction prompt/version/quality evaluation. Keep these UI audit IDs instead:
+
+| Audit items | Ownership and current disposition |
+|---|---|
+| N1/N2/N7/I1 | Readable approval/capability names; cross-layer G1 batch still to be designed |
+| N5 | Glyph replacement delivered; readable tool names remain G1 work |
+| N6/U2/U3 and related-page fields | D65/G4; remove meaningless internal fields from primary and expanded views; earlier disclosure-only cleanup is insufficient |
+| A4 | D34 deviation addressed by the frontend Toast batch; not a new deferred registration |
+| U1/L1/N4 | D68 for Monitor; D67 for other disclosures. Close controls exist; Monitor layout and asynchronous state residuals remain |
+| P1h | Live2D configuration/hidden-pause follow-up, outside G1 |
+| P1e | D67; hidden-page gating delivered, subject to targeted behavior verification |
+| U8/U9/U10 | D67 live tool feedback across Chat/Pet; additive presentation over the existing turn/Run authority |
 
 ## 10. Suggested execution batches
+
+Historical sequencing from the initial audit. Delivered frontend batches are recorded in the report;
+the G1 grill will define the next executable batches. In particular, the old Batch 6 grouping does not
+add Live2D configuration to the newly confirmed Chat/Pet scope.
 
 | Batch | Contents | Notes |
 |---|---|---|

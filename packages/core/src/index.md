@@ -2,7 +2,7 @@
 - harness/ — Core-owned Trigger admission and Run/Attempt lifecycle service above the existing ToolLoopAgent
 - scheduler/ — durable Scheduled Task definitions, calendar evaluation, occurrence outbox, and canonical Run adapter
 - index.ts — package public entry; empty until an external consumer exists (core runs as a process)
-- main.ts — process entry: marker-first memory authority selection → token-first Replay View/request-envelope measurement + config/runtime adapters → operator registries (including on-demand migration) → ws-server; closes MCP clients + db on SIGINT/SIGTERM
+- main.ts — process entry: marker-first memory authority selection → token-first Replay View/request-envelope measurement + config/runtime adapters → operator registries (including on-demand migration) → ws-server; attaches the read-only MCP approval name resolver after MCP boot and closes MCP clients + db on SIGINT/SIGTERM
 - config/ — env → validated boot config; plus the operator-facing settings store (knob registry, precedence source, writer, change fan-out)
 - boot/ — the composition root's config+storage phase: open the DB on the env-only data root, then resolve every other knob (env > stored > default) for the loaders
 - logging/ — pino root logger factory

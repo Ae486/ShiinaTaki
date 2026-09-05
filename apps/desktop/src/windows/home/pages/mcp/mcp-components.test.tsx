@@ -43,23 +43,46 @@ function card(server: McpServerView, overrides: Partial<typeof actions> = {}): s
 }
 
 describe("MCP page components", () => {
-  it("renders the display name card with phase badge, tool count and the collapsed technical disclosure", () => {
-    const markup = card(view());
+  it("renders useful configuration, selected tools and actions without exposing internal bookkeeping", () => {
+    const server = view({
+      configRevision: 914731,
+      status: { ...view().status, runtimeGeneration: 825462 },
+      selectedTools: ["get_issue", "search_issues"],
+    });
+    const markup = card(server);
     expect(markup).toContain("github");
     expect(markup).toContain("已连接");
     expect(markup).toContain("工具 4");
     expect(markup).toContain("stdio · node server.mjs");
     expect(markup).toContain("测试");
     expect(markup).toContain("重连");
+    expect(markup).toContain("停用");
+    expect(markup).toContain("编辑");
     expect(markup).toContain("移除");
-    // 修订/代次/Owner live inside the 运行与配置详情 disclosure (U2), with copy affordances — never as card badges.
-    expect(markup).toContain("运行与配置详情");
-    expect(markup).toContain("修订");
-    expect(markup).toContain("代次");
-    expect(markup).toContain("Owner");
-    expect(markup).toContain('aria-label="复制 Owner"');
-    expect(markup).not.toContain(">修订 3<");
-    expect(markup).not.toContain(">代次 2<");
+    expect(markup).toContain("选定工具");
+    expect(markup).toContain("get_issue、search_issues");
+    expect(markup).toContain("<details");
+    expect(markup).not.toMatch(/<details[^>]*\bopen\b/u);
+    // Static markup includes disclosure bodies, titles and accessible names, not just the card face.
+    expect(markup).not.toMatch(/修订|代次|Owner|复制/u);
+    expect(markup).not.toContain(HOST);
+    expect(markup).not.toContain(String(server.configRevision));
+    expect(markup).not.toContain(String(server.status.runtimeGeneration));
+  });
+
+  it("keeps a successful connection's tool count and measured duration without an empty disclosure", () => {
+    const published = {
+      status: "published" as const, at: NOW, runtimeGeneration: 472915,
+      toolNames: ["get_issue", "search_issues"], skipped: [], pages: 17, durationMs: 247,
+    };
+    const markup = card(view({ status: { ...view().status, lastOutcome: published } }));
+    expect(markup).toContain("最近连接成功：2 个工具");
+    expect(markup).toContain("耗时 247 毫秒");
+    expect(markup).toContain("测试");
+    expect(markup).not.toContain("<details");
+    expect(markup).not.toContain("页列举");
+    expect(markup).not.toContain(String(published.pages));
+    expect(markup).not.toContain(String(published.runtimeGeneration));
   });
 
   it("renders the partial-failure diagnostics truthfully and lets the operator dismiss it per outcome", () => {
@@ -71,7 +94,8 @@ describe("MCP page components", () => {
     });
     const markup = card(failedView);
     expect(markup).toContain("密钥无法解析");
-    expect(markup).toContain("上一次良好代次继续服务");
+    expect(markup).toContain("现有连接仍可使用");
+    expect(markup).not.toMatch(/候选|代次/u);
     expect(markup).toContain("知道了");
     expect(card(failedView, { diagnosticsDismissed: true })).not.toContain("密钥无法解析");
     // a NEW outcome (different timestamp) is a different dismiss key, so a fresh failure re-shows the banner
@@ -82,6 +106,26 @@ describe("MCP page components", () => {
       },
     });
     expect(mcpDiagnosticKey(failedView)).not.toBe(mcpDiagnosticKey(later));
+  });
+
+  it.each([
+    { phase: "failed" as const, runtimeGeneration: null },
+    { phase: "draining" as const, runtimeGeneration: 2 },
+    { phase: "connecting" as const, runtimeGeneration: 2 },
+    { phase: "connected" as const, runtimeGeneration: null },
+  ])("does not promise an active connection for $phase with runtime $runtimeGeneration", (status) => {
+    const markup = card(view({
+      status: {
+        ...view().status, ...status,
+        lastOutcome: { status: "failed", at: NOW, reason: "deadline-exceeded", message: "连接未能在期限内完成" },
+      },
+    }));
+    expect(markup).toContain("最近一次连接失败");
+    expect(markup).toContain("操作超时");
+    expect(markup).toContain("连接未能在期限内完成");
+    expect(markup).toContain("知道了");
+    expect(markup).not.toContain("现有连接仍可使用");
+    expect(markup).not.toMatch(/候选|代次/u);
   });
 
   it("renders the disabled state and the two-step remove confirm", () => {

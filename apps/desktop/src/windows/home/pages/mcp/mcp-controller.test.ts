@@ -139,6 +139,28 @@ describe("mcp controller", () => {
     expect(sink.loaded.mock.calls.at(-1)?.[1]).toMatchObject({ kind: "error" });
   });
 
+  it("keeps successful diagnostic feedback useful and bound to the requested server", async () => {
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn() };
+    const controller = createMcpController(sink);
+    const testRequest = vi.fn(async () => ({
+      status: "ok" as const,
+      toolNames: ["get_issue", "search_issues"],
+      skipped: [{ toolName: "legacy_issue", code: "UNION_UNSUPPORTED" as const, path: "properties.format" }],
+      pages: 2,
+      durationMs: 35,
+    }));
+    const stub = client({ mcpTest: testRequest });
+    controller.replace(stub);
+    await controller.test("github");
+    expect(testRequest).toHaveBeenCalledTimes(1);
+    expect(testRequest).toHaveBeenCalledWith({ serverId: "github" });
+    expect(sink.loaded).toHaveBeenLastCalledWith(servers("github").servers, {
+      kind: "tested",
+      message: "github 测试通过：2 个工具，耗时 35 毫秒，跳过 1 个",
+    });
+    expect(stub.calls.filter((name) => name === "mcpList")).toHaveLength(2);
+  });
+
   it("renders test outcome facts and does not report a failed candidate as success", async () => {
     const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn() };
     const controller = createMcpController(sink);

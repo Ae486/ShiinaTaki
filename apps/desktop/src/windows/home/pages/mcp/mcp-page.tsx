@@ -50,7 +50,7 @@ export function McpPage() {
     <>
       <PageHeader
         title="MCP 服务器"
-        hint="期望状态存于 Core；添加/编辑/启停/移除即时生效，无需重启。密钥值只写入加密目录，绝不回显。"
+        hint="添加、编辑、启停和移除即时生效，无需重启。已保存的凭据无法再次查看。"
         busy={mcp.state.kind === "loading" && mcp.state.previous !== null}
       />
       <ExtensionConvergenceStrip state={convergence} />
@@ -237,7 +237,7 @@ function EmptyServerState({ disabled, onAdd }: { disabled: boolean; onAdd(): voi
     <PageCard title="尚未配置 MCP 服务器">
       <EmptyState
         title="尚未配置 MCP 服务器"
-        hint="添加第一个服务器后，Core 会连接它并把工具纳入治理管控。"
+        hint="添加并连接服务器，接入需要的工具；使用时仍受权限设置限制。"
         action={<ActionButton tone="primary" disabled={disabled} onClick={onAdd}>添加服务器</ActionButton>}
       />
     </PageCard>

@@ -1,6 +1,6 @@
 /**
  * INPUT:  validated Trigger Requests, provider-neutral snapshot capture, and lifecycle callbacks
- * OUTPUT: the single Core-owned admission/transition/status service plus captured process-local Run context
+ * OUTPUT: Core-owned admission/transition/status plus process-local Run execution and presentation context
  * POS:    core/harness — lifecycle owner above SQLite repositories and below every trigger/chat adapter
  */
 import { randomUUID } from "node:crypto";
@@ -24,6 +24,7 @@ export interface CapturedRunSnapshot {
 
 export interface RunExecutionContext {
   readonly tools?: ToolSet;
+  readonly toolDisplayNames?: Readonly<Record<string, string>>;
   readonly memoryTools?: ToolSet;
   readonly instructions?: string;
   dispose?(): void;

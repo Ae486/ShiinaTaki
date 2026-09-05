@@ -1,8 +1,8 @@
 {
   "id": "dsh-observability-expansion",
   "name": "dsh-observability-expansion",
-  "title": "DSH observability producer expansion",
-  "description": "Producer-first expansion of the DSH-style observability plane plus a DSH-shaped Chinese Monitor UI: add replayable Core Run Event facts for model/tool/usage/context/timing/governance/retry/recovery, then extend projections and a dismissible semantic Inspector without a second authority or runtime.",
+  "title": "DSH observability and Trajectory UI port",
+  "description": "Replayable Core observability plus a direct DSH Trajectory presentation port/rebuild with Chinese system labels, useful-field selection and real-data adapters; the current Monitor is a functional prototype, not an accepted product UI.",
   "status": "in_progress",
   "dev_type": null,
   "scope": "packages/shared + packages/core + apps/desktop Monitor projection/UI + observability planning docs; no second runtime or authority",
@@ -33,6 +33,6 @@
     "docs/deferred-decisions.md",
     "docs/ARCHITECTURE-ROADMAP.md"
   ],
-  "notes": "D68-A producer, durable usage, projection, query, and semantic Inspector data are implemented, formally checked, and manually accepted. Prompt Cache child 08-28-harness-prompt-cache-stability is archived and passed. Compaction Harness child 08-29-compaction-harness completed all four slices and formally passed the context-management gate on 2026-08-31: complete projected-input pressure at configurable effectiveWindow * 0.8, typed Context Reduction and remeasurement, summary quality, durable retry/cooldown, and end-to-end recovery are proven. D68-B remains pending as a separate stage: DSH-shaped Desktop layout, disclosures, tail/history interaction, responsive behavior, and visual polish. D67 remains the separate cross-Home reactive/disclosure follow-up.",
+  "notes": "D68-A producer, durable usage, projection, query, and semantic Inspector data are implemented, formally checked, and manually accepted. Prompt Cache child 08-28-harness-prompt-cache-stability is archived and passed. Compaction Harness child 08-29-compaction-harness completed all four slices and formally passed the context-management gate on 2026-08-31: complete projected-input pressure at configurable effectiveWindow * 0.8, typed Context Reduction and remeasurement, summary quality, durable retry/cooldown, and end-to-end recovery are proven. D68-B remains pending as a separate stage: DSH-shaped Desktop layout, disclosures, tail/history interaction, responsive behavior, and visual polish. D67 remains the separate cross-Home reactive/disclosure follow-up. Owner G5 clarification (2026-09-05): the current Monitor only validates traceability and has no visual/interaction acceptance. D68-B must primarily port DSH Trajectory composition, styles and behavior, with complete Chinese system labels and G4 metadata removal. The accepted non-Monitor visual baseline does not constrain this rebuild. Data-layer acceptance above is not UI acceptance. Product implementation remains pending the reviewed slice plan and explicit activation.",
   "meta": {}
 }

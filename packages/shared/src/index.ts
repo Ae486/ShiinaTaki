@@ -1,6 +1,6 @@
 /**
  * INPUT:  n/a
- * OUTPUT: the @taki/shared public API — named re-exports of every protocol schema + type
+ * OUTPUT: the @taki/shared public API — named protocol exports and pure presentation vocabulary
  * POS:    shared — the package's only public entry (no export *; no internal barrels)
  */
 export { PingSchema, PongSchema } from "./ping-schema.ts";
@@ -182,6 +182,11 @@ export type {
   PermissionCellState, PermissionLevelGetParams, PermissionLevel, PermissionLevelSetParams,
   PermissionLevelState, PermissionPosture,
 } from "./governance-api.ts";
+
+export {
+  getCapabilityLabel, getPermissionCellDisplay, PERMISSION_OVERRIDE_LABELS, PERMISSION_POSTURE_LABELS,
+} from "./governance-presentation.ts";
+export { captureToolDisplayNames, formatMcpToolDisplayName, getKnownToolDisplayName, getValidToolDisplayName } from "./tool-presentation.ts";
 
 export { EXTENSION_DISCOVERY_BUDGET, EXTENSION_CALL_ERROR_CODES, EXTENSION_KINDS, EXTENSION_METHODS, ExtensionCollisionSchema, ExtensionConvergenceResultSchema, ExtensionCallErrorCodeSchema, ExtensionCallModeSchema, ExtensionCallParamsSchema, ExtensionCallResultSchema, ExtensionDescribeParamsSchema, ExtensionDescribeResultSchema, ExtensionDescriptorSchema, ExtensionDiscoverParamsSchema, ExtensionDiscoverResultSchema, ExtensionDiscoveryBudgetSchema, ExtensionHostSnapshotSchema, ExtensionIdentitySchema, ExtensionKindSchema, ExtensionRunSnapshotSchema, ExtensionStatusParamsSchema } from "./extension-discovery-schema.ts";
 export type { ExtensionCallMode, ExtensionCallErrorCode, ExtensionCallParams, ExtensionCallResult, ExtensionCollision, ExtensionConvergenceResult, ExtensionDescriptor, ExtensionDescribeParams, ExtensionDescribeResult, ExtensionDiscoverParams, ExtensionDiscoverResult, ExtensionDiscoveryBudget, ExtensionHostSnapshot, ExtensionIdentity, ExtensionKind, ExtensionRunSnapshot, ExtensionStatusParams } from "./extension-discovery-schema.ts";

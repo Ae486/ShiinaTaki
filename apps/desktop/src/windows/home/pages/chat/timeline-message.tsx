@@ -1,5 +1,5 @@
 /**
- * INPUT:  one committed TimelineEntry (role + parts, or a legacy text-only row via `content`).
+ * INPUT:  one committed TimelineEntry with optional captured tool names, or a legacy content-only row.
  * OUTPUT: <TimelineMessage> — one role-styled row; dispatches each part (text→markdown, tool→card, image→thumbnail).
  * POS:    ui/windows/home/pages/chat — the row renderer, wrapped in React.memo so only the in-flight row re-parses markdown per
  *         delta (research r2); settled rows keep a stable entry reference from the store and skip re-render.
@@ -27,9 +27,9 @@ function PartView({ part }: { part: TimelinePart }) {
     case "image":
       return <ImageAttachment imageRef={part.ref} />;
     case "tool-call":
-      return <ToolCard name={part.toolName} state="call" />;
+      return <ToolCard name={part.toolName} displayName={part.displayName} state="call" />;
     case "tool-result":
-      return <ToolCard name={part.toolName} state={outputState(part.output)} />;
+      return <ToolCard name={part.toolName} displayName={part.displayName} state={outputState(part.output)} />;
   }
 }
 

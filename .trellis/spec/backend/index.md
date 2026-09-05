@@ -23,6 +23,7 @@ Before writing backend code:
 | [Logging Guidelines](./logging-guidelines.md) | pino / tracing, audit log |
 | [E2E Harness](./e2e-harness.md) | Headless `withStack` fixture; L1 (deterministic) + L2 (real-agent) dual-track per capability |
 | [Permission Authorization](./permission-authorization.md) | Executable canonical governance contract: Core-owned durable Level/overrides/generation; extension-neutral identity/registry; complete Host projection, trusted local classification, stricter-only final enforcement/evidence; legacy deny migration; Home and real-process gates |
+| [Operation Presentation](./operation-presentation.md) | Chinese capability/tool/approval names, current-target approval labels, immutable per-Run display-name capture, safe Timeline metadata and unchanged canonical replay |
 | [Server-Push & Connection Auth](./server-push-and-connection-auth.md) | Fan-out channel pattern (timeline/avatar, no Rust mirror for operator-only); per-generation reconnect restoration; connection auth vs Core governance vs Host final enforcement; loopback auto-trust (P3) fail-closed rules |
 | [Host-Bound Operation Lifecycle](./host-operation-lifecycle.md) | Implemented Host-control wire/generation/routing foundation plus shared offline, unknown-outcome, explicit-resume, and Run Receipt rules |
 | [Operator Config Store](./config-store.md) | Sparse Core-owned settings overlay; env > stored > default; config.* operator protocol, secret masking, typed refusals, live timing-policy validation and apply truthfulness |

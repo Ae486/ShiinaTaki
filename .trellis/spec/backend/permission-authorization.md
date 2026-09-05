@@ -8,6 +8,11 @@ Posture ordering is `auto < ask < deny`. A Host may preserve or increase that or
 Standard MCP and portable `SKILL.md` packages remain ecosystem formats. Their adapters resolve canonical identity but
 do not create extension-specific authority.
 
+Readable names and approval copy follow [Operation Presentation](./operation-presentation.md).
+Approval construction and final revalidation read classifier identity/revision from the active service
+registry; non-MCP does not imply `fixed-risk` (`write_file` uses `workspace-path`). Labels never become
+binding keys or change decision usability.
+
 ## Scenario: Global policy, Host projection, and final enforcement
 
 ### 1. Scope / Trigger
@@ -220,9 +225,10 @@ complete lexically sorted `cells` array. TypeScript and Rust both compute SHA-25
   refetches Core truth.
 - Permission snapshots stay in component/controller memory. They never enter `localStorage`, Zustand persistence,
   `useCachedFetch`, or the page-cache allow-list.
-- Home renders factory, override, effective posture, override mode, generation, loading/reconnecting/read/validation
+- Home renders factory, override, effective posture, override mode, loading/reconnecting/read/validation
   failure, saved, conflict, second-confirm, reset, and immutable states. It may state globally that Hosts can tighten;
-  it must not invent a per-row Host constraint that Core did not return.
+  it must not invent a per-row Host constraint that Core did not return. Generation/revision values remain internal
+  inputs for CAS and freshness checks; G4 excludes their primary, expanded, copy and accessible presentation.
 
 #### Slice 3 / canonical Approval seam
 

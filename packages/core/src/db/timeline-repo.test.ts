@@ -80,6 +80,52 @@ describe("createTimelineRepo.append", () => {
   });
 });
 
+describe("timeline tool display names", () => {
+  it("retains bounded names through writes and reads while scrubbing raw input only", () => {
+    const displayName = "🛠".repeat(120);
+    const output = { type: "json", value: { displayName: "x".repeat(300), input: "business input" }, hash: "business hash" };
+    const parts: TimelinePart[] = [
+      { type: "tool-call", toolCallId: "c1", toolName: "opaque_route", displayName, input: { secret: "RAW_INPUT_SENTINEL" } },
+      { type: "tool-result", toolCallId: "c1", toolName: "opaque_route", displayName, output },
+    ];
+    const committed = repo.append({ characterId: "taki", role: "assistant", content: "canonical projection", parts });
+    const expected = [
+      { type: "tool-call", toolCallId: "c1", toolName: "opaque_route", displayName },
+      { type: "tool-result", toolCallId: "c1", toolName: "opaque_route", displayName, output },
+    ];
+    expect(committed.parts).toEqual(expected);
+    expect(repo.latestAscending("taki", 10)[0]?.parts).toEqual(expected);
+    expect(repo.pageBefore({ characterId: "taki", limit: 10 }).entries[0]?.parts).toEqual(expected);
+    const raw = String(db.prepare("SELECT parts FROM timeline_messages WHERE seq = :seq").get({ seq: committed.seq })?.parts);
+    expect(raw).toContain(displayName);
+    expect(raw).not.toContain("RAW_INPUT_SENTINEL");
+    expect(raw).toContain("business input");
+    expect(raw).toContain("business hash");
+  });
+
+  it("omits malformed optional names on append and legacy reads instead of rejecting the row", () => {
+    for (const displayName of [null, 17, {}, "", " \t\n", "x".repeat(241), "🛠".repeat(121)]) {
+      const parts = [
+        { type: "tool-call", toolCallId: "c1", toolName: "opaque_route", displayName, input: { secret: "RAW_INPUT_SENTINEL" } },
+        { type: "tool-result", toolCallId: "c1", toolName: "opaque_route", displayName, output: { type: "text", value: "done" } },
+      ];
+      const expected = [
+        { type: "tool-call", toolCallId: "c1", toolName: "opaque_route" },
+        { type: "tool-result", toolCallId: "c1", toolName: "opaque_route", output: { type: "text", value: "done" } },
+      ];
+      const committed = repo.append({ characterId: "taki", role: "assistant", content: "canonical projection", parts: parts as TimelinePart[] });
+      expect(committed.parts).toEqual(expected);
+      const raw = String(db.prepare("SELECT parts FROM timeline_messages WHERE seq = :seq").get({ seq: committed.seq })?.parts);
+      expect(raw).not.toContain("displayName");
+      expect(raw).not.toContain("RAW_INPUT_SENTINEL");
+
+      db.prepare("UPDATE timeline_messages SET parts = :parts WHERE seq = :seq")
+        .run({ seq: committed.seq, parts: JSON.stringify(parts) });
+      expect(repo.rangeAscending("taki", committed.seq - 1, committed.seq)[0]?.parts).toEqual(expected);
+    }
+  });
+});
+
 describe("createTimelineRepo.deleteEntry", () => {
   it("removes exactly the addressed row; later reads exclude it and other rows survive", () => {
     repo.append({ characterId: "taki", role: "user", content: "keep-1" });
@@ -210,11 +256,16 @@ describe("timeline restart survival", () => {
     try {
       const first = openDatabase({ path: file, migrations: MIGRATIONS });
       createTimelineRepo(first).append({ characterId: "taki", role: "user", content: "before restart" });
+      createTimelineRepo(first).append({ characterId: "taki", role: "assistant", content: "[tool-call: captured_route]",
+        parts: [{ type: "tool-call", toolCallId: "captured-call", toolName: "captured_route", displayName: "Retired server · tool" }] });
       first.close(); // releases the OS file handle
 
       const second = openDatabase({ path: file, migrations: MIGRATIONS });
       const rows = createTimelineRepo(second).latestAscending("taki", 10);
-      expect(rows.at(-1)?.content).toBe("before restart");
+      expect(rows[0]?.content).toBe("before restart");
+      expect(rows[1]?.parts).toEqual([{
+        type: "tool-call", toolCallId: "captured-call", toolName: "captured_route", displayName: "Retired server · tool",
+      }]);
       second.close();
     } finally {
       rmSync(dir, { recursive: true, force: true });

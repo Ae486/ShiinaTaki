@@ -3,7 +3,7 @@
  * INPUT:  process env (bootstrap) + the config store's resolved knobs, and OS signals
  * OUTPUT: a running headless Agent Core — WS server bound to loopback; exits 0 on SIGINT/SIGTERM
  * POS:    core — the process entry/composition root; wires boot (config store → logger → model(s) → db) →
- *         store/media/subscriptions → ws-server
+ *         store/media/subscriptions and deferred MCP approval names → ws-server
  */
 import { join } from "node:path";
 import type { ToolSet } from "ai";
@@ -30,6 +30,8 @@ import { bootstrapCore } from "./boot/core-bootstrap.ts";
 import { composeHindsightSetup } from "./boot/hindsight-setup-boot.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
 import { composeApprovalRuntime } from "./approval/approval-runtime.ts";
+import type { ApprovalLabelResolver } from "./approval/approval-labels.ts";
+import { createMcpApprovalLabelResolver } from "./mcp/mcp-approval-labels.ts";
 import { createGovernancePolicyRepo } from "./governance/governance-policy-repo.ts";
 import { createGovernancePolicyService } from "./governance/governance-policy-service.ts";
 import { createMemoryAutoRepo } from "./db/memory-auto-repo.ts";
@@ -191,9 +193,12 @@ const deviceRegistry = createDeviceRegistry({
 const connectionRegistry = createConnectionRegistry();
 const hostCatalogs = createHostCatalogStore();
 const registry = createMethodRegistry();
+// Approval boots first; its read-only MCP name source is attached only after the manager exists.
+let resolveApprovalLabels: ApprovalLabelResolver = () => new Map();
 const { approval, coreToolGovernance } = composeApprovalRuntime({
   db, governance, coreHostId, registry, connections: connectionRegistry, logger,
   recordRunEvent: effectLifecycle.record,
+  resolveLabels: (decisions) => resolveApprovalLabels(decisions),
 });
 
 // Skills: durable lifecycle rows plus an immutable runtime catalog. Legacy files are read once as a seed and never written.
@@ -217,6 +222,7 @@ migrateMcpPlaintextSecrets({ catalog: secretCatalog, configPath: join(serverConf
 // Boot reconcile is non-blocking so the WS server starts while candidates connect; a locked catalog skips only
 // the servers whose refs it cannot resolve, truthfully — one bad server never disables its siblings.
 const mcpBoot = bootMcpLifecycle({ db, dataDir: serverConfig.dataDir, coreHostId, secretCatalog, governance, approval, logger });
+resolveApprovalLabels = createMcpApprovalLabelResolver(() => mcpBoot.manager.snapshot());
 void mcpBoot.manager.reconcile(mcpBoot.desired.list()).then(() => undefined, () => undefined); // desired → candidates → publish
 registerSecretMethods(registry, { service: mcpBoot.catalog, logger: secretLog });
 registerMcpMethods(registry, { service: createMcpLifecycleService({ repo: mcpBoot.desired, manager: mcpBoot.manager }), logger: mcpBoot.log });

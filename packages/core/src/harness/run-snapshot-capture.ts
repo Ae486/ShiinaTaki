@@ -1,11 +1,11 @@
 /**
  * INPUT:  live Extension/Host, Governance, Memory, and model-route authorities at Run admission
- * OUTPUT: redaction-safe immutable RunSnapshot draft plus the exact process-local execution context
+ * OUTPUT: redaction-safe RunSnapshot plus process-local execution bindings and captured presentation names
  * POS:    core/harness — provider-neutral admission adapter; raw prompts, tools, secrets, and payloads never persist
  */
 import { createHash } from "node:crypto";
 import type { ToolSet } from "ai";
-import type { MemoryProviderCapabilities, TriggerRequest } from "@taki/shared";
+import { captureToolDisplayNames, type MemoryProviderCapabilities, type TriggerRequest } from "@taki/shared";
 import type { ExtensionRunContext } from "../extensions/extension-run-context.ts";
 import type { ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
@@ -59,6 +59,7 @@ async function captureSnapshot(args: {
   const memory = input.memory.snapshot();
   const executionContext = Object.freeze({
     tools: context.tools,
+    toolDisplayNames: captureToolDisplayNames(context.toolDisplayNames),
     memoryTools: Object.freeze(input.memory.createTools(request.characterId)),
     instructions: context.instructions,
   });

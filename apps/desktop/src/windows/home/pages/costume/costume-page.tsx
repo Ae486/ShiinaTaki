@@ -1,10 +1,8 @@
 /**
- * INPUT:  none (page root); reads the costume list and drives import + switching through its hooks.
- * OUTPUT: <CostumePage> — the costume surface migrated out of the retired pet-side CharacterPanel: import a model
- *         archive, then pick a costume. The row being switched shows its own indicator + Cancel, a failed switch says
- *         why and leaves the highlight where it was, and a failed list refresh keeps the last good list on screen.
- * POS:    ui/windows/home/pages/costume — presentational; a pick is COMMANDED to the pet window, which owns the scene
- *         and reports back what actually happened.
+ * INPUT:  costume/import hooks and the Home client; Pet result events govern switching.
+ * OUTPUT: <CostumePage> — import outcome/count and resource warnings, plus result-driven costume selection.
+ * POS:    ui/windows/home/pages/costume — presentation only; import and switching stay hook-owned.
+ *         The Pet owns the scene; failed list refreshes retain the last good list with retry.
  */
 
 import { useRef } from "react";
@@ -77,7 +75,7 @@ function ImportFeedback({ state }: { state: CharacterImport }) {
     <>
       {state.result && (
         <div className="mt-2">
-          <FeedbackLine tone="ok">已导入 {state.result.characterId}（{state.result.costumes.length} 套服装）</FeedbackLine>
+          <FeedbackLine tone="ok">导入成功（{state.result.costumes.length} 套服装）</FeedbackLine>
         </div>
       )}
       {state.warnings.length > 0 && (

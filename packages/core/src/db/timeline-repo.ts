@@ -1,10 +1,11 @@
 /**
  * INPUT:  the Database wrapper + append/paging calls (characterId-scoped)
- * OUTPUT: timeline repository with names-only tool-call rows and sanitized legacy reads over timeline_messages
+ * OUTPUT: timeline rows with bounded display names, names-only tool calls, and sanitized legacy reads
  * POS:    core/db — timeline SQL and defense-in-depth privacy boundary; raw tool-call input never crosses the repo
  */
 import { randomUUID } from "node:crypto";
 import {
+  getValidToolDisplayName,
   TimelineEntrySchema,
   type TimelineEntry,
   type TimelineHistoryParams,
@@ -139,7 +140,17 @@ function parseParts(row: SqlRow): TimelinePart[] | undefined {
 }
 
 function sanitizeParts(parts: TimelinePart[] | undefined): TimelinePart[] | undefined {
-  return parts?.map((part) => part.type === "tool-call"
-    ? { type: "tool-call", toolCallId: part.toolCallId, toolName: part.toolName }
-    : part);
+  return parts?.map((part) => {
+    if (part.type !== "tool-call" && part.type !== "tool-result") return part;
+    const displayName = getValidToolDisplayName(part.displayName);
+    const identity = {
+      toolCallId: part.toolCallId,
+      toolName: part.toolName,
+      ...(displayName === undefined ? {} : { displayName }),
+    };
+    // Do not recurse into output: its business data must survive even when it has a displayName or input field.
+    return part.type === "tool-call"
+      ? { type: part.type, ...identity }
+      : { type: part.type, ...identity, output: part.output };
+  });
 }

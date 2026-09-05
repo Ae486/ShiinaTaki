@@ -47,8 +47,10 @@
   coverage, selected range, and the canonical source digest.
 - Exactly one `open` operation may exist per Character. Lease expiry permits a later fenced attempt; an old attempt
   cannot remove the new attempt's controller or write through the replacement fence.
-- Timeline appends strictly after `selectedThroughSeq` are allowed while summary generation runs. Any change inside the
-  selected range changes the digest and rejects the generated summary as `SOURCE_STALE`.
+- Timeline appends strictly after `selectedThroughSeq` are allowed while summary generation runs. A change to canonical
+  source fields inside the selected range changes the digest and rejects the generated summary as `SOURCE_STALE`.
+  The optional tool-call/result `displayName` is presentation metadata and is excluded from this hash; all other source
+  fields and the unlabeled v1 digest bytes remain unchanged. See [Operation Presentation](./operation-presentation.md).
 - Summary revision and `throughSeq` are rechecked at commit. A competing summary produces `SUMMARY_CONFLICT` and remains
   authoritative.
 - Summary replacement, operation state `committed`, and the immutable `committed` event execute in one short synchronous
@@ -95,7 +97,7 @@
 | Lease owner/fence is stale, cancelled, or expired | Reject the transition as stale; do not append misleading stage evidence or advance the checkpoint. |
 | Selected range is discontinuous from expected summary coverage | Reject before durable operation creation. |
 | Stable operation ID is reused with different source identity | Reject with an operation identity conflict; never reopen it for different evidence. |
-| Selected Timeline range changes during generation | Record `SOURCE_STALE`; keep the previous summary. |
+| Canonical source fields in the selected Timeline range change during generation | Record `SOURCE_STALE`; keep the previous summary. |
 | Summary revision or coverage changes during generation | Record `SUMMARY_CONFLICT`; preserve the newer checkpoint. |
 | Memory flush is incomplete, fenced, failed, or unavailable | Record the closed failure class; do not summarize/retire the range. |
 | Auxiliary generation fails or returns empty text | Record `SUMMARY_GENERATION_FAILED` or `SUMMARY_EMPTY`; do not advance. |
@@ -126,6 +128,8 @@
 - Fresh, version-31 upgrade, historical lineage, reopen, and second-open no-op coverage for migration 032.
 - One-open-per-Character uniqueness, other-Character independence, stable retry identity, increasing attempt/fence, and
   stale-fence rejection.
+- Equal source/operation identity for otherwise-identical Timeline rows with absent or changed tool display names;
+  canonical content/output changes still change identity or cause `SOURCE_STALE`.
 - Flush, generated, failed, cancelled, abandoned, and committed event ordering with append-only trigger enforcement.
 - Atomic rollback when committed evidence cannot be inserted; exact duplicate commit idempotency.
 - Concurrent tail append acceptance, selected-range mutation rejection, summary revision/coverage conflict, and

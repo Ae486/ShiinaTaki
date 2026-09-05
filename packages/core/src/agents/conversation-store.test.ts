@@ -125,6 +125,8 @@ describe("createConversationStore", () => {
     // Every row fired timeline.appended (UI parity), and the tool row carries its structured parts.
     expect(emitted.map((entry) => entry.role)).toEqual(["user", "assistant", "tool", "assistant"]);
     expect(emitted[2]?.parts?.[0]).toMatchObject({ type: "tool-result", toolCallId: "c1" });
+    expect(emitted[1]?.parts?.[0]).toMatchObject({ toolName: "screenshot", displayName: "屏幕截图" });
+    expect(emitted[2]?.parts?.[0]).toMatchObject({ toolName: "screenshot", displayName: "屏幕截图" });
 
     expect(store.history("taki")).toEqual([
       { role: "user", content: "screenshot please" },
@@ -160,6 +162,27 @@ describe("createConversationStore", () => {
       role: "assistant",
       content: [{ type: "tool-call", toolCallId: "secret-call", toolName: "exec", input: {} }],
     }]);
+  });
+
+  it("captures the presentation input once before append observers can replace its names", () => {
+    const names = { opaque_route: "Original server · tool" };
+    const emitted: TimelineEntry[] = [];
+    const store = makeStore((entry) => {
+      emitted.push(entry);
+      names.opaque_route = "Replacement server · tool";
+    });
+    store.appendTurn("taki", [
+      { role: "assistant", content: [{ type: "tool-call", toolCallId: "c1", toolName: "opaque_route", input: {} }] },
+      { role: "tool", content: [{ type: "tool-result", toolCallId: "c1", toolName: "opaque_route", output: { type: "text", value: "done" } }] },
+    ], names);
+
+    expect(emitted.map((entry) => entry.parts?.[0])).toEqual([
+      { type: "tool-call", toolCallId: "c1", toolName: "opaque_route", displayName: "Original server · tool" },
+      { type: "tool-result", toolCallId: "c1", toolName: "opaque_route", displayName: "Original server · tool",
+        output: { type: "text", value: "done" } },
+    ]);
+    expect(JSON.stringify(store.history("taki"))).not.toContain("Original server");
+    expect(JSON.stringify(store.history("taki"))).not.toContain("Replacement server");
   });
 
   it("drops leading orphan tool rows from history (window cut must not start replay with a tool message)", () => {

@@ -113,10 +113,34 @@ describe("Approval dialog controller", () => {
     expect(controller.snapshot().status).toMatchObject({ kind: "error" });
     controller.acknowledgeDisclosure(true);
     await controller.choose("allow_always");
-    expect(connection.calls).toEqual([expect.objectContaining({
+    expect(connection.calls).toEqual([{
+      approvalId: IDS[0],
       choice: "allow_always",
+      expectedApprovalGeneration: 4,
       disclosure: { revision: 1, futureBackgroundUseAccepted: true },
-    })]);
+    }]);
+  });
+
+  it("requires a fresh background-use acknowledgement for the next queued approval", async () => {
+    const connection = client();
+    const controller = createApprovalDialogController(() => undefined);
+    controller.replace(connection);
+    connection.push({ type: "request", request: request(IDS[0]) });
+    connection.push({ type: "request", request: { ...request(IDS[1]), approvalGeneration: 8 } });
+    controller.acknowledgeDisclosure(true);
+    await controller.choose("allow_always");
+    expect(controller.snapshot()).toMatchObject({ request: { approvalId: IDS[1] }, disclosureAcknowledged: false });
+    await controller.choose("allow_always");
+    expect(connection.calls).toHaveLength(1);
+    controller.acknowledgeDisclosure(true);
+    await controller.choose("allow_always");
+    expect(connection.calls[1]).toEqual({
+      approvalId: IDS[1],
+      choice: "allow_always",
+      expectedApprovalGeneration: 8,
+      disclosure: { revision: 1, futureBackgroundUseAccepted: true },
+    });
+    controller.dispose();
   });
 
   it("keeps the prompt visible with an explicit error if an invalid always request lacks disclosure", async () => {
@@ -189,6 +213,7 @@ describe("Approval dialog controller", () => {
     const controller = createApprovalDialogController(() => undefined);
     controller.replace(first);
     first.push({ type: "request", request: request(IDS[0]) });
+    controller.acknowledgeDisclosure(true);
     const responding = controller.choose("allow_once");
     controller.replace(second);
     resolve({ status: "accepted", approvalGeneration: 4 });

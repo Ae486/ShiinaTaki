@@ -1,6 +1,6 @@
 /**
  * INPUT: replaceable WsClient generations and callbacks for validated MCP views/outcomes
- * OUTPUT: current-client-only reads/mutations, conflict refetch, serialization, and partial-commit truth
+ * OUTPUT: current-client-only reads/mutations, conflict refetch, useful test feedback, and partial-commit truth
  * POS: Home MCP framework-free authority guard; timed-out mutations are never replayed automatically
  */
 import type { WsClient } from "@/lib/ws-client.js";
@@ -229,6 +229,6 @@ function testFeedback(serverId: string, result: McpTestResult): McpFeedback {
   }
   return {
     kind: "tested",
-    message: `${serverId} 测试通过：${result.toolNames.length} 个工具，${result.pages} 页，${result.durationMs}ms，跳过 ${result.skipped.length} 个`,
+    message: `${serverId} 测试通过：${result.toolNames.length} 个工具，耗时 ${result.durationMs} 毫秒，跳过 ${result.skipped.length} 个`,
   };
 }

@@ -133,6 +133,24 @@ describe("permission controller generations", () => {
     expect(h.events.at(-1)).toMatchObject({ kind: "loaded", value: { feedback: { kind: "conflict" } } });
   });
 
+  it("sends the exact cell, level, posture and confirmation with the captured policy generation", async () => {
+    const active = client({
+      permissionLevelGet: vi.fn(async (): Promise<PermissionLevelState> => ({ level: "standard", policyGeneration: 7, registryRevision: 1 })),
+      permissionCellsGet: vi.fn(async () => snapshot(7)),
+    });
+    const h = harness();
+    h.controller.replace(active);
+    await flush();
+    await h.controller.setCell({ key: "exec:blocked", level: "standard", posture: "auto", secondConfirm: true }, 7);
+    expect(active.permissionCellSet).toHaveBeenCalledWith({
+      key: "exec:blocked",
+      level: "standard",
+      posture: "auto",
+      secondConfirm: true,
+      expectedPolicyGeneration: 7,
+    });
+  });
+
   it("does not replay a timed-out mutation whose remote outcome is unknown", async () => {
     const active = client({
       permissionLevelSet: vi.fn(async () => Promise.reject(new RpcDeadlineExceededError(

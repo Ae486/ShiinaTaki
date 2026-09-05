@@ -1,11 +1,10 @@
 /**
  * INPUT:  Home's current authenticated client generation plus a lifecycle-derived refresh key
- * OUTPUT: useExtensionConvergence() and a compact owner/generation status band
+ * OUTPUT: useExtensionConvergence() and a compact availability, extension, and name-conflict status band
  * POS:    Home shared presentation; disposable read projection with no cache or mutation authority
  */
 import { useEffect, useMemo, useState } from "react";
 import { useHomeClient } from "./home-client-context.ts";
-import { CopyableRow } from "@/components/ui/copyable-row.js";
 import {
   createExtensionConvergenceController,
   type ExtensionConvergenceState,
@@ -30,24 +29,18 @@ export function ExtensionConvergenceStrip({ state }: { state: ExtensionConvergen
   const data = state.kind === "ready" ? state.data : state.previous;
   if (!data) {
     return state.kind === "failure"
-      ? <p role="status" className="border-y border-warn-border bg-warn-soft px-3 py-2 text-xs text-warn-strong">扩展收敛状态不可用：{state.message}</p>
-      : <p role="status" className="border-y border-border px-3 py-2 text-xs text-text-secondary">正在读取扩展收敛状态…</p>;
+      ? <p role="status" className="border-y border-warn-border bg-warn-soft px-3 py-2 text-xs text-warn-strong">扩展状态不可用：{state.message}</p>
+      : <p role="status" className="border-y border-border px-3 py-2 text-xs text-text-secondary">{state.kind === "idle" ? "等待连接以读取扩展状态…" : "正在读取扩展状态…"}</p>;
   }
   const readyHosts = data.hosts.filter((host) => host.available).length;
   return (
-    <section aria-label="扩展收敛状态" className="flex flex-wrap items-center gap-x-4 gap-y-1 border-y border-border bg-surface px-3 py-2 text-xs text-text-body">
-      {/* U4: the Core host id is an opaque diagnostic identifier — the short form displays, the copy affordance
-          writes the FULL id so it can be grepped in logs. */}
-      <CopyableRow compact label="Core" value={shortId(data.coreHostId)} copyValue={data.coreHostId} mono />
-      <span>Hosts {readyHosts}/{data.hosts.length}</span>
-      <span>Extensions {data.entries.length}</span>
-      <span className={data.collisions.length ? "text-warn-strong" : "text-text-secondary"}>Collisions {data.collisions.length}</span>
+    <section aria-label="扩展状态" className="flex flex-wrap items-center gap-x-4 gap-y-1 border-y border-border bg-surface px-3 py-2 text-xs text-text-body">
+      <span>可用主机 {readyHosts}/{data.hosts.length}</span>
+      <span>扩展 {data.entries.length}</span>
+      <span className={data.collisions.length ? "text-warn-strong" : "text-text-secondary"}>名称冲突 {data.collisions.length}</span>
+      {state.kind === "idle" && <span className="text-text-secondary">等待连接，显示上次结果</span>}
       {state.kind === "loading" && <span className="text-text-secondary">刷新中</span>}
       {state.kind === "failure" && <span className="text-warn-strong">刷新失败，显示上次结果</span>}
     </section>
   );
-}
-
-function shortId(value: string): string {
-  return `${value.slice(0, 8)}…${value.slice(-4)}`;
 }

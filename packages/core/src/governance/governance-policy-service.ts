@@ -1,6 +1,6 @@
 /**
  * INPUT:  canonical registry plus the durable policy repository and operator/evaluation requests
- * OUTPUT: read/mutate/evaluate policy service with override legality, reconciliation, and ask fail-closed decisions
+ * OUTPUT: policy reads/mutations/evaluation, copied registry classifier metadata, and ask fail-closed decisions
  * POS:    core/governance — sole policy-domain authority between SQLite, operator methods, and execution adapters
  */
 import {
@@ -44,6 +44,7 @@ export interface GovernancePolicyService {
     denyConstraints?: string[];
   }): GovernanceEvaluationResult;
   authorize(input: { identity: CanonicalCapabilityIdentity; cellKey: string; denyConstraints?: string[] }): GovernanceExecutionDecision;
+  classifierMetadata(capabilityId: string): Readonly<Pick<HostCapabilityGovernanceSupport, "classifierId" | "classifierRevision">>;
   hostDispatchPolicy(capabilityId: string): {
     policyGeneration: number;
     compatibility: HostCapabilityGovernanceSupport;
@@ -68,6 +69,7 @@ export function createGovernancePolicyService(
     },
     setCell: (params) => setCell(repo, registry, params),
     evaluate: (input) => evaluate(repo, registry, input),
+    classifierMetadata: (capabilityId) => classifierMetadata(registry, capabilityId),
     authorize(input) {
       const evaluation = this.evaluate(input);
       if (evaluation.posture === "auto") return { allowed: true, evaluation };
@@ -96,6 +98,12 @@ export function createGovernancePolicyService(
       };
     },
   };
+}
+
+function classifierMetadata(registry: GovernanceRegistry, capabilityId: string) {
+  const classifier = governanceDescriptor(registry, capabilityId)?.classifier;
+  if (!classifier) throw new Error(`unknown governance capability ${capabilityId}`);
+  return { classifierId: classifier.classifierId, classifierRevision: classifier.classifierRevision };
 }
 
 function setCell(repo: GovernancePolicyRepo, registry: GovernanceRegistry, params: PermissionCellSetParams) {

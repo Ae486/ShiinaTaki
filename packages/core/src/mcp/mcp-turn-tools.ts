@@ -1,9 +1,10 @@
 /**
  * INPUT: active runtime generations, governance dependencies, and interactive turn context
- * OUTPUT: governed per-turn tools wrapped by acquire/execute/finally-release generation leases
+ * OUTPUT: governed per-turn tools with readable approvals and acquire/execute/finally-release generation leases
  * POS: core/mcp turn assembly; retired generations fail closed and captured snapshots never redirect
  */
 import type { Tool, ToolSet } from "ai";
+import { APPROVAL_PRESENTATION_REVISION, getCapabilityLabel, type ApprovalPresentation } from "@taki/shared";
 import type { GovernancePolicyService } from "../governance/governance-policy-service.ts";
 import { wrapGovernedTool, type GovernedDispatchLease, type InteractiveGovernanceContext } from "../governance/governed-tool.ts";
 import { acquireLease, releaseLease, type GenerationRecord } from "./mcp-generations.ts";
@@ -119,16 +120,16 @@ function mcpBinding(governance: TurnGovernance, record: GenerationRecord, ref: M
   };
 }
 
-function mcpPresentation(ref: McpToolRef) {
+function mcpPresentation(ref: McpToolRef): ApprovalPresentation {
   return {
-    revision: 1 as const,
-    title: "Allow MCP tool",
-    capabilityLabel: ref.toolName,
+    revision: APPROVAL_PRESENTATION_REVISION,
+    title: "确认调用 MCP 工具",
+    capabilityLabel: getCapabilityLabel("mcp.tool.call"),
     subjectLabel: ref.serverName,
-    riskSummary: "This configured MCP tool can access its server with the supplied call.",
-    sections: [{ title: "Target", fields: [
-      { label: "Server", value: ref.serverName },
-      { label: "Tool", value: ref.toolName },
+    riskSummary: "此调用将交给所配置的 MCP 服务器处理，实际影响取决于该工具的功能。",
+    sections: [{ title: "调用目标", fields: [
+      { label: "服务器", value: ref.serverName },
+      { label: "工具", value: ref.toolName },
     ] }],
   };
 }

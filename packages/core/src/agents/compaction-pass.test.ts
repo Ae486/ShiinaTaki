@@ -151,6 +151,21 @@ function seed(timeline: ReturnType<typeof createTimelineRepo>, n: number): void 
   for (let i = 0; i < n; i += 1) timeline.append({ characterId: "taki", role: "user", content: `m${i + 1}` });
 }
 
+function seedToolSource(f: ReturnType<typeof fixture>) {
+  seed(f.timeline, 10);
+  // Fixed row identity/time make the pre-presentation v1 fingerprint an executable compatibility fixture.
+  f.db.prepare("UPDATE timeline_messages SET id = printf('00000000-0000-4000-8000-%012d', seq), created_at = :at")
+    .run({ at: "2026-09-06T00:00:00.000Z" });
+  const call = [{ type: "tool-call", toolCallId: "c1", toolName: "opaque_route" }];
+  const result = [{ type: "tool-result", toolCallId: "c1", toolName: "opaque_route", output: {
+    type: "json", value: { text: "original result", displayName: "business label", input: "business input" },
+  } }];
+  const update = f.db.prepare("UPDATE timeline_messages SET role = :role, content = :content, parts = :parts WHERE seq = :seq");
+  update.run({ seq: 2, role: "assistant", content: "[tool-call: opaque_route]", parts: JSON.stringify(call) });
+  update.run({ seq: 3, role: "tool", content: "[tool-result: opaque_route -> json]", parts: JSON.stringify(result) });
+  return { call, result };
+}
+
 describe("compaction trigger math (row 7 — fires above the ratio, never at or below)", () => {
   it("does nothing at or below triggerRatio × wall", async () => {
     for (const estimated of [79, 80]) {
@@ -321,6 +336,71 @@ describe("compaction sequencing (row 8 — flush first, success-only advance, re
 });
 
 describe("durable compaction coordination (Slice 3)", () => {
+  it("keeps v1 source and operation identities unchanged by tool display names", async () => {
+    // Empty output leaves the same retiring range available for another attempt without advancing the summary.
+    const f = fixture({ model: generatingModel("") as LanguageModel });
+    const parts = seedToolSource(f);
+    const identities = f.db.prepare("SELECT operation_id, source_digest FROM conversation_compaction_operations");
+    await f.pass.maybeRun("taki");
+    const baseline = identities.all();
+    expect(baseline).toEqual([{
+      operation_id: "compact:d8f6d0b7f9a57b46896b2e185d4134ab8bd53572af3faaac9ee449193ede5928",
+      source_digest: "6c2e67bc09eb04ef28d735dd5d4a413ca1b7ea094d969ff83741ab9457cc0983",
+    }]);
+
+    const update = f.db.prepare("UPDATE timeline_messages SET parts = :parts WHERE seq = :seq");
+    for (const displayName of ["Original server · tool", "Replacement display only"]) {
+      update.run({ seq: 2, parts: JSON.stringify(parts.call.map((part) => ({ ...part, displayName }))) });
+      update.run({ seq: 3, parts: JSON.stringify(parts.result.map((part) => ({ ...part, displayName }))) });
+      await f.pass.maybeRun("taki");
+      expect(identities.all()).toEqual(baseline);
+      expect(f.summaries.get("taki")).toBeNull();
+      expect(f.timeline.rangeAscending("taki", 1, 3).every((entry) =>
+        entry.parts?.every((part) => "displayName" in part && part.displayName === displayName))).toBe(true);
+    }
+    expect(f.operations.get(String(baseline[0]?.operation_id))?.attemptNo).toBe(3);
+  });
+
+  it("accepts an in-flight change limited to tool display names without rewriting the Timeline", async () => {
+    const controlled = controlledGenerateModel("canonical source summary");
+    const f = fixture({ model: controlled.model });
+    const parts = seedToolSource(f);
+    const running = f.pass.maybeRun("taki");
+    await controlled.started;
+    const named = parts.result.map((part) => ({ ...part, displayName: "New display only" }));
+    f.db.prepare("UPDATE timeline_messages SET parts = :parts WHERE seq = 3").run({ parts: JSON.stringify(named) });
+    controlled.release();
+    await running;
+
+    expect(f.summaries.get("taki")).toEqual({ throughSeq: 6, text: "canonical source summary" });
+    expect(f.timeline.rangeAscending("taki", 2, 3)[0]?.parts).toEqual(named);
+    expect(f.db.prepare("SELECT state FROM conversation_compaction_operations").get()).toEqual({ state: "committed" });
+  });
+
+  it.each(["content", "output"])("still rejects changed canonical transcript %s with named tools", async (field) => {
+    const controlled = controlledGenerateModel("must be discarded");
+    const f = fixture({ model: controlled.model });
+    const parts = seedToolSource(f);
+    const named = parts.result.map((part) => ({ ...part, displayName: "Original server · tool" }));
+    const update = f.db.prepare("UPDATE timeline_messages SET parts = :parts WHERE seq = 3");
+    update.run({ parts: JSON.stringify(named) });
+    const running = f.pass.maybeRun("taki");
+    await controlled.started;
+    if (field === "content") {
+      f.db.prepare("UPDATE timeline_messages SET content = :content WHERE seq = 1").run({ content: "changed dialogue" });
+    } else {
+      // A displayName inside the business output is canonical data, unlike the tool part's UI-only label.
+      update.run({ parts: JSON.stringify(named.map((part) => ({ ...part, output: {
+        ...part.output, value: { ...part.output.value, displayName: "changed business result" },
+      } }))) });
+    }
+    controlled.release();
+    await running;
+    expect(f.summaries.get("taki")).toBeNull();
+    const operation = f.db.prepare("SELECT operation_id FROM conversation_compaction_operations").get();
+    expect(f.operations.get(String(operation?.operation_id))).toMatchObject({ state: "failed", failureCode: "SOURCE_STALE" });
+  });
+
   it("accepts a concurrent append strictly after the captured retiring range", async () => {
     const controlled = controlledGenerateModel("captured range summary");
     const f = fixture({ model: controlled.model });

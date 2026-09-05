@@ -1,5 +1,5 @@
 /**
- * INPUT:  Core Database, governance service, Core Host identity, method/connection registries, and logger
+ * INPUT:  Core Database, governance, registries, logger, and optional read-only approval label resolver
  * OUTPUT: composeApprovalRuntime(...) — canonical authority, interactive service, tool adapter, and method cleanup wiring
  * POS:    core/approval — production composition seam for interactive Core/MCP Approval; legacy modules stay dormant
  */
@@ -15,6 +15,7 @@ import { createApprovalDecisionService } from "./approval-decision-service.ts";
 import { createApprovalInteractionService } from "./approval-interaction-service.ts";
 import { createApprovalStateRepo } from "./approval-state-repo.ts";
 import type { RunEvent } from "@taki/shared";
+import type { ApprovalLabelResolver } from "./approval-labels.ts";
 
 export function composeApprovalRuntime(input: {
   db: Database;
@@ -24,9 +25,10 @@ export function composeApprovalRuntime(input: {
   connections: ConnectionRegistry;
   logger: Logger;
   recordRunEvent?: (event: Omit<RunEvent, "eventId" | "seq">) => void;
+  resolveLabels?: ApprovalLabelResolver;
 }) {
   const authority = createApprovalDecisionService(createApprovalStateRepo(input.db));
-  const approval = createApprovalInteractionService(authority, input.recordRunEvent);
+  const approval = createApprovalInteractionService(authority, input.recordRunEvent, input.resolveLabels);
   registerPermissionMethods(input.registry, {
     service: input.governance,
     logger: input.logger,

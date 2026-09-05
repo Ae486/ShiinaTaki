@@ -1,16 +1,17 @@
 /**
- * INPUT:  TimelineRepo, append/remove sinks, optional token budget + SummaryReader, and wall/backstop observers
+ * INPUT:  TimelineRepo, turn display-name snapshots, append/remove sinks, and optional Replay View policies
  * OUTPUT: append/remove APIs plus one project() source for history(), windowStart(), and estimatedTokens()
  * POS:    core/agents — names-only persistence and the Character-scoped Replay View projection boundary (ADR 0008)
  */
 import type { ModelMessage } from "ai";
-import type { TimelineEntry } from "@taki/shared";
+import { captureToolDisplayNames, type TimelineEntry } from "@taki/shared";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import { estimateMessageTokens } from "../memory/token-estimator.ts";
 import { selectWindow } from "./context-window.ts";
 import { foldUnderPressure } from "./replay-folds.ts";
 import { loadReplaySource, REPLAY_SOURCE_BACKSTOP, type ReplaySource } from "./replay-source-loader.ts";
-import { toEntryInput, toModelMessage, toUserEntryInput, type TurnEntryInput, type TurnMessage, type UserImageInput } from "./turn-mapping.ts";
+import { toModelMessage, toUserEntryInput, type TurnEntryInput, type TurnMessage, type UserImageInput } from "./turn-mapping.ts";
+import { toPresentedTurnEntry } from "./turn-presentation.ts";
 
 // Legacy no-budget compatibility only. Measured production replay uses the separately observable source backstop.
 export const REPLAY_WINDOW = 200;
@@ -69,7 +70,7 @@ export interface ConversationStore {
    * Persists a whole turn's response tail (names-only assistant tool-call parts + tool-result messages + final text),
    * oldest-first, as returned by `result.responseMessages` — the fix for cross-turn tool-record loss (D1 #1).
    */
-  appendTurn(characterId: string, messages: TurnMessage[]): void;
+  appendTurn(characterId: string, messages: TurnMessage[], toolDisplayNames?: Readonly<Record<string, string>>): void;
   /** Deletes one row by seq (cancel-retract) + fires onRemove; single Workspace/DB writer (invariant 2). */
   removeEntry(characterId: string, seq: number): void;
   /** The replay window as AI SDK messages, oldest-first (summary head first when one is substituted — R3). */
@@ -139,9 +140,11 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
     // No images = toUserEntryInput returns the legacy `{role:"user", content}` row (byte-identical to before #17).
     appendUser: (characterId, text, images = []) => commit(characterId, toUserEntryInput(text, images)),
     appendAssistant: (characterId, text) => void commit(characterId, { role: "assistant", content: text }),
-    appendTurn: (characterId, messages) => {
+    appendTurn: (characterId, messages, toolDisplayNames) => {
+      // An append observer can mutate injected inputs after the first row; every row must keep this batch's names.
+      const names = captureToolDisplayNames(toolDisplayNames);
       for (const message of messages) {
-        const input = toEntryInput(message);
+        const input = toPresentedTurnEntry(message, names);
         if (input) commit(characterId, input);
       }
     },

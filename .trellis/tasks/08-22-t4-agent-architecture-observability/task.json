@@ -26,7 +26,9 @@
     "08-25-scheduled-task-provider",
     "08-27-observability-projection-ui",
     "08-28-dsh-observability-expansion",
-    "08-30-frontend-uiux-optimization"
+    "08-30-frontend-uiux-optimization",
+    "09-05-uiux-readable-operations",
+    "09-05-uiux-live-tool-feedback"
   ],
   "parent": null,
   "relatedFiles": [],

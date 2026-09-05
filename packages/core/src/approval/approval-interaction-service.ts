@@ -1,6 +1,6 @@
 /**
  * INPUT:  canonical Approval requests, exact operator Connection objects, and the durable ApprovalDecisionService
- * OUTPUT: connection-owned pending/session lifecycle with targeted request/closed notifications and bounded responses
+ * OUTPUT: connection-owned Approval lifecycle, targeted notifications, and a bounded read-only named list projection
  * POS:    core/approval — transient Core authority for interactive Core/MCP asks; raw execution input never enters here
  */
 import {
@@ -24,6 +24,7 @@ import {
   type ApprovalInteractionState,
 } from "./approval-interaction-state.ts";
 import { sameApprovalBinding } from "./approval-interaction-binding.ts";
+import { approvalDecisionLabels, type ApprovalLabelResolver } from "./approval-labels.ts";
 
 export type ApprovalInteractionDecision =
   | { allowed: true; scope: "once" | "session" | "always"; approvalGeneration: number }
@@ -72,6 +73,7 @@ export interface ApprovalInteractionService {
 export function createApprovalInteractionService(
   authority: ApprovalDecisionService,
   record?: (event: Omit<RunEvent, "eventId" | "seq">) => void,
+  resolveLabels?: ApprovalLabelResolver,
 ): ApprovalInteractionService {
   const state: ApprovalInteractionState = createApprovalInteractionState();
   const generationListeners: Array<(approvalGeneration: number) => void> = [];
@@ -92,7 +94,7 @@ export function createApprovalInteractionService(
       notifyGeneration(before);
       return result;
     },
-    list: () => list(authority),
+    list: () => list(authority, resolveLabels),
     revoke(decisionId, expectedApprovalGeneration) {
       const before = authority.snapshot().approvalGeneration;
       const result = revokeDurableDecision({ state, authority, decisionId, expectedApprovalGeneration });
@@ -186,12 +188,12 @@ function isCurrentAuthority(
     && sameApprovalBinding(session.binding, input.binding);
 }
 
-function list(authority: ApprovalDecisionService): ApprovalListResult {
+function list(authority: ApprovalDecisionService, resolveLabels?: ApprovalLabelResolver): ApprovalListResult {
   const snapshot = authority.snapshot();
   return {
     approvalGeneration: snapshot.approvalGeneration,
     governanceRegistryRevision: snapshot.governanceRegistryRevision,
     disclosureRevision: snapshot.disclosureRevision as 1,
-    decisions: authority.list(),
+    decisions: authority.list(approvalDecisionLabels(snapshot.decisions, resolveLabels)),
   };
 }

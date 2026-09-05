@@ -47,8 +47,11 @@ applied, and defaults to `DISABLED`.
 - Projection filters that require Runs, Attempts, Receipts, or Events may scan keyset batches up to a bounded budget.
   If the budget is reached before durable exhaustion, return the last scanned Run as `nextCursor` even when the page
   is empty or shorter than requested. Never report false exhaustion after an early SQL `LIMIT`.
-- Ordinary rows expose semantic labels, timing, state/outcome, counts, bounded summaries, and effect context. Opaque
-  IDs, digests, revisions, generations, and correlation values are inspector-only.
+- User-facing rows and Inspector details expose semantic labels, timing, state/outcome, counts, bounded summaries,
+  useful input/output and effect context. Under the 2026-09-05 G4 owner clarification, opaque IDs, digests, internal
+  revisions/generations and correlation bookkeeping are not rendered even in expanded details or `FULL_LOCAL`.
+  Existing wire/internal identity fields remain valid for queries, authorization, selection and replay; this display
+  rule neither deletes canonical evidence nor changes API schemas. Follow the frontend field-selection contract.
 - Monitoring is producer-first. A token, tool, timing, provider/model, approval, delivery, recovery, or cache field may
   enter Shared contracts/UI only after a fixed Core lifecycle boundary emits a versioned, bounded fact that can rebuild
   the same projection after restart. Missing/unknown facts remain absent or explicitly unknown; the UI never infers
@@ -82,6 +85,7 @@ applied, and defaults to `DISABLED`.
 | Connection closes or client unsubscribes | Remove the exact connection-scoped subscription idempotently |
 | Projection requests a field with no durable producer | Omit/mark unknown; do not fabricate or derive from Pino/UI state |
 | Provider exposes no authoritative cache signal | Cache status is unavailable, never a synthetic miss |
+| A response contains technical identity/bookkeeping fields | Preserve the contract internally; user-facing views render useful semantic fields and omit those bookkeeping values, including expanded Inspector views |
 
 ## 5. Good / Base / Bad Cases
 
@@ -95,7 +99,7 @@ applied, and defaults to `DISABLED`.
 - Base: a provider reports token usage but no cache information. The trajectory shows the token fact and omits cache
   totals without degrading the Run.
 - Bad: filter only the newest 500 Runs in memory and omit `nextCursor` when none match; this silently hides older
-  matches. Also bad: expose raw event JSON as the primary UI, keep a subscription after socket close, or calculate a
+  matches. Also bad: dump internal event metadata into primary or expanded UI, keep a subscription after socket close, or calculate a
   "cache miss" from the absence of a cache field.
 - Bad: perform authoritative settlement only inside `onLanguageModelCallEnd` and assume throwing will fail the turn;
   AI SDK telemetry notification catches that exception.
@@ -113,6 +117,8 @@ applied, and defaults to `DISABLED`.
   observed by `assertHealthy()` and rejects the owning stream.
 - Core methods/live: operator role, backfill-before-live order, one membership per connection, explicit unsubscribe,
   close cleanup, overflow/mode invalidation, and observer isolation.
+- Desktop projection: expanded Inspector and every enabled mode retain useful semantic facts without technical
+  bookkeeping rows/copy controls; hidden presentation must not break the original query, selection or cursor identity.
 - Integration: isolated real Core boot in default-disabled and enabled modes plus an authenticated operator
   `observability.state/list` smoke.
 - Cross-layer changes also require Shared/Core/Desktop typechecks and tests, Desktop build, root lint, and

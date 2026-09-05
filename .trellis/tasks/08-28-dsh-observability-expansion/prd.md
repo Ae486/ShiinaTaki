@@ -2,10 +2,20 @@
 
 ## Goal
 
-Expand TakiAgent's existing Run/Event monitor into a useful, replayable, DSH-shaped developer observability surface. The
-monitor must expose the facts needed to understand and tune an Agent run (model requests, tools, usage, timing,
-governance, retry/recovery, and context) while keeping Core as the only execution authority. Its layout and information
-hierarchy must follow the checked-in DSH Trajectory design rather than the current vertically stacked card layout.
+Rebuild TakiAgent's Monitor presentation primarily from the checked-in DSH Trajectory implementation,
+using the existing Core Run/Event authority. The current page is a functional trace-validation prototype,
+not an accepted product UI or a layout/visual constraint. The delivered Monitor must make model requests,
+tools, usage, timing, governance, retry/recovery and context understandable through DSH's information
+organization, interaction and visual design, with complete Chinese system labels and G4 field selection.
+
+## Planning refresh — 2026-09-05
+
+The [G1 UI/UX grill](../08-22-t4-agent-architecture-observability/research/uiux-grill-2026-09-05.md)
+coordinates the next stage and records current source findings. Monitor-specific layout, information
+hierarchy, selection/live/history correctness, and producer-backed metrics remain D68 work. Chat/Pet
+tool feedback and non-Monitor naming/approval work remain separate workstreams. G5 explicitly excludes
+Monitor from the accepted non-Monitor visual baseline. D68-B is a DSH-led UI port/rebuild, not a polish
+pass on the current scaffold. This planning clarification does not activate implementation.
 
 ## Requirements
 
@@ -27,8 +37,9 @@ hierarchy must follow the checked-in DSH Trajectory design rather than the curre
 
 ### 2. DSH-shaped Monitor layout and interaction
 
-- Replace the current vertical `filter -> Run card -> trajectory card -> inspector card` arrangement with a DSH-shaped
-  full-height workspace:
+- Port DSH's presentation composition and interaction patterns as the default approach. Match its hierarchy,
+  density, spacing, grouped rows, control placement and selected/detail states; the existing Monitor components
+  are reusable only where they support that target. Replace the test scaffold with a full-height workspace:
   - a compact Run browser on the left;
   - a central execution ledger with a fixed Overview/timing strip;
   - a selection-based Inspector on the right.
@@ -43,11 +54,20 @@ hierarchy must follow the checked-in DSH Trajectory design rather than the curre
   states.
 - Use a responsive narrow-screen fallback (stacked ledger plus a closable bottom/detail drawer) without changing the
   information hierarchy.
+- Include the DSH timing Overview, loaded-history controls, request totals, search and grouping interactions
+  where their real TakiAgent facts exist. A generic table/card arrangement is not sufficient DSH parity.
+- Preserve layout stability across Inspector/disclosure open-close, live row updates, and loading-state changes.
+  Existing selected content and reading anchors must not jump; explicit pane dragging follows the pointer directly.
+  Apply the [shared motion design](../08-22-t4-agent-architecture-observability/research/uiux-motion-continuity-2026-09-05.md)
+  with reduced-motion and interrupted-transition behavior included in the batch design.
 
 ### 3. Chinese user-facing labels and semantic information hierarchy
 
 - All visible Monitor labels, filter options, status values, section names, buttons, empty/error states, and accessibility
   labels must be Simplified Chinese.
+- Translate framework-owned captions, tooltips, no-data text and fallback labels as well as primary headings.
+  Preserve the identity of actual provider/model/tool names, code, paths and output content; localization must not
+  rewrite those values or guess the cause of an upstream error.
 - Internal event kinds, schema names, and wire values remain stable English identifiers; presentation code maps them to
   Chinese labels in one closed mapper.
 - The ordinary Run list and ledger show meaningful semantic facts only: Character, trigger, initiator, state/outcome,
@@ -56,8 +76,9 @@ hierarchy must follow the checked-in DSH Trajectory design rather than the curre
 - The default Inspector shows applicable `概览`, `用量`, `耗时`, `上下文`, `输入摘要`, `输出摘要`, `工具定义`, `重试/恢复`
   sections. It must not lead with opaque identifiers.
 - `runId`, `attemptId`, `effectId`, sequence numbers, hashes/digests, generations, revisions, and correlation keys are
-  never primary content. If a developer genuinely needs them, place them in an explicitly collapsed `技术关联` section
-  in an authorized local mode.
+  internal bookkeeping. G4 removes their user-facing display, including expanded Inspector details and `FULL_LOCAL`;
+  do not create a replacement `技术关联` disclosure/copy panel. Keep identities needed for queries, bindings and replay
+  in the underlying contracts. Use the [current field inventory](../08-22-t4-agent-architecture-observability/research/uiux-useful-information-2026-09-05.md).
 - Raw prompts, credentials, authorization material, raw Host/MCP payloads, and sensor/media bytes remain excluded even in
   `FULL_LOCAL`. Bounded redacted detail may be shown when a producer supplies it.
 - Cache display is `缓存读取/缓存写入` only when authoritative fields exist; otherwise show `缓存信息未提供`, never a
@@ -99,11 +120,16 @@ hierarchy must follow the checked-in DSH Trajectory design rather than the curre
 - [ ] A provider with no cache signal displays `缓存信息未提供`; no `miss`, zero, or hit-rate is inferred.
 - [ ] The Monitor uses a DSH-shaped left-browser/center-ledger/right-Inspector layout on wide screens and a usable
   responsive fallback on narrow screens.
+- [ ] Representative default, selected, expanded, live, historical and narrow-window states are compared against
+  the DSH reference for composition, density, spacing, interaction and visual hierarchy. Every required adaptation
+  is recorded; "trace data appears" or "three regions exist" is not sufficient UI acceptance.
 - [ ] Every expandable Monitor section can be collapsed again, and the Inspector has a visible close control.
-- [ ] Primary Monitor labels and accessibility text are Chinese; opaque IDs/hashes/generations are absent from ordinary
-  rows and default details.
+- [ ] Monitor labels and accessibility text are Chinese; opaque IDs/hashes/internal generations and revisions are absent
+  from primary and expanded user-facing details, including `FULL_LOCAL`, while query/selection identities still work.
 - [ ] Live committed events update the selected Run without leaving/re-entering the page; older-history loading and
   tail-follow behavior do not steal the user's scroll position.
+- [ ] Inspector/disclosure transitions and live updates preserve selected-record, scroll, and focus continuity at real
+  window sizes; interrupted or reduced-motion transitions leave no stale content or invisible input-blocking layer.
 - [ ] `DISABLED`, `FEEDBACK_ONLY`, and `FULL_LOCAL` preserve their privacy and availability contracts.
 - [ ] Core, Shared, and Desktop tests cover schema strictness, producer absence/unknown behavior, replay equality,
   filters, disclosure state, close behavior, reconnect/backfill, and protected-content exclusion.
@@ -111,8 +137,9 @@ hierarchy must follow the checked-in DSH Trajectory design rather than the curre
 ## Definition of Done
 
 - Shared contracts, Core producers, projections, WS methods, and Desktop Monitor UI are updated together.
-- DSH reference behavior is cited in the design and verified against the local reference source; no new observability or
-  UI framework is introduced.
+- DSH reference components/styles/behavior are mapped in the design and reused where practical. Required
+  TakiAgent adapters and dependency choices are explicit; no DSH runtime or second authority is introduced.
+  Substantially copied MIT source retains the copyright/license notice and source attribution.
 - Relevant specs, research, tests, and deferred-decision links are updated.
 - Shared/Core/Desktop typechecks, tests, lint, Desktop build, task validation, and `git diff --check` pass.
 - No production implementation starts until this PRD, `design.md`, and `implement.md` are reviewed and the task is
@@ -144,9 +171,11 @@ hierarchy must follow the checked-in DSH Trajectory design rather than the curre
 
 ## Technical Notes
 
-- Current TakiAgent events are limited to lifecycle/effect/usage; proposed model/tool/context/governance/recovery event
-  kinds are additive recommendations and must be finalized against live AI SDK stream shapes before implementation.
-- Current Monitor Inspector is technical-field-first and permanently appended to the page. D68 explicitly replaces that
-  presentation with a dismissible, semantic-first Inspector.
+- The original producer inventory predates D68-A. Provider/model, model timing/TTFT, tool, token/reasoning/cache facts
+  are already available where their producers supply them. Verify residual context/compaction, request-summary,
+  governance/recovery, and delivery needs against current contracts; do not rebuild existing producers or invent gaps.
+- The frontend phase added close controls and a three-zone scaffold. Current residuals include the unreachable wide
+  right pane, stale Inspector response handling, Run-summary/selection recovery, and unnecessary metadata still
+  rendered by the Inspector. G4 requires removing those visible fields. Component presence is not D68-B acceptance.
 - Existing `run_events` stores JSON payloads, so additive event kinds do not require a SQLite migration unless measured
   volume later proves an index/materialized-counter need.

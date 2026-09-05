@@ -4,7 +4,7 @@
 - observability-schema.ts — bounded monitor mode, real-field Run query, Chinese semantic trajectory, inspector, and live notification contracts
 - observability-presentation.ts — closed English-wire to Simplified-Chinese Monitor presentation mapper
 - scheduled-task-schema.ts — canonical durable schedule definitions and operator management protocol
-- index.ts — package public entry; named re-exports of the protocol surface
+- index.ts — package public entry; named re-exports of protocol contracts and pure presentation vocabulary
 - ping-schema.ts — scaffold ping/pong smoke schema (desktop IPC smoke; untouched this slice)
 - json-rpc-schema.ts — JSON-RPC 2.0 envelope schemas + JSON_RPC_ERROR_CODES + JSON_RPC_APP_ERROR + client-frame union
 - error-code-schema.ts — closed cross-process ErrorCode union
@@ -13,7 +13,7 @@
 - host-control-api.ts — focused named public export surface for Host-control schemas and types
 - connect-schema.ts — CONNECT_METHOD + RoleSchema + connect handshake param/result schemas (ADR 0004)
 - chat-schema.ts — CHAT_METHODS + chat.send { messageId, runId } acknowledgement, legacy/exact-run cancel, delta/complete/error schemas; +ImageAttachment/IMAGE_MEDIA_TYPES (in-flight image input, #17)
-- timeline-schema.ts — TIMELINE_METHODS + timeline entry/part/history/subscribe/appended/removed schemas (ADR 0005); parts = structured tool-call/result + image fidelity; removed = cancel-retract push
+- timeline-schema.ts — timeline entry/part/history/push schemas with optional bounded tool display names, canonical replay fields, image fidelity, and cancel-retract identity
 - config-schema.ts — CONFIG_METHODS + knob entry/list/set/subscribe/changed schemas + ConfigRefusalReason (settings store); operator-only, NO Rust mirror
 - timing-policy-schema.ts — single D59/D61 timing-key vocabulary + cross-field policy schema + owner-approved development defaults; shared by Core registry and Desktop consumers
 - media-schema.ts — MEDIA_METHODS + media.get/clear/usage param & result schemas (attachment byte serving + lifecycle); operator-only, NO Rust mirror
@@ -29,6 +29,8 @@
 - governance-registry.ts — validated versioned canonical descriptor registry and collision-safe lookup helpers
 - governance-evaluator.ts — pure fail-closed effective posture evaluator (Approval deliberately absent)
 - governance-api.ts — focused named public facade for governance and permission exports
+- governance-presentation.ts — exact-key Chinese capability/cell descriptions and posture/override labels, separate from authority and safe for unknown historical keys
+- tool-presentation.ts — fixed/MCP readable names, bounded optional label validation, and frozen own-key display-name snapshots; unknown routing keys stay unresolved
 - perception-schema.ts — PERCEPTION_METHODS + Privacy Pause state/set + activity-card schemas (current/recent/samplingStatus/pauseState) (T3b; panel UI at #26); operator-only, NO Rust mirror
 - capability-schema.ts — compatibility entry re-exporting the canonical Host-bound capability channel schemas
 - capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec/ForegroundWindow); mirrored in Rust serde

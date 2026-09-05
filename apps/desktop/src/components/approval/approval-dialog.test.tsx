@@ -46,7 +46,35 @@ describe("ApprovalDialog", () => {
     expect(html).toContain('role="alert"');
     expect(html).toContain("data-keep-interactive");
     expect(html).toContain("我明确同意此长期允许也适用于未来后台运行");
+    expect(html).not.toContain("披露版本");
+    expect(html).not.toContain(request.approvalId);
+    expect(html).not.toContain(request.binding.decisionScopeDigest);
+    expect(html).toContain(request.presentation.title);
+    expect(html).toContain(request.presentation.riskSummary);
     expect(html).toContain("disabled=\"\"");
+  });
+
+  it("keeps future-background-use consent as a separate requirement for the unchanged always choice", () => {
+    for (const accepted of [false, true]) {
+      const html = renderToStaticMarkup(
+        <ApprovalDialog
+          request={request}
+          queued={0}
+          status={{ kind: "ready" }}
+          disclosureAcknowledged={accepted}
+          onDisclosureAcknowledged={() => undefined}
+          onChoose={() => undefined}
+          onDismiss={() => undefined}
+        />,
+      );
+      const always = html.match(/<button[^>]*>始终允许（含未来后台运行）<\/button>/)?.[0];
+      expect(always).toBeDefined();
+      expect(always?.includes('disabled=""')).toBe(!accepted);
+      expect(html).toContain('type="checkbox"');
+      expect(html).toContain("我明确同意此长期允许也适用于未来后台运行。");
+      expect(html).not.toContain("披露版本");
+      expect(html.match(/<button\b/g)).toHaveLength(request.allowedChoices.length);
+    }
   });
 
   it("disables every choice while a response is in flight", () => {
