@@ -11,8 +11,9 @@
 
 The continuation of session `01a0437d-29a9-7fd2-b35c-7ef01f7af14e` recovered the owner's explicit approval to commit
 and archive `08-29-compaction-harness`. Slices 1-3 are checkpointed at `64ff195`, `8266050`, and `77cce38`; Slice 4 and
-the final convergence repairs are complete. The task remains active only until the authorized commit/archive sequence
-finishes. Its detailed evidence is in `.trellis/tasks/08-29-compaction-harness/implement.md`.
+the final convergence repairs are committed at `94407cf`, with the source-size/quality guidance at `6761090`.
+The child is completed and archived on 2026-09-05; its session pointers were cleared. Detailed evidence is in
+`.trellis/tasks/archive/2026-09/08-29-compaction-harness/implement.md`.
 
 - Shipped contract: token-first Replay, one provider-independent Utility Slot/maintenance path, durable fenced summary
   CAS, complete-input pressure at `effectiveWindow * 0.8`, deterministic reduction/remeasurement, and safe quality/retry
@@ -29,7 +30,7 @@ finishes. Its detailed evidence is in `.trellis/tasks/08-29-compaction-harness/i
 - D70 preserves the unproven same-ToolLoop `prepareStep` limitation. D75 tracks token-ratio/benefit observability; D76
   tracks prompt versioning and fidelity benchmarks. They are separate follow-ups, not incomplete Slice 4 work.
 
-Close only this child. Parent `08-28-dsh-observability-expansion` remains `in_progress` for D68-B; its UI work has not
+Only this child was closed. Parent `08-28-dsh-observability-expansion` remains `in_progress` for D68-B; its UI work has not
 been started by this closeout. Keep OpenBiliClaw and Avatar lab work independent. The historical program snapshots below
 remain useful for their contracts, not as current task or Git-status authority.
 

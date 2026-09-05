@@ -330,6 +330,10 @@ authoritative evidence.
 
 ## Final closeout verification - 2026-09-05
 
+Lifecycle: implementation is committed as `94407cf`; source-size/quality guidance is committed as `6761090`.
+This child was archived on 2026-09-05, clearing its active session pointers. Parent D68-B remains open.
+The dispatch instructions above record the historical active-task path; future work needs its own reviewed task.
+
 Continuation from session `01a0437d-29a9-7fd2-b35c-7ef01f7af14e` recovered the owner's explicit commit/archive
 authorization. The final full-scope Compaction review repaired three demonstrated defects before closeout:
 
@@ -381,7 +385,7 @@ PowerShell's interrupted PTY wrapper returned 1 separately. Both PIDs and listen
 | Tool safety | Balanced calls/results; no side-effect replay; privacy-safe compaction transcript |
 | Existing behavior | Normal chat/tool flow, Character isolation, Memory authority, prompt cache stability, and Monitor projections |
 | Runtime | `pnpm -r typecheck`, root `pnpm lint`, focused/full `pnpm -r test`, Core boot smoke, and `git diff --check` |
-| Task hygiene | `python ./.trellis/scripts/task.py validate .trellis/tasks/08-29-compaction-harness` |
+| Task hygiene | `python ./.trellis/scripts/task.py validate .trellis/tasks/archive/2026-09/08-29-compaction-harness` |
 
 ## Explicit non-goals for this task
 

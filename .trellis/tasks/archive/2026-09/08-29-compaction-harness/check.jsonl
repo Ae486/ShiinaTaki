@@ -8,8 +8,8 @@
 {"file":".trellis/spec/backend/observability-projection.md","reason":"Future semantic compaction evidence, unknown-value and projection privacy contract."}
 {"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Cross-layer consistency review checklist."}
 {"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Evidence-first review rule for installed SDK and reference behavior."}
-{"file":".trellis/tasks/08-29-compaction-harness/research/current-compaction-design.md","reason":"Live implementation evidence and defect list to verify against all changes."}
-{"file":".trellis/tasks/08-29-compaction-harness/research/compaction-design-brief.md","reason":"Compact source-linked DSH/current-design comparison and review checklist."}
+{"file":".trellis/tasks/archive/2026-09/08-29-compaction-harness/research/current-compaction-design.md","reason":"Live implementation evidence and defect list to verify against all changes."}
+{"file":".trellis/tasks/archive/2026-09/08-29-compaction-harness/research/compaction-design-brief.md","reason":"Compact source-linked DSH/current-design comparison and review checklist."}
 {"file":".trellis/tasks/archive/2026-08/07-28-memory-context/batch-6-design.md","reason":"Existing token and overflow contracts; detect accidental regressions."}
 {"file":".trellis/tasks/archive/2026-08/07-28-memory-context/batch-7-design.md","reason":"Existing summary/fold/background contracts; detect silent policy drift."}
 {"file":".trellis/tasks/archive/2026-08/07-28-memory-context/research/re-compaction-prompts.md","reason":"Summary quality and truncation lessons for review."}

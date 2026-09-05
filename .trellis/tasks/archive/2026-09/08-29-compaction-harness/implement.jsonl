@@ -7,8 +7,8 @@
 {"file":".trellis/spec/backend/e2e-harness.md","reason":"Deterministic and real-agent evidence rules for long-history and recovery scenarios."}
 {"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Required boundary mapping across Timeline, projector, database, runtime composition and future Monitor projection."}
 {"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Rules for resolving implementation gaps from named source code and installed APIs rather than invention."}
-{"file":".trellis/tasks/08-29-compaction-harness/research/current-compaction-design.md","reason":"Verified live TakiAgent compaction/replay behavior, tests, and known defects."}
-{"file":".trellis/tasks/08-29-compaction-harness/research/compaction-design-brief.md","reason":"Compact, source-linked execution summary of current defects, DSH transfer decisions, T5 constraints and planned slices."}
+{"file":".trellis/tasks/archive/2026-09/08-29-compaction-harness/research/current-compaction-design.md","reason":"Verified live TakiAgent compaction/replay behavior, tests, and known defects."}
+{"file":".trellis/tasks/archive/2026-09/08-29-compaction-harness/research/compaction-design-brief.md","reason":"Compact, source-linked execution summary of current defects, DSH transfer decisions, T5 constraints and planned slices."}
 {"file":".trellis/tasks/archive/2026-08/07-28-memory-context/batch-6-design.md","reason":"Ratified token-window, calibration and overflow baseline that implementation must preserve or explicitly revise."}
 {"file":".trellis/tasks/archive/2026-08/07-28-memory-context/batch-7-design.md","reason":"Ratified summary projection, folds, detached compaction and flush-before-retire behavior."}
 {"file":".trellis/tasks/archive/2026-08/07-28-memory-context/research/re-compaction-prompts.md","reason":"Reviewed companion summary prompt, quality, date and no-hard-cap decisions."}
