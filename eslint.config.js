@@ -25,8 +25,8 @@ export default tseslint.config(
   {
     plugins: { unicorn },
     rules: {
-      // Anti-sprawl size caps (CLAUDE.md): treat as hard.
-      "max-lines": ["error", { max: 300, skipBlankLines: true, skipComments: true }],
+      // Anti-sprawl responsibility guard (CLAUDE.md): 300-line baseline, with ~20% tolerance before review pressure.
+      "max-lines": ["error", { max: 360, skipBlankLines: true, skipComments: true }],
       "max-lines-per-function": ["error", { max: 50, skipBlankLines: true, skipComments: true }],
       "max-params": ["error", 3],
       // Kebab-case filenames, always.

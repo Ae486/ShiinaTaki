@@ -1,15 +1,20 @@
 # Backend Quality Guidelines
 
-## Size caps (hard rules; will be enforced by ESLint/clippy config)
+## Size and responsibility guard
 
 | Scope | Cap |
 | --- | --- |
-| TS file | 300 lines (`max-lines`, skipBlankLines) |
+| TS file | 300-line baseline; 360-line review threshold (`max-lines`, skipBlankLines) |
 | TS function | 50 lines; max 3 params |
 | Rust function | 100 lines (clippy `too_many_lines`) |
 | Rust file | 500 lines soft cap — split modules before crossing |
 
 Exemptions: generated code, migrations, test files.
+
+The 300-line figure is a design signal, not a mechanical formatting target. A cohesive file may use the roughly 20%
+tolerance up to about 360 lines when that keeps one responsibility readable. Do not compress statements, remove useful
+whitespace, or create artificial helper files merely to pass the check. Split a file when it combines distinct
+responsibilities or materially exceeds the relaxed threshold; function and parameter limits remain strict.
 
 ## Anti-sprawl behavior
 
@@ -62,7 +67,7 @@ Rust:
 ## Checks before handoff
 
 ```
-pnpm -r typecheck && pnpm -r lint && pnpm -r test
+pnpm -r typecheck && pnpm lint && pnpm -r test
 cargo clippy --manifest-path apps/desktop/src-tauri/Cargo.toml -- -D warnings
 cargo test  --manifest-path apps/desktop/src-tauri/Cargo.toml
 ```

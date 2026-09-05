@@ -6,7 +6,7 @@
 
 Before writing backend code:
 
-1. Read `CLAUDE.md` (root) — architecture invariants, naming, size caps.
+1. Read `CLAUDE.md` (root) — architecture invariants, naming, and size/responsibility guidance.
 2. Read `CONTEXT.md` — use domain terms exactly (Capability, Permission Gate, Node, Workspace...).
 3. Protocol change? Start in `packages/shared` (zod schema) — never declare message shapes locally.
 4. New system action? It is a Capability: Rust implementation + permission entry + audit; TS side only gets a client stub.
@@ -19,7 +19,7 @@ Before writing backend code:
 | [Directory Structure](./directory-structure.md) | Where files go in `packages/core` and `src-tauri` |
 | [Database Guidelines](./database-guidelines.md) | SQLite single-writer, wrapper, migrations |
 | [Error Handling](./error-handling.md) | Structured tool errors, Rust error types, IPC error shape |
-| [Quality Guidelines](./quality-guidelines.md) | Size caps, lint, tests, forbidden patterns |
+| [Quality Guidelines](./quality-guidelines.md) | Size/responsibility guard, lint, tests, forbidden patterns |
 | [Logging Guidelines](./logging-guidelines.md) | pino / tracing, audit log |
 | [E2E Harness](./e2e-harness.md) | Headless `withStack` fixture; L1 (deterministic) + L2 (real-agent) dual-track per capability |
 | [Permission Authorization](./permission-authorization.md) | Executable canonical governance contract: Core-owned durable Level/overrides/generation; extension-neutral identity/registry; complete Host projection, trusted local classification, stricter-only final enforcement/evidence; legacy deny migration; Home and real-process gates |

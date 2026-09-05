@@ -75,7 +75,7 @@ references/          Third-party study material — git-ignored; licenses vary (
 ## Anti-sprawl rules (the point: AI assistants default to appending — don't)
 
 - **Do not append new functionality to an existing file by default.** Before adding code, ask: is this a distinct concern? Then it gets its own colocated file.
-- Size caps (enforced via ESLint/clippy once configured; treat as hard now): **TS file <= 300 lines, function <= 50 lines, params <= 3. Rust function <= 100 lines (clippy `too_many_lines`), file soft cap 500.** Exemptions: generated code, test files.
+- Size guidance (enforced by ESLint/clippy): **TS files have a 300-line baseline and a relaxed 360-line review threshold (about 20% tolerance); functions remain <= 50 lines and params <= 3. Rust functions remain <= 100 lines (clippy `too_many_lines`), with a 500-line soft file threshold.** The file threshold is a responsibility-boundary signal, not a formatting target: never compress readable code or split a cohesive module only to satisfy a number. Split when distinct responsibilities become coupled, or when a file materially exceeds the relaxed threshold. Exemptions: generated code, test files.
 - A new cluster of state + handlers + calls for one feature = extract it (hook / child component / service module) immediately, not "later".
 - **No barrel files inside packages.** `index.ts` exists only as a package's public entry, with named re-exports (never `export *`). Internal code uses direct imports.
 - No god-buckets: no catch-all `types.ts` / `utils.ts` growing without bound — split by responsibility.

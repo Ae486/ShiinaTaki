@@ -1,8 +1,12 @@
 # Frontend Quality Guidelines
 
-## Size caps (same as backend TS)
+## Size and responsibility guard (same as backend TS)
 
-File <= 300 lines; function/hook/component <= 50 lines; max 3 params; test files exempt. Do not append to an existing file by default — distinct concern = new colocated file.
+Use a 300-line baseline and a relaxed 360-line review threshold for source files; function/hook/component <= 50 lines and
+max 3 params remain strict; test files are exempt. The file threshold is a responsibility signal, not a formatting target:
+do not compress readable code or create artificial splits to satisfy a number. Split when distinct concerns become coupled
+or a file materially exceeds the relaxed threshold. Do not append to an existing file by default — distinct concern = new
+colocated file.
 
 ## Performance rules (this window is ALWAYS ON — perf is a feature, not an optimization)
 

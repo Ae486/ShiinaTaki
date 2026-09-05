@@ -17,8 +17,10 @@
 
 - Building a new tool: walk the **[B — Birth checklist](#b--birth-checklist)** first, then satisfy N/D/S/R/I.
 - Reviewing a tool: each rule is a checkable assertion; a violation without a logged exemption is a review finding.
-- Sizing: tool files are thin (CLAUDE.md anti-sprawl — file ≤300 lines, `execute` ≤50, params ≤3); business logic
-  delegates to a capability client / subscription, never inline in the handler (B2).
+- Sizing: tool files are thin (CLAUDE.md anti-sprawl — 300-line baseline with a relaxed 360-line review threshold;
+  `execute` ≤50, params ≤3); business logic delegates to a capability client / subscription, never inline in the
+  handler (B2). The file threshold is a responsibility signal, not a formatting target: do not compress readable code
+  or split a cohesive tool solely to satisfy a number.
 
 ## Source keys
 

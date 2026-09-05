@@ -693,8 +693,9 @@ packages/core/src/heartbeat/
   utterance-policy.ts     rate budget, quiet hours, class-based override, ignore-backoff
   deferral.ts             queue-of-one, breakpoint release, staleness TTL
 ```
-Seven files, each well under the 300-line cap; every one is unit-testable with an injected
-clock, matching how `activity-state.ts` and `privacy-pause.ts` are already built [D].
+Seven files, each kept cohesive and near the 300-line baseline; use the roughly 20% tolerance as a review threshold
+and split only when responsibilities become coupled or a file materially exceeds that threshold. Every file remains
+unit-testable with an injected clock, matching how `activity-state.ts` and `privacy-pause.ts` are already built [D].
 
 ---
 

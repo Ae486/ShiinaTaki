@@ -145,9 +145,9 @@ That works (the `turn` param is optional — `chat-agent.ts:32`, `:76`; tests al
 - `packages/core/package.json` — add `"croner": "^10"` to `dependencies`.
 - `packages/core/src/db/migrations/005-schedules.ts` (new) — `CREATE TABLE schedules (id TEXT PRIMARY KEY, character_id TEXT NOT NULL, kind TEXT NOT NULL, cron TEXT, prompt TEXT NOT NULL, enabled INTEGER NOT NULL, last_run_at TEXT, next_run_at TEXT, created_at TEXT NOT NULL) STRICT;` + an index on `(enabled, next_run_at)`. Register in `db/migrations/index-list.ts` (import + array entry).
 - `packages/core/src/db/schedule-repo.ts` (new) — `createScheduleRepo(db) -> { list, listDue, insert, update, delete, markRun }`; zod row parse; mirrors `memory-auto-repo.ts`. Persist `last_run_at` so intervals survive restarts (survey B3, `m5-proactivity-survey.md:272-278`).
-- `packages/core/src/scheduler/scheduler.ts` (new) — croner `Cron` instances built from repo rows; `start()/stop()/reload()`; each fire delegates to the heartbeat/turn runner. Keep ≤300 lines; if the registry + the job-lifecycle grow, split `scheduler/job-registry.ts`.
+- `packages/core/src/scheduler/scheduler.ts` (new) — croner `Cron` instances built from repo rows; `start()/stop()/reload()`; each fire delegates to the heartbeat/turn runner. Keep the module cohesive near the 300-line baseline; review around 360 lines and split only when registry and job-lifecycle responsibilities become materially coupled.
 - `packages/core/src/scheduler/index.md` + `packages/core/src/heartbeat/index.md` + `packages/core/src/proactive/index.md` (new folder indexes — mandatory, `quality-guidelines.md:34-36`), and one line each added to `packages/core/src/index.md`.
-- `main.ts` — construct `scheduleRepo` beside `:123`, `scheduler` + `heartbeatRunner` beside `:359-360`, and `scheduler.stop()` in `shutdown` (`:379-386`). **`main.ts` is already at 389 lines and was noted at the 300-line cap during T3a** (devlog m5: "main.ts 触顶 300 行, 顺手抽出 `media/directory-size.ts`"). T4 adds wiring to a file already over cap — expect to extract a composition helper (e.g. `packages/core/src/proactivity-wiring.ts` or a `scheduler/compose.ts` taking the already-built deps) rather than appending inline.
+- `main.ts` — construct `scheduleRepo` beside `:123`, `scheduler` + `heartbeatRunner` beside `:359-360`, and `scheduler.stop()` in `shutdown` (`:379-386`). **`main.ts` was already beyond the old 300-line cap during T3a** (devlog m5: "main.ts 触顶 300 行, 顺手抽出 `media/directory-size.ts`"). T4 adds wiring to a file that is now materially beyond the relaxed review threshold — keep the planned composition helper (e.g. `packages/core/src/proactivity-wiring.ts` or a `scheduler/compose.ts` taking the already-built deps) as a responsibility-boundary refactor, not line-count compression.
 
 ---
 
@@ -288,7 +288,7 @@ Also available: `renderDayDate` (`:32-35`, stable-early), `renderCurrentTime` (`
 
 ### Universal (root `CLAUDE.md` + `.trellis/spec/backend/quality-guidelines.md`)
 
-- TS file ≤ **300 lines**; function ≤ **50**; params ≤ **3**. Exempt: migrations, generated, tests.
+- TS file **300-line baseline; 360-line relaxed review threshold** (about 20% tolerance); function ≤ **50**; params ≤ **3**. Exempt: migrations, generated, tests. Do not compress readable code or split a cohesive module solely for the file number; split distinct responsibilities or materially oversized files.
 - kebab-case filenames always; `x-tool.ts` exporting `createXTool`; `XSchema` + `type X = z.infer<...>`.
 - No barrel files inside packages; no god-bucket `utils.ts`/`types.ts`; do not append a distinct concern to an existing file.
 - Every production file opens with a 3-6 line `INPUT: / OUTPUT: / POS:` header. Every touched directory updates its `index.md` **in the same change**.
@@ -354,7 +354,7 @@ Permitted (additive seams): pre-loop guard/save/append (`:79-90`), `ToolLoopAgen
 | **Approval deadlock / silent deny** | `chat-agent.ts:100`, `approval/approval-gate.ts` | With no `turn.notify`, unremembered MCP tools are denied fail-closed (correct, but the model sees denials it cannot resolve). Shell capability tools can still raise a **node-side** dialog from an unattended turn — a heartbeat calling `screenshot` at 3am pops a Windows dialog. Constrain the heartbeat's toolset or rely on the Privacy Pause / permission level. |
 | **Turn-queue deadlock** | `turn-queue.ts:21-33` | `acquire` never times out. A heartbeat that awaits the lock behind a wedged user turn waits forever, and croner may stack more fires behind it. Use `tryAcquire` (§1.5) + an `inflight` guard, mirroring `activity-sampler.ts:135`. |
 | **Timer holds the process open** | `main.ts:379-388` | croner jobs are not `.unref()`'d timers by default — `scheduler.stop()` must run in `shutdown` or `SIGINT` hangs. |
-| **`main.ts` over cap** | `main.ts` is 389 lines | Already over the 300-line rule and flagged during T3a. Adding scheduler+heartbeat+proactive wiring inline will fail review. |
+| **`main.ts` responsibility pressure** | `main.ts` was 389 lines during the T3a note and has since grown | The old 300-line rule is not a mechanical failure, but this file is materially beyond the relaxed threshold and combines composition concerns. Keep scheduler+heartbeat+proactive wiring in a dedicated composition helper. |
 | **Reconcile wipes an index-only tag** | `memory/indexer.ts:26-49` + `main.ts:148` | A `context` column added only to `memory_entries` disappears at the next boot. Frontmatter first (§5.2). |
 | **Legacy memory files fail to parse** | `memory/entry.ts:32` hard `parse` | A REQUIRED new frontmatter field makes every pre-existing memory "invalid" at reconcile (`store.ts:94-96`). Make `context` optional. |
 | **T3b is uncommitted** | `git status` | `packages/core/src/perception/` is untracked. Any branch/stash/reset operation loses it. Confirm with the leader whether to commit T3b before starting T4. |
