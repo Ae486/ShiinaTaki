@@ -1346,3 +1346,42 @@ recorded without widening this child or entering Heartbeat implementation:
 ### Status
 
 [OK] **Planning/documentation complete; commit and archive remain owner-authorized next steps**
+
+
+## Session 29: Compaction Harness final check and archive
+
+**Date**: 2026-09-05
+**Task**: Compaction Harness final check and archive
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Resumed session 01a0437d-29a9-7fd2-b35c-7ef01f7af14e with existing owner authorization. Completed final Compaction review, committed the remaining Slice 4 work and development guidance, archived only the Compaction child, and preserved unrelated Avatar/OpenBiliClaw work.
+
+### Main Changes
+
+- Fixed actual provider-message reduction accounting, strict-below-trigger target arithmetic, and primary-only relationship pressure publication; all three have regressions and executable spec coverage.
+- Updated HANDOFF, completed task/research status, D70/D75/D76 links, archive-safe context manifests, and recorded implementation commit. Reconciled the stale index with existing Session 28 before adding this entry.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `6761090` | (see git log) |
+| `94407cf` | (see git log) |
+| `34fd3bc` | (see git log) |
+
+### Testing
+
+- [OK] Core: 293 files, 1853 passed, 1 skipped; focused gate: 4 files, 21 passed. Shared 356, Desktop 565, CLI 47 passed. The initial Skills ZIP timeout passed unchanged alone and in the final full Core run.
+- [PARTIAL] Core/Shared/CLI/E2E typechecks and Desktop source-only typecheck passed. Lint excluding apps/desktop/lab passed with one existing warning. Full-workspace typecheck/lint remain blocked by concurrent excluded lab errors; see archived implement.md.
+- [OK] Isolated Core boot migrated 1-32; same-data reopen applied no migration; SIGINT exit code 0, listeners closed, SQLite integrity ok, zero model/compaction activity. Child and parent manifests and staged whitespace checks passed.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Parent 08-28-dsh-observability-expansion remains in_progress for D68-B. D75 metrics and D76 prompt quality need separate reviewed follow-up scope; no new task was activated.
+- No paid/provider calls or Rust checks were repeated in final closeout. Real-provider acceptance remains the dated 2026-09-02 evidence. Unrelated lab/OpenBiliClaw changes remain outside these local commits.

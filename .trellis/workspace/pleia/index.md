@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 27
-- **Last Active**: 2026-08-25
+- **Total Sessions**: 29
+- **Last Active**: 2026-09-05
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1311 | Active |
+| `journal-1.md` | ~1387 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,8 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 29 | 2026-09-05 | Compaction Harness final check and archive | `6761090`, `94407cf`, `34fd3bc` | `task/t4-skills-mcp-productization` |
+| 28 | 2026-08-27 | Monitor acceptance follow-up planning | - | `task/t4-skills-mcp-productization` |
 | 27 | 2026-08-25 | Slice 5A Scheduled Task provider | `c692c82`, `240a040` | `task/t4-skills-mcp-productization` |
 | 26 | 2026-08-24 | Complete Slice 2 Durable Event Ledger | `8f75115` | `task/t4-skills-mcp-productization` |
 | 25 | 2026-08-24 | Complete Slice 1 Harness Foundation | `0e61111`, `10151e0`, `f59ed3e`, `73ef453` | `task/t4-skills-mcp-productization` |
