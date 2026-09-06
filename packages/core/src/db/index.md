@@ -27,6 +27,13 @@
 - hindsight-bank-setup-repo.ts — deterministic per-Bank template/setup evidence repository
 - hindsight-cutover-run-repo.ts — B4 lifecycle/fencing state plus bounded operator status and verification projections
 - hindsight-replica-repo.ts — atomic logical snapshot staging, published replica records, and per-Bank checkpoint repository
+- hindsight-replica-sync-repo.ts — Bank/lease/deadline validation, journal and reconciliation/reset, atomic canonical/FTS/cache publication, and checkpoint-last CAS
+- hindsight-replica-record-store.ts — strict full-record persistence, kind-aware and malformed-row FTS repair/removal, search, and manifest digest
+- hindsight-replica-checkpoint-store.ts — checkpoint read and predecessor CAS publication
+- hindsight-replica-lease-repo.ts — persisted per-Bank owner/run/fence lease lifecycle
+- hindsight-replica-scheduler-repo.ts — durable Bank configuration, manual/catch-up claims, lease-bound settlement, and restart recovery
+- hindsight-replica-schedule-state.ts — deterministic retry precedence, independent due intervals, and manual-mode transitions
+- hindsight-replica-snapshot-cache.ts — payload-and-witness digests bound to Bank/lineage/generation/page hash, with atomic pruning and journal invalidation
 - hindsight-authority-repo.ts — synchronous precondition gate, activation receipts, and atomic Local-to-Hindsight epoch promotion
 - canonical-memory-authority-repo.ts — explicit Local authority epoch and scoped Bank persistence
 - structured-memory-block-repo.ts — revisioned Core-owned structured Memory Blocks, registry/writer enforcement, rendering

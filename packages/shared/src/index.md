@@ -39,8 +39,11 @@
 - skill-lifecycle-schema.ts — strict Skill package lifecycle/operator protocol, import limits, provenance, trust, scan, and runtime projections
 - ws-defaults.ts — default loopback WS host/port constants
 - memory-provider-domain-schema.ts — strict canonical authority, Bank, source, unit, derived, policy, capability, and error contracts
-- memory-provider-operation-schema.ts — strict retain, recall, reflect, and mutation operation contracts
+- memory-provider-operation-schema.ts — consistent retain pending/zero-result/per-Bank receipts and mutation supersession contracts alongside recall/reflect
 - memory-provider-envelope-schema.ts — validated success/error envelopes for canonical provider operations
+- memory-replica-schema.ts — bounded ordered journal upsert/tombstone and replica checkpoint contracts
+- memory-replica-schedule-schema.ts — durable Bank configuration, fenced run/result, retry/manual state, and closed truthful status contracts
+- hindsight-journal-schema.ts — complete Hindsight transaction batches, per-change lineage, cursor windows, and unique object transitions
 - memory-migration-schema.ts — strict operator-only migration control and bounded report contracts
 - hindsight-cutover-schema.ts — strict B4 import, logical snapshot/page/record, staging checkpoint, fact mapping, activation, and operator status/verification contracts
 - run-event-schema.ts — versioned durable Run/Event contracts, including model/tool/context/governance observability facts

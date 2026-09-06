@@ -35,12 +35,12 @@
 - tidy-tools.ts — the maintenance verbs the foreground agent never gets: memory_reinforce / memory_archive_supersede (the sanctioned promotion route) / memory_set_disclosure / memory_refile / block_rethink (background blocks only) / memory_finish_edits (the structural terminal); never-throw envelopes
 - tidy-pass.ts — the model-led maintenance pass: write-count trigger (maybeRun) + operator runNow over one execute path; clean store = zero model calls; system-reminder input framing; six refinement principles + do-nothing permission + imported R10 voice; stopWhen finish-tool/step-cap; watermark advances only on success; tidy event + counts-only log line
 - memory-provider.ts — async provider and optional vector projection interfaces
-- local-memory-provider.ts — dormant structured Local provider with atomic retain, sparse recall, and CAS mutations
+- local-memory-provider.ts — structured Local provider with completed-only retain, applied/unchanged CAS mutations, and sparse recall
 - canonical-local-runtime.ts — post-activation SQLite-only runtime with canonical tools/assembly and no Markdown dependency
 - runtime-selector.ts — marker-first startup routing that never constructs legacy memory after canonical activation
 - runtime-composition.ts — marker-first Core composition for one Utility Slot, provider-independent Compaction/maintenance with complete-pressure measurement, Legacy retirement, Canonical Local activation, and on-demand migration cutover
 - authority-aware-legacy-surfaces.ts — mutable authority wrappers that retire legacy auto-memory, tidy, and direct writes after canonical activation
 - memory-coordinator.ts — persisted-authority dispatch, capability checks, cancellation, and no-fallback envelopes
-- hindsight/ — inactive B3 Hindsight connection/setup client, compatibility, persistence, and operator orchestration; never wired into Memory Authority
+- hindsight/ — Hindsight setup/cutover clients and offline-testable replica sync/reconciliation; runtime authority composition remains separate
 - canonical-tools/ — dormant capability-filtered Hindsight-aligned tool adapters
 - image-description-writer.ts — thin, DELETABLE image→text bridge (#17 decision 6, D28): VLM describes a turn's images, PII-scrubs the text, writes ONE episode via the existing store path with origin "observed" (the marker the render sites fence on — D47); detached, warn+drop

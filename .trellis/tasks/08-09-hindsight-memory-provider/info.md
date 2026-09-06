@@ -2,7 +2,18 @@
 
 ## Status
 
-Prepared for implementation. Product semantics are approved, the first supported Hindsight base release is fixed to `0.9.0`, and the required compatibility extensions are evidence-backed by the task research files. Exact extension schemas remain implementation contracts to be authored and tested in Batch 0.
+Product semantics are approved and the first supported Hindsight base release is fixed to `0.9.0`. Compatibility
+contracts and source evidence are maintained in the compatibility child and the task research files.
+
+Current continuation status (2026-09-06): the main-worktree B5 task remains `in_progress` on baseline `3c67fd5`.
+Waves 0-2 have independent offline verification; Wave 2 passed with five fixes and is uncommitted. Its executable
+contract is [Memory Replica Sync](../../spec/backend/memory-replica-sync.md), including scheduling/lease ownership,
+transaction deadlines, admitted Bank binding, and verified page-cache reuse. Cold or unverified cache records still
+require provider page reads. B4 owns current-Local coverage, import completeness, and the final activation fence.
+Wave 3 Pending Memory/recovery is outstanding and B6 remains planning; offline verification opens no live gate.
+See [B4 current-Local gate](../08-09-hindsight-initial-cutover/design.md),
+[B5 sync/recovery plan](../08-09-memory-replica-sync-recovery/implement.md), and [B6 runtime plan](../08-09-memory-runtime-integration/implement.md).
+No live acceptance criterion is marked passed by this continuation.
 
 ## Design Sources
 

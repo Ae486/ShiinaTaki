@@ -2,7 +2,7 @@
 - hindsight-contracts.ts — bounded Hindsight 0.9.0 raw-wire schemas and safe projections
 - hindsight-endpoint-policy.ts — endpoint normalization and SSRF/redirect policy for explicit operator endpoints
 - hindsight-errors.ts — sanitized Hindsight setup failure code and retry projection
-- hindsight-client.ts — injected authenticated REST client with bounded/cancelled setup, import, and logical-snapshot operations
+- hindsight-client.ts — authenticated REST client with streaming response bounds for setup, import, logical snapshots, and complete journal pages
 - hindsight-secret-refs.ts — fixed provider-neutral Secret Catalog refs and connection-only trusted resolver marker
 - hindsight-compatibility-service.ts — ordered exact-build health/version/manifest gate and safe configuration fingerprint
 - hindsight-bank-identity.ts — versioned deterministic opaque Global/Character external Bank ids
@@ -14,9 +14,17 @@
 - hindsight-import-identity.ts — deterministic UUID adapter for B2 operation identities
 - hindsight-import-ledger-repo.ts — resumable B4 operation and one-to-many fact ledger repository
 - hindsight-import-orchestrator.ts — deadline-bounded idempotent retain and derived fact mapping orchestration
-- hindsight-snapshot-contracts.ts — bounded provider wire schemas and provider-neutral logical snapshot normalization
+- hindsight-snapshot-contracts.ts — bounded provider wire schemas and collision-rejecting logical payload normalization with opaque nested JSON keys
 - hindsight-snapshot-validator.ts — page/order/count/hash/manifest and provider-lineage integrity gate
 - hindsight-replica-builder.ts — cursor-bound snapshot capture, staging, reconciliation callback, and checkpoint publication
+- hindsight-replica-projection.ts — source-grounded canonical Taki policy/provenance projection for snapshot and journal records
+- hindsight-journal-contracts.ts — authenticated changes endpoint wire normalization with complete transaction bounds
+- hindsight-incremental-sync.ts — one admitted Bank journal page pulled, projected, and transactionally applied under Bank binding, lease, and captured deadline
+- hindsight-replica-scheduler.ts — asynchronous all-Bank single-flight execution, persisted wakes, bounded supervisor retries, manual/reconnection requests, and truthful status
+- hindsight-replica-run-execution.ts — bounded per-run cancellation, reset escalation, and lease-fenced completion
+- hindsight-replica-sync-runner.ts — admitted client/repository incremental catch-up, full logical reconciliation, and verified reset integration
+- hindsight-replica-snapshot-loader.ts — verified one-record snapshot transfer with current-manifest cache reuse and bounded requests
+- hindsight-replica-errors.ts — closed replica diagnostics and lease/reset classification without provider exception text
 - hindsight-replica-reconcile.ts — exact import document/fact/revision reconciliation against a staged snapshot
 - hindsight-authority-promotion-service.ts — bounded Local quiescence and single synchronous Hindsight promotion transaction
 - hindsight-setup-errors.ts — sanitized setup error normalization shared by setup stages

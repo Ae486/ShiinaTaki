@@ -54,3 +54,20 @@ Perform a resumable, verifiable Local-to-Hindsight migration and activate Hindsi
 - The current Taki runtime has no Hindsight data-plane provider, logical snapshot/journal/checkpoint implementation, or Hindsight epoch promotion seam; these are B4 deliverables.
 - The binding authority/replica policy is [`docs/adr/0009-single-memory-authority-with-local-replica.md`](../../../docs/adr/0009-single-memory-authority-with-local-replica.md).
 - Detailed live seam evidence is in [`research/taki-cutover-seams.md`](research/taki-cutover-seams.md).
+
+## Current Local Coverage Addendum (2026-09-05)
+
+B4 import completeness is defined against a frozen **current Local epoch manifest**, not only the completed B2
+`memory_migration_sources` rows. Before any remote mutation, capture one immutable manifest for every current Local
+canonical Bank and its source, document, memory-unit, derived, lifecycle, policy, revision, and tombstone-relevant
+record. The manifest binds `{localEpochId, capturedAt, schemaVersion, bankIds, sourceRevisionFence, contentDigest}` and
+records the exact source set that must be imported. The B2 snapshot, migration ledger, and backup remain immutable
+evidence; B4 may reference them but must not rewrite or delete them.
+
+The run must prove that the frozen manifest covers all Local retain/edit/invalidate/restore changes since B2. If a
+current Local source or revision is absent from the B2 evidence, B4 records a bounded catch-up set and either imports it
+before continuing or restarts the frozen manifest after the current Local writer is quiesced. At the end of import, take
+a short final fence and revalidate the Local epoch, source revision fence, and content digest. Any drift restarts the
+manifest/import check and leaves `canonical-local` authoritative. A completed B2 ledger alone is therefore not a
+cutover gate. Real activation additionally requires runtime/provider readiness and the full B4 integrity gates; this
+addendum does not mark the live acceptance criteria passed.

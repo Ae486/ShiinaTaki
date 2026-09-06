@@ -435,3 +435,8 @@ await fence.quiesce({ timeoutMs }, () => activateCanonicalLocal(db, {
 }));
 // Startup/runtime selects canonical from the persisted marker; no Markdown fallback or dual-write exists.
 ```
+
+## Canonical Memory Replica Synchronization
+
+See [Memory Replica Sync](./memory-replica-sync.md) for the B5 journal, response bounds, canonical projection,
+lease/transaction/checkpoint, restart-read, and result-receipt contracts.

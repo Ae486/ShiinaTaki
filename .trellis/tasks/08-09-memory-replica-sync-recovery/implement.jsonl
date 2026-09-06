@@ -1,1 +1,10 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Single-writer SQLite transactions, migration ordering, checkpoint-last publication, and restart durability."}
+{"file":".trellis/spec/backend/memory-replica-sync.md","reason":"Executable B5 complete-journal, transport bound, projection, lease/checkpoint, and result-receipt contracts."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Bounded pending, cancellation, unknown-outcome, retry, and superseded error semantics."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Focused/full test gates, typecheck, lint, privacy, and schema/file responsibility checks."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Trace journal, replica, FTS, checkpoint, reader, pending, and runtime boundaries."}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Require source-backed Hindsight journal, snapshot, cursor, revision, and derived-completion assumptions."}
+{"file":"docs/adr/0009-single-memory-authority-with-local-replica.md","reason":"Single authority, verified replica, degraded writes, no automatic failover, and recovery ordering."}
+{"file":".trellis/tasks/08-09-hindsight-initial-cutover/design.md","reason":"B4 current-Local coverage gate, immutable evidence, final fence, and activation boundary consumed by B5."}
+{"file":".trellis/tasks/08-09-hindsight-initial-cutover/research/hindsight-cutover-contracts.md","reason":"Accepted Hindsight journal, snapshot, cursor reset, revision, and derived completion contracts."}
+{"file":".trellis/tasks/08-09-memory-replica-sync-recovery/research/runtime-baseline-2026-09-05.md","reason":"Live Shared/Core runtime seams, migration baseline, and B5/B6 boundary evidence."}

@@ -5,6 +5,7 @@
  */
 import type { Tool } from "ai";
 import type { CanonicalCapabilityIdentity } from "@taki/shared";
+import { MemoryErrorCodeSchema } from "@taki/shared";
 import type { GovernancePolicyService } from "./governance-policy-service.ts";
 import type { ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
 import type { ApprovalPresentation } from "@taki/shared";
@@ -245,11 +246,13 @@ function settleToolResult(effects: EffectLifecycleService, effect: EffectLifecyc
 
 function toolFailure(result: unknown) {
   if (typeof result !== "object" || result === null || !("ok" in result) || (result as { ok?: unknown }).ok !== false) return undefined;
-  const failure = result as { code?: unknown; state?: unknown };
+  const failure = result as { code?: unknown; state?: unknown; error?: { code?: unknown } };
+  const canonicalCode = MemoryErrorCodeSchema.safeParse(failure.error?.code);
+  const code = canonicalCode.success ? canonicalCode.data : typeof failure.code === "string" ? failure.code : undefined;
   const outcome = failure.state === "outcome_unknown" ? "outcome_unknown" as const
-    : failure.state === "cancelled" || failure.code === "MEMORY_OPERATION_CANCELLED" ? "cancelled" as const
-      : failure.code === "MEMORY_OUTCOME_UNKNOWN" ? "outcome_unknown" as const : "failed" as const;
-  const errorCode = typeof failure.code === "string" ? failure.code.toLowerCase().slice(0, 100) : "tool_failed";
+    : failure.state === "cancelled" || code === "MEMORY_OPERATION_CANCELLED" ? "cancelled" as const
+      : code === "MEMORY_OUTCOME_UNKNOWN" ? "outcome_unknown" as const : "failed" as const;
+  const errorCode = code?.toLowerCase().slice(0, 100) ?? "tool_failed";
   return { outcome, errorCode };
 }
 

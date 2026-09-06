@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { EditableMemoryPatchSchema, RecallRequestSchema, RecallResultSchema, RetainRequestSchema } from "./memory-provider-operation-schema.ts";
+import { EditableMemoryPatchSchema, MutationResultSchema, RecallRequestSchema, RecallResultSchema, RetainBankProgressSchema, RetainRequestSchema, RetainResultSchema } from "./memory-provider-operation-schema.ts";
 
 const time = "2026-08-19T00:00:00.000Z";
 const provenance = { actor: "agent" as const, origin: "explicit-agent" as const, characterId: null, timelineFromSeq: null, timelineToSeq: null, capturedAt: time, sanitized: true as const, sourceRef: null };
@@ -20,5 +20,31 @@ describe("canonical operation schemas", () => {
     const result = { hits: [], returned: 0, truncated: false, vectorState: "unavailable" as const, partial: true, branchFailures: [{ scope: "global" as const, code: "MEMORY_PROVIDER_UNAVAILABLE" as const, retryable: false, nextAction: "none" as const }] };
     expect(RecallResultSchema.safeParse(result).success).toBe(false);
     expect(RecallResultSchema.safeParse({ ...result, branchFailures: [{ ...result.branchFailures[0], retryable: true, nextAction: "check-provider" as const }] }).success).toBe(true);
+  });
+  it("represents pending receipts and policy-permitted zero-result completion", () => {
+    expect(RetainResultSchema.safeParse({ status: "pending", operationId: "op", documentId: "doc", sourceRevision: null, memories: [] }).success).toBe(true);
+    expect(RetainResultSchema.safeParse({ status: "completed", documentId: "doc", sourceRevision: 1, memories: [], zeroResult: true }).success).toBe(true);
+    expect(RetainResultSchema.safeParse({ status: "completed", documentId: "doc", sourceRevision: 1, memories: [] }).success).toBe(false);
+  });
+  it("keeps stale and missing mutations non-blocking and validates two-bank progress", () => {
+    expect(MutationResultSchema.safeParse({ outcome: "superseded", record: null }).success).toBe(true);
+    expect(MutationResultSchema.safeParse({ outcome: "not_found", record: null }).success).toBe(true);
+    const progress = { status: "failed" as const, operationId: null, memoryCount: 0, error: "MEMORY_PROVIDER_UNAVAILABLE" as const };
+    expect(RetainResultSchema.safeParse({ status: "pending", operationId: "op", documentId: null, sourceRevision: null, memories: [], bankProgress: [{ scope: "global" as const, ...progress }, { scope: "character" as const, status: "pending" as const, operationId: "op-2", memoryCount: 0, error: null }] }).success).toBe(true);
+    expect(RetainResultSchema.safeParse({ status: "pending", operationId: "op", documentId: null, sourceRevision: null, memories: [], bankProgress: [{ scope: "global" as const, ...progress, error: null }] }).success).toBe(false);
+  });
+  it("rejects incomplete Bank progress in a completed retain receipt", () => {
+    const completed = { status: "completed", documentId: "doc", sourceRevision: 1, memories: [{ memoryId: "m", revision: 1 }] };
+    for (const status of ["pending", "failed"] as const) {
+      const bankProgress = [{ scope: "global", status, operationId: "op", memoryCount: 0,
+        error: status === "failed" ? "MEMORY_PROVIDER_UNAVAILABLE" : null }];
+      expect(RetainResultSchema.safeParse({ ...completed, bankProgress }).success).toBe(false);
+    }
+  });
+  it("validates a standalone Bank receipt before an aggregate can accept it", () => {
+    const progress = { scope: "global", operationId: null, memoryCount: 0, error: null };
+    expect(RetainBankProgressSchema.safeParse({ ...progress, status: "failed" }).success).toBe(false);
+    expect(RetainBankProgressSchema.safeParse({ ...progress, status: "pending" }).success).toBe(false);
+    expect(RetainBankProgressSchema.safeParse({ ...progress, status: "completed", error: "MEMORY_OUTCOME_UNKNOWN" }).success).toBe(false);
   });
 });

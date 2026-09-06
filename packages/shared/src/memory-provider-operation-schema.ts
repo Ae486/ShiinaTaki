@@ -20,8 +20,46 @@ export const RetainRequestSchema = z.strictObject({
   provenance: MemoryProvenanceSchema, policy: PolicyInput,
 });
 export type RetainRequest = z.infer<typeof RetainRequestSchema>;
-export const RetainResultSchema = z.strictObject({ status: z.literal("completed"), documentId: Id, sourceRevision: z.int().min(1), memories: z.array(z.strictObject({ memoryId: Id, revision: z.int().min(1) })).min(1).max(256) });
+const RetainMemoryRefSchema = z.strictObject({ memoryId: Id, revision: z.int().min(1) });
+export const RetainBankProgressSchema = z.strictObject({
+  scope: z.enum(["global", "character"]),
+  status: z.enum(["pending", "completed", "failed"]),
+  operationId: Id.nullable(),
+  memoryCount: z.int().min(0).max(256),
+  error: MemoryErrorCodeSchema.nullable(),
+}).superRefine((value, context) => {
+  if ((value.status === "failed") !== (value.error !== null)) {
+    context.addIssue({ code: "custom", path: ["error"], message: "only failed Bank progress requires an error code" });
+  }
+  if (value.status === "pending" && value.operationId === null) {
+    context.addIssue({ code: "custom", path: ["operationId"], message: "pending Bank progress requires an operation identity" });
+  }
+});
+export type RetainBankProgress = z.infer<typeof RetainBankProgressSchema>;
+
+export const RetainCompletedResultSchema = z.strictObject({
+  status: z.literal("completed"), documentId: Id, sourceRevision: z.int().min(1),
+  memories: z.array(RetainMemoryRefSchema).max(256), zeroResult: z.boolean().optional(),
+  bankProgress: z.array(RetainBankProgressSchema).max(2).optional(),
+}).superRefine((value, context) => {
+  if (value.memories.length === 0 && value.zeroResult !== true) {
+    context.addIssue({ code: "custom", path: ["memories"], message: "empty retain requires an explicit zero-result receipt" });
+  }
+  if (value.memories.length > 0 && value.zeroResult === true) {
+    context.addIssue({ code: "custom", path: ["zeroResult"], message: "zero-result receipt cannot include memories" });
+  }
+  if (value.bankProgress?.some((item) => item.status !== "completed")) {
+    context.addIssue({ code: "custom", path: ["bankProgress"], message: "completed retain requires every Bank to be complete" });
+  }
+  validateBankProgress(value.bankProgress, context);
+});
+const RetainPendingResultSchema = z.strictObject({
+  status: z.literal("pending"), operationId: Id, documentId: Id.nullable(), sourceRevision: z.int().min(1).nullable(),
+  memories: z.array(RetainMemoryRefSchema).max(256), bankProgress: z.array(RetainBankProgressSchema).max(2).optional(),
+}).superRefine((value, context) => validateBankProgress(value.bankProgress, context));
+export const RetainResultSchema = z.union([RetainCompletedResultSchema, RetainPendingResultSchema]);
 export type RetainResult = z.infer<typeof RetainResultSchema>;
+export type RetainCompletedResult = z.infer<typeof RetainCompletedResultSchema>;
 
 export const RecallRequestSchema = z.strictObject({
   bankId: Id, query: z.string().min(1).max(16_384), queryTimestamp: Timestamp.nullable(), budget: z.enum(["low", "mid", "high"]),
@@ -69,8 +107,22 @@ export const RestoreMemoryRequestSchema = z.strictObject({ bankId: Id, memoryId:
 export type UpdateMemoryRequest = z.infer<typeof UpdateMemoryRequestSchema>;
 export type InvalidateMemoryRequest = z.infer<typeof InvalidateMemoryRequestSchema>;
 export type RestoreMemoryRequest = z.infer<typeof RestoreMemoryRequestSchema>;
-export const MutationResultSchema = z.strictObject({ outcome: z.enum(["applied", "unchanged"]), record: CanonicalMemoryRecordSchema });
+export const AppliedMutationResultSchema = z.strictObject({ outcome: z.enum(["applied", "unchanged"]), record: CanonicalMemoryRecordSchema });
+const SupersededMutationResultSchema = z.strictObject({ outcome: z.literal("superseded"), record: CanonicalMemoryRecordSchema.nullable() });
+const MissingMutationResultSchema = z.strictObject({ outcome: z.literal("not_found"), record: z.null() });
+export const MutationResultSchema = z.union([AppliedMutationResultSchema, SupersededMutationResultSchema, MissingMutationResultSchema]);
 export type MutationResult = z.infer<typeof MutationResultSchema>;
+export type AppliedMutationResult = z.infer<typeof AppliedMutationResultSchema>;
 export const EditResultSchema = MutationResultSchema;
 export const InvalidateResultSchema = MutationResultSchema;
 export const RestoreResultSchema = MutationResultSchema;
+
+function validateBankProgress(
+  progress: Array<RetainBankProgress> | undefined,
+  context: z.RefinementCtx,
+): void {
+  if (!progress) return;
+  if (new Set(progress.map((item) => item.scope)).size !== progress.length) {
+    context.addIssue({ code: "custom", path: ["bankProgress"], message: "Bank progress scopes must be unique" });
+  }
+}

@@ -7,8 +7,8 @@ import { createHash, randomUUID } from "node:crypto";
 import {
   CanonicalMemoryUnitSchema, MemoryErrorSchema, MutationRequestSchema, RecallRequestSchema, RetainRequestSchema,
   RecallHitSchema, type CanonicalMemoryBank, type CanonicalMemoryRecord, type EditableMemoryPatch, type MemoryErrorCode,
-  type MemoryProviderCapabilities, type MemoryResult, type MutationRequest, type MutationResult, type RecallRequest,
-  type RecallResult, type RetainRequest, type RetainResult, type TakiMemoryPolicyProjection,
+  type MemoryProviderCapabilities, type MemoryResult, type MutationRequest, type AppliedMutationResult as MutationResult, type RecallRequest,
+  type RecallResult, type RetainRequest, type RetainCompletedResult as RetainResult, type TakiMemoryPolicyProjection,
 } from "@taki/shared";
 import type { z } from "zod";
 import type { CanonicalMemoryAuthorityRepo } from "../db/canonical-memory-authority-repo.ts";
@@ -28,7 +28,12 @@ export interface LocalMemoryProviderDeps {
   tokenizer: SearchTokenizer; vector?: MemoryVectorProjection; now?: () => string; providerLineageId?: string;
 }
 
-export function createLocalMemoryProvider(deps: LocalMemoryProviderDeps): MemoryProvider {
+export interface LocalMemoryProvider extends MemoryProvider {
+  retain(context: MemoryProviderCallContext, request: RetainRequest): Promise<MemoryResult<RetainResult>>;
+  mutate(context: MemoryProviderCallContext, request: MutationRequest): Promise<MemoryResult<MutationResult>>;
+}
+
+export function createLocalMemoryProvider(deps: LocalMemoryProviderDeps): LocalMemoryProvider {
   const epoch = deps.authority.activeEpoch(); const state = { vectorDegraded: false };
   const providerLineageId = deps.providerLineageId ?? epoch.providerLineageId;
   return {

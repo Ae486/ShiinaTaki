@@ -3,7 +3,7 @@
   "name": "memory-replica-sync-recovery",
   "title": "Memory replica synchronization and recovery",
   "description": "Implement transactional incremental replica synchronization, periodic reconciliation, durable degraded writes, and deterministic recovery without automatic authority failover.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "backend-memory-replication",
   "package": null,

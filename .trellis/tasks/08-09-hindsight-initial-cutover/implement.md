@@ -94,3 +94,17 @@ accepted Hindsight service; real LLM health remains explicit and owner-approved.
 - Active authority remains `canonical-local` until the owner explicitly approves an actual cutover run.
 - No B4 test or offline command imports existing user Memory into Hindsight.
 - B2 evidence remains readable and untouched.
+
+## Wave 0A - Current Local coverage preflight (required before Wave 1)
+
+**Ownership:** B4 coverage manifest, catch-up detector, and final-fence revalidation tests. This is an import
+prerequisite, not a new task and not a production cutover.
+
+**RED:** a current Local source/revision created or changed after B2 is detected; retain/edit/invalidate/restore and
+tombstone cases are represented; a manifest drift during import is refused; B2 rows remain unchanged. A completed B2
+`memory_migration_sources` row without a matching current revision is not accepted as coverage.
+
+**GREEN:** freeze one bounded current Local epoch manifest, derive a deterministic catch-up set or restart decision,
+retain immutable B2 ledger/snapshot references, and perform a short final fence revalidation before activation
+preparation. Any mismatch leaves Local authoritative. This wave can prove offline set completeness and drift handling;
+it cannot prove a live Hindsight endpoint, runtime provider readiness, or authority activation.

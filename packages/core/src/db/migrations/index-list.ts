@@ -36,6 +36,8 @@ import { scheduledTasksMigration029 } from "./029-scheduled-tasks.ts";
 import { scheduledOccurrenceCharacterMigration030 } from "./030-scheduled-occurrence-character.ts";
 import { runUsageDetailsMigration031 } from "./031-run-usage-details.ts";
 import { conversationCompactionLifecycleMigration032 } from "./032-conversation-compaction-lifecycle.ts";
+import { hindsightReplicaSyncMigration033 } from "./033-hindsight-replica-sync.ts";
+import { hindsightReplicaSchedulerMigration034 } from "./034-hindsight-replica-scheduler.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -70,4 +72,6 @@ export const MIGRATIONS: Migration[] = [
   scheduledOccurrenceCharacterMigration030,
   runUsageDetailsMigration031,
   conversationCompactionLifecycleMigration032,
+  hindsightReplicaSyncMigration033,
+  hindsightReplicaSchedulerMigration034,
 ];
