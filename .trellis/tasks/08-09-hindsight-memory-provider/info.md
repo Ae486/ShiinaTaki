@@ -6,7 +6,7 @@ Product semantics are approved and the first supported Hindsight base release is
 contracts and source evidence are maintained in the compatibility child and the task research files.
 
 Current continuation status (2026-09-06): the main-worktree B5 task remains `in_progress` on baseline `3c67fd5`.
-Waves 0-2 have independent offline verification; Wave 2 passed with five fixes and is uncommitted. Its executable
+Waves 0-2 have independent offline verification; Wave 2 passed with five fixes; Waves 0-2 are committed as `69ca779`. Its executable
 contract is [Memory Replica Sync](../../spec/backend/memory-replica-sync.md), including scheduling/lease ownership,
 transaction deadlines, admitted Bank binding, and verified page-cache reuse. Cold or unverified cache records still
 require provider page reads. B4 owns current-Local coverage, import completeness, and the final activation fence.

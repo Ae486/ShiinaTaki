@@ -5,8 +5,8 @@
 > Wave 2 scheduling/reconciliation recovery passed with five fixes. Full TS tests/typechecks, root lint, and isolated
 > Core startup with migrations 1..34 passed. Read the child's execution record for exact evidence, cache/API limits,
 > and unrun platform/live gates; its executable contract is `.trellis/spec/backend/memory-replica-sync.md`.
-> Work remains uncommitted and B5 remains `in_progress`.
-> The B5 execution record is close to the 32 KiB context limit; keep later evidence in linked task research files.
+> Waves 0-2 are committed as `69ca779`; B5 remains `in_progress` for Wave 3.
+> The active execution plan is compact; complete prior evidence is preserved in the task research archive.
 > Preserve existing changes and the protected legacy backup. Wave 3 recovery, B6 runtime wiring, B4 current-Local
 > coverage/final fence, and owner-approved live activation remain outstanding. The T4 snapshot below does not select
 > the active Memory task or authorize work outside the main worktree.

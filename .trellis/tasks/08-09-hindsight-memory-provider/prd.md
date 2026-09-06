@@ -7,7 +7,7 @@ and acceptance separately against the frozen compatibility target and extension 
 
 Current continuation status (2026-09-06): B5 Waves 0-2 have passed their independent offline checks on main baseline
 `3c67fd5`. Wave 2 recovery completed scheduling, verified reconciliation, and cursor reset; its independent review
-fixed five defects and passed the full TS matrix plus isolated Core startup. The implementation remains uncommitted.
+fixed five defects and passed the full TS matrix plus isolated Core startup. The Waves 0-2 checkpoint is committed as `69ca779`.
 B4 still owns complete frozen current-Local coverage (including post-B2 retain/edit/invalidate/restore changes) and
 final-fence revalidation before live use. B5 Wave 3 and B6 runtime wiring remain outstanding; no live acceptance or
 authority activation is implied. Cross-links: [B4](../08-09-hindsight-initial-cutover/prd.md),
