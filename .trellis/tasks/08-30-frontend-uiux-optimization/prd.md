@@ -12,8 +12,9 @@ live event, Live2D config keys) are consumed by later batches and are explicitly
 
 G4's first pure-frontend cleanup slice is implemented and independently checked. See
 [the slice evidence](implementation-evidence-g4-2026-09-05.md): 19 files, all required automated gates
-passed, Desktop 108 files / 594 tests. Real WebView2/owner acceptance remains pending; no task-wide
-completion or lifecycle closeout is implied.
+passed, Desktop 108 files / 594 tests at that checkpoint. Subsequent isolated WebView2 QA passed
+12/12 groups and G4 was committed with A1/A2 as `a771496`. This is engineering evidence, not personal
+owner inspection; no historical task-wide acceptance or lifecycle closeout is implied.
 
 The owner considers the non-Monitor visual baseline broadly satisfactory and defers its small UI/UX
 details to a later focused pass. G5 excludes Monitor: the current page is only a functional prototype,

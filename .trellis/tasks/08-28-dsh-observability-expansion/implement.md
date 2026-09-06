@@ -18,9 +18,17 @@ the port and identifies only concrete missing-data work. Cache and Compaction ga
 The [2026-09-06 source/adapter preflight](research/d68-b-ui-port-adapter-map-2026-09-06.md) is complete.
 It identifies request-correlation and backward-history projection work, current selection/live-summary
 defects, and the DSH virtualizer dependency. Main adopted version 3.14.9 under the owner's 2026-09-06
-execution delegation. The final additive wire contract remains a prerequisite to D68-B dispatch;
-A1/A2 checking is complete in the separate readable-operations task. No new D68-B production
-implementation is claimed here.
+execution delegation. The additive wire/producer contract is now reviewed in design section 9 and
+the [query preflight](research/d68-query-contract-2026-09-06.md). A1/A2 is committed as `a771496`;
+D64 in the readable-operations task precedes this implementation. D75 remains deferred.
+
+Continuation activation (2026-09-06): D64 passed independent review and engineering acceptance and
+is committed as `a5d1b66`. Main recovered the original session, reviewed this adapter contract,
+validated both 17-entry manifests and activated this task for session
+`codex_01a074f6-ff11-71b3-832a-e35578901417`. One direct `gpt-6-astra/high` implement agent,
+`/root/d68_implementation`, now owns the coherent Shared/Core/Desktop D68-B slice. Main owns
+documents, cross-slice integration and isolated WebView2/reference verification. D68-B acceptance
+remains pending until that implementation and its independent check finish.
 
 ## Dispatch and task-pointer protocol
 
@@ -152,7 +160,7 @@ implementation stage; this gate completion does not itself start Desktop work.
    deliberate domain/privacy/G4 difference. Exercise the real enabled Monitor in WebView2, including a successful
    and failed tool/model path. Revise old scaffold tests that would preserve the rejected presentation.
 
-Exit gate: automated behavior checks plus reference comparison and owner visual/interaction acceptance confirm
+Exit gate: automated behavior checks plus reference comparison and real-window engineering acceptance confirm
 the DSH-led product UI, complete Chinese system labels, meaningful data and working live/history interactions.
 Traceability, a nominal three-region component, or a static screenshot alone cannot pass this gate.
 
@@ -160,8 +168,9 @@ Traceability, a nominal three-region component, or a static screenshot alone can
 
 1. Run Shared/Core/Desktop typechecks, tests, lint, Desktop build, task validation and `git diff --check`.
 2. Verify disabled/feedback/full modes and provider-without-cache behavior.
-3. Run a real isolated Core/desktop monitor smoke with the configured model and inspect a model request plus a tool
-   success/failure.
+3. Run a real isolated Core/SDK producer smoke with deterministic model responses, then actual WebView2
+   interaction for a model request and tool success/failure. Label fixture data explicitly; do not repeat
+   paid cache/Compaction acceptance or claim personal owner inspection.
 4. Update the observability spec and deferred decision links with any implementation learning.
 5. Reassess whether D67's generic Home disclosure/read-model work remains separate; do not silently absorb it.
 

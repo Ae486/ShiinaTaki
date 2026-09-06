@@ -5,7 +5,7 @@
   "description": "Truthful live Chat tool entries and segmented Pet text/tool bubbles with stable transitions and history reconciliation.",
   "status": "planning",
   "dev_type": null,
-  "scope": "Source-backed planning, then separate reviewed cross-layer slices under the T4 UI/UX parent; no Hindsight/memory work.",
+  "scope": "Foreground Chat/Pet ordered live activity and bounded Character snapshots; exact shared invocation/outcome facts; optional Timeline presentation metadata with atomic batch handoff and preserved canonical replay; segmented CSS-driven Pet continuity. No execution-policy, Hindsight/Memory, D63, D75/D76/D77 or proactive/heartbeat changes.",
   "package": null,
   "priority": "P1",
   "creator": "pleia",
@@ -21,6 +21,6 @@
   "children": [],
   "parent": "08-22-t4-agent-architecture-observability",
   "relatedFiles": [],
-  "notes": "Owner explicitly authorized creation on 2026-09-05. Keep planning until design/implement artifacts and curated context are reviewed; first active slice is the existing frontend G4 cleanup.",
+  "notes": "Owner confirmed Chat/Pet requirements and delegated motion design, completion and local commits. Main reviewed the source-backed design and ordered L1-L3 execution plan on 2026-09-06. Reuse the D68 invocation/outcome bridge and A2 captured names. This child stays planning until D64 and D68-B gates pass and main activates it. No personal owner inspection or new paid-service requirement is implied.",
   "meta": {}
 }

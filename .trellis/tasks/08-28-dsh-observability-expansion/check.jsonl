@@ -1,16 +1,17 @@
-{"file":".trellis/spec/backend/observability-projection.md","reason":"Check producer-first projection, privacy/mode contracts, cursor behavior and no-execution-mutation invariant."}
-{"file":".trellis/spec/backend/agent-runtime.md","reason":"Check model/tool loop behavior, durable facts and error/retry boundaries."}
-{"file":".trellis/spec/backend/database-guidelines.md","reason":"Check event durability, replay, migrations and single-writer constraints."}
-{"file":".trellis/spec/backend/logging-guidelines.md","reason":"Check diagnostics separation and sensitive-field exclusion."}
-{"file":".trellis/spec/frontend/home-window.md","reason":"Check Home layout, client lifecycle, streaming and page integration."}
-{"file":".trellis/spec/frontend/state-management.md","reason":"Check generation-safe state, live updates, revalidation and non-authoritative cache use."}
-{"file":".trellis/spec/frontend/component-guidelines.md","reason":"Check accessible Chinese disclosure controls, Inspector close behavior and component boundaries."}
-{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Check responsive/performance/loading states and required Desktop quality gates."}
-{"file":".trellis/tasks/08-28-dsh-observability-expansion/research/d68-producer-first-scope-2026-08-28.md","reason":"Check implementation against verified DSH/Taki producer matrix and explicit non-goals."}
-{"file":".trellis/tasks/08-22-t4-agent-architecture-observability/research/dsh-observability.md","reason":"Check fidelity to DSH event/query/trajectory patterns and TakiAgent adaptations."}
-{"file":"references/deepseek-harness-master/packages/client/ui-trajectory/README.md","reason":"Check layout, semantic rows, Inspector tabs, fold/unfold, lazy history and tail-follow parity."}
+{"file": ".trellis/spec/backend/observability-projection.md", "reason": "Check producer-first projection, privacy/mode contracts, cursor behavior and no-execution-mutation invariant."}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Check model/tool loop behavior, durable facts and error/retry boundaries."}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Check event durability, replay, migrations and single-writer constraints."}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Check diagnostics separation and sensitive-field exclusion."}
+{"file": ".trellis/spec/frontend/home-window.md", "reason": "Check Home layout, client lifecycle, streaming and page integration."}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Check generation-safe state, live updates, revalidation and non-authoritative cache use."}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Check accessible Chinese disclosure controls, Inspector close behavior and component boundaries."}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Check responsive/performance/loading states and required Desktop quality gates."}
+{"file": ".trellis/tasks/08-28-dsh-observability-expansion/research/d68-producer-first-scope-2026-08-28.md", "reason": "Check implementation against verified DSH/Taki producer matrix and explicit non-goals."}
+{"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/dsh-observability.md", "reason": "Check fidelity to DSH event/query/trajectory patterns and TakiAgent adaptations."}
+{"file": "references/deepseek-harness-master/packages/client/ui-trajectory/README.md", "reason": "Check layout, semantic rows, Inspector tabs, fold/unfold, lazy history and tail-follow parity."}
 {"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-useful-information-2026-09-05.md", "reason": "G4 removes meaningless internal metadata from all user-facing details; verified reference patterns, field inventory, retained contracts and old assertions."}
 {"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-grill-2026-09-05.md", "reason": "Owner G5 makes DSH Trajectory the Monitor product baseline; current UI is only a trace-validation prototype. Preserve G4 field selection and full Chinese system labels."}
-{"file": ".trellis/tasks/08-28-dsh-observability-expansion/research/d68-b-ui-port-adapter-map-2026-09-06.md", "reason": "Check DSH parity and current projection/history/selection facts without repeating D68-A or inventing missing metrics."}
+{"file": ".trellis/tasks/08-28-dsh-observability-expansion/research/d68-b-ui-port-adapter-map-2026-09-06.md", "reason": "Reviewed DSH source/style map and real-data adapters; main adopted the exact 3.14.9 virtualizer under delegated authority."}
 {"file": ".trellis/spec/backend/operation-presentation.md", "reason": "Verify useful-name rendering never exposes routing keys or changes execution/replay identity."}
 {"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-execution-delegation-2026-09-06.md", "reason": "Latest execution authority, fidelity and evidence requirements."}
+{"file": ".trellis/tasks/08-28-dsh-observability-expansion/research/d68-query-contract-2026-09-06.md", "reason": "Reviewed exact model/invocation identity, bounded pages/summary/Inspector, real outcome semantics, controller recovery and explicit D75 deferral."}

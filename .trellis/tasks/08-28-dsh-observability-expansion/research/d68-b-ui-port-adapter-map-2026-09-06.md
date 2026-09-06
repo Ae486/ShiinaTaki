@@ -54,8 +54,8 @@ main-supplied task path without touching the legacy Compaction pointer.
 There is no current Monitor-specific contract for raw prompt text, assistant message bodies, full
 tool input/output, tool definitions or content diffs. Do not read relationship Timeline or raw Host/MCP
 payloads to fill DSH tabs. Show only applicable semantic sections backed by existing safe facts; do not
-add empty generic payload panels. D75 compaction-benefit measurement remains an unchosen separate
-scope item, and absent cache information remains `缓存信息未提供`.
+add empty generic payload panels. Main's subsequent [query/producer review](d68-query-contract-2026-09-06.md)
+keeps D75 compaction-benefit measurement deferred. Absent cache information remains `缓存信息未提供`.
 
 ## 3. Required adapter changes before the presentation port
 

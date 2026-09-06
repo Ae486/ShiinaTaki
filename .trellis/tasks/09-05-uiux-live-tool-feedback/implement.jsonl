@@ -8,3 +8,10 @@
 {"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-motion-continuity-2026-09-05.md", "reason": "Confirmed transient-tool lifecycle, reading anchors, interrupted transitions and reduced-motion design."}
 {"file": ".trellis/spec/backend/operation-presentation.md", "reason": "Reuse A2 captured tool names for live events and persisted handoff without current-catalog lookups."}
 {"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-execution-delegation-2026-09-06.md", "reason": "Latest autonomous execution/commit authority; retain confirmed Chat/Pet behavior and evidence requirements."}
+{"file": ".trellis/tasks/09-05-uiux-live-tool-feedback/research/live-feedback-contract-2026-09-06.md", "reason": "Verified SDK phases, MCP failure fidelity, step capture, Character fan-out, bounded recovery, atomic history handoff and main-selected narrow metadata."}
+{"file": ".trellis/tasks/08-28-dsh-observability-expansion/research/d68-query-contract-2026-09-06.md", "reason": "Reuse completed D68 request/invocation/name/outcome bridge; do not invent request identity from generation callId."}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Additive nullable Timeline metadata and atomic write-before-publish under the one-writer contract."}
+{"file": ".trellis/spec/backend/agent-runtime.md", "reason": "Full canonical turn persistence, real tool facts and exceptional stream boundaries."}
+{"file": ".trellis/spec/backend/compaction-harness.md", "reason": "Presentation-only metadata must preserve canonical replay/source digests and completed effects."}
+{"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "Generation-safe subscribe/read restoration, hidden-page behavior and reading anchors."}
+{"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "Keep D64 negotiation and per-generation request/restoration/teardown behavior."}

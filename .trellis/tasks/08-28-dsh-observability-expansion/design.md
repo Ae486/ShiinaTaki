@@ -308,3 +308,87 @@ Mandatory exclusions apply in all modes. Pino remains process diagnostics and is
 - Chinese-copy audit includes toolbar/Overview/Inspector tabs, statuses, tooltips, empty/error/loading text and
   accessible labels. UI-owned English fallback text is a defect; real model/tool names and content retain their identity.
 - Full gates: Shared/Core/Desktop typecheck, tests, lint, Desktop build, task validation and `git diff --check`.
+
+## 9. Reviewed D68-B executable adapter — 2026-09-06
+
+Main adopts the [query/producer preflight](research/d68-query-contract-2026-09-06.md) and
+[DSH component/style map](research/d68-b-ui-port-adapter-map-2026-09-06.md). This section supersedes
+conceptual tab lists or grouping shortcuts above where current producers do not support them.
+D68-A/cache/Compaction are complete; correct only the newly verified adapter defects.
+
+### 9.1 Request, tool and display facts
+
+Use model `effectId` as exact request identity. SDK generation `callId` is reused across steps.
+Add optional machine-only correlation to trajectory rows and producer-confirmed `modelEffectId`
+and captured `displayName` to tool facts. A per-attempt immutable request/invocation bridge connects
+the existing middleware binding and actual SDK callback objects. Ambiguous, legacy or missing
+associations stay ungrouped; never infer a parent from names, time or an overwritten generation map.
+
+Correct receipt/preliminary/outcome defects at this same seam: received call is not proved execution,
+wrapper entry can wait for Approval, and preliminary output is not terminal. Normalize known
+`ok:false` and MCP `isError:true` before model-output conversion; unknown stays unknown. Reuse this
+pure classifier and captured invocation in the later Chat/Pet slice instead of creating separate
+truth. Do not add Chat transport/history changes in D68-B. Names reuse A2 without current-catalog
+lookup or routing-key decoding; a 120-unit trajectory label cannot replace its 240-unit name field.
+
+### 9.2 Query and history wire contract
+
+Preserve forward `afterSeq`, existing cursor semantics and limit 1..200. Add optional `tail: true`
+or exclusive `beforeSeq`, mutually exclusive with each other and nonzero `afterSeq`. Return
+chronological rows, `hasOlder` and optional oldest-boundary `olderCursor`; a backward page never
+rewinds the independent client live cursor. Forward `hasMore` still drives catch-up; backward pages
+use `hasOlder`. `beforeSeq=1` is a valid empty page. Character/Run authorization precedes stale
+cursor validation; disabled mode stays inaccessible.
+
+Use indexed bounded repository pages and exact Inspector event lookup. Aggregate summary facts in
+the existing database without materializing the ledger or adding another store. Preserve totals
+and completeness: unknown bucket contributors cannot become observed zero. Compare SQL aggregation
+with prior semantics in tests; keep page/tail/summary consistent at the synchronous read boundary.
+
+Selection is independent of newest-list membership. Restore an older selected Run with an authorized
+tail query. Committed live events invalidate its summary; coalesce one in-flight and one trailing
+refresh without replacing rows or scroll position. Reconnect drains bounded forward pages before
+resubscribing. Bound subscription backfill too; prove recovery beyond 328 missed records. Inspector
+selection/close uses an independent epoch for both success and failure responses.
+
+### 9.3 DSH presentation fidelity and allowed differences
+
+Add the adopted exact `@tanstack/react-virtual@3.14.9` dependency. Port the source Toolbar, fixed
+three-lane Overview, compact event/content ledger, request/Attempt grouping, temporary resizable
+Inspector and history/follow behavior. Start with reference CSS spacing, type scale, separators and
+selection states, mapping its tokens to TakiAgent. Ordinary reference rows are 30 px, Toolbar 32 px
+and Overview 50 px; narrow controls may wrap accessibly. Preserve the full MIT notice and source
+attribution in substantially adapted files. Split by responsibility without importing DSH runtime
+stores or retaining its oversized modules.
+
+The Run browser is TakiAgent's selection adapter; Monitor has no composer. Give Monitor a full-width,
+full-height body while preserving other pages' width policy. On narrow windows, the Run selector
+stacks above the ledger and Inspector becomes a closable bottom drawer. Search is literal over loaded
+safe rows and says so; it is not global ledger search. Group/collapse controls stay independent.
+Range selection, clear, wheel zoom and right-drag pan use real recorded timing; missing durations
+remain start markers. Group labels expose neither canonical IDs nor guessed global ordinals.
+
+Inspector renders only populated typed semantic sections from the whitelist. Return an empty
+technical array for compatibility in every mode; remove the UI's technical disclosure/copy fallback.
+Omit unsupported prompt/full tool I/O/definition/diff tabs. Keep useful names, status, provider/model,
+usage/cache/timing and recorded context/approval/recovery facts. Never fill missing metrics or call
+first output necessarily a first text token.
+
+Use stable keys and measured virtualization above 100 rows with 12-row overscan, as in the reference.
+Preserve prepend anchors and suspend follow during historical reading, text selection, range focus
+or Inspector inspection. A new-record control resumes following deliberately. Pane open/close and
+narrow transitions retain reading/focus anchors; direct resize has no easing lag. Apply the shared
+continuity/reduced-motion contract, without whole-list entrance replay or polling.
+
+### 9.4 Scope and acceptance decisions
+
+D75 stays deferred because persisted same-scope token-benefit evidence is absent. No Compaction
+migration, invented ratio, prompt tuning or Character-memory change belongs here. Existing real
+usage, reasoning, cache and timing remain. D77 and actual T4 proactive/heartbeat work are also outside.
+
+One coherent implementation and one combined independent cross-layer check cover D68-B; main can
+review simple cosmetic follow-ups. Exercise real isolated Core/SDK producers with deterministic
+model responses, then real WebView2 interaction using sparse and dense fixtures. Do not repeat paid
+cache/Compaction acceptance. Record data provenance and compare default, selected, grouped, live,
+history, empty/error and narrow states with DSH. Engineering acceptance is autonomous under the
+latest delegation; personal owner inspection is not claimed.

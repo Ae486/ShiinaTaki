@@ -7,9 +7,11 @@ D77. G4 confirms useful operation details and removal of meaningless internal me
 G5 confirms a DSH-led Monitor UI rebuild; the current Monitor is a trace-validation prototype, not an accepted visual baseline.
 The owner approved the six-batch sequence and proceeding with implementation on 2026-09-05, then
 explicitly approved the naming/approval and live-feedback child-task creation. G4 frontend cleanup has
-passed implementation and automated review; A1 of the naming/approval child is now in progress.
-Later slices still require their complete source-backed design and execution artifacts. D64's command
-disclosure policy is pending an explicit owner choice; D75 first-batch inclusion remains undecided.
+passed implementation, review and real WebView2 QA. G4 plus A1/A2 naming/approval are committed as
+`a771496`. D64 policy A is independently checked and committed as `a5d1b66` under the owner's
+2026-09-06 execution delegation. D68-B's query/producer plan is reviewed and now in implementation; D75
+remains deferred for a dedicated measurement slice. Later slices still require their complete
+source-backed design and execution artifacts, without repeated owner-confirmation gates.
 This record coordinates the existing architecture/UI work. Verify the session task before every slice;
 the legacy compaction pointer must never reactivate the archived task.
 
@@ -198,8 +200,8 @@ actual WebView2 interaction. Existing traceability evidence and the earlier broa
 not count as approval of Monitor's current appearance. Non-Monitor visual reuse remains unchanged.
 
 Remaining Pet combinations include multiple tools without intervening language; derive their design
-from G3 rather than reopening its confirmed normal and terminal-error behavior. The remaining scope
-choice includes whether new D75 compaction measurements belong in the first delivery batch. D68
+from G3 rather than reopening its confirmed normal and terminal-error behavior. Main's 2026-09-06
+source review keeps D75 outside this delivery: same-scope token-benefit evidence is not persisted. D68
 implements G5's DSH product baseline and G4's information selection. Resolve only material
 product choices one at a time and derive implementation mechanics from existing contracts and source.
 

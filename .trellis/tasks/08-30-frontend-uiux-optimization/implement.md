@@ -2,9 +2,11 @@
 
 ## Current slice and authorization
 
-Implementation and independent automated review have passed; see
-[the current evidence](implementation-evidence-g4-2026-09-05.md). Manual WebView2/owner acceptance is
-still open. The ordered steps below document the executed scope and required remaining acceptance.
+Implementation, independent automated review and isolated WebView2 engineering QA (12/12 groups)
+have passed; see [the current evidence](implementation-evidence-g4-2026-09-05.md). G4 and A1/A2 were
+committed together as `a771496`. Owner visual inspection is not claimed. The ordered steps below
+document the executed scope; the latest execution delegation authorizes autonomous engineering
+acceptance and coherent local commits while the remaining UI/UX slices continue.
 
 The owner approved the six-batch UI/UX sequence and implementation on 2026-09-05. This is its first
 batch, using the existing pure-frontend task. Earlier frontend batches remain historical deliveries;
@@ -55,8 +57,9 @@ snapshot, CAS, key, selection, binding or generation-guard use.
    tests that merely mirror deleted JSX. Update module headers and folder indexes with the real contract.
 6. Dispatch independent check after both implementations finish. The check agent reviews all this
    slice's changes, fixes findings, and runs the required gates below. Main reviews the resulting diff.
-7. Record changed surfaces, automated evidence, remaining manual acceptance, and later batch ownership.
-   Do not mark the whole frontend task complete, commit, push, finish or archive without owner authority.
+7. Record changed surfaces, automated and real-window engineering evidence, and later batch ownership.
+   The 2026-09-06 delegation authorizes checked local commits. Keep the whole frontend task open while
+   its required integration work remains; no push or unobserved owner acceptance is implied.
 
 ## Validation and acceptance
 

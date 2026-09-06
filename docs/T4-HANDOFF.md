@@ -9,18 +9,20 @@
 
 ## Current UI/UX checkpoint - 2026-09-06
 
-Stay in `H:/TakiAgent-worktrees/t4`, branch `task/t4-skills-mcp-productization`, checked checkpoint `a771496`.
+Stay in `H:/TakiAgent-worktrees/t4`, branch `task/t4-skills-mcp-productization`, checked checkpoint `a5d1b66`.
 The continuation recovered `.trellis/tasks/09-05-uiux-readable-operations` from session
 `01a070e4-3a27-7562-ab12-14cc42cbea98` and bound it to
-`session:codex_01a074f6-ff11-71b3-832a-e35578901417`. Verify the live task with `task.py current --source`;
+`session:codex_01a074f6-ff11-71b3-832a-e35578901417`. After D64's checked commit, main activated
+`.trellis/tasks/08-28-dsh-observability-expansion` in that session and dispatched the single direct
+`/root/d68_implementation` agent. Verify the live task with `task.py current --source`;
 never reactivate the stale legacy Compaction pointer. G4 and A1/A2 are committed together as
 `a771496` (`feat(ui): make operations and approvals readable`). No push, finish or archive was performed.
 
 Latest authorization: the owner activated an execution goal to complete the planned work without
 further confirmations and to manage task commits. See
 [the delegation record](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-execution-delegation-2026-09-06.md).
-The no-commit statement above describes the preceding validation checkpoint; checked local commits
-are now authorized. Use the live Git log for checkpoint hashes. Do not claim unobserved owner review.
+Checked local commits are authorized. Use the live Git log for later checkpoint hashes. Engineering
+window acceptance is autonomous under this delegation; do not claim unobserved owner review.
 
 - G4 information cleanup is implemented and checked. Its isolated frontend-only WebView2 QA passed
   12/12 interaction groups with synthetic responses; this does not certify normal Shell/Core startup
@@ -48,9 +50,17 @@ are now authorized. Use the live Git log for checkpoint hashes. Do not claim uno
   The former `d64_check` session completed; it is not a live child of the incoming coordinator.
 - The next main delivery is D68's DSH Monitor port, then Chat and Pet. The
   [current DSH source/adapter map](../.trellis/tasks/08-28-dsh-observability-expansion/research/d68-b-ui-port-adapter-map-2026-09-06.md)
-  identifies real projection/history/client gaps. `@tanstack/react-virtual@3.14.9` is proposed to retain
+  identifies real projection/history/client gaps. The reviewed
+  [query/producer contract](../.trellis/tasks/08-28-dsh-observability-expansion/research/d68-query-contract-2026-09-06.md)
+  adds exact model Effect/invocation association, bounded history/summary/Inspector and recovery
+  corrections. `@tanstack/react-virtual@3.14.9` is adopted to retain
   DSH's measured-row behavior and is compatible with React 19; main has adopted it under delegated
-  authority. Install it in the reviewed D68-B slice. No D68-B production implementation has started.
+  authority. The reviewed D68-B slice is now in implementation from baseline `a5d1b66`; its final
+  independent review and engineering acceptance remain pending.
+- The live-feedback child now has reviewed `design.md`, `implement.md` and a source preflight. It
+  remains planning until D64/D68-B pass. It reuses their invocation/name/outcome facts, adds bounded
+  Character activity recovery and optional Timeline presentation metadata with atomic history handoff,
+  then implements Chat and the confirmed separate Pet bubbles with CSS-driven continuous motion.
 - User process refinement: simple changes may skip a separate check agent or join a related check;
   retain focused verification and independent review for authorization/protocol/streaming consistency.
   Implement agents use `gpt-6-astra/high`, check agents `gpt-6-astra/xhigh`, no recursive delegation.
@@ -62,7 +72,8 @@ are now authorized. Use the live Git log for checkpoint hashes. Do not claim uno
 The decision source remains the parent
 [UI/UX grill](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-grill-2026-09-05.md).
 The new [Operation Presentation spec](../.trellis/spec/backend/operation-presentation.md) is shared by
-the naming task and downstream Monitor/live-feedback contexts. D75 scope is unchosen; D77 error
+the naming task and downstream Monitor/live-feedback contexts. The reviewed D68-B plan keeps D75
+deferred for a dedicated same-scope measurement producer/persistence slice; D77 error
 taxonomy and real T4 initiative/heartbeat/cross-device work remain later work.
 
 ## 0. Compaction checkpoint - 2026-09-05
