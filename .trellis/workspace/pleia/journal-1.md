@@ -1385,3 +1385,40 @@ Resumed session 01a0437d-29a9-7fd2-b35c-7ef01f7af14e with existing owner authori
 
 - Parent 08-28-dsh-observability-expansion remains in_progress for D68-B. D75 metrics and D76 prompt quality need separate reviewed follow-up scope; no new task was activated.
 - No paid/provider calls or Rust checks were repeated in final closeout. Real-provider acceptance remains the dated 2026-09-02 evidence. Unrelated lab/OpenBiliClaw changes remain outside these local commits.
+
+
+## Session 30: Memory replica Waves 0-2 checkpoint
+
+**Date**: 2026-09-06
+**Task**: Memory replica Waves 0-2 checkpoint
+**Branch**: `main`
+
+### Summary
+
+Committed the independently verified offline Waves 0-2 implementation and associated planning/specs. Archived the complete execution record and compacted the active plan. B5 remains in_progress; Wave 3 is the owner-approved next phase after this bookkeeping checkpoint.
+
+### Main Changes
+
+- Committed canonical result receipts, transactional journal/FTS/checkpoint storage, durable scheduling, verified reconciliation and migrations 033-034; retained B4/B6 readiness gates.
+- Preserved the original 31837-byte execution record verbatim from 69ca779 in task research, reduced implement.md to 5642 bytes, and updated evidence links and parent/HANDOFF checkpoint references.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `69ca779` | (see git log) |
+| `e5d1bb5` | (see git log) |
+
+### Testing
+
+- [OK] Independent review on the unchanged production code passed Shared 378, Core 1950, CLI 47, Desktop 548 tests, all five TS typechecks, root lint with one existing warning, and isolated Core startup through migration 034.
+- [OK] Archival byte equality, Markdown links/anchors, UTF-8/no-BOM, whitespace, context budget and B4/B5/B6 task manifests passed; no production code changed during bookkeeping.
+
+### Status
+
+[OK] **Waves 0-2 checkpoint complete; B5 remains in progress**
+
+### Next Steps
+
+- Continue Wave 3 Pending Memory, unconfirmed overlay and ordered recovery under the existing active B5 task; keep one astra/high implementer followed by one astra/xhigh checker with explicit 30-minute waits.
+- B4 current-Local coverage/final fence, B6 wiring and live activation remain gated. No task finish/archive, push, real Hindsight/LLM call, existing-user-data migration or protected-backup access occurred.
