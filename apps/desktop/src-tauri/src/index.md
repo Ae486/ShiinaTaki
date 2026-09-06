@@ -4,11 +4,13 @@
 - node.rs — tauri-FREE node assembly: NodeConfig + build_node, create-only stable device identity with winner adoption, tracing, and WsClient; shared by lib.rs and bin/taki-node
 - status.rs — StatusEmitter trait (status sink seam) + TracingStatusEmitter (headless log-only impl)
 - protocol.rs — stable crate-internal protocol import surface, non-Host serde mirrors, and the golden-fixture parity sweep
-- ws_challenge.rs — pure Host ask helpers: sealed challenge building, redacted classification-only presentation, and exact one-shot resume authorization validation
+- ws_challenge.rs — sealed preflight building, complete ask-exec disclosure, Chinese ordinary Host prompts and exact one-shot authorization checks
+- exec_command_disclosure.rs — pure whole-value credential masking, visible escaping and complete bounded 8-by-12 chunk packing
+- exec_command_disclosure/ — borrowed-span credential contexts and finite token/header/URI/private-key recognition; colocated adversarial tests
 - host_control_protocol.rs — strict Host negotiation/catalog/immutable-control/request/cancel/response serde mirrors and protocol-v3 constants
-- host_approval_protocol.rs — validated Host challenge/resume authorization DTOs plus cross-language canonical digest helpers (control, challenge, and approval decision scope)
-- host_session.rs — one live Host generation's exact binding, cancellation, 256-entry terminal-attempt cache, and memory-only one-shot pending challenge state
-- ws_client.rs — reconnecting node client: handshake/catalog, request classification, challenge/resume; resume consumes once, rechecks current Host floors immediately before execution, and audits approved/denied truth
+- host_approval_protocol.rs — strict optional command-disclosure mirror and legacy-compatible challenge/control/scope canonical digests
+- host_session.rs — exact live-generation binding, policy-independent exact cancellation/ACK retirement, raw pending cleanup and a 256-entry terminal cache
+- ws_client.rs — Node handshake/catalog, disclosure/ACK settlement and atomic exact-bound execute/resume consumption; invalid matching authority retires once with final Host floors and original audit preserved
 - gate.rs — retained pre-Slice-3 evaluator plus production legacy-deny/legacy-level readers and distinct auto/deny/Core-approved final-enforcement audit seams; `ws_client.rs` never calls the local prompt/writer
 - gate/ — read-only legacy compatibility plus dormant pre-Slice-3 evaluator/approver helpers and tests; current production authority is the Core projection composed with Host stricter-only constraints
 - audit.rs — Shell-owned JSONL audit trail (append-only, names-only EXCEPT exec's command, ruling 9) + ISO-8601 timestamp

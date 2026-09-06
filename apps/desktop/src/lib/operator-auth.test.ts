@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { ConnectParams } from "@taki/shared";
+import { APPROVAL_COMMAND_DISCLOSURE_REVISION, type ConnectParams } from "@taki/shared";
 import { authenticateOperator, recoverOperatorAuth } from "./operator-auth.ts";
 import type { IdentityStorage } from "./device-identity.ts";
 
@@ -29,6 +29,7 @@ describe("authenticateOperator", () => {
     await authenticateOperator({ client, deviceName: "taki-pet", storage: identity });
 
     expect(calls[0]).not.toHaveProperty("token");
+    expect(calls[0]).toMatchObject({ capabilities: [], approvalCommandDisclosureRevision: APPROVAL_COMMAND_DISCLOSURE_REVISION });
     expect(calls[1]).toMatchObject({ deviceId: "device-1", deviceName: "taki-pet", token: "token-1" });
   });
 
@@ -54,6 +55,18 @@ describe("authenticateOperator", () => {
       deviceName: "taki-home",
       storage: identity,
     });
-    expect(calls).toEqual([{ deviceId: "device-1", deviceName: "taki-home", role: "operator", capabilities: [] }]);
+    expect(calls).toEqual([{ deviceId: "device-1", deviceName: "taki-home", role: "operator", capabilities: [], approvalCommandDisclosureRevision: 1 }]);
+  });
+
+  it("keeps the existing credential after local display compatibility refusal", async () => {
+    vi.stubGlobal("crypto", { randomUUID: () => "device-1" });
+    const identity = storage();
+    await authenticateOperator({ client: { connect: async () => ({ ok: true, token: "existing" }) }, deviceName: "home", storage: identity });
+    const refused = { ok: false, code: null, message: "Core 版本不支持完整命令审批，请更新 Core 后重试。" } as const;
+    const connect = vi.fn(async () => refused);
+    expect(await authenticateOperator({ client: { connect }, deviceName: "home", storage: identity })).toEqual(refused);
+    expect(connect).toHaveBeenCalledWith(expect.objectContaining({ token: "existing", approvalCommandDisclosureRevision: 1 }));
+    await authenticateOperator({ client: { connect }, deviceName: "home", storage: identity });
+    expect(connect).toHaveBeenLastCalledWith(expect.objectContaining({ token: "existing" }));
   });
 });

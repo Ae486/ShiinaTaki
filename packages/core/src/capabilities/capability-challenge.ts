@@ -1,11 +1,12 @@
 /**
  * INPUT:  Host capability.challenge frames, the broker's sealed pending attempts, and the Approval interaction
- * OUTPUT: challenge provenance/digest validation, operator bridging, single-use resume authorization minting
+ * OUTPUT: provenance/digest checks, pre-prompt exec compatibility refusal, operator bridging and one-use resume authority
  * POS:    core/capabilities — the ONE Host ask bridge; never a second dialog, never raw input beyond the pending record
  */
 import { createHash, randomUUID } from "node:crypto";
 import {
   APPROVAL_BINDING_REVISION,
+  APPROVAL_COMMAND_DISCLOSURE_REVISION,
   CANONICAL_GOVERNANCE_REGISTRY,
   HOST_CONTROL_METHODS,
   canonicalCapabilityChallenge,
@@ -116,6 +117,8 @@ function bridgeToOperator(args: {
     notifyHostCancel(pending, requestId, "approval_denied");
     return { accepted: true };
   }
+  const unsupported = rejectUnsupportedCommand(state, pending, params);
+  if (unsupported) return unsupported;
   const remainingMs = Math.max(1, Date.parse(pending.control.deadlineAt) - state.now());
   const handle = state.approval.request({
     owner: operator.connection,
@@ -142,6 +145,27 @@ function bridgeToOperator(args: {
     () => settleChallengeDecision(state, requestId, invalidatedDecision(state)),
   );
   return { accepted: true };
+}
+
+function rejectUnsupportedCommand(
+  state: CapabilityBrokerState,
+  pending: PendingCapability,
+  params: CapabilityChallenge,
+): CapabilityRespondResult | undefined {
+  if (pending.control.capabilityId !== "exec") return undefined;
+  const operator = pending.target.operator?.connection.state;
+  const message = !params.presentation.commandDisclosure
+    ? "执行端版本不支持完整命令审批，已拒绝执行；请更新执行端后重试。"
+    : operator?.status !== "authenticated" || operator.role !== "operator"
+      || operator.approvalCommandDisclosureRevision !== APPROVAL_COMMAND_DISCLOSURE_REVISION
+      ? "操作端版本不支持完整命令审批，已拒绝执行；请更新操作端后重试。"
+      : undefined;
+  if (!message) return undefined;
+  settlePending(state, params.requestId, {
+    outcome: { ok: false, code: "DENIED", message }, terminalReason: "late",
+  });
+  notifyHostCancel(pending, params.requestId, "approval_invalidated");
+  return reject("unsupported_version");
 }
 
 function settleChallengeDecision(

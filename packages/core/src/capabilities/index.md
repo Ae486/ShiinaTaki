@@ -3,7 +3,7 @@
 - capability-broker-state.ts — pending/terminal state owner with exact cleanup and execution/cancellation-aware interruption settlement shared with the Approval bridge
 - capability-effect-lifecycle.ts — Host preflight-to-wait/intent coordinator and exact terminal Effect settlement
 - capability-response.ts — pure terminal verifier shared by live and terminal-cache settlement: provenance, exact control, authorization lineage, and stricter-only governance evidence
-- capability-challenge.ts — the ONE Host ask bridge: capability.challenge provenance/digest validation, operator-owned Approval bridging, and single-use resume authorization minting
+- capability-challenge.ts — Host ask provenance/digest checks, immediate exec legacy-peer refusal, operator-owned Approval and one-use resume authority
 - capability-tools.ts — the six Shell-routed capability tools as one per-call factory: binds the initiating operator socket for interactive turns and yields the unattended bag otherwise
 - canonical-input.ts — deterministic JSON canonicalization + lowercase SHA-256 input digest for sealed dispatch identity
 - capture-stamp.ts — captureStamp(): the Q5 state-snapshot capture moment (ISO, stamped once at execute, persists byte-stable into replay); shared by the screenshot/process-list/clipboard-read results

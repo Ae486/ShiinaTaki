@@ -5,7 +5,7 @@
 - procs.ts — spawnProc/killTree (Windows tree-kill) + getFreePort + hermetic childEnv
 - rpc-socket.ts — raw out-of-process JSON-RPC WS client (id-correlated requests + notification waits)
 - ws-relay.ts — loopback-only capability request/response transformer with directional counts and bounded shutdown
-- operator-drivers.ts — operator drivers: pairing, L2 chat, L1 capability drive (optional interactive owner), Approval prompt await/respond, Core Permission Level mutation, and persisted timeline reads
+- operator-drivers.ts — negotiated and explicit legacy operator pairing, L1 capability/Approval drivers, L2 chat and typed operator reads
 - seed-timeline.ts — pre-boot timeline pollution (character "taki") via core's seed-timeline-cli; hallucination L2 setup
 - seed-memory.ts — pre-boot memory entry files into the workspace memory tree (startup reconcile indexes them); name-recall L2 setup
 - seed-canonical-memory.ts — pre-boot migrated empty canonical Local authority and global/Character banks for isolated production-shaped tests

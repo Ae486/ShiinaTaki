@@ -7,6 +7,7 @@
 // the same node from them; capability handlers and the wire protocol stay crate-internal.
 pub mod audit;
 mod capabilities_impl;
+mod exec_command_disclosure;
 pub mod gate;
 mod host_session;
 pub mod node;

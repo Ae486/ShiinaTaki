@@ -1,6 +1,6 @@
 /**
  * INPUT:  ConnectParams from a dispatched pre-auth connect request + injected registries, code/audit sinks, the loopback-trust flag
- * OUTPUT: connectMethod(deps) -> MethodDefinition; authenticates the socket (token / pairing / loopback auto-trust) or drives pairing (prd §3/§6, P3)
+ * OUTPUT: connectMethod(deps) — authenticates token/pairing/loopback sockets and echoes offered operator display support
  * POS:    core/server/methods — the ONLY pre-auth method; thin delegation to device-registry + connection-registry
  */
 import {
@@ -66,7 +66,7 @@ export function connectMethod(deps: ConnectMethodDeps): MethodDefinition<Connect
 
 function handleConnect(deps: ConnectMethodDeps, params: ConnectParams, ctx: MethodContext): ConnectResult {
   const { deviceRegistry, connectionRegistry, onPairingCode, onAutoTrust, trustLoopbackOperator } = deps;
-  const { deviceId, deviceName, role, capabilities, token, pairingCode } = params;
+  const { deviceId, deviceName, role, token, pairingCode } = params;
 
   if (ctx.connection.state.status === "authenticated") {
     // App-level refusal (not envelope INVALID_REQUEST): the frame is well-formed; re-handshake
@@ -97,9 +97,9 @@ function handleConnect(deps: ConnectMethodDeps, params: ConnectParams, ctx: Meth
   const { remoteAddress } = ctx.connection;
   if (trustLoopbackOperator && role === RoleSchema.enum.operator && isLoopback(remoteAddress)) {
     const issued = deviceRegistry.trustDevice(deviceId, { deviceName, role });
-    connectionRegistry.authenticate(ctx.connection, { deviceId, role, capabilities });
+    const host = connectionRegistry.authenticate(ctx.connection, identity);
     onAutoTrust({ deviceId, deviceName, remoteAddress });
-    return { status: "ok", token: issued };
+    return connectedResult(params, host, issued);
   }
 
   const code = deviceRegistry.beginPairing(deviceId);
@@ -109,7 +109,10 @@ function handleConnect(deps: ConnectMethodDeps, params: ConnectParams, ctx: Meth
 
 function authenticatedIdentity(params: ConnectParams) {
   const host = params.host ? negotiateHost(params.host) : undefined;
-  return { deviceId: params.deviceId, role: params.role, capabilities: params.capabilities, host };
+  return {
+    deviceId: params.deviceId, role: params.role, capabilities: params.capabilities, host,
+    approvalCommandDisclosureRevision: params.approvalCommandDisclosureRevision,
+  };
 }
 
 function negotiateHost(host: NonNullable<ConnectParams["host"]>) {
@@ -132,7 +135,11 @@ function connectedResult(
   host: ReturnType<ConnectionRegistry["authenticate"]>,
   token?: string,
 ): ConnectResult {
-  return { status: "ok", token, host: params.role === "node" ? host : undefined };
+  return {
+    status: "ok", token, host: params.role === "node" ? host : undefined,
+    ...(params.role === "operator" && params.approvalCommandDisclosureRevision !== undefined
+      ? { approvalCommandDisclosureRevision: params.approvalCommandDisclosureRevision } : {}),
+  };
 }
 
 interface PairingInput {

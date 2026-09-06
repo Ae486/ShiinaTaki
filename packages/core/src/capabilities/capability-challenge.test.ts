@@ -8,7 +8,7 @@ import type {
   CanonicalApprovalRequest,
   HostGovernanceEvidence,
 } from "@taki/shared";
-import { canonicalCapabilityChallenge, canonicalHostOperationControl } from "@taki/shared";
+import { canonicalCapabilityChallenge, canonicalHostOperationControl, reconstructApprovalCommand } from "@taki/shared";
 import { approvalDecisionScopeDigest } from "../approval/approval-binding.ts";
 import type { ApprovalInteractionService } from "../approval/approval-interaction-service.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
@@ -436,6 +436,109 @@ function lineageOf(harness: Harness) {
     challengeDigest: resume.authorization.challengeDigest,
   };
 }
+
+const EXEC_PRESENTATION: ApprovalPresentation = {
+  revision: 1, title: "允许执行此命令？", capabilityLabel: "执行命令", riskSummary: "已隐藏识别到的凭证。",
+  sections: [{ title: "完整命令", fields: [{ label: "命令", value: "whoami --token=[凭证已隐藏] " }, { label: "命令", value: "完整尾部" }] }],
+  commandDisclosure: { revision: 1, complete: true, encoding: "visible-escapes", reconstruction: "section-field-concat" },
+};
+
+function execTarget(harness: Harness, support = true): CapabilityDispatchTarget {
+  if (support && harness.operator.state.status === "authenticated") {
+    harness.operator.state = { ...harness.operator.state, approvalCommandDisclosureRevision: 1 };
+  }
+  const base = askTarget(harness);
+  return { ...base,
+    descriptor: { capabilityId: "exec", execution: "effect", cancellation: "non-cooperative", governance: { descriptorRevision: 1, classifierId: "exec-command", classifierRevision: 1 } },
+    governanceProjection: { ...base.governanceProjection, cells: [{ key: "exec:allowlist-miss", posture: "ask" }] },
+  };
+}
+
+function execChallenge(request: CapabilityRequest, presentation = EXEC_PRESENTATION): CapabilityChallenge {
+  const base = challengeFor(request);
+  const challenge: CapabilityChallenge = { ...base, presentation,
+    governance: { ...ASK_EVIDENCE, cellKey: "exec:allowlist-miss" },
+    decisionScopeDigest: approvalDecisionScopeDigest({ bindingRevision: 1,
+      identity: { capabilityId: "exec", ownerHostId: HOST }, descriptorRevision: 1,
+      classifierId: "exec-command", classifierRevision: 1, cellKey: "exec:allowlist-miss" }),
+  };
+  challenge.challengeDigest = createHash("sha256").update(canonicalCapabilityChallenge(challenge)).digest("hex");
+  return challenge;
+}
+
+describe("exec complete-disclosure compatibility", () => {
+  it.each(["host", "operator"])("immediately denies an old %s before Approval, intent or resume", async (legacy) => {
+    const order: string[] = [];
+    const h = makeHarness(true, effectService(order));
+    const pending = h.broker.request(execTarget(h, legacy !== "operator"), { command: "RAW_CREDENTIAL_SENTINEL" });
+    const presentation = legacy === "host" ? PRESENTATION : EXEC_PRESENTATION;
+    const request = sentRequest(h);
+    expect(h.broker.challenge(execChallenge(request, presentation), { hostId: HOST, connectionGeneration: 1 }))
+      .toEqual({ accepted: false, reason: "unsupported_version" });
+    await expect(pending).resolves.toMatchObject({ ok: false, code: "DENIED", message: expect.stringContaining("版本不支持完整命令审批") });
+    expect(h.approvalRequests).toHaveLength(0);
+    expect(order).toEqual([]);
+    expect(h.hostFrames.get("capability.resume")).toBeUndefined();
+    expect(h.hostFrames.get("capability.execute")).toBeUndefined();
+    expect(h.hostFrames.get("capability.cancel")).toHaveLength(1);
+    expect(JSON.stringify(h.records)).not.toContain("RAW_CREDENTIAL_SENTINEL");
+  });
+
+  it("preserves no-operator APPROVAL_REQUIRED even for a legacy Host presentation", async () => {
+    const h = makeHarness(false);
+    const pending = h.broker.request({ ...execTarget(h), operator: undefined }, SENTINEL_INPUT);
+    h.broker.challenge(execChallenge(sentRequest(h), PRESENTATION), { hostId: HOST, connectionGeneration: 1 });
+    await expect(pending).resolves.toMatchObject({ ok: false, code: "APPROVAL_REQUIRED" });
+    expect(h.approvalRequests).toHaveLength(0);
+  });
+
+  it("validates provenance before applying compatibility refusal", async () => {
+    const h = makeHarness();
+    const pending = h.broker.request(execTarget(h), SENTINEL_INPUT);
+    const request = sentRequest(h);
+    expect(h.broker.challenge(execChallenge(request, PRESENTATION), { hostId: "foreign", connectionGeneration: 1 }))
+      .toEqual({ accepted: false, reason: "wrong_host" });
+    expect(h.hostFrames.get("capability.cancel")).toBeUndefined();
+    h.broker.challenge(execChallenge(request, PRESENTATION), { hostId: HOST, connectionGeneration: 1 });
+    await expect(pending).resolves.toMatchObject({ code: "DENIED" });
+  });
+
+  it("forwards the sealed complete command unchanged and resumes exactly once after allow", async () => {
+    const h = makeHarness();
+    const pending = h.broker.request(execTarget(h), { command: "RAW_CREDENTIAL_SENTINEL" });
+    const request = sentRequest(h);
+    const challenge = execChallenge(request);
+    expect(h.broker.challenge(challenge, { hostId: HOST, connectionGeneration: 1 })).toEqual({ accepted: true });
+    expect(h.approvalRequests).toHaveLength(1);
+    expect(h.approvalRequests[0]!.presentation).toEqual(EXEC_PRESENTATION);
+    expect(reconstructApprovalCommand(h.approvalRequests[0]!.presentation)).toBe("whoami --token=[凭证已隐藏] 完整尾部");
+    const response = { approvalId: h.approvalRequests[0]!.approvalId, choice: "allow_once" as const, expectedApprovalGeneration: 1 };
+    expect(h.approval.respond(h.operator, response).status).toBe("accepted");
+    expect(h.approval.respond(h.operator, response).status).toBe("late");
+    await Promise.resolve();
+    expect(h.hostFrames.get("capability.resume")).toHaveLength(1);
+    const terminal = { requestId: request.requestId, control: request.control, state: "completed" as const,
+      output: {}, governance: challenge.governance, authorization: lineageOf(h) };
+    expect(h.broker.resolve(terminal, { hostId: HOST, connectionGeneration: 1 })).toEqual({ accepted: true });
+    await expect(pending).resolves.toEqual({ ok: true, output: {} });
+    expect(JSON.stringify(h.records)).not.toContain("RAW_CREDENTIAL_SENTINEL");
+  });
+
+  it("accepts an immediate Host disclosure failure with exact ask evidence and no authorization", async () => {
+    const h = makeHarness();
+    const pending = h.broker.request(execTarget(h), SENTINEL_INPUT);
+    const request = sentRequest(h);
+    const failed = { requestId: request.requestId, control: request.control, state: "failed" as const,
+      error: { code: "DENIED" as const, message: "无法完整、安全地展示此命令审批，已拒绝执行。" },
+      governance: { ...ASK_EVIDENCE, cellKey: "exec:allowlist-miss" } };
+    expect(h.broker.resolve({ ...failed, control: { ...request.control, inputDigest: "f".repeat(64) } }, { hostId: HOST, connectionGeneration: 1 }))
+      .toEqual({ accepted: false, reason: "stale_generation" });
+    expect(h.broker.resolve(failed, { hostId: HOST, connectionGeneration: 1 })).toEqual({ accepted: true });
+    await expect(pending).resolves.toMatchObject({ ok: false, code: "DENIED" });
+    expect(h.approvalRequests).toHaveLength(0);
+    expect(h.hostFrames.get("capability.resume")).toBeUndefined();
+  });
+});
 
 function openSecondInteraction(harness: Harness): string {
   const before = harness.approvalRequests.length;

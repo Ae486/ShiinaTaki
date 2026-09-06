@@ -1,11 +1,11 @@
 /**
  * INPUT:  one socket-local canonical Approval request plus a response callback
- * OUTPUT: <ApprovalDialog> — sealed presentation, explicit choices, and future-background-use acknowledgement.
+ * OUTPUT: <ApprovalDialog> — literal complete command or ordinary sealed fields, choices and background-use consent.
  * POS:    ui/components/approval — ephemeral operator prompt; disclosure revisions stay in the controller binding.
  *         The shared Dialog traps/restores focus and keeps escapePolicy="none" for fail-closed approval.
  */
 import { useId } from "react";
-import type { ApprovalChoice, CanonicalApprovalRequest } from "@taki/shared";
+import { reconstructApprovalCommand, type ApprovalChoice, type CanonicalApprovalRequest } from "@taki/shared";
 import { Dialog } from "@/components/ui/dialog.js";
 import { FeedbackLine } from "@/components/ui/feedback-line.js";
 import { ActionButton } from "@/windows/home/action-button.js";
@@ -77,6 +77,15 @@ export function ApprovalDialog({
 }
 
 function ApprovalSections({ request }: { request: CanonicalApprovalRequest }) {
+  const command = reconstructApprovalCommand(request.presentation);
+  if (command !== undefined) return (
+    <pre
+      role="region"
+      aria-label="完整命令（已隐藏识别到的凭证，控制字符以转义显示）"
+      tabIndex={0}
+      className="mt-4 max-h-72 select-text overflow-auto whitespace-pre-wrap break-words rounded-xl bg-surface-muted p-3 font-mono text-sm text-text-body focus-visible:outline-2 focus-visible:outline-offset-2"
+    ><code>{command}</code></pre>
+  );
   return (
     <div className="mt-4 space-y-3">
       {request.presentation.sections.map((section) => (

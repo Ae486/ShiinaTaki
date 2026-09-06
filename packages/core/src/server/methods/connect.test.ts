@@ -66,6 +66,7 @@ interface ConnectInput {
   token?: string;
   pairingCode?: string;
   host?: ConnectParams["host"];
+  approvalCommandDisclosureRevision?: ConnectParams["approvalCommandDisclosureRevision"];
 }
 
 interface Attempt {
@@ -86,6 +87,7 @@ function callConnect(h: Harness, input: ConnectInput, remoteAddress: string | un
     capabilities: input.capabilities ?? [],
     token: input.token,
     pairingCode: input.pairingCode,
+    approvalCommandDisclosureRevision: input.approvalCommandDisclosureRevision,
     host: input.host ?? (input.role === "node"
       ? {
           protocol: { min: HOST_CONTROL_PROTOCOL_VERSION, max: HOST_CONTROL_PROTOCOL_VERSION },
@@ -106,6 +108,24 @@ function appErrorCode(error: unknown): string {
 }
 
 describe("connect loopback auto-trust (P3)", () => {
+  it("stores and echoes display support on loopback, token and pairing paths only when offered", () => {
+    const h = boot(true);
+    const identity = { deviceId: OPERATOR_ID, role: "operator" as const, approvalCommandDisclosureRevision: 1 as const };
+    const local = callConnect(h, identity, "127.0.0.1");
+    const token = ConnectResultSchema.parse(local.result).token;
+    const resumed = callConnect(h, { ...identity, token }, "203.0.113.1");
+    const remoteIdentity = { ...identity, deviceId: NODE_ID };
+    callConnect(h, remoteIdentity, "203.0.113.1");
+    const paired = callConnect(h, { ...remoteIdentity, pairingCode: h.codes[0]!.code }, "203.0.113.1");
+    for (const attempt of [local, resumed, paired]) {
+      expect(attempt.error).toBeUndefined();
+      expect(attempt.result).toMatchObject({ status: "ok", approvalCommandDisclosureRevision: 1 });
+      expect(attempt.connection.state).toMatchObject({ status: "authenticated", role: "operator", capabilities: [], approvalCommandDisclosureRevision: 1 });
+    }
+    const legacy = callConnect(h, { deviceId: OPERATOR_ID, role: "operator", token }, "203.0.113.1");
+    expect(legacy.result).not.toHaveProperty("approvalCommandDisclosureRevision");
+    expect(legacy.connection.state.status === "authenticated" && legacy.connection.state.approvalCommandDisclosureRevision).toBeUndefined();
+  });
   it("auto-trusts a loopback operator with no credential when the flag is on", () => {
     const h = boot(true);
     const attempt = callConnect(h, { deviceId: OPERATOR_ID, role: "operator" }, "127.0.0.1");

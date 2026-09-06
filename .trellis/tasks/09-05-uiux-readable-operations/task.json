@@ -5,7 +5,7 @@
   "description": "Readable Chinese operation and approval content over canonical bindings, including safe D64 command disclosure.",
   "status": "in_progress",
   "dev_type": null,
-  "scope": "Shared presentation vocabulary; Core safe Approval labels and captured tool-name projection; Desktop permission/approval/tool names; exclude new display metadata from canonical Compaction source identity. Rust D64 command disclosure is a later policy-gated slice. No Hindsight or Memory Authority changes.",
+  "scope": "Completed and checked A1/A2 readable names, approvals and captured tool-name metadata, plus D64 complete command disclosure across Rust/Shared/Core/Desktop/CLI. Operator support negotiation, immediate compatibility refusal, exact pending cleanup and unchanged execution/audit authority are verified. No D63 or Hindsight/Memory Authority changes.",
   "package": null,
   "priority": "P1",
   "creator": "pleia",
@@ -21,6 +21,6 @@
   "children": [],
   "parent": "08-22-t4-agent-architecture-observability",
   "relatedFiles": [],
-  "notes": "Owner approved the UI/UX sequence and child creation on 2026-09-05. G4 and A1/A2 implementation, combined review, full Shared/Core/Desktop gates and isolated WebView2 QA passed; owned test processes are cleaned. The check includes a narrow display-name source-digest compatibility fix, without reopening Compaction. On 2026-09-06 the owner delegated completion and commits without further confirmation; main selected D64 policy A and is reviewing its current adapter/compatibility contract. Local checked commits are authorized; no push or unobserved owner manual acceptance is implied.",
+  "notes": "G4 and A1/A2 are committed as a771496. Under the owner's 2026-09-06 execution/commit delegation, D64 is implemented and independently checked with fixes. Full package/typecheck/lint/Rust gates, real Core/Host L1 6/6 and WebView2 7/7 passed. Continuation verified all reviewer/frontend source and asset hashes, then passed 32 Core and 50 CLI regressions. See implementation-evidence-d64-2026-09-06.md. D68-B is next. Personal owner visual inspection remains unclaimed; no push is implied.",
   "meta": {}
 }

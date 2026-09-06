@@ -24,6 +24,7 @@
 | [Costume Operation Lifecycle](./costume-operation-lifecycle.md) | Total attempt budget, cancellation, renderer attachment commit, report recovery, and Home result truth |
 | [Live2D Renderer Contract](./live2d-renderer.md) | Locked renderer stack, load order, generation-split param API, BanG Dream model facts |
 | [Home Window, Pages & Streaming Timeline](./home-window.md) | Window topology, runtime-created windows + per-window capability, result-bearing cross-window commands, useful field selection without internal metadata dumps, secure MCP management, in-flight row lifecycle, media.get render path, markdown default-safe |
+| [Command Approval Display](../backend/command-approval-disclosure.md) | Typed full-command reconstruction, operator support echo, literal accessible rendering and unchanged approval/focus authority |
 | [Packaged-Build Defect Classes](./packaged-build.md) | CSP packaged-only, WebView2 silent quirks (dialogs/glyphs), boot-silence invariants, CDP debugging recipe |
 
 ## Quality Check (run before handing off)

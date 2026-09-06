@@ -78,6 +78,19 @@ describe("ConnectParamsSchema", () => {
   it("accepts an optional pairing code", () => {
     expect(ConnectParamsSchema.safeParse({ ...base, pairingCode: "123456" }).success).toBe(true);
   });
+
+  it("negotiates command display only for operators without adding execution capabilities", () => {
+    expect(ConnectParamsSchema.parse({ ...base, approvalCommandDisclosureRevision: 1 }))
+      .toMatchObject({ capabilities: [], approvalCommandDisclosureRevision: 1 });
+    expect(ConnectParamsSchema.parse(base)).not.toHaveProperty("approvalCommandDisclosureRevision");
+    expect(ConnectParamsSchema.safeParse({ ...base, approvalCommandDisclosureRevision: 2 }).success).toBe(false);
+    expect(ConnectParamsSchema.safeParse({ ...base, role: "node", approvalCommandDisclosureRevision: 1,
+      host: { protocol: { min: HOST_CONTROL_PROTOCOL_VERSION, max: HOST_CONTROL_PROTOCOL_VERSION }, catalogSchemaVersions: [HOST_CATALOG_SCHEMA_VERSION] },
+    }).success).toBe(false);
+    expect(ConnectResultSchema.parse({ status: "ok", approvalCommandDisclosureRevision: 1 }))
+      .toEqual({ status: "ok", approvalCommandDisclosureRevision: 1 });
+    expect(ConnectResultSchema.parse({ status: "ok" })).not.toHaveProperty("approvalCommandDisclosureRevision");
+  });
 });
 
 describe("ConnectResultSchema", () => {

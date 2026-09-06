@@ -1,5 +1,5 @@
 # core/server/methods/
-- connect.ts — connect: the ONLY pre-auth method; token verify, pairing handshake, or loopback operator auto-trust (P3), then authenticate the socket
+- connect.ts — the only pre-auth method: token/pairing/loopback authentication and offered operator-display support echo on every success path
 - host-catalog-publish.ts — host.catalogPublish (node-only): provenance-bound complete publication with fail-closed retirement for rejected current-generation candidates
 - extension-status.ts — operator-only extension.status convergence projection over current Host/Skill/MCP owner generations
 - chat-send.ts — chat.send (operator-only): durably admit and ack { messageId, runId }, then stream chat.delta/.complete/.error; turns serialize per characterId, settle the Run, and preserve cancel-before-reply retraction

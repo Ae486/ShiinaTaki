@@ -1,9 +1,10 @@
 /**
  * INPUT:  candidate connect-handshake params + results (parsed WS frames)
- * OUTPUT: RoleSchema, ConnectParamsSchema/ConnectResultSchema (+types), CONNECT_METHOD
+ * OUTPUT: role/handshake schemas, including physical-operator command-display offers and echoes
  * POS:    shared/protocol — the ONLY pre-auth handshake contract (ADR 0004); identity is deviceId, never host/IP
  */
 import { z } from "zod";
+import { APPROVAL_COMMAND_DISCLOSURE_REVISION } from "./approval-schema.ts";
 import { HostDeclarationSchema, HostNegotiationSchema } from "./host-control-schema.ts";
 
 export const CONNECT_METHOD = "connect";
@@ -20,6 +21,7 @@ export const ConnectParamsSchema = z
     token: z.string().optional(),
     pairingCode: z.string().optional(),
     host: HostDeclarationSchema.optional(),
+    approvalCommandDisclosureRevision: z.literal(APPROVAL_COMMAND_DISCLOSURE_REVISION).optional(),
   })
   // Operators converse/configure; they never provide capabilities (topology invariant, ADR 0004).
   .refine((params) => params.role !== "operator" || params.capabilities.length === 0, {
@@ -33,6 +35,10 @@ export const ConnectParamsSchema = z
   .refine((params) => params.role !== "node" || params.host !== undefined, {
     message: "nodes must declare host protocol support",
     path: ["host"],
+  })
+  .refine((params) => params.role === "operator" || params.approvalCommandDisclosureRevision === undefined, {
+    message: "command display support is operator-only",
+    path: ["approvalCommandDisclosureRevision"],
   });
 export type ConnectParams = z.infer<typeof ConnectParamsSchema>;
 
@@ -41,5 +47,9 @@ export const ConnectResultSchema = z.object({
   // Present once: in the result of a connect that just minted a token — via completed pairing OR loopback auto-trust (#16 P3).
   token: z.string().optional(),
   host: HostNegotiationSchema.optional(),
+  approvalCommandDisclosureRevision: z.literal(APPROVAL_COMMAND_DISCLOSURE_REVISION).optional(),
+}).refine((result) => result.host === undefined || result.approvalCommandDisclosureRevision === undefined, {
+  message: "execution hosts do not negotiate operator command display",
+  path: ["approvalCommandDisclosureRevision"],
 });
 export type ConnectResult = z.infer<typeof ConnectResultSchema>;

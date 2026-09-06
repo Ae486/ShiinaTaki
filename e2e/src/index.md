@@ -24,6 +24,7 @@ Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pn
 - exec-timeout.e2e.test.ts — #20 (slow) a long command is killed at the 30s deadline → timedOut, exitCode null
 - exec-cwd.e2e.test.ts — #21 `git init` lands .git under the node exec-cwd (exec runs in the Workspace)
 - exec-audit-command.e2e.test.ts — #22 audit records `command` for exec, absent for non-exec
+- approval-challenge-resume.e2e.test.ts — isolated D64 L1 allow/deny/unattended, disclosure-failure and legacy-peer refusal; full masked display with original approved-exec audit and no diagnostic leakage
 - hallucination-l2.e2e.test.ts — D1 multi-turn hallucination reproduction: seeded verbal-success pollution; the next turn must really invoke the tool AND persist tool rows (red pre-fix, green post agent-harness-improve)
 - name-recall-l2.e2e.test.ts — T5 batch 5 flagship: the user's name exists ONLY in the seeded memory store (never in the timeline); the agent must memory_search and answer it (retention proof — green pre- AND post-5b overhaul, guards the post-R6 recall path)
 - prompt-prefix-cache.e2e.test.ts — key-gated isolated real-provider acceptance over stable long history; proves one names-only Core tool path, per-request normalized usage arithmetic, positive post-cold cache reads, and the >=50% follow-up prefix-reuse gate without logging content or ids
@@ -31,7 +32,6 @@ Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pn
 L2 dual-track (real-LLM, key-gated via it.skipIf; MAY red until agent-tool-timeline — the red catches the H2/tool-call
 hallucination, do not weaken). Each asserts the agent really invoked the tool (core log) AND the end-to-end result is
 correct (exit / OS-clipboard / on-disk file):
-- approval-challenge-resume.e2e.test.ts — real-process Slice-4 vertical: ask challenge → operator allow/deny/unattended → resume or fail-closed settle, with the raw-input sentinel absent from audit/logs
 - exec-l2.e2e.test.ts — real agent asked to run `hostname` invokes exec and it exits 0
 - clipboard-l2.e2e.test.ts — real agent asked to copy a token; the OS clipboard holds it (verified via an L1 read)
 - workspace-l2.e2e.test.ts — real agent asked to write+read a file; the token lands on disk in the Workspace

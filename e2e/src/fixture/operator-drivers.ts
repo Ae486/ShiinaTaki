@@ -8,6 +8,7 @@
 import type { z } from "zod";
 import {
   APPROVAL_METHODS,
+  APPROVAL_COMMAND_DISCLOSURE_REVISION,
   CHAT_METHODS,
   CONNECT_METHOD,
   TIMELINE_HISTORY_LIMIT_MAX,
@@ -36,14 +37,26 @@ export interface PairingSpec {
 
 /** Runs the full operator pairing handshake; resolves once the socket is authenticated. */
 export async function pairOperator(socket: RpcSocket, spec: PairingSpec): Promise<void> {
-  const identity = { deviceId: spec.deviceId, deviceName: spec.deviceName, role: "operator" as const };
+  await pairOperatorDisplay(socket, spec, APPROVAL_COMMAND_DISCLOSURE_REVISION);
+}
+
+/** Explicit old-binary fixture; never infer display support from authentication alone. */
+export async function pairLegacyOperator(socket: RpcSocket, spec: PairingSpec): Promise<void> {
+  await pairOperatorDisplay(socket, spec, undefined);
+}
+
+async function pairOperatorDisplay(socket: RpcSocket, spec: PairingSpec, revision: 1 | undefined): Promise<void> {
+  const identity = { deviceId: spec.deviceId, deviceName: spec.deviceName, role: "operator" as const,
+    ...(revision === undefined ? {} : { approvalCommandDisclosureRevision: revision }),
+  };
   const first = JsonRpcErrorResponseSchema.parse(await socket.request(CONNECT_METHOD, identity));
   const code = (first.error.data as { code?: string } | undefined)?.code;
   if (code !== "PAIRING_REQUIRED") throw new Error(`expected PAIRING_REQUIRED, got ${String(code)}`);
 
   const pairingCode = await spec.getCode();
   const second = await socket.request(CONNECT_METHOD, { ...identity, pairingCode });
-  ConnectResultSchema.parse(JsonRpcSuccessResponseSchema.parse(second).result);
+  const result = ConnectResultSchema.parse(JsonRpcSuccessResponseSchema.parse(second).result);
+  if (result.approvalCommandDisclosureRevision !== revision) throw new Error("operator command display negotiation failed");
 }
 
 export interface AgentTurn {

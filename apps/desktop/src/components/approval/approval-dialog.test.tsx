@@ -29,6 +29,27 @@ const request: CanonicalApprovalRequest = {
 };
 
 describe("ApprovalDialog", () => {
+  it("renders all marked command chunks as one escaped selectable literal with a reachable tail", () => {
+    const parts = ['  tool "a b" ', '<script>alert("x")</script>', "x".repeat(500), "\\n", " 最后😀"];
+    const marked: CanonicalApprovalRequest = { ...request, presentation: { ...request.presentation,
+      commandDisclosure: { revision: 1, complete: true, encoding: "visible-escapes", reconstruction: "section-field-concat" },
+      sections: [
+        { title: "CHUNK_TITLE_NOT_VISIBLE", fields: parts.slice(0, 2).map((value) => ({ label: "CHUNK_LABEL_NOT_VISIBLE", value })) },
+        { title: "CHUNK_TAIL_NOT_VISIBLE", fields: parts.slice(2).map((value) => ({ label: "CHUNK_LABEL_NOT_VISIBLE", value })) },
+      ],
+    } };
+    const html = renderToStaticMarkup(<ApprovalDialog request={marked} queued={0} status={{ kind: "ready" }}
+      disclosureAcknowledged={false} onDisclosureAcknowledged={() => undefined} onChoose={() => undefined} onDismiss={() => undefined} />);
+    expect(html).toContain(renderToStaticMarkup(<code>{parts.join("")}</code>));
+    expect(html).toContain('role="region"');
+    expect(html).toContain('tabindex="0"');
+    expect(html).toContain("overflow-auto");
+    expect(html).toContain("select-text");
+    expect(html).toContain("whitespace-pre-wrap");
+    for (const hidden of ["CHUNK_", "commandDisclosure", "visible-escapes", "section-field-concat", "<script>", "line-clamp", "text-ellipsis"])
+      expect(html).not.toContain(hidden);
+    expect(html.match(/<button\b/g)).toHaveLength(request.allowedChoices.length);
+  });
   it("renders safe presentation, queue count, error feedback, and the Pet hit-test marker", () => {
     const html = renderToStaticMarkup(
       <ApprovalDialog

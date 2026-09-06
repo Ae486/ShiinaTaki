@@ -1,9 +1,9 @@
 /**
  * INPUT:  socket lifecycle and authenticated connect identities; Core-assigned Host negotiation facts
- * OUTPUT: per-socket state, per-Host generations, explicit Host lookup, replacement retirement, remove listeners
+ * OUTPUT: per-socket authentication/display support, per-Host generations, replacement retirement and remove listeners
  * POS:    core/server — connection authentication truth; D59 browser generations remain separate and absent here
  */
-import type { HostNegotiation, Role } from "@taki/shared";
+import type { ConnectParams, HostNegotiation, Role } from "@taki/shared";
 
 export type ConnectionState =
   | { readonly status: "awaiting" }
@@ -13,6 +13,7 @@ export type ConnectionState =
       readonly role: Role;
       readonly capabilities: readonly string[];
       readonly host?: HostNegotiation;
+      readonly approvalCommandDisclosureRevision?: ConnectParams["approvalCommandDisclosureRevision"];
     };
 
 export type ConnectionNotify = (method: string, params: unknown) => void;
@@ -29,6 +30,7 @@ export interface AuthenticatedIdentity {
   role: Role;
   capabilities: readonly string[];
   host?: Omit<HostNegotiation, "hostId" | "connectionGeneration">;
+  approvalCommandDisclosureRevision?: ConnectParams["approvalCommandDisclosureRevision"];
 }
 
 export interface ConnectionRegistry {
@@ -72,6 +74,7 @@ export function createConnectionRegistry(): ConnectionRegistry {
         role: identity.role,
         capabilities: [...identity.capabilities],
         host,
+        approvalCommandDisclosureRevision: identity.role === "operator" ? identity.approvalCommandDisclosureRevision : undefined,
       };
       if (host) {
         const previous = state.liveHosts.get(host.hostId);

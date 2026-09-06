@@ -1,8 +1,9 @@
 # Operation names and approval presentation
 
 Presentation explains an operation; it never identifies or authorizes its execution. This contract
-covers the readable-operations A1/A2 boundary. Host command disclosure remains the separate D64
-policy-gated slice, and live tool delivery/state reconciliation belongs to the live-feedback task.
+covers the readable-operations A1/A2 boundary. D64's full command, masking, handshake and canonical
+binding contract is in [command-approval-disclosure.md](command-approval-disclosure.md). Live tool
+delivery/state reconciliation belongs to the live-feedback task.
 
 ## 1. Scope / Trigger
 

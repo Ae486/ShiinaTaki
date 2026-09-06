@@ -1,6 +1,6 @@
 /**
  * INPUT:  a WS URL; inbound JSON-RPC frames (acks, chat stream, canonical Approval request/closed pushes)
- * OUTPUT: connectChatClient(url) -> ChatClient with chat/read/call plus targeted Approval response/event methods
+ * OUTPUT: ChatClient with echo-verified operator connect, chat/read/call and targeted Approval response/events
  * POS:    cli — the transport client; @taki/shared-typed, zod-validates inbound frames; never imports @taki/core
  */
 import { once } from "node:events";
@@ -27,6 +27,7 @@ import {
   type CanonicalApprovalRespondResult,
   type ChatSendParams,
   type ConnectParams,
+  type ConnectResult,
   type ErrorCode,
   type JsonRpcClientFrame,
   type TimelineHistoryParams,
@@ -46,7 +47,7 @@ export type ApprovalPushEvent =
 
 /** The connect handshake outcome: authenticated (ok, token present only right after pairing) or refused. */
 export type ConnectOutcome =
-  | { ok: true; token?: string }
+  | ({ ok: true } & Pick<ConnectResult, "token" | "approvalCommandDisclosureRevision">)
   | { ok: false; code: ErrorCode | null; message: string };
 
 export interface ChatClient {
@@ -144,7 +145,11 @@ function parseClientFrame(text: string): JsonRpcClientFrame | null {
 async function handshake(rpc: JSONRPCServerAndClient, params: ConnectParams): Promise<ConnectOutcome> {
   try {
     const result = ConnectResultSchema.parse(await rpc.request(CONNECT_METHOD, params));
-    return { ok: true, token: result.token };
+    if (params.approvalCommandDisclosureRevision !== undefined
+      && result.approvalCommandDisclosureRevision !== params.approvalCommandDisclosureRevision) {
+      return { ok: false, code: null, message: "Core 版本不支持完整命令审批，请更新 Core 后重试。" };
+    }
+    return { ok: true, token: result.token, approvalCommandDisclosureRevision: result.approvalCommandDisclosureRevision };
   } catch (error) {
     if (error instanceof JSONRPCErrorException) {
       return { ok: false, code: appErrorCode(error.data), message: error.message };

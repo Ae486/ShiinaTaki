@@ -1,7 +1,7 @@
 /**
  * INPUT:  canonical Approval request/respond/closed/list/revoke payload candidates
- * OUTPUT: strict versioned operator schemas with bounded redacted presentation and explicit choices
- * POS:    shared/approval — canonical operator lifecycle contract; raw execution input is intentionally absent
+ * OUTPUT: strict operator schemas, bounded command-disclosure metadata and exact literal reconstruction
+ * POS:    shared/approval — presentation never becomes execution input or authorization authority
  */
 import { z } from "zod";
 import {
@@ -39,6 +39,26 @@ const ApprovalPresentationSectionSchema = z.strictObject({
   fields: z.array(ApprovalPresentationFieldSchema).min(1).max(12),
 });
 
+export const APPROVAL_COMMAND_DISCLOSURE_REVISION = 1;
+export const ApprovalCommandDisclosureSchema = z.strictObject({
+  revision: z.literal(APPROVAL_COMMAND_DISCLOSURE_REVISION),
+  complete: z.literal(true),
+  encoding: z.literal("visible-escapes"),
+  reconstruction: z.literal("section-field-concat"),
+});
+export type ApprovalCommandDisclosure = z.infer<typeof ApprovalCommandDisclosureSchema>;
+
+const commandEncoder = new TextEncoder();
+
+function validCommandChunk(value: string): boolean {
+  // Iteration keeps Unicode scalars intact but exposes an unpaired surrogate as its own code point.
+  for (const scalar of value) {
+    const code = scalar.codePointAt(0) ?? 0;
+    if (code >= 0xD800 && code <= 0xDFFF) return false;
+  }
+  return commandEncoder.encode(value).byteLength <= 500;
+}
+
 export const ApprovalPresentationSchema = z.strictObject({
   revision: z.literal(APPROVAL_PRESENTATION_REVISION),
   title: z.string().min(1).max(120),
@@ -46,8 +66,26 @@ export const ApprovalPresentationSchema = z.strictObject({
   subjectLabel: z.string().min(1).max(160).optional(),
   riskSummary: PresentationTextSchema,
   sections: z.array(ApprovalPresentationSectionSchema).min(1).max(8),
+  commandDisclosure: ApprovalCommandDisclosureSchema.optional(),
+}).superRefine((presentation, ctx) => {
+  if (!presentation.commandDisclosure) return;
+  for (const [sectionIndex, section] of presentation.sections.entries()) {
+    for (const [fieldIndex, field] of section.fields.entries()) {
+      if (!validCommandChunk(field.value)) ctx.addIssue({
+        code: "custom",
+        message: "command chunks must be valid Unicode within 500 UTF-8 bytes and UTF-16 units",
+        path: ["sections", sectionIndex, "fields", fieldIndex, "value"],
+      });
+    }
+  }
 });
 export type ApprovalPresentation = z.infer<typeof ApprovalPresentationSchema>;
+
+/** Only typed command fields participate; transport grouping must never insert source whitespace. */
+export function reconstructApprovalCommand(presentation: ApprovalPresentation): string | undefined {
+  if (!presentation.commandDisclosure) return undefined;
+  return presentation.sections.flatMap((section) => section.fields.map((field) => field.value)).join("");
+}
 
 const AllowedChoicesSchema = z.array(ApprovalChoiceSchema).min(2).max(4)
   .refine((choices) => new Set(choices).size === choices.length, "approval choices must be unique")

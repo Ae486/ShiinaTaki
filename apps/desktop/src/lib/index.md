@@ -3,13 +3,13 @@ Cross-cutting Pet UI clients + seams (talk to the Agent Core / hold window-share
 icons/ (the shared glyph set) and the two window-shared React hooks below.
 - ws-client.ts — operator WS JSON-RPC client to the Core (browser WebSocket): public turn/handshake/monitor subscribe-unsubscribe wiring
 - ws-client-routes.ts — inbound half: the zod boundary (frame parse + chat/avatar/timeline/config/Approval/monitor push routing) and the D29 mid-turn-close abort
-- ws-client-methods.ts — outbound half: handshake plus schema-validated operator methods including extension convergence
+- ws-client-methods.ts — outbound half: command-display echo validation before connect promotion plus schema-validated operator methods
 - rpc-deadline.ts — method-class timing table + typed deadline error + json-rpc-2.0 native timeout requester seam
 - timing-policy.ts — window-owned bootstrap/last-good timing policy store; validates full Core config refreshes without persistence
 - timing-policy-sync.ts — exact-once config subscription and serialized full-policy refresh for an authenticated client
 - connection-status.ts — discriminated operator connection states plus the one semantic notice-copy mapping shared by every surface
 - connection-generation-controller.ts — framework-free fresh-client generation lifecycle: auth/restore promotion, full-jitter retry, stability reset, stale guards, disposal
-- operator-auth.ts — shared Pet/Home/Chat authentication using the newest same-origin operator credential per generation
+- operator-auth.ts — shared Pet/Home/Chat authentication with per-generation display support and credential-preserving compatibility refusal
 - ws-transport.ts — browser-WebSocket wrapper behind a small transport interface (keeps ws-client node-testable)
 - device-identity.ts — the operator device identity (deviceId + reconnect token) persisted in localStorage
 - presentation-gate.ts — the ONE presentation gate (D21/TTS seam): reply text + avatar command surface together

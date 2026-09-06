@@ -9,11 +9,12 @@
 
 ## Current UI/UX checkpoint - 2026-09-06
 
-Stay in `H:/TakiAgent-worktrees/t4`, branch `task/t4-skills-mcp-productization`, base HEAD `3c67fd5`.
-The main session's current task is `.trellis/tasks/09-05-uiux-readable-operations`, source
-`session:codex_01a070e4-3a27-7562-ab12-14cc42cbea98`. Verify it with `task.py current --source`;
-never reactivate the stale legacy Compaction pointer. No UI/UX commit, push, finish or archive has
-been performed, and manual acceptance remains explicit.
+Stay in `H:/TakiAgent-worktrees/t4`, branch `task/t4-skills-mcp-productization`, checked checkpoint `a771496`.
+The continuation recovered `.trellis/tasks/09-05-uiux-readable-operations` from session
+`01a070e4-3a27-7562-ab12-14cc42cbea98` and bound it to
+`session:codex_01a074f6-ff11-71b3-832a-e35578901417`. Verify the live task with `task.py current --source`;
+never reactivate the stale legacy Compaction pointer. G4 and A1/A2 are committed together as
+`a771496` (`feat(ui): make operations and approvals readable`). No push, finish or archive was performed.
 
 Latest authorization: the owner activated an execution goal to complete the planned work without
 further confirmations and to manage task commits. See
@@ -37,7 +38,14 @@ are now authorized. Use the live Git log for checkpoint hashes. Do not claim uno
   covered. This is a metadata compatibility fix in the naming task; it does not reopen Compaction.
 - D64/B command disclosure uses policy A selected by main under that delegation, as recorded in
   [the policy proposal](../.trellis/tasks/09-05-uiux-readable-operations/research/d64-disclosure-policy-proposal-2026-09-05.md).
-  Current adapter/compatibility research is the remaining pre-implementation gate, not owner approval.
+  Its implementation and independent `gpt-6-astra/xhigh` review are complete, with Unicode/whole-value
+  masking and exact pending cancellation/resume fixes. Host v3 is retained with correlated challenge
+  ACK failure settlement; Desktop/CLI use operator offer/echo before rendering the complete command.
+  The continuation verified all 9 reviewer file hashes, 260 frontend source/config hashes and 23
+  frozen assets, and passed 32 Core plus 50 CLI regressions. Full gates, real Core/Host L1 6/6 and
+  actual WebView2 7/7 are recorded in the
+  [final D64 evidence](../.trellis/tasks/09-05-uiux-readable-operations/implementation-evidence-d64-2026-09-06.md).
+  The former `d64_check` session completed; it is not a live child of the incoming coordinator.
 - The next main delivery is D68's DSH Monitor port, then Chat and Pet. The
   [current DSH source/adapter map](../.trellis/tasks/08-28-dsh-observability-expansion/research/d68-b-ui-port-adapter-map-2026-09-06.md)
   identifies real projection/history/client gaps. `@tanstack/react-virtual@3.14.9` is proposed to retain

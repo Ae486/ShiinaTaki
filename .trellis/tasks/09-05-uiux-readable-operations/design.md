@@ -150,12 +150,112 @@ remain readable; no database rewrite is required. This slice does not change too
 stream delivery or result semantics, which belong to the live-feedback child. That child consumes
 the same captured-name contract for live events, ensuring no label flip at persistence handoff.
 
-## 5. B — D64 policy A and compatibility gate
+## 5. B — D64 complete command disclosure
 
-The linked proposal now selects policy A under delegated authority. The executable slice must specify supported
-masking rules, full command segmentation, visible escaping, sanitized immediate refusal, old-Host
-compatibility, exact challenge binding and original-command execution/audit. A1/A2 do not authorize
-expanding D63 or claiming universal secret detection. Preserve the selected policy's stated limitation.
+Main reviewed and adopts the [executable source contract](research/d64-executable-contract-2026-09-06.md)
+and [disclosure/validation companion](research/d64-disclosure-validation-2026-09-06.md)
+under the recorded delegation. This section is the implementation decision; the research supplies
+exact source anchors, the compatibility matrix and adversarial test cases. G4/A1/A2 are committed as
+`a771496`; preserve that checkpoint. D64 is now authorized for implementation.
+
+### 5.1 Projection and unchanged authority
+
+Only an `exec` preflight whose effective posture is `ask` requires the new disclosure. Build it from
+the exact sealed `request.input.command`, before creating the challenge digest. Auto and non-exec
+preflights keep their existing bounds and behavior. Exec currently has no per-request cwd/timeout
+override; do not invent one or mix non-command values into the command body.
+
+Adopt policy A: preserve complete permitted command content, source order, quotes and ordinary paths;
+fully hide recognized credentials. Unrecognized free text remains visible to the authenticated
+initiating operator. Recognition is finite, not proof that arbitrary text contains no secret.
+Use source-span scanning in a pure Rust module, never dequoted argv reconstruction, process execution,
+environment expansion, filesystem reads or path resolution. No new dependency is needed.
+
+Adopt research section 6.2's exact key/suffix families, path exclusions, complete header/cookie values,
+URL userinfo and credential query values, vendor-token/JWT classes and matched private-key blocks.
+Support credential aliases only in recognized curl command context: header arguments and user/proxy
+credentials must not turn unrelated programs' short options into secret fields. Freeze supported
+aliases, percent-encoded query-key handling and finite token-prefix classes in tests. A recognized
+value with an ambiguous boundary is a disclosure refusal. Unknown ordinary syntax remains visible.
+
+Apply whole-span masking before chunking. Escape literal backslashes, CR/LF/TAB, C0/DEL/C1 controls,
+the listed Bidi controls, U+2028/U+2029 and the finite invisible-format set from research section 6.3.
+Keep ordinary printable Unicode unchanged. The escaped display must distinguish literal escape-like
+text from real controls. Do not claim it is a copy-back executable command.
+
+### 5.2 Typed wire and bounded complete reconstruction
+
+Keep Approval presentation revision 1, Host protocol v3, catalog schema v2, existing challenge domain,
+control/scope digests and future-background consent revisions. Add only this optional Shared-defined
+presentation property after `sections`, with a matching strict Rust mirror:
+
+```typescript
+commandDisclosure?: {
+  revision: 1;
+  complete: true;
+  encoding: "visible-escapes";
+  reconstruction: "section-field-concat";
+};
+```
+
+When present, every field value in outer section order and inner field order is part of the command.
+The shared `reconstructApprovalCommand` helper joins them with an empty separator. No classification,
+note or other value may enter those fields. Explanations stay in title/risk copy. Consumers branch on
+the typed marker, never translated labels or title matching.
+
+Each marked value must satisfy both 500 UTF-8 bytes and 500 UTF-16 units; Shared rejects lone
+surrogates. Pack complete Unicode/escape/marker atoms into at most 12 fields per section and 8
+sections. All text must fit; over-capacity or invalid disclosure returns a finite refusal, never a
+truncated `complete` presentation. Keep memory/output bounded and scanning linear in input size.
+An omitted marker must stay omitted in Rust serialization and canonical bytes, preserving legacy
+golden hashes. Add a distinct cross-language marked-command fixture.
+
+### 5.3 Connection support and compatibility
+
+Add optional operator-only `approvalCommandDisclosureRevision: 1` to connect params/results. Store
+the selected offer on the authenticated physical Connection and echo it only for an actual offer.
+Token, pairing and loopback auto-trust paths all propagate it. Do not reuse execution `capabilities`,
+write durable support metadata or change token verification rules.
+
+Desktop and the maintained CLI advertise support only with their full renderer in place and verify
+the echo before promoting the client/restoring subscriptions. A missing echo is a readable local
+compatibility error with `code: null`; it must not clear an existing token or enter AUTH_FAILED
+credential recovery. Old clients with no offer remain supported for compatible non-exec traffic.
+
+For `exec` ask, Core first validates provenance, sealed control/digests and trusted evidence, then
+requires marked disclosure and support on the initiating operator. A legacy Host or unsupported
+operator is immediately settled as `DENIED` with fixed Chinese update guidance and Host cancellation;
+no Approval, intent or resume is created. No-operator remains `APPROVAL_REQUIRED`. Non-exec/auto
+behavior is unchanged. Never strip the marker or downgrade to classification-only command approval.
+
+For marked exec asks, use the existing challenge RPC with string ID
+`challenge:<requestId>:<challengeId>`. Complete its ignored ACK/error route: success only acknowledges
+reception; a correlated rejection, malformed result or RPC error atomically retires that exact
+still-pending challenge and returns one sanitized `DENIED`. Match both UUIDs in the current
+HostSession. Register pending before send; clear both pending raw input and active state on terminal
+retirement. Late/replayed ACKs after resume/cancel/complete and unrelated numeric responses are no-ops.
+Do not log/echo peer error content. Send failures clear local pending state; remote delivery after
+socket loss still relies on the existing disconnect/deadline lifecycle.
+
+Challenge-build failure also settles immediately from the exact request/control and original
+preflight evidence, stores no pending raw slot and starts no execution. Preserve one-shot resume,
+expiry/reconnect invalidation, final Host enforcement and the existing restricted raw-command audit.
+No new command/display persistence, diagnostic payload or raw denial audit is allowed. D63 execution
+semantics are unchanged.
+
+### 5.4 User presentation and delivery
+
+Desktop renders the joined projection once as literal selectable monospaced text in an accessible
+scrollable region; CLI prints the identical join with decoration only outside it. Retain the full
+tail and whitespace, without chunk labels, synthetic newlines, truncation, HTML or shell links.
+Use concise Chinese copy explaining hidden recognized credentials and visible escapes. Keep existing
+approval choices, focus trap/restoration, expiry, queue and generation-bound responses intact.
+
+One `gpt-6-astra/high` implementation owns the coherent Rust/Shared/Core/Desktop/CLI adapter and
+colocated tests/indexes named in research section 10. Main owns task/spec synchronization. One
+`gpt-6-astra/xhigh` independent review covers security, protocol and lifecycle behavior, including
+actual isolated Core/Host approval/deny/disclosure-failure paths. Simple copy/style fixes join that
+review or main review; do not create repetitive standalone checks.
 
 ## 6. Verification and rollback
 
@@ -164,7 +264,8 @@ exact MCP matching, no label-induced binding/digest/usability/generation changes
 permission/revoke/disclosure actions. A2 tests cover captured names across MCP replacement, optional
 field DB round-trip, raw-input scrubbing, byte-equivalent canonical replay and legacy entries.
 
-Run relevant Shared/Core/Desktop suites, workspace typecheck, root lint and Desktop build. B adds
+Run relevant Shared/Core/Desktop/CLI suites, workspace typecheck, root lint and Desktop build. B adds
 Rust/Shared parity, redaction/bounds, challenge/authorization and real-process exec tests. Actual
-WebView2 and owner visual acceptance remain separate gates. Rollback removes presentation additions
+WebView2 engineering acceptance is autonomous; personal owner inspection is never presumed.
+Rollback removes presentation additions
 without rewriting historical authority, changing permission policy or reverting the prior G4 cleanup.

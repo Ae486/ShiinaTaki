@@ -1,5 +1,5 @@
 //! INPUT:  one authenticated Host negotiation plus request/cancel/resume/terminal frames for that live generation
-//! OUTPUT: generation-bound begin/cancel/complete decisions, a 256-entry terminal cache, and one-shot challenge state
+//! OUTPUT: generation-bound attempt/ACK retirement, a 256-entry terminal cache, and one-shot challenge state
 //! POS:    shell/host_session — transport-agnostic duplicate/cancellation owner; discarded on every reconnect; the
 //!         pending challenge's raw input is memory-only here and never reaches disk, logs, or audit
 
@@ -44,6 +44,7 @@ pub(crate) struct PendingChallengeRecord {
 pub(crate) enum ChallengeSlot {
     Stored,
     Occupied,
+    Retired,
 }
 
 pub(crate) struct HostSession {
@@ -84,6 +85,10 @@ impl HostSession {
         challenge: crate::protocol::CapabilityChallenge,
         input: serde_json::Value,
     ) -> ChallengeSlot {
+        if !self.active.get(&challenge.control.attempt_id)
+            .is_some_and(|binding| binding.matches(&challenge.request_id, &challenge.control)) {
+            return ChallengeSlot::Retired;
+        }
         match self.pending_challenges.entry(challenge.request_id.clone()) {
             std::collections::hash_map::Entry::Occupied(_) => ChallengeSlot::Occupied,
             std::collections::hash_map::Entry::Vacant(slot) => {
@@ -103,23 +108,47 @@ impl HostSession {
         self.pending_challenges.remove(request_id)
     }
 
+    /// Only an exact, still-pending marked exec challenge may react to this RPC response. An ACK
+    /// never grants authority; late/foreign ACKs cannot reach a consumed or replaced raw-input slot.
+    pub(crate) fn acknowledge_challenge(
+        &mut self,
+        id: &crate::protocol::JsonRpcId,
+        result: Option<serde_json::Value>,
+    ) -> Option<CapabilityRespond> {
+        let crate::protocol::JsonRpcId::Str(id) = id else { return None; };
+        if id.len() != 83 { return None; }
+        let (request_id, challenge_id) = id.strip_prefix("challenge:")?.split_once(':')?;
+        if request_id.len() != 36 || challenge_id.len() != 36
+            || uuid::Uuid::parse_str(request_id).is_err() || uuid::Uuid::parse_str(challenge_id).is_err() { return None; }
+        let pending = self.pending_challenges.get(request_id)?;
+        if pending.challenge.challenge_id != challenge_id || pending.challenge.control.capability_id != "exec"
+            || pending.challenge.presentation.command_disclosure.is_none() { return None; }
+        if result.and_then(|value| serde_json::from_value::<crate::protocol::HostFrameAck>(value).ok())
+            == Some(crate::protocol::HostFrameAck::Accepted) { return None; }
+        self.complete_challenge_failure(request_id, challenge_id,
+            "Core 无法接受完整命令审批，已拒绝执行；请更新 Core 后重试。")
+    }
+
+    pub(crate) fn complete_challenge_failure(
+        &mut self,
+        request_id: &str,
+        challenge_id: &str,
+        message: &'static str,
+    ) -> Option<CapabilityRespond> {
+        let pending = self.pending_challenges.get(request_id)?;
+        if pending.challenge.challenge_id != challenge_id { return None; }
+        let response = CapabilityRespond::err(request_id.into(), pending.challenge.control.clone(),
+            crate::protocol::CapabilityErrorCode::Denied, message.into())
+            .with_governance(pending.challenge.governance.clone());
+        self.complete(response)
+    }
+
     /// Retires a pending challenge on cancel. No effect has started, so this applies regardless of the
     /// descriptor's cancellation kind; the settled cancelled frame enters the terminal cache.
     pub(crate) fn retire_challenge(&mut self, cancel: &CapabilityCancel) -> Option<CapabilityRespond> {
-        if !self.accepts(&cancel.control) {
-            return None;
-        }
-        let attempt_id = &cancel.control.attempt_id;
-        let binding = self.active.get(attempt_id)?;
-        if !binding.matches(&cancel.request_id, &cancel.control) {
-            return None;
-        }
-        self.pending_challenges.remove(&cancel.request_id)?;
-        self.active.remove(attempt_id);
-        let response =
-            CapabilityRespond::cancelled(cancel.request_id.clone(), cancel.control.clone());
-        self.terminal.insert(attempt_id.clone(), response.clone());
-        Some(response)
+        let pending = self.pending_challenges.get(&cancel.request_id)?;
+        if pending.challenge.control != cancel.control { return None; }
+        self.cancel(cancel)
     }
 
     pub(crate) fn begin(&mut self, request: &CapabilityRequest) -> BeginDecision {
@@ -165,19 +194,9 @@ impl HostSession {
     }
 
     pub(crate) fn cancel(&mut self, cancel: &CapabilityCancel) -> Option<CapabilityRespond> {
-        if !self.accepts(&cancel.control) {
-            return None;
-        }
-        let attempt_id = &cancel.control.attempt_id;
-        let binding = self.active.get(attempt_id)?;
-        if !binding.matches(&cancel.request_id, &cancel.control) {
-            return None;
-        }
-        self.active.remove(attempt_id);
-        let response =
-            CapabilityRespond::cancelled(cancel.request_id.clone(), cancel.control.clone());
-        self.terminal.insert(attempt_id.clone(), response.clone());
-        Some(response)
+        // A later policy must prevent new execution, not prevent cleanup of an already accepted
+        // binding. complete checks that exact request/control and only removes its own pending slot.
+        self.complete(CapabilityRespond::cancelled(cancel.request_id.clone(), cancel.control.clone()))
     }
 
     pub(crate) fn complete(&mut self, response: CapabilityRespond) -> Option<CapabilityRespond> {
@@ -188,6 +207,10 @@ impl HostSession {
         let binding = self.active.get(&attempt_id)?;
         if !binding.matches(response.request_id(), response.control()) {
             return None;
+        }
+        if self.pending_challenges.get(response.request_id())
+            .is_some_and(|pending| pending.challenge.control == *response.control()) {
+            self.pending_challenges.remove(response.request_id());
         }
         self.active.remove(&attempt_id);
         self.terminal.insert(attempt_id, response.clone());
@@ -560,11 +583,11 @@ mod tests {
             approval_fixture("capability-challenge.screenshot.valid.json"),
         )
         .expect("fixture challenge");
-        let mut control = challenge.control.clone();
-        control.target_host_id = HOST.into();
-        control.connection_generation = 1;
-        control.catalog_generation = 1;
-        let challenge = crate::protocol::CapabilityChallenge { control, ..challenge };
+        let request = request(29, 1, 1);
+        assert_eq!(session.begin(&request), BeginDecision::Start);
+        let challenge = crate::protocol::CapabilityChallenge {
+            request_id: request.request_id, control: request.control, ..challenge
+        };
         assert_eq!(
             session.store_challenge(challenge.clone(), json!({"secret": "SENTINEL"})),
             ChallengeSlot::Stored
@@ -615,15 +638,135 @@ mod tests {
     #[test]
     fn reconnect_discards_pending_challenges_with_the_session() {
         let mut first = HostSession::new(HOST.into(), 1, 1);
-        let challenge = crate::protocol::parse_capability_challenge(
+        let mut challenge = crate::protocol::parse_capability_challenge(
             approval_fixture("capability-challenge.screenshot.valid.json"),
         )
         .expect("fixture challenge");
+        let request = request(31, 1, 1);
+        assert_eq!(first.begin(&request), BeginDecision::Start);
+        challenge.request_id = request.request_id;
+        challenge.control = request.control;
         assert_eq!(
             first.store_challenge(challenge.clone(), Value::Null),
             ChallengeSlot::Stored
         );
         let replacement = HostSession::new(HOST.into(), 2, 1);
         assert!(replacement.pending_challenge(&challenge.request_id).is_none());
+    }
+
+    fn pending_exec() -> (HostSession, crate::protocol::CapabilityChallenge, CapabilityRequest) {
+        let challenge = crate::protocol::parse_capability_challenge(
+            approval_fixture("capability-challenge.exec-disclosure.valid.json"),
+        ).unwrap();
+        let request = CapabilityRequest { request_id: challenge.request_id.clone(),
+            control: challenge.control.clone(), input: json!({"command": "RAW_INPUT_SENTINEL"}) };
+        let mut session = HostSession::new(HOST.into(), 1, 1);
+        assert_eq!(session.begin(&request), BeginDecision::Start);
+        assert_eq!(session.store_challenge(challenge.clone(), request.input.clone()), ChallengeSlot::Stored);
+        (session, challenge, request)
+    }
+
+    fn ack_id(challenge: &crate::protocol::CapabilityChallenge) -> crate::protocol::JsonRpcId {
+        crate::protocol::JsonRpcId::Str(format!("challenge:{}:{}", challenge.request_id, challenge.challenge_id))
+    }
+
+    #[test]
+    fn exact_negative_ack_retires_raw_and_active_once_with_original_evidence() {
+        for result in [None, Some(json!({"accepted": false, "reason": "unsupported_version"})),
+            Some(json!({"accepted": true, "unknown": "PEER_SECRET"})), Some(json!({"bad": "PEER_SECRET"}))] {
+            let (mut session, challenge, request) = pending_exec();
+            let response = session.acknowledge_challenge(&ack_id(&challenge), result).unwrap();
+            assert!(session.pending_challenge(&request.request_id).is_none());
+            assert!(session.active.is_empty());
+            let value = serde_json::to_value(&response).unwrap();
+            assert_eq!(value["governance"], serde_json::to_value(&challenge.governance).unwrap());
+            assert_eq!(value["error"]["code"], "DENIED");
+            assert!(value.get("authorization").is_none());
+            assert!(!value.to_string().contains("SENTINEL"));
+            assert!(!value.to_string().contains("PEER_SECRET"));
+            assert!(session.acknowledge_challenge(&ack_id(&challenge), None).is_none());
+            assert!(session.retire_challenge(&cancel(&request)).is_none());
+            assert_eq!(session.begin(&request), BeginDecision::Cached(Box::new(response)));
+        }
+    }
+
+    #[test]
+    fn accepted_unrelated_and_old_challenge_ack_cannot_consume_authority() {
+        let (mut session, challenge, request) = pending_exec();
+        for id in [crate::protocol::JsonRpcId::Num(1), crate::protocol::JsonRpcId::Str("challenge:bad:bad".into()),
+            crate::protocol::JsonRpcId::Str(format!("challenge:{}:99999999-9999-4999-8999-999999999999", request.request_id))] {
+            assert!(session.acknowledge_challenge(&id, None).is_none());
+        }
+        assert!(session.acknowledge_challenge(&ack_id(&challenge), Some(json!({"accepted": true}))).is_none());
+        assert!(session.pending_challenge(&request.request_id).is_some());
+        assert_eq!(session.begin(&request), BeginDecision::DuplicateInFlight);
+        session.consume_challenge(&request.request_id).unwrap();
+        assert!(session.acknowledge_challenge(&ack_id(&challenge), None).is_none());
+        assert_eq!(session.active.len(), 1, "ACK after consume cannot cancel an executing attempt");
+    }
+
+    #[test]
+    fn exact_completion_cancel_and_reconnect_leave_no_raw_ack_target() {
+        let (mut session, challenge, request) = pending_exec();
+        let mut wrong = request.clone();
+        wrong.control.input_digest = "f".repeat(64);
+        assert!(session.complete(completed(&wrong, json!({}))).is_none());
+        assert!(session.pending_challenge(&request.request_id).is_some());
+        session.complete(completed(&request, json!({}))).unwrap();
+        assert!(session.pending_challenge(&request.request_id).is_none());
+        assert!(session.acknowledge_challenge(&ack_id(&challenge), None).is_none());
+        assert_eq!(session.store_challenge(challenge.clone(), request.input.clone()), ChallengeSlot::Retired);
+        let mut replacement = HostSession::new(HOST.into(), 2, 1);
+        assert!(replacement.acknowledge_challenge(&ack_id(&challenge), None).is_none());
+        let (mut session, challenge, request) = pending_exec();
+        session.retire_challenge(&cancel(&request)).unwrap();
+        assert!(session.acknowledge_challenge(&ack_id(&challenge), None).is_none());
+    }
+
+    #[test]
+    fn old_ack_cannot_retire_a_new_challenge_reusing_the_request_id() {
+        let (mut session, old, mut request) = pending_exec();
+        session.retire_challenge(&cancel(&request)).unwrap();
+        request.control.attempt_id = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa".into();
+        let mut new = old.clone();
+        new.control = request.control.clone();
+        new.challenge_id = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb".into();
+        assert_eq!(session.begin(&request), BeginDecision::Start);
+        assert_eq!(session.store_challenge(new.clone(), request.input), ChallengeSlot::Stored);
+        assert!(session.acknowledge_challenge(&ack_id(&old), None).is_none());
+        assert_eq!(session.pending_challenge(&new.request_id).unwrap().challenge.challenge_id, new.challenge_id);
+    }
+
+    #[test]
+    fn exact_cancellation_retires_old_policy_work_without_reopening_execution() {
+        let (mut session, challenge, old) = pending_exec();
+        let mut newer = request(93, 1, 1);
+        newer.control.policy_generation = 2;
+        assert_eq!(session.begin(&newer), BeginDecision::Start);
+        assert!(session.retire_challenge(&cancel(&old)).is_some());
+        assert!(session.pending_challenge(&old.request_id).is_none());
+        assert!(!session.active.contains_key(&old.control.attempt_id));
+        assert!(session.active.contains_key(&newer.control.attempt_id));
+        assert!(session.acknowledge_challenge(&ack_id(&challenge), None).is_none());
+        assert_eq!(session.begin(&old), BeginDecision::Rejected);
+
+        let mut session = HostSession::new(HOST.into(), 1, 1);
+        let old_read = request(94, 1, 1);
+        assert_eq!(session.begin(&old_read), BeginDecision::Start);
+        assert_eq!(session.begin(&newer), BeginDecision::Start);
+        assert!(session.cancel(&cancel(&old_read)).is_some());
+        assert!(session.complete(completed(&old_read, json!({}))).is_none());
+        assert_eq!(session.begin(&old_read), BeginDecision::Rejected);
+    }
+
+    #[test]
+    fn cancellation_cannot_remove_another_pending_control_with_the_same_request_id() {
+        let (mut session, challenge, old) = pending_exec();
+        let mut conflicting = request(95, 1, 1);
+        conflicting.request_id = old.request_id.clone();
+        assert_eq!(session.begin(&conflicting), BeginDecision::Start);
+        assert!(session.retire_challenge(&cancel(&conflicting)).is_none());
+        assert_eq!(session.pending_challenge(&old.request_id).unwrap().challenge, challenge);
+        assert!(session.active.contains_key(&old.control.attempt_id));
     }
 }

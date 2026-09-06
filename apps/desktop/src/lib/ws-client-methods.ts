@@ -1,6 +1,6 @@
 /**
  * INPUT:  a JSON-RPC client bound to the operator socket + call params from the UI hooks.
- * OUTPUT: handshake() plus typed request methods including governance, lifecycle, and extension convergence
+ * OUTPUT: echo-verified handshake() plus typed request methods for governance, lifecycle and extension convergence
  * POS:    ui/lib — the outbound half of ws-client (no turn/stream state lives here). Every result is parsed through a
  *         @taki/shared schema: the zod boundary holds for every inbound frame.
  */
@@ -72,6 +72,7 @@ import {
   type CharacterImportParams,
   type ConfigSetParams,
   type ConnectParams,
+  type ConnectResult,
   type ErrorCode,
   type McpAddParams,
   type McpEditParams,
@@ -153,7 +154,9 @@ function skillMethods(request: <T>(method: string, params: JSONRPCParams) => Pro
 }
 
 /** The handshake outcome: authenticated, or refused with the app ErrorCode (PAIRING_REQUIRED / AUTH_FAILED / ...). */
-export type ConnectOutcome = { ok: true; token?: string } | { ok: false; code: ErrorCode | null; message: string };
+export type ConnectOutcome =
+  | ({ ok: true } & Pick<ConnectResult, "token" | "approvalCommandDisclosureRevision">)
+  | { ok: false; code: ErrorCode | null; message: string };
 
 function appErrorCode(data: unknown): ErrorCode | null {
   if (typeof data !== "object" || data === null || !("code" in data)) return null;
@@ -168,7 +171,11 @@ export async function handshake(
 ): Promise<ConnectOutcome> {
   try {
     const result = ConnectResultSchema.parse(await requestWithDeadline({ rpc, timing, method: CONNECT_METHOD, params }));
-    return { ok: true, token: result.token };
+    if (params.approvalCommandDisclosureRevision !== undefined
+      && result.approvalCommandDisclosureRevision !== params.approvalCommandDisclosureRevision) {
+      return { ok: false, code: null, message: "Core 版本不支持完整命令审批，请更新 Core 后重试。" };
+    }
+    return { ok: true, token: result.token, approvalCommandDisclosureRevision: result.approvalCommandDisclosureRevision };
   } catch (error) {
     if (error instanceof JSONRPCErrorException) {
       return { ok: false, code: appErrorCode(error.data), message: error.message };

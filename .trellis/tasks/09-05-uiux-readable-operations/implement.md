@@ -9,7 +9,7 @@ policy A and proceeds after its current adapter/compatibility design review. Com
 changes; retain no push, Hindsight/memory-runtime change or D63 execution expansion. Record actual
 engineering acceptance without claiming unobserved owner manual acceptance.
 
-Read `prd.md`, `design.md`, curated manifests and both research files before dispatch. Preserve the
+Read `prd.md`, `design.md`, curated manifests and their research sources before dispatch. Preserve the
 checked G4 frontend edits and all unrelated work. Verify the T4 worktree, branch and session pointer
 before every slice/agent; semantic discovery uses jbcontext only, never YCE. Main owns documents,
 cross-slice contracts and integration. Implement is gpt-6-astra/high; check is gpt-6-astra/xhigh;
@@ -56,14 +56,20 @@ A1 checkpoint. D64 keeps a separate independent review because it changes a secu
 
 ## B — D64 actual command disclosure
 
-1. Record the owner's selected policy in the proposal and finalize the compatible Host presentation
-   design. Resolve whole-command capacity, unsupported forms and old-Host behavior before code.
+1. Completed: main adopted policy A and reviewed the
+   [source-backed executable contract](research/d64-executable-contract-2026-09-06.md). Design section 5
+   fixes the optional typed command marker, operator support echo and Host-v3 correlated ACK path.
+   G4/A1/A2 checkpoint: `a771496`. No further owner-choice gate remains.
 2. Implement the Host projection/masking/visible escaping with no command execution for formatting.
    Preserve exact raw input and seal the final display before challenge digest creation.
 3. Settle disclosure failures immediately and safely; keep once-only resume, original command audit,
    deadline, reconnect and final Host-floor enforcement. D63 remains unchanged.
-4. Implement readable full-command Desktop display without truncation or a raw-metadata panel.
-5. Run the dedicated Rust/Shared/protocol tests, real-process approval paths and independent review.
+4. Implement the narrow operator offer/echo across all Core authentication branches and maintained
+   Desktop/CLI clients, then their exact full-command display without truncation or metadata panels.
+   Explicit legacy refusal must settle before any prompt/intent/resume and preserve existing tokens.
+5. Run focused Rust/Shared/protocol/lifecycle tests during implementation. Independently review the
+   coherent slice once, including the actual isolated process approval/deny/refusal paths and legacy
+   digest fixtures. Then run final relevant package/typecheck/lint/build/Rust gates once.
 
 ## Required gates and handoff
 
@@ -73,6 +79,17 @@ A1 checkpoint. D64 keeps a separate independent review because it changes a secu
   clippy gate, scoped first and widened as required by the changed Rust contract.
 - `python .trellis/scripts/task.py validate 09-05-uiux-readable-operations` and document/link checks.
 - Protect unrelated dirty files and the deferred-registry prefix; write concise source-backed evidence.
-- Actual window acceptance covers readable labels, long/unknown names, details, keyboard focus,
-  revocation and command approval. Leave manual criteria open until confirmed by the owner.
+- Actual window engineering acceptance covers readable labels, long/unknown names, details, keyboard
+  focus, revocation and command approval. Record observed checks under the execution delegation;
+  never describe engineering QA as personal owner inspection.
 - The next main delivery is D68/G5 Monitor, followed by Chat and Pet slices in the live-feedback child.
+
+## D64 final checkpoint — 2026-09-06
+
+B is implemented and independently checked with all findings fixed. Shared/Core/Desktop/CLI,
+workspace typecheck/lint, Rust/Clippy, real Core/Host L1 and the frozen actual WebView2 gates passed.
+The continuation coordinator verified 9/9 reviewer file hashes, 260/260 frontend source/config hashes
+and 23/23 frozen assets, then passed 32 Core and 50 CLI regressions against the current worktree.
+The source-backed [final evidence](implementation-evidence-d64-2026-09-06.md) records exact counts,
+fixes, scope and residuals. This satisfies B's implementation/review/engineering gates without
+claiming personal owner inspection. D68-B can now follow the reviewed execution plan.

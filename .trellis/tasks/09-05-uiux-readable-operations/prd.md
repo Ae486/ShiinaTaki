@@ -21,14 +21,20 @@ without exposing internal routing/binding identifiers or changing execution/perm
 
 ## Acceptance Criteria
 
-- [ ] Supported operations render useful names/targets across live tool cards, settings and approvals.
-- [ ] Primary/expanded/accessibility/copy content contains no meaningless internal binding metadata.
-- [ ] Durable decisions remain correctly bound when listed, revoked, refreshed or restored.
-- [ ] Command approval shows sufficient permitted context to understand the exact proposed action.
-- [ ] Redaction, stale challenge, expiry, reconnect, hard constraints and confirmation behavior retain
+- [x] Supported operations render useful names/targets across live tool cards, settings and approvals.
+- [x] Primary/expanded/accessibility/copy content contains no meaningless internal binding metadata.
+- [x] Durable decisions remain correctly bound when listed, revoked, refreshed or restored.
+- [x] Command approval shows sufficient permitted context to understand the exact proposed action.
+- [x] Redaction, stale challenge, expiry, reconnect, hard constraints and confirmation behavior retain
       their existing guarantees; tests cover changed contracts and meaningful failure cases.
-- [ ] Relevant package gates and real-window operator checks pass; owner visual acceptance is recorded
+- [x] Relevant package gates and real-window operator checks pass; owner visual acceptance is recorded
       separately from automated evidence.
+
+Engineering acceptance completed on 2026-09-06: see
+[A1/A2 evidence](implementation-evidence-a1-a2-2026-09-06.md) and
+[D64 evidence](implementation-evidence-d64-2026-09-06.md). Real-window engineering checks were
+performed under the owner's execution delegation; personal owner visual inspection remains
+unclaimed and is not substituted by automated results.
 
 ## Notes
 

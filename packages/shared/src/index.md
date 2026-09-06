@@ -11,7 +11,7 @@
 - host-control-schema.ts — canonical Execution Host negotiation/catalog/control/cancel/settlement schemas, distinct DENIED vs APPROVAL_REQUIRED failures, exact acknowledgement union, and frozen method names
 - host-approval-schema.ts — protocol-v3 Host challenge/resume extension with redacted presentation, nested single-use authorization, and canonical digest payloads
 - host-control-api.ts — focused named public export surface for Host-control schemas and types
-- connect-schema.ts — CONNECT_METHOD + RoleSchema + connect handshake param/result schemas (ADR 0004)
+- connect-schema.ts — role/handshake schemas with operator-only command-display offer/echo and separate Host negotiation
 - chat-schema.ts — CHAT_METHODS + chat.send { messageId, runId } acknowledgement, legacy/exact-run cancel, delta/complete/error schemas; +ImageAttachment/IMAGE_MEDIA_TYPES (in-flight image input, #17)
 - timeline-schema.ts — timeline entry/part/history/push schemas with optional bounded tool display names, canonical replay fields, image fidelity, and cancel-retract identity
 - config-schema.ts — CONFIG_METHODS + knob entry/list/set/subscribe/changed schemas + ConfigRefusalReason (settings store); operator-only, NO Rust mirror
@@ -20,7 +20,7 @@
 - avatar-schema.ts — AVATAR_METHODS + avatar.subscribe/report/command schemas (LLM-driven expression/motion push); report carries the worn costume id (1f change-detection); operator-only, NO Rust mirror
 - character-schema.ts — CHARACTER_METHODS + character.import/list/costumes/costumeResolution schemas + CostumeAvailability + CharacterId slug + import-error vocabulary (#18); operator-only, NO Rust mirror
 - approval-decision-schema.ts — canonical current/stored Approval binding revisions, fixed-order serializers, durable rows, safe labels, and list usability schemas
-- approval-schema.ts — strict canonical approval.request/respond/closed/list/revoke envelopes with bounded redacted presentation and explicit choices
+- approval-schema.ts — canonical Approval envelopes, optional complete-command marker, dual-unit chunk bounds and exact literal reconstruction
 - approval-api.ts — focused named public facade for canonical Approval schemas, serializers, and types
 - legacy-approval-schema.ts — compatibility-only LegacyApproval* MCP prompt schemas used by dormant Core and CLI code
 - permission-level-schema.ts — Core-owned permission.* generation/concurrency schemas plus isolated legacy Rust-compatible leaves for pre-projection golden fixtures

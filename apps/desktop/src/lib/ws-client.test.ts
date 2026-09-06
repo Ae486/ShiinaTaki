@@ -391,6 +391,25 @@ describe("createWsClient inbound routing", () => {
     });
     expect(await outcome).toEqual({ ok: false, code: "PAIRING_REQUIRED", message: "pairing required" });
   });
+
+  it.each([true, false])("checks the command-display echo before starting timing sync (echo=%s)", async (echo) => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport, timingPolicy: createTimingPolicyStore() });
+    h.open();
+    const outcome = client.connect({ deviceId: "d", deviceName: "pet", role: "operator", capabilities: [],
+      token: "existing", approvalCommandDisclosureRevision: 1 });
+    await flush();
+    expect(JSON.parse(h.sent[0]!).params).toMatchObject({ approvalCommandDisclosureRevision: 1, capabilities: [] });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: {
+      status: "ok", ...(echo ? { approvalCommandDisclosureRevision: 1 } : {}),
+    } });
+    if (echo) await expect(outcome).resolves.toMatchObject({ ok: true, approvalCommandDisclosureRevision: 1 });
+    else {
+      await expect(outcome).resolves.toEqual({ ok: false, code: null, message: "Core 版本不支持完整命令审批，请更新 Core 后重试。" });
+      expect(h.sent.map((value) => JSON.parse(value).method)).toEqual(["connect"]);
+    }
+    client.close();
+  });
 });
 
 describe("createWsClient disconnect handling (D29)", () => {
