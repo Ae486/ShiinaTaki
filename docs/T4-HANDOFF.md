@@ -47,9 +47,9 @@ and historical pure-frontend task remain open; D69/D75/D76/D77 and actual T4 ini
 cross-device work are separate. Do not infer a new task activation from this delivery.
 
 Preserve concurrent Avatar Lab, OpenBiliClaw, Desktop tsconfig/vite, Avatar documentation/index,
-unrelated task metadata and the session export. The final protected inventory has 42 unchanged
-hashes and one concurrent Lab change that this program did not edit or revert. D71-D74 remain
-working-copy additions excluded by partial staging. Main stays at the checked Memory checkpoint
+unrelated task metadata and the session export. Lab work continued independently during and after
+acceptance; preserve its current files and do not treat the earlier test totals as certification of
+those later edits. D71-D74 remain working-copy additions excluded by partial staging. Main stays at the checked Memory checkpoint
 `c3f8bc4`; Hindsight is untouched. Migration035 is now present; future migrations append after it.
 
 Implementation agents use `gpt-6-astra/high`, check agents `gpt-6-astra/xhigh`, without recursive

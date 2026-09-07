@@ -60,8 +60,10 @@ All work stays in `H:/TakiAgent-worktrees/t4`; main and Hindsight are untouched.
 OpenBiliClaw, their task metadata, Desktop tsconfig/vite changes, the Avatar documentation/index
 entry and the session export remain outside these commits. The four foreign D71-D74 rows remain
 unchanged in the working copy of `docs/deferred-decisions.md` and are excluded by partial staging.
-The final protected inventory found 42 unchanged hashes and one concurrent Lab file change predating
-the final gates; no agent in this delivery edited or reverted that file.
+Preservation checks record ongoing independent Lab changes; the post-commit inventory is retained in
+`target/uiux-live-feedback-20260907/delivery-verification.json`. These files are left in the working
+copy and excluded from the commits. Acceptance totals refer to the frozen delivery and do not certify
+later concurrent Lab edits.
 
 Use the normal coordinated Core/Desktop build and additive migration. Rollback must preserve canonical
 Timeline records, migration history, D64/D68/Memory contracts and the verified native/socket shutdown
