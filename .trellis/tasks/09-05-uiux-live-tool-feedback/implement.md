@@ -13,6 +13,11 @@ are prohibited. Implement agents are gpt-6-astra/high, check gpt-6-astra/xhigh. 
 especially Avatar lab, OpenBiliClaw, Hindsight/Memory and their shared documents. Main owns artifacts
 and scoped commits; workers do not stage, commit, push, reset, rebase or archive.
 
+Before L1, complete the [upstream synchronization prerequisite](research/upstream-sync-preflight-2026-09-06.md).
+The reviewed Memory checkpoint adds migrations 033/034 and a nested Memory error mapping that overlaps
+D68's outcome fix. Preserve both contracts and verify the merged T4 tree before allocating the next
+Timeline migration or dispatching live-feedback production work.
+
 ## L1 — producer, activity transport and durable handoff
 
 1. Inspect the completed D68 invocation/outcome bridge and use it directly. Add an ordered foreground

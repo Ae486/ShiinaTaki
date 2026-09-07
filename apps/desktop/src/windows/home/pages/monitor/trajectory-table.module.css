@@ -1,0 +1,334 @@
+/* DSH TrajectoryTable.module.css adaptation; DeepSeek MIT, see third-party-notices.md. */
+.root {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--trajectory-bg);
+  container: trajectory-table / inline-size;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 122px minmax(0, 1fr);
+  flex: none;
+  height: 30px;
+  align-items: center;
+  border-bottom: 1px solid var(--trajectory-border);
+  color: var(--trajectory-caption);
+  background: var(--trajectory-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.header span {
+  padding: 0 8px;
+}
+
+.header span:first-child {
+  text-align: right;
+  padding-right: 4px;
+}
+
+.header span:last-child {
+  padding-left: 4px;
+}
+
+.pane {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  overflow-anchor: none;
+  outline-offset: -2px;
+}
+
+.body {
+  position: relative;
+  min-width: 0;
+}
+
+.body[data-virtual='true'] > .row, .body[data-virtual='true'] > .attempt {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.body[data-ready='false'] {
+  visibility: hidden;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 122px minmax(0, 1fr);
+  box-sizing: border-box;
+  height: 30px;
+  min-height: 30px;
+  border-bottom: 1px solid var(--trajectory-hairline);
+  outline: none;
+  transition: background-color var(--duration-fast) ease-out, opacity var(--duration-fast) ease-out;
+}
+
+.row:hover {
+  background: var(--trajectory-hover);
+}
+
+.row[data-selected='true'] {
+  background: var(--trajectory-selected);
+  box-shadow: inset 3px 0 var(--trajectory-accent);
+}
+
+.row[data-error='true'][data-selected='true'] {
+  box-shadow: inset 3px 0 var(--color-danger);
+}
+
+.row:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--trajectory-accent);
+}
+
+.row[data-timeline-focus='outside'] {
+  opacity: 0.24;
+}
+
+.event {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  padding: 0 4px 0 8px;
+  border-left: 2px solid color-mix(in srgb, var(--trajectory-accent) 22%, var(--trajectory-bg));
+}
+
+.kind {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  box-sizing: border-box;
+  height: 19px;
+  max-width: 90px;
+  padding: 0 5px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 10px;
+  line-height: 16px;
+  font-weight: 650;
+  color: var(--trajectory-caption);
+  background: var(--trajectory-muted);
+  white-space: nowrap;
+}
+
+.kind[data-kind='model'] {
+  color: var(--color-accent-text);
+  background: var(--color-accent-soft);
+}
+
+.kind[data-kind='tool'] {
+  color: var(--color-warn-strong);
+  background: var(--color-warn-soft);
+}
+
+.kind[data-kind='usage'], .kind[data-kind='context'] {
+  color: var(--color-ok-strong);
+  background: var(--color-ok-soft);
+}
+
+.kind[data-error='true'] {
+  color: var(--color-danger);
+  background: var(--color-danger-soft);
+}
+
+.content {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 4px;
+  overflow: hidden;
+}
+
+.row[data-child='true'] .content {
+  padding-left: 14px;
+}
+
+.name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.summary {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--trajectory-caption);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+.state {
+  flex: none;
+  margin-left: auto;
+  color: var(--trajectory-caption);
+  font-size: 10px;
+}
+
+.row[data-error='true'] .state {
+  color: var(--color-danger);
+}
+
+.metric {
+  flex: none;
+  color: var(--trajectory-caption);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.fold {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 18px;
+  border: 0;
+  background: transparent;
+  color: var(--trajectory-caption);
+}
+
+.fold:hover {
+  color: var(--trajectory-text);
+}
+
+.fold svg {
+  width: 10px;
+  height: 10px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.attempt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  height: 20px;
+  min-height: 20px;
+  padding: 0 8px;
+  border-top: 2px solid var(--trajectory-border);
+  background: var(--trajectory-muted);
+  color: var(--trajectory-caption);
+  font-size: 10px;
+}
+
+.attempt button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+}
+
+.attempt span:last-child {
+  margin-left: auto;
+  color: var(--trajectory-dimmed);
+}
+
+.history {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 30px;
+  border: 0;
+  border-bottom: 1px solid var(--trajectory-border);
+  background: var(--trajectory-bg);
+  color: var(--trajectory-secondary);
+  font: 12px/1 var(--font-sans);
+}
+
+.history:hover:not(:disabled) {
+  background: var(--trajectory-hover);
+}
+
+.loading {
+  position: absolute;
+  z-index: 4;
+  top: 30px;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  background: var(--trajectory-bg);
+  color: var(--trajectory-caption);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.empty {
+  display: grid;
+  min-height: 120px;
+  place-content: center;
+  padding: 16px;
+  color: var(--trajectory-caption);
+  text-align: center;
+}
+
+.resume {
+  position: absolute;
+  z-index: 5;
+  right: 14px;
+  bottom: 10px;
+  min-height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--trajectory-border);
+  border-radius: 4px;
+  color: var(--trajectory-secondary);
+  background: var(--trajectory-bg);
+  box-shadow: var(--shadow-card);
+  font: 11px/1 var(--font-sans);
+}
+
+@container trajectory-table (max-width: 620px) {
+  .row, .header {
+    grid-template-columns: 78px minmax(0, 1fr);
+  }
+  .kind {
+    max-width: 58px;
+    padding: 0 3px;
+  }
+  .event {
+    padding-left: 3px;
+  }
+  .summary {
+    display: none;
+  }
+}
+
+@container trajectory-table (max-width: 370px) {
+  .metric {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
+}

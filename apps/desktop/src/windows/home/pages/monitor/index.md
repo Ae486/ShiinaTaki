@@ -1,11 +1,36 @@
 # windows/home/pages/monitor/
-Optional operator/developer monitor (DSH-shaped, L1): three zones against the CURRENT projections — left Run browser
-(compact tiles + filters), central grouped trajectory ledger, and an on-demand closable inspector whose width is
-drag-adjustable (320-440px clamp) when side-by-side; under a narrow container everything stacks (browser → ledger →
-inspector inline section, never a modal). D68 producer events enhance it later.
-- monitor-page.tsx — page root + zone composition: filters live in the browser pane, tiles ride SelectionTile (U1 second-click closes), the P1e gate calls controller.setVisible (hidden = unsubscribe + no re-publishing; reactivation rebinds + refetches), inspector width rides page memory; the ledger is an internally scrolled tail-follow view (bottom-pin, pause-on-scroll-up, resume affordance, reset per selection via the ledger key)
-- monitor-layout.tsx — the three-zone scaffold: shared MasterDetail row for browser|ledger with the inspector as a conditional right column (inner @container query); InspectorPane (closable PageCard + ResizeDivider with pointer drag + separator keyboard contract)
-- monitor-labels.ts — the page's single presentation-label seam (N4): Chinese initiator/state/outcome/phase/effect labels, Run/Attempt group headers and connection kinds; wire vocabulary delegates to the shared observabilityLabel map, unknown values fall back to the raw string
-- monitor-controller.ts — disposable generation-safe WS state owner for restore, live cursors, paging and stale recovery; setVisible (P1e) disposes the live subscription and suppresses publishes while hidden; the selected run and the inspected row close on a second click (U1 two-way disclosure)
-- use-trajectory-follow.ts — monitor-local scroll seam: bottom-pinning keyed on mounted row count, pause-on-scroll-up (following=false is the operator's own position, never synthetic), resume() scrolls back and re-pins; deliberately not the shared chat hook (prepend-hold/top-reach machinery unneeded; extraction waits for a third consumer)
-- monitor-view.tsx — pure Run/Attempt grouping (Chinese group headers) and inspector fields; technical values ride the shared CopyableRow and the detail list clamps min-w-0 (grouping keys stay hidden)
+Read-only DSH presentation over Core Run/Event projections: compact Run browser, 32px Toolbar, fixed
+three-lane Overview, compact measured ledger, and temporary resizable Inspector/narrow drawer.
+System and accessible copy is Chinese. Correlation stays internal; unsupported payload panels are absent.
+- monitor-page.tsx — full-height Monitor-only page composition and explicit connection/read/mode feedback
+- use-monitor-controller.ts — native Home client/visibility binding with disposable controller cleanup
+- monitor-controller.ts — generation-guarded Run browsing and selected-Run coordinator ownership
+- monitor-selection.ts — selected-Run restoration independent of list membership, bounded forward catch-up, distinct older/live cursors, and synchronized selected browser summaries
+- monitor-detail-requests.ts — independent Inspector epochs and one-in-flight/one-trailing summary revalidation that rejects older snapshots without replacing rows
+- monitor-request-state.ts — request scope, semantic error translation, and monotonic summary/cursor/row merges
+- monitor-run-browser.tsx — compact authorized summaries, retained older selection, and bounded Run browsing
+- monitor-run-filters.tsx — summary/initiator/state/time query controls and invalid-range feedback
+- monitor-labels.ts — Chinese wire/mode/connection labels and recorded time formatting; actual names bypass the mapper
+- trajectory-workspace.tsx — DSH Toolbar/Overview/ledger/Inspector composition for one selected Run
+- use-trajectory-workspace.ts — disposable local filters, independent folds, timing/record selection, width, and reading commands
+- trajectory-workspace-actions.ts — explicit navigation, ancestor reveal, close/resume, and range/fold actions
+- trajectory-records.ts — immutable semantic records paired by exact model/invocation identity; ambiguous or absent associations remain independent
+- trajectory-layout.ts — chronological measurable items, Attempt/request folds, safe literal search, and real-field filter options
+- trajectory-timing.ts — measured three-lane spans, inclusive range focus, anchored zoom, and clamped pan; no wall-clock durations
+- trajectory-toolbar.tsx — compact Chinese timing/folding/search/filter controls and durable request/tool totals
+- trajectory-filters.tsx — closable loaded-window filter popover with captured tool names and real provider/model/status options
+- trajectory-overview.tsx — fixed three-lane timing Overview, historical-prefix control, exact recorded tooltips, and selection state
+- use-overview-gestures.ts — pointer capture, cancellation, wheel zoom, right-drag pan, and keyboard navigation lifecycle
+- trajectory-ledger.tsx — compact selectable grouped records with stable measurement keys and explicit history/follow controls
+- use-trajectory-follow.ts — installed measured virtualizer integration above 100 items, 12-row overscan, retained offset across threshold changes, and selection suspension
+- trajectory-scroll.ts — deterministic initial-tail, prepend-anchor, focus, and follow placement; content-only updates do not scroll
+- monitor-layout.tsx — temporary wide Inspector/narrow closable drawer with focus restoration and resize binding
+- use-inspector-resize.ts — clamped direct pointer/keyboard resize and lost-capture/blur/hidden/narrow cleanup
+- monitor-view.tsx — conditional semantic tabs, keyboard navigation, and independently closable detail sections
+- trajectory-inspector-model.ts — authorized section projection following the same exact record's later settlement and usage
+- monitor-workspace.module.css — Monitor-only full-height layout, compact Run browser, and responsive stacking
+- trajectory-toolbar.module.css — DSH Toolbar density and accessible narrow wrapping
+- trajectory-overview.module.css — fixed lanes, truthful markers/spans, range overlays, and reduced-motion tooltips
+- trajectory-table.module.css — 30px rows, group separators, selection/error states, and measured-row geometry
+- monitor-inspector.module.css — resizable Inspector/narrow drawer, occupied-space disclosures, and reduced-motion cleanup
+- third-party-notices.md — retained full DeepSeek MIT notice and presentation source attribution

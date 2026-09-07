@@ -38,8 +38,14 @@ function subscribe(input: { service: ObservabilityQueryService; live: RunEventLi
   return { method: OBSERVABILITY_METHODS.subscribe, roles: ["operator"], paramsSchema: RunMonitorSubscribeParamsSchema, handler: (params, ctx) => {
     if (input.service.mode() === "DISABLED") throw new Error("OBSERVABILITY_DISABLED");
     const backfill = input.service.trajectory({ characterId: params.characterId, runKey: params.runKey, afterSeq: params.afterSeq, limit: 200 });
-    for (const row of backfill.rows) ctx.notify(OBSERVABILITY_METHODS.event, { runKey: params.runKey, cursor: row.seq, row, invalidated: false });
     subscriptions.get(ctx.connection)?.close();
+    subscriptions.delete(ctx.connection);
+    for (const row of backfill.rows) ctx.notify(OBSERVABILITY_METHODS.event, { runKey: params.runKey, cursor: row.seq, row, invalidated: false });
+    if (backfill.hasMore) {
+      // The client drains forward pages before subscribing again. Attaching with an undisclosed gap would lose history.
+      ctx.notify(OBSERVABILITY_METHODS.event, { runKey: params.runKey, cursor: backfill.cursor.seq, invalidated: true, reason: "overflow" });
+      return RunMonitorSubscribeResultSchema.parse({ status: "ok", cursor: backfill.cursor.seq });
+    }
     const holder: { current: RunEventSubscription | null } = { current: null };
     const subscription = input.live.subscribe(params.runKey, (event) => {
       if (input.service.mode() === "DISABLED") {

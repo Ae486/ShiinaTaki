@@ -107,8 +107,9 @@ export const convergenceMigration = { version: 20, sql: canonicalMemoryMigration
 - The ledger is per-Run. Character-lineage aggregation needs a separate multi-Run cursor/order/authorization contract;
   do not merge independent Run sequence spaces as a shortcut.
 - Event rows are append-only at the database boundary: normal lifecycle code never updates/deletes them, and migration
-  triggers reject such mutations. Projection rows may hide opaque IDs, hashes, generations, and revisions from ordinary
-  presentation while retaining them for explicit developer inspection.
+  triggers reject such mutations. Opaque IDs, hashes, generations, and revisions remain internal correlation and query
+  inputs; no ordinary, expanded, Inspector, tooltip, copy, or accessibility surface displays them. Monitor's compatibility
+  `technical` array stays empty, and semantic Inspector sections follow the observability projection whitelist.
 
 ### 4. Validation & Error Matrix
 
@@ -134,7 +135,8 @@ export const convergenceMigration = { version: 20, sql: canonicalMemoryMigration
 - Transition atomicity and event-write rollback tests for admission/start/retry/cancel/settle.
 - Idempotent admission tail, sequence contiguity, cursor/backfill, observer isolation, bounded overflow, and restart
   replay tests.
-- Projection tests asserting readable ordinary summaries and inspector-only technical metadata.
+- Projection tests asserting readable summaries and semantic Inspector sections, empty technical metadata, and no
+  exposed opaque identities in user-facing details or accessibility content.
 
 ### 7. Wrong vs Correct
 

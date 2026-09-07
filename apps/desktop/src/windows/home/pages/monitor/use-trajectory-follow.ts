@@ -1,54 +1,64 @@
 /**
- * INPUT:  the trajectory ledger's content-change counter (mounted row count) from the controller's view state.
- * OUTPUT: useTrajectoryFollow(rowCount) -> { scrollRef, onScroll, following, resume } — bottom-pinning while the
- *         operator sits at the bottom; scrolling up pauses the follow, resume() scrolls back and re-pins.
- * POS:    ui/windows/home/pages/monitor — monitor-local scroll seam (DOM-only). Deliberately NOT the shared
- *         use-timeline-scroll: chat's hook carries the prepend-hold + top-reach loadOlder machinery (firstSeq,
- *         hasMore, loadOlder, in-flight length) the ledger does not have, and chat never renders its paused state.
- *         Extraction waits for a genuine third consumer (reactive-read-models.md §f).
+ * INPUT:  measurable ledger items, bounded older-page actions, and explicit inspection/range suspension
+ * OUTPUT: measured virtualization, stable prepend anchors, initial tail placement, and deliberate follow control
+ * POS:    ui/monitor — DSH Table scroll adaptation; see third-party-notices.md (DeepSeek MIT); no polling
  */
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
+import type { LedgerItem } from "./trajectory-layout.ts";
+import {
+  focusRecord, holdAnchor, onLedgerScroll, pauseFollowing, positionLedgerRows, requestOlderPage, resumeFollowing,
+  type LedgerPosition, type LedgerPositionContext,
+} from "./trajectory-scroll.ts";
 
-import { useLayoutEffect, useRef, useState, type RefObject } from "react";
+export interface LedgerHistory {
+  hasOlder: boolean;
+  loading: boolean;
+  load(): Promise<void>;
+}
+export interface LedgerHandle {
+  holdAnchor(): void;
+  focusRecord(key: string): void;
+  resume(): void;
+}
+export interface FollowInput { items: readonly LedgerItem[]; history: LedgerHistory; suspended: boolean; active: boolean }
 
-const NEAR_BOTTOM_PX = 48;
-
-export interface TrajectoryFollow {
-  scrollRef: RefObject<HTMLDivElement | null>;
-  onScroll: () => void;
-  /** false = the operator scrolled away from the bottom and live rows no longer move the view. This is the user's
-   *  own scroll position, never a synthetic state — the resume affordance renders only while it is false. */
-  following: boolean;
-  resume: () => void;
+export function useTrajectoryFollow(input: FollowInput) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const position = useRef<LedgerPosition>({ initialized: false, following: true, requesting: false, count: 0 });
+  const [following, setFollowing] = useState(true);
+  const [ready, setReady] = useState(false);
+  const enabled = input.items.length > 100;
+  const getScrollElement = useCallback(() => scrollRef.current, []);
+  const estimateSize = useCallback((index: number) => input.items[index]?.height ?? 30, [input.items]);
+  const getItemKey = useCallback((index: number) => input.items[index]?.key ?? index, [input.items]);
+  const virtualizer = useVirtualizer<HTMLDivElement, HTMLDivElement>({
+    count: enabled ? input.items.length : 0, enabled, getScrollElement, estimateSize, getItemKey,
+    initialOffset: () => scrollRef.current?.scrollTop ?? 0,
+    initialRect: { width: 0, height: 600 }, anchorTo: "end", overscan: 12,
+    scrollMargin: input.history.hasOlder ? 30 : 0, scrollEndThreshold: 2,
+  });
+  const context: LedgerPositionContext = { input, pane: scrollRef, virtualizer, enabled, state: position.current, setFollowing, setReady };
+  useLayoutEffect(() => positionLedgerRows(context));
+  useLayoutEffect(() => { if (input.suspended) pauseFollowing(context); }, [input.suspended]);
+  useSelectionSuspension(scrollRef, () => { if (input.active) pauseFollowing(context); });
+  return {
+    scrollRef, following, ready, enabled, virtualizer,
+    onScroll: () => onLedgerScroll(context), loadOlder: () => requestOlderPage(context),
+    holdAnchor: () => holdAnchor(context), focusRecord: (key: string) => focusRecord(context, key),
+    resume: () => resumeFollowing(context),
+  };
 }
 
-export function useTrajectoryFollow(rowCount: number): TrajectoryFollow {
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  const atBottomRef = useRef(true);
-  const [following, setFollowing] = useState(true);
-
-  const onScroll = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < NEAR_BOTTOM_PX;
-    atBottomRef.current = atBottom;
-    setFollowing(atBottom); // same-value setState is a React no-op, so scrolling stays cheap
-  };
-
-  // Follow live appends down only while at-bottom; otherwise hold the operator's reading position. The effect keys
-  // on row count alone — opening the inspector (or any layout change) does not run it, so it never fights the follow.
-  useLayoutEffect(() => {
-    const el = scrollRef.current;
-    if (!el || !atBottomRef.current) return;
-    el.scrollTop = el.scrollHeight;
-  }, [rowCount]);
-
-  const resume = () => {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTop = el.scrollHeight;
-    atBottomRef.current = true;
-    setFollowing(true);
-  };
-
-  return { scrollRef, onScroll, following, resume };
+function useSelectionSuspension(pane: { current: HTMLDivElement | null }, pauseFollow: () => void): void {
+  const latest = useRef(pauseFollow);
+  latest.current = pauseFollow;
+  useEffect(() => {
+    const changed = () => {
+      const selection = document.getSelection();
+      if (selection && !selection.isCollapsed && pane.current?.contains(selection.anchorNode)) latest.current();
+    };
+    document.addEventListener("selectionchange", changed);
+    return () => document.removeEventListener("selectionchange", changed);
+  }, [pane]);
 }

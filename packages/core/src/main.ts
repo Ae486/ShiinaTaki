@@ -3,7 +3,7 @@
  * INPUT:  process env (bootstrap) + the config store's resolved knobs, and OS signals
  * OUTPUT: a running headless Agent Core — WS server bound to loopback; exits 0 on SIGINT/SIGTERM
  * POS:    core — the process entry/composition root; wires boot (config store → logger → model(s) → db) →
- *         store/media/subscriptions and deferred MCP approval names → ws-server
+ *         store/media/subscriptions, bounded Run-event backfill, and deferred MCP approval names → ws-server
  */
 import { join } from "node:path";
 import type { ToolSet } from "ai";
@@ -121,7 +121,7 @@ const coreHostId = loadOrCreateHostIdentity(join(serverConfig.dataDir, "host-ide
 logger.info("Core Host identity loaded");
 const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
 const runEventRepo = createRunEventRepo(db);
-const runEventLive = createRunEventLiveBus((runId, afterSeq) => runEventRepo.list(runId, afterSeq));
+const runEventLive = createRunEventLiveBus((runId, afterSeq, limit) => runEventRepo.page({ runId, afterSeq, limit }));
 const runRepo = createRunRepo(db, runEventRepo, runEventLive);
 const observability = createObservabilityQueryService({ db, events: runEventRepo, mode: () => MonitorModeSchema.parse(boot.config.source.resolve(MONITOR_MODE_CONFIG_KEY)?.value ?? "DISABLED") });
 const effectLifecycle = createEffectLifecycleService(

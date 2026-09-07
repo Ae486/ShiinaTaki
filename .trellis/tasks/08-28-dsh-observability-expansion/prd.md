@@ -109,30 +109,32 @@ pass on the current scaffold. This planning clarification does not activate impl
 
 ## Acceptance Criteria
 
-- [ ] A replay/restart of the same Run reconstructs identical monitor summaries and trajectory rows from the durable
+- [x] A replay/restart of the same Run reconstructs identical monitor summaries and trajectory rows from the durable
   Run Event ledger.
-- [ ] A successful model request exposes provider/model, start/finish state, measured duration, first-stream/TTFT data
+- [x] A successful model request exposes provider/model, start/finish state, measured duration, first-stream/TTFT data
   when produced, and usage quality without fabricating missing values.
-- [ ] A successful and a failed tool invocation each produce a readable call/result row with outcome, bounded error
+- [x] A successful and a failed tool invocation each produce a readable call/result row with outcome, bounded error
   classification, and duration when known.
-- [ ] Retry, recovery, approval, and context facts appear only when emitted by their fixed Core producers and can be
+- [x] Retry, recovery, approval, and context facts appear only when emitted by their fixed Core producers and can be
   filtered/inspected without exposing protected payloads.
-- [ ] A provider with no cache signal displays `缓存信息未提供`; no `miss`, zero, or hit-rate is inferred.
-- [ ] The Monitor uses a DSH-shaped left-browser/center-ledger/right-Inspector layout on wide screens and a usable
+- [x] A provider with no cache signal displays `缓存信息未提供`; no `miss`, zero, or hit-rate is inferred.
+- [x] The Monitor uses a DSH-shaped left-browser/center-ledger/right-Inspector layout on wide screens and a usable
   responsive fallback on narrow screens.
-- [ ] Representative default, selected, expanded, live, historical and narrow-window states are compared against
+- [x] Representative default, selected, expanded, live, historical and narrow-window states are compared against
   the DSH reference for composition, density, spacing, interaction and visual hierarchy. Every required adaptation
   is recorded; "trace data appears" or "three regions exist" is not sufficient UI acceptance.
-- [ ] Every expandable Monitor section can be collapsed again, and the Inspector has a visible close control.
-- [ ] Monitor labels and accessibility text are Chinese; opaque IDs/hashes/internal generations and revisions are absent
+- [x] Every expandable Monitor section can be collapsed again, and the Inspector has a visible close control.
+- [x] Monitor labels and accessibility text are Chinese; opaque IDs/hashes/internal generations and revisions are absent
   from primary and expanded user-facing details, including `FULL_LOCAL`, while query/selection identities still work.
-- [ ] Live committed events update the selected Run without leaving/re-entering the page; older-history loading and
+- [x] Live committed events update the selected Run without leaving/re-entering the page; older-history loading and
   tail-follow behavior do not steal the user's scroll position.
-- [ ] Inspector/disclosure transitions and live updates preserve selected-record, scroll, and focus continuity at real
+- [x] Inspector/disclosure transitions and live updates preserve selected-record, scroll, and focus continuity at real
   window sizes; interrupted or reduced-motion transitions leave no stale content or invisible input-blocking layer.
-- [ ] `DISABLED`, `FEEDBACK_ONLY`, and `FULL_LOCAL` preserve their privacy and availability contracts.
-- [ ] Core, Shared, and Desktop tests cover schema strictness, producer absence/unknown behavior, replay equality,
+- [x] `DISABLED`, `FEEDBACK_ONLY`, and `FULL_LOCAL` preserve their privacy and availability contracts.
+- [x] Core, Shared, and Desktop tests cover schema strictness, producer absence/unknown behavior, replay equality,
   filters, disclosure state, close behavior, reconnect/backfill, and protected-content exclusion.
+
+Acceptance record: [2026-09-07 engineering evidence](implementation-evidence-d68-b-2026-09-07.md). These checks were performed under the owner's delegated engineering acceptance; personal owner inspection is not claimed.
 
 ## Definition of Done
 
@@ -174,8 +176,9 @@ pass on the current scaffold. This planning clarification does not activate impl
 - The original producer inventory predates D68-A. Provider/model, model timing/TTFT, tool, token/reasoning/cache facts
   are already available where their producers supply them. Verify residual context/compaction, request-summary,
   governance/recovery, and delivery needs against current contracts; do not rebuild existing producers or invent gaps.
-- The frontend phase added close controls and a three-zone scaffold. Current residuals include the unreachable wide
-  right pane, stale Inspector response handling, Run-summary/selection recovery, and unnecessary metadata still
-  rendered by the Inspector. G4 requires removing those visible fields. Component presence is not D68-B acceptance.
+- The earlier scaffold residuals were resolved by the checked D68-B port: full-height layout, temporary semantic
+  Inspector, bounded history, current summaries and retained selection. Final acceptance includes real-window
+  geometry, interrupted/reduced-motion interaction, reading anchors and reconnect; component presence alone was
+  not used as evidence.
 - Existing `run_events` stores JSON payloads, so additive event kinds do not require a SQLite migration unless measured
   volume later proves an index/materialized-counter need.

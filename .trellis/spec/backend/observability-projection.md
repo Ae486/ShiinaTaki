@@ -25,6 +25,15 @@ const OBSERVABILITY_METHODS = {
 type MonitorMode = "DISABLED" | "FEEDBACK_ONLY" | "FULL_LOCAL";
 type RunMonitorCursor = { queuedAt: string; key: string };
 
+type TrajectoryWindow = {
+  afterSeq?: number; // forward, default 0
+  tail?: true;
+  beforeSeq?: number; // exclusive positive sequence
+  limit?: number; // 1..200
+};
+// tail/beforeSeq/nonzero afterSeq are mutually exclusive. Responses retain forward cursor/hasMore,
+// plus optional hasOlder/olderCursor for backward history without rewinding the client's live cursor.
+
 type RunObservabilitySession = {
   middleware: LanguageModelMiddleware; // commits Effect intent before provider dispatch
   telemetry: Telemetry;                // supplies normalized usage and measured performance
@@ -69,6 +78,37 @@ applied, and defaults to `DISABLED`.
   subscription closes the prior membership; explicit unsubscribe and `ctx.onClose` both dispose it. Overflow or mode
   disable emits an invalidation and cannot block Run execution.
 
+### D68-B exact identity, query and timing contract
+
+- A model request is identified by its model Effect, not the SDK generation `callId`, which can span several
+  requests. Optional projection correlation (`eventKind`, `effectId`, `callId`, `toolCallId`, `modelEffectId`,
+  `invocationId`) is machine-only. Group or enrich records only from proved identities; legacy, conflicting or
+  missing associations remain independent.
+- The per-attempt `tool-invocation.ts` bridge captures immutable IDs and the A2 display name through actual SDK
+  object identity. Late callbacks retain that snapshot; never use a newest-toolCallId map or copy raw inputs.
+  Captured names retain the 240-unit contract. An already frozen ambiguous association is not silently upgraded.
+- `tool-outcome.ts` classifies actual pre-conversion terminal results. Preliminary output never settles;
+  `ok:false` and MCP `isError:true` cannot become successful results after model-output conversion. Legacy stored
+  content without captured outcome evidence is not proof of success.
+- Canonical governed Effect settlement and tool observations reuse `classifyToolOutcome({ type, output,
+  preliminary?, invalid? })`. Error codes come only from existing closed Shared vocabularies and verified broker
+  codes; arbitrary `output.code` text maps to `tool_failed`, even if it already resembles a valid identifier.
+  Canonical nested Memory `error.code` preserves unknown/cancelled outcomes. Never classify by substring or
+  retain private text by replacing characters/truncating it. The original tool result and execution/Approval/CAS
+  behavior remain unchanged by this diagnostic projection.
+- Tool receipt is not execution. SDK wrapper start proves processing and can precede Approval waiting. Optional
+  `startedAt` and duration from that interval must be labeled processing, including waiting, rather than confirmed
+  underlying execution. Missing durations stay absent; the UI may show a start marker, never a fabricated live span.
+- Repository pages use indexed bounded reads. Forward pages ascend; tail/before reads select backward and return
+  chronological rows. `beforeSeq=1` is a valid empty window. Character/Run authorization precedes cursor errors.
+  Inspector reads the exact event; summaries aggregate existing tables with complete-only sums that distinguish
+  unknown constituents from observed zero. No second store or full-ledger materialization is introduced.
+- Backward `olderCursor` is independent of forward live progress. Reconnect drains bounded forward pages before
+  subscribing; subscription backfill itself is bounded. Recovery must work beyond one bus/window capacity without
+  silent gaps or endless overflow loops.
+- Inspector returns populated typed semantic sections and an empty compatibility `technical` array in all modes.
+  No producer exists here for raw prompt/full tool input/output/definitions/diff panels; do not invent those tabs.
+
 ## 4. Validation & Error Matrix
 
 | Condition | Required result |
@@ -85,6 +125,8 @@ applied, and defaults to `DISABLED`.
 | Connection closes or client unsubscribes | Remove the exact connection-scoped subscription idempotently |
 | Projection requests a field with no durable producer | Omit/mark unknown; do not fabricate or derive from Pino/UI state |
 | Provider exposes no authoritative cache signal | Cache status is unavailable, never a synthetic miss |
+| Tool output contains an unrecognized/private error code | Emit `tool_failed`; do not persist the text or infer cancellation/governance from a substring |
+| MCP returns `isError: true`, or canonical Memory returns nested unknown/cancelled evidence | Governed Effect and observation use the same closed outcome classification |
 | A response contains technical identity/bookkeeping fields | Preserve the contract internally; user-facing views render useful semantic fields and omit those bookkeeping values, including expanded Inspector views |
 
 ## 5. Good / Base / Bad Cases
@@ -119,10 +161,16 @@ applied, and defaults to `DISABLED`.
   close cleanup, overflow/mode invalidation, and observer isolation.
 - Desktop projection: expanded Inspector and every enabled mode retain useful semantic facts without technical
   bookkeeping rows/copy controls; hidden presentation must not break the original query, selection or cursor identity.
+- D68-B: repeated generation/tool IDs across requests, immutable late/duplicate callback association, pre-conversion
+  failure/preliminary handling, page edges and authorization, aggregate unknown/zero parity, and recovery beyond
+  328 missed events. Verify same-record settlement enrichment without changing the selected logical identity.
 - Integration: isolated real Core boot in default-disabled and enabled modes plus an authenticated operator
   `observability.state/list` smoke.
 - Cross-layer changes also require Shared/Core/Desktop typechecks and tests, Desktop build, root lint, and
   `git diff --check`.
+- Outcome regressions exercise the actual governed wrapper and SQLite Effect settlement as well as the pure
+  classifier: unchanged return value, one execution, MCP failure, nested Memory uncertainty/cancellation and
+  private/unrecognized-code exclusion. Browser-only projection fixtures cannot establish this producer contract.
 
 ## 7. Wrong vs Correct
 
@@ -155,4 +203,12 @@ telemetry.onLanguageModelCallEnd = (event) => effects.settle(usageFrom(event));
 telemetry.onLanguageModelCallEnd = (event) => observer.settleOrCapture(event);
 for await (const part of result.stream) consume(part);
 observer.assertHealthy();
+```
+
+```typescript
+// Wrong: a syntactically valid provider code may contain private text and is not a trusted vocabulary.
+const errorCode = output.code.toLowerCase().slice(0, 100);
+
+// Correct: the same closed pre-conversion classifier supplies observed and governed settlement facts.
+const outcome = classifyToolOutcome({ type: "tool-result", output });
 ```

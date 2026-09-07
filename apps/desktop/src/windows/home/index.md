@@ -2,9 +2,9 @@
 The home window: one instance, left menu / right page content. Pages are registry-driven — adding a page is one row
 in pages.ts. Holds no state of record (invariant 4); every page talks to the Core over the window's own operator WS.
 - main.tsx — React root mounting <HomeShell> into home.html #root, on the page named by the `?page=` boot param
-- home-shell.tsx — two-pane shell + lazy visited-page keep-alive host, shared Home-client provider, and that socket's single Approval modal owner; <main> anchors the shared connection-status overlay banner (U6); publishes the shown page to the visibility store (P1e) so hidden keep-alive pages stop working; Chat keeps a separate socket/modal
+- home-shell.tsx — two-pane shell, retained visited pages, shared client/Approval owner, and connection feedback; Monitor survives transient client retirement, initial unresolved routes stay pending, and confirmed disable removes its surface
 - pages.ts — THE page registry (id/label/icon/component rows) + the derived PageId union + isPageId
-- pages/monitor/ — conditionally visible read-only Run monitor: three-zone DSH scaffold (Run browser / grouped ledger / closable drag-adjustable inspector) with semantic filters, durable/live cursor recovery and inspector-only technical metadata
+- pages/monitor/ — full-height DSH Run browser/Toolbar/Overview/measured-ledger/temporary-Inspector port with semantic filters, independent history/live recovery, and no user-facing internal metadata
 - default-page-id.ts — dependency-leaf default page id shared by navigation consumers without loading page components
 - visited-page-ids.ts — dependency-leaf visited-page sequence used by the Home keep-alive host
 - page-visibility-store.ts — zustand gate signal (P1e): the shell writes the shown page; hidden keep-alive pages stop subscriptions/fetches/re-publishes and reactivate on show (the chat page deliberately stays live)
@@ -12,6 +12,7 @@ in pages.ts. Holds no state of record (invariant 4); every page talks to the Cor
 - boot-page.ts — pure `?page=` parse with a fallback to the default page
 - use-home-navigate-event.ts — listens for the home:navigate Tauri event (openHome on an already-open window)
 - use-home-connection.ts — the shared settings-family connection owner using fresh authenticated generations plus one stable last-good timing accessor; independent from Pet and Chat
+- use-monitor-availability.ts — generation-safe typed Monitor availability, retained across transient null clients; config changes supersede stale reads and only confirmed disable redirects a requested Monitor route
 - home-client-context.ts — React context exposing the client, status, and window-owned timing accessor to settings pages (chat keeps its own socket)
 - page-chrome.tsx — shared page frame: <PageHeader> (title, hint, background-refresh marker) + <PageBody> (scrolling, keyboard-scrollable, width-capped column) + <PageAlert> (delegates to the ui/ FeedbackLine in the danger tone, with an optional retry action)
 - page-card.tsx — shared page chrome: <PageCard> (title + optional header control) + <LabeledRows> (the label/value list the settings-family pages render)

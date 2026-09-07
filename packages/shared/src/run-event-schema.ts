@@ -141,14 +141,18 @@ const ModelResponseSettledPayloadSchema = z.strictObject({
   durationMs: DURATION.optional(), timeToFirstOutputMs: DURATION.optional(), errorCode: ERROR_CODE.optional(),
 });
 const ToolCallStartedPayloadSchema = z.strictObject({
-  kind: z.literal("tool.call.started"), state: z.enum(["running", "validation_failed"]),
+  kind: z.literal("tool.call.started"), state: z.enum(["received", "processing", "running", "validation_failed"]),
   effectId: ID.optional(), callId: ID.optional(), toolName: ID, toolCallId: ID,
+  invocationId: ID.optional(), modelEffectId: ID.optional(),
+  displayName: z.string().min(1).max(240).refine((value) => value.trim().length > 0).optional(),
   validationState: z.enum(["accepted", "failed"]),
 });
 const ToolResultSettledPayloadSchema = z.strictObject({
   kind: z.literal("tool.result.settled"), state: TOOL_OUTCOME,
   effectId: ID.optional(), callId: ID.optional(), toolName: ID, toolCallId: ID,
-  outcome: TOOL_OUTCOME, durationMs: DURATION.optional(),
+  invocationId: ID.optional(), modelEffectId: ID.optional(),
+  displayName: z.string().min(1).max(240).refine((value) => value.trim().length > 0).optional(),
+  outcome: TOOL_OUTCOME, durationMs: DURATION.optional(), startedAt: TIMESTAMP.optional(),
   errorClass: z.enum(["validation", "execution", "governance", "stale", "unknown"]).optional(),
   errorCode: ERROR_CODE.optional(), summary: SAFE_BOUNDED.optional(),
 });

@@ -1,8 +1,9 @@
 # core/db/
 - effect-repo.ts — Core-owned provider-neutral Effect intent/wait/settlement CAS boundary with authoritative detailed usage rows/events
 - run-repo.ts — durable Run aggregate with atomic admission/context evidence, CAS lifecycle/retry transitions, and bounded Receipt status
-- run-event-repo.ts — immutable, contiguous, redaction-safe lifecycle evidence ledger queries and appends
-- run-event-live.ts — post-commit best-effort observer bus with cursor isolation
+- run-event-repo.ts — immutable contiguous event appends, indexed bounded forward/tail/before pages, exact event lookup, and synchronous summary aggregation
+- run-event-live.ts — post-commit best-effort observer bus with bounded durable backfill, bounded live queues, and independent cursor isolation
+- run-observability-aggregate.ts — SQL event/usage/effect summary facts with complete-bucket unknown semantics and no full-ledger materialization
 - run-event-projection.ts — deterministic replay/projection anchor and readable summary mapper
 - run-event-factory.ts — bounded canonical lifecycle/recovery event construction and transition predicates
 - run-recovery-repo.ts — durable recovery classification writer with recovery-owned event source and queue projection

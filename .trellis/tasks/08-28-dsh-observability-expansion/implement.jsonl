@@ -15,3 +15,5 @@
 {"file": ".trellis/spec/backend/operation-presentation.md", "reason": "Consume captured names and Chinese authority-independent labels; preserve historical targets and canonical bindings."}
 {"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-execution-delegation-2026-09-06.md", "reason": "Autonomous DSH implementation and selected virtualizer dependency; no repeated owner confirmation gate."}
 {"file": ".trellis/tasks/08-28-dsh-observability-expansion/research/d68-query-contract-2026-09-06.md", "reason": "Reviewed exact model/invocation identity, bounded pages/summary/Inspector, real outcome semantics, controller recovery and explicit D75 deferral."}
+{"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "D68 bounded catch-up, separate history/live cursors, coalesced summary refresh, measured scroll anchors and Home availability across reconnect."}
+{"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "D68 completion fix rejects native non-OPEN sends and releases retired cleanup RPC deadlines without replay."}

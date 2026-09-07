@@ -4,17 +4,19 @@
 >
 > Scope: post-Skills/MCP T4 - Autonomous Runs, Run Receipts, Scheduled Tasks, Heartbeat, delivery, reliability, and later Experience Review.
 >
-> Latest checkpoint: 2026-09-06. Older sections retain their historical dates. Recheck every Git hash,
+> Latest checkpoint: 2026-09-07. Older sections retain their historical dates. Recheck every Git hash,
 > task pointer, dependency state, and runtime claim before use.
 
-## Current UI/UX checkpoint - 2026-09-06
+## Current UI/UX checkpoint - 2026-09-07
 
-Stay in `H:/TakiAgent-worktrees/t4`, branch `task/t4-skills-mcp-productization`, checked checkpoint `a5d1b66`.
+Stay in `H:/TakiAgent-worktrees/t4`, branch `task/t4-skills-mcp-productization`. D64 is checked at `a5d1b66`;
+D68-B has now passed independent review and delegated engineering acceptance. Use the live Git log for its commit.
 The continuation recovered `.trellis/tasks/09-05-uiux-readable-operations` from session
 `01a070e4-3a27-7562-ab12-14cc42cbea98` and bound it to
 `session:codex_01a074f6-ff11-71b3-832a-e35578901417`. After D64's checked commit, main activated
-`.trellis/tasks/08-28-dsh-observability-expansion` in that session and dispatched the single direct
-`/root/d68_implementation` agent. Verify the live task with `task.py current --source`;
+`.trellis/tasks/08-28-dsh-observability-expansion` in that session. Its original implementation and independent
+`/root/d68_check` agents are complete; the interrupted check was resumed without repeating unchanged full gates.
+Verify the live task with `task.py current --source`;
 never reactivate the stale legacy Compaction pointer. G4 and A1/A2 are committed together as
 `a771496` (`feat(ui): make operations and approvals readable`). No push, finish or archive was performed.
 
@@ -48,31 +50,34 @@ window acceptance is autonomous under this delegation; do not claim unobserved o
   actual WebView2 7/7 are recorded in the
   [final D64 evidence](../.trellis/tasks/09-05-uiux-readable-operations/implementation-evidence-d64-2026-09-06.md).
   The former `d64_check` session completed; it is not a live child of the incoming coordinator.
-- The next main delivery is D68's DSH Monitor port, then Chat and Pet. The
-  [current DSH source/adapter map](../.trellis/tasks/08-28-dsh-observability-expansion/research/d68-b-ui-port-adapter-map-2026-09-06.md)
-  identifies real projection/history/client gaps. The reviewed
-  [query/producer contract](../.trellis/tasks/08-28-dsh-observability-expansion/research/d68-query-contract-2026-09-06.md)
-  adds exact model Effect/invocation association, bounded history/summary/Inspector and recovery
-  corrections. `@tanstack/react-virtual@3.14.9` is adopted to retain
-  DSH's measured-row behavior and is compatible with React 19; main has adopted it under delegated
-  authority. The reviewed D68-B slice is now in implementation from baseline `a5d1b66`; its final
-  independent review and engineering acceptance remain pending.
+- D68's DSH Monitor port is implemented, independently checked and engineering accepted. The
+  [delivery evidence](../.trellis/tasks/08-28-dsh-observability-expansion/implementation-evidence-d68-b-2026-09-07.md)
+  records 93 frozen files, five reproduced/fixed defect groups, Shared 411/Core 1,940/Desktop 690 passing tests,
+  one existing Core skip, successful type/lint/build gates and three isolated Core modes with zero provider calls.
+  Main's final actual WebView2 gate passed 24/24 groups, including paused 100-to-101 virtualization, 706-record
+  reconnect, hidden/pending details and interrupted pane geometry. Six served assets, 21 build files, 285 source
+  hashes and the production CSP were verified; all owned QA processes/listeners are stopped. UI data is synthetic;
+  installed-SDK/SQLite producer and real Core startup evidence are separately labeled. Personal owner inspection
+  is not claimed. The exact `@tanstack/react-virtual@3.14.9` remains the sole new dependency.
 - The live-feedback child now has reviewed `design.md`, `implement.md` and a source preflight. It
-  remains planning until D64/D68-B pass. It reuses their invocation/name/outcome facts, adds bounded
+  remains planning until the [upstream Memory synchronization prerequisite](../.trellis/tasks/09-05-uiux-live-tool-feedback/research/upstream-sync-preflight-2026-09-06.md)
+  is checked. It reuses D64/D68 invocation/name/outcome facts, adds bounded
   Character activity recovery and optional Timeline presentation metadata with atomic history handoff,
   then implements Chat and the confirmed separate Pet bubbles with CSS-driven continuous motion.
 - User process refinement: simple changes may skip a separate check agent or join a related check;
   retain focused verification and independent review for authorization/protocol/streaming consistency.
   Implement agents use `gpt-6-astra/high`, check agents `gpt-6-astra/xhigh`, no recursive delegation.
-  Semantic discovery uses jbcontext only; YCE is prohibited in every agent prompt.
-- Preserve unrelated work. The post-review comparison found 36/37 older protected-file hashes equal;
-  the existing Avatar Lab `param-access.test.ts` differs from the old checkpoint and was left untouched.
-  Its write timestamp precedes the full gates. The deferred registry is unchanged at 77,280 bytes.
+  Semantic discovery uses jbcontext only; YCE is prohibited in every agent prompt. A healthy child is not
+  interrupted; the owner's waiting cadence is thirty minutes, with replies to concrete checkpoints/blockers.
+- Preserve unrelated Avatar Lab, OpenBiliClaw, Desktop tsconfig/vite and task metadata. Desktop's 690-test gate
+  includes 10 external Lab tests; their files stay outside the D68 inventory and staging. Local main advanced to
+  `c3f8bc4` with checked offline Memory Replica Waves 0-2, migrations 033/034 and a governed-tool overlap. Merge
+  those contracts semantically and verify T4 before the Chat/Pet implementation; do not modify main or Hindsight.
 
 The decision source remains the parent
 [UI/UX grill](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-grill-2026-09-05.md).
 The new [Operation Presentation spec](../.trellis/spec/backend/operation-presentation.md) is shared by
-the naming task and downstream Monitor/live-feedback contexts. The reviewed D68-B plan keeps D75
+the naming task and downstream Monitor/live-feedback contexts. The D68-B delivery keeps D75
 deferred for a dedicated same-scope measurement producer/persistence slice; D77 error
 taxonomy and real T4 initiative/heartbeat/cross-device work remain later work.
 

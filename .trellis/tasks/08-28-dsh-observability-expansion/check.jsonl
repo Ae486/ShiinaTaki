@@ -15,3 +15,5 @@
 {"file": ".trellis/spec/backend/operation-presentation.md", "reason": "Verify useful-name rendering never exposes routing keys or changes execution/replay identity."}
 {"file": ".trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-execution-delegation-2026-09-06.md", "reason": "Latest execution authority, fidelity and evidence requirements."}
 {"file": ".trellis/tasks/08-28-dsh-observability-expansion/research/d68-query-contract-2026-09-06.md", "reason": "Reviewed exact model/invocation identity, bounded pages/summary/Inspector, real outcome semantics, controller recovery and explicit D75 deferral."}
+{"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "D68 bounded catch-up, separate history/live cursors, coalesced summary refresh, measured scroll anchors and Home availability across reconnect."}
+{"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "Verify native transport readiness and immediate cleanup rejection alongside the unchanged connection-generation contract."}

@@ -1,6 +1,6 @@
 /**
  * INPUT:  trusted canonical identity/cell sidecar, GovernancePolicyService, and an existing AI SDK Tool closure
- * OUTPUT: common policy/approval guards using service-owned classifier metadata and the original tool closure
+ * OUTPUT: common policy/approval guards, the original tool result, and payload-free terminal Effect classification
  * POS:    core/governance — explicit Core/MCP/Skill adapter primitive; presentation keys and tool metadata grant nothing
  */
 import type { Tool } from "ai";
@@ -14,6 +14,7 @@ import type { EffectLifecycle } from "@taki/shared";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { randomUUID } from "node:crypto";
 import type { ToolEffectObserver } from "../observability/tool-effect-observer.ts";
+import { classifyToolOutcome } from "../agents/tool-outcome.ts";
 
 export interface GovernedToolBinding {
   identity: CanonicalCapabilityIdentity;
@@ -230,26 +231,16 @@ function effectIntent(context: GovernedToolContext, runId: string, attemptId: st
 }
 
 function settleToolResult(effects: EffectLifecycleService, effect: EffectLifecycle, result: unknown): void {
-  const failure = toolFailure(result);
+  const classified = classifyToolOutcome({ type: "tool-result", output: result });
   effects.settle({
     effectId: effect.effectId,
     runId: effect.runId,
     attemptId: effect.attemptId,
     expectedVersion: effect.version,
-    outcome: failure?.outcome ?? "completed",
-    summary: failure ? undefined : "tool completed",
-    errorCode: failure?.errorCode,
+    outcome: classified.outcome,
+    summary: classified.outcome === "completed" ? "tool completed" : undefined,
+    errorCode: classified.errorCode,
   });
-}
-
-function toolFailure(result: unknown) {
-  if (typeof result !== "object" || result === null || !("ok" in result) || (result as { ok?: unknown }).ok !== false) return undefined;
-  const failure = result as { code?: unknown; state?: unknown };
-  const outcome = failure.state === "outcome_unknown" ? "outcome_unknown" as const
-    : failure.state === "cancelled" || failure.code === "MEMORY_OPERATION_CANCELLED" ? "cancelled" as const
-      : failure.code === "MEMORY_OUTCOME_UNKNOWN" ? "outcome_unknown" as const : "failed" as const;
-  const errorCode = typeof failure.code === "string" ? failure.code.toLowerCase().slice(0, 100) : "tool_failed";
-  return { outcome, errorCode };
 }
 
 function recordGovernance(

@@ -87,6 +87,9 @@ interface TimingPolicy {
   settings-family client, and no window assumes shared JavaScript memory.
 - Every attempt creates a fresh transport and a fresh `WsClient`. A candidate client is published only after its
   `connect` handshake and required per-generation restoration complete.
+- `WsTransport.send(payload): void` rejects unless the native socket is `WebSocket.OPEN`, before native `send()`.
+  CLOSING/CLOSED browsers can discard a send without throwing, leaving a cleanup RPC pending until its deadline.
+  The existing JSON-RPC rejection path must release that ID/deadline immediately; never buffer or replay the payload.
 - `connect` uses one captured `openAuthMs` budget across both physical open and authentication. Time spent opening is
   subtracted before the handshake request starts; expiry must not send a late `connect` frame.
 - A close or transient attempt failure retires that generation exactly once, publishes `reconnecting`, and schedules
@@ -175,6 +178,7 @@ interface TimingPolicy {
 |-----------|-------------------|
 | Transport factory/client factory throws | Publish reconnecting and schedule a jittered retry |
 | Socket closes before open | Reject every `whenOpen` waiter; retire once; retry |
+| A request/cleanup reaches a non-OPEN native socket | Reject before browser dispatch; settle the RPC and release its deadline without a closed-socket console error |
 | Open consumes the total open/auth budget | Close/retire candidate; do not send `connect` afterward |
 | Pairing is required or auth is refused | Publish the specific terminal state; do not blind-retry |
 | A stored operator token is rejected with `AUTH_FAILED` | Clear only the token, keep the stable `deviceId`, create one fresh generation, then publish terminal `AUTH_FAILED` if it is rejected again |
@@ -211,6 +215,8 @@ interface TimingPolicy {
   states, stale callbacks, exact-once retirement, and disposal.
 - `ws-client.test.ts`: close-before-open, total open/auth budget, pending request/D29 settlement, native timeout cleanup,
   concurrent request isolation, late responses, config subscription memoization, and handler fan-out.
+- `ws-transport.test.ts`: CONNECTING/CLOSING/CLOSED never dispatch a native send; OPEN sends are unchanged. An actual
+  `createWsClient` cleanup request rejects immediately and leaves no request-deadline timer.
 - `timing-policy-schema.test.ts`, `timing-policy.test.ts`, `timing-policy-sync.test.ts`: complete keys, cross-field
   validation, last-good retention, serialized reread, and live-change behavior.
 - `restore-pet-connection.test.ts`: callback -> truthful report -> subscribe order, restoration failure, stale generation,
@@ -218,7 +224,7 @@ interface TimingPolicy {
 - `restore-chat-timeline.test.ts` plus store tests: subscribe-before-history, live-race dedup, removal tombstones,
   authoritative newest reconciliation, and older cursor preservation.
 - Monitor controller/view tests: retired-generation suppression, disabled-state clearing and Home-row removal,
-  list/trajectory pagination, semantic grouping without opaque labels, inspector-only copy controls, live cursor
+  list/trajectory pagination, semantic grouping/details with no technical identity/copy fallback, live cursor
   continuation, overflow recovery, and explicit unsubscribe on rebind/disposal.
 - Reactive page tests: focus/visibility/invalidation revalidation, one in-flight refresh, last-good preservation,
   stale/error recovery, disposal cancellation, lazy-page cursor/selection retention, tail-follow suspension, and

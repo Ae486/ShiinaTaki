@@ -68,11 +68,16 @@ Each page declares how a fresh generation becomes trustworthy; there is no globa
 | Page | Restore seam |
 | --- | --- |
 | chat | `restore-chat-timeline.ts`: subscribe BEFORE history, then an authoritative newest-page reconciliation keyed by `seq` (tombstones for removed rows; raced live rows and older pages survive). `connected` publishes only after restoration. |
-| monitor | `bind` → `attach` → `monitorState` restore re-reads mode + list + the selected run's trajectory (selection memory survives hide/show and client swaps); an `invalidated` live event re-reads from the durable cursor (`recoverLive`), and the surfaced `stale` flag clears only on real recovery. |
+| monitor | Restore mode/list and the independently selected Run through an authorized tail query, even when it is outside the newest list. Keep older/live cursors separate, drain bounded forward pages before subscribing, and refresh committed-event summaries with one in-flight plus one trailing request. Inspector success/error/close has its own epoch. |
 | perception | Reads are keyed on visibility; reactivation (or reconnect via a new generation) re-runs them. Pause state is never cached. |
 | mcp / skills | A fresh `mcp.list` / `skill.list` per generation; state resets to loading on bind. |
 | settings (config) | Per-generation `config.list` via `useCachedFetch`, plus the one deduped on-show refetch when deltas were skipped while hidden. |
 | permissions | Fresh snapshot per generation from the controller (`replace(ready)`); conflict refetches; nothing persists. |
+
+Monitor summary replacement is guarded by durable cursor progress as well as request/client identity. A delayed
+summary or forward page from an older cursor cannot overwrite a newer live/recovery summary. Accepted restoration
+and catch-up update the selected Run's browser entry together with its trajectory summary; the latest list snapshot
+is not an authority for selected-Run freshness. Preserve the one in-flight plus one trailing summary refresh.
 
 ## (f) Scroll discipline: bottom-pinning, pause-on-scroll-up, load-older hold
 
@@ -81,11 +86,15 @@ Each page declares how a fresh generation becomes trustworthy; there is no globa
   while at-bottom, a prepend hold that preserves the reading position when an older page lands (keyed on
   the oldest mounted seq so it survives the P1b window trim), and a bounded backstop that re-arms the
   load guard if a page was fully trimmed.
-- The monitor trajectory ledger follows the same pattern with fewer inputs
-  (`use-trajectory-follow.ts`): content changes are row appends only (no prepend, no top-reach load), so
-  it keys on the mounted row count and additionally EXPOSES the paused state (`following`) so the UI can
-  render a truthful affordance. Opening the inspector changes layout, not row count — the follow never
-  fights it.
+- D68-B Monitor uses measured record keys and explicit older-page prepends (`use-trajectory-follow.ts`).
+  Preserve the reading anchor when rows/group separators/history controls change. Initial tail placement
+  and deliberate resume may scroll; content-only updates must not repeatedly force tail writes. Historical
+  reading, text selection, range focus and Inspector inspection suspend following. A summary refresh
+  replaces neither rows nor their reading position.
+- Crossing the measured-virtualization threshold must preserve the existing native offset. Configure
+  `initialOffset: () => scrollRef.current?.scrollTop ?? 0` when enabling the installed virtualizer above 100 items;
+  its default zero otherwise moves a paused reader to the top and can trigger an unintended older-page request.
+  Cover both disable/enable transitions and real-window 100-to-101 live append while paused, in addition to prepend.
 - A pause/resume affordance is rendered ONLY when the user is genuinely paused-from-bottom AND it is a
   real control (`已暂停跟随 · 回到底部` ActionButton → scroll to bottom + re-pin). If the stream rarely
   pushes, the affordance simply rarely appears — that is correct, not a defect to paper over with an
@@ -95,9 +104,8 @@ Each page declares how a fresh generation becomes trustworthy; there is no globa
 
 - `PageHeader busy` is fed by actual in-flight loads (`loadingRuns || loadingTrajectory` in the monitor;
   `refreshing` from `useCachedFetch` for cached pages). No simulated busy state, no artificial delay.
-- The monitor's `stale` flag is set ONLY by a Core `invalidated` monitor event and cleared ONLY by real
-  recovery (`refresh`, `recoverLive`, re-select, restore's disabled-reset, or a contiguous live `onLive`
-  row append from the subscribe cursor) — never by a timer or a guess. The cached-fetch `refreshing` marker is driven by the load state machine
+- The monitor's `stale` flag follows actual connection retirement, invalidation or failed recovery and
+  clears only through real restoration/reconciliation — never a timer or guess. The cached-fetch `refreshing` marker is driven by the load state machine
   (`cached-fetch-state.ts`), and its error line by the actual rejection.
 - If a signal does not exist, the UI shows nothing rather than a plausible lie (batch-2 §9 ruling; the
   same honesty rule as costume phases and test-result truth in home-window.md).
@@ -123,8 +131,20 @@ const unsubscribe = ready.onConfigChanged((changed) => {
 
 ## Future extraction rule
 
-`use-timeline-scroll` (chat) and `use-trajectory-follow` (monitor) deliberately duplicate the
-at-bottom/pin skeleton because their inputs genuinely differ (prepend hold + top-reach loadOlder +
-in-flight length vs row-count-only + an exposed paused state) and a parameterized merge would contort
-the chat seam. Extract ONE `useTailFollow` when a THIRD consumer materializes with a superset of these
-inputs — not before.
+`use-timeline-scroll` (Chat) and `use-trajectory-follow` (Monitor) have different inputs: sequenced
+Timeline/in-flight content versus measured, grouped, filtered trajectory records and range/Inspector
+focus. Preserve those ownership boundaries. Revisit shared tail-follow logic when a third real consumer
+establishes a coherent reusable contract; do not merge them merely because both scroll.
+
+## Home Monitor availability across connection retirement
+
+`use-monitor-availability.ts` distinguishes unknown availability from a confirmed Core mode. Initial
+unknown exposes no Monitor surface and preserves an initially requested Monitor route. A transient
+`client=null` or failed read keeps the last confirmed mode so HomeShell does not unmount the Monitor
+controller and discard selection before restoration. Confirmed DISABLED still hides the page and
+applies the existing Chat fallback. Valid config pushes supersede older snapshots; malformed modes and
+retired-client callbacks cannot enable the page. This is disposable display state, not query authority.
+
+Regression evidence must exercise enabled -> null -> replacement, old responses, initial route,
+config/snapshot races and genuine disable. Actual WebView2 reconnect verifies mounted-page/selection
+continuity beyond a controller-only test.

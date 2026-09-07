@@ -15,3 +15,4 @@
 {"file": ".trellis/spec/backend/compaction-harness.md", "reason": "Presentation-only metadata must preserve canonical replay/source digests and completed effects."}
 {"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "Generation-safe subscribe/read restoration, hidden-page behavior and reading anchors."}
 {"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "Keep D64 negotiation and per-generation request/restoration/teardown behavior."}
+{"file": ".trellis/tasks/09-05-uiux-live-tool-feedback/research/upstream-sync-preflight-2026-09-06.md", "reason": "Verify upstream Memory compatibility, closed D68 outcome classification and migration numbering on the merged T4 baseline."}

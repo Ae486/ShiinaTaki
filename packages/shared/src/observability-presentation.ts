@@ -3,6 +3,7 @@
  * OUTPUT: centralized Simplified Chinese presentation labels for Monitor consumers
  * POS:    shared/presentation — protocol identifiers stay English; visible semantic labels resolve here
  */
+import type { RunMonitorSummary, TrajectoryInspector } from "./observability-schema.ts";
 const OBSERVABILITY_LABELS = {
   primary: "用户发起",
   scheduled: "定时任务",
@@ -16,6 +17,8 @@ const OBSERVABILITY_LABELS = {
   chat: "对话",
   "scheduled-task": "定时任务",
   running: "运行中",
+  received: "已接收",
+  processing: "处理中",
   queued: "排队中",
   prepared: "已准备",
   intent_committed: "意图已提交",
@@ -103,7 +106,7 @@ const OBSERVABILITY_LABELS = {
   "model.request.started": "模型请求开始",
   "model.stream.first": "首次有效输出",
   "model.response.settled": "模型响应结束",
-  "tool.call.started": "工具调用开始",
+  "tool.call.started": "工具调用",
   "tool.result.settled": "工具结果",
   "context.snapshot": "上下文快照",
   "governance.evaluated": "治理评估",
@@ -121,4 +124,21 @@ export function observabilityLabel(value: string): string {
 
 export function observabilityLabels(values: readonly string[]): string[] {
   return values.map(observabilityLabel);
+}
+
+export function observabilityUsageDetails(
+  usage: Omit<RunMonitorSummary["usage"], "quality"> & { quality?: string },
+): TrajectoryInspector["detail"] {
+  const fields: TrajectoryInspector["detail"] = usage.quality ? [{ label: "用量质量", value: observabilityLabel(usage.quality) }] : [];
+  const counts = [
+    ["输入令牌", usage.inputTokens], ["非缓存输入", usage.inputTokenDetails?.noCacheTokens],
+    ["缓存读取", usage.inputTokenDetails?.cacheReadTokens], ["缓存写入", usage.inputTokenDetails?.cacheWriteTokens],
+    ["输出令牌", usage.outputTokens], ["文本输出", usage.outputTokenDetails?.textTokens],
+    ["推理令牌", usage.outputTokenDetails?.reasoningTokens], ["总令牌", usage.totalTokens],
+  ] as const;
+  for (const [label, value] of counts) if (value !== undefined) fields.push({ label, value: String(value) });
+  if (usage.inputTokenDetails?.cacheReadTokens === undefined && usage.inputTokenDetails?.cacheWriteTokens === undefined) {
+    fields.push({ label: "缓存信息", value: "缓存信息未提供" });
+  }
+  return fields;
 }

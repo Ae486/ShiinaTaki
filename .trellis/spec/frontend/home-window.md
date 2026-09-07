@@ -240,8 +240,8 @@ change with the implementation; an old presentation assertion does not override 
 
 ### Monitor product baseline (G5, owner 2026-09-05)
 
-The existing Monitor is a trace-validation prototype, not an accepted product UI. It is excluded from
-the owner's acceptance of the other pages' visual direction. Port/rebuild Monitor primarily from
+The pre-D68 Monitor prototype did not establish product UI acceptance. Monitor has its own acceptance,
+separate from the other pages' visual direction. Port/rebuild Monitor primarily from
 `references/deepseek-harness-master/packages/client/ui-trajectory`: its Toolbar/Overview/Table/Inspector
 composition, styles, density, grouped information and interaction. Use the
 [D68 source-to-target plan](../../tasks/08-28-dsh-observability-expansion/design.md).
@@ -253,8 +253,18 @@ commands, paths and content retain their identity. Retain MIT source attribution
 
 Acceptance compares representative default, selected/expanded, live-tail, older-history and narrow
 states against DSH and exercises the actual WebView2 UI. A working trace, a nominal three-region grid,
-or old screenshot/test acceptance does not establish G5 completion. This is the target contract;
-the source prototype still requires implementation work.
+or old screenshot/test acceptance does not establish G5 completion. D68-B's implementation must pass
+that actual-window gate; automated source/component checks alone are insufficient.
+
+Use the reference's compact Toolbar (32px), fixed three-lane Overview (50px) and ordinary rows (30px),
+with a full-height Run browser, measured ledger, temporary resizable Inspector and closable narrow
+drawer. Range/search/grouping use loaded real records; durable full-Run totals remain distinguished.
+Missing timing is a start marker. Keep history anchors, current selection and reduced-motion cleanup.
+
+HomeShell must preserve the last confirmed Monitor availability through a transient null connection;
+otherwise unmounting discards the controller before its reconnect logic can restore selection. Initial
+unknown must not expose the page or discard its requested route; confirmed DISABLED retains the normal
+hide/navigation behavior. Follow [the availability contract](reactive-read-models.md).
 
 ## Streaming timeline: the in-flight assistant row lifecycle
 

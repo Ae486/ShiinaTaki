@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { tool } from "ai";
+import { z } from "zod";
 import type { EffectLifecycle } from "@taki/shared";
 import { createRunEventRepo } from "../db/run-event-repo.ts";
 import { createEffectRepo } from "../db/effect-repo.ts";
 import { createEffectLifecycleService, type EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { createCompanionFixture, type CompanionFixture } from "../testing/companion-fixture.ts";
-import { failingMockModel, midStreamErrorModel, streamingMockModel } from "../testing/mock-language-model.ts";
+import { failingMockModel, midStreamErrorModel, scriptedModel, streamingMockModel } from "../testing/mock-language-model.ts";
 import { createChatAgent } from "./chat-agent.ts";
 
 const fixtures: CompanionFixture[] = [];
@@ -110,6 +112,52 @@ describe("Run observability telemetry", () => {
     });
     await expect(drain(agent.stream({ characterId: "taki", message: "hi" }, { runId: "run", attemptId: "attempt" })))
       .rejects.toThrow("settlement failed");
+  });
+
+  it("uses the real SDK object bridge for reused call IDs, captured names, and pre-conversion failure outcomes", async () => {
+    const { companion, events, lifecycle } = fixture();
+    const model = scriptedModel([
+      { kind: "tool", toolCallId: "reused", toolName: "echo", input: { privateInput: "not-in-events" } },
+      { kind: "tool", toolCallId: "reused", toolName: "echo", input: { privateInput: "not-in-events" } },
+      { kind: "tool", toolCallId: "reused", toolName: "echo", input: { privateInput: "not-in-events" } },
+      { kind: "text", deltas: ["done"] },
+    ]);
+    const outputs = [
+      { ok: true, content: [{ type: "text" as const, text: "one" }] },
+      { isError: true, content: [{ type: "text" as const, text: "two" }] },
+      { ok: false, code: "TOOL_FAILED", content: [{ type: "text" as const, text: "three" }] },
+    ];
+    let calls = 0;
+    const capturedName = "名".repeat(240);
+    const names = { echo: capturedName };
+    const agent = createChatAgent({
+      model, store: companion.conversation, memory: companion.memory, effectLifecycle: lifecycle,
+      runContext: () => ({ toolDisplayNames: names, tools: {
+        echo: tool({ inputSchema: z.object({ privateInput: z.string() }), execute: async () => {
+          names.echo = "catalog replacement";
+          return outputs[calls++]!;
+        }, toModelOutput: ({ output }) => ({ type: "content", value: output.content }) }),
+      } }),
+    });
+    await expect(drain(agent.stream({ characterId: "taki", message: "hi" }, { runId: "run", attemptId: "attempt" })))
+      .resolves.toBe("done");
+    const ledger = events.list("run");
+    const requests = ledger.filter((event) => event.payload.kind === "model.request.started")
+      .map((event) => event.payload as Extract<typeof event.payload, { kind: "model.request.started" }>);
+    const starts = ledger.filter((event) => event.payload.kind === "tool.call.started")
+      .map((event) => event.payload as Extract<typeof event.payload, { kind: "tool.call.started" }>);
+    const results = ledger.filter((event) => event.payload.kind === "tool.result.settled")
+      .map((event) => event.payload as Extract<typeof event.payload, { kind: "tool.result.settled" }>);
+    expect(calls).toBe(3);
+    expect(new Set(requests.map((request) => request.callId)).size).toBe(1);
+    expect(new Set(requests.map((request) => request.effectId)).size).toBe(4);
+    expect(starts.map((start) => start.modelEffectId)).toEqual(requests.slice(0, 3).map((request) => request.effectId));
+    expect(results.map((result) => result.invocationId)).toEqual(starts.map((start) => start.invocationId));
+    expect(new Set(starts.map((start) => start.invocationId)).size).toBe(3);
+    expect(results.map((result) => result.outcome)).toEqual(["completed", "failed", "failed"]);
+    expect(results.every((result) => result.displayName === capturedName && result.startedAt !== undefined)).toBe(true);
+    expect(JSON.stringify(ledger)).not.toContain("not-in-events");
+    expect(JSON.stringify(ledger)).not.toContain("catalog replacement");
   });
 });
 

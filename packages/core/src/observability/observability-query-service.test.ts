@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createRunEventRepo } from "../db/run-event-repo.ts";
 import { createRunRepo } from "../db/run-repo.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
@@ -43,7 +43,7 @@ describe("ObservabilityQueryService", () => {
     ]));
     expect(inspector.technical).toEqual([]);
   });
-  it("projects detailed usage, real model/tool filters, failures, retry, and FULL_LOCAL technical disclosure", () => {
+  it("projects detailed usage and filters while FULL_LOCAL retains only semantic Inspector sections", () => {
     const f = fixture(); appendDetailedEvents(f);
     const service = createObservabilityQueryService({ ...f, mode: () => "FULL_LOCAL" });
     const summary = service.list({ characterId: "taki", limit: 25 }).runs[0]!;
@@ -72,9 +72,10 @@ describe("ObservabilityQueryService", () => {
     const usageRow = first.rows.find((row) => row.kind === "usage")!;
     const inspector = service.inspect({ characterId: "taki", runKey: "run", rowKey: usageRow.rowKey });
     expect(inspector.technicalCollapsed).toBe(true);
-    expect(inspector.technical).toEqual(expect.arrayContaining([expect.objectContaining({ label: "事件 ID" })]));
+    expect(inspector.technical).toEqual([]);
+    expect(inspector.sections?.map((section) => section.key)).toEqual(["event", "usage"]);
     expect(inspector.detail).toEqual(expect.arrayContaining([
-      { label: "缓存读取", value: "5" }, { label: "推理 Token", value: "3" }, { label: "总 Token", value: "20" },
+      { label: "缓存读取", value: "5" }, { label: "推理令牌", value: "3" }, { label: "总令牌", value: "20" },
     ]));
   });
   it("rejects stale list and trajectory cursors instead of silently returning a misleading empty page", () => { const f = fixture(); const service = createObservabilityQueryService({ ...f, mode: () => "FEEDBACK_ONLY" }); expect(() => service.list({ characterId: "taki", cursor: { queuedAt: "2026-08-27T00:00:01.000Z", key: "run" }, limit: 25 })).toThrow(/CURSOR_STALE/); expect(() => service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 99, limit: 10 })).toThrow(/CURSOR_STALE/); });
@@ -101,4 +102,46 @@ describe("ObservabilityQueryService", () => {
     expect(second.runs.map((run) => run.key)).toEqual(["run"]);
   });
   it("keeps trajectory and inspector unavailable while the monitor mode is disabled", () => { const f = fixture(); const service = createObservabilityQueryService({ ...f }); expect(() => service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 0, limit: 10 })).toThrow(/DISABLED/); expect(() => service.inspect({ characterId: "taki", runKey: "run", rowKey: f.events.list("run")[0]!.eventId })).toThrow(/DISABLED/); });
+
+  it("uses bounded SQL reads for pages, list filters, and exact Inspector lookup", () => {
+    const f = fixture(); appendDetailedEvents(f);
+    const service = createObservabilityQueryService({ ...f, mode: () => "FULL_LOCAL" });
+    vi.spyOn(f.events, "list").mockImplementation(() => { throw new Error("unbounded event read"); });
+    const tail = service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 0, tail: true, limit: 3 });
+    expect(tail.rows).toHaveLength(3);
+    expect(tail.hasOlder).toBe(true);
+    const page = service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 0, beforeSeq: tail.olderCursor!.seq, limit: 3 });
+    expect(page.rows.at(-1)!.seq).toBeLessThan(tail.rows[0]!.seq);
+    expect(service.list({ characterId: "taki", limit: 25, toolName: "broken" }).runs).toHaveLength(1);
+    const get = vi.spyOn(f.events, "get");
+    service.inspect({ characterId: "taki", runKey: "run", rowKey: tail.rows[0]!.rowKey });
+    expect(get).toHaveBeenCalledExactlyOnceWith("run", tail.rows[0]!.rowKey);
+    expect(service.trajectory({ characterId: "taki", runKey: "run", afterSeq: 0, beforeSeq: 1, limit: 200 }))
+      .toMatchObject({ rows: [], hasOlder: false, hasMore: false, cursor: { seq: 0 } });
+  });
+
+  it("checks Character ownership before stale forward or before cursor errors", () => {
+    const f = fixture(); const service = createObservabilityQueryService({ ...f, mode: () => "FULL_LOCAL" });
+    expect(() => service.trajectory({ characterId: "other", runKey: "run", afterSeq: 10_000, limit: 1 })).toThrow("OBSERVABILITY_FORBIDDEN");
+    expect(() => service.trajectory({ characterId: "other", runKey: "run", afterSeq: 0, beforeSeq: 10_000, limit: 1 })).toThrow("OBSERVABILITY_FORBIDDEN");
+    expect(() => service.inspect({ characterId: "other", runKey: "run", rowKey: "missing" })).toThrow("OBSERVABILITY_FORBIDDEN");
+  });
+
+  it("keeps SQL aggregate parity with complete sums, missing buckets, observed zero, and quality precedence", () => {
+    const f = fixture();
+    const attemptId = String(f.db.prepare("SELECT attempt_id FROM run_attempts WHERE run_id='run'").get()?.attempt_id);
+    const service = createObservabilityQueryService({ ...f, mode: () => "FULL_LOCAL" });
+    expect(service.list({ characterId: "taki", limit: 1 }).runs[0]!.usage).toEqual({});
+    const appendUsage = (quality: "reported" | "estimated" | "unknown", details: object) => f.events.append({
+      runId: "run", attemptId, schemaVersion: "run-event.v1", category: "usage", kind: "usage.settled",
+      occurredAt: "2026-09-06T00:00:00.000Z", source: "core.effect-lifecycle",
+      payload: { kind: "usage.settled", state: "settled", effectId: "effect", usageId: `usage-${f.events.tail("run").seq}`, quality, ...details },
+    });
+    appendUsage("reported", { inputTokens: 0, inputTokenDetails: { cacheReadTokens: 0 }, outputTokens: 0, totalTokens: 0 });
+    expect(service.list({ characterId: "taki", limit: 1 }).runs[0]!.usage).toEqual({ inputTokens: 0, inputTokenDetails: { cacheReadTokens: 0 }, outputTokens: 0, totalTokens: 0, quality: "reported" });
+    appendUsage("estimated", { inputTokens: 8, outputTokens: 2, totalTokens: 10 });
+    expect(service.list({ characterId: "taki", limit: 1 }).runs[0]!.usage).toEqual({ inputTokens: 8, outputTokens: 2, totalTokens: 10, quality: "estimated" });
+    appendUsage("unknown", {});
+    expect(service.list({ characterId: "taki", limit: 1 }).runs[0]!.usage).toEqual({ quality: "unknown" });
+  });
 });

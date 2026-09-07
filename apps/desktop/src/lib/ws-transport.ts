@@ -1,6 +1,6 @@
 /**
- * INPUT:  a loopback WS URL (ws://127.0.0.1:<port>).
- * OUTPUT: createBrowserTransport(url) -> WsTransport: send/close + message/open/close listener registration.
+ * INPUT:  a Core WebSocket URL and the native socket's readiness state.
+ * OUTPUT: WsTransport with fail-fast non-open send rejection and message/open/close listener registration.
  * POS:    ui/lib — the browser-native WebSocket seam under ws-client. Isolating it keeps ws-client testable in node
  *         (tests inject a fake WsTransport; no jsdom/WebSocket needed) and framework-free of any Node `ws` package.
  */
@@ -17,7 +17,12 @@ export interface WsTransport {
 export function createBrowserTransport(url: string): WsTransport {
   const socket = new WebSocket(url);
   return {
-    send: (payload) => socket.send(payload),
+    send(payload) {
+      // CLOSING/CLOSED native sockets discard send() without rejecting the pending JSON-RPC request.
+      // Reject before calling the browser so retired-controller cleanup cannot wait on its RPC deadline.
+      if (socket.readyState !== WebSocket.OPEN) throw new Error("WebSocket transport is not open");
+      socket.send(payload);
+    },
     close: () => socket.close(),
     onMessage: (handler) =>
       socket.addEventListener("message", (event) => {

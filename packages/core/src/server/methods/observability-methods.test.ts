@@ -65,4 +65,29 @@ describe("observability methods", () => {
     f.live.publish([event(2)]); await Promise.resolve(); await Promise.resolve();
     expect(f.notifications).toHaveLength(0);
   });
+
+  it("invalidates a bounded backfill instead of attaching across more than 328 missing records", async () => {
+    const f = fixture();
+    vi.mocked(f.service.trajectory).mockImplementation(({ afterSeq, limit }) => {
+      const rows = Array.from({ length: Math.min(limit, 729 - afterSeq) }, (_, index) => row(afterSeq + index + 1));
+      return { rows, run: { key: "run" }, cursor: { runKey: "run", seq: rows.at(-1)?.seq ?? afterSeq }, hasMore: afterSeq + limit < 729 } as never;
+    });
+    await f.registry.dispatch({ jsonrpc: "2.0", id: 1, method: OBSERVABILITY_METHODS.subscribe,
+      params: { characterId: "taki", runKey: "run", afterSeq: 0 } }, f.context);
+    expect(f.notifications).toHaveLength(201);
+    expect(f.notifications.at(-1)?.params).toMatchObject({ cursor: 200, invalidated: true, reason: "overflow" });
+    f.live.publish([event(730)]); await Promise.resolve();
+    expect(f.notifications).toHaveLength(201);
+    const sequences = f.notifications.slice(0, 200).map((notification) => (notification.params as { cursor: number }).cursor);
+    let cursor = 200;
+    while (cursor < 729) {
+      const page = f.service.trajectory({ characterId: "taki", runKey: "run", afterSeq: cursor, limit: 200 });
+      sequences.push(...page.rows.map((value) => value.seq)); cursor = page.cursor.seq;
+    }
+    expect(sequences).toEqual(Array.from({ length: 729 }, (_, index) => index + 1));
+    await f.registry.dispatch({ jsonrpc: "2.0", id: 2, method: OBSERVABILITY_METHODS.subscribe,
+      params: { characterId: "taki", runKey: "run", afterSeq: cursor } }, f.context);
+    f.live.publish([event(730)]); await Promise.resolve(); await Promise.resolve();
+    expect(f.notifications.at(-1)?.params).toMatchObject({ cursor: 730, invalidated: false });
+  });
 });

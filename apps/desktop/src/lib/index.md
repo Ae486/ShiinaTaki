@@ -10,7 +10,7 @@ icons/ (the shared glyph set) and the two window-shared React hooks below.
 - connection-status.ts — discriminated operator connection states plus the one semantic notice-copy mapping shared by every surface
 - connection-generation-controller.ts — framework-free fresh-client generation lifecycle: auth/restore promotion, full-jitter retry, stability reset, stale guards, disposal
 - operator-auth.ts — shared Pet/Home/Chat authentication with per-generation display support and credential-preserving compatibility refusal
-- ws-transport.ts — browser-WebSocket wrapper behind a small transport interface (keeps ws-client node-testable)
+- ws-transport.ts — browser-WebSocket wrapper with non-open send rejection before native dispatch; keeps ws-client node-testable and retired-socket RPCs bounded
 - device-identity.ts — the operator device identity (deviceId + reconnect token) persisted in localStorage
 - presentation-gate.ts — the ONE presentation gate (D21/TTS seam): reply text + avatar command surface together
 - active-character.ts — the pet window's active character id (data; M5 #24 makes it selectable)

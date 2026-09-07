@@ -28,6 +28,7 @@ export interface ModelEffectBinding {
 export interface ModelEffectObserver {
   bindEffect(input: { effect: EffectLifecycle; provider: string; modelId: string }): ModelEffectBinding;
   firstOutput(input: ModelEffectBinding & { outputKind: "text" | "reasoning" | "tool" }): void;
+  toolCall?(input: ModelEffectBinding & { toolCallId: string; toolName: string }): void;
   fail(input: ModelEffectBinding & { errorCode: string; outcome: "failed" | "outcome_unknown" }): void;
 }
 
@@ -85,14 +86,16 @@ function prepareBinding(
     ?? { effect, callId: effect.effectId };
 }
 
-function observeStream(input: {
+interface ObservedModelStream {
   stream: ReadableStream<ProviderStreamPart>;
   binding: ModelEffectBinding;
   context: ModelEffectContext;
   model: { provider: string; modelId: string };
-}): ReadableStream<ProviderStreamPart> {
+}
+
+function observeStream(input: ObservedModelStream): ReadableStream<ProviderStreamPart> {
   const reader = input.stream.getReader();
-  let firstOutput = false;
+  const observeOutput = createOutputObserver(input);
   let terminal = false;
   const interrupt = (errorCode: string): void => {
     if (terminal) return;
@@ -109,11 +112,7 @@ function observeStream(input: {
           return;
         }
         const part = next.value;
-        const outputKind = meaningfulOutput(part);
-        if (!firstOutput && outputKind) {
-          firstOutput = true;
-          input.context.observer?.firstOutput({ ...input.binding, outputKind });
-        }
+        observeOutput(part);
         if (part.type === "error") interrupt("provider_stream_error");
         if (part.type === "finish") {
           terminal = true;
@@ -132,6 +131,20 @@ function observeStream(input: {
       await reader.cancel(reason);
     },
   });
+}
+
+function createOutputObserver(input: Pick<ObservedModelStream, "binding" | "context">) {
+  let firstOutput = false;
+  return (part: ProviderStreamPart): void => {
+    if (part.type === "tool-call") input.context.observer?.toolCall?.({
+      ...input.binding, toolCallId: part.toolCallId, toolName: part.toolName,
+    });
+    const outputKind = meaningfulOutput(part);
+    if (!firstOutput && outputKind) {
+      firstOutput = true;
+      input.context.observer?.firstOutput({ ...input.binding, outputKind });
+    }
+  };
 }
 
 function meaningfulOutput(part: ProviderStreamPart): "text" | "reasoning" | "tool" | undefined {

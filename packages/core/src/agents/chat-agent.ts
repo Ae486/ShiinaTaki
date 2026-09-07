@@ -1,12 +1,8 @@
 /**
- * INPUT:  ChatSendParams (+optional attachments) + an injected LanguageModel (AI SDK v7), ConversationStore,
- *         MemoryEngine, optional AutoMemory/visionModel/attachment store/imageMemory/onUsage hooks
- * OUTPUT: createChatAgent({model, store, memory, ...}) -> ChatAgent whose stream() yields text deltas; persists the
- *         FULL turn with captured display names after the loop; abort-aware, partial text never lost;
- *         a cancel before any output retracts the just-appended user row (deletes it + skips the memory writes)
- * POS:    core/agents — the streaming chat loop; DAY-STABLE instructions (base prompt + day line + memory context)
- *         with the volatile <turn-context> tail riding the outgoing user message (Q4/ADR 0008); auto-writes detached;
- *         a classified context-overflow retries ONCE against the same captured Run extension context
+ * INPUT:  chat/attachment input, SDK models, ConversationStore, Memory hooks, and captured Run/extension bindings
+ * OUTPUT: text streaming, full-turn persistence, captured names, and immutable per-attempt invocation observation
+ * POS:    core/agents — the existing ToolLoopAgent boundary; owns abort/retract and one context-overflow retry,
+ *         preserving day-stable instructions, volatile message-tail context, and detached memory writes
  */
 import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type Telemetry, type ToolSet } from "ai";
 import { captureToolDisplayNames, type ChatSendParams, type ImageAttachment } from "@taki/shared";
@@ -234,7 +230,11 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   // ONE clock read per attempt: the instructions' day line and the tail's time line must agree (Q4).
   const now = Date.now();
   const instructions = composeInstructions(deps, { characterId, message: controlMessage, runInstructions: attempt.runContext?.instructions }, now);
-  const selectedModel = vision ? vision.model : deps.model; const { model, observability } = createRunObservabilityModel({ model: selectedModel, lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId });
+  const selectedModel = vision ? vision.model : deps.model;
+  const { model, observability } = createRunObservabilityModel({
+    model: selectedModel, lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId,
+    toolDisplayNames: attempt.toolDisplayNames,
+  });
   if (turn && observability) turn.toolObserver = observability.tools;
   const tools = assembleTurnTools(deps, attempt, turn); const toolOrder = Object.keys(tools).sort((left, right) => left < right ? -1 : left > right ? 1 : 0);
   let preparedTools: ReadonlyArray<Record<string, unknown>> | undefined;

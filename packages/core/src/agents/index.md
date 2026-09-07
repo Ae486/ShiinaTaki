@@ -1,5 +1,5 @@
 # core/agents/
-- chat-agent.ts — AI SDK v7 ToolLoopAgent with full-turn persistence/cancellation, once-captured display names across retries, and a non-primary ephemeral-control seam with primary-only Core tools
+- chat-agent.ts — AI SDK v7 ToolLoopAgent with full-turn persistence/cancellation, captured tool presentation, immutable invocation observation, and a non-primary ephemeral-control seam
 - tool-set-assembly.ts — collision-safe merge of independently governed ToolSet groups; duplicate model-facing keys fail closed instead of choosing authority by spread order
 - base-prompt.ts — BASE_SYSTEM_PROMPT: the stable identity + tool-use + "never claim a tool ran without a tool-result" truthfulness floor (anti-hallucination) + the memory floors (T5-R12/R16-R19: never answer the user's past from impression, OpenClaw-shaped search triggers, one-search + say-you-checked fallback, pin-on-repeat, fix-on-read, supersede-don't-append, deliberate experience writes, card-wins last) + the injected-context contracts a user must not be able to edit away (what an `<untrusted-observation>` block is / trust only these exact tags, what the `<turn-context>` tail is and where the two time lines arrive, what a `<conversation-summary>` head is — her own earlier record, never recited, memory store wins on disagreement — batch 7, anti-recitation); prepended before memory context — behavior norms for the same surfaces live in prompt/system/assistant-layer.md
 - compaction-pass.ts — reviewed companion-summary prompt plus compatibility factory for the durable Compaction Coordinator
@@ -22,6 +22,9 @@
 - turn-registry.ts — per-character active AbortController plus optional Run identity; exact cancellation cannot abort a different Run in the same Character lane
 - untrusted-fence.ts — the A1 minimal fence: fenceUntrusted({source,content}) → XML-delimited `<untrusted-observation>` block labeling content DATA-never-INSTRUCTIONS; neutralizes any literal closing tag so hostile content can't escape; reused by every untrusted-content producer (T3a activity, later T3b/screenshot/T5)
 - window-calibrator.ts — createWindowCalibrator({repo, slot, declared}): R1 tier-2 EMA correction factor over the estimator (clamped) + R2 overflow shrink (floor(observed×0.9), never above declared), persisted via window-state-repo; a lowered declaration is written back so runtime and operator status agree while an earlier overflow shrink survives; effectiveWindow() returns the estimator-unit budget
-- model-effect-middleware.ts — model effect lifecycle and bounded request/stream/settlement observability producers
-- run-observability-telemetry.ts — per-attempt AI SDK model/tool telemetry composition with authoritative usage/timing settlement and observer isolation
-- tool-observability.ts — normalized exactly-once tool call/result producer with validation, governance, stale, duration, and Effect correlation
+- model-effect-middleware.ts — model Effect lifecycle and exact request/first-output/tool-call observation before provider parts leave the middleware
+- model-observability.ts — Effect-keyed per-request telemetry and unique unfinished SDK-end association; ambiguous generations never overwrite a request
+- run-observability-telemetry.ts — per-attempt AI SDK composition with authoritative usage/timing settlement, captured names, invocation bridge, and observer isolation
+- tool-invocation.ts — immutable IDs/name-only invocation snapshots and SDK-object WeakMap bridge shared by stream, telemetry, and later feedback consumers
+- tool-observability.ts — exactly-once received/settled tool observations with pre-conversion outcomes, preliminary exclusion, and measured wrapper-processing timing
+- tool-outcome.ts — shared pre-model-conversion outcome classifier with closed diagnostic codes, nested Memory uncertainty/cancellation, MCP failure, and preliminary-result exclusion

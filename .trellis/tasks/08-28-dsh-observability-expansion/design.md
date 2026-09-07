@@ -316,6 +316,12 @@ Main adopts the [query/producer preflight](research/d68-query-contract-2026-09-0
 conceptual tab lists or grouping shortcuts above where current producers do not support them.
 D68-A/cache/Compaction are complete; correct only the newly verified adapter defects.
 
+Implementation refinements (2026-09-06): optional tool `startedAt` comes from the actual SDK wrapper
+callback and measures processing that may include Approval waiting; it does not prove underlying
+dispatch. HomeShell's Monitor availability retains the last confirmed mode through transient null
+clients, preserves initial unknown route intent and hides only on a confirmed disabled mode. This
+bounded Home integration is required for the selected Run/controller to survive real reconnect.
+
 ### 9.1 Request, tool and display facts
 
 Use model `effectId` as exact request identity. SDK generation `callId` is reused across steps.

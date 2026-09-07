@@ -44,7 +44,8 @@ Before any execution-stage delegated explore, implementation, or check:
 4. Every prompt is in English and explicitly states: `YCE is disabled and must not be used`; use `jbcontext` for semantic
    search; do not spawn or delegate to another agent; do not commit, push, reset, rebase, or archive.
 5. There is at most one explore/research, one implementation agent, and one formal check agent for each executable slice.
-   A healthy child is not interrupted; the main session waits in ten-minute cadence.
+   A healthy child is not interrupted. The owner's latest refinement uses thirty-minute wait cycles;
+   main replies to actual questions/blockers/checkpoints without periodic progress requests.
 
 The explore step is a bounded preflight, not a second architecture discussion. It writes only a research artifact with
 verified file/symbol/stream-shape facts. It must not alter production code or task status. Once the main session reviews
@@ -212,3 +213,14 @@ exceeded.
 - Producer wiring can be feature-gated by Monitor mode without changing Run correctness.
 - UI can fall back to the existing semantic projection if a new optional detail is unavailable; it must never fall back to
   raw technical fields.
+
+## D68-B completion checkpoint — 2026-09-07
+
+Stages 5 and 6 passed implementation, one combined independent review and delegated actual-WebView2 engineering
+acceptance. See [the final evidence](implementation-evidence-d68-b-2026-09-07.md): 93 reviewed files, five fixed defect
+groups, Shared 411/Core 1,940/Desktop 690 passing tests, type/lint/build/context gates, three isolated Core modes,
+and 24/24 final WebView2 interaction groups. One existing archive fixture remains skipped; existing lint/build
+advisories remain recorded. All owned test/QA processes are stopped. No personal owner inspection is claimed.
+
+The wider UI/UX program continues with checked upstream synchronization, then the reviewed Chat/Pet child.
+D75/D76/D77 and true T4 remain outside this delivery. This checkpoint does not archive the parent program.
