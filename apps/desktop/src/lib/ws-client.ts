@@ -5,7 +5,7 @@
  */
 
 import { JSONRPCClient, JSONRPCServer, JSONRPCServerAndClient } from "json-rpc-2.0";
-import { CHAT_METHODS } from "@taki/shared";
+import { CHAT_METHODS, ChatSendResultSchema } from "@taki/shared";
 import type {
   AvatarCommand,
   ApprovalListResult,
@@ -18,6 +18,8 @@ import type {
   CharacterImportResult,
   CharacterListResult,
   ChatSendParams,
+  ChatActivity,
+  ChatActivityReadResult,
   CanonicalApprovalRespondParams,
   CanonicalApprovalRespondResult,
   ConfigChanged,
@@ -62,6 +64,7 @@ import type {
   TimelineHistoryParams,
   TimelineHistoryResult,
   TimelineRemoved,
+  TimelineCommitted,
   TimingPolicy,
   MonitorStateResult,
   RunMonitorListParams,
@@ -79,6 +82,8 @@ import { createTimingPolicySync, type TimingPolicySync } from "./timing-policy-s
 import { handshake, requestMethods, type ConnectOutcome } from "./ws-client-methods.ts";
 import {
   addConfigChangedHandler,
+  addChatActivityHandler,
+  addTimelineCommittedHandler,
   addApprovalHandler,
   addMonitorHandler,
   bindTransport,
@@ -86,10 +91,10 @@ import {
   installRoutes,
   CONNECTION_LOST_MESSAGE,
   WsOpenDeadlineExceededError,
-  type ChatHandlers,
   type ApprovalPushEvent,
 } from "./ws-client-routes.ts";
 import type { WsTransport } from "./ws-transport.ts";
+import { sendChatTurn, type ChatHandlers } from "./ws-chat-turn.ts";
 
 export type { ChatHandlers, ConnectOutcome };
 
@@ -97,7 +102,11 @@ export interface WsClient {
   connect(params: ConnectParams): Promise<ConnectOutcome>;
   chat(params: ChatSendParams, handlers: ChatHandlers): Promise<void>;
   /** Cancels the character's in-flight turn (idempotent; false = nothing was running). The composer's abort entry. */
-  chatCancel(characterId: string): Promise<boolean>;
+  chatCancel(characterId: string, runId?: string): Promise<boolean>;
+  /** Disposable active-turn recovery; never replays a send or a tool. */
+  chatActivityRead(characterId: string): Promise<ChatActivityReadResult>;
+  onChatActivity(handler: (event: ChatActivity) => void): () => void;
+  onTimelineCommitted(handler: (batch: TimelineCommitted) => void): () => void;
   subscribeAvatar(characterId: string): Promise<void>;
   reportAvatar(params: AvatarReportParams): Promise<void>;
   /** Fetches one newest-first page of a character's timeline (the chat page's history paging). */
@@ -264,21 +273,15 @@ export function createWsClient(deps: WsClientDeps): WsClient {
     async chat(params, handlers) {
       // A turn started on a dead socket can never be answered — reject now instead of leaving the caller pending (D29).
       if (isClosed()) throw new Error(CONNECTION_LOST_MESSAGE);
-      const done = new Promise<void>((resolve) => {
-        state.current = { handlers, finish: resolve };
-      });
-      try {
-        await requestWithDeadline({ rpc, timing, method: CHAT_METHODS.send, params });
-      } catch (error) {
-        state.current = null; // the turn never started — drop the stale handlers
-        throw error;
-      }
-      await done;
+      await sendChatTurn({ slot: state, characterId: params.characterId, handlers,
+        request: async () => ChatSendResultSchema.parse(await requestWithDeadline({ rpc, timing, method: CHAT_METHODS.send, params })) });
     },
     ...methods,
     onAvatarCommand: (handler) => (state.push.avatar = handler),
     onTimelineAppended: (handler) => (state.push.timeline = handler),
     onTimelineRemoved: (handler) => (state.push.timelineRemoved = handler),
+    onChatActivity: (handler) => addChatActivityHandler(state, handler),
+    onTimelineCommitted: (handler) => addTimelineCommittedHandler(state, handler),
     onConfigChanged: (handler) => addConfigChangedHandler(state, handler),
     onApproval: (handler) => addApprovalHandler(state, handler),
     onMonitorEvent: (handler) => addMonitorHandler(state, handler),

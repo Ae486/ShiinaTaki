@@ -19,6 +19,7 @@
 - 032-conversation-compaction-lifecycle.ts — migration 32: revisioned summary checkpoint, fenced per-Character operation cursor, and immutable bounded compaction events
 - 033-hindsight-replica-sync.ts — migration 33: canonical incremental replica records, FTS projection, checkpoints, and Bank leases
 - 034-hindsight-replica-scheduler.ts — migration 34: durable scheduler/run state and the current verified single-record snapshot cache
+- 035-timeline-presentation.ts — migration 35: additive nullable Timeline display metadata; canonical fields and prior migration lineages are unchanged
 - 013-config.ts — migration 13: config (the sparse operator-set settings store: key/JSON value/updated_at; a row exists only for a knob the panel actually set)
 - 014-governance-policy.ts — migration 14: Core-owned global Level/policy generation singleton + sparse validated cell overrides
 - 015-approval.ts — migration 15: Core Approval generation/revision singleton + canonical durable always-allow decisions

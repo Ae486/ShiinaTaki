@@ -8,8 +8,8 @@ import { captureToolDisplayNames, getKnownToolDisplayName, getValidToolDisplayNa
 
 export interface ToolInvocationSnapshot {
   readonly invocationId: string;
-  readonly runId: string;
-  readonly attemptId: string;
+  readonly runId?: string;
+  readonly attemptId?: string;
   readonly toolCallId: string;
   readonly toolName: string;
   readonly displayName?: string;
@@ -40,8 +40,8 @@ export interface ToolInvocationBridge {
 }
 
 interface BridgeInput {
-  runId: string;
-  attemptId: string;
+  runId?: string;
+  attemptId?: string;
   toolDisplayNames?: Readonly<Record<string, string>>;
   newId?: () => string;
 }

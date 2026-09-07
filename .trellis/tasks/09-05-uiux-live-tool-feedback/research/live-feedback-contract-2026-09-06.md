@@ -4,6 +4,13 @@ Read-only source study returned on 2026-09-06 at T4 checkpoint `a771496`, coordi
 request-identity research. No production files or task pointers were changed and no tests were run.
 The design document records main's final choices where they narrow the research proposals.
 
+Implementation clarification, 2026-09-07: Core can acknowledge another Run while the current
+Character turn still owns the execution queue. The bounded recovery projection therefore tracks the
+latest **started** foreground turn, switching at queue acquisition rather than mere admission.
+This preserves the current turn's remaining events and terminal publication. Admission/queue/cancel
+policy is unchanged. The source-backed two-sender regression and native reproduction are recorded
+in the implementation evidence; current design.md supersedes the earlier admission wording below.
+
 ## Source facts that change the implementation
 
 | Source | Verified consequence |

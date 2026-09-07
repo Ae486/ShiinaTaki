@@ -108,11 +108,61 @@
   /* Motion: the two durations the UI actually uses (explicit, was implicit). */
   --duration-fast: 120ms;
   --duration-base: 150ms;
+  --duration-layout: 200ms;
 
   /* Shadow steps: card chrome < floating overlays (toast/wheel/bubble) < modal. */
   --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-overlay: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-modal: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+}
+
+/* The Pet frame reserves available window geometry but stays transparent and pointer-pass-through.
+   Row padding belongs to the measured envelope, so a departing tail releases its gap continuously. */
+@layer components {
+  .pet-bubble-transcript {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    pointer-events: none;
+  }
+
+  .pet-bubble-group {
+    position: relative;
+    overflow: hidden;
+    overflow-anchor: none;
+    transition: height var(--duration-layout) ease-out;
+  }
+
+  .pet-bubble-natural { position: relative; }
+
+  .pet-bubble-row {
+    position: relative;
+    width: 100%;
+    padding: 0.5rem 0.25rem 0;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--duration-base) ease-out, transform var(--duration-base) ease-out;
+  }
+
+  @starting-style {
+    .pet-bubble-row[data-presence="entering"] { opacity: 0; transform: translateY(4px); }
+  }
+
+  .pet-bubble-row[data-presence="exiting"] {
+    position: absolute;
+    opacity: 0;
+    transition-duration: var(--duration-fast);
+    pointer-events: none;
+  }
+
+  .pet-bubble-surface { white-space: pre-wrap; overflow-wrap: anywhere; pointer-events: none; }
+  .pet-bubble-row[data-presence="present"] .pet-bubble-surface { pointer-events: auto; }
+  .pet-bubble-group[data-instant] { transition: none; }
+  .pet-bubble-group[data-instant] .pet-bubble-row { transition: none; }
+  .pet-bubble-scroll-anchor { height: 1px; overflow-anchor: none; }
+  .pet-bubble-scroll-anchor[data-following] { overflow-anchor: auto; }
 }
 
 @layer base {

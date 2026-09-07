@@ -31,6 +31,7 @@ export interface WsServerOptions {
 export interface WsServer {
   /** The actually-bound port (resolves the ephemeral port when started with 0). */
   port: number;
+  /** Resolves after the listener and every accepted socket's connection cleanup have closed. */
   close(): Promise<void>;
 }
 
@@ -154,9 +155,15 @@ function boundPort(wss: WebSocketServer, fallback: number): number {
   return typeof address === "object" && address !== null ? address.port : fallback;
 }
 
-function closeServer(wss: WebSocketServer): Promise<void> {
-  return new Promise((resolve, reject) => {
-    for (const client of wss.clients) client.terminate();
+async function closeServer(wss: WebSocketServer): Promise<void> {
+  const clients = [...wss.clients];
+  // ws's internally owned HTTP server can report close before upgraded sockets emit their close events. The
+  // application releases shared storage after this promise, so wait for our previously registered cleanup listeners
+  // as well. Register before terminate; socket errors are already logged and do not replace the close boundary.
+  const clientsClosed = clients.map((client) => new Promise<void>((resolve) => client.once("close", () => resolve())));
+  const listenerClosed = new Promise<void>((resolve, reject) => {
     wss.close((err) => (err ? reject(err) : resolve()));
   });
+  for (const client of clients) client.terminate();
+  await Promise.all([listenerClosed, ...clientsClosed]);
 }

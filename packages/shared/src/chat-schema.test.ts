@@ -15,13 +15,15 @@ import {
 const IMAGE = { mediaType: "image/png" as const, dataBase64: "aGk=" };
 
 describe("CHAT_METHODS", () => {
-  it("exposes the five chat method names", () => {
+  it("exposes legacy chat and read-only live activity method names", () => {
     expect(CHAT_METHODS).toEqual({
       send: "chat.send",
       cancel: "chat.cancel",
       delta: "chat.delta",
       complete: "chat.complete",
       error: "chat.error",
+      activity: "chat.activity",
+      activityRead: "chat.activity.read",
     });
   });
 });

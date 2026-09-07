@@ -4,4 +4,4 @@
 - observability-inspector.ts — populated typed semantic sections from authorized durable events; technical compatibility arrays stay empty
 - observability-run-summary.ts — durable Run summaries from SQL aggregates with omission-preserving usage/cache totals
 - observability-run-filters.ts — real-field Run/event filters over bounded keyset scans
-- tool-effect-observer.ts — narrow in-memory tool-call to governed Effect correlation contract
+- tool-effect-observer.ts — narrow in-memory Effect correlation and optional confirmed Approval/dispatch phase callbacks; no authority or payload ownership

@@ -1,6 +1,6 @@
 /**
  * INPUT:  one authenticated candidate WsClient, the live PetScene, and its lifecycle generation guard.
- * OUTPUT: restorePetConnection() — guarded avatar callback, truthful scene report, then one observed subscription.
+ * OUTPUT: restorePetConnection() — guarded avatar report/subscription and read-only Chat activity restoration
  * POS:    ui/windows/pet — required per-generation restoration before the pet connection may publish connected.
  */
 
@@ -14,9 +14,11 @@ import {
 import { sharedPresentationGate } from "@/lib/presentation-gate.js";
 import type { WsClient } from "@/lib/ws-client.js";
 import type { PetScene } from "@/renderer/pet-scene.js";
+import { restoreBubbleActivity } from "@/features/chat-bubble/bubble-activity-binding.js";
 
 export interface PetConnectionRestoration {
-  client: Pick<WsClient, "onAvatarCommand" | "reportAvatar" | "subscribeAvatar">;
+  client: Pick<WsClient, "onAvatarCommand" | "reportAvatar" | "subscribeAvatar"
+    | "onChatActivity" | "chatActivityRead" | "subscribeTimeline" | "onClose">;
   scene: Pick<PetScene, "applyAvatarCommand" | "reportSnapshot"> | null;
   context: ConnectionGenerationContext;
   reportSync?: CostumeReportSyncTracker;
@@ -52,4 +54,5 @@ export async function restorePetConnection(input: PetConnectionRestoration): Pro
   await reportCurrentScene(input);
   if (!input.context.isCurrent()) return;
   await input.client.subscribeAvatar(ACTIVE_CHARACTER_ID);
+  if (input.context.isCurrent()) await restoreBubbleActivity(input.client, input.context);
 }

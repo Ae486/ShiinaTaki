@@ -39,6 +39,7 @@ export const RPC_METHOD_POLICIES: ReadonlyMap<string, RpcMethodPolicy> = new Map
   [CONNECT_METHOD, { class: "open-auth", timing: "openAuthMs", timeoutOutcome: "unknown" }],
   [CHAT_METHODS.send, { class: "chat-ack", timing: "chatAckMs", timeoutOutcome: "unknown" }],
   [CHAT_METHODS.cancel, INTERACTIVE_MUTATION],
+  [CHAT_METHODS.activityRead, INTERACTIVE_READ],
   [AVATAR_METHODS.subscribe, INTERACTIVE_MUTATION],
   [AVATAR_METHODS.report, INTERACTIVE_MUTATION],
   [TIMELINE_METHODS.history, INTERACTIVE_READ],

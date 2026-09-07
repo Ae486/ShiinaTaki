@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { enterSubmits, escapeCloses } from "./chat-bubble.tsx";
+import { enterSubmits, escapeCloses } from "./use-bubble-form.ts";
 
 describe("pet bubble Enter-to-submit gate (A2 IME safety)", () => {
   it("submits on plain Enter outside an IME composition", () => {

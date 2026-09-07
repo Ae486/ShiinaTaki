@@ -8,12 +8,12 @@ import type { EffectLifecycleService } from "../harness/effect-lifecycle-service
 import type { ToolEffectObserver } from "../observability/tool-effect-observer.ts";
 import { createModelEffectMiddleware } from "./model-effect-middleware.ts";
 import { createModelObserver } from "./model-observability.ts";
-import { createToolObserver } from "./tool-observability.ts";
+import { createToolObserver, type ToolActivityObserver } from "./tool-observability.ts";
 import { createToolInvocationBridge, type ToolInvocationBridge } from "./tool-invocation.ts";
 export type { ToolEffectObserver } from "../observability/tool-effect-observer.ts";
 
 export interface RunObservabilitySession {
-  middleware: LanguageModelMiddleware;
+  middleware?: LanguageModelMiddleware;
   telemetry: Telemetry;
   tools: ToolEffectObserver;
   invocations: ToolInvocationBridge;
@@ -27,16 +27,20 @@ export function createRunObservabilityModel(input: {
   runId?: string;
   attemptId?: string;
   toolDisplayNames?: Readonly<Record<string, string>>;
+  activity?: ToolActivityObserver;
 }): { model: LanguageModel; observability?: RunObservabilitySession } {
-  if (!input.lifecycle || !input.runId || !input.attemptId) return { model: input.model };
+  if (!input.lifecycle || !input.runId || !input.attemptId) {
+    return { model: input.model, ...(input.activity ? { observability: untrackedToolSession(input) } : {}) };
+  }
   const observability = createRunObservabilitySession({
     lifecycle: input.lifecycle, runId: input.runId, attemptId: input.attemptId,
     toolDisplayNames: input.toolDisplayNames,
+    activity: input.activity,
   });
   return {
-    model: wrapLanguageModel({
+    model: observability.middleware ? wrapLanguageModel({
       model: input.model as Parameters<typeof wrapLanguageModel>[0]["model"], middleware: observability.middleware,
-    }),
+    }) : input.model,
     observability,
   };
 }
@@ -46,6 +50,7 @@ export function createRunObservabilitySession(input: {
   runId: string;
   attemptId: string;
   toolDisplayNames?: Readonly<Record<string, string>>;
+  activity?: ToolActivityObserver;
   now?: () => number;
 }): RunObservabilitySession {
   const now = input.now ?? Date.now;
@@ -58,12 +63,25 @@ export function createRunObservabilitySession(input: {
       onLanguageModelCallStart: model.start, onLanguageModelCallEnd: model.end,
       onToolExecutionStart: tools.start, onToolExecutionEnd: tools.end, executeTool: tools.execute,
     },
-    tools: { bindEffect: tools.bindEffect },
+    tools: { bindEffect: tools.bindEffect, phase: tools.phase },
     invocations,
     observeStreamPart(part) {
       tools.observeStreamPart(part);
       model.assertHealthy();
     },
     assertHealthy: model.assertHealthy,
+  };
+}
+
+function untrackedToolSession(input: {
+  runId?: string; attemptId?: string; toolDisplayNames?: Readonly<Record<string, string>>; activity?: ToolActivityObserver;
+}): RunObservabilitySession {
+  const tools = createToolObserver(input, Date.now);
+  return {
+    telemetry: { onToolExecutionStart: tools.start, onToolExecutionEnd: tools.end, executeTool: tools.execute },
+    tools: { bindEffect: tools.bindEffect, phase: tools.phase },
+    invocations: tools.invocations,
+    observeStreamPart: tools.observeStreamPart,
+    assertHealthy() { /* Legacy callers have no model Effect authority to validate or fabricate. */ },
   };
 }

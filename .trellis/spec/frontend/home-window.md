@@ -266,21 +266,32 @@ otherwise unmounting discards the controller before its reconnect logic can rest
 unknown must not expose the page or discard its requested route; confirmed DISABLED retains the normal
 hide/navigation behavior. Follow [the availability contract](reactive-read-models.md).
 
-## Streaming timeline: the in-flight assistant row lifecycle
+## Streaming timeline: ordered activity and complete batch handoff
 
 Tool names follow [Operation Presentation](../backend/operation-presentation.md): valid captured
 `displayName` -> known fixed-tool Chinese name -> generic Chinese tool text. Never expose an unknown
 canonical key or reconstruct an MCP name from it. The optional Timeline field is captured with the
 Run's actual tools, survives persistence, and does not change model replay or call/result identity.
-This name contract does not itself implement live tool delivery or completed-call reconciliation.
+Live delivery follows [Foreground Chat Feedback](foreground-chat-feedback.md) and the
+[Core activity/batch contract](../backend/foreground-chat-activity.md):
 
-The persisted timeline and the live stream are two sources merged in one store (`pages/chat/chat-timeline-store.ts`), keyed by `seq`:
-
-- Persisted entries: initial `timeline.history` page (newest-first → reverse for display) + live `timeline.appended`, both **Map-keyed by `seq`** (dedup + ascending sort; loadOlder prepends without duplicating; a subscribe-before-history race dedups by seq).
-- The streaming assistant reply is a SEPARATE **in-flight row keyed by `chat.send`'s `messageId`** (which is NOT the persisted entry's uuid — do not try to id-match them). `chat.delta` grows it; the assistant's `timeline.appended` (the persisted version) **drops the in-flight row and inserts the entry in ONE atomic `set()`** — this ordering (Core sends `persistTurn` fan-out just before `chat.complete`) is what prevents a duplicate flash. `chat.complete` → `clearInflight` is the safety net, not the primary path.
-- Only an **assistant**-role `appended` drops the in-flight row; user/tool appended rows must not. `chat.error` mid-stream clears the in-flight row and pushes an inline notice atomically. A new `messageId` replaces a stale in-flight row.
-- The in-flight bubble uses identical assistant-row styling for a seamless swap.
-- Scroll discipline (bottom-pinning, pause-on-scroll-up, the load-older hold, and the truthful paused-follow affordance rule) is codified in [`reactive-read-models.md`](./reactive-read-models.md) §(f).
+- Canonical history remains keyed by Timeline `seq`; pages are newest-first on the wire and deduplicated
+  into display order. Read views never write another transcript authority.
+- `chat.activity` carries stable language/tool `itemId` and accepted-message identity. `chat.send`'s
+  acknowledgement `messageId` is distinct from a persisted row UUID. Keep exact acknowledgement,
+  Character and physical client generation when settling requests or restoring drafts.
+- One compact invocation entry interleaves with language, updates truthful phase/outcome in place, and
+  remains in Chat history. Captured names survive handoff; old unlabeled rows retain conservative fallback.
+- Buffer partial appends with presentation metadata. A complete `timeline.committed` batch or complete
+  paged-history recovery atomically covers only that accepted message, preserving keys, focus and text
+  selection. Never clear all activity when the first assistant row arrives or legacy completion fires.
+- `chat.delta` remains a compatibility fallback when authoritative activity is absent. Receiving both
+  channels cannot duplicate text; late callbacks from a retired message/client cannot erase current state.
+- Reconnect restores subscriptions and bounded snapshots through reads. Stale/unavailable state remains
+  truthful, does not replay mutations, and does not automatically open Pet.
+- Scroll discipline (bottom-pinning, pause-on-scroll-up, the load-older hold and truthful paused-follow
+  affordance) remains in [`reactive-read-models.md`](reactive-read-models.md) §(f). Pet additionally follows
+  the segmented transcript and occupied-space motion rules in the foreground-feedback contract.
 
 ## Rendering server-owned binary refs (images)
 

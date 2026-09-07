@@ -25,11 +25,15 @@ import type { TurnQueue } from "../../agents/turn-queue.ts";
 import type { TurnRegistry } from "../../agents/turn-registry.ts";
 import type { Logger } from "../../logging/logger.ts";
 import type { MethodContext, MethodDefinition } from "../method-registry.ts";
+import { createChatTurnActivity, type ChatTurnActivity } from "../../agents/chat-activity.ts";
+import type { ChatActivityProjection } from "../../agents/chat-activity-projection.ts";
+import type { TimelineSubscriptions } from "../timeline-subscriptions.ts";
 
 /** The turn-lifecycle pair every send runs under: per-character serialization + cancellation (D1 #3/#4). */
 export interface TurnControls {
   queue: TurnQueue;
   turns: TurnRegistry;
+  live?: { activity: ChatActivityProjection; subscriptions: TimelineSubscriptions };
 }
 
 // eslint-disable-next-line max-params
@@ -67,10 +71,16 @@ export function chatSendMethod(
       interactive.attemptId = attemptId;
       runIdRef.value = runId;
       if (closed) runs.requestCancel(runId, "connection closed");
+      const identity = { characterId: params.characterId, messageId, runId, attemptId };
+      const activity = controls.live ? createChatTurnActivity({ identity, publish: (event) => {
+        if (controls.live?.activity.apply(event)) controls.live.subscriptions.publishActivity(event, {
+          connection: ctx.connection, notify: (value) => ctx.notify(CHAT_METHODS.activity, value),
+        });
+      } }) : undefined;
       // Defer streaming to the next macrotask so the ack — sent by the server as
       // this dispatch's result, a couple of microtask hops later — is flushed to
       // the socket before the first delta notification.
-      setImmediate(() => void runQueued({ chatAgent, log, params, ctx, messageId, runId, attemptId, controller, controls, runs, interactive }));
+      setImmediate(() => void runQueued({ chatAgent, log, params, ctx, messageId, runId, attemptId, controller, controls, runs, interactive, activity }));
       return { messageId, runId };
     },
   };
@@ -88,6 +98,7 @@ interface PumpArgs {
   controls: TurnControls;
   runs: RunService<TurnInteractive>;
   interactive: TurnInteractive;
+  activity?: ChatTurnActivity;
 }
 
 // A turn fully commits (append user -> stream -> append turn) before the character's next send starts; concurrent
@@ -97,7 +108,17 @@ async function runQueued(args: PumpArgs): Promise<void> {
   const release = await controls.queue.acquire(params.characterId);
   const controller = controls.turns.begin(params.characterId, args.controller, args.runId);
   try {
-    if (args.runs.start(args.runId, args.attemptId) === false) return;
+    // A queued admission must not replace the running turn or suppress its remaining events. The prior owner
+    // has fully settled before this acquisition; the new snapshot starts with the matching ordered producer.
+    controls.live?.activity.start({ characterId: params.characterId, messageId: args.messageId,
+      runId: args.runId, attemptId: args.attemptId });
+    args.activity?.start();
+    if (args.runs.start(args.runId, args.attemptId) === false) {
+      args.activity?.terminal({ outcome: controller.signal.aborted ? "cancelled" : "outcome_unknown", message: "本次对话未开始" });
+      args.ctx.notify(CHAT_METHODS.error, { messageId: args.messageId, characterId: params.characterId,
+        code: ErrorCodeSchema.enum.PROVIDER_ERROR, message: "本次对话未开始" } satisfies ChatError);
+      return;
+    }
     await pump(args, controller);
   } finally {
     controls.turns.end(params.characterId, controller);
@@ -127,6 +148,9 @@ async function pump(args: PumpArgs, controller: AbortController): Promise<void> 
       attemptId,
       turnKind: "primary",
       runContext: runs.context(runId),
+      activity: args.activity,
+      get toolObserver() { return interactive.toolObserver; },
+      set toolObserver(observer) { interactive.toolObserver = observer; },
       onRetry: (reason) => {
         const before = runs.status(runId).run;
         if (before.state !== "running" || before.activeAttemptId !== attemptId) return false;
@@ -147,6 +171,7 @@ async function pump(args: PumpArgs, controller: AbortController): Promise<void> 
     if (retracted) {
       runs.requestCancel(runId, "turn cancelled before reply");
       runs.settle(runId, attemptId, "cancelled", { retryable: false, summary: "cancelled before reply" });
+      args.activity?.terminal({ outcome: "cancelled" });
       // Cancelled before any reply: BOTH cancel endings land here, not the catch — a graceful abort closes the
       // stream cleanly, and the agent swallows the throw ending once it retracts. Tell the UI to restore the draft.
       ctx.notify(CHAT_METHODS.error, {
@@ -159,6 +184,7 @@ async function pump(args: PumpArgs, controller: AbortController): Promise<void> 
     } else {
       if (controller.signal.aborted) runs.requestCancel(runId, "turn cancelled");
       runs.settle(runId, attemptId, controller.signal.aborted ? "cancelled" : "completed", { retryable: false });
+      args.activity?.terminal({ outcome: controller.signal.aborted ? "cancelled" : "completed" });
       // A cancelled-after-output turn also ends here: the stream closes gracefully after the abort, partial text streamed.
       ctx.notify(CHAT_METHODS.complete, { messageId, characterId } satisfies ChatComplete);
     }
@@ -173,6 +199,8 @@ async function pump(args: PumpArgs, controller: AbortController): Promise<void> 
     // Provider messages and arbitrary thrown values can contain request bodies, prompts, tool payloads, or credentials.
     // Keep those out of durable Receipt evidence and Pino; the interactive error remains user-facing only.
     log.warn({ messageId, characterId, errorCode: evidence.errorCode }, "chat stream failed");
+    args.activity?.terminal({ outcome: controller.signal.aborted ? "cancelled" : "failed",
+      message: controller.signal.aborted ? "turn cancelled" : evidence.summary });
     ctx.notify(CHAT_METHODS.error, {
       messageId,
       characterId,

@@ -1,7 +1,7 @@
 # desktop/src/
 - main.tsx — React entry; mounts App into #root
 - app.tsx — status + pairing panel: listens to taki://status, submits the pairing code via submit_pairing_code
-- styles.css — Tailwind entry stylesheet
+- styles.css — shared theme/motion tokens and CSS-only Pet row/occupied-space transitions with transparent viewport geometry
 - lib/ — Pet UI clients + seams: operator WS client, device identity, presentation gate, active character, window seams, icons/
 - features/ — feature folders (components + hooks colocated): chat-bubble (#16), character-import (#18), operation-wheel (#26)
 - components/ — cross-window reusable UI: toast/ (the D34 transient-notice surface)

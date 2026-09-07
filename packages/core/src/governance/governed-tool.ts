@@ -1,6 +1,6 @@
 /**
  * INPUT:  trusted canonical identity/cell sidecar, GovernancePolicyService, and an existing AI SDK Tool closure
- * OUTPUT: common policy/approval guards, the original tool result, and payload-free terminal Effect classification
+ * OUTPUT: unchanged guarded execution/results, closed Effect outcomes, and optional wait/dispatch observations
  * POS:    core/governance — explicit Core/MCP/Skill adapter primitive; presentation keys and tool metadata grant nothing
  */
 import type { Tool } from "ai";
@@ -120,6 +120,7 @@ async function executeGoverned(args: ExecuteGovernedArgs) {
       const effectId = randomUUID();
       waiting = interactive.effects.prepareWaiting({ ...effectIntent(context, interactive.runId, interactive.attemptId, effectId, input), effectId, approvalRef: { approvalId: handle.approvalId, policyGeneration: decision.evaluation.policyGeneration, approvalGeneration: interactive.approval.approvalGeneration(), bindingDigest: requestedBinding.decisionScopeDigest } });
       binding.effect?.onIntent?.(waiting, input);
+      observePhase(context, options, "approval");
     } catch {
       handle.cancel();
       return { ok: false, code: "STALE_EFFECT", message: "tool authorization became stale" };
@@ -195,6 +196,7 @@ async function executeWithEffect(args: ExecuteGovernedArgs & { waiting?: ReturnT
     if (effect && toolCallId) (context.effect?.toolObserver ?? interactive?.toolObserver)?.bindEffect({ toolCallId, effectId: effect.effectId });
     context.binding.effect?.onIntent?.(effect!, input);
     const executionOptions = effect ? withEffectContext(options, effect) : options;
+    observePhase(context, options, "executing");
     const raw = await Promise.resolve(execute(input, executionOptions as Parameters<NonNullable<Tool["execute"]>>[1])).catch((error: unknown) => {
       if (effect && effects) effects.settle({ effectId: effect.effectId, runId: effect.runId, attemptId: effect.attemptId, expectedVersion: effect.version, outcome: "failed", errorCode: "tool_error" });
       throw error;
@@ -205,6 +207,14 @@ async function executeWithEffect(args: ExecuteGovernedArgs & { waiting?: ReturnT
   } finally {
     lease?.release();
   }
+}
+
+function observePhase(context: GovernedToolContext, options: unknown, phase: "approval" | "executing"): void {
+  const toolCallId = toolCallIdOf(options);
+  if (!toolCallId) return;
+  try {
+    (context.effect?.toolObserver ?? context.interactive?.toolObserver)?.phase?.({ toolCallId, phase });
+  } catch { /* Optional display observers cannot suppress an authorized dispatch or settle an Effect. */ }
 }
 
 function withEffectContext(options: unknown, effect: EffectLifecycle): unknown {

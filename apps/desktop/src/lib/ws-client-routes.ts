@@ -18,6 +18,7 @@ import {
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
+  ChatActivitySchema,
   ConfigChangedSchema,
   OBSERVABILITY_METHODS,
   RunMonitorEventSchema,
@@ -25,32 +26,20 @@ import {
   TIMELINE_METHODS,
   TimelineAppendedSchema,
   TimelineRemovedSchema,
+  TimelineCommittedSchema,
+  type ChatActivity,
   type AvatarCommand,
   type ApprovalClosed,
   type CanonicalApprovalRequest,
   type ConfigChanged,
   type RunMonitorEvent,
-  type ErrorCode,
   type JsonRpcClientFrame,
   type TimelineEntry,
   type TimelineRemoved,
+  type TimelineCommitted,
 } from "@taki/shared";
 import type { WsTransport } from "./ws-transport.ts";
-
-/** Streamed-turn callbacks: deltas append into the bubble, complete/error settle it (mirrors the CLI's ChatHandlers). */
-export interface ChatHandlers {
-  // messageId keys the in-flight assistant row (the chat page drops it when its persisted entry arrives, #17).
-  onDelta: (delta: string, messageId: string) => void;
-  onComplete?: () => void;
-  // retracted=true means the turn was cancelled before any reply: the user row is already gone (timeline.removed),
-  // so the caller restores the draft instead of surfacing the message as an error toast (cancel-retract).
-  onError?: (code: ErrorCode, message: string, retracted?: boolean) => void;
-}
-
-interface Turn {
-  handlers: ChatHandlers;
-  finish: () => void;
-}
+import { abortPendingChatTurn, routeChatNotification, type PendingChatTurn } from "./ws-chat-turn.ts";
 
 interface PushSlots {
   avatar: ((command: AvatarCommand) => void) | null;
@@ -59,6 +48,8 @@ interface PushSlots {
   config: Set<(changed: ConfigChanged) => void>;
   approval: Set<(event: ApprovalPushEvent) => void>;
   monitor: Set<(event: RunMonitorEvent) => void>;
+  activity: Set<(event: ChatActivity) => void>;
+  committed: Set<(batch: TimelineCommitted) => void>;
 }
 
 export type ApprovalPushEvent =
@@ -66,12 +57,23 @@ export type ApprovalPushEvent =
   | { type: "closed"; closed: ApprovalClosed };
 
 export interface Routes {
-  current: Turn | null;
+  current: PendingChatTurn | null;
   push: PushSlots;
 }
 
 export function createRoutes(): Routes {
-  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(), approval: new Set(), monitor: new Set() } };
+  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(),
+    approval: new Set(), monitor: new Set(), activity: new Set(), committed: new Set() } };
+}
+
+export function addChatActivityHandler(state: Routes, handler: (event: ChatActivity) => void): () => void {
+  state.push.activity.add(handler);
+  return () => state.push.activity.delete(handler);
+}
+
+export function addTimelineCommittedHandler(state: Routes, handler: (batch: TimelineCommitted) => void): () => void {
+  state.push.committed.add(handler);
+  return () => state.push.committed.delete(handler);
 }
 
 export function addConfigChangedHandler(state: Routes, handler: (changed: ConfigChanged) => void): () => void {
@@ -99,32 +101,26 @@ function clearPushHandlers(state: Routes): void {
   state.push.config.clear();
   state.push.approval.clear();
   state.push.monitor.clear();
+  state.push.activity.clear();
+  state.push.committed.clear();
 }
 
 /** Routes the Core's notifications (chat stream + avatar/timeline/config pushes) to their handlers; each zod-validated. */
 export function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
-  const endTurn = (act: (turn: Turn) => void): void => {
-    const turn = state.current;
-    state.current = null;
-    if (turn) act(turn);
-  };
   rpc.addMethod(CHAT_METHODS.delta, (params: unknown) => {
-    const { delta, messageId } = ChatDeltaSchema.parse(params);
-    state.current?.handlers.onDelta(delta, messageId);
+    routeChatNotification(state, { kind: "delta", value: ChatDeltaSchema.parse(params) });
   });
   rpc.addMethod(CHAT_METHODS.complete, (params: unknown) => {
-    ChatCompleteSchema.parse(params);
-    endTurn((turn) => {
-      turn.handlers.onComplete?.();
-      turn.finish();
-    });
+    routeChatNotification(state, { kind: "complete", value: ChatCompleteSchema.parse(params) });
   });
   rpc.addMethod(CHAT_METHODS.error, (params: unknown) => {
-    const { code, message, retracted } = ChatErrorSchema.parse(params);
-    endTurn((turn) => {
-      turn.handlers.onError?.(code, message, retracted);
-      turn.finish();
-    });
+    routeChatNotification(state, { kind: "error", value: ChatErrorSchema.parse(params) });
+  });
+  rpc.addMethod(CHAT_METHODS.activity, (params: unknown) => {
+    publishHandlers(state.push.activity, ChatActivitySchema.parse(params));
+  });
+  rpc.addMethod(TIMELINE_METHODS.committed, (params: unknown) => {
+    publishHandlers(state.push.committed, TimelineCommittedSchema.parse(params));
   });
   // Fire-and-forget pushes: a missing handler is harmless (closing a client window must not break a turn, invariant 4).
   rpc.addMethod(AVATAR_METHODS.command, (params: unknown) => {
@@ -150,6 +146,12 @@ export function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void 
     notifyMonitorHandlers(state, RunMonitorEventSchema.parse(params));
   });
   installApprovalRoutes(rpc, state);
+}
+
+function publishHandlers<T>(handlers: Set<(value: T) => void>, value: T): void {
+  for (const handler of [...handlers]) {
+    try { handler(value); } catch { console.warn("[ws-client] activity/timeline handler failed"); }
+  }
 }
 
 function installApprovalRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
@@ -181,11 +183,7 @@ export const CONNECTION_LOST_MESSAGE = "连接已断开，本轮回复中断";
  * the caller's await resolves and its isSending clears — a silently pending turn wedges the composer until reload.
  */
 export function abortTurn(state: Routes, message: string): void {
-  const turn = state.current;
-  state.current = null;
-  if (!turn) return;
-  turn.handlers.onError?.("INTERNAL_ERROR", message);
-  turn.finish();
+  abortPendingChatTurn(state, message);
 }
 
 /** null = not a valid client frame; the caller drops it (never a silent swallow that corrupts routing). */

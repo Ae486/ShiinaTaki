@@ -6,14 +6,14 @@
 
 import type { TimelineEntry } from "@taki/shared";
 
-export interface DateGroup {
+export interface DateGroup<Entry = TimelineEntry> {
   /** Local calendar day (YYYY-MM-DD) — a stable, timezone-correct divider key/label. */
   dateKey: string;
-  entries: TimelineEntry[];
+  entries: Entry[];
 }
 
 // The LOCAL calendar day of an ISO timestamp — the date-divider boundary the user actually reads (not UTC).
-function localDateKey(createdAt: string): string {
+export function localDateKey(createdAt: string): string {
   const date = new Date(createdAt);
   const month = `${date.getMonth() + 1}`.padStart(2, "0");
   const day = `${date.getDate()}`.padStart(2, "0");
@@ -21,8 +21,8 @@ function localDateKey(createdAt: string): string {
 }
 
 /** Groups CONSECUTIVE entries by local day; correct because the input is already chronological (append-only seq). */
-export function groupByLocalDate(entries: TimelineEntry[]): DateGroup[] {
-  const groups: DateGroup[] = [];
+export function groupByLocalDate<Entry extends { createdAt: string }>(entries: Entry[]): DateGroup<Entry>[] {
+  const groups: DateGroup<Entry>[] = [];
   for (const entry of entries) {
     const dateKey = localDateKey(entry.createdAt);
     const last = groups.at(-1);

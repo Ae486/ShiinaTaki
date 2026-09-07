@@ -1,6 +1,6 @@
 /**
  * INPUT:  chat/attachment input, SDK models, ConversationStore, Memory hooks, and captured Run/extension bindings
- * OUTPUT: text streaming, full-turn persistence, captured names, and immutable per-attempt invocation observation
+ * OUTPUT: ordered live activity, text compatibility streaming, and atomic full-turn persistence after either ending
  * POS:    core/agents — the existing ToolLoopAgent boundary; owns abort/retract and one context-overflow retry,
  *         preserving day-stable instructions, volatile message-tail context, and detached memory writes
  */
@@ -20,9 +20,11 @@ import { fireUsageReport, type TurnUsageReport } from "./turn-usage-report.ts";
 import { estimateMessagesTokens, estimateTokens } from "../memory/token-estimator.ts";
 import type { RequestMeasurement } from "./request-measurement.ts";
 import { measurePostTurnRequest, prepareOutgoingRequest, type RequestPreparationDeps } from "./request-preparation.ts";
-import type { TurnMessage, UserImageInput } from "./turn-mapping.ts";
+import type { UserImageInput } from "./turn-mapping.ts";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { createRunObservabilityModel, type ToolEffectObserver } from "./run-observability-telemetry.ts";
+import type { ChatActivityAttempt, ChatTurnActivity } from "./chat-activity.ts";
+import { createTurnRecording, type TurnRecording } from "./turn-recording.ts";
 
 /** Per-turn execution handle. Primary chat supplies a WS connection; unattended non-primary Runs omit it. */
 export interface TurnContext {
@@ -45,6 +47,8 @@ export interface TurnContext {
   /** Records a new durable Attempt immediately before the one supported overflow retry. */
   onRetry?: (reason: string) => boolean;
   toolObserver?: ToolEffectObserver;
+  /** Disposable foreground presentation; the accepted send identity and terminal notification are server-owned. */
+  activity?: ChatTurnActivity;
 }
 
 export interface ChatAgent {
@@ -163,6 +167,9 @@ interface AttemptState {
   instructions: string;
   outgoing: ModelMessage[];
   stepEnded: boolean;
+  recording: TurnRecording;
+  activity?: ChatActivityAttempt;
+  afterCommit?: () => void;
 }
 
 async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: TurnContext): AsyncIterable<string> {
@@ -186,46 +193,66 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   const ownsRunContext = turn?.runContext === undefined;
   const base = { characterId, message, attachments, images, vision, userSeq: userEntry?.seq, primary, runContext,
     toolDisplayNames: captureToolDisplayNames(runContext?.toolDisplayNames) };
-  // R2 retry seam (batch 6): ONE overflow-classified retry around the whole attempt. Retry ONLY when the failed
-  // attempt was provably side-effect-free — zero text yielded (nothing user-visible lost) AND zero completed steps
-  // (no tool can have acted; re-running the model after a completed tool step could act twice — the error-handling
-  // spec's never-blind-retry rule). Unrecognized errors and second failures propagate as today (fail-open), and an
-  // absent onOverflow seam disables the retry entirely (nothing would have recalibrated the window). NEVER any
-  // compaction/summarization here — batch 7 owns that (R2).
   try {
-    for (let attempt = 0; ; attempt += 1) {
-      const state: AttemptState = { instructions: "", outgoing: [], stepEnded: false };
-      let yielded = false;
-      try {
-        for await (const delta of runAttempt(deps, { ...base, state }, turn)) {
-          yielded = true;
-          yield delta;
-        }
-        return;
-      } catch (error) {
-        const onOverflow = deps.onOverflow;
-        const clean = !yielded && !state.stepEnded;
-        if (attempt > 0 || !clean || onOverflow === undefined || !isContextOverflowError(error)) throw error;
-        if (turn?.onRetry?.("context_overflow") === false) throw error;
-        // Observed = the provider-reported request size when the body names one, else our own estimate of the SAME
-        // request (computed only here, off every hot path). The calibrator persists the shrunken window, so the
-        // retry's fresh history() pull re-windows through the store's budget closure.
-        onOverflow(observedTokensOf(error) ?? estimateTokens(state.instructions) + estimateMessagesTokens(state.outgoing));
-      }
-    }
+    yield* executeAttempts(deps, base, turn);
   } finally {
     if (ownsRunContext) runContext?.dispose?.();
   }
 }
 
-// ONE model attempt — request composition, streaming, persistence, retract, detached fires — extracted so the R2
-// retry can re-run it under the recalibrated window (batch-6 design §3.1's named-fn relief; the machinery below is
-// the pre-batch-6 runTurn body, moved verbatim). The fresh per-attempt history() pull is the point: the retry's
-// window is computed under the budget the calibrator just shrank.
+async function* executeAttempts(deps: ChatAgentDeps, base: Omit<TurnAttempt, "state">, turn?: TurnContext): AsyncIterable<string> {
+  for (let ordinal = 0; ; ordinal += 1) {
+    const state: AttemptState = { instructions: "", outgoing: [], stepEnded: false, recording: createTurnRecording() };
+    let yielded = false;
+    let failure: { error: unknown } | undefined;
+    let retrying = false;
+    let retracted = false;
+    try {
+      try {
+        for await (const delta of runAttempt(deps, { ...base, state }, turn)) { yielded = true; yield delta; }
+      } catch (error) {
+        const clean = !yielded && !state.stepEnded;
+        if (ordinal === 0 && clean && deps.onOverflow && isContextOverflowError(error)
+          && turn?.onRetry?.("context_overflow") !== false) {
+          deps.onOverflow(observedTokensOf(error) ?? estimateTokens(state.instructions) + estimateMessagesTokens(state.outgoing));
+          retrying = true;
+          continue;
+        }
+        failure = { error };
+      }
+    } finally {
+      state.activity?.close(turn?.signal?.aborted ?? false);
+      // Includes iterator.return(): delivered partial text survives even when a direct consumer stops reading.
+      // A failed transaction is outside the stream catch and therefore cannot retry or append a second batch.
+      if (!retrying) retracted = finishRecordedTurn(deps.store, { ...base, state }, turn);
+    }
+    if (retracted) return;
+    if (failure) throw failure.error;
+    state.afterCommit?.();
+    return;
+  }
+}
+
+function finishRecordedTurn(store: ConversationStore, attempt: TurnAttempt, turn?: TurnContext): boolean {
+  if (!attempt.primary) return false;
+  const { recording, activity } = attempt.state;
+  const retract = (turn?.signal?.aborted ?? false) && !recording.hasProduced() && attempt.userSeq !== undefined;
+  if (retract && attempt.userSeq !== undefined) {
+    store.removeEntry(attempt.characterId, attempt.userSeq);
+    turn?.onRetract?.();
+  }
+  recording.commit({ store, characterId: attempt.characterId, toolDisplayNames: attempt.toolDisplayNames,
+    activity: turn?.activity, attempt: activity });
+  return retract;
+}
+
+// Each attempt rebuilds the calibrated Replay View and captures actual SDK material. The outer turn alone decides
+// retry/retraction and commits the captured batch before detached maintenance sees the updated relationship history.
 // eslint-disable-next-line max-lines-per-function
 async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): AsyncIterable<string> {
   const { store, approval } = deps;
-  const { characterId, message, attachments, images, vision, userSeq, primary, state } = attempt;
+  const { characterId, message, attachments, images, vision, primary, state } = attempt;
+  state.activity = turn?.activity?.beginAttempt(turn.attemptId);
   const controlMessage = turn?.controlInput ?? message; const replay = store.project(characterId); const history = replay.messages;
   // ONE clock read per attempt: the instructions' day line and the tail's time line must agree (Q4).
   const now = Date.now();
@@ -234,6 +261,7 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   const { model, observability } = createRunObservabilityModel({
     model: selectedModel, lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId,
     toolDisplayNames: attempt.toolDisplayNames,
+    activity: state.activity?.observer,
   });
   if (turn && observability) turn.toolObserver = observability.tools;
   const tools = assembleTurnTools(deps, attempt, turn); const toolOrder = Object.keys(tools).sort((left, right) => left < right ? -1 : left > right ? 1 : 0);
@@ -250,10 +278,11 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
     // Compatibility seam for focused tests and pre-Slice-3 callers. Production Batch 1 leaves this absent because
     // MCP execution is already guarded by its canonical adapter and `ask` fails closed before the raw closure.
     toolApproval: approval ? ({ toolCall }) => approval.decide(toolCall, turn?.notify) : undefined,
-    // A completed step disqualifies the R2 retry (see runTurn's seam comment); construction-level on purpose so the
-    // frozen stream loop body below stays byte-identical (`onStepFinish` is this callback's deprecated alias).
-    onStepEnd: () => {
+    // Capture each completed step before a later request can fail and reject the aggregate response promise.
+    // The same completed-step fact preserves the existing prohibition on retrying completed tool effects.
+    onStepEnd: (event) => {
       state.stepEnded = true;
+      state.recording.capture(event.stepNumber, event.response.messages);
     },
   });
   // THREE additive seams ride ONLY this turn's outgoing copy of the last user row (the D1-frozen turn is otherwise
@@ -273,45 +302,24 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   // Exposed for the R2 estimate fallback — read only on the retry path, never on the hot path.
   state.instructions = instructions;
   state.outgoing = outgoing;
-  // abortSignal is per-call by SDK design (not a constructor setting). A cancel ends the stream by EITHER a graceful
-  // `abort` part or a THROWN reason (see retractIfCancelledSilent) — the retract seam below handles both endings.
+  // abortSignal is per-call by SDK design. The outer capture/commit finally covers graceful abort and thrown reasons.
   const result = await agent.stream({ messages: outgoing, abortSignal: turn?.signal });
 
-  // finish-step clears in-flight text once that step is present in responseMessages, avoiding duplicate persistence.
-  let pendingStepText = ""; let streamEnded = false;
-  try {
-    try {
-      // Iterate result.stream (not textStream) so a provider failure surfaces as an error part rather than being
-      // swallowed. Tool/approval/abort parts flow by here — the assembled turn is persisted from responseMessages.
-      for await (const part of result.stream) {
-        observability?.observeStreamPart(part);
-        if (part.type === "text-delta") {
-          pendingStepText += part.text;
-          yield part.text;
-        } else if (part.type === "finish-step") {
-          pendingStepText = "";
-        } else if (part.type === "error") {
-          throw part.error;
-        }
-      }
-      observability?.assertHealthy(); streamEnded = true;
-    } finally {
-      // Persist whatever the turn produced — completed steps AND partial text — even on abort/error (D1 #1/#5).
-      if (primary) await persistTurn(store, characterId, {
-        result, pendingStepText, streamEnded, toolDisplayNames: attempt.toolDisplayNames,
-      });
-    }
-  } catch (error) {
-    // Throw ending of a cancel: the transport rejects the read with our string reason (fails isAbortError), so the
-    // SDK errors the stream — same retract rule as the graceful ending (see retractIfCancelledSilent); else propagate.
-    if (primary && userSeq !== undefined && await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
-    throw error;
+  // The public stream owns presentation order. Completed steps were captured independently before a later throw.
+  for await (const part of result.stream) {
+    state.recording.observe(part);
+    observability?.observeStreamPart(part);
+    if (observability) state.activity?.observe(part, observability.invocations);
+    if (part.type === "text-delta") yield part.text;
+    else if (part.type === "error") throw part.error;
   }
-  // Graceful ending (the SDK emitted an `abort` part then closed): the same retract check on the clean path.
-  if (primary && userSeq !== undefined && await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
-  if (primary) measurePostTurnRequest(deps, { characterId, instructions, tools, toolOrder, toolSchemaTokens: prepared.toolSchemaTokens, store });
-  if (primary) fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
-  if (primary) fireUsageReport(deps, { characterId, usage: result.usage, instructions, outgoing, tools, toolOrder, preparedTools, replay: replay.measurement });
+  observability?.assertHealthy();
+  state.afterCommit = () => {
+    if (!primary) return;
+    measurePostTurnRequest(deps, { characterId, instructions, tools, toolOrder, toolSchemaTokens: prepared.toolSchemaTokens, store });
+    fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
+    fireUsageReport(deps, { characterId, usage: result.usage, instructions, outgoing, tools, toolOrder, preparedTools, replay: replay.measurement });
+  };
 }
 
 function assembleTurnTools(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): ToolSet {
@@ -353,29 +361,6 @@ function fireDetachedTurnWrites(deps: ChatAgentDeps, ctx: { characterId: string;
   }
 }
 
-interface RetractInput {
-  characterId: string;
-  userSeq: number;
-  result: { responseMessages: PromiseLike<TurnMessage[]> };
-  pendingStepText: string;
-  turn?: TurnContext;
-}
-
-// The cancel-before-reply retract, ENDING-AGNOSTIC. A cancel reaches runTurn's post-loop code by either SDK ending:
-// (a) GRACEFUL — the model read resolves (or rejects with an AbortError-shaped error) and the SDK emits an `abort`
-// stream part then closes; (b) THROW — the transport rejects the read with our PLAIN-STRING abort reason, which
-// fails provider-utils `isAbortError` (an Error/DOMException named AbortError/ResponseAborted/TimeoutError), so the
-// SDK errors the stream and the for-await throws the reason. In BOTH, "produced nothing" == aborted with no completed
-// step (responseMessages settles to [] / rejects — verified it does NOT hang after the error ending) and no partial
-// text. On retract: delete exactly the appended user row (DB + timeline.removed) and signal the pump to restore the
-// draft; the message never enters memory. Attachments are NOT restored client-side (bytes stay until TTL GC).
-async function retractIfCancelledSilent(store: ConversationStore, input: RetractInput): Promise<boolean> {
-  if (!(input.turn?.signal?.aborted ?? false) || input.pendingStepText.length > 0) return false;
-  if ((await Promise.resolve(input.result.responseMessages).then((m) => m.length, () => 0)) !== 0) return false;
-  store.removeEntry(input.characterId, input.userSeq);
-  input.turn?.onRetract?.();
-  return true;
-}
 
 // Image turns need BOTH the vision slot and the attachment store; a turn with images but either missing is rejected
 // (the guard). Returns the narrowed non-optional pair so the save + model-pick sites carry no `undefined` (decision 5).
@@ -426,29 +411,6 @@ function buildMultimodalUser(text: string, attachments: ImageAttachment[]): Mode
   return { role: "user", content: text.length > 0 ? [{ type: "text" as const, text }, ...fileParts] : fileParts };
 }
 
-interface TurnOutcome {
-  result: { responseMessages: PromiseLike<TurnMessage[]> };
-  pendingStepText: string;
-  streamEnded: boolean;
-  toolDisplayNames?: Readonly<Record<string, string>>;
-}
-
-// On a clean end (including a graceful abort) the stream was fully consumed, so responseMessages settles: it
-// resolves with every COMPLETED step's messages, or rejects when none completed (abort during step 0). After a
-// THROWN error the loop exited early — the pipeline may never flush its promises, so they are not awaited.
-async function persistTurn(store: ConversationStore, characterId: string, outcome: TurnOutcome): Promise<void> {
-  if (outcome.streamEnded) {
-    const completed = await Promise.resolve(outcome.result.responseMessages).then(
-      (messages) => messages,
-      () => [] as TurnMessage[],
-    );
-    if (completed.length > 0) store.appendTurn(characterId, completed, outcome.toolDisplayNames);
-  }
-  // The interrupted step's partial text exists only in our accumulator (the SDK never finalizes that step); the
-  // transcript must never lose what the user already saw — on abort AND on a thrown mid-stream error (D1 #5).
-  // A clean completion cleared it at the final finish-step, so this only fires for interrupted turns.
-  if (outcome.pendingStepText.length > 0) store.appendAssistant(characterId, outcome.pendingStepText);
-}
 
 // Instructions = the stable base prompt (identity + the "never claim a tool ran without a tool-result" floor, D1 #2),
 // the day-date line (byte-stable for a calendar day), the assembled memory context, then any extra section (skills

@@ -25,6 +25,7 @@ function pagingRepo(rows: TimelineEntry[], calls: { count: number }): TimelineRe
       return { entries, nextBefore: eligible.length > limit ? entries.at(-1)?.seq ?? null : null };
     },
     append: () => { throw new Error("unused"); },
+    appendBatch: () => { throw new Error("unused"); },
     deleteEntry: () => undefined,
     latestAscending: () => [],
     latestSeq: () => 0,

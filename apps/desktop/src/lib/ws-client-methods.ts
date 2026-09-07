@@ -21,6 +21,7 @@ import {
   CharacterImportResultSchema,
   CharacterListResultSchema,
   ChatCancelResultSchema,
+  ChatActivityReadResultSchema,
   ConfigListResultSchema,
   ConfigSetResultSchema,
   ConfigSubscribeResultSchema,
@@ -201,8 +202,10 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
   let configSubscription: Promise<void> | null = null;
   return {
     ...avatarMethods(request),
-    chatCancel: async (characterId: string) =>
-      ChatCancelResultSchema.parse(await request(CHAT_METHODS.cancel, { characterId })).cancelled,
+    chatCancel: async (characterId: string, runId?: string) =>
+      ChatCancelResultSchema.parse(await request(CHAT_METHODS.cancel, { characterId, ...(runId ? { runId } : {}) })).cancelled,
+    chatActivityRead: async (characterId: string) =>
+      ChatActivityReadResultSchema.parse(await request(CHAT_METHODS.activityRead, { characterId })),
     timelineHistory: async (params: TimelineHistoryParams) =>
       TimelineHistoryResultSchema.parse(await request(TIMELINE_METHODS.history, params)),
     subscribeTimeline: async (characterId: string) => void (await request(TIMELINE_METHODS.subscribe, { characterId })),

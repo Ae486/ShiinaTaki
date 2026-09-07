@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bubbleSubmission } from "./chat-bubble.tsx";
+import { bubbleSubmission } from "./use-bubble-form.ts";
 
 describe("pet bubble submission readiness", () => {
   it("keeps a reconnect-time draft local by refusing to produce a submitted message", () => {

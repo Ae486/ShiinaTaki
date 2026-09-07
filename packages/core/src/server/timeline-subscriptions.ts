@@ -1,15 +1,17 @@
 /**
- * INPUT:  subscribe/unsubscribe(characterId, connection, sink) + publish(entry)/publishRemoved(ref) from the store's onAppend/onRemove
- * OUTPUT: createTimelineSubscriptions() -> { subscribe, unsubscribe, publish, publishRemoved, count }; characterId→connection→sink
- * POS:    core/server — the timeline.appended/removed fan-out registry (invariant 7); disconnect cleanup driven by ctx.onClose
+ * INPUT:  authenticated Character subscriptions and committed Timeline / disposable activity facts
+ * OUTPUT: isolated fan-out with one initiator delivery and connection-scoped cleanup
+ * POS:    core/server — the existing Character subscription registry; no new socket or execution authority
  */
-import type { TimelineEntry, TimelineRemoved } from "@taki/shared";
+import type { ChatActivity, TimelineCommitted, TimelineEntry, TimelineRemoved } from "@taki/shared";
 import type { Connection } from "./connection-registry.ts";
 
 /** One subscriber's two push handlers: an appended entry and a retract (removed) ref — the sibling of onAppend/onRemove. */
 export interface TimelineSink {
   appended(entry: TimelineEntry): void;
   removed(ref: TimelineRemoved): void;
+  committed?(batch: TimelineCommitted): void;
+  activity?(event: ChatActivity): void;
 }
 
 export interface TimelineSubscriptions {
@@ -19,6 +21,8 @@ export interface TimelineSubscriptions {
   publish(entry: TimelineEntry): void;
   /** Fans a retract (removed) ref out to every connection subscribed to its character. */
   publishRemoved(ref: TimelineRemoved): void;
+  publishCommitted(batch: TimelineCommitted): void;
+  publishActivity(event: ChatActivity, initiator?: { connection: Connection; notify(event: ChatActivity): void }): void;
   count(characterId: string): number;
 }
 
@@ -44,15 +48,28 @@ export function createTimelineSubscriptions(): TimelineSubscriptions {
     publish(entry) {
       const sinks = byCharacter.get(entry.characterId);
       if (!sinks) return;
-      for (const sink of sinks.values()) sink.appended(entry);
+      for (const sink of sinks.values()) publish(() => sink.appended(entry));
     },
     publishRemoved(ref) {
       const sinks = byCharacter.get(ref.characterId);
       if (!sinks) return;
-      for (const sink of sinks.values()) sink.removed(ref);
+      for (const sink of sinks.values()) publish(() => sink.removed(ref));
+    },
+    publishCommitted(batch) {
+      for (const sink of byCharacter.get(batch.characterId)?.values() ?? []) publish(() => sink.committed?.(batch));
+    },
+    publishActivity(event, initiator) {
+      for (const [connection, sink] of byCharacter.get(event.characterId) ?? []) {
+        if (connection !== initiator?.connection) publish(() => sink.activity?.(event));
+      }
+      if (initiator) publish(() => initiator.notify(event));
     },
     count(characterId) {
       return byCharacter.get(characterId)?.size ?? 0;
     },
   };
+}
+
+function publish(notify: () => void): void {
+  try { notify(); } catch { /* A disconnected observer cannot suppress another authorized subscriber. */ }
 }

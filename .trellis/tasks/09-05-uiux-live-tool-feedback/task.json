@@ -3,7 +3,7 @@
   "name": "uiux-live-tool-feedback",
   "title": "Live tool feedback across Chat and Pet",
   "description": "Truthful live Chat tool entries and segmented Pet text/tool bubbles with stable transitions and history reconciliation.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "Foreground Chat/Pet ordered live activity and bounded Character snapshots; exact shared invocation/outcome facts; optional Timeline presentation metadata with atomic batch handoff and preserved canonical replay; segmented CSS-driven Pet continuity. No execution-policy, Hindsight/Memory, D63, D75/D76/D77 or proactive/heartbeat changes.",
   "package": null,
@@ -21,6 +21,6 @@
   "children": [],
   "parent": "08-22-t4-agent-architecture-observability",
   "relatedFiles": [],
-  "notes": "Owner confirmed Chat/Pet requirements and delegated motion design, completion and local commits. Main reviewed the source-backed design and ordered L1-L3 execution plan on 2026-09-06. Reuse the D68 invocation/outcome bridge and A2 captured names. This child stays planning until D64 and D68-B gates pass and main activates it. No personal owner inspection or new paid-service requirement is implied.",
+  "notes": "Owner confirmed Chat/Pet requirements and delegated motion design, completion, engineering window acceptance and checked local commits. Activated 2026-09-07 after D68 commit 1f76ce9 and checked upstream merge 258b35b. L1-L3 and independent review are complete: 127 frozen source/test/index files; Shared 446, Core 2064 plus one existing skip, Desktop 751; all five typechecks, lint and build pass. Final WebView2 15/15 groups pass with exact source/build/CSP verification and cleaned processes. Actual Core ordered/failure/cancel, queue and shutdown regressions pass. Migration 035 is additive and canonical replay is preserved. See implementation-evidence-2026-09-07.md. Main is completing scoped Git/program delivery; personal owner inspection is not claimed, and no push or archival is implied.",
   "meta": {}
 }

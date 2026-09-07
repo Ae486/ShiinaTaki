@@ -76,8 +76,13 @@ describe("secure MCP lifecycle (real core process)", () => {
       // --- a real governed tool call through Approval: standard level asks, the operator allows once ---
       const outcome = triggerCapability(operator, { capability: "e2e_echo", input: { text: "hello" }, interactive: true, timeoutMs: 60_000 });
       const prompt = await awaitApprovalRequest(operator);
-      expect(prompt.presentation.capabilityLabel).toBe("echo");
+      // A1's action label is stable Chinese copy; the exact server and tool remain separate target fields.
+      expect(prompt.presentation.capabilityLabel).toBe("调用 MCP 工具");
       expect(prompt.presentation.subjectLabel).toBe("e2e");
+      expect(prompt.presentation.sections).toEqual([
+        { title: "调用目标", fields: [{ label: "服务器", value: "e2e" }, { label: "工具", value: "echo" }] },
+      ]);
+      expect(prompt.binding.identity.capabilityId).toBe("mcp.tool.call");
       const acknowledged = respondApproval(operator, {
         approvalId: prompt.approvalId,
         choice: "allow_once",

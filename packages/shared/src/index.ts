@@ -37,6 +37,10 @@ export type { ConnectParams, ConnectResult, Role } from "./connect-schema.ts";
 
 export { CHAT_METHODS, ChatCancelParamsSchema, ChatCancelResultSchema, ChatCompleteSchema, ChatDeltaSchema, ChatErrorSchema, ChatSendParamsSchema, ChatSendResultSchema, IMAGE_MEDIA_TYPES, ImageAttachmentSchema, MAX_ATTACHMENTS_PER_MESSAGE } from "./chat-schema.ts";
 export type { ChatCancelParams, ChatCancelResult, ChatComplete, ChatDelta, ChatError, ChatSendParams, ChatSendResult, ImageAttachment } from "./chat-schema.ts";
+export { CHAT_ACTIVITY_MAX_ITEMS, CHAT_ACTIVITY_MAX_TEXT_BYTES, ChatActivitySchema, ChatActivityReadParamsSchema, ChatActivityReadResultSchema, ChatActivityOutcomeSchema, ChatActivityPhaseSchema, ChatActivityMessageSchema, ChatActivityTerminalSchema, ChatActivityToolStatusSchema, ChatActivityTextItemSchema, ChatActivityToolItemSchema, ChatActivityItemSchema, utf8TextBytes, appendedUtf8TextBytes, chatActivityItemTextBytes } from "./chat-activity-schema.ts";
+export type { ChatActivity, ChatActivityReadParams, ChatActivityReadResult, ChatActivityOutcome, ChatActivityPhase, ChatActivityTerminal, ChatActivityIdentity, ChatActivityToolStatus, ChatActivityTextItem, ChatActivityToolItem, ChatActivityItem } from "./chat-activity-schema.ts";
+export { TimelinePresentationSchema, TimelineItemReferenceSchema, TimelineTextReferenceSchema, TimelineToolReferenceSchema, validTimelinePresentation, sanitizeTimelinePresentations } from "./timeline-presentation-schema.ts";
+export type { TimelinePresentation, TimelineItemReference, TimelineTextReference, TimelineToolReference } from "./timeline-presentation-schema.ts";
 
 export {
   RUN_METHODS, RunInitiatorSchema, RunProvenanceSchema, DeliveryClassSchema, ContextModeSchema, RunStateSchema,
@@ -66,8 +70,8 @@ export type {
   QueueState, QueueListParams, QueueEntry, QueueListResult, RecoveryClassification, RecoveryReport,
 } from "./harness-schema.ts";
 
-export { TIMELINE_HISTORY_LIMIT_DEFAULT, TIMELINE_HISTORY_LIMIT_MAX, TIMELINE_METHODS, TimelineAppendedSchema, TimelineEntrySchema, TimelineHistoryParamsSchema, TimelineHistoryResultSchema, TimelinePartSchema, TimelineRemovedSchema, TimelineRoleSchema, TimelineSubscribeParamsSchema, TimelineSubscribeResultSchema, TimelineToolOutputSchema } from "./timeline-schema.ts";
-export type { TimelineAppended, TimelineEntry, TimelineHistoryParams, TimelineHistoryResult, TimelinePart, TimelineRemoved, TimelineRole, TimelineSubscribeParams, TimelineSubscribeResult, TimelineToolOutput } from "./timeline-schema.ts";
+export { TIMELINE_HISTORY_LIMIT_DEFAULT, TIMELINE_HISTORY_LIMIT_MAX, TIMELINE_METHODS, TimelineAppendedSchema, TimelineCommittedSchema, TimelineEntrySchema, TimelineHistoryParamsSchema, TimelineHistoryResultSchema, TimelinePartSchema, TimelineRemovedSchema, TimelineRoleSchema, TimelineSubscribeParamsSchema, TimelineSubscribeResultSchema, TimelineToolOutputSchema } from "./timeline-schema.ts";
+export type { TimelineAppended, TimelineCommitted, TimelineEntry, TimelineHistoryParams, TimelineHistoryResult, TimelinePart, TimelineRemoved, TimelineRole, TimelineSubscribeParams, TimelineSubscribeResult, TimelineToolOutput } from "./timeline-schema.ts";
 
 export { MEMORY_METHODS, MemoryAutoStatusSchema, MemoryStatusParamsSchema, MemoryStatusResultSchema, MemorySummaryStatusSchema, MemoryTidyDefectsSchema, MemoryTidyParamsSchema, MemoryTidyResultSchema, MemoryWindowSlotSchema } from "./memory-schema.ts";
 export type { MemoryAutoStatus, MemoryStatusParams, MemoryStatusResult, MemorySummaryStatus, MemoryTidyDefects, MemoryTidyParams, MemoryTidyResult, MemoryWindowSlot } from "./memory-schema.ts";

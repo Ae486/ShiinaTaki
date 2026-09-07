@@ -1,5 +1,10 @@
 # core/agents/
-- chat-agent.ts — AI SDK v7 ToolLoopAgent with full-turn persistence/cancellation, captured tool presentation, immutable invocation observation, and a non-primary ephemeral-control seam
+- chat-agent.ts — AI SDK v7 ToolLoopAgent with ordered activity, exception-safe atomic turn persistence, existing cancellation/retry and non-primary control boundaries
+- chat-activity.ts — accepted-message ordered producer; callback-before-receipt buffering, immutable invocations and identity-guarded terminalization
+- chat-activity-projection.ts — runtime-owned latest started Character snapshot, incremental item/text budgets, explicit overflow and disposal
+- turn-activity-presentation.ts — stable item links and text spans into canonical step rows without changing replay content
+- turn-recording.ts — per-step completed-message capture and uncovered partial text; callback-before-iterator-close provenance prevents duplicate commits
+- conversation-turn-writer.ts — whole-turn preparation and transaction, followed by isolated legacy append and complete batch publication
 - tool-set-assembly.ts — collision-safe merge of independently governed ToolSet groups; duplicate model-facing keys fail closed instead of choosing authority by spread order
 - base-prompt.ts — BASE_SYSTEM_PROMPT: the stable identity + tool-use + "never claim a tool ran without a tool-result" truthfulness floor (anti-hallucination) + the memory floors (T5-R12/R16-R19: never answer the user's past from impression, OpenClaw-shaped search triggers, one-search + say-you-checked fallback, pin-on-repeat, fix-on-read, supersede-don't-append, deliberate experience writes, card-wins last) + the injected-context contracts a user must not be able to edit away (what an `<untrusted-observation>` block is / trust only these exact tags, what the `<turn-context>` tail is and where the two time lines arrive, what a `<conversation-summary>` head is — her own earlier record, never recited, memory store wins on disagreement — batch 7, anti-recitation); prepended before memory context — behavior norms for the same surfaces live in prompt/system/assistant-layer.md
 - compaction-pass.ts — reviewed companion-summary prompt plus compatibility factory for the durable Compaction Coordinator
@@ -13,7 +18,7 @@
 - replay-source-loader.ts — pages durable Timeline rows beyond the legacy 200-row view until token candidates are sufficient, a nearby summary bridge is reached, or history ends; a documented 10,000-row emergency ceiling emits an explicit degraded-source fact
 - request-measurement.ts — provider-neutral complete request-envelope decomposition (assembled instructions/messages, Replay/history/summary/fold savings, prepared tool schemas, cache-read pressure, response reserve); no fabricated usage/cache values
 - turn-usage-report.ts — detached committed-turn usage reporting; combines authoritative provider usage with request measurement for calibration without adding chat latency
-- conversation-store.ts — SQLite-backed conversation store with one `project()` computation shared by history/windowStart/pressure measurement; measured Replay View uses the paged source loader, summary substitution, folds and balanced token selection; legacy no-budget mode retains the 200-row compatibility window
+- conversation-store.ts — atomic conversational writer and one unchanged `project()` computation for history/windowStart/pressure, with canonical paging/summary/fold/selection behavior
 - overflow-error.ts — R2's pure overflow classifier: isContextOverflowError (APICallError + 4xx/absent status + sourced context-length phrase family; unrecognized fails open — no retry) + observedTokensOf (the failing request's provider-reported token count, never the advertised maximum)
 - replay-folds.ts — foldUnderPressure(entries, budget) -> { entries, estimatedTokens }: T5-R4's pure under-pressure folds inside the replay view (ADR 0008 idempotent projection; copies only, stored rows untouched) — stage a snapshot-class results (Q5 capturedAt marker) beyond the newest 3 per toolName, stage b fact-class results oldest-first, stage c tool-call args over the ~200-char floor; Hermes-style one-line traces; under budget = zero folds
 - turn-mapping.ts — privacy boundary between live AI SDK messages and TimelineEntry: tool calls persist/replay by name and call id only with empty replay inputs; raw arguments never enter timeline rows or reconstructed history; image parts replay as text projection
@@ -24,7 +29,7 @@
 - window-calibrator.ts — createWindowCalibrator({repo, slot, declared}): R1 tier-2 EMA correction factor over the estimator (clamped) + R2 overflow shrink (floor(observed×0.9), never above declared), persisted via window-state-repo; a lowered declaration is written back so runtime and operator status agree while an earlier overflow shrink survives; effectiveWindow() returns the estimator-unit budget
 - model-effect-middleware.ts — model Effect lifecycle and exact request/first-output/tool-call observation before provider parts leave the middleware
 - model-observability.ts — Effect-keyed per-request telemetry and unique unfinished SDK-end association; ambiguous generations never overwrite a request
-- run-observability-telemetry.ts — per-attempt AI SDK composition with authoritative usage/timing settlement, captured names, invocation bridge, and observer isolation
-- tool-invocation.ts — immutable IDs/name-only invocation snapshots and SDK-object WeakMap bridge shared by stream, telemetry, and later feedback consumers
-- tool-observability.ts — exactly-once received/settled tool observations with pre-conversion outcomes, preliminary exclusion, and measured wrapper-processing timing
+- run-observability-telemetry.ts — per-attempt SDK composition sharing immutable invocations with optional activity; legacy callers gain no invented Run/Effect
+- tool-invocation.ts — immutable IDs/name-only snapshots and SDK-object bridge; real optional Run lineage, exact request identity and conservative ambiguity
+- tool-observability.ts — isolated durable/activity callbacks with pre-conversion outcomes, preliminary exclusion, measured processing and confirmed governed phases
 - tool-outcome.ts — shared pre-model-conversion outcome classifier with closed diagnostic codes, nested Memory uncertainty/cancellation, MCP failure, and preliminary-result exclusion

@@ -2,12 +2,13 @@
 - connect.ts — the only pre-auth method: token/pairing/loopback authentication and offered operator-display support echo on every success path
 - host-catalog-publish.ts — host.catalogPublish (node-only): provenance-bound complete publication with fail-closed retirement for rejected current-generation candidates
 - extension-status.ts — operator-only extension.status convergence projection over current Host/Skill/MCP owner generations
-- chat-send.ts — chat.send (operator-only): durably admit and ack { messageId, runId }, then stream chat.delta/.complete/.error; turns serialize per characterId, settle the Run, and preserve cancel-before-reply retraction
+- chat-send.ts — durable send admission/ack, queue-owner activity replacement plus legacy stream settlement, exact captured observer wiring and unchanged initiator cancellation
+- chat-activity-read.ts — operator-only Character recovery snapshot; read-only, complete or explicitly unavailable, with no execution/replay path
 - chat-cancel.ts — chat.cancel (operator-only): legacy character-only active-turn abort plus optional exact runId durable cancellation for queued work; idempotent ({cancelled:false} when absent/mismatched)
 - run-status.ts — run.status (operator-only): bounded Run/Attempt/Receipt status by durable runId
 - scheduled-task-methods.ts — operator-only Scheduled Task list/create/update/pause/resume/delete registration seam
 - timeline-history.ts — timeline.history (operator-only): newest-first cursor page of the conversation timeline
-- timeline-subscribe.ts — timeline.subscribe (operator-only): register a timeline.appended/removed sink; auto-unsubscribe on disconnect
+- timeline-subscribe.ts — operator-only Character append/remove/commit/activity subscription; observing disconnect retires only that subscription
 - avatar-subscribe.ts — avatar.subscribe (operator-only): register an avatar.command sink; auto-unsubscribe on disconnect
 - avatar-report.ts — avatar.report (operator-only): record the Pet UI's loaded-model motion/expression names (+ the worn costume id for 1f change-detection) into the vocabulary store
 - media-get.ts — media.get (operator-only): serve one attachment's bytes for scroll-back; thin delegation to attachment-store.read (ref confinement single-sourced there)

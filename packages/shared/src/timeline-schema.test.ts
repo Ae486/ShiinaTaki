@@ -21,12 +21,13 @@ const entry = {
 };
 
 describe("TIMELINE_METHODS", () => {
-  it("names the four timeline methods", () => {
+  it("names the compatible timeline methods and complete batch notification", () => {
     expect(TIMELINE_METHODS).toEqual({
       history: "timeline.history",
       subscribe: "timeline.subscribe",
       appended: "timeline.appended",
       removed: "timeline.removed",
+      committed: "timeline.committed",
     });
   });
 });

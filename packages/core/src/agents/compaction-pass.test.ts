@@ -336,6 +336,27 @@ describe("compaction sequencing (row 8 — flush first, success-only advance, re
 });
 
 describe("durable compaction coordination (Slice 3)", () => {
+  it("keeps replay and v1 Compaction identities byte-equivalent when only Timeline presentation changes", async () => {
+    const f = fixture({ model: generatingModel("") as LanguageModel });
+    seedToolSource(f);
+    const store = createConversationStore({ repo: f.timeline });
+    const replay = JSON.stringify(store.history("taki"));
+    await f.pass.maybeRun("taki");
+    const identities = f.db.prepare("SELECT operation_id,source_digest FROM conversation_compaction_operations").all();
+    for (const [entryIndex, seq] of [2, 3].entries()) {
+      f.db.prepare("UPDATE timeline_messages SET presentation=:presentation WHERE seq=:seq").run({ seq,
+        presentation: JSON.stringify({ schemaVersion: "timeline-presentation.v1", messageId: "display-only",
+          entryIndex, entryCount: 2, activitySeq: 7, references: [
+            { kind: "tool", itemId: "immutable-invocation", order: 0, partIndex: 0, outcome: "outcome_unknown", message: "结果未确认" },
+          ] }),
+      });
+    }
+    expect(f.timeline.rangeAscending("taki", 1, 3).every((entry) => entry.presentation?.messageId === "display-only")).toBe(true);
+    expect(JSON.stringify(store.history("taki"))).toBe(replay);
+    await f.pass.maybeRun("taki");
+    expect(f.db.prepare("SELECT operation_id,source_digest FROM conversation_compaction_operations").all()).toEqual(identities);
+  });
+
   it("keeps v1 source and operation identities unchanged by tool display names", async () => {
     // Empty output leaves the same retiring range available for another attempt without advancing the summary.
     const f = fixture({ model: generatingModel("") as LanguageModel });

@@ -289,6 +289,23 @@ describe("startWsServer pre-auth gate + pairing handshake", () => {
 });
 
 describe("startWsServer chat.send streaming (authenticated)", () => {
+  it("drains every accepted connection cleanup before close resolves", async () => {
+    const harness = await boot(streamingMockModel([]));
+    await pair(harness, OPERATOR_ID, "operator");
+    await pair(harness, NODE_ID, "operator");
+    const removed = vi.fn();
+    harness.connections.onRemove(removed);
+    expect(harness.connections.list()).toHaveLength(2);
+
+    // Keep both peers open. The owned HTTP listener may close before their WS close events; callers must still be
+    // able to release shared storage immediately after this promise, with no later registered connection cleanup.
+    const server = servers.pop();
+    if (!server) throw new Error("missing test server");
+    await server.close();
+    expect(harness.connections.list()).toHaveLength(0);
+    expect(removed).toHaveBeenCalledTimes(2);
+  });
+
   it("acks, then streams deltas, then completes — in order, all carrying characterId", async () => {
     const harness = await boot(streamingMockModel(["Hel", "lo ", "you"]));
     const { client } = await pair(harness, OPERATOR_ID, "operator");

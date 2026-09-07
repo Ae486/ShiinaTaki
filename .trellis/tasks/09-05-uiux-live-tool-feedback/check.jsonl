@@ -16,3 +16,9 @@
 {"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "Generation-safe subscribe/read restoration, hidden-page behavior and reading anchors."}
 {"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "Keep D64 negotiation and per-generation request/restoration/teardown behavior."}
 {"file": ".trellis/tasks/09-05-uiux-live-tool-feedback/research/upstream-sync-preflight-2026-09-06.md", "reason": "Verify upstream Memory compatibility, closed D68 outcome classification and migration numbering on the merged T4 baseline."}
+{"file": ".trellis/tasks/09-05-uiux-live-tool-feedback/research/upstream-sync-evidence-2026-09-07.md", "reason": "Distinguish verified merge baseline from new Chat/Pet behavior and preserve incoming Memory contracts."}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "Require accepted connection cleanup before Core storage release and natural native-I/O exit; review the new real-process regression."}
+{"file": ".trellis/spec/backend/e2e-harness.md", "reason": "Preserve isolated local-provider lifecycle tests, test-only signal delivery and truthful graceful-exit proof."}
+{"file": ".trellis/tasks/09-05-uiux-live-tool-feedback/research/core-shutdown-evidence-2026-09-07.md", "reason": "Root-owned native repair: reproduced forced-exit Windows assertion plus WS cleanup after closed DB; both fixed and covered by real-process tests."}
+{"file": ".trellis/spec/backend/foreground-chat-activity.md", "reason": "Executable L1-L3 producer, snapshot, optional metadata and complete-batch contract; source-backed refinement of the approved design."}
+{"file": ".trellis/spec/frontend/foreground-chat-feedback.md", "reason": "Confirmed Chat/Pet ordered rendering, generation-safe recovery, stable handoff and continuous occupied-space motion contract."}

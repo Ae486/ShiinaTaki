@@ -25,6 +25,10 @@
   idempotent reads when client identity changes; they never retain a closed client or replay a mutation.
 - D59/D61 timing policy is window-owned, in-memory, and last-good across client generations. Core config is the only
   persisted authority; see `operator-connection-recovery.md`.
+- Foreground Chat/Pet activity uses the shared generation/Character recovery adapter and feature-local disposable
+  views. Keep initiating request acknowledgement/draft state separate from observed activity, and commit complete
+  Timeline batches atomically. Presence/layout state cannot authorize a retry or cancellation. See
+  [Foreground Chat Feedback](foreground-chat-feedback.md); none of this content enters a persisted cache.
 - Permission policy is more restrictive than an ordinary cached read: it refetches from Core for every replacement
   Home client, ignores retired-client results, serializes mutations, and never enters `useCachedFetch`, the persistence
   allow-list, Zustand persistence, or `localStorage`. A stale mutation refetches after `POLICY_CONFLICT`; a timeout or

@@ -143,6 +143,19 @@ describe("chat timeline store", () => {
     expect(useChatTimelineStore.getState().entries.map((value) => value.seq)).toEqual([1]);
   });
 
+  it("keeps a disjoint reconnect gap reachable when the old history cursor was exhausted", () => {
+    const store = useChatTimelineStore.getState();
+    store.mergeHistory({ entries: [entry(1, "user", "old")], nextBefore: null });
+    store.reconcileLatest({
+      page: { entries: [entry(10, "assistant", "new"), entry(9, "user", "new question")], nextBefore: 9 },
+      baseline: { seqs: new Set([1]), loaded: true, nextBefore: null }, removedDuringRestore: new Set(),
+    });
+    expect(useChatTimelineStore.getState().nextBefore).toBe(9);
+    store.prependOlder({ entries: Array.from({ length: 7 }, (_, index) => entry(8 - index, "assistant", "missed")), nextBefore: null });
+    expect(useChatTimelineStore.getState().entries.map((row) => row.seq)).toEqual(Array.from({ length: 10 }, (_, index) => index + 1));
+    expect(useChatTimelineStore.getState().nextBefore).toBeNull();
+  });
+
   describe("P1a coalesced-flush append (growInflightIfCurrent)", () => {
     it("appends the accumulated text while the streamed row still exists", () => {
       const store = useChatTimelineStore.getState();

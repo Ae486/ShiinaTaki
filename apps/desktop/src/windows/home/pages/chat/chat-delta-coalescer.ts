@@ -1,8 +1,8 @@
 /**
- * INPUT:  chat.delta arrivals (messageId, delta) from the chat send handlers.
+ * INPUT:  legacy chat.delta arrivals when no ordered activity stream owns that message
  * OUTPUT: recordDelta() — deltas coalesced into one ~40ms trailing-edge store update so MarkdownView re-parses at
  *         most ~25x/s instead of per-delta (P1a). flush()/resetForTests() are the teardown seams.
- * POS:    ui/windows/home/pages/chat — the ONLY path streaming deltas take into the timeline store. A setTimeout
+ * POS:    ui/windows/home/pages/chat — legacy text fallback; segmented activity uses lib/chat-activity-coalescer. A setTimeout
  *         trailing edge, deliberately NOT rAF (a hidden window pauses rAF while the chat page must stay live for
  *         the backlog-on-return contract) and NOT setInterval (no polling loop when no deltas are in flight). The
  *         FIRST delta of a turn is applied immediately (the row appears without waiting a window); later deltas

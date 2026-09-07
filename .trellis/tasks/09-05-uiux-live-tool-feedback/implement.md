@@ -3,8 +3,13 @@
 ## Authorization and prerequisites
 
 The owner confirmed the Chat/Pet sequence and delegated detailed motion design, completion and local
-commits. Main reviewed design.md against current SDK/Core/consumer sources. This task is planning
-until D64 and D68-B have passed their independent gates and the main session switches to this child.
+commits. Main reviewed design.md against current SDK/Core/consumer sources and activated this task
+on 2026-09-07 after D64, D68-B and the checked upstream integration commit `258b35b` passed their
+gates. L1-L3, the combined independent review and delegated engineering acceptance completed on
+2026-09-07. Shared 446/Core 2,064/Desktop 751 tests passed with one existing Core skip; type/lint/build
+and the final 15/15 native WebView2 groups passed. See the
+[delivery evidence](implementation-evidence-2026-09-07.md) for frozen artifacts and runtime proof.
+The coordinator retains scoped local commit and program-status reconciliation.
 Do not use the stale legacy Compaction pointer. No new confirmation is needed for the reviewed scope.
 
 Read PRD, design, curated manifests and the referenced source preflight. Verify T4 cwd/branch/current
@@ -19,7 +24,7 @@ D68's outcome fix. Preserve both contracts and verify the merged T4 tree before 
 Timeline migration or dispatching live-feedback production work.
 
 The prerequisite passed on 2026-09-07: see [merged-tree evidence](research/upstream-sync-evidence-2026-09-07.md).
-The checked registry ends at 034. Verify the local integration commit before starting L1.
+The checked baseline registry ends at 034; L1 appends nullable presentation migration 035.
 
 ## L1 — producer, activity transport and durable handoff
 

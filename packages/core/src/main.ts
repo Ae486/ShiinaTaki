@@ -3,7 +3,7 @@
  * INPUT:  process env (bootstrap) + the config store's resolved knobs, and OS signals
  * OUTPUT: a running headless Agent Core — WS server bound to loopback; exits 0 on SIGINT/SIGTERM
  * POS:    core — the process entry/composition root; wires boot (config store → logger → model(s) → db) →
- *         store/media/subscriptions, bounded Run-event backfill, and deferred MCP approval names → ws-server
+ *         atomic Timeline/activity delivery, bounded Run-event backfill, and deferred MCP approval names → ws-server
  */
 import { join } from "node:path";
 import type { ToolSet } from "ai";
@@ -11,6 +11,7 @@ import { MONITOR_MODE_CONFIG_KEY, MonitorModeSchema } from "@taki/shared";
 import { CANONICAL_MEMORY_SYSTEM_PROMPT, createChatAgent } from "./agents/chat-agent.ts";
 import { BASE_SYSTEM_PROMPT } from "./agents/base-prompt.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
+import { createChatActivityProjection } from "./agents/chat-activity-projection.ts";
 import { mergeToolSets } from "./agents/tool-set-assembly.ts";
 import { createTurnQueue } from "./agents/turn-queue.ts";
 import { createTurnRegistry } from "./agents/turn-registry.ts";
@@ -70,6 +71,7 @@ import { avatarReportMethod } from "./server/methods/avatar-report.ts";
 import { avatarSubscribeMethod } from "./server/methods/avatar-subscribe.ts";
 import { chatCancelMethod } from "./server/methods/chat-cancel.ts";
 import { chatSendMethod } from "./server/methods/chat-send.ts";
+import { chatActivityReadMethod } from "./server/methods/chat-activity-read.ts";
 import { capabilityChallengeMethod } from "./server/methods/capability-challenge.ts";
 import { capabilityRespondMethod } from "./server/methods/capability-respond.ts";
 import { capabilityTriggerMethod, devTriggerEnabled } from "./server/methods/capability-trigger.ts";
@@ -135,6 +137,7 @@ const timelineRepo = createTimelineRepo(db);
 const windowStateRepo = createWindowStateRepo(db);
 const windowCalibrator = createWindowCalibrator({ repo: windowStateRepo, slot: "main", declared: contextConfig.contextTokens.main });
 const timelineSubscriptions = createTimelineSubscriptions();
+const chatActivity = createChatActivityProjection();
 const chatLog = logger.child({ mod: "chat" });
 // Replay View admission uses historyRatio × the calibrated window. Proactive compaction separately measures the
 // complete assembled request against effectiveWindow × compact.triggerRatio.
@@ -144,6 +147,7 @@ const latestRequestMeasurements = new Map<string, RequestMeasurement>();
 const conversationStore = createConversationStore({
   repo: timelineRepo,
   onAppend: (entry) => timelineSubscriptions.publish(entry),
+  onCommit: (batch) => timelineSubscriptions.publishCommitted(batch),
   onRemove: (ref) => timelineSubscriptions.publishRemoved(ref),
   window: { budget: historyBudget },
   // R3: the rolling summary substitutes as the replay head; the wall-hit warn means the compactor is being outrun.
@@ -324,7 +328,8 @@ const recovery = createRecoveryCoordinator({ db, runs: runRepo, effects: effectL
 await recovery.scan();
 
 // Turn lifecycle (D1 #3/#4): per-character serialization + the cancellable-turn registry shared by send/cancel.
-const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry() };
+const turnControls = { queue: createTurnQueue(), turns: createTurnRegistry(),
+  live: { activity: chatActivity, subscriptions: timelineSubscriptions } };
 const scheduleRepo = createScheduledTaskRepo(db);
 const schedulePatterns = createSchedulePatternAdapter();
 const scheduleLifecycle: { engine?: ReturnType<typeof createScheduleEngine> } = {};
@@ -428,6 +433,7 @@ registry.register(
   ),
 );
 registry.register(chatCancelMethod(turnControls.turns, runService));
+registry.register(chatActivityReadMethod(chatActivity));
 registry.register(hostCatalogPublishMethod(hostCatalogs, connectionRegistry));
 registry.register(extensionStatusMethod({ coreHostId, snapshot: () => extensions.runContext().snapshot }));
 registry.register(capabilityRespondMethod(capabilityBroker, connectionRegistry));
@@ -511,12 +517,15 @@ function shutdown(signal: string): void {
   recovery.close();
   cancelDurableWorkForShutdown();
   void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => server.close()).then(async () => {
+    chatActivity.dispose();
     skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients
     // (each exactly once), before the db handle and process go away.
     await mcpBoot.manager.close();
     db.close(); // release the sqlite file handle (and checkpoint the WAL) before exit
-    process.exit(0);
+    // Let pending native I/O retire after application teardown. Forced exit after fetch can abort Windows libuv
+    // while its async handles are closing; natural exit also lets buffered diagnostics finish writing.
+    process.exitCode = 0;
   });
 }
 

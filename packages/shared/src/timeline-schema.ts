@@ -1,17 +1,19 @@
 /**
  * INPUT:  candidate timeline.* params/event payloads (parsed WS frames + repo rows)
- * OUTPUT: timeline schemas with canonical replay fields and optional bounded tool display names
+ * OUTPUT: canonical timeline rows, optional stable presentation references, and atomic turn-commit notifications
  * POS:    shared/protocol — the timeline persistence contract (ADR 0005, invariants 3, 7); core repo + server + CLI
  */
 import { z } from "zod";
 import { IMAGE_MEDIA_TYPES } from "./chat-schema.ts";
 import { getValidToolDisplayName } from "./tool-presentation.ts";
+import { readTimelinePresentation, sanitizeTimelinePresentations } from "./timeline-presentation-schema.ts";
 
 export const TIMELINE_METHODS = {
   history: "timeline.history",
   subscribe: "timeline.subscribe",
   appended: "timeline.appended",
   removed: "timeline.removed",
+  committed: "timeline.committed",
 } as const;
 
 /** A timeline row's authorship — deliberately distinct from the connect Role (operator|node). */
@@ -60,7 +62,7 @@ export const TimelinePartSchema = z.discriminatedUnion("type", [
 export type TimelinePart = z.infer<typeof TimelinePartSchema>;
 
 // seq is the append order (INTEGER PRIMARY KEY AUTOINCREMENT), always >= 1; it is the paging cursor.
-export const TimelineEntrySchema = z.object({
+const TimelineRowSchema = z.object({
   seq: z.int().positive(),
   id: z.uuid(),
   characterId: z.string().min(1),
@@ -69,8 +71,32 @@ export const TimelineEntrySchema = z.object({
   // Additive, backward-compatible: absent on legacy text-only rows; present carries full model-replay fidelity.
   parts: z.array(TimelinePartSchema).optional(),
   createdAt: z.string().min(1),
+  presentation: z.unknown().optional(),
+});
+export const TimelineEntrySchema = TimelineRowSchema.transform(({ presentation: candidate, ...row }) => {
+  const presentation = readTimelinePresentation(candidate, row);
+  return { ...row, ...(presentation ? { presentation } : {}) };
 });
 export type TimelineEntry = z.infer<typeof TimelineEntrySchema>;
+
+export const TimelineCommittedSchema = z.strictObject({
+  characterId: z.string().min(1),
+  messageId: z.string().min(1),
+  activitySeq: z.int().nonnegative(),
+  entries: z.array(TimelineEntrySchema),
+}).superRefine((batch, ctx) => {
+  const seqs = new Set<number>();
+  for (const [index, entry] of batch.entries.entries()) {
+    const view = "presentation" in entry ? entry.presentation : undefined;
+    if (entry.characterId !== batch.characterId || seqs.has(entry.seq) || !view
+      || view.messageId !== batch.messageId || view.activitySeq !== batch.activitySeq
+      || view.entryCount !== batch.entries.length || view.entryIndex !== index) {
+      ctx.addIssue({ code: "custom", message: "incomplete or inconsistent timeline batch" });
+    }
+    seqs.add(entry.seq);
+  }
+}).transform((batch) => ({ ...batch, entries: sanitizeTimelinePresentations(batch.entries) }));
+export type TimelineCommitted = z.infer<typeof TimelineCommittedSchema>;
 
 export const TIMELINE_HISTORY_LIMIT_DEFAULT = 50;
 export const TIMELINE_HISTORY_LIMIT_MAX = 200;
@@ -87,7 +113,7 @@ export const TimelineHistoryResultSchema = z.object({
   // Newest-first page; nextBefore is the cursor for the next (older) page, or null at the end.
   entries: z.array(TimelineEntrySchema),
   nextBefore: z.int().positive().nullable(),
-});
+}).transform((page) => ({ ...page, entries: sanitizeTimelinePresentations(page.entries) }));
 export type TimelineHistoryResult = z.infer<typeof TimelineHistoryResultSchema>;
 
 export const TimelineSubscribeParamsSchema = z.object({

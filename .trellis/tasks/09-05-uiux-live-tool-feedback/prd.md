@@ -29,21 +29,26 @@ continuous-timeline authority, with stable text segmentation and smooth layout t
 
 ## Acceptance Criteria
 
-- [ ] Text/tool/text/tool sequences render in true order before the turn completes.
-- [ ] Call receipt, execution, success, failure and cancellation use real producer facts and reconcile
+- [x] Text/tool/text/tool sequences render in true order before the turn completes.
+- [x] Call receipt, execution, success, failure and cancellation use real producer facts and reconcile
       with stored history without duplicates or terminal calls appearing active.
-- [ ] Pet retains separate language segments, removes completed transient tools at the agreed boundary,
+- [x] Pet retains separate language segments, removes completed transient tools at the agreed boundary,
       and shows the agreed single terminal-error bubble.
-- [ ] Long streams, historical scrolling, reconnect and late/out-of-order results preserve the active
+- [x] Long streams, historical scrolling, reconnect and late/out-of-order results preserve the active
       turn/selection and never trigger duplicate execution.
-- [ ] Interrupted transitions and reduced motion leave no jumps, hidden input blockers or stale bubbles.
-- [ ] Relevant Shared/Core/Desktop gates and real WebView2 interaction checks pass; owner visual
+- [x] Interrupted transitions and reduced motion leave no jumps, hidden input blockers or stale bubbles.
+- [x] Relevant Shared/Core/Desktop gates and real WebView2 interaction checks pass; owner visual
       acceptance remains explicit.
+
+Engineering acceptance completed on 2026-09-07 under the owner's execution delegation. The
+[delivery evidence](implementation-evidence-2026-09-07.md) records 3,261 package tests, one existing
+skip, independent review, actual Core cases and final 15/15 WebView2 interaction groups with immutable
+source/assets/CSP verification. Personal owner visual inspection is not claimed or marked passed.
 
 ## Notes
 
-- Planning child created with owner consent on 2026-09-05. Complete the source-backed event/data-flow
-  design and ordered Chat/Pet execution slices before activation.
+- Planning child created with owner consent on 2026-09-05. Its source-backed design and L1-L3 plan
+  were reviewed before activation on 2026-09-07, following checked integration commit `258b35b`.
 - Sources: [G2/G3 decisions](../08-22-t4-agent-architecture-observability/research/uiux-grill-2026-09-05.md),
   [motion design](../08-22-t4-agent-architecture-observability/research/uiux-motion-continuity-2026-09-05.md)
   and [useful details](../08-22-t4-agent-architecture-observability/research/uiux-useful-information-2026-09-05.md).

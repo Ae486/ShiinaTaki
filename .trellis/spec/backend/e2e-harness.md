@@ -18,6 +18,10 @@ Every scenario is its own `e2e/src/<name>.e2e.test.ts` calling `withStack(opts, 
 - **A single-turn empty-DB L2 CANNOT catch hallucination.** Empty history = nothing for the model to imitate, so the agent invokes the tool and the test is green whether the bug exists or not. Hallucination regression needs a multi-turn or polluted-timeline scenario (see `docs/deferred-decisions.md` D1). Do not treat a green single-turn L2 as proof the hallucination is gone.
 - **`capability.trigger` is dev-only and must stay so**: registered only under `TAKI_DEV_TRIGGER=1`, operator-only, and it is NOT a governance bypass — it drives the same `tool.execute` the agent does, so every call still crosses Core policy and, for Host-owned actions, the Host's sealed projection/classification/final-enforcement path. Never register it in production; its schema never enters `@taki/shared`.
 - The fixture must ALWAYS tear down (process tree + temp dirs) even on a boot failure — keep boot inside the try/finally.
+- A focused Core lifecycle scenario may compose the existing process/RPC primitives directly when it requires a
+  local scripted provider or graceful signal delivery absent from `withStack`. Keep any IPC preload test-only,
+  release its own handle, isolate data/provider configuration and retain bounded failure cleanup. See
+  `e2e/src/core-shutdown.e2e.test.ts` and the [shutdown contract](server-push-and-connection-auth.md#scenario-core-shutdown-drains-accepted-connections-before-storage).
 
 ## Test-only Host-frame relay
 

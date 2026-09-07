@@ -5,17 +5,24 @@
  */
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { Telemetry, ToolExecutionEndEvent, ToolExecutionStartEvent } from "ai";
-import type { RunEvent } from "@taki/shared";
+import type { ChatActivityPhase, RunEvent } from "@taki/shared";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { createToolInvocationBridge, type ToolInvocationBridge, type ToolInvocationSnapshot } from "./tool-invocation.ts";
 import { classifyToolOutcome, type ToolOutcome, type ToolOutcomeInput } from "./tool-outcome.ts";
 
 interface ToolObserverInput {
-  lifecycle: EffectLifecycleService;
-  runId: string;
-  attemptId: string;
+  lifecycle?: EffectLifecycleService;
+  runId?: string;
+  attemptId?: string;
   toolDisplayNames?: Readonly<Record<string, string>>;
   invocations?: ToolInvocationBridge;
+  activity?: ToolActivityObserver;
+}
+
+/** Optional display observer receives the same immutable object bridge as the durable D68 observer. */
+export interface ToolActivityObserver {
+  phase(invocation: ToolInvocationSnapshot, phase: ChatActivityPhase): void;
+  terminal(invocation: ToolInvocationSnapshot, outcome: ToolOutcome, durationMs?: number): void;
 }
 
 interface ToolObserverState {
@@ -43,11 +50,16 @@ export function createToolObserver(input: ToolObserverInput, now: () => number) 
       const invocation = execution.getStore();
       if (invocation?.toolCallId === toolCallId) state.effectIds.set(invocation.invocationId, effectId);
     },
+    phase({ toolCallId, phase }: { toolCallId: string; phase: "approval" | "executing" }) {
+      const invocation = execution.getStore();
+      if (invocation?.toolCallId === toolCallId) observeActivity(() => input.activity?.phase(invocation, phase));
+    },
     start(event: ToolExecutionStartEvent) {
       const invocation = invocations.capture(event.toolCall);
       if (!state.processingStartedAt.has(invocation.invocationId)) {
         state.processingStartedAt.set(invocation.invocationId, new Date(now()).toISOString());
       }
+      observeActivity(() => input.activity?.phase(invocation, "processing"));
       recorder.start(invocation, "processing");
     },
     end: (event: ToolExecutionEndEvent) => observeTerminal({ event, invocations, recorder }),
@@ -68,11 +80,11 @@ function createToolRecorder(args: {
       if (args.state.started.has(invocation.invocationId)) return;
       args.state.started.add(invocation.invocationId);
       const occurredAt = new Date(args.now()).toISOString();
-      record(args.input.lifecycle, toolEvent(args.input, occurredAt, {
+      recordTool(args.input, occurredAt, {
         kind: "tool.call.started",
         state: invocation.validationState === "failed" ? "validation_failed" : phase,
         ...identityFields(invocation), validationState: invocation.validationState,
-      }));
+      });
     },
     result(invocation, outcome, durationMs) {
       if (args.state.settled.has(invocation.invocationId)) return;
@@ -80,13 +92,19 @@ function createToolRecorder(args: {
       const occurredAt = new Date(args.now()).toISOString();
       const effectId = args.state.effectIds.get(invocation.invocationId);
       const startedAt = args.state.processingStartedAt.get(invocation.invocationId);
-      record(args.input.lifecycle, toolEvent(args.input, occurredAt, {
+      observeActivity(() => args.input.activity?.terminal(invocation, outcome,
+        durationMs === undefined ? undefined : boundedDuration(durationMs)));
+      recordTool(args.input, occurredAt, {
         kind: "tool.result.settled", state: outcome.outcome, ...identityFields(invocation), ...outcome,
         ...(effectId ? { effectId } : {}), ...(startedAt ? { startedAt } : {}),
         ...(durationMs === undefined ? {} : { durationMs: boundedDuration(durationMs) }),
-      }));
+      });
     },
   };
+}
+
+function observeActivity(publish: () => void): void {
+  try { publish(); } catch { /* A disposable projection is never part of the execution authority. */ }
 }
 
 function identityFields(invocation: ToolInvocationSnapshot) {
@@ -153,15 +171,16 @@ function boundedDuration(value: number): number {
   return Math.min(86_400_000, Math.max(0, Math.round(value)));
 }
 
-function toolEvent(
-  input: { runId: string; attemptId: string },
+function recordTool(
+  input: ToolObserverInput,
   occurredAt: string,
   payload: Extract<RunEvent["payload"], { kind: "tool.call.started" | "tool.result.settled" }>,
-): Omit<RunEvent, "eventId" | "seq"> {
-  return {
+): void {
+  if (!input.lifecycle || !input.runId || !input.attemptId) return;
+  record(input.lifecycle, {
     runId: input.runId, attemptId: input.attemptId, schemaVersion: "run-event.v1",
     category: "tool", kind: payload.kind, occurredAt, source: "core.tool-observer", payload,
-  };
+  });
 }
 
 function record(lifecycle: EffectLifecycleService, event: Omit<RunEvent, "eventId" | "seq">): void {

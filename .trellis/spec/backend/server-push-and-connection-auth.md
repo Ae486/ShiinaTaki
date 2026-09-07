@@ -66,3 +66,67 @@ Non-negotiable safety properties (all enforced + tested; a change here is a secu
 - Operator capabilities are schema-forced empty (`connect-schema.ts`), parsed before the handler → an auto-trusted operator can't smuggle capabilities.
 
 Reference: `server/methods/connect.ts`, `devices/device-registry.ts` (`issueToken`/`trustDevice`), hardened by the fable5 security review (2026-07-14). Residual boundary notes (multi-user host, deviceId clobber) → deferred D25.
+
+## Scenario: Core shutdown drains accepted connections before storage
+
+### 1. Scope / Trigger
+
+Applies to `WsServer.close()` and Core process shutdown. Connection callbacks can cancel Runs, retire Host
+generations and unsubscribe observers; they may still need SQLite after the listening port has closed.
+
+### 2. Signatures
+
+- `WsServer.close(): Promise<void>` resolves after both the owned listener and all accepted sockets close.
+- `MethodContext.onClose(callback: () => void)` callbacks and `ConnectionRegistry.remove(connection)` run
+  before that promise resolves. This does not turn synchronous callbacks into background work.
+- `main.ts` invokes the existing SIGINT/SIGTERM shutdown handler once; no public shutdown RPC is added.
+
+### 3. Contracts
+
+- Preserve admission sealing, recovery/scheduler stop, cancellation and bounded turn draining before closing
+  the server. Close Skill/MCP resources and SQLite only after accepted connection cleanup finishes.
+- Register each accepted socket's close waiter before terminating it. The installed `ws` implementation's
+  internally created HTTP server can emit close before its upgraded sockets finish; its callback alone is
+  insufficient. Socket errors remain logged and do not substitute for socket closure.
+- After resource cleanup, set `process.exitCode = 0` and let Node retire remaining native I/O naturally.
+  `process.exit(0)` after fetch can trigger a Windows Node/libuv async-handle assertion and truncate logs.
+- Process tests may deliver SIGTERM through a test-only `--import` IPC preload on Windows. The preload must
+  disconnect its own IPC channel so the test itself does not keep Core alive. Production has no such hook.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required result |
+| --- | --- |
+| Authenticated peers remain attached at shutdown | All registered cleanup completes before SQLite closes. |
+| A peer starts closing concurrently | Same cleanup ordering; no late `database is not open` callback. |
+| Provider HTTP requests have failed and settled | Successful cleanup exits 0 without forced termination or native assertion. |
+| A lifecycle check times out | Fail and clean up the owned process; never report a force-killed process as graceful. |
+
+### 5. Good/Base/Bad Cases
+
+- Good: wait for listener plus accepted socket closure, release storage, and allow natural process exit.
+- Base: no connected peers; listener closure still completes the same shutdown chain.
+- Bad: close SQLite as soon as the HTTP listener closes, or hide pending callbacks by forcing process exit.
+
+### 6. Tests Required
+
+- `packages/core/src/server/ws-server.test.ts`: keep two authenticated peers open; immediately after close
+  resolves, the connection registry is empty and both removal callbacks have run exactly once.
+- `e2e/src/core-shutdown.e2e.test.ts`: boot actual strip-only Core with isolated storage and a local rejecting
+  HTTP provider, settle two Chat failures, then stop with an open or concurrently closing peer. Assert exit 0,
+  one shutdown, no native assertion, bounded cleanup and no paid provider or real data access.
+
+### 7. Wrong vs Correct
+
+```ts
+// Wrong: an HTTP listener can close before the accepted WS connection callbacks finish.
+await new Promise<void>((resolve) => wss.close(() => resolve()));
+db.close();
+process.exit(0);
+
+// Correct: the server primitive owns both listener and accepted-connection cleanup.
+await server.close();
+await closeRemainingResources();
+db.close();
+process.exitCode = 0;
+```

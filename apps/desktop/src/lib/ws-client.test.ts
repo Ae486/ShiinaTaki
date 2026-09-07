@@ -60,6 +60,73 @@ function lastRequestId(sent: string[]): number | string {
 }
 
 describe("createWsClient inbound routing", () => {
+  it("buffers early notifications until the exact acknowledgement and ignores an older turn while a new send waits", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const observed: string[] = [];
+    const first = client.chat({ characterId: "taki", message: "first" }, {
+      onAccepted: (ack) => observed.push(`accepted:${ack.messageId}`),
+      onDelta: (text) => observed.push(text), onComplete: () => observed.push("complete:first"),
+    });
+    h.deliver({ jsonrpc: "2.0", method: CHAT_METHODS.delta, params: { messageId: "first", characterId: "taki", delta: "A" } });
+    h.deliver({ jsonrpc: "2.0", method: CHAT_METHODS.complete, params: { messageId: "first", characterId: "taki" } });
+    expect(observed).toEqual([]);
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "first", runId: "run-first" } });
+    await first;
+    expect(observed).toEqual(["accepted:first", "A", "complete:first"]);
+
+    let settled = false;
+    const second = client.chat({ characterId: "taki", message: "second" }, {
+      onDelta: (text) => observed.push(text), onComplete: () => { settled = true; },
+    });
+    for (const messageId of ["first", "unrelated"]) {
+      h.deliver({ jsonrpc: "2.0", method: CHAT_METHODS.error,
+        params: { messageId, characterId: "taki", code: "PROVIDER_ERROR", message: "old error" } });
+    }
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "second", runId: "run-second" } });
+    await flush();
+    h.deliver({ jsonrpc: "2.0", method: CHAT_METHODS.complete, params: { messageId: "first", characterId: "taki" } });
+    h.deliver({ jsonrpc: "2.0", method: CHAT_METHODS.complete, params: { messageId: "second", characterId: "other" } });
+    expect(settled).toBe(false);
+    h.deliver({ jsonrpc: "2.0", method: CHAT_METHODS.delta, params: { messageId: "second", characterId: "taki", delta: "B" } });
+    h.deliver({ jsonrpc: "2.0", method: CHAT_METHODS.complete, params: { messageId: "second", characterId: "taki" } });
+    await second;
+    expect(observed).toEqual(["accepted:first", "A", "complete:first", "B"]);
+  });
+
+  it("parses activity/read/commit contracts, isolates observers and retires them with the physical client", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const activity: unknown[] = [];
+    const commits: unknown[] = [];
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const remove = client.onChatActivity((event) => activity.push(event));
+    client.onChatActivity(() => { throw new Error("private consumer failure"); });
+    client.onTimelineCommitted((batch) => commits.push(batch));
+    const start = { kind: "turn.started", characterId: "taki", messageId: "message", seq: 1 };
+    try {
+      h.deliver({ jsonrpc: "2.0", method: CHAT_METHODS.activity, params: start });
+      h.deliver({ jsonrpc: "2.0", method: TIMELINE_METHODS.committed,
+        params: { characterId: "taki", messageId: "message", activitySeq: 1, entries: [] } });
+      expect(activity).toEqual([start]);
+      expect(commits).toHaveLength(1);
+      const reading = client.chatActivityRead("taki");
+      expect(JSON.parse(h.sent.at(-1)!)).toMatchObject({ method: CHAT_METHODS.activityRead, params: { characterId: "taki" } });
+      h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { ...start, kind: undefined, status: "active", items: [] } });
+      expect(await reading).toMatchObject({ messageId: "message", status: "active", seq: 1, items: [] });
+      remove();
+      h.closeSocket();
+      h.deliver({ jsonrpc: "2.0", method: CHAT_METHODS.activity, params: start });
+      h.deliver({ jsonrpc: "2.0", method: TIMELINE_METHODS.committed,
+        params: { characterId: "taki", messageId: "message", activitySeq: 1, entries: [] } });
+      expect(activity).toHaveLength(1);
+      expect(commits).toHaveLength(1);
+      expect(warn.mock.calls.flat().join(" ")).not.toContain("private consumer failure");
+    } finally { warn.mockRestore(); }
+  });
+
   it("routes canonical Approval request/closed pushes and isolates failing handlers", () => {
     const h = harness();
     const client = createWsClient({ transport: h.transport });
@@ -150,7 +217,7 @@ describe("createWsClient inbound routing", () => {
     );
     await flush();
     const id = lastRequestId(h.sent);
-    h.deliver({ jsonrpc: "2.0", id, result: { messageId: "m1" } });
+    h.deliver({ jsonrpc: "2.0", id, result: { messageId: "m1", runId: "r1" } });
     for (const delta of ["Hel", "lo"]) {
       h.deliver({ jsonrpc: "2.0", method: CHAT_METHODS.delta, params: { messageId: "m1", characterId: "taki", delta } });
     }
@@ -340,7 +407,7 @@ describe("createWsClient inbound routing", () => {
       },
     );
     await flush();
-    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "m1" } });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "m1", runId: "r1" } });
     h.deliver({
       jsonrpc: "2.0",
       method: CHAT_METHODS.error,
@@ -486,7 +553,7 @@ describe("createWsClient disconnect handling (D29)", () => {
       { onDelta: () => undefined, onError: (code, message) => (errored = { code, message }) },
     );
     await flush();
-    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "m1" } });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "m1", runId: "r1" } });
     h.deliver({ jsonrpc: "2.0", method: CHAT_METHODS.delta, params: { messageId: "m1", characterId: "taki", delta: "He" } });
     h.closeSocket();
     await turn; // the defect was an await that never resolved
@@ -522,7 +589,7 @@ describe("createWsClient disconnect handling (D29)", () => {
       { onDelta: () => undefined, onError: () => errors++ },
     );
     await flush();
-    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "m1" } });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "m1", runId: "r1" } });
     h.closeSocket();
     h.closeSocket();
     await turn;
@@ -544,7 +611,7 @@ describe("createWsClient disconnect handling (D29)", () => {
       { onDelta: () => undefined, onError: () => turnErrors++ },
     );
     await flush();
-    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "m1" } });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { messageId: "m1", runId: "r1" } });
 
     client.close();
     h.deliver({ jsonrpc: "2.0", method: CONFIG_METHODS.changed, params: { key: "TAKI_LOG_LEVEL", value: "debug" } });

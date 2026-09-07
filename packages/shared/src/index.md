@@ -12,8 +12,10 @@
 - host-approval-schema.ts — protocol-v3 Host challenge/resume extension with redacted presentation, nested single-use authorization, and canonical digest payloads
 - host-control-api.ts — focused named public export surface for Host-control schemas and types
 - connect-schema.ts — role/handshake schemas with operator-only command-display offer/echo and separate Host negotiation
-- chat-schema.ts — CHAT_METHODS + chat.send { messageId, runId } acknowledgement, legacy/exact-run cancel, delta/complete/error schemas; +ImageAttachment/IMAGE_MEDIA_TYPES (in-flight image input, #17)
-- timeline-schema.ts — timeline entry/part/history/push schemas with optional bounded tool display names, canonical replay fields, image fidelity, and cancel-retract identity
+- chat-schema.ts — chat methods including ordered activity/read, accepted send identity, legacy cancellation/events, and in-flight image input
+- chat-activity-schema.ts — strict ordered language/tool events, real phase/outcome vocabulary, bounded recovery snapshots and incremental UTF-8 accounting
+- timeline-presentation-schema.ts — independently validated batch coverage and consistent canonical item references; corrupt references fall back without hiding history or losing handoff identity
+- timeline-schema.ts — canonical Timeline history, optional stable presentation metadata, complete batch commits and compatible append/remove notifications
 - config-schema.ts — CONFIG_METHODS + knob entry/list/set/subscribe/changed schemas + ConfigRefusalReason (settings store); operator-only, NO Rust mirror
 - timing-policy-schema.ts — single D59/D61 timing-key vocabulary + cross-field policy schema + owner-approved development defaults; shared by Core registry and Desktop consumers
 - media-schema.ts — MEDIA_METHODS + media.get/clear/usage param & result schemas (attachment byte serving + lifecycle); operator-only, NO Rust mirror

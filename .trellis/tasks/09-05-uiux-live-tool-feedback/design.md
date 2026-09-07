@@ -4,7 +4,8 @@
 
 Implement the owner-confirmed G2/G3 behavior after D64 and D68-B. The latest execution delegation
 authorizes design choices, implementation, engineering acceptance and scoped local commits without
-repeated confirmation. The task stays planning until its implementation turn is activated.
+repeated confirmation. Main activated this task on 2026-09-07 after the checked D68 delivery and
+upstream integration commit `258b35b`.
 
 Sources: [current producer/persistence preflight](research/live-feedback-contract-2026-09-06.md),
 [D68 exact invocation bridge](../08-28-dsh-observability-expansion/research/d68-query-contract-2026-09-06.md),
@@ -57,10 +58,15 @@ chat.complete/error remain separate. A different Character cannot receive or rea
 Receiving activity never automatically opens Pet.
 
 Add read-only `chat.activity.read({characterId})`. Its disposable projection is owned alongside the
-existing Character Agent lifecycle, with at most the latest admitted foreground turn per Character.
+existing Character Agent lifecycle, with at most the latest started foreground turn per Character.
 Return explicit active/terminal/idle/unavailable state, last sequence and complete currently retained
-items. Replace the projection on the next admitted turn and release it with the owning runtime;
-closing a UI cannot cancel the underlying Agent. A terminal projection may retain the last reply
+items. Replace the projection when the next queued foreground turn acquires execution and starts,
+then release it with the owning runtime. A merely admitted queued request must not replace the
+currently running turn's snapshot or suppress its remaining activity/terminal publication;
+disposing an observing view releases its subscription only, without cancelling the underlying turn.
+Keep the existing initiating request's explicit cancellation and connection-loss contract in
+`chat-send.ts`; this child adds no cancellation authority to projection/view disposal and does not
+change that established execution policy. A terminal projection may retain the last reply
 for reopening an existing Pet bubble, but is not a durable history or a replay source.
 
 Main selects a recovery-snapshot budget of 512 items and 1 MiB UTF-8 display text, counted incrementally.
@@ -92,8 +98,10 @@ Use a strict versioned Shared metadata schema containing only:
 
 Reuse that messageId as the batch identity; no separate commitId, duplicate Run lineage, raw input,
 copied transcript, provider metadata or alternate content authority. Names already preserved on A2
-tool parts stay there. Validate part references against the row; malformed optional presentation is
-omitted while valid canonical history remains readable. Replay and Compaction source digest select
+tool parts stay there. Validate part references against the row and joined batch, including item
+kind/order and canonical tool identity. Invalid headers are omitted; independently valid headers with
+bad reference maps retain empty references so complete-batch handoff and canonical content remain
+readable. Producer preparation remains strict. Replay and Compaction source digest select
 only the same canonical fields as before. Add explicit metadata-only equivalence regressions.
 
 Capture completed step response messages in `onStepEnd` before a later error can discard them. Its
@@ -115,7 +123,9 @@ New reducers buffer ordinary appends belonging to the active batch. The batch no
 all durable entries, reuses visible item keys and retires covered live state in one update. It does
 not clear on the first assistant row or solely on chat.complete. History carries the same metadata,
 so a lost batch push is recoverable: fetch the necessary older pages until the indicated batch is
-complete before retiring its live projection. Preserve unrelated history and the reading anchor.
+complete before retiring its live projection. Saved pending-turn anchors and prior canonical coverage
+also recover a batch wholly absent from the newest page; retain a reachable cursor for a missing
+middle range. Preserve unrelated history and the reading anchor.
 
 Old rows without metadata retain their canonical order. Pair call/result records conservatively
 inside their sequential history scope; keep one visible invocation entry where pairing is proved.

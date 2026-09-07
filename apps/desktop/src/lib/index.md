@@ -1,9 +1,14 @@
 # lib/
 Cross-cutting Pet UI clients + seams (talk to the Agent Core / hold window-shared services). Framework-free apart from
 icons/ (the shared glyph set) and the two window-shared React hooks below.
-- ws-client.ts — operator WS JSON-RPC client to the Core (browser WebSocket): public turn/handshake/monitor subscribe-unsubscribe wiring
-- ws-client-routes.ts — inbound half: the zod boundary (frame parse + chat/avatar/timeline/config/Approval/monitor push routing) and the D29 mid-turn-close abort
-- ws-client-methods.ts — outbound half: command-display echo validation before connect promotion plus schema-validated operator methods
+- ws-client.ts — operator WS client composition: exact initiating-request acknowledgement, independent activity/commit observers, handshake and typed request families
+- ws-client-routes.ts — inbound zod boundary, isolated activity/commit fan-out, exact legacy chat routing and physical-generation retirement
+- ws-client-methods.ts — command-display echo validation and schema-validated operator methods, including read-only activity recovery and optional exact-Run cancel
+- ws-chat-turn.ts — bounded acknowledgement-race buffering, exact Character/message matching and one initiating-request settlement
+- chat-activity-state.ts — shared immutable Chat/Pet activity reducer, stable item keys and missing-sequence detection
+- chat-activity-coalescer.ts — per-generation/message/attempt/segment text cadence with immediate semantic boundaries and cancellable publication
+- chat-activity-recovery.ts — subscribe/read/live reconciliation, bounded races, explicit unavailable state, read-only gap recovery and disposal
+- tool-activity-display.ts — shared captured-name and truthful phase/outcome vocabulary for Chat and Pet
 - rpc-deadline.ts — method-class timing table + typed deadline error + json-rpc-2.0 native timeout requester seam
 - timing-policy.ts — window-owned bootstrap/last-good timing policy store; validates full Core config refreshes without persistence
 - timing-policy-sync.ts — exact-once config subscription and serialized full-policy refresh for an authenticated client

@@ -3,6 +3,7 @@ import {
   TIMING_POLICY_DEVELOPMENT_DEFAULTS,
   type AvatarCommand,
   type AvatarReportParams,
+  type ChatActivityReadResult,
 } from "@taki/shared";
 import {
   createConnectionGenerationController,
@@ -45,6 +46,20 @@ class AvatarClient implements ConnectionGenerationClient {
     this.avatarHandler = handler;
   }
 
+  onChatActivity(): () => void {
+    this.order.push("activity-handler");
+    return () => undefined;
+  }
+
+  async subscribeTimeline(): Promise<void> {
+    this.order.push("timeline-subscribe");
+  }
+
+  async chatActivityRead(): Promise<ChatActivityReadResult> {
+    this.order.push("activity-read");
+    return { characterId: "taki", status: "idle" };
+  }
+
   async reportAvatar(params: AvatarReportParams): Promise<void> {
     this.order.push("report");
     this.reports.push(params);
@@ -75,7 +90,7 @@ describe("restorePetConnection", () => {
     const client = new AvatarClient();
     await restorePetConnection({ client, scene: null, context: context(() => true) });
 
-    expect(client.order).toEqual(["handler", "report", "subscribe"]);
+    expect(client.order).toEqual(["handler", "report", "subscribe", "activity-handler", "timeline-subscribe", "activity-read"]);
     expect(client.reports).toEqual([{ characterId: "taki", motions: [], expressions: [] }]);
     expect(client.subscribeCalls).toBe(1);
   });
@@ -92,7 +107,7 @@ describe("restorePetConnection", () => {
     client.deliver(EXPRESSION);
     client.deliver(MOTION);
 
-    expect(client.order).toEqual(["handler", "report", "subscribe"]);
+    expect(client.order).toEqual(["handler", "report", "subscribe", "activity-handler", "timeline-subscribe", "activity-read"]);
     expect(client.reports).toEqual([
       { characterId: "taki", motions: ["wave"], expressions: ["smile"], costume: "arbeit" },
     ]);
@@ -217,8 +232,8 @@ describe("accelerated long-idle avatar recovery", () => {
     expect(homeChat.sends).toBe(2);
     expect(clients).toHaveLength(2);
     expect(clients.map((client) => client.order)).toEqual([
-      ["handler", "report", "subscribe"],
-      ["handler", "report", "subscribe"],
+      ["handler", "report", "subscribe", "activity-handler", "timeline-subscribe", "activity-read"],
+      ["handler", "report", "subscribe", "activity-handler", "timeline-subscribe", "activity-read"],
     ]);
     expect(clients.map((client) => client.subscribeCalls)).toEqual([1, 1]);
     expect(applied).toEqual([EXPRESSION, MOTION, EXPRESSION, MOTION]);
