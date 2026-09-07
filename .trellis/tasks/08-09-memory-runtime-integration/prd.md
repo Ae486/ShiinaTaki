@@ -33,3 +33,15 @@ Integrate the provider model into live agent turns while preserving prompt-cache
 - Hindsight compatibility patches, initial migration, and sync storage internals.
 - Bank-wide destructive administration exposed as agent tools.
 - Final setup and operations UI.
+
+## Contract Clarifications (2026-09-05)
+
+- B6 consumes B5's stable replica-reader, Pending Memory, and recovery contracts; it does not recreate sync storage or
+  activation logic.
+- `RunSnapshot` freezes provider identity, lineage, authority epoch, capabilities, and tools. Coordinator/tool wiring and
+  `run-snapshot-capture.ts` must use one immutable snapshot and fail closed on drift.
+- Automatic foreground recall is appended to ephemeral outgoing `<turn-context>` before request-preparation measurement.
+  It is excluded from timeline, summaries, compaction gates, Write Gate input, and Retain payloads. Primary-only
+  conversational auto-ingestion is distinct from delivered autonomous speech and silent controls.
+- Hindsight keeps a narrow Taki policy curator and uses `MemoryFlushPort` for pre-retirement durability; Pending replay
+  remains B5 ordered recovery, never generic blind Effect replay.

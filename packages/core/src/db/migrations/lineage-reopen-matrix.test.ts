@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
-import { join } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import type { Migration } from "../migration-runner.ts";
 import { openDatabase, type Database } from "../sqlite.ts";
@@ -21,13 +21,23 @@ import { scheduledTasksMigration029 } from "./029-scheduled-tasks.ts";
 import { scheduledOccurrenceCharacterMigration030 } from "./030-scheduled-occurrence-character.ts";
 import { runUsageDetailsMigration031 } from "./031-run-usage-details.ts";
 import { conversationCompactionLifecycleMigration032 } from "./032-conversation-compaction-lifecycle.ts";
+import { hindsightReplicaSyncMigration033 } from "./033-hindsight-replica-sync.ts";
+import { hindsightReplicaSchedulerMigration034 } from "./034-hindsight-replica-scheduler.ts";
+import { canonicalPayloadHash } from "../../memory/legacy-migration/legacy-identities.ts";
+import { createIntlSegmenterTokenizer } from "../../memory/search-tokenizer.ts";
+import { createReplicaRecordStore } from "../hindsight-replica-record-store.ts";
+import { createHindsightReplicaLeaseRepo } from "../hindsight-replica-lease-repo.ts";
+import { publishReplicaCheckpoint, readReplicaCheckpoint } from "../hindsight-replica-checkpoint-store.ts";
 
 const roots: string[] = [];
 const dbs: Database[] = [];
 
 afterEach(() => {
   for (const db of dbs.splice(0)) db.close();
-  for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
+  for (const root of roots.splice(0)) {
+    if (dirname(resolve(root)) !== resolve(tmpdir()) || !basename(root).startsWith("taki-migration-lineage-")) throw new Error("unsafe fixture path");
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 function createPath(): string {
@@ -49,7 +59,7 @@ function close(db: Database): void {
 }
 
 function expectFinalSchema(db: Database): void {
-  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(32);
+  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(34);
   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map((row) => row.name);
   expect(tables).toEqual(expect.arrayContaining([
     "canonical_memory_units",
@@ -61,6 +71,12 @@ function expectFinalSchema(db: Database): void {
     "hindsight_cutover_runs",
     "hindsight_import_operations",
     "hindsight_replica_checkpoints",
+    "hindsight_replica_sync_checkpoints",
+    "hindsight_replica_sync_records",
+    "hindsight_replica_sync_fts",
+    "hindsight_replica_sync_leases",
+    "hindsight_replica_sync_schedule",
+    "hindsight_replica_sync_snapshot_cache",
     "hindsight_authority_activation_receipts",
     "runs",
     "run_attempts",
@@ -89,7 +105,7 @@ function expectReopenNoOp(path: string): Database {
   const appliedOnReopen: number[][] = [];
   const reopened = open(path, MIGRATIONS, (applied) => appliedOnReopen.push(applied));
   expectFinalSchema(reopened);
-    expect(appliedOnReopen).toEqual([[]]);
+  expect(appliedOnReopen).toEqual([[]]);
   return reopened;
 }
 
@@ -99,10 +115,10 @@ describe("migration lineage reopen matrix", () => {
     const firstApplied: number[][] = [];
     const first = open(path, MIGRATIONS, (applied) => firstApplied.push(applied));
     expectFinalSchema(first);
-    expect(firstApplied).toEqual([Array.from({ length: 32 }, (_, index) => index + 1)]);
+    expect(firstApplied).toEqual([Array.from({ length: 34 }, (_, index) => index + 1)]);
     close(first);
     const reopened = expectReopenNoOp(path);
-    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(32);
+    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(34);
   });
 
   it("converges the historical T4 17/18 MCP-Skill lineage through 024", () => {
@@ -129,11 +145,13 @@ describe("migration lineage reopen matrix", () => {
       scheduledOccurrenceCharacterMigration030,
       runUsageDetailsMigration031,
       conversationCompactionLifecycleMigration032,
+      hindsightReplicaSyncMigration033,
+      hindsightReplicaSchedulerMigration034,
     ], (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]]);
+    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34]]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT version FROM migrations ORDER BY version").all().map((row) => row.version)).toEqual(
-      Array.from({ length: 32 }, (_, index) => index + 1),
+      Array.from({ length: 34 }, (_, index) => index + 1),
     );
     close(reopened);
     expectReopenNoOp(path);
@@ -146,7 +164,7 @@ describe("migration lineage reopen matrix", () => {
     close(first);
     const tailApplied: number[][] = [];
     const reopened = open(path, MIGRATIONS, (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32]]);
+    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34]]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT mode FROM memory_authority_selection WHERE singleton=1").get()?.mode)
       .toBe("legacy-markdown");
@@ -163,7 +181,7 @@ describe("migration lineage reopen matrix", () => {
 
     const applied: number[][] = [];
     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([[32]]);
+    expect(applied).toEqual([[32, 33, 34]]);
     expect(upgraded.prepare(`SELECT through_seq,text,revision,last_operation_id,source_from_seq,source_through_seq,
       source_digest,captured_tail_seq FROM conversation_summary WHERE character_id='taki'`).get()).toEqual({
       through_seq: 12,
@@ -209,5 +227,39 @@ describe("migration lineage reopen matrix", () => {
       .toEqual({ mode: "hindsight", active_epoch_id: "hindsight-epoch", provider_lineage_id: "provider-lineage" });
     expect(reopened.prepare("SELECT transaction_id FROM hindsight_authority_activation_receipts").get()?.transaction_id)
       .toBe("hindsight-tx");
+  });
+
+  it("adds version 034 without rewriting an existing replica, checkpoint, or usable lease", () => {
+    const path = createPath(); const first = open(path, MIGRATIONS.slice(0, 33));
+    const at = "2026-09-06T00:00:00.000Z"; const uuid = "11111111-1111-4111-8111-111111111111";
+    const record = { bankId: "bank", objectKind: "memory_unit", objectId: "removed", objectRevision: 2, operation: "tombstone", payload: null };
+    first.exec(`INSERT INTO hindsight_replica_sync_records
+      (bank_id,object_kind,object_id,object_revision,operation,record_json,record_hash,source_cursor)
+      VALUES ('bank','memory_unit','removed',2,'tombstone','${JSON.stringify(record)}','${canonicalPayloadHash(record)}',12);`);
+    const lease = createHindsightReplicaLeaseRepo(first, () => at).acquire({ bankId: "bank", ownerId: "old-owner", durationMs: 60_000 });
+    const checkpoint = { bankId: "bank", providerLineageId: uuid, bankGeneration: uuid, authorityEpochId: "authority",
+      replicaEpochId: uuid, endCursor: 12, snapshotId: uuid, snapshotCursor: 8, snapshotManifestDigest: "a".repeat(64),
+      manifestDigest: createReplicaRecordStore(first, createIntlSegmenterTokenizer({ stoplist: true })).digest("bank"), verifiedAt: at };
+    first.transaction(() => publishReplicaCheckpoint(first, { previous: null, next: checkpoint }));
+    const records = first.prepare("SELECT * FROM hindsight_replica_sync_records").all();
+    const leases = first.prepare("SELECT * FROM hindsight_replica_sync_leases").all();
+    close(first); const applied: number[][] = [];
+    const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
+    expect(applied).toEqual([[34]]);
+    expectFinalSchema(upgraded);
+    expect(upgraded.prepare("SELECT * FROM hindsight_replica_sync_records").all()).toEqual(records);
+    expect(createReplicaRecordStore(upgraded, createIntlSegmenterTokenizer({ stoplist: true })).get({
+      bankId: "bank", objectKind: "memory_unit", objectId: "removed", includeTombstones: true,
+    })).toEqual(record);
+    expect(upgraded.prepare("SELECT * FROM hindsight_replica_sync_leases").all()).toEqual(leases);
+    expect(() => createHindsightReplicaLeaseRepo(upgraded, () => at).assert(lease)).not.toThrow();
+    expect(readReplicaCheckpoint(upgraded, "bank")).toEqual(checkpoint);
+    expect(upgraded.prepare("SELECT count(*) AS n FROM hindsight_replica_sync_schedule").get()?.n).toBe(0);
+    expect(upgraded.prepare("SELECT mode FROM memory_authority_selection").get()?.mode).toBe("legacy-markdown");
+    close(upgraded); const reopened = expectReopenNoOp(path);
+    expect(readReplicaCheckpoint(reopened, "bank")).toEqual(checkpoint);
+    expect(reopened.prepare("SELECT * FROM hindsight_replica_sync_records").all()).toEqual(records);
+    expect(reopened.prepare("SELECT * FROM hindsight_replica_sync_leases").all()).toEqual(leases);
+    expect(() => createHindsightReplicaLeaseRepo(reopened, () => at).assert(lease)).not.toThrow();
   });
 });

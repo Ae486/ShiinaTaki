@@ -1,1 +1,9 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python3 .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Check atomic journal application, FTS rebuild, checkpoint CAS, and restart behavior."}
+{"file":".trellis/spec/backend/memory-replica-sync.md","reason":"Check complete-journal, streaming byte/record bounds, canonical projection, and checkpoint preservation on failure."}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Check structured nested memory errors, retryability, cancellation, unknown outcomes, and superseded rows."}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Check focused/full quality gates, schema bounds, privacy, and regression coverage."}
+{"file":".trellis/spec/guides/cross-layer-thinking-guide.md","reason":"Check journal-to-reader-to-runtime data flow and boundary validation."}
+{"file":".trellis/tasks/08-09-memory-replica-sync-recovery/design.md","reason":"Review implementation against B5 canonical sync, reader, scheduler, and pending contracts."}
+{"file":".trellis/tasks/08-09-memory-replica-sync-recovery/implement.md","reason":"Review ordered waves, first-slice proof, and explicit live activation gates."}
+{"file":".trellis/tasks/08-09-memory-replica-sync-recovery/research/runtime-baseline-2026-09-05.md","reason":"Recheck implementation assumptions against the current Shared/Core baseline and migration 032 ceiling."}
+{"file":"docs/adr/0009-single-memory-authority-with-local-replica.md","reason":"Check no automatic failover, confirmed/unconfirmed separation, and recovery ordering."}

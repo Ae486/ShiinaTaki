@@ -18,6 +18,9 @@ The reviewed Memory checkpoint adds migrations 033/034 and a nested Memory error
 D68's outcome fix. Preserve both contracts and verify the merged T4 tree before allocating the next
 Timeline migration or dispatching live-feedback production work.
 
+The prerequisite passed on 2026-09-07: see [merged-tree evidence](research/upstream-sync-evidence-2026-09-07.md).
+The checked registry ends at 034. Verify the local integration commit before starting L1.
+
 ## L1 — producer, activity transport and durable handoff
 
 1. Inspect the completed D68 invocation/outcome bridge and use it directly. Add an ordered foreground

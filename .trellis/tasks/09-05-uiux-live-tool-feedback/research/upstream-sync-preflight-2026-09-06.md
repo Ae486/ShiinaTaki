@@ -4,6 +4,11 @@ Main inspected local Git on 2026-09-06 while D68-B's independent review was acti
 integration prerequisite; it does not activate the live-feedback child or claim that synchronization
 has completed. Re-read current HEAD/main and the migration registry before implementation.
 
+Update, 2026-09-07: the prerequisite is now checked on the merged T4 tree. See
+[the integration evidence](upstream-sync-evidence-2026-09-07.md) for conflict resolution, independent
+review, downstream gates, isolated startup/reopen and preservation of foreign work. The remaining
+sections record the original preflight, not an outstanding synchronization request.
+
 ## Verified upstream checkpoint
 
 `main` at `c3f8bc4` contains three commits missing from T4 at `9704d5c`:

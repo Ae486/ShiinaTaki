@@ -4,7 +4,7 @@
  * POS:    core/memory/hindsight — provider boundary; no offset list is accepted as a replica feed
  */
 import { z } from "zod";
-import { HindsightLogicalSnapshotMetadataSchema, HindsightLogicalSnapshotPageSchema, type HindsightLogicalSnapshotManifest, type HindsightLogicalSnapshotMetadata, type HindsightLogicalSnapshotPage, type HindsightLogicalSnapshotRecord } from "@taki/shared";
+import { HindsightLogicalSnapshotMetadataSchema, HindsightLogicalSnapshotPageSchema, HindsightLogicalSnapshotRecordSchema, type HindsightLogicalSnapshotManifest, type HindsightLogicalSnapshotMetadata, type HindsightLogicalSnapshotPage, type HindsightLogicalSnapshotRecord } from "@taki/shared";
 
 const Id = z.string().min(1).max(512);
 const Hash = z.string().regex(/^[a-f0-9]{64}$/);
@@ -64,7 +64,7 @@ export function normalizeSnapshotPage(value: HindsightSnapshotPageWire): Hindsig
     totalPages: value.total_pages,
     recordCount: value.record_count,
     contentHash: value.content_sha256,
-    records: value.records.map(normalizeRecord),
+    records: value.records.map(normalizeHindsightLogicalRecord),
   });
 }
 
@@ -79,12 +79,15 @@ function normalizeManifest(value: HindsightSnapshotMetadataWire["manifest"]): Hi
   };
 }
 
-function normalizeRecord(value: z.infer<typeof WireRecordSchema>): HindsightLogicalSnapshotRecord {
+export function normalizeHindsightLogicalRecord(value: z.infer<typeof WireRecordSchema>): HindsightLogicalSnapshotRecord {
   const payload = toCamel(value.payload);
-  return { objectKind: value.object_kind, objectId: value.object_id, objectRevision: value.object_revision,
-    payload: { kind: value.object_kind, value: payload } } as HindsightLogicalSnapshotRecord;
+  return HindsightLogicalSnapshotRecordSchema.parse({ objectKind: value.object_kind, objectId: value.object_id, objectRevision: value.object_revision,
+    payload: { kind: value.object_kind, value: payload } });
 }
 
 function toCamel(value: Record<string, unknown>): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(value).map(([key, item]) => [key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase()), item]));
+  const entries = Object.entries(value).map(([key, item]) => [key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase()), item] as const);
+  // Provider fields are normalized only at the top level; nested metadata/config keys are opaque.
+  if (new Set(entries.map(([key]) => key)).size !== entries.length) throw new Error("HINDSIGHT_RESPONSE_INVALID");
+  return Object.fromEntries(entries);
 }

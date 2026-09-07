@@ -10,7 +10,7 @@
 ## Current UI/UX checkpoint - 2026-09-07
 
 Stay in `H:/TakiAgent-worktrees/t4`, branch `task/t4-skills-mcp-productization`. D64 is checked at `a5d1b66`;
-D68-B has now passed independent review and delegated engineering acceptance. Use the live Git log for its commit.
+D68-B passed independent review and delegated engineering acceptance and is committed at `1f76ce9`.
 The continuation recovered `.trellis/tasks/09-05-uiux-readable-operations` from session
 `01a070e4-3a27-7562-ab12-14cc42cbea98` and bound it to
 `session:codex_01a074f6-ff11-71b3-832a-e35578901417`. After D64's checked commit, main activated
@@ -59,9 +59,11 @@ window acceptance is autonomous under this delegation; do not claim unobserved o
   hashes and the production CSP were verified; all owned QA processes/listeners are stopped. UI data is synthetic;
   installed-SDK/SQLite producer and real Core startup evidence are separately labeled. Personal owner inspection
   is not claimed. The exact `@tanstack/react-virtual@3.14.9` remains the sole new dependency.
-- The live-feedback child now has reviewed `design.md`, `implement.md` and a source preflight. It
-  remains planning until the [upstream Memory synchronization prerequisite](../.trellis/tasks/09-05-uiux-live-tool-feedback/research/upstream-sync-preflight-2026-09-06.md)
-  is checked. It reuses D64/D68 invocation/name/outcome facts, adds bounded
+- The live-feedback child now has reviewed `design.md`, `implement.md` and a source preflight. The
+  [upstream Memory synchronization gate](../.trellis/tasks/09-05-uiux-live-tool-feedback/research/upstream-sync-evidence-2026-09-07.md)
+  passed independent merge review, Shared 433/Core 2,036/Desktop 690/CLI 50 tests, type/lint/build,
+  and three isolated Core startup/storage/reopen modes through migration 034 with zero provider calls.
+  After its checked merge commit, activate the existing child. It reuses D64/D68 invocation/name/outcome facts, adds bounded
   Character activity recovery and optional Timeline presentation metadata with atomic history handoff,
   then implements Chat and the confirmed separate Pet bubbles with CSS-driven continuous motion.
 - User process refinement: simple changes may skip a separate check agent or join a related check;
@@ -71,8 +73,10 @@ window acceptance is autonomous under this delegation; do not claim unobserved o
   interrupted; the owner's waiting cadence is thirty minutes, with replies to concrete checkpoints/blockers.
 - Preserve unrelated Avatar Lab, OpenBiliClaw, Desktop tsconfig/vite and task metadata. Desktop's 690-test gate
   includes 10 external Lab tests; their files stay outside the D68 inventory and staging. Local main advanced to
-  `c3f8bc4` with checked offline Memory Replica Waves 0-2, migrations 033/034 and a governed-tool overlap. Merge
-  those contracts semantically and verify T4 before the Chat/Pet implementation; do not modify main or Hindsight.
+  `c3f8bc4` with checked offline Memory Replica Waves 0-2, migrations 033/034 and a governed-tool overlap. The
+  checked integration retains the closed D68 outcome classifier, both branches' tests and all 979 Shared exports.
+  All 43 protected foreign-file hashes remain unchanged. Do not modify main or Hindsight; append the next
+  Timeline presentation migration after 034.
 
 The decision source remains the parent
 [UI/UX grill](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-grill-2026-09-05.md).

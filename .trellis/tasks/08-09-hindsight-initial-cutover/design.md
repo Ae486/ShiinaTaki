@@ -89,3 +89,20 @@ resume, cursor-bound snapshot consistency, manifest mismatch, cursor expiry, tra
 stale promotion, restart persistence, and Local-authority preservation on every failure path. A controlled live gate is
 separate: it may validate a real accepted Hindsight deployment and setup/import twice, but real LLM health requires
 explicit owner approval because it makes provider calls.
+
+## Current Local Coverage Gate
+
+The B2 migration snapshot is immutable historical evidence, not the complete current source of truth. B4 starts by
+freezing a `CurrentLocalEpochManifest` for every canonical Local Bank. Its sorted entries cover source/document identity,
+content hash, source and record revisions, lifecycle state, derived objects, Taki policy projection, and tombstone
+markers. The manifest also records the Local authority epoch, schema version, captured timestamp, and a source revision
+fence. A source is required when it is present in the frozen current Local projection and is not explicitly excluded by
+the approved migration policy.
+
+The importer compares this manifest with B2 `memory_migration_sources` and ledger evidence. Local retain, edit,
+invalidate, restore, and reclassification operations performed after B2 become a bounded catch-up set; they are imported
+using their current canonical content/revision or the run restarts from a new frozen manifest after a writer quiescence.
+No source is silently considered covered because it has a B2 row. Before preparing activation, acquire a short final
+Local write fence and re-read the epoch, source revision fence, and digest. A mismatch discards only B4 staging and
+restarts coverage verification while preserving B2 evidence and all resumable B4 ledger rows. The final fence is a
+revalidation boundary, not permission to bypass unresolved mappings.

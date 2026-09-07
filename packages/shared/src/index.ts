@@ -270,14 +270,14 @@ export type {
   CanonicalMemoryRecord, MemoryProviderCapabilities, MemoryErrorCode, MemoryError,
 } from "./memory-provider-domain-schema.ts";
 export {
-  RetainRequestSchema, RetainResultSchema, RecallRequestSchema, RecallScoreSchema, RecallHitSchema, RecallResultSchema,
+  RetainRequestSchema, RetainResultSchema, RetainCompletedResultSchema, RetainBankProgressSchema, RecallRequestSchema, RecallScoreSchema, RecallHitSchema, RecallResultSchema,
   ReflectRequestSchema, ReflectResultSchema, EditableMemoryPatchSchema, MutationRequestSchema, UpdateMemoryRequestSchema,
   InvalidateMemoryRequestSchema, RestoreMemoryRequestSchema, MutationResultSchema, EditResultSchema, InvalidateResultSchema,
-  RestoreResultSchema,
+  RestoreResultSchema, AppliedMutationResultSchema,
 } from "./memory-provider-operation-schema.ts";
 export type {
-  RetainRequest, RetainResult, RecallRequest, RecallResult, ReflectRequest, ReflectResult, EditableMemoryPatch,
-  MutationRequest, UpdateMemoryRequest, InvalidateMemoryRequest, RestoreMemoryRequest, MutationResult,
+  RetainRequest, RetainResult, RetainCompletedResult, RetainBankProgress, RecallRequest, RecallResult, ReflectRequest, ReflectResult, EditableMemoryPatch,
+  MutationRequest, UpdateMemoryRequest, InvalidateMemoryRequest, RestoreMemoryRequest, MutationResult, AppliedMutationResult,
 } from "./memory-provider-operation-schema.ts";
 export {
   MemorySuccessEnvelopeSchema, MemoryErrorEnvelopeSchema, RetainEnvelopeSchema, RecallEnvelopeSchema, ReflectEnvelopeSchema,
@@ -286,6 +286,25 @@ export {
 export type {
   MemoryResult, RetainEnvelope, RecallEnvelope, ReflectEnvelope, EditEnvelope, InvalidateEnvelope, RestoreEnvelope,
 } from "./memory-provider-envelope-schema.ts";
+export {
+  MEMORY_REPLICA_PAGE_LIMIT, MemoryReplicaObjectKindSchema, MemoryReplicaPayloadSchema, MemoryReplicaRecordSchema,
+  MemoryReplicaJournalRecordSchema, MemoryReplicaJournalPageSchema, MemoryReplicaCheckpointSchema, MemoryReplicaLeaseSchema,
+} from "./memory-replica-schema.ts";
+export {
+  REPLICA_AUTO_INTERVAL_MS, REPLICA_FULL_RECONCILIATION_INTERVAL_MS, REPLICA_RETRY_DELAYS_MS,
+  MemoryReplicaBankSchema, MemoryReplicaScheduleConfigSchema, MemoryReplicaSyncStateSchema, MemoryReplicaSyncStatusSchema,
+  MemoryReplicaRunKindSchema, MemoryReplicaScheduledRunSchema, MemoryReplicaRunResultSchema, MemoryReplicaErrorCodeSchema,
+} from "./memory-replica-schedule-schema.ts";
+export type {
+  MemoryReplicaBank, MemoryReplicaScheduleConfig, MemoryReplicaSyncState, MemoryReplicaSyncStatus,
+  MemoryReplicaRunKind, MemoryReplicaScheduledRun, MemoryReplicaRunResult, MemoryReplicaErrorCode,
+} from "./memory-replica-schedule-schema.ts";
+export { HindsightJournalChangeSchema, HindsightJournalPageSchema } from "./hindsight-journal-schema.ts";
+export type { HindsightJournalChange, HindsightJournalPage } from "./hindsight-journal-schema.ts";
+export type {
+  MemoryReplicaObjectKind, MemoryReplicaPayload, MemoryReplicaRecord, MemoryReplicaJournalRecord,
+  MemoryReplicaJournalPage, MemoryReplicaCheckpoint, MemoryReplicaLease,
+} from "./memory-replica-schema.ts";
 export {
   MEMORY_MIGRATION_METHODS, MemoryMigrationActivateParamsSchema, MemoryMigrationActivationSchema, MemoryMigrationDryRunParamsSchema,
   MemoryMigrationExceptionPageSchema, MemoryMigrationExceptionSchema, MemoryMigrationExceptionsParamsSchema,

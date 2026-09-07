@@ -257,6 +257,26 @@ describe("createCoreToolGovernanceAdapter", () => {
     expect(db.prepare("SELECT state,outcome FROM run_effects").get()).toEqual({ state: "terminal", outcome: "outcome_unknown" });
   });
 
+  it.each([
+    ["MEMORY_OPERATION_CANCELLED", "cancelled", "none"],
+    ["MEMORY_OUTCOME_UNKNOWN", "outcome_unknown", "check-provider"],
+  ] as const)("projects nested %s into Effect settlement", async (code, outcome, nextAction) => {
+    const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+    dbs.push(db);
+    db.exec("INSERT INTO run_snapshots (snapshot_id,run_id,schema_version,manifest_json,manifest_digest,captured_at,created_at) VALUES ('s','r','harness.v1','{}','aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z'); INSERT INTO runs (run_id,character_id,trigger_request_id,idempotency_key,request_hash,initiator,provenance_json,delivery_class,state,state_version,snapshot_id,active_attempt_id,queued_at,operation_phase,created_at,updated_at) VALUES ('r','c','t','i','h','primary','{}','class_a','running',0,'s','a','2026-08-25T00:00:00.000Z','executing','2026-08-25T00:00:00.000Z','2026-08-25T00:00:00.000Z'); INSERT INTO run_attempts (attempt_id,run_id,ordinal,state,state_version,provider,model_id,snapshot_id) VALUES ('a','r',1,'effect_running',0,'p','m','s');");
+    const caps = { providerId: "local", contractVersion: 1 as const, retain: true, recall: true, reflect: false, edit: true, invalidate: true, restore: true, conditionalMutation: true, idempotentWrites: true, sparseRetrieval: true, vectorRetrieval: "unavailable" as const, derivedMemoryRead: false };
+    const original = attachMemoryEffectMetadata(tool({ description: "memory", inputSchema: z.object({}), execute: async () => ({ ok: false,
+      requestId: "memory-request", providerId: "local", authorityEpochId: "epoch", capabilities: caps,
+      error: { code, category: "availability", message: "memory operation did not complete", retryable: false, nextAction },
+    }) }), { operation: "recall", authorityEpochId: "epoch", providerId: "local", providerLineageId: "lineage", capabilities: caps, replayPosture: "safe" });
+    const effects = createEffectLifecycleService(createEffectRepo(db, createRunEventRepo(db)));
+    const approval = createApprovalInteractionService(createApprovalDecisionService(createApprovalStateRepo(db)));
+    const connection = { state: { status: "authenticated" as const, deviceId: "operator", role: "operator" as const, capabilities: [] as string[] } };
+    const wrapped = createCoreToolGovernanceAdapter(service(), OWNER_HOST_ID, approval).wrap({ recall: original }, { connection, runId: "r", attemptId: "a", effects });
+    await wrapped.recall?.execute?.({}, { toolCallId: "memory", messages: [] } as never);
+    expect(db.prepare("SELECT state,outcome,error_code FROM run_effects").get()).toEqual({ state: "terminal", outcome, error_code: code.toLowerCase() });
+  });
+
   it("keeps lifecycle-only non-primary Memory calls inside the Core Effect bracket", async () => {
     const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
     dbs.push(db);

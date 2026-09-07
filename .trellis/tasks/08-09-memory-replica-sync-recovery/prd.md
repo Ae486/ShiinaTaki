@@ -33,3 +33,18 @@ Keep the structured local replica close to Hindsight authority asynchronously an
 - Initial legacy import and first authority activation.
 - Automatic recall projection and final operator presentation.
 - Planned Local cutover or emergency takeover UX.
+
+## Contract Clarifications (2026-09-05)
+
+- Live B5 use starts only after B4 proves complete coverage of the frozen current Local epoch, including post-B2
+  retain/edit/invalidate/restore changes, and passes the short final Local fence. B2 evidence remains immutable.
+  Owner-approved offline Waves 0-2 may use deterministic fixtures; their implementation and checks do not open this gate.
+- The canonical result contract must represent pending receipts, policy-permitted zero-result retain, superseded/not-found
+  mutations, unknown/cancelled outcomes, and per-bank partial progress. Governed tools read `error.code`; a bounded
+  prerequisite fix and regression tests precede replica implementation.
+- Replica sync runs are independent of B2 import, use per-Bank lease/fence and predecessor-cursor CAS, and atomically
+  upsert/tombstone canonical payloads, FTS, and checkpoint. Full-record readers and Taki policy projection are required;
+  identity/revision/hash listing alone is insufficient. Current checkpoints are separate from immutable activation
+  receipts, and remote snapshot expiry never invalidates a verified local replica.
+- Pending replay belongs to B5 recovery and is ordered after remote pull and before derived completion/second pull. It is
+  not generic blind Effect replay and never changes authority automatically.

@@ -22,6 +22,8 @@ import { HindsightDetailedOperationSchema, HindsightDocumentResponseSchema, Hind
 import { canonicalPayloadHash } from "../legacy-migration/legacy-identities.ts";
 import { HindsightSnapshotMetadataWireSchema, HindsightSnapshotPageWireSchema, normalizeSnapshotMetadata, normalizeSnapshotPage } from "./hindsight-snapshot-contracts.ts";
 import type { HindsightLogicalSnapshotMetadata, HindsightLogicalSnapshotPage } from "@taki/shared";
+import type { HindsightJournalPage } from "@taki/shared";
+import { HindsightJournalWireSchema, normalizeHindsightJournal } from "./hindsight-journal-contracts.ts";
 
 export interface HindsightTransportResponse {
   status: number;
@@ -55,6 +57,7 @@ export interface HindsightClient {
   createLogicalSnapshot?: (input: { bankId: string; pageSize: number; ttlSeconds: number; context: HindsightCallContext }) => Promise<HindsightLogicalSnapshotMetadata>;
   logicalSnapshot?: (bankId: string, snapshotId: string, context: HindsightCallContext) => Promise<HindsightLogicalSnapshotMetadata>;
   logicalSnapshotPage?: (input: { bankId: string; snapshotId: string; pageNumber: number; context: HindsightCallContext }) => Promise<HindsightLogicalSnapshotPage>;
+  changesAfter?: (input: { bankId: string; afterCursor: number; limit: number; context: HindsightCallContext }) => Promise<HindsightJournalPage>;
 }
 
 const MAX_RESPONSE_BYTES = 512 * 1024;
@@ -116,7 +119,25 @@ function createClientMethods(request: <T>(input: RequestInput<T>) => Promise<T>)
       return { items: result.items, total: result.total, limit: result.limit, offset: result.offset };
     },
   };
-  return Object.assign(methods, createSnapshotMethods(request));
+  return Object.assign(methods, createSnapshotMethods(request), createJournalMethods(request));
+}
+
+function createJournalMethods(request: <T>(input: RequestInput<T>) => Promise<T>): Pick<HindsightClient, "changesAfter"> {
+  return { changesAfter: async (input) => {
+    if (!Number.isSafeInteger(input.afterCursor) || input.afterCursor < 0 || !Number.isSafeInteger(input.limit)
+      || input.limit < 1 || input.limit > 1000 || input.bankId.length < 1 || input.bankId.length > 256) {
+      throw hindsightError("HINDSIGHT_RESPONSE_INVALID");
+    }
+    const query = new URLSearchParams({ after_cursor: String(input.afterCursor), limit: String(input.limit) });
+    return request({
+      path: `/ext/taki-memory/banks/${encodeURIComponent(input.bankId)}/changes?${query}`,
+      context: input.context, schema: { parse: (raw) => {
+        const page = normalizeHindsightJournal(HindsightJournalWireSchema.parse(raw), input.bankId);
+        if (page.predecessorCursor !== input.afterCursor) throw hindsightError("HINDSIGHT_RESPONSE_INVALID");
+        return page;
+      } },
+    });
+  } };
 }
 
 function createSnapshotMethods(request: <T>(input: RequestInput<T>) => Promise<T>): Pick<HindsightClient, "createLogicalSnapshot" | "logicalSnapshot" | "logicalSnapshotPage"> {
@@ -190,7 +211,7 @@ function composeSignal(caller: AbortSignal | undefined, deadline: AbortSignal): 
 function mapHttpFailure(status: number, path: string): HindsightError {
   const snapshot = path.includes("/snapshots");
   const code: HindsightErrorCode = status === 408 ? "HINDSIGHT_TIMEOUT"
-    : snapshot && status === 409 ? "HINDSIGHT_CURSOR_RESET_REQUIRED"
+    : (snapshot || path.includes("/changes?")) && status === 409 ? "HINDSIGHT_CURSOR_RESET_REQUIRED"
       : snapshot && status === 410 ? "HINDSIGHT_SNAPSHOT_EXPIRED"
         : snapshot && status === 404 && path.includes("/pages/") ? "HINDSIGHT_SNAPSHOT_PAGE_MISSING"
           : snapshot && status === 404 ? "HINDSIGHT_SNAPSHOT_NOT_FOUND"
@@ -202,5 +223,29 @@ function mapHttpFailure(status: number, path: string): HindsightError {
 
 async function defaultTransport(input: string | URL, init?: RequestInit): Promise<HindsightTransportResponse> {
   const response = await fetch(input, init);
-  return { status: response.status, headers: response.headers, body: await response.text() };
+  if (!response.ok) {
+    await response.body?.cancel();
+    return { status: response.status, headers: response.headers, body: "" };
+  }
+  return { status: response.status, headers: response.headers, body: await readBoundedBody(response) };
+}
+
+async function readBoundedBody(response: Response): Promise<string> {
+  if (!response.body) return "";
+  const reader = response.body.getReader(); const decoder = new TextDecoder();
+  let bytes = 0; let body = "";
+  try {
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) return body + decoder.decode();
+      bytes += chunk.value.byteLength;
+      if (bytes > MAX_RESPONSE_BYTES) {
+        await reader.cancel();
+        throw hindsightError("HINDSIGHT_RESPONSE_INVALID");
+      }
+      body += decoder.decode(chunk.value, { stream: true });
+    }
+  } finally {
+    reader.releaseLock();
+  }
 }

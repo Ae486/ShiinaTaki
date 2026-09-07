@@ -6,9 +6,9 @@
 import { createHash } from "node:crypto";
 import {
   CanonicalDerivedMemorySchema, CanonicalMemoryRecordSchema, CanonicalMemorySourceSchema,
-  CanonicalMemoryUnitSchema, MutationResultSchema, RetainResultSchema, TakiMemoryPolicyProjectionSchema,
+  CanonicalMemoryUnitSchema, AppliedMutationResultSchema, RetainCompletedResultSchema, TakiMemoryPolicyProjectionSchema,
   type CanonicalDerivedMemory, type CanonicalMemoryRecord, type CanonicalMemorySource,
-  type CanonicalMemoryUnit, type MutationResult, type TakiMemoryPolicyProjection,
+  type CanonicalMemoryUnit, type AppliedMutationResult as MutationResult, type TakiMemoryPolicyProjection,
 } from "@taki/shared";
 import { z } from "zod";
 import type { Database, SqlRow } from "./sqlite.ts";
@@ -187,12 +187,12 @@ function replayMutation(db: Database, input: MutationInput, operation: "edit" | 
   const stored = MutationReceiptSchema.parse(previous.result);
   const record = readSnapshot(db, { epochId: input.epochId, bankId: stored.bankId, memoryId: stored.memoryId, revision: stored.revision });
   if (!record) throw new Error("MEMORY_INTEGRITY_ERROR: mutation receipt snapshot missing");
-  return MutationResultSchema.parse({ outcome: stored.outcome, record });
+  return AppliedMutationResultSchema.parse({ outcome: stored.outcome, record });
 }
 
 function replayRetain(previous: { requestHash: string; result: unknown }, hash: string): RetainResult {
   if (previous.requestHash !== hash) throw new Error("MEMORY_REQUEST_ID_CONFLICT");
-  const parsed = RetainResultSchema.parse(previous.result);
+  const parsed = RetainCompletedResultSchema.parse(previous.result);
   return { documentId: parsed.documentId, sourceRevision: parsed.sourceRevision, memories: parsed.memories };
 }
 
