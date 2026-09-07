@@ -1,7 +1,8 @@
 # Foreground Chat/Pet live-feedback delivery evidence
 
 Status: **implementation, independent source review and delegated engineering acceptance passed on
-2026-09-07**. All required package and native-window gates passed; scoped Git/program delivery follows.
+2026-09-07**. All required package and native-window gates passed. Code is committed at `8433093`;
+the [program delivery record](../08-22-t4-agent-architecture-observability/research/uiux-delivery-2026-09-07.md) closes the scoped task.
 
 ## Scope and authority
 
@@ -67,7 +68,7 @@ Final logs and inventories are under `target/uiux-live-feedback-20260907/`.
 | Shared suite | 47 files / 446 passed | `implement/final-shared-full.log` |
 | Core suite | 312 files / 2,064 passed; one existing skip | `implement/final-core-full-bounded.log` |
 | Desktop suite | 131 files / 751 passed, including existing non-owned Lab tests | `implement/final-desktop-full.log` |
-| Workspace typecheck | All five projects passed; subsequent Core test-only check passed | `implement/final-workspace-typecheck.log`, `final-core-typecheck-after-mirror.log` |
+| Workspace typecheck | All five projects passed; subsequent Core test-only check passed | `implement/final-workspace-typecheck.log`, `implement/final-core-typecheck-after-mirror.log` |
 | Root lint | Passed; one existing unused-disable warning in `run-repo.ts` | `implement/final-root-lint.log` |
 | Desktop build | Passed; existing chunk-size advisory | `implement/final-desktop-build.log` |
 | Independent source/gates review | PASS; no unresolved finding; 127 files verified | `check/final-review.md`, `check/source-freeze.json` |

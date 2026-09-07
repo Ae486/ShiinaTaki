@@ -1,19 +1,16 @@
 # UI/UX requirement grill — 2026-09-05
 
-Status: planning and decision recording. G1, G2, G3's Pet sequence, G3a's exit boundary, and G3c's
-terminal error bubble are owner-confirmed. G3b adds an owner-confirmed continuity requirement with
-detailed design delegated to the main session. Error-code/message cleanup is separately deferred as
-D77. G4 confirms useful operation details and removal of meaningless internal metadata across user-facing pages.
-G5 confirms a DSH-led Monitor UI rebuild; the current Monitor is a trace-validation prototype, not an accepted visual baseline.
-The owner approved the six-batch sequence and proceeding with implementation on 2026-09-05, then
-explicitly approved the naming/approval and live-feedback child-task creation. G4 frontend cleanup has
-passed implementation, review and real WebView2 QA. G4 plus A1/A2 naming/approval are committed as
-`a771496`. D64 policy A is independently checked and committed as `a5d1b66` under the owner's
-2026-09-06 execution delegation. D68-B's query/producer plan is reviewed and now in implementation; D75
-remains deferred for a dedicated measurement slice. Later slices still require their complete
-source-backed design and execution artifacts, without repeated owner-confirmation gates.
-This record coordinates the existing architecture/UI work. Verify the session task before every slice;
-the legacy compaction pointer must never reactivate the archived task.
+Status: confirmed requirements, with the approved G1-G5 program delivered on 2026-09-07 under the
+owner's [execution delegation](uiux-execution-delegation-2026-09-06.md). G4/A1/A2 (`a771496`), D64
+(`a5d1b66`), D68 (`1f76ce9`), checked upstream integration (`258b35b`) and Chat/Pet (`8433093`)
+have passed their recorded review and engineering acceptance. The final integration includes 3,261
+package tests and 15/15 immutable-build Chat/Pet WebView2 groups, with one existing test skip separate.
+See [the program delivery record](uiux-delivery-2026-09-07.md) for evidence and remaining scope.
+
+The sections below preserve the owner's planning-time rulings, including the then-prototype Monitor
+baseline. They are not instructions to restart completed batches. Personal owner inspection is not
+claimed. Historical frontend/architecture tasks and D67/D69/D75/D76/D77/true T4 follow-ups remain
+separate; the stale global Compaction pointer must never reactivate that archived child.
 
 ## G1 — next-stage scope (confirmed)
 

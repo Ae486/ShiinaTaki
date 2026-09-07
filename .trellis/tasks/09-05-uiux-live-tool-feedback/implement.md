@@ -9,7 +9,8 @@ gates. L1-L3, the combined independent review and delegated engineering acceptan
 2026-09-07. Shared 446/Core 2,064/Desktop 751 tests passed with one existing Core skip; type/lint/build
 and the final 15/15 native WebView2 groups passed. See the
 [delivery evidence](implementation-evidence-2026-09-07.md) for frozen artifacts and runtime proof.
-The coordinator retains scoped local commit and program-status reconciliation.
+Code is committed at `8433093`; task/program completion is recorded in the
+[integration checkpoint](../08-22-t4-agent-architecture-observability/research/uiux-delivery-2026-09-07.md).
 Do not use the stale legacy Compaction pointer. No new confirmation is needed for the reviewed scope.
 
 Read PRD, design, curated manifests and the referenced source preflight. Verify T4 cwd/branch/current

@@ -9,81 +9,53 @@
 
 ## Current UI/UX checkpoint - 2026-09-07
 
-Stay in `H:/TakiAgent-worktrees/t4`, branch `task/t4-skills-mcp-productization`. D64 is checked at `a5d1b66`;
-D68-B passed independent review and delegated engineering acceptance and is committed at `1f76ce9`.
-The continuation recovered `.trellis/tasks/09-05-uiux-readable-operations` from session
-`01a070e4-3a27-7562-ab12-14cc42cbea98` and bound it to
-`session:codex_01a074f6-ff11-71b3-832a-e35578901417`. After D64's checked commit, main activated
-`.trellis/tasks/08-28-dsh-observability-expansion` in that session. Its original implementation and independent
-`/root/d68_check` agents are complete; the interrupted check was resumed without repeating unchanged full gates.
-Verify the live task with `task.py current --source`;
-never reactivate the stale legacy Compaction pointer. G4 and A1/A2 are committed together as
-`a771496` (`feat(ui): make operations and approvals readable`). No push, finish or archive was performed.
+The approved G1-G5 UI/UX program is **complete** in `H:/TakiAgent-worktrees/t4`, branch
+`task/t4-skills-mcp-productization`. The latest code commit is `8433093`. The
+[program delivery record](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-delivery-2026-09-07.md)
+is the current integration truth; older sections below retain their historical dates.
 
-Latest authorization: the owner activated an execution goal to complete the planned work without
-further confirmations and to manage task commits. See
-[the delegation record](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-execution-delegation-2026-09-06.md).
-Checked local commits are authorized. Use the live Git log for later checkpoint hashes. Engineering
-window acceptance is autonomous under this delegation; do not claim unobserved owner review.
+| Delivered stage | Local commit | Evidence |
+| --- | --- | --- |
+| G4 cleanup and A1/A2 readable operation/approval names | `a771496` | [G4](../.trellis/tasks/08-30-frontend-uiux-optimization/implementation-evidence-g4-2026-09-05.md), [A1/A2](../.trellis/tasks/09-05-uiux-readable-operations/implementation-evidence-a1-a2-2026-09-06.md) |
+| D64 bound, safely disclosed approval commands | `a5d1b66` | [D64](../.trellis/tasks/09-05-uiux-readable-operations/implementation-evidence-d64-2026-09-06.md) |
+| D68 DSH Monitor port | `1f76ce9` | [D68-B](../.trellis/tasks/08-28-dsh-observability-expansion/implementation-evidence-d68-b-2026-09-07.md) |
+| Checked Memory integration before live feedback | `258b35b` | [Merge proof](../.trellis/tasks/09-05-uiux-live-tool-feedback/research/upstream-sync-evidence-2026-09-07.md) |
+| Ordered Chat/Pet feedback and continuous Pet bubbles | `8433093` | [Final live-feedback proof](../.trellis/tasks/09-05-uiux-live-tool-feedback/implementation-evidence-2026-09-07.md) |
 
-- G4 information cleanup is implemented and checked. Its isolated frontend-only WebView2 QA passed
-  12/12 interaction groups with synthetic responses; this does not certify normal Shell/Core startup
-  or owner visual acceptance. See the [G4 evidence](../.trellis/tasks/08-30-frontend-uiux-optimization/implementation-evidence-g4-2026-09-05.md).
-- A1/A2 readable names, permissions/approvals and immutable captured tool names are implemented.
-  One combined `gpt-6-astra/xhigh` review passed: Shared 402, Core 1,889 and Desktop 612 tests;
-  Core retains one conditional real-ZST-sample skip. Workspace typecheck, root lint and Desktop build
-  passed, with one existing lint warning. The focused final-build WebView2 check passed 6/6 groups
-  with synthetic data, no page/console errors, exact production CSP and verified assets. Owned test
-  processes/listeners are cleaned up; owner manual acceptance remains open.
-  [A1/A2 evidence](../.trellis/tasks/09-05-uiux-readable-operations/implementation-evidence-a1-a2-2026-09-06.md)
-  records exact gates and remaining acceptance.
-- The combined review fixed long-name wrapping and excluded only new tool `displayName` metadata
-  from canonical Compaction source identity. Legacy v1 hashes and real-content stale detection are
-  covered. This is a metadata compatibility fix in the naming task; it does not reopen Compaction.
-- D64/B command disclosure uses policy A selected by main under that delegation, as recorded in
-  [the policy proposal](../.trellis/tasks/09-05-uiux-readable-operations/research/d64-disclosure-policy-proposal-2026-09-05.md).
-  Its implementation and independent `gpt-6-astra/xhigh` review are complete, with Unicode/whole-value
-  masking and exact pending cancellation/resume fixes. Host v3 is retained with correlated challenge
-  ACK failure settlement; Desktop/CLI use operator offer/echo before rendering the complete command.
-  The continuation verified all 9 reviewer file hashes, 260 frontend source/config hashes and 23
-  frozen assets, and passed 32 Core plus 50 CLI regressions. Full gates, real Core/Host L1 6/6 and
-  actual WebView2 7/7 are recorded in the
-  [final D64 evidence](../.trellis/tasks/09-05-uiux-readable-operations/implementation-evidence-d64-2026-09-06.md).
-  The former `d64_check` session completed; it is not a live child of the incoming coordinator.
-- D68's DSH Monitor port is implemented, independently checked and engineering accepted. The
-  [delivery evidence](../.trellis/tasks/08-28-dsh-observability-expansion/implementation-evidence-d68-b-2026-09-07.md)
-  records 93 frozen files, five reproduced/fixed defect groups, Shared 411/Core 1,940/Desktop 690 passing tests,
-  one existing Core skip, successful type/lint/build gates and three isolated Core modes with zero provider calls.
-  Main's final actual WebView2 gate passed 24/24 groups, including paused 100-to-101 virtualization, 706-record
-  reconnect, hidden/pending details and interrupted pane geometry. Six served assets, 21 build files, 285 source
-  hashes and the production CSP were verified; all owned QA processes/listeners are stopped. UI data is synthetic;
-  installed-SDK/SQLite producer and real Core startup evidence are separately labeled. Personal owner inspection
-  is not claimed. The exact `@tanstack/react-virtual@3.14.9` remains the sole new dependency.
-- The live-feedback child now has reviewed `design.md`, `implement.md` and a source preflight. The
-  [upstream Memory synchronization gate](../.trellis/tasks/09-05-uiux-live-tool-feedback/research/upstream-sync-evidence-2026-09-07.md)
-  passed independent merge review, Shared 433/Core 2,036/Desktop 690/CLI 50 tests, type/lint/build,
-  and three isolated Core startup/storage/reopen modes through migration 034 with zero provider calls.
-  After its checked merge commit, activate the existing child. It reuses D64/D68 invocation/name/outcome facts, adds bounded
-  Character activity recovery and optional Timeline presentation metadata with atomic history handoff,
-  then implements Chat and the confirmed separate Pet bubbles with CSS-driven continuous motion.
-- User process refinement: simple changes may skip a separate check agent or join a related check;
-  retain focused verification and independent review for authorization/protocol/streaming consistency.
-  Implement agents use `gpt-6-astra/high`, check agents `gpt-6-astra/xhigh`, no recursive delegation.
-  Semantic discovery uses jbcontext only; YCE is prohibited in every agent prompt. A healthy child is not
-  interrupted; the owner's waiting cadence is thirty minutes, with replies to concrete checkpoints/blockers.
-- Preserve unrelated Avatar Lab, OpenBiliClaw, Desktop tsconfig/vite and task metadata. Desktop's 690-test gate
-  includes 10 external Lab tests; their files stay outside the D68 inventory and staging. Local main advanced to
-  `c3f8bc4` with checked offline Memory Replica Waves 0-2, migrations 033/034 and a governed-tool overlap. The
-  checked integration retains the closed D68 outcome classifier, both branches' tests and all 979 Shared exports.
-  All 43 protected foreign-file hashes remain unchanged. Do not modify main or Hindsight; append the next
-  Timeline presentation migration after 034.
+Final full gates passed: Shared 446, Core 2,064 plus one existing skip, Desktop 751, all five workspace
+typechecks, root lint and Desktop build. The final independent review froze 127 source/test/index
+files and 24 build files. Actual Core ordered/reused-ID/failure/cancel, queued admission and natural
+shutdown variants passed. Startup/storage/reopen retains migrations 001-035 and all three Monitor modes.
 
-The decision source remains the parent
-[UI/UX grill](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-grill-2026-09-05.md).
-The new [Operation Presentation spec](../.trellis/spec/backend/operation-presentation.md) is shared by
-the naming task and downstream Monitor/live-feedback contexts. The D68-B delivery keeps D75
-deferred for a dedicated same-scope measurement producer/persistence slice; D77 error
-taxonomy and real T4 initiative/heartbeat/cross-device work remain later work.
+Final real WebView2 acceptance passed 15/15 groups, covering order/outcomes, selected tool-heading DOM,
+atomic history handoff, missing batches/paging/reconnect, Pet segmented text/transient tools/error,
+scrolling/selection, intermediate CSS geometry, interruptions/reduced/zero motion and real visibility.
+Both pages' served resources and production CSP match; 320 frontend/Shared/config sources, 127 reviewed
+files, 24 assets, 22 QA inputs and 78 existing read-only model files are verified. All owned QA processes
+and listeners are stopped. Synthetic UI/provider data and actual Core/SDK/SQLite evidence are separate.
+
+The owner [delegated completion, engineering window acceptance and checked local commits](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-execution-delegation-2026-09-06.md).
+No repeated owner confirmation was required; personal owner visual inspection is not claimed.
+The readable-operations, D68 and live-feedback children are completed but remain in their task
+directories. No finish/archive/push was performed. The root native session
+`codex_01a074f6-ff11-71b3-832a-e35578901417` may still point to the completed live-feedback child.
+Always inspect `task.py current --source`; never reactivate the stale global Compaction pointer.
+
+D64/D65/D68 are resolved within recorded engineering acceptance. D67 retains Perception push and the
+wider cross-Home refresh/disclosure audit after the Monitor/Chat/Pet delivery. The architecture parent
+and historical pure-frontend task remain open; D69/D75/D76/D77 and actual T4 initiative, Heartbeat and
+cross-device work are separate. Do not infer a new task activation from this delivery.
+
+Preserve concurrent Avatar Lab, OpenBiliClaw, Desktop tsconfig/vite, Avatar documentation/index,
+unrelated task metadata and the session export. The final protected inventory has 42 unchanged
+hashes and one concurrent Lab change that this program did not edit or revert. D71-D74 remain
+working-copy additions excluded by partial staging. Main stays at the checked Memory checkpoint
+`c3f8bc4`; Hindsight is untouched. Migration035 is now present; future migrations append after it.
+
+Implementation agents use `gpt-6-astra/high`, check agents `gpt-6-astra/xhigh`, without recursive
+delegation. Semantic discovery uses jbcontext, never YCE. Simple changes may join a related review;
+protocol/authorization/streaming consistency retains independent review. Resume interrupted work
+from concrete checkpoints and do not repeat unchanged successful full gates.
 
 ## 0. Compaction checkpoint - 2026-09-05
 
