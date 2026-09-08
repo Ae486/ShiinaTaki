@@ -1422,3 +1422,36 @@ Committed the independently verified offline Waves 0-2 implementation and associ
 
 - Continue Wave 3 Pending Memory, unconfirmed overlay and ordered recovery under the existing active B5 task; keep one astra/high implementer followed by one astra/xhigh checker with explicit 30-minute waits.
 - B4 current-Local coverage/final fence, B6 wiring and live activation remain gated. No task finish/archive, push, real Hindsight/LLM call, existing-user-data migration or protected-backup access occurred.
+
+
+## Session 31: Home continuity closeout and Heartbeat planning entry
+
+**Date**: 2026-09-08
+**Task**: Home continuity closeout and Heartbeat planning entry
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Closed the owner-accepted Home continuity work, recorded deferred permission UX as D78, and entered T4 Heartbeat planning without production implementation.
+
+### Main Changes
+
+- Committed 95 reviewed UI/spec/test files; preserve unrelated Lab/OpenBiliClaw work and D71-D74.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `d6ddf2e5f932a096ff6162d31b05caeb16e7286e` | (see git log) |
+
+### Testing
+
+- [OK] 952 Desktop tests, five workspace typechecks, lint/build and strict WebView2 14/14 already passed; final source hashes still match.
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Complete Heartbeat scope/design and review incoming Memory lineage before implementation.

@@ -7,6 +7,42 @@
 > Latest checkpoint: 2026-09-08. Older sections retain their historical dates. Recheck every Git hash,
 > task pointer, dependency state, and runtime claim before use.
 
+## Current visual continuity checkpoint - 2026-09-08
+
+After manual inspection of the refresh work, the owner approved the
+[Home visual continuity follow-up](../.trellis/tasks/09-08-uiux-visual-continuity/prd.md).
+Engineering work and owner visual acceptance completed on 2026-09-08, based on `82e0a4a`.
+The owner then authorized local closeout; all 95 reviewed implementation files are committed as
+`d6ddf2e`. Acceptance documentation and the owned D78 registry entry form the documentation closeout.
+Run/Inspector replacement, shared pending slots, Perception layout, action-owned floating feedback
+and attachment draft retirement are implemented. Independent source review is complete for all 95
+changed source/test/index/spec files; Desktop 952 tests, all five workspace typechecks, root lint
+and the production Desktop build pass. The final build preserves all 375 recorded build inputs.
+
+Final frozen-build WebView2 passed **14/14** cases with zero page/fixture errors. The corrected
+build verifies stable header/card geometry, painted Run/Inspector transitions, Toast expiry/reading
+and late image-pick retirement. Hidden mode downgrade/reveal exposes old local detail in 0/61 frames.
+All 21 frozen Home resources and 95 reviewed files match; all eight owned QA PIDs were cleaned up.
+The
+[implementation evidence](../.trellis/tasks/09-08-uiux-visual-continuity/implementation-evidence-2026-09-08.md)
+records the exact boundary and manual checklist. After Desktop relaunch the owner reported no issues.
+The following permission-blocked sampling observation was attributed to the switch to standard
+permissions; the owner stopped investigation and deferred permission-system improvements as
+[D78](deferred-decisions.md). This is a separate follow-up, not an outstanding visual-continuity defect.
+No push, archive or change to the owner's running Core is part of this local commit closeout.
+Preserve concurrent Lab/OpenBiliClaw/config/parent metadata and the existing session export.
+
+The agreed pre-Heartbeat UI/UX workstream now includes the completed G1-G5 program, triggered
+refresh/disclosure work and this accepted visual-continuity follow-up. Historical whole-frontend
+closure remains narrower than claiming every UI/UX aspiration is delivered: long-CJK Markdown
+profiling and dedicated OS IME verification remain separate; theme/font and Live2D configuration
+entries were excluded. D77 error fidelity and D78 permission UX remain owner-deferred, with D69
+tool repair behavior and D75/D76 compaction measurement/quality in their own workstreams. The
+architecture and historical frontend parents stay open. The owner approved entering T4 Heartbeat
+planning after closeout; the root session now points to `.trellis/tasks/09-08-t4-heartbeat` in
+`planning`. The initial PRD preserves the frozen direction; no Heartbeat production implementation
+is activated by this entry.
+
 ## Current refresh completion checkpoint - 2026-09-08
 
 [Page state and event-triggered refresh](../.trellis/tasks/09-08-uiux-triggered-refresh/prd.md) is
@@ -32,7 +68,7 @@ profiling, D77, Avatar Lab/OpenBiliClaw, D69/D75/D76 and true T4 initiative/Hear
 separate. Current Lab/config inputs are included in the build hash record, but Home evidence does not
 certify their product behavior. Preserve all concurrent files and staged boundaries.
 
-The root session `codex_01a074f6-ff11-71b3-832a-e35578901417` remains bound to the completed refresh task.
+At this earlier closeout, root session `codex_01a074f6-ff11-71b3-832a-e35578901417` remained bound to the completed refresh task. It subsequently moved through visual continuity to the Heartbeat planning task recorded above.
 Inspect `task.py current --source` before any next work. Keep the stale global Compaction pointer
 untouched; no task archive, push or automatic follow-up activation was performed.
 
