@@ -138,3 +138,17 @@ The 40ms coalescer alone does not satisfy the streaming/performance acceptance c
 Markdown is still reparsed on a flush. Likewise, a three-zone component alone does not prove that the
 right Inspector is reachable within PageBody. Retain targeted verification rather than marking these
 criteria passed from implementation presence or broad visual feedback.
+
+## Engineering acceptance crosswalk — 2026-09-08
+
+The [triggered-refresh follow-up](../09-08-uiux-triggered-refresh/implementation-evidence-2026-09-08.md)
+completed the identified resource-state, demand/event refresh, disclosure and editing-continuity gaps.
+Its independent review covers 171 paths and its final WebView2 matrix passed 20/20, including first/stale
+errors, successful empty state, retry, real changed-data delivery, retained drafts/selection and reconnect.
+The source-backed policy covers all eight registered pages; existing Monitor and Chat/Pet acceptance is
+reused only within its recorded scope.
+
+The later approved DSH Monitor composition supersedes a literal requirement to use the same placeholder
+component on every page. Correct loading/empty/error semantics and useful retry are the current contract.
+This follow-up does not mark the historical whole-task checklist complete: long-CJK Markdown profiling
+remains separate, and engineering window evidence does not constitute personal owner or real OS IME acceptance.

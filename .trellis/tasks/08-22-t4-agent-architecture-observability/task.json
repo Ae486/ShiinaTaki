@@ -28,10 +28,11 @@
     "08-28-dsh-observability-expansion",
     "08-30-frontend-uiux-optimization",
     "09-05-uiux-readable-operations",
-    "09-05-uiux-live-tool-feedback"
+    "09-05-uiux-live-tool-feedback",
+    "09-08-uiux-triggered-refresh"
   ],
   "parent": null,
   "relatedFiles": [],
-  "notes": "The owner-approved G1-G5 UI/UX program completed on 2026-09-07; see research/uiux-delivery-2026-09-07.md. Readable operations, D68 and live Chat/Pet children are completed with scoped local commits and engineering acceptance. The architecture parent and historical pure-frontend task remain in_progress for their broader unclosed scope. D67 Perception/cross-Home audit, D69, D75/D76/D77 and actual T4 initiative/Heartbeat/cross-device remain separate. No parent archive or automatic follow-up activation is implied.",
+  "notes": "The owner-approved G1-G5 UI/UX program completed on 2026-09-07; see research/uiux-delivery-2026-09-07.md. Readable operations, D68 and live Chat/Pet children are completed with scoped local commits and engineering acceptance. The architecture parent and historical pure-frontend task remain in_progress for their broader unclosed scope. On 2026-09-08 child 09-08-uiux-triggered-refresh completed D67 page states and event/demand refresh in code 7d89191 after full independent source review and final 20/20 native engineering acceptance. Personal/OS IME inspection is not claimed. D69, long-CJK profiling, D75/D76/D77 and actual T4 initiative/Heartbeat/cross-device remain separate. No parent archive is implied.",
   "meta": {}
 }

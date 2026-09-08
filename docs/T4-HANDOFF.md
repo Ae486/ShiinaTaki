@@ -4,8 +4,37 @@
 >
 > Scope: post-Skills/MCP T4 - Autonomous Runs, Run Receipts, Scheduled Tasks, Heartbeat, delivery, reliability, and later Experience Review.
 >
-> Latest checkpoint: 2026-09-07. Older sections retain their historical dates. Recheck every Git hash,
+> Latest checkpoint: 2026-09-08. Older sections retain their historical dates. Recheck every Git hash,
 > task pointer, dependency state, and runtime claim before use.
+
+## Current refresh completion checkpoint - 2026-09-08
+
+[Page state and event-triggered refresh](../.trellis/tasks/09-08-uiux-triggered-refresh/prd.md) is
+**engineering complete**, code commit `7d89191dba88c1a143be1de86eac4d86dcc20aa7`. This closes D67's
+remaining Perception/cross-Home refresh and disclosure audit within the recorded scope. Home now has
+explicit entry/demand/producer/write/recovery policies, truthful resource states, stable reading and
+editing, and opt-in Perception/extension invalidation. No polling, new dependency, migration, capture
+policy, persistent authority/cache category or production Rust change was introduced.
+
+The [final evidence](../.trellis/tasks/09-08-uiux-triggered-refresh/implementation-evidence-2026-09-08.md)
+records one complete independent review of 171 paths and fixes for late MCP save outcomes, newer
+drafts/actual-commit retry versions, obsolete shared config reads and trailing-read busy state.
+Core passed 2,139 tests plus one existing skip, Shared 453 and Desktop 877. All five workspace types
+passed; root lint has zero errors and one existing warning in unchanged `db/run-repo.ts`.
+Actual Core two-operator/shutdown scenarios passed four tests. Final frozen WebView2 passed **20/20**
+with zero runtime/fixture errors; 366 build inputs, 24 assets, 25 QA program inputs and the exact
+reviewed source match. Production CSP remains enforced. All eight owned QA PIDs and listeners were cleaned.
+
+The owner delegated implementation, engineering window acceptance and checked local commits. The
+refresh task is completed; the architecture and historical frontend parents remain open. Real system
+IME and personal normal-window editing/hide/restore inspection remain manual checks. Long-CJK Markdown
+profiling, D77, Avatar Lab/OpenBiliClaw, D69/D75/D76 and true T4 initiative/Heartbeat/cross-device remain
+separate. Current Lab/config inputs are included in the build hash record, but Home evidence does not
+certify their product behavior. Preserve all concurrent files and staged boundaries.
+
+The root session `codex_01a074f6-ff11-71b3-832a-e35578901417` remains bound to the completed refresh task.
+Inspect `task.py current --source` before any next work. Keep the stale global Compaction pointer
+untouched; no task archive, push or automatic follow-up activation was performed.
 
 ## Current UI/UX checkpoint - 2026-09-07
 
@@ -37,12 +66,12 @@ and listeners are stopped. Synthetic UI/provider data and actual Core/SDK/SQLite
 The owner [delegated completion, engineering window acceptance and checked local commits](../.trellis/tasks/08-22-t4-agent-architecture-observability/research/uiux-execution-delegation-2026-09-06.md).
 No repeated owner confirmation was required; personal owner visual inspection is not claimed.
 The readable-operations, D68 and live-feedback children are completed but remain in their task
-directories. No finish/archive/push was performed. The root native session
-`codex_01a074f6-ff11-71b3-832a-e35578901417` may still point to the completed live-feedback child.
+directories. No finish/archive/push was performed. The root native session was subsequently bound
+to the owner-approved planning follow-up above on 2026-09-08.
 Always inspect `task.py current --source`; never reactivate the stale global Compaction pointer.
 
-D64/D65/D68 are resolved within recorded engineering acceptance. D67 retains Perception push and the
-wider cross-Home refresh/disclosure audit after the Monitor/Chat/Pet delivery. The architecture parent
+D64/D65/D68 are resolved within recorded engineering acceptance. D67's remaining Perception and
+cross-Home refresh/disclosure work was subsequently completed in the 2026-09-08 checkpoint above. The architecture parent
 and historical pure-frontend task remain open; D69/D75/D76/D77 and actual T4 initiative, Heartbeat and
 cross-device work are separate. Do not infer a new task activation from this delivery.
 
