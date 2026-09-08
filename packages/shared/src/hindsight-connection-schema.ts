@@ -51,6 +51,7 @@ export const HindsightSupportReasonSchema = z.enum([
   "backend_capability_probe_failed", "alternative_memory_store", "memory_store_capability_missing",
   "memory_store_capability_probe_failed", "provider_lineage_unavailable", "authentication_not_required",
   "authentication_capability_probe_failed",
+  "native_result_schema_unavailable",
 ]);
 export const HindsightCompatibilitySupportSchema = z.strictObject({ state: HindsightSupportSchema, reason: HindsightSupportReasonSchema });
 export type HindsightCompatibilitySupport = z.infer<typeof HindsightCompatibilitySupportSchema>;
@@ -75,6 +76,7 @@ export const HindsightCompatibilityProjectionSchema = z.strictObject({
     logicalSnapshot: HindsightVersionedContractSchema,
     additiveObservationInstructions: HindsightVersionedContractSchema,
     controlledLayerProjection: HindsightVersionedContractSchema,
+    nativeResults: HindsightVersionedContractSchema.optional(),
   }),
 });
 export type HindsightCompatibilityProjection = z.infer<typeof HindsightCompatibilityProjectionSchema>;

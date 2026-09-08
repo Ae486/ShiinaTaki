@@ -1,15 +1,50 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
-> Main-worktree Memory continuation (2026-09-06): `H:/TakiAgent` owns the active
-> `.trellis/tasks/08-09-memory-replica-sync-recovery` B5 task. Waves 0-2 have passed independent offline checks;
-> Wave 2 scheduling/reconciliation recovery passed with five fixes. Full TS tests/typechecks, root lint, and isolated
-> Core startup with migrations 1..34 passed. Read the child's execution record for exact evidence, cache/API limits,
-> and unrun platform/live gates; its executable contract is `.trellis/spec/backend/memory-replica-sync.md`.
-> Waves 0-2 are committed as `69ca779`; B5 remains `in_progress` for Wave 3.
-> The active execution plan is compact; complete prior evidence is preserved in the task research archive.
-> Preserve existing changes and the protected legacy backup. Wave 3 recovery, B6 runtime wiring, B4 current-Local
-> coverage/final fence, and owner-approved live activation remain outstanding. The T4 snapshot below does not select
-> the active Memory task or authorize work outside the main worktree.
+> Active Memory follow-up (2026-09-08): `.trellis/tasks/09-07-hindsight-recovery-evidence` is the session-bound in-progress
+> child of B5. The owner approved cross-repository work in `H:/TakiAgent` and `H:/hindsight` on recovery/append evidence,
+> requiring source-backed necessity, a clear minimal direction and maintained
+> upgrade records. `H:/hindsight/TAKI_PATCHES.md` is the live ledger; the old Taki compatibility archive stays historical.
+> Preserve the prior B5 changes, the protected legacy backup and the unrelated Hindsight control-plane `bin/cli.js` edit.
+> No live provider/LLM use, user-data migration, authority activation, push or task archival is authorized here.
+> The owner approved a provider-only local Git checkpoint after remote verification: `H:/hindsight` on `main`,
+> origin `https://github.com/Ae486/hindsight.git`, commit `8ab65b4c2ea238223eeef84cbdcc012ca7601e86`.
+> It includes the reviewed provider/SDK/test/ledger changes, preserves unrelated `bin/cli.js` bytes, and is not pushed.
+> The coordinated Taki changes remain uncommitted; this provider checkpoint does not authorize Taki Git/task closeout.
+> Latest owner steering: G1's second option is accepted. Confirm routine writes after reliable native-result evidence
+> and local factual application; observation/model work may finish later. Initial activation and a healthy switch to
+> Local keep independent required-maintenance and completeness gates. The reviewed B5 baseline uses the older wait;
+> G1 implementation and independent source review are complete: seven confirmed findings closed, one withdrawn.
+> Final native 69/Shared 396/Core 2036 and scoped quality gates pass. Native/HTTP/SQLite and SDK evidence is in
+> the child's `research/g1-routine-implementation.md` and `research/g1-validation-results.md`. The owner approved
+> the exact Rust dependency patch on 2026-09-08. Actual-source locked/offline build and four generated-model tests
+> pass in `d31d069c8e07`, independently reviewed; package versions/checksums are unchanged. G1 offline work is complete.
+> Before any further grill question, read prior discussion records and reuse settled rulings. `grill.md` indexes T5
+> decisions/kickoff, T4 G2-08, ADR 0009 and the parent PRD; no second product question is ready after that review.
+> The child task's `grill.md` records interoperability as the goal, public logical field alignment, full Canonical Local
+> maintenance in B6, Hindsight-native semantic ownership, adapter/official-extension-first integration and permission for
+> source-backed design refinements. Keep generic native hooks limited to demonstrated remaining gaps. The three
+> research reports remain evidence; the approximately 20-file atomic-retain and source-triggered automatic-MM design
+> is not the selected routine protocol. `design.md` selects tracked extension routes plus exact native per-commit
+> receipts, preserving native streaming and background maintenance. Direct implementer `hindsight_g1_implement`
+> owns that routine slice; `hindsight_g1_independent_check` completed its independent source review. Cutover research
+> is complete as a separate proposal and does not implement its additional producer/fence protocol.
+> The leader provides owned PostgreSQL fixtures and canonical generator tooling. Resume these agents and the task's
+> current plan rather than duplicating work, repeating research or asking again for execution authorization.
+>
+> Main-worktree Memory continuation (2026-09-07): `H:/TakiAgent` owns the active
+> `.trellis/tasks/08-09-memory-replica-sync-recovery` B5 task. Waves 0-2 are committed as `69ca779`.
+> Wave 3's implemented offline mechanics passed independent review with three fixes and 14 added regressions;
+> its 38 source/test/index files remain uncommitted on base `c3f8bc4`. Shared 392/Core 2016/CLI 47/Desktop 548,
+> all five TS typechecks, root lint and isolated Core startup through migrations 1..35 passed. Owned resources were
+> cleaned; provider requests were zero. Startup does not prove graceful shutdown, Host behavior or live acceptance.
+> G1 closes Wave 3's routine native-result/append implementation gaps. Parent/B4/B6/B7/runtime and live criteria
+> remain separate from the verified routine tests; do not report overall Memory interoperability as finished.
+> The reviewed code's unavailable derived fence is a historical baseline, not G1's routine condition. Preserve successful
+> native receipts while awaiting the required evidence; never substitute queue emptiness or
+> silently repeat writes. B4 current-Local coverage/final fence, B6 runtime wiring and owner-approved activation remain open.
+> Read the compact task plan and `research/wave-3-review-2026-09-07.md`; prior evidence is preserved separately.
+> The executable contract is `.trellis/spec/backend/memory-replica-sync.md`. Preserve current changes and the protected
+> legacy backup. The historical T4 snapshot below does not select this task or authorize other-worktree changes.
 >
 > Continuation checkpoint (2026-09-05): the current Compaction Harness state, final verification, and closeout boundary
 > are recorded in Section 0 of `docs/T4-HANDOFF.md`. The Skills/MCP snapshot below is historical context.

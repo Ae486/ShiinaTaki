@@ -1,6 +1,8 @@
 # core/db/migrations/
+- 025-run-events.ts — additive ordered Run Event ledger with immutable rows and bounded event payloads
 - 026-run-effects.ts — additive Run-owned effect current state and authoritative usage persistence for Slice 3
 - 027-effect-approval-ref.ts — additive bounded Approval wait reference on Run Effects for Slice 3B
+- 028-recovery-admission.ts — process generations, durable Run recovery/admission controls, deadlines, cancellation, and budget state
 - 029-scheduled-tasks.ts — durable Scheduled Task definitions and occurrence outbox for Slice 5A
 - 030-scheduled-occurrence-character.ts — append-only Character ownership backfill for occurrence replay safety
 - 031-run-usage-details.ts — additive uncached/cache-read/cache-write/text-output/reasoning usage columns
@@ -19,6 +21,7 @@
 - 032-conversation-compaction-lifecycle.ts — migration 32: revisioned summary checkpoint, fenced per-Character operation cursor, and immutable bounded compaction events
 - 033-hindsight-replica-sync.ts — migration 33: canonical incremental replica records, FTS projection, checkpoints, and Bank leases
 - 034-hindsight-replica-scheduler.ts — migration 34: durable scheduler/run state and the current verified single-record snapshot cache
+- 035-pending-memory.ts — migration 35: idempotent Pending Memory intents, persisted recovery phases, retry state, and safe terminal diagnostics
 - 013-config.ts — migration 13: config (the sparse operator-set settings store: key/JSON value/updated_at; a row exists only for a knob the panel actually set)
 - 014-governance-policy.ts — migration 14: Core-owned global Level/policy generation singleton + sparse validated cell overrides
 - 015-approval.ts — migration 15: Core Approval generation/revision singleton + canonical durable always-allow decisions

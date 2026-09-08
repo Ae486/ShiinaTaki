@@ -1,0 +1,14 @@
+{"file": ".trellis/tasks/09-07-hindsight-recovery-evidence/grill.md", "reason": "Verify accepted G1 native-result/local-application confirmation, preserved cutover and prior rulings; do not apply the older derived wait as the new routine target."}
+{"file": ".trellis/spec/backend/index.md", "reason": "Verify the package pre-development and quality contracts."}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Audit migrations, atomic journal/publication boundaries and stale-writer rejection."}
+{"file": ".trellis/spec/backend/memory-replica-sync.md", "reason": "Recheck actual B5 replay, preserved native success, reset/deadline guards and second-pull completion."}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Check failure, cancellation and unknown outcomes without unsafe replay."}
+{"file": ".trellis/spec/backend/memory-native-result-recovery.md", "reason": "Current G1 tracked factual-result, compact proof and actual-checkpoint contracts; legacy rows and independent cutover gates remain separate."}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "Audit new wire/persistence failure handling for secret or content leaks."}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Required tests, types, lint, startup, source/index checks and canonical SDK regeneration."}
+{"file": ".trellis/spec/guides/source-grounding-guide.md", "reason": "Verify claimed provider guarantees against live native code, not fixtures alone."}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Audit producer-to-consumer identity, outcome, lineage and cursor round trips."}
+{"file": ".trellis/tasks/08-09-memory-replica-sync-recovery/research/wave-3-review-2026-09-07.md", "reason": "Prior review findings must stay fixed; old pass counts are baseline rather than new task evidence."}
+{"file": ".trellis/tasks/09-07-hindsight-recovery-evidence/research/g1-native-result-protocol.md", "reason": "Audit real transaction/part coverage, source-base and attempt fencing, full historical result manifests, strict batch errors, native tail preservation and generation/backup/SDK parity."}
+{"file": ".trellis/tasks/09-07-hindsight-recovery-evidence/research/g1-taki-consumer-and-field-map.md", "reason": "Verify factual checkpoint completion without derived waits, old-row safety, portable hashes, compact page integrity and no false B4/B6 field-coverage claim."}
+{"file": ".trellis/tasks/09-07-hindsight-recovery-evidence/research/g1-cutover-evidence-contract.md", "reason": "Check that routine G1 preserves the independent cutover boundary and reports missing producer/fence/lifecycle proof honestly. This report is a separate proposal, not routine implementation scope or current capability evidence."}

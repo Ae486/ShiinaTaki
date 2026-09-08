@@ -10,5 +10,5 @@
 - legacy-activation-repo.ts — strict marker reads and atomic canonical-local activation receipt transaction
 - legacy-migration-runner.ts — on-demand dry-run/stage/status/exceptions/exclude/verify/activate orchestration
 - legacy-canonical-converter.test.ts — canonical lifecycle, zero-result, replay, Block isolation, and conflict coverage
-- legacy-retain-sanitizer.ts — deterministic credential/hidden-envelope refusal before canonical staging
+- legacy-retain-sanitizer.ts — frozen credential/hidden-envelope refusal reused by canonical staging and Pending Memory admission
 - legacy-source-normalizer.ts — strict Markdown/frontmatter and Memory Block compatibility normalization

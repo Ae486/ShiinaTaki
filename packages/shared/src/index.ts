@@ -292,7 +292,40 @@ export type {
   MemoryReplicaBank, MemoryReplicaScheduleConfig, MemoryReplicaSyncState, MemoryReplicaSyncStatus,
   MemoryReplicaRunKind, MemoryReplicaScheduledRun, MemoryReplicaRunResult, MemoryReplicaErrorCode,
 } from "./memory-replica-schedule-schema.ts";
+export {
+  PendingMemoryOperationSchema, PendingMemoryRefSchema, PendingMemoryIntentSchema, PendingMemoryNativeReceiptSchema,
+  MemoryDerivedCompletionEvidenceSchema, MemoryDerivedCompletionRequestSchema, MemoryDerivedCompletionResultSchema,
+  PendingMemoryPhaseSchema, PendingMemoryStateSchema, PendingMemoryRecordSchema,
+  PendingMemorySummarySchema, PendingMemoryOverlayEntrySchema,
+} from "./pending-memory-schema.ts";
+export type {
+  PendingMemoryOperation, PendingMemoryRef, PendingMemoryIntent, PendingMemoryNativeReceipt,
+  MemoryDerivedCompletionEvidence, MemoryDerivedCompletionRequest, MemoryDerivedCompletionResult,
+  PendingMemoryPhase, PendingMemoryState, PendingMemoryRecord,
+  PendingMemorySummary, PendingMemoryOverlayEntry,
+} from "./pending-memory-schema.ts";
 export { HindsightJournalChangeSchema, HindsightJournalPageSchema } from "./hindsight-journal-schema.ts";
+export {
+  HINDSIGHT_NATIVE_RESULT_VERSION, HINDSIGHT_NATIVE_RESULT_BUILD, HINDSIGHT_NATIVE_RESULT_PAGE_SIZE,
+  HindsightNativeIdentitySchema, HindsightNativeOperationKindSchema, HindsightNativeRetainItemSchema,
+  HindsightTrackedRetainRequestSchema, HindsightNativeMutationSchema, HindsightTrackedMutationRequestSchema,
+  HindsightNativeReferenceSchema, HindsightNativeInputResultSchema, HindsightNativeMutationResultSchema,
+  HindsightNativeResultManifestSchema, HindsightNativeResultSchema, HindsightNativeReceiptReasonSchema,
+  HindsightNativeResultStatusSchema, HindsightNativeResultPageSchema, HindsightNativeResultErrorSchema,
+  HindsightNativeWriteResponseSchema,
+  PendingMemoryDispatchProtocolSchema, PendingMemoryDispatchSchema, PendingMemoryNativeResultReceiptSchema,
+} from "./hindsight-native-result-schema.ts";
+export type {
+  HindsightNativeIdentity, HindsightNativeOperationKind, HindsightNativeRetainItem, HindsightTrackedRetainRequest,
+  HindsightNativeMutation, HindsightTrackedMutationRequest, HindsightNativeReference, HindsightNativeInputResult,
+  HindsightNativeResult, HindsightNativeResultStatus, HindsightNativeResultPage, PendingMemoryDispatchProtocol,
+  HindsightNativeWriteResponse,
+  PendingMemoryDispatch, PendingMemoryNativeResultReceipt,
+} from "./hindsight-native-result-schema.ts";
+export {
+  nativeProofJson, nativeStringPairs, nativeNormalizedTime, nativeRetainRequestFields, nativeMutationRequestFields,
+  nativeReferenceFields, nativeResultFields, nativeReceiptFields,
+} from "./hindsight-native-proof-encoding.ts";
 export type { HindsightJournalChange, HindsightJournalPage } from "./hindsight-journal-schema.ts";
 export type {
   MemoryReplicaObjectKind, MemoryReplicaPayload, MemoryReplicaRecord, MemoryReplicaJournalRecord,

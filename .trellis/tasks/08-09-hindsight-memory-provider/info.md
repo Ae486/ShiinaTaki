@@ -5,15 +5,31 @@
 Product semantics are approved and the first supported Hindsight base release is fixed to `0.9.0`. Compatibility
 contracts and source evidence are maintained in the compatibility child and the task research files.
 
-Current continuation status (2026-09-06): the main-worktree B5 task remains `in_progress` on baseline `3c67fd5`.
-Waves 0-2 have independent offline verification; Wave 2 passed with five fixes; Waves 0-2 are committed as `69ca779`. Its executable
-contract is [Memory Replica Sync](../../spec/backend/memory-replica-sync.md), including scheduling/lease ownership,
-transaction deadlines, admitted Bank binding, and verified page-cache reuse. Cold or unverified cache records still
-require provider page reads. B4 owns current-Local coverage, import completeness, and the final activation fence.
-Wave 3 Pending Memory/recovery is outstanding and B6 remains planning; offline verification opens no live gate.
+Current continuation status (2026-09-08): B5 remains `in_progress`. Waves 0-2 are committed as `69ca779`; Wave 3's
+offline implementation on base `c3f8bc4` passed independent review with three fixes and remains uncommitted. The final
+gate passed Shared 392/Core 2016/CLI 47/Desktop 548, all five typechecks, root lint and isolated startup through 035.
+Its [executable contract](../../spec/backend/memory-replica-sync.md) covers transaction-local Authority/Bank guards,
+durable Pending phases, same-lease reset continuation and unknown native outcomes. The
+[review evidence](../08-09-memory-replica-sync-recovery/research/wave-3-review-2026-09-07.md) records all 14 regressions.
+That reviewed implementation still lacks the then-required provider-derived fence and safe append mapping. The owner
+subsequently amended routine completion as recorded below. The G1 child now implements a native-result/append
+candidate with actual offline producer/SQLite evidence and completed independent source review. Final native 69,
+Shared 396 and Core 2036 tests pass; the approved actual-source Rust build and four generated-model contracts also pass.
+See its `research/g1-validation-results.md` for current results.
+Cold/unverified cache records still require page reads. B4 owns current-Local coverage/import/final
+fence, B6 remains planning, and live activation is gated.
 See [B4 current-Local gate](../08-09-hindsight-initial-cutover/design.md),
 [B5 sync/recovery plan](../08-09-memory-replica-sync-recovery/implement.md), and [B6 runtime plan](../08-09-memory-runtime-integration/implement.md).
 No live acceptance criterion is marked passed by this continuation.
+
+The owner's later 2026-09-07 [direction record](../09-07-hindsight-recovery-evidence/grill.md) confirms that the goal is
+interoperability between a complete Taki Local system and Hindsight's native service. Keep common logical fields and
+identity/provenance mappings aligned, use adapters and official extension seams first, and justify any native hooks.
+Full Canonical Local tidy/retention/background/block maintenance belongs to B6. The earlier strict recovery patch is
+an evaluated option; its approximate file count, atomic input bound and refresh timing are not selected requirements.
+The owner accepted routine confirmation after native-result proof and local factual application, while derived
+maintenance continues natively. Authority cutover retains its independent completeness gate. Read the prior-decision
+index before further grill questions; missing implementation does not reopen an already settled requirement.
 
 ## Design Sources
 
@@ -203,8 +219,11 @@ Failed import or verification returns to `LOCAL_AUTHORITY` without repairing a p
 2. Pull authoritative changes after each Replica Checkpoint and apply each batch transactionally.
 3. Replay pending retains normally and replay mutations only when `expected_revision` still matches.
 4. Mark stale/missing-target mutations `superseded` without blocking other operations.
-5. Wait for or poll the provider's derived-memory completion contract.
-6. Pull resulting derived changes and advance checkpoints only after local application succeeds.
+5. Verify each actual native result, preserving its original identity and honest unknown outcomes.
+6. Pull the committed factual effects and confirm the pending write only after a matching local checkpoint proves
+   successful application. No operation-scoped derived wait is required for this routine confirmation.
+7. Continue ordinary synchronization for later observation/model changes. Derived progress is separate, based on real
+   evidence or explicitly unknown; confirmed writes do not imply that all summaries are current.
 
 ### Routine synchronization
 
@@ -233,8 +252,10 @@ Original Markdown remains exportable and auditable but never mutates authority a
 ## Planned Return to Local
 
 1. Require healthy Hindsight lineage and drain accepted operations.
-2. Run final incremental synchronization and full logical reconciliation.
-3. Require zero pending operations and zero known replica difference.
+2. Verify the derived maintenance required by the cutover contract, then run final incremental synchronization and
+   full logical reconciliation so its results are included.
+3. Require zero pending operations and zero known replica difference. Routine write confirmation alone cannot satisfy
+   the cutover completion/integrity gate.
 4. Fence new writes briefly and queue them.
 5. Snapshot the reconciled replica, create a new Local Authority Epoch, and atomically promote it.
 6. Replay fenced writes against Local.

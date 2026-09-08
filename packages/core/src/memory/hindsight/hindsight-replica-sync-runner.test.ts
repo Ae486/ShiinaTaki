@@ -297,6 +297,48 @@ describe("B5 admitted client/repository runner", () => {
     expect(durableState(f.db)).toEqual(before);
   });
 
+  it.each(["run", "rebuild"] as const)("fences snapshot publication against an Authority change during %s", async (method) => {
+    const f = fixture(); setFixtureAuthority(f.db, { epochId: authority, providerId: "hindsight", providerLineageId: lineage });
+    const before = durableState(f.db); const remote = f.remote.get("global")!;
+    remote.records[2] = memory("global", "m1", { revision: 2, text: "old authority snapshot" }); remote.cursor = 9;
+    f.hook = (url, response) => {
+      if (url.pathname.endsWith("/pages/3")) setFixtureAuthority(f.db, {
+        epochId: "successor-epoch", providerId: "local", providerLineageId: "successor-lineage",
+      });
+      return response;
+    };
+    const lease = f.repo.leases.acquire({ bankId: "global", ownerId: "recovery", durationMs: 61_000 });
+    const runner = createHindsightReplicaSyncRunner({ client: f.client, repo: f.repo,
+      projection: trustedProjection, connection, secretMarker: "offline-marker", now: () => at });
+    const input = { bank: globalBank, run: { lease, kind: "full" as const, trigger: "manual" as const,
+      predecessor: f.repo.checkpoint("global")! }, signal: new AbortController().signal,
+      expectedAuthority: { epochId: authority, providerLineageId: lineage } };
+    try { await expect(runner[method](input)).rejects.toThrow("HINDSIGHT_PENDING_AUTHORITY_MISMATCH"); }
+    finally { releaseFixtureLease(f.repo, lease); }
+    expect(durableState(f.db)).toEqual({ ...before, authority: authorityState(f.db) });
+    expect(authorityState(f.db).receipts).toEqual(before.authority.receipts);
+    expect(createCanonicalMemoryAuthorityRepo(f.db).authorityEpoch().epochId).toBe("successor-epoch");
+  });
+
+  it.each(["incremental", "full"] as const)("rolls back %s payload, FTS, cache and checkpoint if Authority changes inside publication", async (kind) => {
+    const f = fixture(); setFixtureAuthority(f.db, { epochId: authority, providerId: "hindsight", providerLineageId: lineage });
+    const before = durableState(f.db); const added = memory("global", "new", { revision: 1, text: "must roll back" });
+    f.journals.set("global:8", journal("global", 8, { records: [added], current: 9 }));
+    f.remote.get("global")!.records.push(added); f.remote.get("global")!.cursor = 9;
+    f.db.exec(`CREATE TRIGGER change_authority_inside_publication AFTER INSERT ON hindsight_replica_sync_records
+      WHEN NEW.object_id='new' BEGIN UPDATE canonical_memory_authority_epochs SET provider_lineage_id='${other}'
+      WHERE epoch_id='${authority}'; END;`);
+    const lease = f.repo.leases.acquire({ bankId: "global", ownerId: "recovery", durationMs: 61_000 });
+    const runner = createHindsightReplicaSyncRunner({ client: f.client, repo: f.repo,
+      projection: trustedProjection, connection, secretMarker: "offline-marker", now: () => at });
+    try {
+      await expect(runner.run({ bank: globalBank, run: { lease, kind, trigger: "manual", predecessor: f.repo.checkpoint("global")! },
+        signal: new AbortController().signal, expectedAuthority: { epochId: authority, providerLineageId: lineage } }))
+        .rejects.toThrow("HINDSIGHT_PENDING_AUTHORITY_MISMATCH");
+    } finally { releaseFixtureLease(f.repo, lease); }
+    expect(durableState(f.db)).toEqual(before);
+  });
+
   it("refuses an unsupported compatibility manifest before reading data-plane endpoints", async () => {
     const f = fixture(); const before = durableState(f.db);
     f.hook = (url, response) => url.pathname === "/ext/taki-memory/version"
@@ -416,6 +458,19 @@ function dataResponse(input: { url: URL; init?: RequestInit; remote: Map<string,
 }
 
 function open(path: string) { const db = openDatabase({ path, migrations: MIGRATIONS }); dbs.push(db); return db; }
+function setFixtureAuthority(db: Database, value: { epochId: string; providerId: string; providerLineageId: string }) {
+  const previous = createCanonicalMemoryAuthorityRepo(db).authorityEpoch();
+  db.transaction(() => {
+    db.prepare("UPDATE canonical_memory_authority_epochs SET status='closed',ended_at=:at WHERE epoch_id=:epoch")
+      .run({ at, epoch: previous.epochId });
+    db.prepare(`INSERT INTO canonical_memory_authority_epochs
+      (epoch_id,provider_id,provider_lineage_id,status,predecessor_epoch_id,started_at,ended_at,reason)
+      VALUES (:epochId,:providerId,:providerLineageId,'active',:previous,:at,NULL,'planned-switch')`)
+      .run({ ...value, previous: previous.epochId, at });
+    db.prepare("UPDATE canonical_memory_authority_state SET active_epoch_id=:epoch,updated_at=:at WHERE singleton=1")
+      .run({ epoch: value.epochId, at });
+  });
+}
 function replica(db: Database, now: () => string, projection = trustedProjection) { return createHindsightReplicaSyncRepo({ db, now,
   projection, tokenizer: createIntlSegmenterTokenizer({ stoplist: true }) }); }
 function releaseFixtureLease(repo: ReturnType<typeof createHindsightReplicaSyncRepo>, lease: MemoryReplicaLease): void {

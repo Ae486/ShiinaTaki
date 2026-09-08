@@ -5,12 +5,25 @@
 Product requirements were approved during the Hindsight memory design grill. The child tasks record implementation
 and acceptance separately against the frozen compatibility target and extension boundary.
 
-Current continuation status (2026-09-06): B5 Waves 0-2 have passed their independent offline checks on main baseline
-`3c67fd5`. Wave 2 recovery completed scheduling, verified reconciliation, and cursor reset; its independent review
-fixed five defects and passed the full TS matrix plus isolated Core startup. The Waves 0-2 checkpoint is committed as `69ca779`.
-B4 still owns complete frozen current-Local coverage (including post-B2 retain/edit/invalidate/restore changes) and
-final-fence revalidation before live use. B5 Wave 3 and B6 runtime wiring remain outstanding; no live acceptance or
-authority activation is implied. Cross-links: [B4](../08-09-hindsight-initial-cutover/prd.md),
+Current continuation status (2026-09-08): B5 Waves 0-2 are independently verified and committed as `69ca779`.
+Wave 3's implemented offline mechanics passed independent review on base `c3f8bc4` after three fixes and 14 added
+regressions; its 38 source/test/index files remain uncommitted. Shared 392, Core 2016, CLI 47, Desktop 548, all TS
+typechecks, root lint and isolated Core startup through migration 035 passed. Full Wave 3/B5 recovery is incomplete:
+the reviewed baseline uses the older derived-wait rule. The G1 child now implements native-result/local-application
+confirmation and native append recovery as an independently reviewed candidate. Final native 69/Shared 396/Core 2036
+tests pass, together with the approved actual-source Rust build and four generated-model contracts. Its validation report records precise
+offline evidence and the independent live/manual boundaries.
+B4 still owns complete frozen current-Local coverage and final-fence revalidation; B6 runtime wiring and owner-approved
+live activation remain open. See the [independent review](../08-09-memory-replica-sync-recovery/research/wave-3-review-2026-09-07.md).
+The owner approved the nested [recovery-contract follow-up](../09-07-hindsight-recovery-evidence/prd.md), now in progress,
+with source-justified minimal provider changes and an in-repository Hindsight patch ledger for future upstream updates.
+The later 2026-09-07 [confirmed interoperability direction](../09-07-hindsight-recovery-evidence/grill.md) prioritizes
+public logical field alignment, adapters and official extensions, with generic native hooks only for proven gaps.
+Canonical Local full maintenance remains required in B6. The owner then accepted routine write confirmation after
+reliable native-result proof and local application, with derived maintenance continuing asynchronously. Initial
+activation and provider switching keep their independent completion/integrity gates. The earlier approximately
+20-file strict proposal is not the selected routine design. G1 acceptance does not complete the parent or B4/B6 gates.
+Cross-links: [B4](../08-09-hindsight-initial-cutover/prd.md),
 [B5](../08-09-memory-replica-sync-recovery/prd.md), [B6](../08-09-memory-runtime-integration/prd.md).
 
 ## Goal
@@ -26,7 +39,7 @@ Hindsight already provides the professional semantic memory mechanics that Taki'
 - Local is authoritative when Hindsight is disabled.
 - Hindsight becomes authoritative only after authenticated health checks, deterministic import, derived-memory completion, local replica construction, and integrity verification succeed.
 - Hindsight outages never cause automatic authority failover. Reads degrade to the last verified local replica and writes enter a durable Pending Memory outbox.
-- A recovering Hindsight authority first supplies remote changes, then receives replayable pending writes, then supplies resulting derived changes.
+- Recovery first pulls remote changes, safely replays pending writes, and confirms each write after native-result proof and local application of its factual effects. Derived maintenance may finish later; its changes arrive through ordinary synchronization. Initial activation and provider switching retain their separate completeness gates.
 - Hindsight's latest authoritative revision wins. Stale pending mutations become `superseded`; they are audited but never merged, forced, or presented as an interactive conflict.
 - Every Taki user has one Global Memory Bank and one Character Memory Bank per Character-user relationship. Memory Layers are per-memory Taki policy labels, not separate banks.
 - Taki's Write Gate performs only `keep | skip` and `global | character | both` routing. It submits the original safe conversation span; Hindsight owns extraction, one-to-many facts, classification, embeddings, deduplication, observations, and semantic maintenance.
@@ -34,6 +47,9 @@ Hindsight already provides the professional semantic memory mechanics that Taki'
 - Hindsight mode disables duplicate general Taki tidy/consolidation. A reduced Memory Policy Curator retains only Taki-specific layer, visibility, retention, and Memory Block projection policy.
 - The Agent may edit, invalidate, restore, or reclassify any individual memory without an importance confirmation gate. Bank deletion, bulk clearing, and permanent deletion remain Control Plane operations.
 - Both providers use Canonical Memory Records aligned with Hindsight's public logical model. Markdown is retired as runtime storage and remains only a migration snapshot and explicit import/export format.
+- Interoperability preserves supported logical identity mappings, source relationships, lifecycle and provenance across provider changes. Align public field names/types where equivalent; do not mirror private PostgreSQL/SQLite schemas or silently drop supported state on a round trip.
+- Local authority retains complete Taki maintenance on Canonical Local records. B6 must restore working tidy, retention, background jobs and Memory Block projection; Hindsight mode keeps only Taki-specific policy alongside native semantic maintenance.
+- Prefer Taki adapters and supported Hindsight APIs, then official extensions, then minimal generic producer hooks for demonstrated missing guarantees. Source-backed improvements during development are allowed; record the revised design and evidence without silently weakening accepted guarantees or changing supported scope.
 - The local replica mirrors logical, recall-relevant state, not Hindsight's private PostgreSQL schema or operational queues.
 - Local FTS5/BM25 retrieval is always available. Local embeddings and vector indexing are optional, asynchronous enhancements.
 - Agent-facing tools use one Hindsight-aligned Memory Tool Contract. Local implements a compatible subset; Hindsight delegates to its authoritative APIs. Legacy Taki tool names remain non-advertised migration aliases only while executable legacy callers exist.
@@ -90,7 +106,9 @@ Hindsight already provides the professional semantic memory mechanics that Taki'
 - Recall confirmed memory from the last verified replica while Hindsight is unavailable.
 - Persist new retains and mutations in an idempotent Pending Memory outbox.
 - Mark pending content as unconfirmed when included in degraded recall.
-- On recovery, pull authoritative changes, replay compatible pending operations, await derived maintenance, and pull again.
+- On recovery, pull authoritative changes, safely replay compatible pending operations, verify their actual native results, and pull/apply the factual effects before confirming each write.
+- Let Hindsight continue observation/mental-model maintenance natively and synchronize later committed changes. Missing derived-completion evidence does not block a proven factual write; native ambiguity or an unverified local checkpoint still does.
+- Expose write confirmation separately from derived freshness, using real provider evidence or an explicit unknown status. Zero pending writes does not imply authority-cutover readiness.
 - Replay mutations with `expected_revision`; supersede stale target-revision mutations without applying them or blocking unrelated replay.
 
 ### R7. Ingestion, maintenance, and scope policy

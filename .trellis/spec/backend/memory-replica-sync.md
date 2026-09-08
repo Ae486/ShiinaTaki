@@ -5,15 +5,15 @@
 ### 1. Scope / Trigger
 
 - Trigger: B5 applies an admitted Hindsight journal after a verified Bank snapshot or rebuilds the local replica.
-- Wave 1 exposes a one-Bank storage/client primitive. Wave 2 adds the scheduling/reconciliation contract below.
-  Pending Memory recovery and runtime authority activation remain later work; offline fixtures do not prove them.
+- Wave 1 exposes a one-Bank storage/client primitive. Wave 2 adds scheduling/reconciliation; Wave 3 adds the offline
+  Pending Memory contract below. Its provider-derived fence, append recovery, and live activation remain incomplete.
 
 ### 2. Signatures
 
 - Shared contracts: `HindsightJournalPageSchema`, `MemoryReplicaJournalPageSchema`, `MemoryReplicaCheckpointSchema`,
   and `MemoryReplicaLeaseSchema`. Core wire normalization must return these validated contracts.
 - Client: `changesAfter({ bankId, afterCursor, limit, context })`; `limit` is a soft provider page limit.
-- Core repository: `seedVerifiedSnapshot(input)`, `applyPage({ page, expectedCheckpoint, lease, deadlineAt?, expectedBank? })`,
+- Core repository: `seedVerifiedSnapshot(input)`, `applyPage({ page, expectedCheckpoint, lease, deadlineAt?, expectedBank?, expectedAuthority? })`,
   `record`, `logicalRecord`, and `search`. Migration 033 owns `hindsight_replica_sync_records`, `_fts`, `_checkpoints`, and `_leases`.
 
 ### 3. Contracts
@@ -32,6 +32,10 @@
 - Record upserts/tombstones, explicit-column FTS updates, and checkpoint publication share one synchronous SQLite
   transaction. Recheck the owner/run/fence/expiry lease and full expected checkpoint before publishing. Current
   checkpoints never overwrite immutable B4 activation receipts or change Memory Authority.
+- Recovery supplies `expectedAuthority: { epochId, providerLineageId }` to journal and snapshot publication. Compare
+  active provider/epoch/lineage and current trusted Bank scope inside the publication transaction before writes and
+  again before the checkpoint commits. An outer post-await check cannot undo an already published page. Check current
+  scope even when the page contains no Bank object; retain earlier complete pages when a later page is refused.
 - Full canonical reads retain policy, lifecycle, provenance, source, and derived payloads across reopen. Default
   Memory reads and FTS omit invalidated/tombstoned units. Expiring remote snapshot metadata prevents a new rebuild;
   it never invalidates the previously verified local checkpoint or replica.
@@ -105,8 +109,9 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
 - `createHindsightReplicaScheduler(input)` exposes non-blocking `start()`, bounded `stop()`, `tick()`,
   `requestManual(bankId, kind)`, `verifiedReconnect()`, `status()`, and the closed supervisor `lastError()`.
 - `createHindsightReplicaSyncRunner(input)` implements real admitted-client `run`/`rebuild` paths.
-  `syncHindsightBankPage` and repository snapshot/journal inputs accept optional internal `deadlineAt` and
-  `expectedBank`; the scheduled runner always carries its captured deadline and admitted Bank through publication.
+  `syncHindsightBankPage` and repository snapshot/journal inputs accept internal `deadlineAt`, `expectedBank`, and
+  `expectedAuthority?: Pick<MemoryAuthorityEpoch, "epochId" | "providerLineageId">`. Scheduled publication carries its
+  captured deadline/Bank; Pending recovery additionally carries the captured Authority through both pulls and rebuilds.
 - Migration 034 owns `hindsight_replica_sync_schedule(bank_id, version, state_json)` and
   `hindsight_replica_sync_snapshot_cache`. Cache identity includes Bank, provider lineage, Bank generation, and
   provider page hash; rows also retain logical kind/ID, normalized record JSON, and a local integrity digest.
@@ -130,8 +135,9 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
   journal/snapshot transactions before writes and again before checkpoint publication; checking only after an awaited
   page returns is too late. A later failed page/reset leaves earlier complete pages committed.
 - Capture the admitted Bank before HTTP work and carry it as `expectedBank`. Reject a projected Bank scope or
-  Character binding that differs from admission before any write. Initial admission and scheduler configuration
-  checks alone do not cover projection changes during an asynchronous request.
+  Character binding that differs from admission before any write. Recheck `projection.bankScope()` inside publication
+  even when the page contains no Bank object. With `expectedAuthority`, also check the current active provider/epoch/
+  lineage before writes and checkpoint commit. Initial admission and outer checks do not cover asynchronous rebinding.
 - A claim/database supervisor failure must not rearm a zero-delay loop. Use the existing one-minute first delay for
   automatic mode; manual mode requires another explicit action in that process. This supervisor pause is process-local
   because a failed database may not persist it. Retain a closed `lastError()` and never fabricate a durable attempt.
@@ -165,7 +171,7 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
 | Expired/replaced lease, stale run, schedule CAS, or predecessor | Refuse stale publication/settlement; preserve current ownership. |
 | Claim/database supervisor failure | Bound automatic wake; pause manual execution until explicit action; do not invent an attempt. |
 | HTTP response arrives after the absolute deadline | Reject inside publication; leave that page's records, FTS, cache, and checkpoint unchanged. |
-| Projection changes a Bank binding during HTTP work | Reject against captured `expectedBank` before publication. |
+| Authority or trusted Bank binding changes during HTTP work | Reject inside publication against captured identity/scope, including pages without a Bank object. |
 | Cached payload or page-hash/lineage/generation association is corrupt | Cache miss and authenticated refetch; never trust a copied hash alone. |
 | Canonical fields, FTS content, or FTS IDs diverge | Repair from a verified snapshot; preserve unrelated kinds and valid records. |
 | Record/FTS/cache/checkpoint write fails | Roll back all writes in that publication together. |
@@ -203,5 +209,156 @@ await syncHindsightBankPage(input);
 if (Date.now() >= Date.parse(deadlineAt)) throw new Error("HINDSIGHT_DEADLINE_EXCEEDED");
 
 // Correct: carry admission constraints to the repository's transaction-local publication checks.
-await syncHindsightBankPage({ ...input, deadlineAt, expectedBank: admittedBank });
+await syncHindsightBankPage({ ...input, deadlineAt, expectedBank: admittedBank, expectedAuthority: admittedAuthority });
+```
+
+## Scenario: Durable Pending Memory and Ordered Recovery
+
+### Owner amendment: routine confirmation contract (G1 candidate, 2026-09-08)
+
+The owner accepted G1's second option in
+[the recovery design record](../../tasks/09-07-hindsight-recovery-evidence/grill.md). Routine recovery now targets
+authenticated first pull, safe compatible replay, reliable native-result proof, then second pull/local application
+through a matching checkpoint. That pending write may complete without waiting for observation or mental-model work.
+Native acceptance alone, a request echo, a currently similar document or an arbitrary later checkpoint is insufficient;
+the result and applied factual boundary must belong to the original operation and Bank lineage/generation.
+
+Later derived changes still synchronize through the journal. Derived status is separate and must come from a real
+producer or remain unknown. Initial activation and planned authority switching keep independent required-maintenance,
+manifest/reconciliation and final-fence gates; zero pending writes does not satisfy them. Native failures/unknown
+outcomes, idempotency, supersession, lease/deadline guards and checkpoint atomicity retain their existing obligations.
+
+**Implementation boundary:** sections 1-7 below preserve the reviewed legacy protocol and its tests, including
+`awaiting_derived`, the unavailable completion port and append refusal. They continue to govern old rows and old
+builds. New explicitly tracked rows use [G1 native-result recovery](./memory-native-result-recovery.md). Its implementation has offline producer/consumer
+evidence; independent review and the actual Rust dependency/build gate remain open. Neither protocol permits
+silently promoting ambiguous rows. See the child task's `research/g1-validation-results.md` for current evidence.
+
+### 1. Scope / Trigger
+
+- Trigger: an authorized write must survive a Hindsight outage, or the existing replica worker recovers queued writes.
+  Pending admission never selects Local authority, writes confirmed replica rows, or invokes generic Run Effect replay.
+- These are implemented offline consumer mechanics. The supported Hindsight build has no operation-scoped derived
+  fence, and append-specific recovery mapping remains unimplemented. B6 runtime composition and live/manual acceptance
+  remain separate; injected completion evidence does not satisfy the missing provider contract.
+
+### 2. Signatures
+
+- Shared: `PendingMemoryIntentSchema`, `PendingMemoryStateSchema`, `PendingMemoryNativeReceiptSchema`,
+  `MemoryDerivedCompletionRequestSchema`, `MemoryDerivedCompletionEvidenceSchema`, `PendingMemorySummarySchema`,
+  and `PendingMemoryOverlayEntrySchema` are the validated contracts.
+- `createPendingMemoryWriter(deps).enqueue(operation, call, bank)` captures authorized call identity and Bank binding.
+- `createPendingMemoryRepo(db, now?)` exposes `enqueue(intent)`, `get(ref)`, `list(input)`, `summary(ref)`, `overlay(input)`,
+  `claim({ record, guard, forceRetry? })`, `progress({ record, guard, change, checkpoint? })`, and `cancelQueued(ref)`.
+  A guard is `{ lease: MemoryReplicaLease, deadlineAt: string }`.
+- Migration 035 adds `pending_memory`, uniquely keyed by Authority epoch, Bank, and operation identity. Persisted
+  sequence supports bounded ordered reads; state version/hash bind phase transitions to the observed row.
+- `createHindsightPendingRecoveryRunner(deps)` implements the existing scheduler runner's `run`/`rebuild` interface.
+  It reuses the replica runner, worker, lease and retry policy.
+- `MemoryDerivedCompletionPort.check({ request, context })` returns validated `pending` or `completed` evidence.
+  `unavailableHindsightDerivedCompletion` is the explicit refused implementation for the current supported provider.
+
+### 3. Contracts
+
+- New admission requires the active Hindsight epoch, verified checkpoint lineage/generation, trusted Bank scope and
+  authorized canonical request. The writer preserves original provenance time for retain and captured operation time
+  for mutations. Eligibility and trusted provenance remain the caller's responsibility; admission checks are not a
+  replacement Write Gate or a license to invent policy bindings.
+- Preserve immutable intent, intent hash, Bank/operation identity, deterministic native UUID, original timestamp,
+  document identity, target revision, and normalized replay payload. Identical admission returns the original record;
+  changed payload under the same identity is refused. A retry must not mint a new identity or rewrite its history.
+- Persist `queued`, `submitted`, `awaiting_derived`, `awaiting_pull`, `completed`, `superseded`, `failed`,
+  `outcome_unknown`, and `cancelled` distinctly. Native acceptance/completion, derived evidence and local reflection
+  are separate durable facts. Known native success cannot become an unapplied failure, cancellation or unknown write.
+- Claim/progress use synchronous SQLite transactions, observed version/intent-hash CAS, the current Bank lease and
+  one absolute deadline. Recovery also carries captured Authority identity into the actual journal/snapshot
+  transaction guards above. Neither a current-looking lease nor an outer callback check proves active Authority.
+- Recovery order is authenticated lineage/Bank admission, complete first pull, retain-first compatible replay,
+  operation-scoped derived checks, then second pull and local confirmation. A slow or failed row does not prevent
+  independent rows from being submitted; Bank failures retain other Banks' progress. Unresolved pending/failed/unknown
+  rows prevent an overall convergence claim even when individual rows or replica pages succeeded.
+- Queued mutations compare the current target and expected revision; stale/missing targets become `superseded`.
+  Submitted lost-acknowledgement mutations first replay their identical frozen normalized body and native UUID to
+  obtain the stored receipt. Do not supersede a previously applied operation merely because the target later changed
+  or disappeared. Never force an overwrite, merge conflicts, or replace the expected revision with a newer value.
+- Native retain UUIDs are not provider-payload-fingerprinted and terminal operation records can be pruned. Local
+  immutable hashing is mandatory. A missing post-dispatch operation remains `outcome_unknown`; do not guess a remote
+  retention interval or blindly submit again. A Bank generation replacement similarly distinguishes never-dispatched
+  refusal from dispatched uncertainty; known native success retains its receipt and unresolved derived phase.
+- Cursor reset/rebuild can re-enter a stage held by the identical scheduler lease. Resume that stage without another
+  claim, attempt increment, or repeating completed native/derived work. A different lease still needs normal claim/CAS. One
+  captured deadline spans both pulls and every reset/rebuild; reset does not grant a new execution budget.
+- Derived evidence binds Authority epoch, provider lineage, Bank generation, native operation UUID and receipt hash,
+  plus `throughCursor`. Only the matching locally applied checkpoint reaching that cursor permits `completed`.
+  An unreachable/invalid cursor rejects that evidence while retaining native success and independent completed rows.
+  An all-terminal/superseded pass still pulls again to capture concurrent authoritative changes.
+- Native handler completion, extraction count, and Bank-wide queue emptiness do not prove derived completion.
+  Current real-client composition retains `awaiting_derived` with `HINDSIGHT_DERIVED_FENCE_UNAVAILABLE`, without
+  redispatching known successful writes. A future producer must durably link required derived work and its
+  submission/failure/retry outcome to an observable journal boundary before replacing the unavailable port.
+- Native Hindsight supports append, but this consumer cannot prove its combined-document/fact mapping. It refuses
+  append before dispatch with `HINDSIGHT_PENDING_PAYLOAD_UNSUPPORTED`, preserves the original intent in a visible
+  terminal failed row, and continues independent rows. Do not reinterpret append as replace or advertise it as ready.
+- `overlay()` is separate from confirmed reads and returns literal `confirmed: false`, including unresolved unknown
+  intents. It never mutates confirmed canonical rows or FTS. `summary()` counts actual persisted phases/receipts;
+  surfaces without that producer must retain unknown telemetry rather than inventing zeros.
+- Reject unsafe source envelopes/credential fields with closed diagnostics. Admission is limited to 512 KiB of
+  serialized intent, persisted state to 2 MiB, and resolved retain results to 256 fact references. These are local
+  consumer bounds; preserve the separate 512 KiB HTTP response and complete 10,000-record journal-page bounds.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required result |
+| --- | --- |
+| Same identity with changed intent | `HINDSIGHT_PENDING_IDENTITY_CONFLICT`; preserve the original row. |
+| Unsafe/oversized intent or contradictory Bank request | Closed admission refusal; no provider dispatch or confirmed-row write. |
+| Stale row/version, replaced lease, expired deadline or changed Authority/scope | Refuse stale progress/publication inside its transaction; preserve prior complete pages. |
+| Queued cancellation | Persist `cancelled` without dispatch; cancellation after possible dispatch cannot imply rollback. |
+| Queued mutation target stale/missing | `superseded`; retain diagnostics and continue independent rows. |
+| Submitted mutation target later changed | Use the original normalized request/UUID receipt path before deciding its outcome. |
+| Post-dispatch native operation missing, or generation replaced without a receipt | Preserve `outcome_unknown`, original intent and UUID; no blind redispatch. |
+| Native success but no derived fence | `awaiting_derived` plus `HINDSIGHT_DERIVED_FENCE_UNAVAILABLE`; preserve the native receipt. |
+| Derived identity/hash/cursor invalid or second pull fails | Do not complete the row; retain native proof and independently completed work. |
+| Reset resumes the same held lease/stage | Continue once without incrementing attempts or repeating native work. |
+| Append recovery requested | Pre-dispatch `HINDSIGHT_PENDING_PAYLOAD_UNSUPPORTED`; visible retained intent, no endless row retry. |
+
+### 5. Good/Base/Bad Cases
+
+- Good: durable native receipt survives reopen; operation-bound injected evidence is validated, second pull reaches
+  its cursor, and the row becomes completed without changing Authority or merging the unconfirmed overlay.
+- Base: the current supported provider cannot supply the fence; the receipt remains awaiting-derived and recovery
+  reports its incomplete requirement. A superseded row does not block another compatible write.
+- Bad: claim success from a native `completed` response, retry a missing operation with a new UUID, overwrite a newer
+  target, or commit a page after Authority changes and only then reject it in the outer runner.
+
+### 6. Tests Required
+
+- Shared/repository tests for identity/hash and phase consistency, bounded payloads, real summary counts, separate
+  overlays, queue cancellation, version/lease CAS, rollback, and file-backed restart/reopen.
+- Actual injected-HTTP client plus SQLite/scheduler tests for original timestamps/metadata, complete retain mapping,
+  zero-result policy, append refusal, receipt-first mutation replay, pruned/missing operations, supersession,
+  independent rows/Banks, unavailable/invalid derived evidence, and second-pull failure/restart.
+- First/second-pull Authority/Bank races, snapshots with in-flight Authority changes, and transaction-injected changes
+  must preserve canonical rows, FTS, cache and checkpoint together. Include journal pages without a Bank record.
+- Both reset positions must retain one native dispatch, one derived check and one attempt; prove the captured
+  deadline and Authority guard survive rebuild. Generation replacement after lost ACK must preserve unknown intent
+  for retain and mutation. Late callbacks and ignored abort cannot publish or settle stale work.
+- Fresh/034-to-035/no-op reopen preserve canonical records, checkpoints, leases and activation history. Run affected
+  TS gates, untracked source audits and isolated native Node imports/startup after relevant changes; close all owned
+  handles/processes/temp paths. Report unrun provider/Host/manual checks and unproven graceful shutdown separately.
+
+### 7. Wrong vs Correct
+
+```ts
+// Wrong: native completion alone cannot authorize local recovery completion.
+if (nativeOperation.status === "completed") {
+  pending.progress({ record, guard, change: { kind: "confirm" }, checkpoint });
+}
+
+// Correct for the supported build: declare the missing producer contract explicitly.
+const recovery = createHindsightPendingRecoveryRunner({
+  ...deps,
+  derivedCompletion: unavailableHindsightDerivedCompletion,
+});
+// Successful native receipts remain durable; the runner reports the missing fence instead of false convergence.
 ```

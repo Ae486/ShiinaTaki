@@ -18,7 +18,8 @@ Before writing backend code:
 |-------|-------------|
 | [Directory Structure](./directory-structure.md) | Where files go in `packages/core` and `src-tauri` |
 | [Database Guidelines](./database-guidelines.md) | SQLite single-writer, wrapper, migrations, and fenced canonical Memory Replica synchronization |
-| [Memory Replica Sync](./memory-replica-sync.md) | B5 complete journal transactions, fenced scheduling/deadlines/Bank binding, verified selective reconciliation, safe status, and restart proof |
+| [Memory Replica Sync](./memory-replica-sync.md) | B5 transactional Authority/Bank guards, verified reconciliation and durable recovery; legacy derived-wait rules and G1 tracked native-result/checkpoint contracts |
+| [G1 Native Result Recovery](./memory-native-result-recovery.md) | Tracked request identity, exact native historical proof, compact paging, old-row safety and actual SQLite factual confirmation; independent cutover boundaries |
 | [Error Handling](./error-handling.md) | Structured tool errors, Rust error types, IPC error shape |
 | [Quality Guidelines](./quality-guidelines.md) | Size/responsibility guard, lint, tests, forbidden patterns |
 | [Logging Guidelines](./logging-guidelines.md) | pino / tracing, audit log |

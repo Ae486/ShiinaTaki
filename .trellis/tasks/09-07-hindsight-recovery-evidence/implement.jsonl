@@ -1,0 +1,14 @@
+{"file": ".trellis/tasks/09-07-hindsight-recovery-evidence/grill.md", "reason": "Accepted G1 factual-write confirmation, independent cutover gates and prior-grill decision index; read before older strict-option research."}
+{"file": ".trellis/spec/backend/index.md", "reason": "Core and Shared pre-development rules and package boundaries."}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "Keep provider adaptation in memory/hindsight and SQLite persistence in db."}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Preserve single-writer migrations, atomic publication, authority and Bank guards."}
+{"file": ".trellis/spec/backend/memory-replica-sync.md", "reason": "Existing B5 pending phases, native receipts, derived cursor fence and documented safety limits."}
+{"file": ".trellis/spec/backend/memory-native-result-recovery.md", "reason": "Current G1 tracked factual-result, compact proof and actual-checkpoint contracts; legacy rows and independent cutover gates remain separate."}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Closed diagnostics and honest unknown outcomes after possible remote writes."}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "No memory content, credentials or raw provider exceptions in logs."}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Source structure, meaningful tests, native Node verification and Hindsight generated-client gates."}
+{"file": ".trellis/spec/guides/source-grounding-guide.md", "reason": "Resolve missing contract detail from cited source before coding; do not invent provider guarantees."}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Trace producer transaction through public wire, consumer persistence and second-pull confirmation."}
+{"file": ".trellis/tasks/08-09-memory-replica-sync-recovery/research/wave-3-review-2026-09-07.md", "reason": "Preserved independent review, regression obligations and precise missing producer/append evidence."}
+{"file": ".trellis/tasks/09-07-hindsight-recovery-evidence/research/g1-native-result-protocol.md", "reason": "Selected extension-first native result/part protocol, mutation cursor, exact streaming/zero/delta/batch/large-append coverage, lifecycle and separate cutover evidence."}
+{"file": ".trellis/tasks/09-07-hindsight-recovery-evidence/research/g1-taki-consumer-and-field-map.md", "reason": "Actual Taki state/guard/receipt integration, compact full-result pages, old-row hash compatibility and scoped logical-field obligations."}

@@ -38,6 +38,7 @@ import { runUsageDetailsMigration031 } from "./031-run-usage-details.ts";
 import { conversationCompactionLifecycleMigration032 } from "./032-conversation-compaction-lifecycle.ts";
 import { hindsightReplicaSyncMigration033 } from "./033-hindsight-replica-sync.ts";
 import { hindsightReplicaSchedulerMigration034 } from "./034-hindsight-replica-scheduler.ts";
+import { pendingMemoryMigration035 } from "./035-pending-memory.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -74,4 +75,5 @@ export const MIGRATIONS: Migration[] = [
   conversationCompactionLifecycleMigration032,
   hindsightReplicaSyncMigration033,
   hindsightReplicaSchedulerMigration034,
+  pendingMemoryMigration035,
 ];

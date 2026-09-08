@@ -1,7 +1,7 @@
 /**
- * INPUT:  frozen B2 operation identity strings
+ * INPUT:  domain-separated B2 import or Pending Memory operation identity strings
  * OUTPUT: deterministic RFC 4122 UUIDs accepted by Hindsight async retain
- * POS:    core/memory/hindsight — protocol adapter; B2 identity remains the durable Taki audit identity
+ * POS:    core/memory/hindsight — frozen UUID protocol adapter; the caller's original identity remains durable audit evidence
  */
 import { createHash } from "node:crypto";
 

@@ -1,0 +1,21 @@
+--- a/hindsight-clients/rust/Cargo.toml
++++ b/hindsight-clients/rust/Cargo.toml
+@@ -23,6 +23,8 @@
+ thiserror = "1.0"
+ # Progenitor client support
+ progenitor-client = "0.11"
++# Typify-generated OpenAPI pattern types validate with this locked runtime.
++regress = "=0.10.5"
+ # Additional types
+ chrono = { version = "0.4", features = ["serde"] }
+ # HTTP types
+--- a/hindsight-clients/rust/Cargo.lock
++++ b/hindsight-clients/rust/Cargo.lock
+@@ -334,6 +334,7 @@
+  "progenitor",
+  "progenitor-client",
+  "regex",
++ "regress",
+  "reqwest",
+  "serde",
+  "serde_json",

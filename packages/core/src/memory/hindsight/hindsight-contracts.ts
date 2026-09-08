@@ -13,6 +13,7 @@ const support = z.object({
     "backend_capability_probe_failed", "alternative_memory_store", "memory_store_capability_missing",
     "memory_store_capability_probe_failed", "provider_lineage_unavailable", "authentication_not_required",
     "authentication_capability_probe_failed",
+    "native_result_schema_unavailable",
   ]),
 });
 const versioned = z.object({ version: text, support });
@@ -50,6 +51,7 @@ export const HindsightCompatibilityWireSchema = z.object({
     logical_snapshot: versioned,
     additive_observation_instructions: versioned,
     controlled_layer_projection: versioned,
+    native_results: versioned.optional(),
   }),
 });
 export type HindsightCompatibilityWire = z.infer<typeof HindsightCompatibilityWireSchema>;

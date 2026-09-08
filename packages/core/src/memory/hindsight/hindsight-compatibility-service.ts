@@ -7,6 +7,7 @@ import { createHash } from "node:crypto";
 import {
   HINDSIGHT_API_VERSION,
   HINDSIGHT_COMPATIBILITY_BUILD,
+  HINDSIGHT_NATIVE_RESULT_BUILD,
   HINDSIGHT_COMPATIBILITY_VERSION,
   HindsightCompatibilityProjectionSchema,
   type HindsightCompatibilityProjection,
@@ -53,8 +54,9 @@ async function validateCompatibility(input: {
 }
 
 function projectManifest(manifest: HindsightCompatibilityWire): HindsightCompatibilityProjection {
+  const build = manifest.source_identity.compatibility_build;
   if (manifest.base_api_version !== HINDSIGHT_API_VERSION || manifest.compatibility_version !== HINDSIGHT_COMPATIBILITY_VERSION ||
-      manifest.source_identity.compatibility_build !== HINDSIGHT_COMPATIBILITY_BUILD) {
+      (build !== HINDSIGHT_COMPATIBILITY_BUILD && build !== HINDSIGHT_NATIVE_RESULT_BUILD)) {
     throw hindsightError("HINDSIGHT_EXTENSION_UNSUPPORTED");
   }
   if (manifest.provider.database_dialect !== "postgresql" || manifest.provider.storage_mode !== "sql_rows" || manifest.provider.lineage === null) {
@@ -63,7 +65,8 @@ function projectManifest(manifest: HindsightCompatibilityWire): HindsightCompati
   if (!supported(manifest.support) || manifest.journal.schema_version !== 1 || !manifest.journal.cursor_reset_supported || manifest.snapshot.schema_version !== 1) {
     throw hindsightError("HINDSIGHT_EXTENSION_UNSUPPORTED");
   }
-  const contracts = Object.values(manifest.contracts);
+  const contracts = [manifest.contracts.change_journal, manifest.contracts.conditional_mutation, manifest.contracts.logical_snapshot,
+    manifest.contracts.additive_observation_instructions, manifest.contracts.controlled_layer_projection];
   if (contracts.some((contract) => contract.version !== CONTRACT_VERSION || !supported(contract.support))) {
     throw hindsightError("HINDSIGHT_EXTENSION_UNSUPPORTED");
   }
@@ -83,6 +86,7 @@ function projectManifest(manifest: HindsightCompatibilityWire): HindsightCompati
       logicalSnapshot: manifest.contracts.logical_snapshot,
       additiveObservationInstructions: manifest.contracts.additive_observation_instructions,
       controlledLayerProjection: manifest.contracts.controlled_layer_projection,
+      ...(manifest.contracts.native_results ? { nativeResults: manifest.contracts.native_results } : {}),
     },
   });
 }
@@ -107,5 +111,6 @@ function fingerprint(connection: HindsightConnectionProjection, secretMarker: st
     apiVersion: HINDSIGHT_API_VERSION,
     compatibilityVersion: HINDSIGHT_COMPATIBILITY_VERSION,
     compatibilityBuild: HINDSIGHT_COMPATIBILITY_BUILD,
+    nativeResultBuild: HINDSIGHT_NATIVE_RESULT_BUILD,
   })).digest("hex");
 }

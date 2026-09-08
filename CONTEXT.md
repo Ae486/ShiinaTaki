@@ -255,6 +255,14 @@ _Avoid_: replacement prompt (the Hindsight base remains authoritative), forked d
 The one provider whose confirmed state determines durable searchable memory at a given time. Hindsight is the Memory Authority when enabled; otherwise the Local Memory Provider is, and an outage never transfers authority automatically.
 _Avoid_: primary database, active-active memory, source of truth (ambiguous about policy vs content)
 
+**Local Memory Provider**:
+Taki's standalone memory system, including its own memory maintenance, when Local is the Memory Authority. It is distinct from the Memory Replica used while Hindsight remains authoritative.
+_Avoid_: local replica (a copy without write authority), fallback-only memory
+
+**Hindsight Memory Provider**:
+The memory provider backed by Hindsight's native semantic memory service, with Taki-specific companion policy applied around it. It is the Memory Authority only after an explicit, verified activation.
+_Avoid_: second memory authority, Taki consolidation backend
+
 **Authority Epoch**:
 A contiguous history governed by one declared Memory Authority. An explicit disaster takeover starts a new epoch so a recovered former authority cannot merge or overwrite the new history automatically.
 _Avoid_: sync session, provider version

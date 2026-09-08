@@ -439,4 +439,10 @@ await fence.quiesce({ timeoutMs }, () => activateCanonicalLocal(db, {
 ## Canonical Memory Replica Synchronization
 
 See [Memory Replica Sync](./memory-replica-sync.md) for the B5 journal, response bounds, canonical projection,
-lease/transaction/checkpoint, restart-read, and result-receipt contracts.
+lease/transaction/checkpoint, captured Authority/Bank publication guards, and restart-read contracts. It also defines
+migration 035 Pending Memory identity/CAS, native/derived/local-completion phases, separate unconfirmed overlays,
+same-lease reset continuation, and the explicit provider evidence required before recovery can be called complete.
+G1 adds an explicit tracked dispatch and compact verified factual-result receipt to existing JSON state; migration 035
+and old intent/receipt bytes remain unchanged. Only the original identity and an actual transactionally matching
+checkpoint may confirm a new tracked write. Legacy derived-wait rows are not promoted automatically.
+See [G1 Native Result Recovery](./memory-native-result-recovery.md) for the current tracked protocol.

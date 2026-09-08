@@ -26,6 +26,14 @@ autonomous provenance, Hindsight narrow curator, and Local full maintenance sele
 **Proof:** one advertised vocabulary, bounded structured errors, no feedback loop, correct bank routing, and policy edits
 go only through the authority provider.
 
+Local full maintenance must execute against Canonical Local storage: port the useful Taki tidy/consolidation,
+retention/visibility, background-job and Memory Block behavior through the Local provider. Do not restore retired
+Markdown storage or accept placeholder empty results/tools as completed integration. Hindsight mode delegates generic
+semantic maintenance to Hindsight and keeps only Taki-specific policy. Verify an offline Local-authority scenario
+with persisted maintenance effects, correct provider selection and preservation of interchange identity/provenance.
+See the [confirmed direction](../09-07-hindsight-recovery-evidence/grill.md); algorithmic parity with Hindsight is not
+required for a complete Local mode.
+
 ## Wave 4 - Flush/recovery integration and quality gate
 
 **Ownership:** `MemoryFlushPort` pre-retirement durability binding, B5 Pending recovery coordinator invocation, status /

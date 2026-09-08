@@ -1,7 +1,7 @@
 /**
- * INPUT:  normalized legacy content selected for canonical migration
+ * INPUT:  normalized content selected for canonical migration or Pending Memory admission
  * OUTPUT: deterministic sanitized text or a closed refusal diagnostic
- * POS:    core/memory/legacy-migration — migration-only privacy boundary before canonical staging
+ * POS:    core/memory/legacy-migration — frozen refusal classifier reused by Pending Memory; no migration side effects
  */
 import { legacyDiagnostic, type LegacyDiagnostic } from "./legacy-diagnostics.ts";
 

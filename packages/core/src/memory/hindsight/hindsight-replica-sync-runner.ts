@@ -1,11 +1,11 @@
 /**
- * INPUT:  authenticated Hindsight client, verified B5 checkpoint, trusted Taki projection, and a fenced run
+ * INPUT:  authenticated Hindsight client, verified B5 checkpoint, trusted projection, and captured Bank/authority/deadline bindings
  * OUTPUT: complete incremental catch-up or verified logical reconciliation/reset with atomic local publication
  * POS:    core/memory/hindsight — offline-testable B5 data-plane runner; runtime/B4 activation wiring remains external
  */
 import {
   MemoryReplicaBankSchema, type HindsightConnectionProjection, type MemoryReplicaBank,
-  type MemoryReplicaCheckpoint, type MemoryReplicaRunResult, type MemoryReplicaScheduledRun,
+  type MemoryAuthorityEpoch, type MemoryReplicaCheckpoint, type MemoryReplicaRunResult, type MemoryReplicaScheduledRun,
 } from "@taki/shared";
 import { z } from "zod";
 import type { HindsightReplicaSyncRepo } from "../../db/hindsight-replica-sync-repo.ts";
@@ -18,6 +18,8 @@ import { loadHindsightReplicaSnapshot } from "./hindsight-replica-snapshot-loade
 
 export interface HindsightReplicaRunInput {
   bank: MemoryReplicaBank; run: MemoryReplicaScheduledRun; signal: AbortSignal;
+  deadlineAt?: string;
+  expectedAuthority?: Pick<MemoryAuthorityEpoch, "epochId" | "providerLineageId">;
 }
 export interface HindsightReplicaSchedulerRunner {
   run(input: HindsightReplicaRunInput): Promise<MemoryReplicaRunResult>;
@@ -55,7 +57,7 @@ async function admit(deps: RunnerDependencies, input: HindsightReplicaRunInput):
   if (!checkpoint) throw new Error("HINDSIGHT_CHECKPOINT_MISSING");
   if (canonicalJson(checkpoint) !== canonicalJson(input.run.predecessor)) throw new Error("HINDSIGHT_CHECKPOINT_STALE");
   const now = deps.now ?? (() => new Date().toISOString());
-  const deadlineAt = new Date(Date.parse(now()) + (deps.deadlineMs ?? 60_000)).toISOString();
+  const deadlineAt = input.deadlineAt ?? new Date(Date.parse(now()) + (deps.deadlineMs ?? 60_000)).toISOString();
   const request = () => requestContext({ now, deadlineAt, signal: input.signal, timeoutMs: deps.connection.requestTimeoutMs });
   request();
   const admitted = await createHindsightCompatibilityService().validate({ connection: deps.connection,
@@ -64,13 +66,16 @@ async function admit(deps: RunnerDependencies, input: HindsightReplicaRunInput):
   deps.repo.leases.assert(input.run.lease);
   const providerLineageId = admitted.compatibility.providerLineage;
   if (providerLineageId === null) throw new Error("HINDSIGHT_DATABASE_UNSUPPORTED");
+  if (input.expectedAuthority && (providerLineageId !== input.expectedAuthority.providerLineageId
+    || checkpoint.authorityEpochId !== input.expectedAuthority.epochId)) throw new Error("HINDSIGHT_PENDING_AUTHORITY_MISMATCH");
   return { bank, checkpoint, providerLineageId, deadlineAt, request, now };
 }
 
 async function incremental(deps: RunnerDependencies, input: HindsightReplicaRunInput, context: RunContext): Promise<MemoryReplicaRunResult> {
   while (true) {
     const result = await syncHindsightBankPage({ client: deps.client, repo: deps.repo, lease: input.run.lease,
-      projection: deps.projection, context: context.request(), deadlineAt: context.deadlineAt, expectedBank: context.bank });
+      projection: deps.projection, context: context.request(), deadlineAt: context.deadlineAt, expectedBank: context.bank,
+      expectedAuthority: input.expectedAuthority });
     context.request();
     if (!result.hasMore) return { checkpoint: result.checkpoint, observedCursor: result.observedCursor };
   }
@@ -85,7 +90,7 @@ async function reconcile(value: { deps: RunnerDependencies; input: HindsightRepl
     authorityEpochId: context.checkpoint.authorityEpochId, expectedProviderLineageId: context.providerLineageId,
     expectedBankGeneration: snapshot.metadata.manifest.bankGeneration, expectedCheckpoint: context.checkpoint,
     reset: value.reset || snapshot.metadata.manifest.bankGeneration !== context.checkpoint.bankGeneration,
-    deadlineAt: context.deadlineAt, expectedBank: context.bank });
+    deadlineAt: context.deadlineAt, expectedBank: context.bank, expectedAuthority: input.expectedAuthority });
   return { checkpoint, observedCursor: snapshot.metadata.manifest.endCursor };
 }
 

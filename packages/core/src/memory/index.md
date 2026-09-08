@@ -41,6 +41,8 @@
 - runtime-composition.ts — marker-first Core composition for one Utility Slot, provider-independent Compaction/maintenance with complete-pressure measurement, Legacy retirement, Canonical Local activation, and on-demand migration cutover
 - authority-aware-legacy-surfaces.ts — mutable authority wrappers that retire legacy auto-memory, tidy, and direct writes after canonical activation
 - memory-coordinator.ts — persisted-authority dispatch, capability checks, cancellation, and no-fallback envelopes
-- hindsight/ — Hindsight setup/cutover clients and offline-testable replica sync/reconciliation; runtime authority composition remains separate
+- pending-memory-safety.ts — bounded canonical outbox payload admission with credential and hidden-envelope refusal
+- pending-memory-writer.ts — explicit canonical outage-write admission with captured authority/Bank identity and unchanged replay timestamps
+- hindsight/ — Hindsight setup/cutover clients and offline-testable replica sync/reconciliation/recovery; runtime authority composition remains separate
 - canonical-tools/ — dormant capability-filtered Hindsight-aligned tool adapters
 - image-description-writer.ts — thin, DELETABLE image→text bridge (#17 decision 6, D28): VLM describes a turn's images, PII-scrubs the text, writes ONE episode via the existing store path with origin "observed" (the marker the render sites fence on — D47); detached, warn+drop

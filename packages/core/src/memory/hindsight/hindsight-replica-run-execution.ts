@@ -1,6 +1,6 @@
 /**
  * INPUT:  one durable scheduler claim, a replica runner, and a bounded cancellation budget
- * OUTPUT: fenced completion/reset settlement and immediate lease revocation on stop or timeout
+ * OUTPUT: one absolute run/reset deadline, fenced settlement, and immediate lease revocation on stop or timeout
  * POS:    core/memory/hindsight — execution lifetime; late/uncooperative adapters cannot publish after cancellation
  */
 import type { MemoryReplicaBank, MemoryReplicaErrorCode, MemoryReplicaRunResult, MemoryReplicaScheduledRun } from "@taki/shared";
@@ -20,11 +20,13 @@ interface ExecutionInput {
 interface ExecutionState {
   input: ExecutionInput; run: MemoryReplicaScheduledRun; controller: AbortController;
   cancelled: boolean; settled: boolean; finished: boolean; cancellationFailure: unknown;
+  deadlineAt: string;
 }
 
 export function executeHindsightReplicaRun(input: ExecutionInput): ReplicaRunExecution {
   const state: ExecutionState = { input, run: input.run, controller: new AbortController(),
-    cancelled: false, settled: false, finished: false, cancellationFailure: undefined };
+    cancelled: false, settled: false, finished: false, cancellationFailure: undefined,
+    deadlineAt: new Date(Date.parse(input.repo.now()) + input.timeoutMs).toISOString() };
   let rejectCancellation: (reason: Error) => void = () => undefined;
   const cancellation = new Promise<never>((_resolve, reject) => { rejectCancellation = reject; });
   const cancel = (code: MemoryReplicaErrorCode) => {
@@ -43,11 +45,11 @@ export function executeHindsightReplicaRun(input: ExecutionInput): ReplicaRunExe
 
 async function perform(state: ExecutionState): Promise<MemoryReplicaRunResult> {
   const { input } = state;
-  try { return await input.runner.run({ bank: input.bank, run: state.run, signal: state.controller.signal }); }
+  try { return await input.runner.run({ bank: input.bank, run: state.run, signal: state.controller.signal, deadlineAt: state.deadlineAt }); }
   catch (error) {
     if (state.controller.signal.aborted || !replicaResetRequired(error)) throw error;
     state.run = input.repo.promoteToFull(state.run);
-    return input.runner.rebuild({ bank: input.bank, run: state.run, signal: state.controller.signal });
+    return input.runner.rebuild({ bank: input.bank, run: state.run, signal: state.controller.signal, deadlineAt: state.deadlineAt });
   }
 }
 

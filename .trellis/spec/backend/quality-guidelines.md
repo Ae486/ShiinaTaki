@@ -132,6 +132,25 @@ openapi-generator-cli generate ...
 go mod tidy
 ```
 
+### Generated-model semantics (G1)
+
+- With pinned OpenAPI Generator 7.10.0, nullable properties inside `additionalProperties: false` objects must take
+  a supported normalization path. The canonical OpenAPI helper hoists complete field schemas into named components;
+  it preserves required/nullability/validation and rejects name collisions. Do not relax the schema to unblock generation.
+- Python generated `from_dict` must preserve supplied wire keys before Pydantic validation. Filling omitted PATCH
+  fields with `None` changes request meaning and replay identity. Keep the canonical AST postprocessor and actual
+  nested `from_dict`/`from_json` omission-versus-null regressions; generated output is never the editing source.
+- Rust's OpenAPI 3.0 adapter represents nullable references with `allOf: [$ref]` and outer `nullable: true` because
+  `ReferenceOr` ignores `$ref` siblings. Compile-only tests miss the lost-null bug; exercise real generated serde code.
+- Source-qualify Taki enum titles as well as component names. Locked Typify reuses an existing type by title without
+  checking structural equality. `TakiNativeOperationStatus` and `TakiNativeReceiptReason` keep G1 values separate from
+  old native operation/compatibility enums; verify actual enum parsing and preserve native public type names.
+- Generated SHA-256 pattern validators require the Rust generator's `regress` runtime. A package already present in
+  a build-time lock graph is still a new runtime edge when declared directly. Follow the task's dependency authorization
+  boundary and then run the actual locked crate gate; a temporary proposal build is not that gate.
+- Windows documentation checks normalize CRLF input before frontmatter/heading parsing and generated-page comparison.
+  Preserve the checks themselves and compare generated SDK trees byte-for-byte after a clean rerun.
+
 #### Correct
 
 ```bash

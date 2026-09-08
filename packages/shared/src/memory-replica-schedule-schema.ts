@@ -1,7 +1,7 @@
 /**
  * INPUT:  Core-owned replica scheduler configuration and bounded diagnostic state
  * OUTPUT: validated per-Bank scheduling/status contracts for automatic and manual sync
- * POS:    shared protocol — durable Wave 2 scheduler state; never contains provider payloads or secrets
+ * POS:    shared protocol — durable replica scheduling and recovery diagnostics; no provider payloads or secrets
  */
 import { z } from "zod";
 import { HindsightErrorCodeSchema } from "./hindsight-connection-schema.ts";
@@ -58,6 +58,12 @@ export const MemoryReplicaErrorCodeSchema = z.enum([
   "HINDSIGHT_SNAPSHOT_MANIFEST_CHANGED", "HINDSIGHT_SNAPSHOT_BANK_MISMATCH", "HINDSIGHT_SNAPSHOT_LINEAGE_MISMATCH",
   "HINDSIGHT_SNAPSHOT_COUNT_MISMATCH", "HINDSIGHT_SNAPSHOT_MANIFEST_HASH_MISMATCH", "HINDSIGHT_SNAPSHOT_PAGE_ORDER_MISMATCH",
   "HINDSIGHT_SNAPSHOT_PAGE_HASH_MISMATCH", "HINDSIGHT_REPLICA_RESULT_INVALID",
+  "HINDSIGHT_PENDING_IDENTITY_CONFLICT", "HINDSIGHT_PENDING_PAYLOAD_UNSAFE", "HINDSIGHT_PENDING_PAYLOAD_UNSUPPORTED",
+  "HINDSIGHT_PENDING_STATE_STALE", "HINDSIGHT_PENDING_RECEIPT_INVALID", "HINDSIGHT_PENDING_OPERATION_FAILED",
+  "HINDSIGHT_PENDING_OPERATION_CANCELLED", "HINDSIGHT_PENDING_OUTCOME_UNKNOWN", "HINDSIGHT_PENDING_SUPERSEDED",
+  "HINDSIGHT_PENDING_REMAINS", "HINDSIGHT_PENDING_AUTHORITY_MISMATCH", "HINDSIGHT_PENDING_CLIENT_UNAVAILABLE",
+  "HINDSIGHT_DERIVED_FENCE_UNAVAILABLE", "HINDSIGHT_DERIVED_FENCE_INVALID",
+  "HINDSIGHT_NATIVE_RESULT_UNAVAILABLE", "HINDSIGHT_NATIVE_RESULT_INVALID",
 ]);
 export type MemoryReplicaErrorCode = z.infer<typeof MemoryReplicaErrorCodeSchema>;
 

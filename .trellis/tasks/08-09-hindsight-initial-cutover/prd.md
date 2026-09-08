@@ -49,6 +49,14 @@ Perform a resumable, verifiable Local-to-Hindsight migration and activate Hindsi
 
 ## Technical Notes
 
+- The 2026-09-07 [G1 routine-recovery amendment](../09-07-hindsight-recovery-evidence/grill.md) allows factual-write
+  confirmation before background summaries finish. It does not relax this initial-cutover task's required derived,
+  complete current-Local coverage, manifest, reconciliation or final-fence proof. Zero Pending Memory alone is not
+  an activation criterion.
+- The [independent cutover evidence research](../09-07-hindsight-recovery-evidence/research/g1-cutover-evidence-contract.md)
+  proposes the finite source/scope/model certificate needed by this gate. Native operation completion and old model
+  timestamps do not provide it. Its producer implementation and B4 consumer integration remain separate work;
+  the healthy Hindsight-to-Local source fence belongs to planned switch-back, outside this task's scope.
 - B2 archived migration artifacts provide the immutable source snapshot, canonical staging, and migration ledger input.
 - B3 provides authenticated Hindsight connection, compatibility/template readiness, and operator-only setup methods.
 - The current Taki runtime has no Hindsight data-plane provider, logical snapshot/journal/checkpoint implementation, or Hindsight epoch promotion seam; these are B4 deliverables.

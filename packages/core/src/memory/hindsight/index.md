@@ -2,7 +2,16 @@
 - hindsight-contracts.ts — bounded Hindsight 0.9.0 raw-wire schemas and safe projections
 - hindsight-endpoint-policy.ts — endpoint normalization and SSRF/redirect policy for explicit operator endpoints
 - hindsight-errors.ts — sanitized Hindsight setup failure code and retry projection
-- hindsight-client.ts — authenticated REST client with streaming response bounds for setup, import, logical snapshots, and complete journal pages
+- hindsight-client.ts — authenticated REST client with streaming response bounds, cancellation, and typed conditional failures for setup/import/replica/recovery
+- hindsight-pending-client.ts — canonical retain-to-native wire mapping and B0 expected-revision/mutation-ID replay with bounded native receipts
+- hindsight-pending-retain.ts — native operation/document/fact completion proof; pruned responses remain unknown and never cause blind resubmission
+- hindsight-pending-replay.ts — frozen idempotent native replay, expected-revision supersession, and stage-preserving per-operation failures
+- hindsight-derived-completion.ts — required operation-scoped derived/journal evidence port; the admitted provider explicitly reports the missing contract
+- hindsight-pending-recovery-stages.ts — retain-first dispatch, native/derived completion, same-lease reset continuation, and generation-loss uncertainty
+- hindsight-pending-recovery-runner.ts — routine factual proof/checkpoint recovery with explicit legacy compatibility under the existing scheduler
+- hindsight-native-result-client.ts — tracked write admission, durable result status and immutable page HTTP methods
+- hindsight-native-proof.ts — frozen dispatch encoding, portable producer hashes and bounded full-page proof verification
+- hindsight-pending-native-result.ts — tracked replay/progress, safe missing-claim retry and factual receipt publication
 - hindsight-secret-refs.ts — fixed provider-neutral Secret Catalog refs and connection-only trusted resolver marker
 - hindsight-compatibility-service.ts — ordered exact-build health/version/manifest gate and safe configuration fingerprint
 - hindsight-bank-identity.ts — versioned deterministic opaque Global/Character external Bank ids
@@ -11,7 +20,7 @@
 - hindsight-bank-setup.ts — idempotent Bank/template application, operation polling, and verified projection
 - hindsight-setup-stages.ts — deterministic setup targets and dry-run preflight orchestration
 - hindsight-import-contracts.ts — bounded retain/operation/document/fact data-plane wire schemas
-- hindsight-import-identity.ts — deterministic UUID adapter for B2 operation identities
+- hindsight-import-identity.ts — frozen deterministic UUID adapter for domain-separated B2 and Pending Memory operation identities
 - hindsight-import-ledger-repo.ts — resumable B4 operation and one-to-many fact ledger repository
 - hindsight-import-orchestrator.ts — deadline-bounded idempotent retain and derived fact mapping orchestration
 - hindsight-snapshot-contracts.ts — bounded provider wire schemas and collision-rejecting logical payload normalization with opaque nested JSON keys
@@ -19,10 +28,10 @@
 - hindsight-replica-builder.ts — cursor-bound snapshot capture, staging, reconciliation callback, and checkpoint publication
 - hindsight-replica-projection.ts — source-grounded canonical Taki policy/provenance projection for snapshot and journal records
 - hindsight-journal-contracts.ts — authenticated changes endpoint wire normalization with complete transaction bounds
-- hindsight-incremental-sync.ts — one admitted Bank journal page pulled, projected, and transactionally applied under Bank binding, lease, and captured deadline
+- hindsight-incremental-sync.ts — one admitted Bank journal page pulled, projected, and transactionally applied under captured Authority/Bank binding, lease, and deadline
 - hindsight-replica-scheduler.ts — asynchronous all-Bank single-flight execution, persisted wakes, bounded supervisor retries, manual/reconnection requests, and truthful status
-- hindsight-replica-run-execution.ts — bounded per-run cancellation, reset escalation, and lease-fenced completion
-- hindsight-replica-sync-runner.ts — admitted client/repository incremental catch-up, full logical reconciliation, and verified reset integration
+- hindsight-replica-run-execution.ts — captured absolute run/reset deadline, bounded cancellation, reset escalation, and lease-fenced completion
+- hindsight-replica-sync-runner.ts — admitted client/repository catch-up, reconciliation/reset, and optional recovery authority/deadline binding
 - hindsight-replica-snapshot-loader.ts — verified one-record snapshot transfer with current-manifest cache reuse and bounded requests
 - hindsight-replica-errors.ts — closed replica diagnostics and lease/reset classification without provider exception text
 - hindsight-replica-reconcile.ts — exact import document/fact/revision reconciliation against a staged snapshot

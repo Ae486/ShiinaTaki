@@ -43,6 +43,9 @@
 - memory-provider-envelope-schema.ts — validated success/error envelopes for canonical provider operations
 - memory-replica-schema.ts — bounded ordered journal upsert/tombstone and replica checkpoint contracts
 - memory-replica-schedule-schema.ts — durable Bank configuration, fenced run/result, retry/manual state, and closed truthful status contracts
+- pending-memory-schema.ts — immutable write intents, legacy phases, versioned factual proof/dispatch state, and unconfirmed overlays
+- hindsight-native-result-schema.ts — tracked native commands, immutable paged full results, and compact G1 receipt contracts
+- hindsight-native-proof-encoding.ts — portable typed hash fields and UTF-8 serialization, independent of legacy local hashes
 - hindsight-journal-schema.ts — complete Hindsight transaction batches, per-change lineage, cursor windows, and unique object transitions
 - memory-migration-schema.ts — strict operator-only migration control and bounded report contracts
 - hindsight-cutover-schema.ts — strict B4 import, logical snapshot/page/record, staging checkpoint, fact mapping, activation, and operator status/verification contracts
