@@ -83,7 +83,7 @@ class ApprovalDecisions implements ApprovalDecisionsController {
     try {
       const result = await client.approvalRevoke({ decisionId, expectedApprovalGeneration: data.approvalGeneration });
       if (!this.current(client, generation)) return;
-      this.message = result.status === "stale_generation" ? "审批状态已变化，已重新读取。" : null;
+      this.message = result.status === "stale_generation" ? "审批状态已变化，请核对当前列表后重试。" : null;
       this.reads.acceptUpdate();
       this.reads.setActive(this.visible);
       if (this.visible) this.restoreAfterRevoke = false;

@@ -39,7 +39,7 @@ export function TrajectoryOverview(props: OverviewProps) {
         </div>
         {!props.model && <span className={css.empty}>尚无时间记录</span>}
         {props.history.hasOlder && (!props.model || gesture.domain.start === props.model.start) && <button type="button"
-          className={css.earlier} disabled={props.history.loading} aria-label="载入更早记录，尚未载入部分的耗时未知"
+          className={css.earlier} disabled={props.history.loading} aria-busy={props.history.loading} aria-label="载入更早记录，尚未载入部分的耗时未知"
           title="更早记录尚未载入" onPointerDown={(event) => event.stopPropagation()} onClick={() => void props.history.load()}>…</button>}
         {gesture.viewport && <button className={css.reset} type="button" aria-label="重置时间缩放"
           onPointerDown={(event) => event.stopPropagation()} onClick={gesture.resetViewport}>全程</button>}

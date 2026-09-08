@@ -5,6 +5,7 @@
  */
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { createKnobDraftController, initialKnobDraft, type KnobDraftInput } from "./knob-draft-controller.ts";
+import { dismissToastGroup } from "@/components/toast/toast-store.js";
 
 export function useKnobDraft(input: KnobDraftInput) {
   const [state, setState] = useState(() => initialKnobDraft(input.entry));
@@ -12,17 +13,17 @@ export function useKnobDraft(input: KnobDraftInput) {
   useLayoutEffect(() => controller.update(input), [controller, input.entry, input.connectionReady, input.onSave]);
   useEffect(() => () => controller.retire(), [controller]);
   const events = useMemo(() => ({
-    change: (draft: string) => controller.change(draft),
+    change: (draft: string) => { dismissToastGroup(`config:${input.entry.key}`); controller.change(draft); },
     focus: () => controller.focus(),
     blur: () => controller.blur(),
     compositionStart: () => controller.compositionStart(),
-    compositionEnd: (draft: string) => controller.compositionEnd(draft),
+    compositionEnd: (draft: string) => { dismissToastGroup(`config:${input.entry.key}`); controller.compositionEnd(draft); },
     commit: () => { void controller.save(); },
-  }), [controller]);
+  }), [controller, input.entry.key]);
   return {
     state, events,
     conflicted: state.dirty && state.latest !== state.baseline,
     useLatest: () => controller.useLatest(),
-    save: () => { void controller.save(true); },
+    save: () => { dismissToastGroup(`config:${input.entry.key}`); void controller.save(true); },
   };
 }

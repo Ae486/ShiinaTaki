@@ -26,5 +26,5 @@ attachments. One continuous timeline, NO session list.
 - image-attachment.tsx — image part renderer (presentational): Skeleton pulse block / "图片已过期" (image-off glyph) / resolved thumbnail
 - use-attachment-image.ts — lazy media.get + module ref→dataURL cache (the ws touchpoint for image parts); P1b LRU-bounded at 40 resolved entries (in-flight fetches never evicted, failures self-evict for retry)
 - composer.tsx — draft/attachments remain editable during reconnect; send is readiness-gated; in-flight state still owns chat.cancel and retracted-draft recovery; buttons ride the shared ActionButton pill and IconButton (≥32px hit targets)
-- use-image-attach.ts — file-pick → normalize (downscale/JPEG) → { mediaType, raw base64, preview }, capped at 4
+- use-image-attach.ts — bounded file-pick/normalization and previews; current-pick failures notify once from the action, while send/clear/unmount retires old decoding without breaking additive picks within one draft
 - image-attach-decode.ts — pure size-gate verdict + data-URL split (the node-testable core of use-image-attach)

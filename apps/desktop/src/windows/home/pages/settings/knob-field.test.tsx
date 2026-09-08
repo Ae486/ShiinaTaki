@@ -23,7 +23,7 @@ function entry(overrides: Partial<ConfigEntry> = {}): ConfigEntry {
 
 function render(entry_: ConfigEntry, chineseLabel?: string): string {
   return renderToStaticMarkup(
-    <KnobField entry={entry_} chineseLabel={chineseLabel} connectionReady={true} notice={undefined} onSave={noop} />,
+    <KnobField entry={entry_} chineseLabel={chineseLabel} connectionReady={true} onSave={noop} />,
   );
 }
 

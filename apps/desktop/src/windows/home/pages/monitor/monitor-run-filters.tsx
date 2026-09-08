@@ -5,6 +5,7 @@
  */
 import { useState, type FormEvent } from "react";
 import type { RunInitiator, RunState } from "@taki/shared";
+import { PendingIndicator } from "@/components/ui/pending-indicator.js";
 import type { MonitorFilters } from "./monitor-controller.ts";
 import { INITIATOR_OPTIONS, STATE_OPTIONS } from "./monitor-labels.ts";
 import css from "./monitor-workspace.module.css";
@@ -38,7 +39,9 @@ export function MonitorRunFilters({ filters, pending, apply }: FilterProps) {
     <label>起始时间<input type="datetime-local" value={from} onChange={(event) => setFrom(event.target.value)} /></label>
     <label>结束时间<input type="datetime-local" value={to} onChange={(event) => setTo(event.target.value)} /></label>
     {error && <p role="alert">{error}</p>}
-    <button type="submit" disabled={pending}>{pending ? "正在筛选…" : "应用筛选"}</button>
+    <button type="submit" disabled={pending} aria-busy={pending}>应用筛选
+      <PendingIndicator active={pending} label="正在筛选运行记录" />
+    </button>
   </form>;
 }
 

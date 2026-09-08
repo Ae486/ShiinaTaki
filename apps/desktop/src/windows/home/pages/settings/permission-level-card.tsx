@@ -7,6 +7,7 @@
 import type { PermissionLevel, PermissionCellsState } from "@taki/shared";
 import { PageCard } from "../../page-card.tsx";
 import { SelectionTile } from "@/components/ui/selection-tile.js";
+import { PendingIndicator } from "@/components/ui/pending-indicator.js";
 
 const LEVELS: Array<{ level: PermissionLevel; label: string; detail: string }> = [
   { level: "strict", label: "严格", detail: "更多操作需要批准或被拒绝" },
@@ -18,10 +19,13 @@ export function PermissionLevelCard(props: {
   data: PermissionCellsState;
   disabled: boolean;
   pending: boolean;
+  refreshing?: boolean;
   onSetLevel(level: PermissionLevel): void;
 }) {
   return (
-    <PageCard title="权限级别">
+    <PageCard title="权限级别" action={<span aria-busy={props.pending || props.refreshing === true}>
+      <PendingIndicator active={props.pending || props.refreshing === true} label={props.pending ? "正在保存权限修改" : "正在读取权限策略"} />
+    </span>}>
       <p className="mb-3 text-xs leading-relaxed text-text-secondary">
         设备本地限制、管理策略和固定安全规则始终生效，宽松级别也不能解除。
       </p>

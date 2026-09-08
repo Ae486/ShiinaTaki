@@ -44,6 +44,19 @@ async function flush(): Promise<void> {
 }
 
 describe("permission controller generations", () => {
+  it("delivers saved feedback once from the action, never through subsequent list snapshots", async () => {
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn(), feedback: vi.fn() };
+    const controller = createPermissionController(sink);
+    controller.replace(client());
+    await controller.refresh();
+    await controller.setLevel("relaxed", 1);
+    await controller.refresh();
+    await controller.refresh();
+    expect(sink.feedback).toHaveBeenCalledTimes(1);
+    expect(sink.feedback).toHaveBeenCalledWith(expect.objectContaining({ kind: "saved" }));
+    expect(sink.loaded.mock.calls.every(([, feedback]) => feedback?.kind !== "saved")).toBe(true);
+  });
+
   it("joins coincident pair reads and retires both old successes and failures while hidden", async () => {
     const pending = deferred<PermissionLevelState>();
     const active = client({ permissionLevelGet: vi.fn(() => pending.promise) });
@@ -174,6 +187,26 @@ describe("permission controller generations", () => {
     expect(active.permissionCellSet).toHaveBeenCalledTimes(1);
     expect(active.permissionCellsGet).toHaveBeenCalledTimes(2);
     expect(h.events.at(-1)).toMatchObject({ kind: "loaded", value: { feedback: { kind: "conflict" } } });
+  });
+
+  it("keeps conflict and failed-read evidence distinct without claiming a successful reconciliation", async () => {
+    const failure = new Error("permission read unavailable");
+    const active = client({ permissionCellSet: vi.fn(async () => {
+      throw Object.assign(new Error("conflict"), { data: { code: "POLICY_CONFLICT" } });
+    }) });
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn(), feedback: vi.fn() };
+    const controller = createPermissionController(sink);
+    controller.replace(active);
+    await controller.refresh();
+    vi.mocked(active.permissionCellsGet).mockRejectedValueOnce(failure);
+    await controller.setCell({ key: "screenshot", level: "standard", posture: null }, 1);
+    expect(sink.feedback).toHaveBeenCalledExactlyOnceWith({ kind: "conflict", message: "权限策略已在别处修改；请核对当前状态后重试。" });
+    expect(sink.loadFailed).toHaveBeenCalledExactlyOnceWith(failure, snapshot());
+    expect(active.permissionCellSet).toHaveBeenCalledTimes(1);
+    expect(active.permissionCellsGet).toHaveBeenCalledTimes(2);
+    await controller.setLevel("relaxed", 1);
+    expect(active.permissionLevelSet).not.toHaveBeenCalled();
+    controller.dispose();
   });
 
   it("sends the exact cell, level, posture and confirmation with the captured policy generation", async () => {

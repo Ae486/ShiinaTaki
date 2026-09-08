@@ -12,6 +12,7 @@ import { extensionResource } from "./extension-convergence-resource.ts";
 import { usePageActive } from "./page-visibility-store.ts";
 import { ActionButton } from "./action-button.tsx";
 import { ReadObservationNotice } from "./read-observation-notice.tsx";
+import { PendingIndicator } from "@/components/ui/pending-indicator.js";
 
 const INITIAL_STATE: ExtensionConvergenceState = { kind: "idle", previous: null, observation: "idle" };
 
@@ -64,7 +65,7 @@ export function ExtensionConvergenceStrip({ state, onRefresh, connectionReady }:
       <span>扩展 {data.entries.length}</span>
       <span className={data.collisions.length ? "text-warn-strong" : "text-text-secondary"}>名称冲突 {data.collisions.length}</span>
       {state.kind === "idle" && <span className="text-text-secondary">等待连接，显示上次结果</span>}
-      {state.kind === "loading" && <span className="text-text-secondary">刷新中</span>}
+      <PendingIndicator active={state.kind === "loading"} label="正在更新扩展状态" className="text-text-secondary" />
       {state.kind === "failure" && <><span className="text-warn-strong">刷新失败，显示上次结果</span>
         <ActionButton disabled={!connectionReady} onClick={() => void onRefresh()}>重试</ActionButton></>}
       <ReadObservationNotice observation={state.observation} onRefresh={onRefresh} disabled={!connectionReady} />

@@ -8,6 +8,7 @@ import type { ConfigEntry, ConfigValue } from "@taki/shared";
 import { Badge, type BadgeTone } from "../../badge.tsx";
 import { CARD_ROW } from "../../page-card.tsx";
 import { FeedbackLine } from "@/components/ui/feedback-line.js";
+import { PendingIndicator } from "@/components/ui/pending-indicator.js";
 import { editorFor } from "./knob-editor.ts";
 import { KnobInput } from "./knob-input.tsx";
 import { ActionButton } from "../../action-button.tsx";
@@ -19,7 +20,6 @@ export interface KnobFieldProps {
   /** Client-side Chinese label from config-groups; undefined = unknown key renders the raw key primary. */
   chineseLabel?: string;
   connectionReady: boolean;
-  notice: { ok: boolean; message: string } | undefined;
   onSave: (key: string, value: ConfigValue | null) => Promise<ConfigSaveOutcome>;
 }
 
@@ -33,7 +33,7 @@ function badgesFor(entry: ConfigEntry): Array<{ label: string; tone: BadgeTone }
   return badges;
 }
 
-export function KnobField({ entry, chineseLabel, connectionReady, notice, onSave }: KnobFieldProps) {
+export function KnobField({ entry, chineseLabel, connectionReady, onSave }: KnobFieldProps) {
   const editor = editorFor(entry);
   const availableEditor = connectionReady || editor.disabled ? editor : { ...editor, disabled: true };
   const draft = useKnobDraft({ entry, connectionReady, onSave });
@@ -51,7 +51,8 @@ export function KnobField({ entry, chineseLabel, connectionReady, notice, onSave
             </>
           )}
         </div>
-        <span className="flex flex-wrap justify-end gap-1">
+        <span className="flex flex-wrap items-center justify-end gap-1" aria-busy={draft.state.saving}>
+          <PendingIndicator active={draft.state.saving} label="正在保存配置" />
           {badgesFor(entry).map((badge) => (
             <Badge key={badge.label} tone={badge.tone}>
               {badge.label}
@@ -63,9 +64,6 @@ export function KnobField({ entry, chineseLabel, connectionReady, notice, onSave
       <KnobInput entry={entry} editor={availableEditor} draft={draft.state.draft} events={draft.events} />
       {editor.disabledReason && <p className="text-xs text-text-secondary">{editor.disabledReason}</p>}
       <DraftFeedback draft={draft} disabled={availableEditor.disabled} />
-      {notice && <FeedbackLine tone={notice.ok ? draft.state.dirty ? "info" : "ok" : "danger"}>
-        {notice.ok && draft.state.dirty ? `上次提交：${notice.message}；当前修改尚未保存。` : notice.message}
-      </FeedbackLine>}
     </div>
   );
 }
@@ -74,13 +72,12 @@ function DraftFeedback({ draft, disabled }: { draft: ReturnType<typeof useKnobDr
   const state = draft.state;
   return (
     <div className="min-h-5">
-      {state.saving && <FeedbackLine tone="info">保存中…</FeedbackLine>}
       {state.error && <FeedbackLine tone="danger">{state.error}</FeedbackLine>}
       {draft.conflicted && <FeedbackLine tone="warn">此项已在别处修改。最新值：{state.latest || "（未设置）"}</FeedbackLine>}
-      {state.dirty && !state.saving && (
+      {state.dirty && (
         <div className="flex flex-wrap items-center gap-2">
-          {draft.conflicted && <ActionButton disabled={state.composing} onClick={draft.useLatest}>使用最新值</ActionButton>}
-          <ActionButton disabled={disabled || state.composing} onClick={draft.save}>
+          {draft.conflicted && <ActionButton disabled={state.composing || state.saving} onClick={draft.useLatest}>使用最新值</ActionButton>}
+          <ActionButton disabled={disabled || state.composing || state.saving} onClick={draft.save}>
             {draft.conflicted ? "确认覆盖保存" : "保存未保存的修改"}
           </ActionButton>
         </div>

@@ -20,6 +20,7 @@ import {
 } from "./mcp-state.ts";
 import { useHomeClient } from "../../home-client-context.ts";
 import { usePageActive } from "../../page-visibility-store.ts";
+import { useMcpFeedback } from "./use-mcp-feedback.ts";
 import {
   createMcpController,
   type McpEditorMutationResult,
@@ -46,30 +47,31 @@ export function useMcpServers(): McpServersView {
   const ready: McpPageClient | null = client && status.kind === "connected" ? client : null;
   const visible = usePageActive("mcp");
   const [pending, setPending] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<McpFeedback | null>(null);
+  const notices = useMcpFeedback();
   const [observation, setObservation] = useState<ReadObservationState>("idle");
   const [state, setState] = useState<McpViewState>({ kind: "idle", token: 0, previous: null });
   const controller = useMemo(() => createMcpController({
     loading: (previous) => setState((current) => beginMcpLoad(current.token, previous)),
     loaded: (servers, feedback) => setState((current) => applyMcpLoad(current, { token: current.token, servers, feedback: feedback ?? null })),
     loadFailed: (cause) => setState((current) => failMcpLoad(current, current.token, cause)),
-    mutationStarted: (key) => { setPending(key); setFeedback(null); setState((current) => beginMcpMutation(current, current.token, key)); },
-    mutationFailed: (cause) => { setFeedback(mcpMutationFeedback(cause)); setState((current) => failMcpMutation(current, current.token, cause)); },
+    mutationStarted: (key) => { setPending(key); notices.started(key); setState((current) => beginMcpMutation(current, current.token, key)); },
+    mutationFailed: (cause) => { notices.retain(mcpMutationFeedback(cause)); setState((current) => failMcpMutation(current, current.token, cause)); },
     idle: (previous) => setState((current) => ({ kind: "idle", token: current.token, previous })),
-    feedback: setFeedback,
+    feedback: notices.report,
     mutationSettled: () => setPending(null),
     observation: setObservation,
   }), []);
 
   useLayoutEffect(() => controller.setVisible(visible), [controller, visible]);
   useLayoutEffect(() => {
+    notices.reset();
     setState((current) => ({ kind: "idle", token: current.token + 1, previous: previousMcpData(current) }));
     controller.replace(ready);
     return () => controller.replace(null);
-  }, [controller, ready]);
+  }, [controller, ready, notices.reset]);
   useEffect(() => () => controller.dispose(), [controller]);
 
-  const refresh = useCallback((feedback?: McpFeedback) => controller.refresh(feedback), [controller]);
+  const refresh = useCallback(() => controller.refresh(), [controller]);
   const add = useCallback((draft: McpServerDraft) => controller.add(draft), [controller]);
   const edit = useCallback((draft: McpServerDraft, expectedRevision: number) =>
     controller.edit(draft, expectedRevision), [controller]);
@@ -79,5 +81,5 @@ export function useMcpServers(): McpServersView {
   const reconnect = useCallback(async (serverId: string) => void (await controller.reconnect(serverId)), [controller]);
   const test = useCallback(async (serverId: string) => void (await controller.test(serverId)), [controller]);
 
-  return { state, connectionReady: ready !== null, observation, pending, feedback, refresh, add, edit, setEnabled, remove, reconnect, test };
+  return { state, connectionReady: ready !== null, observation, pending, feedback: notices.feedback, refresh, add, edit, setEnabled, remove, reconnect, test };
 }

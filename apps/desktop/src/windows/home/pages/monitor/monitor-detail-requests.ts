@@ -1,9 +1,10 @@
 /**
  * INPUT:  current Monitor selection scopes, committed-event invalidations, and Inspector selection actions
- * OUTPUT: independently guarded Inspector requests and one-in-flight/one-trailing summary revalidation
+ * OUTPUT: coherent committed Inspector snapshots, independent pending targets, and coalesced summary revalidation
  * POS:    ui/monitor — request coordination only; summary updates never replace rows or history/reading cursors
  */
 import { monitorError, monitorUnavailable, type MonitorRequestScope, type MonitorSelectionAccess } from "./monitor-request-state.ts";
+import type { MonitorViewState } from "./monitor-controller.ts";
 
 interface SummaryRefresh { scope: MonitorRequestScope; dirty: boolean }
 
@@ -14,33 +15,53 @@ export class MonitorDetailRequests {
 
   constructor(access: MonitorSelectionAccess) { this.access = access; }
 
-  retire(): void {
+  retire(): Partial<MonitorViewState> {
     this.inspectorEpoch += 1;
     this.summary = undefined;
-    this.access.publish({ loadingInspector: false, refreshingSummary: false });
+    return { requestedRowKey: undefined, loadingInspector: false, refreshingSummary: false };
+  }
+
+  reset(): Partial<MonitorViewState> {
+    return { ...this.retire(), inspector: undefined, inspectedRowKey: undefined, inspectorError: null };
   }
 
   closeInspector(): void {
     this.inspectorEpoch += 1;
-    this.access.publish({ inspector: undefined, inspectedRowKey: undefined, loadingInspector: false, inspectorError: null });
+    this.access.publish({ inspector: undefined, inspectedRowKey: undefined, requestedRowKey: undefined,
+      loadingInspector: false, inspectorError: null });
   }
 
   async inspect(rowKey: string, refresh = false): Promise<void> {
     const scope = this.access.capture();
     if (!scope) return;
-    if (!refresh && this.access.read().inspectedRowKey === rowKey) { this.closeInspector(); return; }
+    const view = this.access.read();
+    // An automatic restoration cannot supersede the operator's newer explicit choice (or duplicate its read).
+    if (refresh && view.requestedRowKey) return;
+    if (!refresh && (view.inspectedRowKey === rowKey || view.requestedRowKey === rowKey)) { this.closeInspector(); return; }
     const epoch = ++this.inspectorEpoch;
-    this.access.publish({ inspectedRowKey: rowKey, loadingInspector: true, inspectorError: null,
-      ...(refresh ? {} : { inspector: undefined }) });
+    this.access.publish({ requestedRowKey: rowKey, loadingInspector: true, inspectorError: null });
+    if (!this.access.current(scope) || epoch !== this.inspectorEpoch) return;
     try {
       const inspector = await scope.target.monitorInspect({ characterId: scope.characterId, runKey: scope.runKey, rowKey });
       if (!this.access.current(scope) || epoch !== this.inspectorEpoch) return;
-      this.access.publish({ inspector, loadingInspector: false });
+      this.access.publish({ inspectedRowKey: rowKey, inspector, requestedRowKey: undefined, loadingInspector: false });
     } catch (cause) {
       if (!this.access.current(scope) || epoch !== this.inspectorEpoch) return;
-      if (monitorUnavailable(cause)) this.access.failed(cause);
-      else this.access.publish({ loadingInspector: false, inspectorError: monitorError(cause) });
+      this.inspectorFailed(cause, rowKey);
     }
+  }
+
+  private inspectorFailed(cause: unknown, rowKey: string): void {
+    const unavailable = monitorUnavailable(cause);
+    if (unavailable === "monitor" || unavailable === "run") { this.access.failed(cause); return; }
+    const view = this.access.read();
+    const replacing = view.inspectedRowKey !== undefined && view.inspectedRowKey !== rowKey;
+    this.access.publish({
+      ...(unavailable === "record" ? { trajectory: this.access.missingRow(rowKey) } : {}),
+      ...(unavailable === "record" && view.inspectedRowKey === rowKey ? { inspector: undefined, inspectedRowKey: undefined } : {}),
+      requestedRowKey: undefined, loadingInspector: false,
+      inspectorError: `${replacing ? "未能切换到所选记录。" : ""}${monitorError(cause)}`,
+    });
   }
 
   refreshSummary(): void {

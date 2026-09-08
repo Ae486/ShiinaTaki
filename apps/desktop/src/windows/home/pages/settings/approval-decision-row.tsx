@@ -30,8 +30,8 @@ export function ApprovalDecisionRow({ decision, disabled, pending, onRevoke }: A
           <span>创建于 <time dateTime={decision.createdAt}>{createdAt}</time></span>
         </div>
       </div>
-      <ActionButton tone="secondary" disabled={disabled} onClick={() => onRevoke(decision.decisionId)}>
-        {pending ? "撤销中…" : "撤销"}
+      <ActionButton tone="secondary" busy={pending} disabled={disabled} onClick={() => onRevoke(decision.decisionId)}>
+        撤销
       </ActionButton>
     </div>
   );

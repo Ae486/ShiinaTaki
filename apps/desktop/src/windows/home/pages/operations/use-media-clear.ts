@@ -1,60 +1,36 @@
 /**
- * INPUT:  the home shell's WsClient + a refresh callback to run once the purge settles.
- * OUTPUT: useMediaClear(client, onSettled) -> { phase, notice, error, onEvent } — the two-step attachment purge.
- * POS:    ui/windows/home/pages/operations — the destructive action, split out of use-operations so the guard (a purge
- *         is issued ONLY from the confirming step) sits alone with the call it protects.
+ * INPUT:  the Home operator client and the storage read invalidation callback.
+ * OUTPUT: confirmed purge actions, retained retryable errors and once-only floating outcomes.
+ * POS:    Operations React adapter; the local controller owns the destructive two-step guard.
  */
 
-import { useCallback, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { WsClient } from "@/lib/ws-client.js";
-import { clearPhaseAfter, type ClearEvent, type ClearPhase } from "./operations-state.ts";
+import type { ClearEvent, ClearPhase } from "./operations-state.ts";
+import { createMediaClearController, type MediaClearState } from "./media-clear-controller.ts";
+import { dismissToastGroup, pushToast } from "@/components/toast/toast-store.js";
+
+const REPLACE_KEY = "media-clear";
 
 export interface MediaClearControl {
   phase: ClearPhase;
-  notice: string | null;
   error: string | null;
   onEvent: (event: ClearEvent) => void;
 }
 
 export function useMediaClear(client: WsClient | null, onSettled: () => void): MediaClearControl {
-  const [phase, setPhase] = useState<ClearPhase>("idle");
-  const phaseRef = useRef<ClearPhase>("idle");
-  const [notice, setNotice] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const currentClient = useRef(client);
-  currentClient.current = client;
-
-  const onEvent = useCallback(
-    (event: ClearEvent) => {
-      const current = phaseRef.current;
-      const next = clearPhaseAfter(current, event);
-      if (next === current) return;
-      if (next !== "clearing") {
-        phaseRef.current = next;
-        setPhase(next);
-        return;
-      }
-      if (!client) return;
-      phaseRef.current = next;
-      setPhase(next);
-      setError(null);
-      void client
-        .mediaClear()
-        .then((result) => {
-          if (currentClient.current !== client) return;
-          setNotice(`已清除 ${result.removedCount} 个附件，释放 ${result.freedBytes} 字节`);
-          onSettled();
-        })
-        .catch((cause: unknown) => {
-          if (currentClient.current === client) setError(cause instanceof Error ? cause.message : String(cause));
-        })
-        .finally(() => {
-          phaseRef.current = "idle";
-          setPhase("idle");
-        });
-    },
-    [client, onSettled],
-  );
-
-  return { phase, notice, error, onEvent };
+  const [state, setState] = useState<MediaClearState>({ phase: "idle", error: null });
+  const settled = useRef(onSettled);
+  settled.current = onSettled;
+  const controller = useMemo(() => createMediaClearController({
+    changed: setState,
+    started: () => dismissToastGroup(REPLACE_KEY),
+    succeeded: (result, eventKey) => pushToast(`已清除 ${result.removedCount} 个附件，释放 ${result.freedBytes} 字节`,
+      "success", { eventKey, replaceKey: REPLACE_KEY }),
+    failed: (eventKey) => pushToast("附件清除失败，请查看存储卡片中的说明。", "error", { eventKey, replaceKey: REPLACE_KEY }),
+    settled: () => settled.current(),
+  }), []);
+  useLayoutEffect(() => controller.replace(client), [controller, client]);
+  useEffect(() => () => controller.dispose(), [controller]);
+  return { ...state, onEvent: controller.onEvent };
 }

@@ -16,6 +16,7 @@ interface ConfigSaveInput {
   entry(key: string): ConfigEntry | undefined;
   versionOf(key: string): number;
   apply(result: ConfigSetResult): void;
+  started?(key: string): void;
   notice(key: string, notice: { ok: boolean; message: string }): void;
 }
 
@@ -47,6 +48,7 @@ class ConfigSaves {
     const epoch = this.epoch;
     const version = this.input.versionOf(key);
     this.pending.add(key);
+    this.input.started?.(key);
     try {
       const result = await client.configSet({ key, value });
       if (this.client !== client || this.epoch !== epoch) return { kind: "retired" };
@@ -55,7 +57,7 @@ class ConfigSaves {
       const current = Boolean(latest && !latest.secret && !latest.envLocked && latest.apply !== "env-only"
         && ((this.input.versionOf(key) === version && latest.value === entry.value) || latest.value === effective));
       if (current) this.input.apply(result);
-      this.input.notice(key, { ok: true, message: applyVerdict(result.apply) });
+      this.input.notice(key, { ok: true, message: current ? applyVerdict(result.apply) : "已提交；检测到其他修改，请核对当前值。" });
       return { kind: "saved", display: effective === null ? "" : String(effective), current };
     } catch (cause) {
       if (this.client !== client || this.epoch !== epoch) return { kind: "retired" };

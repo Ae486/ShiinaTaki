@@ -4,6 +4,7 @@ import { OperationsPage } from "./pages/operations/operations-page.tsx";
 import { CostumePage } from "./pages/costume/costume-page.tsx";
 import { PerceptionPage } from "./pages/perception/perception-page.tsx";
 import { McpPage } from "./pages/mcp/mcp-page.tsx";
+import { PageHeader } from "./page-chrome.tsx";
 import type { CostumePageView } from "./pages/costume/use-costume-page.ts";
 import type { OperationsView } from "./pages/operations/use-operations.ts";
 import type { McpServersView } from "./pages/mcp/use-mcp.ts";
@@ -20,7 +21,7 @@ const read = async () => undefined;
 const ops: OperationsView = {
   status: null, usage: null, statusLoading: false, usageLoading: false, statusError: null, usageError: null,
   refreshStatus: read, refreshUsage: read, connectionReady: true, tidy: null, tidying: false, refreshing: false,
-  clear: { phase: "idle", notice: null, error: null, onEvent: () => undefined }, error: null, refresh: read, runTidy: read,
+  clear: { phase: "idle", error: null, onEvent: () => undefined }, error: null, refresh: read, runTidy: read,
 };
 const costume: CostumePageView = {
   view: { rows: [], missingPacks: [], current: null }, hasSnapshot: false, connectionReady: true,
@@ -44,6 +45,29 @@ beforeEach(() => {
 });
 
 describe("resource page cold, empty and stale states", () => {
+  it("keeps a fast background refresh out of the visible page heading", () => {
+    const html = renderToStaticMarkup(<PageHeader title="Settings" busy />);
+    expect(html.replace(/<[^>]*>/g, "")).toBe("Settings");
+  });
+
+  it("retains populated Perception content without inserting transient refresh paragraphs", () => {
+    const card = {
+      current: { processName: "Code.exe", windowTitle: "main.ts", startedAt: 1, durationMs: 300_000, samples: 5, idle: false },
+      recent: [{ processName: "Browser.exe", windowTitle: "Earlier", startedAt: 0, durationMs: 120_000, samples: 2, idle: false }],
+      samplingStatus: { foreground: true, ambientScreen: false },
+      pauseState: { paused: false, until: null },
+    };
+    hooks.perception.mockReturnValue({ ...perception, kind: "loading", card, pause: card.pauseState,
+      refreshing: true, stale: true, observation: "live" });
+    const html = renderToStaticMarkup(<PerceptionPage />);
+    const visibleText = html.replace(/<[^>]*>/g, "");
+    expect(visibleText).toContain("Code.exe · main.ts");
+    expect(visibleText).toContain("Browser.exe · Earlier");
+    expect(visibleText).not.toMatch(/刷新中|正在更新隐私状态|上次采样调度信息，当前状态尚未确认/u);
+    expect(visibleText).not.toContain("暂无活动记录");
+    expect(html).not.toContain("animate-pulse");
+  });
+
   it("renders independent Operations failures with retries and no never-ending skeleton", () => {
     hooks.operations.mockReturnValue({ ...ops, statusError: "status failed", usageError: "usage failed" });
     const html = renderToStaticMarkup(<OperationsPage />);

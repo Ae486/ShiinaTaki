@@ -26,8 +26,9 @@ function pageMarkup(page: React.ReactNode, connected: boolean): string {
 }
 
 function buttonMarkup(markup: string, label: string): string {
-  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(`<button[^>]*>${escaped}</button>`).exec(markup)?.[0] ?? "";
+  return [...markup.matchAll(/<button\b[^>]*>[\s\S]*?<\/button>/g)]
+    .map(([button]) => button)
+    .find((button) => button.replace(/<[^>]*>/g, "").trim() === label) ?? "";
 }
 
 const EDITABLE_KNOB: ConfigEntry = {
@@ -46,10 +47,10 @@ const EDITABLE_KNOB: ConfigEntry = {
 describe("Home connection-dependent action readiness", () => {
   it("disables otherwise-editable settings fields while the shared Home client is unavailable", () => {
     const disconnected = renderToStaticMarkup(
-      <KnobField entry={EDITABLE_KNOB} connectionReady={false} notice={undefined} onSave={refuseSave} />,
+      <KnobField entry={EDITABLE_KNOB} connectionReady={false} onSave={refuseSave} />,
     );
     const connected = renderToStaticMarkup(
-      <KnobField entry={EDITABLE_KNOB} connectionReady notice={undefined} onSave={refuseSave} />,
+      <KnobField entry={EDITABLE_KNOB} connectionReady onSave={refuseSave} />,
     );
 
     expect(disconnected).toContain('disabled=""');

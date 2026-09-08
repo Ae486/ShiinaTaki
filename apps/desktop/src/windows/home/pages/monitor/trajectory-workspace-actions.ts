@@ -35,17 +35,18 @@ interface ActionSetters {
 
 export function trajectoryActions(context: ActionContext, setters: ActionSetters) {
   const hold = () => context.ledger.current?.holdAnchor();
-  const closeInspector = () => { hold(); context.controller.closeInspector(); };
+  const displayedRunKey = context.view.selectedRunKey ?? "";
+  const closeInspector = () => { hold(); context.controller.closeInspector(displayedRunKey); };
   const select = (record: TrajectoryRecord) => {
     hold();
     const focused = focusedRecordKeys(context.model, context.range);
     if (focused && !focused.has(record.key)) setters.setRange(null);
-    if (recordContains(record, context.view.inspectedRowKey)) context.controller.closeInspector();
-    else void context.controller.inspect(record.row.rowKey);
+    if (recordContains(record, context.view.inspectedRowKey)) context.controller.closeInspector(displayedRunKey);
+    else void context.controller.inspect(record.row.rowKey, displayedRunKey);
   };
   return {
     select, closeInspector,
-    loadOlder: async () => { hold(); await context.controller.loadMoreTrajectory(); },
+    loadOlder: async () => { hold(); await context.controller.loadMoreTrajectory(displayedRunKey); },
     changeFilters: (filters: LedgerFilters) => { hold(); setters.setFilters(filters); },
     changeDuration: (duration: boolean) => { setters.setRange(null); setters.setActualDuration(duration); },
     toggleAttempt: (key: string) => { hold(); setters.setFolds((folds) => ({ ...folds, attempts: toggleFold(folds.attempts, key) })); },
@@ -58,7 +59,7 @@ export function trajectoryActions(context: ActionContext, setters: ActionSetters
       context.pendingFocus.current = context.items.find((item) => item.type === "record" && keys?.has(item.key))?.key;
     },
     selectRecord: (key: string) => revealRecord(context, setters, key),
-    resume: () => { setters.setRange(null); context.controller.closeInspector(); context.ledger.current?.resume(); },
+    resume: () => { setters.setRange(null); context.controller.closeInspector(displayedRunKey); context.ledger.current?.resume(); },
   };
 }
 
@@ -75,7 +76,7 @@ function revealRecord(context: ActionContext, setters: ActionSetters, key: strin
   setters.setFolds((folds) => ({
     attempts: withoutKey(folds.attempts, record.attemptKey), requests: withoutKey(folds.requests, record.requestKey),
   }));
-  if (!recordContains(record, context.view.inspectedRowKey)) void context.controller.inspect(record.row.rowKey);
+  if (!recordContains(record, context.view.inspectedRowKey)) void context.controller.inspect(record.row.rowKey, context.view.selectedRunKey ?? "");
 }
 
 function withoutKey(values: ReadonlySet<string>, key: string | undefined): ReadonlySet<string> {

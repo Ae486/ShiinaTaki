@@ -8,6 +8,7 @@ import type { SkillInspectResult, SkillPackageView, SkillStandardMetadata } from
 import { Badge } from "../../badge.tsx";
 import { ActionButton } from "../../action-button.tsx";
 import { FeedbackLine } from "@/components/ui/feedback-line.js";
+import { PendingIndicator } from "@/components/ui/pending-indicator.js";
 import { LabeledRows, PageCard } from "../../page-card.tsx";
 import { REJECTED_PACKAGE_TITLE, lifecycleLabel, runtimeLabel, runtimeTone, scanLabel, scanTone, sourceLabel, trustLabel } from "./skill-labels.ts";
 
@@ -36,7 +37,8 @@ export function SkillCard(input: SkillCardProps) {
     <PageCard
       title={row.skillName ?? REJECTED_PACKAGE_TITLE}
       action={
-        <div className="flex gap-1">
+        <div className="flex items-center gap-1">
+          <PendingIndicator active={input.inspection.pending} label="正在检查技能包" className="text-text-secondary" />
           <Badge tone={runtimeTone(row.runtimeState)}>{runtimeLabel(row.runtimeState)}</Badge>
           <Badge tone={scanTone(row.scanVerdict)}>{scanLabel(row.scanVerdict)}</Badge>
         </div>
@@ -49,7 +51,7 @@ export function SkillCard(input: SkillCardProps) {
           { label: "状态", value: `${lifecycleLabel(row.lifecycleState)} / ${row.enabled ? "已启用" : "已停用"}` },
         ]} />
       </div>
-      {(input.inspected || input.inspection.pending || input.inspection.error) && <InspectSection input={input} />}
+      {(input.inspected || input.inspection.error) && <InspectSection input={input} />}
       <div className="mt-4 flex flex-wrap justify-end gap-2">
         <ActionButton tone="primary" disabled={input.disabled || input.inspection.pending} onClick={actions.inspect}>检查</ActionButton>
         {!rejected && <ActionButton disabled={input.disabled} onClick={actions.toggle}>{row.enabled ? "停用" : "启用"}</ActionButton>}
@@ -77,7 +79,6 @@ function InspectSection({ input }: { input: SkillCardProps }) {
           {inspection.open ? "收起" : "展开"}
         </ActionButton>
       </div>
-      {inspection.pending && <FeedbackLine tone="info">正在检查…</FeedbackLine>}
       {inspection.error && <FeedbackLine tone="danger">检查失败：{inspection.error}，可再次点击检查。</FeedbackLine>}
       {inspection.stale && <FeedbackLine tone="warn">技能包已变化；下方为上次检查结果，请点击检查以读取最新内容。</FeedbackLine>}
       {inspection.open && inspected && (

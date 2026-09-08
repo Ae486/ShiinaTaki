@@ -18,7 +18,7 @@
 | [Hook Guidelines](./hook-guidelines.md) | Custom hooks, WS subscription patterns |
 | [State Management](./state-management.md) | Zustand stores, state ownership, guarded SWR page snapshots |
 | [Foreground Chat Feedback](./foreground-chat-feedback.md) | Shared ordered activity, complete Timeline handoff, segmented Pet tools/text, reading anchors and CSS geometry continuity |
-| [Reactive Read-Models](./reactive-read-models.md) | Event/demand policy, one-flight reads, effective visibility, draft/save conflicts, stable disclosure/reading, recovery and truthful states |
+| [Reactive Read-Models](./reactive-read-models.md) | Event/demand policy, coherent target commits, stable reading/editing, non-displacing pending feedback, once-consumed Toasts and truthful recovery |
 | [Type Safety](./type-safety.md) | zod boundaries, no-any policy |
 | [Quality Guidelines](./quality-guidelines.md) | Size/responsibility guard, perf rules (this window is always-on), tests |
 | [Operator Connection Recovery & Request Deadlines](./operator-connection-recovery.md) | Independent Pet/Home/Chat generations, native JSON-RPC deadlines, restoration ordering, timing policy, and honest reconnect UX |

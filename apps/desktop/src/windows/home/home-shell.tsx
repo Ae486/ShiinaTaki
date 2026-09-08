@@ -1,11 +1,11 @@
 /**
  * INPUT:  page registry, requested route, shared Home connection, and last-confirmed Monitor availability
- * OUTPUT: navigation, retained page instances, client context, connection feedback, Approval modal, and ToastHost
+ * OUTPUT: navigation, retained pages with pre-paint route publication, client context, Approval modal, and ToastHost
  * POS:    ui/home — window root; transient disconnects retain Monitor's mounted controller and selection,
  *         while confirmed DISABLED removes the optional surface and applies the existing Chat fallback
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { ToastHost } from "@/components/toast/toast-host.js";
 import { ConnectionStatusBanner } from "@/components/connection-status/connection-status.js";
 import { SelectionTile } from "@/components/ui/selection-tile.js";
@@ -69,10 +69,10 @@ export function HomeShell() {
   useEffect(() => {
     setVisitedPages((previous) => appendVisitedPage(previous, currentPage));
   }, [currentPage]);
-  // P1e: publish the ACTUALLY-shown page so keep-alive page instances can stop working while hidden (the chat page
-  // ignores the signal by contract). Written from visiblePage, not currentPage, so the monitor-disabled fallback is truth.
+  // A newly unhidden page must reconcile its retained controller snapshot before the browser can paint it.
+  // Publish the actual route in the layout phase; the Monitor-disabled fallback still supplies the route truth.
   const setActivePage = usePageVisibilityStore((state) => state.setActivePage);
-  useEffect(() => { setActivePage(visiblePage.id); }, [visiblePage.id, setActivePage]);
+  useLayoutEffect(() => { setActivePage(visiblePage.id); }, [visiblePage.id, setActivePage]);
   useEffect(() => observeHomeDocumentVisibility(document, usePageVisibilityStore.getState().setDocumentVisible), []);
 
   return (

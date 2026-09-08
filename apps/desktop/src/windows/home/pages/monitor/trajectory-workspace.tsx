@@ -20,8 +20,10 @@ export function TrajectoryWorkspace({ view, controller, active }: WorkspaceProps
     {view.loadingTrajectory ? "正在载入执行轨迹…" : "选择一条运行查看执行轨迹"}
   </div>;
   const history = { hasOlder: view.trajectory.hasOlder === true, loading: view.loadingOlder, load: workspace.actions.loadOlder };
+  const inspecting = view.inspectedRowKey !== undefined || view.requestedRowKey !== undefined || view.inspectorError !== null;
   const matches = new Set(workspace.records.filter((record) => recordMatches(record, workspace.filters)).map((record) => record.key));
-  return <div className={css.main} aria-label="所选运行的轨迹">
+  return <div className={css.main} aria-label="所选运行的轨迹"
+    aria-busy={view.loadingTrajectory || view.recovering || view.refreshingSummary}>
     <TrajectoryToolbar model={{ records: workspace.records, filters: workspace.filters, groups: workspace.groups,
       folds: workspace.folds, actualDuration: workspace.actualDuration, range: workspace.range, run: view.trajectory.run }}
       actions={workspace.actions} active={active} />
@@ -29,12 +31,13 @@ export function TrajectoryWorkspace({ view, controller, active }: WorkspaceProps
       history={history} actions={workspace.actions} selection={{ range: workspace.range,
         recordKey: workspace.selected?.key, matches, focus: workspace.focusKeys }} />
     <div className={css.ledger} onKeyDown={(event) => {
-      if (event.key === "Escape" && !event.defaultPrevented && view.inspectedRowKey) workspace.actions.closeInspector();
+      if (event.key === "Escape" && !event.defaultPrevented && inspecting) workspace.actions.closeInspector();
     }}>
-      <TrajectoryLedger items={workspace.items} selection={{ rowKey: view.inspectedRowKey, focusKeys: workspace.focusKeys }}
-        history={history} inspecting={view.inspectedRowKey !== undefined} active={active}
+      <TrajectoryLedger items={workspace.items} selection={{ rowKey: view.inspectedRowKey,
+        requestedRowKey: view.requestedRowKey, focusKeys: workspace.focusKeys }}
+        history={history} inspecting={inspecting} active={active}
         actions={workspace.actions} handle={workspace.ledger} />
-      <InspectorPane open={view.inspectedRowKey !== undefined} width={workspace.width} resizing={workspace.resizing}
+      <InspectorPane open={inspecting} width={workspace.width} resizing={workspace.resizing}
         active={active} actions={workspace.inspectorActions} content={{ inspector: view.inspector,
           record: workspace.selected, loading: view.loadingInspector, error: view.inspectorError, rowKey: view.inspectedRowKey }} />
     </div>

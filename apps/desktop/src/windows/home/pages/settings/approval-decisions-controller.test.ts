@@ -52,8 +52,9 @@ function revokeControl(row: ReactElement<{ children?: ReactNode }>): ActionButto
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
-  const promise = new Promise<T>((done) => { resolve = done; });
-  return { promise, resolve };
+  let reject!: (cause: unknown) => void;
+  const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
+  return { promise, resolve, reject };
 }
 
 describe("Approval decisions controller", () => {
@@ -117,7 +118,7 @@ describe("Approval decisions controller", () => {
       expectedApprovalGeneration: 4,
     }]);
     const ready = states.filter((state): state is Extract<ApprovalDecisionsState, { kind: "ready" }> => state.kind === "ready");
-    expect(ready.at(-1)?.message).toBe("审批状态已变化，已重新读取。");
+    expect(ready.at(-1)?.message).toBe("审批状态已变化，请核对当前列表后重试。");
   });
 
   it("ignores a retired client's late revoke completion", async () => {
@@ -135,6 +136,25 @@ describe("Approval decisions controller", () => {
     revoke.resolve({ status: "revoked", approvalGeneration: 5 });
     await pending;
     expect(states.at(-1)).toEqual({ kind: "idle", data: EMPTY_LIST, message: null });
+  });
+
+  it("does not claim refreshed approval state before a covering read succeeds", async () => {
+    const pending = deferred<ApprovalListResult>();
+    const read = vi.fn().mockResolvedValueOnce(EMPTY_LIST).mockReturnValueOnce(pending.promise);
+    const revoke = vi.fn(async () => ({ status: "stale_generation" as const, approvalGeneration: 5 }));
+    const states: ApprovalDecisionsState[] = [];
+    const controller = createApprovalDecisionsController((state) => states.push(state));
+    controller.replace({ approvalList: read, approvalRevoke: revoke });
+    await controller.refresh();
+    const done = controller.revoke("11111111-1111-4111-8111-111111111111");
+    await vi.waitFor(() => expect(read).toHaveBeenCalledTimes(2));
+    expect(states.at(-1)).toMatchObject({ kind: "loading", message: "审批状态已变化，请核对当前列表后重试。" });
+    pending.reject(new Error("list unavailable"));
+    await done;
+    expect(states.at(-1)).toMatchObject({ kind: "error", data: EMPTY_LIST, message: "审批请求失败，请检查连接后重试。" });
+    expect(revoke).toHaveBeenCalledTimes(1);
+    expect(read).toHaveBeenCalledTimes(2);
+    controller.dispose();
   });
 });
 
@@ -191,7 +211,10 @@ describe("Approval decision row", () => {
     for (const pending of [false, true]) {
       const row = ApprovalDecisionRow({ decision: item, disabled: true, pending, onRevoke: () => undefined });
       expect(revokeControl(row).disabled).toBe(true);
-      expect(renderToStaticMarkup(row)).toContain(pending ? "撤销中…" : "撤销");
+      const markup = renderToStaticMarkup(row);
+      expect(markup).toContain("撤销");
+      expect(markup).not.toContain("撤销中…");
+      expect(markup.includes('aria-busy="true"')).toBe(pending);
     }
   });
 });

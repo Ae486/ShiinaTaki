@@ -44,7 +44,8 @@ export function ApprovalDecisionsSection() {
       {message && <PageAlert>审批管理：{message}</PageAlert>}
       {!data && state.kind === "loading" && <Skeleton lines={2} />}
       {!data && state.kind === "idle" && <p className="text-xs text-text-secondary">等待连接以读取长期授权。</p>}
-      <ActionButton tone="secondary" disabled={!ready} onClick={refresh}>{state.kind === "error" ? "重试" : "刷新长期授权"}</ActionButton>
+      <ActionButton tone="secondary" busy={state.kind === "loading" && data !== null}
+        disabled={!ready || state.kind === "loading"} onClick={refresh}>刷新长期授权</ActionButton>
       {data?.decisions.length === 0 && <EmptyState title="暂无长期授权" />}
       {data?.decisions.map((decision) => (
         <ApprovalDecisionRow

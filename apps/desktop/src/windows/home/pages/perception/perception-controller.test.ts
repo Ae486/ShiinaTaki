@@ -21,6 +21,29 @@ function fixture() {
 describe("Perception producer observation", () => {
   const flush = () => new Promise((resolve) => setImmediate(resolve));
 
+  it("retains a populated activity snapshot throughout a deferred invalidation and commits the next snapshot directly", async () => {
+    const f = fixture();
+    const populated: PerceptionCard = { ...CARD,
+      current: { processName: "Code.exe", windowTitle: "main.ts", startedAt: 1, durationMs: 60_000, samples: 2, idle: false },
+      recent: [{ processName: "Browser.exe", windowTitle: "Earlier", startedAt: 0, durationMs: 60_000, samples: 2, idle: false }],
+    };
+    f.client.perceptionCard.mockResolvedValue(populated);
+    f.controller.replace(f.client);
+    await f.controller.refresh();
+    const before = f.states.length;
+    const pending = deferred<PerceptionCard>();
+    f.client.perceptionCard.mockReturnValueOnce(pending.promise);
+    const done = f.controller.invalidate();
+    expect(f.state()).toMatchObject({ kind: "loading", stale: true });
+    expect(f.state().card).toBe(populated);
+    const next: PerceptionCard = { ...populated, current: { ...populated.current!, durationMs: 120_000 } };
+    pending.resolve(next);
+    await done;
+    expect(f.states.slice(before).every((state) => state.card === populated || state.card === next)).toBe(true);
+    expect(f.state()).toMatchObject({ kind: "ready", card: next, stale: false });
+    f.controller.dispose();
+  });
+
   it("waits for subscribed membership and folds all pre-baseline hints into one coherent read", async () => {
     const f = fixture();
     const setup = deferred<ReadSubscriptionSupport>();

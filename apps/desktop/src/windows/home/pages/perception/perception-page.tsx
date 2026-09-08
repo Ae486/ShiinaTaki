@@ -10,12 +10,21 @@ import { ReadObservationNotice } from "../../read-observation-notice.tsx";
 import { LabeledRows, PageCard } from "../../page-card.tsx";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { Skeleton } from "@/components/ui/skeleton.js";
-import { FeedbackLine } from "@/components/ui/feedback-line.js";
+import { PendingIndicator } from "@/components/ui/pending-indicator.js";
 import { PauseControls } from "./pause-controls.tsx";
 import { activityRows, samplingRows } from "./perception-view.ts";
 import { usePerception } from "./use-perception.ts";
 
 const RETENTION_KNOBS = ["TAKI_AMBIENT_SCREENSHOT", "TAKI_AMBIENT_SCREENSHOT_RETENTION", "TAKI_ATTACHMENT_TTL_DAYS"];
+
+function SamplingStatus({ stale, refreshing }: { stale: boolean; refreshing: boolean }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-xs text-text-secondary">
+      {stale && !refreshing && <span className="whitespace-nowrap text-warn-strong" title="上次采样调度信息，当前状态尚未确认。">状态待确认</span>}
+      <PendingIndicator active={refreshing} label={stale ? "正在重新确认采样状态" : "正在更新采样状态"} />
+    </span>
+  );
+}
 
 function RetentionCard({ onOpenSettings }: { onOpenSettings: () => void }) {
   return (
@@ -53,9 +62,8 @@ export function PerceptionPage() {
           onSet={(params) => void perception.setPause(params)}
           read={{ loading: perception.loading, refreshing: perception.refreshing, pending: perception.pending, stale: perception.stale }}
         />
-        <PageCard title="采样状态">
+        <PageCard title="采样状态" action={<SamplingStatus stale={perception.stale && perception.card !== null} refreshing={perception.refreshing} />}>
           {perception.card && <LabeledRows rows={samplingRows(perception.card)} />}
-          {perception.stale && perception.card && <FeedbackLine tone="warn">上次采样调度信息，当前状态尚未确认。</FeedbackLine>}
           {!perception.card && perception.loading && <Skeleton lines={3} />}
           {!perception.card && !perception.loading && <p className="text-xs text-text-secondary">采样调度状态尚未确认。</p>}
         </PageCard>

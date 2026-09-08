@@ -21,9 +21,9 @@ export interface MonitorSelectionAccess {
   read(): MonitorViewState;
   publish(patch: Partial<MonitorViewState>): void;
   failed(cause: unknown): void;
+  missingRow(rowKey: string): TrajectoryResult | undefined;
 }
 
-const UNAVAILABLE = new Set(["OBSERVABILITY_FORBIDDEN", "OBSERVABILITY_DISABLED", "RUN_NOT_FOUND", "FORBIDDEN"]);
 const ERRORS: Readonly<Record<string, string>> = {
   OBSERVABILITY_FORBIDDEN: "无权查看这条运行记录。",
   OBSERVABILITY_DISABLED: "运行监视已关闭。",
@@ -45,9 +45,16 @@ export function monitorError(cause: unknown): string {
   return ERRORS[errorCode(cause)] ?? "暂时无法读取运行记录，请检查连接后重试。";
 }
 
-export function monitorUnavailable(cause: unknown): boolean {
-  return UNAVAILABLE.has(errorCode(cause));
+export function monitorUnavailable(cause: unknown): "monitor" | "run" | "record" | undefined {
+  switch (errorCode(cause)) {
+    case "FORBIDDEN": case "OBSERVABILITY_DISABLED": return "monitor";
+    case "OBSERVABILITY_FORBIDDEN": case "RUN_NOT_FOUND": return "run";
+    case "OBSERVABILITY_EVENT_NOT_FOUND": return "record";
+    default: return undefined;
+  }
 }
+
+export const monitorDisabled = (cause: unknown): boolean => errorCode(cause) === "OBSERVABILITY_DISABLED";
 
 export function mergeTrajectoryRows(previous: readonly TrajectoryRow[], next: readonly TrajectoryRow[]): TrajectoryRow[] {
   const rows = new Map(previous.map((row) => [row.seq, row]));

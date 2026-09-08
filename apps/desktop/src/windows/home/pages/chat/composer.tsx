@@ -76,16 +76,8 @@ export function enterSends(key: string, shiftKey: boolean, isComposing: boolean)
 
 export function Composer({ onSend, onCancel, isSending, retractedDraft, consumeRetractedDraft, connectionReady }: ComposerProps) {
   const [draft, setDraft] = useState("");
-  const { attachments, pick, remove, clear, notice, dismissNotice } = useImageAttach();
+  const { attachments, pick, remove, clear } = useImageAttach();
   const canSend = connectionReady && !isSending && (draft.trim().length > 0 || attachments.length > 0);
-
-  // Attach-pick problems (unsupported type, decode failure) surface as toasts (D34) — no layout-height notice bar.
-  useEffect(() => {
-    if (notice) {
-      pushToast(notice);
-      dismissNotice();
-    }
-  }, [notice, dismissNotice]);
 
   // Cancel-before-reply hands the retracted text back: restore it into an EMPTY composer, but NEVER overwrite a
   // draft the user already started — surface it as an info toast instead. One-shot: consume it either way.

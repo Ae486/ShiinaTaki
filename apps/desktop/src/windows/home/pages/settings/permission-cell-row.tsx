@@ -15,6 +15,7 @@ import {
 import { ActionButton } from "../../action-button.tsx";
 import { CARD_ROW } from "../../page-card.tsx";
 import { Badge, type BadgeTone } from "../../badge.tsx";
+import { PendingIndicator } from "@/components/ui/pending-indicator.js";
 
 const POSTURES: PermissionPosture[] = ["auto", "ask", "deny"];
 const TONE: Record<PermissionPosture, BadgeTone> = { auto: "ok", ask: "warn", deny: "neutral" };
@@ -81,7 +82,8 @@ function CellControls(props: PermissionCellRowProps & { onChoose(posture: Permis
   const immutable = props.cell.overrideMode === "immutable";
   const disabled = props.disabled || props.pending || immutable;
   return (
-    <div className="flex flex-wrap items-center justify-end gap-1.5">
+    <div className="flex flex-wrap items-center justify-end gap-1.5" aria-busy={props.pending}>
+      <PendingIndicator active={props.pending} label="正在保存此项权限" />
       <select
         aria-label={`${getPermissionCellDisplay(props.cell.key).label}权限设置`}
         value={props.cell.overridePosture ?? props.cell.factoryPosture}

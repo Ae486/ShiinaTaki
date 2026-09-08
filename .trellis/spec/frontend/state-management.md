@@ -79,8 +79,10 @@ writeCache(key: CacheKey, value: unknown, storage: Storage): void;
   entries become cache misses. Never cast a cache entry into application data.
 - Before `config-list` reaches storage, remove every entry with `secret: true`, even though the Core currently masks
   secret values. Adding a persisted key requires a privacy review, an allow-list edit, and tests in the same change.
-- A cache hit renders immediately while revalidation runs and exposes `refreshing: true` so the page displays a visible
-  refresh marker. A rejected revalidation keeps the last good data behind an error line and a retry action.
+- A cache hit renders immediately while revalidation runs and exposes the real `refreshing` state. Shared
+  `PendingIndicator` reserves a small slot and reveals only slow work; fast reads need no flashing label. This
+  presentation delay never postpones the result or changes authority. A rejected revalidation keeps permitted
+  last-good data with a persistent error and retry action.
 - Storage absence, corruption, quota failure, or blocked writes degrade to memory-only behavior. They must not break the
   page. `load === null` means there is currently no transport and `refresh()` is a no-op; D59 owns connection status and
   reconnection rather than this cache hook. Null/replacement/disabled reads retire pending success and failure alike;
@@ -110,7 +112,7 @@ writeCache(key: CacheKey, value: unknown, storage: Storage): void;
 
 ### 5. Good/Base/Bad Cases
 
-- Good: validated cache seed renders -> visible background refresh -> fresh validated Core response replaces it.
+- Good: validated cache seed stays mounted -> quiet fast read or non-displacing slow indicator -> fresh Core response.
 - Base: no cache renders a placeholder; a failed refresh preserves last-good content and exposes retry/error state.
 - Bad: ad hoc `localStorage.setItem`, persisting perception/chat/pause state, trusting parsed JSON without a schema, or
   clearing the page on a transient Core failure.
@@ -121,7 +123,7 @@ writeCache(key: CacheKey, value: unknown, storage: Storage): void;
   and secret-row stripping.
 - `lib/cached-fetch-state.test.ts` and `read-coordinator.test.ts`: cache seed, cold/retired loading, refresh retention,
   demand joining, trailing invalidation, old success/failure suppression and newer push/echo protection.
-- Each wired page: assert the matching shared schema, `persist` posture, refresh marker, last-good error presentation,
+- Each wired page: assert the matching shared schema, `persist` posture, truthful non-displacing pending state, last-good error presentation,
   and manual Refresh action where the operator can recover.
 - Privacy regression: source/test sweep must keep perception payloads, pause state, chat content, and secrets out of
   `taki.cache.*` entries.

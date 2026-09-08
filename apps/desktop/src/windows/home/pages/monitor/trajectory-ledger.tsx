@@ -4,6 +4,7 @@
  * POS:    ui/monitor — DSH TrajectoryTable adaptation; see third-party-notices.md (DeepSeek MIT)
  */
 import { useImperativeHandle, type CSSProperties, type RefObject } from "react";
+import { PendingIndicator } from "@/components/ui/pending-indicator.js";
 import type { LedgerItem } from "./trajectory-layout.ts";
 import { recordContains, type TrajectoryRecord } from "./trajectory-records.ts";
 import { formatDuration } from "./trajectory-timing.ts";
@@ -18,7 +19,7 @@ interface LedgerActions {
 }
 interface LedgerProps {
   items: readonly LedgerItem[];
-  selection: { rowKey?: string; focusKeys: ReadonlySet<string> | null };
+  selection: { rowKey?: string; requestedRowKey?: string; focusKeys: ReadonlySet<string> | null };
   history: LedgerHistory;
   inspecting: boolean;
   active: boolean;
@@ -37,8 +38,9 @@ export function TrajectoryLedger(props: LedgerProps) {
     <div className={css.header} role="row"><span role="columnheader">事件</span><span role="columnheader">内容与结果</span></div>
     {!follow.ready && <div className={css.loading} role="status">正在定位最新记录…</div>}
     <div className={css.pane} ref={follow.scrollRef} onScroll={follow.onScroll} tabIndex={0} aria-label="轨迹记录滚动区域" data-trajectory-scroll="">
-      {props.history.hasOlder && <button type="button" className={css.history} disabled={props.history.loading} onClick={follow.loadOlder}>
-        {props.history.loading ? "正在载入更早记录…" : "载入更早记录"}
+      {props.history.hasOlder && <button type="button" className={css.history} disabled={props.history.loading}
+        aria-busy={props.history.loading} onClick={follow.loadOlder}>载入更早记录
+        <PendingIndicator active={props.active && props.history.loading} label="正在载入更早记录" />
       </button>}
       <div className={css.body} data-ready={follow.ready} data-virtual={follow.enabled}
         style={follow.enabled ? { height: follow.virtualizer.getTotalSize() } : undefined}>
@@ -55,7 +57,7 @@ export function TrajectoryLedger(props: LedgerProps) {
 
 function LedgerRow({ item, index, selection, actions, placement }: {
   item: LedgerItem; index: number;
-  selection: { rowKey?: string; focusKeys: ReadonlySet<string> | null };
+  selection: { rowKey?: string; requestedRowKey?: string; focusKeys: ReadonlySet<string> | null };
   actions: LedgerActions;
   placement: { style?: CSSProperties; measure?: (node: HTMLDivElement | null) => void };
 }) {
@@ -74,6 +76,7 @@ function LedgerRow({ item, index, selection, actions, placement }: {
     }
   };
   return <div className={css.row} role="row" tabIndex={0} aria-rowindex={index + 2} aria-selected={selected}
+    aria-busy={recordContains(record, selection.requestedRowKey)}
     aria-label={`查看${record.name}详情`} ref={placement.measure} data-index={index} style={placement.style}
     data-record-key={record.key} data-ledger-key={item.key} data-selected={selected} data-error={record.error}
     data-child={record.requestKey !== undefined && record.requestKey !== record.key}

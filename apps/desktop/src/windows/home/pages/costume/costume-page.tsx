@@ -1,6 +1,6 @@
 /**
  * INPUT:  costume/import hooks and the Home client; Pet result events govern switching.
- * OUTPUT: <CostumePage> — import outcome/count and resource warnings, plus result-driven costume selection.
+ * OUTPUT: <CostumePage> — import actions/resource warnings plus result-driven costume selection.
  * POS:    ui/windows/home/pages/costume — presentation only; import and switching stay hook-owned.
  *         The Pet owns the scene; failed list refreshes retain the last good list with retry.
  */
@@ -42,10 +42,11 @@ function ImportRow({
       />
       <ActionButton
         tone="primary"
+        busy={isImporting}
         onClick={() => inputRef.current?.click()}
         disabled={!connectionReady || isImporting}
       >
-        {isImporting ? "导入中…" : "导入模型 (.zip/.zst)"}
+        导入模型 (.zip/.zst)
       </ActionButton>
     </>
   );
@@ -74,11 +75,6 @@ function CostumeList({ costume }: { costume: CostumePageView }) {
 function ImportFeedback({ state }: { state: CharacterImport }) {
   return (
     <>
-      {state.result && (
-        <div className="mt-2">
-          <FeedbackLine tone="ok">导入成功（{state.result.costumes.length} 套服装）</FeedbackLine>
-        </div>
-      )}
       {state.warnings.length > 0 && (
         <div className="mt-1">
           <FeedbackLine tone="warn">{state.warnings.length} 条可选资源警告（加载时容错）</FeedbackLine>
@@ -123,6 +119,7 @@ export function CostumePage() {
           action={
             <ActionButton
               onClick={() => void costume.refresh()}
+              busy={costume.refreshing}
               disabled={!costume.connectionReady || costume.refreshing}
             >
               刷新列表

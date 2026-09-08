@@ -86,7 +86,7 @@ function McpPageBody({ input }: { input: McpPageBodyInput }) {
           {mcp.state.failureKind === "validation" ? "Core 返回的 MCP 快照校验失败" : `读取 MCP 服务器失败：${mcp.state.message}`}
         </PageAlert>
       )}
-      {mcp.feedback && <FeedbackBanner feedback={mcp.feedback} editing={draft !== null} />}
+      {mcp.feedback && mcp.feedback.kind !== "saved" && <FeedbackBanner feedback={mcp.feedback} editing={draft !== null} />}
         <McpMasterDetail
           servers={servers}
           empty={servers === null
@@ -157,6 +157,7 @@ function SelectedServerCard({ selected, disabled, hooks }: { selected: McpServer
     <McpServerCard
       server={selected}
       disabled={disabled}
+      pending={hooks.mcp.pending}
       confirmRemove={hooks.confirmRemove === selected.serverId}
       diagnosticsDismissed={hooks.dismissedDiagnostics.has(mcpDiagnosticKey(selected))}
       onDismissDiagnostics={() => hooks.dismissDiagnostics(mcpDiagnosticKey(selected))}
@@ -175,10 +176,11 @@ function SelectedServerCard({ selected, disabled, hooks }: { selected: McpServer
 }
 
 function FeedbackBanner({ feedback, editing }: { feedback: McpFeedback; editing: boolean }) {
-  const tone = feedback.kind === "saved" || feedback.kind === "tested"
-    ? editing ? "info" : "ok"
+  const tone = feedback.kind === "tested"
+    ? "info"
     : feedback.kind === "conflict" ? "warn" : "danger";
-  return <FeedbackLine tone={tone}>{editing ? `上次操作：${feedback.message}` : feedback.message}</FeedbackLine>;
+  const testing = feedback.kind === "tested" || feedback.kind === "test-failed";
+  return <FeedbackLine tone={tone}>{testing ? `最近一次诊断：${feedback.message}` : editing ? `上次操作：${feedback.message}` : feedback.message}</FeedbackLine>;
 }
 
 function EmptyServerState({ disabled, onAdd }: { disabled: boolean; onAdd(): void }) {

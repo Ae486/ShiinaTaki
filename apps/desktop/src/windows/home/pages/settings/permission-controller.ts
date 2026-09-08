@@ -60,7 +60,7 @@ function refreshController(
   feedback?: PermissionFeedback,
 ): Promise<void> {
   if (feedback) {
-    state.feedback = feedback;
+    state.feedback = feedback.kind === "saved" ? undefined : feedback;
     sink.feedback?.(feedback);
     state.reads.acceptUpdate();
   }
@@ -88,7 +88,7 @@ async function mutateController(
     if (!isCurrent(state, candidate, token)) return;
     sink.mutationFailed(cause);
     if (permissionAppError(cause).code === "POLICY_CONFLICT") {
-      await refreshController(state, sink, { kind: "conflict", message: "Policy changed elsewhere; refreshed from Core" });
+      await refreshController(state, sink, { kind: "conflict", message: "权限策略已在别处修改；请核对当前状态后重试。" });
     }
   } finally {
     if (state.epoch === token) {
@@ -133,12 +133,12 @@ export function createPermissionController(sink: PermissionControllerSink): Perm
     setLevel: (level, expectedPolicyGeneration) => mutateController(state, sink, {
       key: "level",
       operation: async (candidate) => void (await candidate.permissionLevelSet({ level, expectedPolicyGeneration })),
-      feedback: { kind: "saved", message: "Permission Level saved" },
+      feedback: { kind: "saved", message: "权限级别已保存" },
     }),
     setCell: (input, expectedPolicyGeneration) => mutateController(state, sink, {
       key: input.key,
       operation: async (candidate) => void (await candidate.permissionCellSet({ ...input, expectedPolicyGeneration })),
-      feedback: { kind: "saved", message: input.posture === null ? "Override reset" : "Cell override saved" },
+      feedback: { kind: "saved", message: input.posture === null ? "自定义权限已重置" : "自定义权限已保存" },
     }),
     dispose() {
       state.epoch += 1;

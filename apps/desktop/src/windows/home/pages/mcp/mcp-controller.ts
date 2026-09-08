@@ -62,6 +62,7 @@ interface ControllerState {
   visible: boolean;
   reads: ReadCoordinator<McpListResult>;
   feedback: McpFeedback | undefined;
+  feedbackEpoch: number;
   restoreAfterMutation: boolean;
   needsRead: boolean;
   observation: ReadObservation;
@@ -73,7 +74,7 @@ function isCurrent(state: ControllerState, candidate: McpPageClient, token: numb
 
 async function refreshController(state: ControllerState, sink: McpControllerSink, feedback?: McpFeedback): Promise<void> {
   if (feedback) {
-    state.feedback = feedback;
+    state.feedback = feedback.kind === "saved" ? undefined : feedback;
     sink.feedback?.(feedback);
     state.reads.acceptUpdate();
   }
@@ -116,6 +117,9 @@ async function mutateController(
   const candidate = state.client;
   if (!candidate || state.mutating) return { ok: false };
   const token = state.epoch;
+  const feedbackEpoch = ++state.feedbackEpoch;
+  let feedback: McpFeedback | undefined;
+  const completionSink = { ...sink, feedback: (next: McpFeedback) => { feedback = next; } };
   state.mutating = true;
   state.readEpoch += 1;
   state.needsRead = true;
@@ -124,7 +128,7 @@ async function mutateController(
   sink.mutationStarted(spec.key);
   let result: McpEditorMutationResult;
   try {
-    result = await completeMutation(state, sink, { candidate, token, spec });
+    result = await completeMutation(state, completionSink, { candidate, token, spec });
   } finally {
     if (isCurrent(state, candidate, token)) {
       state.mutating = false;
@@ -138,7 +142,11 @@ async function mutateController(
   }
   // All awaited reconciliation, including hide/show recovery above, belongs to the captured client.
   // A retired success or partial-commit revision cannot acknowledge another generation's editor.
-  return isCurrent(state, candidate, token) ? result : { ok: false };
+  if (!isCurrent(state, candidate, token)) return { ok: false };
+  // A notification acknowledges the same guarded completion as the editor. Read-back or visibility
+  // reconciliation may retire the client, and a newer action can supersede this one while it settles.
+  if (feedback && feedbackEpoch === state.feedbackEpoch) sink.feedback?.(feedback);
+  return result;
 }
 
 async function completeMutation(
@@ -165,7 +173,7 @@ async function completeMutation(
     }
     if (mcpAppError(cause).code === "MCP_CONFIG_CONFLICT") {
       // A conflict means the desired row moved: refetch Core truth; the operator retries explicitly.
-      await refreshController(state, sink, { kind: "conflict", message: "配置已在别处修改；已从 Core 重新读取" });
+      await refreshController(state, sink, { kind: "conflict", message: "配置已在别处修改；请核对当前状态后重试。" });
     } else await refreshController(state, sink, mcpMutationFeedback(failure));
     return { ok: false };
   }
@@ -231,7 +239,7 @@ export function createMcpController(sink: McpControllerSink): McpController {
 
 function createControllerState(sink: McpControllerSink): ControllerState {
   const state: ControllerState = {
-    client: null, epoch: 0, readEpoch: 0, lastGood: null, mutating: false, visible: true, feedback: undefined, restoreAfterMutation: false, needsRead: true,
+    client: null, epoch: 0, readEpoch: 0, lastGood: null, mutating: false, visible: true, feedback: undefined, feedbackEpoch: 0, restoreAfterMutation: false, needsRead: true,
     reads: createReadCoordinator<McpListResult>({
       started: () => { state.needsRead = true; sink.loading(state.lastGood); },
       loaded: ({ servers }) => { state.needsRead = false; state.lastGood = servers; sink.loaded(servers, state.feedback); },
@@ -282,7 +290,7 @@ function editSpec(draft: McpServerDraft, expectedRevision: number): MutationSpec
       }
       return { committedRevision: server.configRevision };
     },
-    feedback: { kind: "saved", message: `已保存 ${draft.serverId}` },
+    feedback: { kind: "saved", message: `${draft.serverId} 的本次提交已保存` },
   };
 }
 

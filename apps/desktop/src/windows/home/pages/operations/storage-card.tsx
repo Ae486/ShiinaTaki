@@ -39,7 +39,6 @@ export function StorageCard({
         <Skeleton lines={2} />
       ) : !read.error && <p className="text-xs text-text-secondary">等待连接以读取存储占用。</p>}
       <ClearControls clear={clear} connectionReady={connectionReady} />
-      {clear.notice && <div className="mt-2"><FeedbackLine tone="ok">{clear.notice}</FeedbackLine></div>}
       {clear.error && <div className="mt-2"><FeedbackLine tone="danger">{clear.error}</FeedbackLine></div>}
     </PageCard>
   );
@@ -61,7 +60,7 @@ function ClearControls({ clear, connectionReady }: { clear: MediaClearControl; c
               onClick={() => clear.onEvent("confirm")}
               disabled={!connectionReady || clear.phase === "clearing"}
             >
-              {clear.phase === "clearing" ? "清除中…" : "确认清除"}
+              确认清除
             </ActionButton>
             <ActionButton onClick={() => clear.onEvent("cancel")} disabled={clear.phase === "clearing"}>
               取消

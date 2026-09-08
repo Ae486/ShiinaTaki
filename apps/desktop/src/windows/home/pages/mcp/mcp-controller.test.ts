@@ -46,6 +46,36 @@ function client(behavior: Partial<Record<keyof McpPageClient, (...args: unknown[
 }
 
 describe("MCP subscribed read lifecycle", () => {
+  it("withholds a save notification until post-write reconciliation and drops a retired completion", async () => {
+    let finish!: (value: McpListResult) => void;
+    const pending = new Promise<McpListResult>((resolve) => { finish = resolve; });
+    const read = vi.fn().mockResolvedValueOnce(servers("github")).mockReturnValueOnce(pending);
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn(), feedback: vi.fn() };
+    const controller = createMcpController(sink);
+    controller.replace(client({ mcpList: read }));
+    await controller.refresh();
+    const done = controller.edit({ ...emptyDraft(), serverId: "github", command: "node" }, 1);
+    await flush();
+    expect(sink.feedback).not.toHaveBeenCalled();
+    controller.replace(client({}));
+    finish(servers("github"));
+    expect(await done).toEqual({ ok: false });
+    expect(sink.feedback).not.toHaveBeenCalled();
+  });
+
+  it("delivers a saved outcome once and never echoes it in later snapshots", async () => {
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn(), feedback: vi.fn() };
+    const controller = createMcpController(sink);
+    controller.replace(client({}));
+    await controller.refresh();
+    await controller.edit({ ...emptyDraft(), serverId: "github", command: "node" }, 1);
+    await controller.refresh();
+    await controller.invalidate();
+    expect(sink.feedback).toHaveBeenCalledTimes(1);
+    expect(sink.feedback).toHaveBeenCalledWith(expect.objectContaining({ kind: "saved" }));
+    expect(sink.loaded.mock.calls.every(([, feedback]) => feedback?.kind !== "saved")).toBe(true);
+  });
+
   it("coalesces successful mutation hints and settlement into one list read", async () => {
     const handlers = new Set<(event: ExtensionChanged) => void>();
     let finish!: (value: Awaited<ReturnType<McpPageClient["mcpAdd"]>>) => void;
@@ -284,6 +314,25 @@ describe("mcp controller", () => {
     expect(sink.loaded).toHaveBeenCalled(); // the conflict refetch repopulated Core truth
     const last = sink.loaded.mock.calls.at(-1)?.[1];
     expect(last).toMatchObject({ kind: "conflict" });
+  });
+
+  it("retains conflict diagnostics honestly when the required read-back also fails", async () => {
+    const failure = new Error("MCP list unavailable");
+    const read = vi.fn().mockResolvedValueOnce(servers("github")).mockRejectedValueOnce(failure);
+    const edit = vi.fn(async () => {
+      throw Object.assign(new Error("conflict"), { data: { code: "MCP_CONFIG_CONFLICT" } });
+    });
+    const sink = { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationFailed: vi.fn(), feedback: vi.fn() };
+    const controller = createMcpController(sink);
+    controller.replace(client({ mcpList: read, mcpEdit: edit }));
+    await controller.refresh();
+    expect(await controller.edit({ ...emptyDraft(), serverId: "github", command: "node" }, 1)).toEqual({ ok: false });
+    expect(sink.feedback).toHaveBeenCalledExactlyOnceWith({ kind: "conflict", message: "配置已在别处修改；请核对当前状态后重试。" });
+    expect(sink.loadFailed).toHaveBeenCalledExactlyOnceWith(failure, servers("github").servers);
+    expect(edit).toHaveBeenCalledTimes(1);
+    expect(read).toHaveBeenCalledTimes(2);
+    expect(sink.loaded).toHaveBeenCalledTimes(1);
+    controller.dispose();
   });
 
   it("reports a committed revision and keeps an error feedback when post-edit secret rotation fails", async () => {

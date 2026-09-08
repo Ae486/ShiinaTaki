@@ -1,5 +1,7 @@
 # components/toast/
-The ONE reusable transient-notice surface (D34): floating, zero layout height, hover-pauses, click pauses for good,
-Escape clears, outside-click dismisses, stack capped at 4 (A4).
-- toast-store.ts — per-window toast queue (zustand) + pushToast entry for non-React code + the MAX_TOASTS stacking cap
-- toast-host.tsx — the fixed overlay stack: role=status/aria-live, auto-dismiss timer, labelled close button, hover/click pause, Escape + outside-click dismiss-all, selectable text
+The ONE reusable transient-notice surface (D34): floating, zero layout height, six-second unheld expiry, pointer/focus
+pause, deliberate pointer/keyboard hold, Escape/outside dismissal and the four-item A4 cap.
+- toast-store.ts — compatible pushToast entry, weak event-identity consumption and operation/target replacement in a bounded window-local queue
+- toast-host.tsx — fixed polite live-region stack and Escape/outside dismiss-all listeners
+- toast-card.tsx — selectable notification card, success/warn/error/info tones, labelled close and pointer/keyboard reading protection
+- toast-lifetime.ts — remaining-time presentation deadline with independent hover/focus pauses, deliberate hold and Effect cleanup

@@ -45,7 +45,7 @@ export function McpServerEditor(input: {
         <div className="flex justify-end gap-2">
           <ActionButton onClick={input.onCancel}>取消</ActionButton>
           <ActionButton tone="primary" busy={input.saving} disabled={input.saving || input.disabled} onClick={input.onSave}>
-            {input.saving ? "保存中…" : "保存"}
+            保存
           </ActionButton>
         </div>
       </div>

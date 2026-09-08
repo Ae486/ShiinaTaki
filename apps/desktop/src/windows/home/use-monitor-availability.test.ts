@@ -144,7 +144,7 @@ describe("Home Monitor availability and requested route", () => {
 });
 
 describe("Home availability with the retained Monitor controller", () => {
-  it("restores the same selected older Run and Inspector after a null-client gap", async () => {
+  it.each(["FULL_LOCAL", "FEEDBACK_ONLY"] as const)("restores the same selected older Run with %s detail authority after a null-client gap", async (mode) => {
     const availability = availabilityView();
     useHomeStore.getState().navigate("monitor");
     let view = INITIAL_MONITOR_STATE;
@@ -162,14 +162,15 @@ describe("Home availability with the retained Monitor controller", () => {
     expect(view.inspectedRowKey).toBe(row.rowKey);
     expect(view.stale).toBe(true);
     const replacement = availabilityClient();
-    const next = monitorClient(replacement.client, []);
+    const next = monitorClient(replacement.client, [], mode);
     availability.bind(next); controller.bind(next);
     expect(availability.pages()).toContain("monitor");
-    replacement.pending.resolve(modeState("FEEDBACK_ONLY"));
+    replacement.pending.resolve(modeState(mode));
     await vi.waitFor(() => expect(view.stale).toBe(false));
     expect(view.runs).toEqual([]);
     expect(view.selectedRunKey).toBe(run.key);
-    expect(view.inspectedRowKey).toBe(row.rowKey);
+    expect(view.inspectedRowKey).toBe(mode === "FULL_LOCAL" ? row.rowKey : undefined);
+    expect(view.inspector?.mode).toBe(mode === "FULL_LOCAL" ? "FULL_LOCAL" : undefined);
     expect(view.trajectory?.rows).toEqual([row]);
     availability.close(); controller.dispose();
   });
@@ -184,12 +185,12 @@ const run: RunMonitorSummary = {
 const row: TrajectoryRow = { rowKey: "row", seq: 1, kind: "lifecycle", label: "运行结束", status: "已完成", phase: "run",
   category: "lifecycle", categoryLabel: "生命周期", occurredAt: run.queuedAt, surface: "current", surfaceLabel: "当前" };
 
-function monitorClient(availability: MonitorAvailabilityClient, runs: RunMonitorSummary[]): WsClient {
+function monitorClient(availability: MonitorAvailabilityClient, runs: RunMonitorSummary[], inspectorMode: "FULL_LOCAL" | "FEEDBACK_ONLY" = "FULL_LOCAL"): WsClient {
   return {
     ...availability, monitorList: vi.fn(async () => ({ runs })),
     monitorTrajectory: vi.fn(async (params: TrajectoryParams) => ({ run, rows: params.tail && params.limit > 1 ? [row] : [],
       cursor: { runKey: run.key, seq: params.tail ? 1 : params.afterSeq }, hasMore: false, hasOlder: false })),
-    monitorInspect: vi.fn(async () => ({ mode: "FEEDBACK_ONLY", title: "运行结束", detail: [], technical: [], technicalCollapsed: true, redactionNotice: "仅展示已记录信息。" })),
+    monitorInspect: vi.fn(async () => ({ mode: inspectorMode, title: "运行结束", detail: [], technical: [], technicalCollapsed: true, redactionNotice: "仅展示已记录信息。" })),
     onMonitorEvent: vi.fn(() => () => undefined), subscribeMonitor: vi.fn(async () => undefined), unsubscribeMonitor: vi.fn(async () => undefined),
   } as unknown as WsClient;
 }

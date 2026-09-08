@@ -1,16 +1,17 @@
 /**
- * INPUT:  one disposable Home client generation, visibility, Run filters, and selection actions
- * OUTPUT: guarded Run browsing and a selected trajectory delegated to the Monitor's bounded read coordinator
+ * INPUT:  one disposable Home client generation, live mode hints, visibility, Run filters, and selection actions
+ * OUTPUT: guarded Run browsing, immediate detail-authority retirement and a coherently selected trajectory
  * POS:    ui/monitor — framework-free local state; no polling, durable cache, or competing execution authority
  */
 import type {
   MonitorMode, RunEventCategory, RunInitiator, RunMonitorCursor, RunMonitorSummary, RunOutcome, RunState,
   TrajectoryInspector, TrajectoryResult,
 } from "@taki/shared";
+import { MONITOR_MODE_CONFIG_KEY, MonitorModeSchema } from "@taki/shared";
 import { ACTIVE_CHARACTER_ID } from "@/lib/active-character.js";
 import type { WsClient } from "@/lib/ws-client.js";
 import { MonitorSelection } from "./monitor-selection.ts";
-import { monitorError } from "./monitor-request-state.ts";
+import { monitorError, monitorUnavailable } from "./monitor-request-state.ts";
 
 export interface MonitorFilters {
   characterId: string;
@@ -33,10 +34,14 @@ export interface MonitorViewState {
   filters: MonitorFilters;
   runs: RunMonitorSummary[];
   nextCursor?: RunMonitorCursor;
+  /** Committed identity always describes trajectory; requested identity owns only a pending replacement. */
   selectedRunKey?: string;
+  requestedRunKey?: string;
+  retryRunKey?: string;
   trajectory?: TrajectoryResult;
   inspector?: TrajectoryInspector;
   inspectedRowKey?: string;
+  requestedRowKey?: string;
   loadingRuns: boolean;
   loadingTrajectory: boolean;
   loadingOlder: boolean;
@@ -63,17 +68,20 @@ export interface MonitorController {
   refresh(): Promise<void>;
   loadOlderRuns(): Promise<void>;
   select(runKey: string): Promise<void>;
-  loadMoreTrajectory(): Promise<void>;
-  inspect(rowKey: string): Promise<void>;
-  closeInspector(): void;
+  loadMoreTrajectory(displayedRunKey?: string): Promise<void>;
+  inspect(rowKey: string, displayedRunKey?: string): Promise<void>;
+  closeInspector(displayedRunKey?: string): void;
 }
 
 class MonitorControllerImpl implements MonitorController {
   private state = INITIAL_MONITOR_STATE;
   private client: WsClient | null = null;
   private generation = 0;
+  private binding = 0;
+  private modeEpoch = 0;
   private listEpoch = 0;
   private removeLiveHandler: (() => void) | null = null;
+  private removeModeHandler: (() => void) | null = null;
   private visible = true;
   private readonly selection: MonitorSelection;
   private readonly emit: (state: MonitorViewState) => void;
@@ -83,6 +91,7 @@ class MonitorControllerImpl implements MonitorController {
     this.selection = new MonitorSelection({
       read: () => this.state, client: () => this.client, generation: () => this.generation,
       visible: () => this.visible, publish: (patch) => this.publish(patch),
+      retireList: () => { this.listEpoch += 1; },
     });
   }
 
@@ -97,13 +106,17 @@ class MonitorControllerImpl implements MonitorController {
 
   bind(next: WsClient | null): void {
     const previous = this.client;
+    this.binding += 1;
     this.generation += 1;
     this.listEpoch += 1;
     this.selection.retire();
     this.removeLiveHandler?.();
     this.removeLiveHandler = null;
+    this.removeModeHandler?.();
+    this.removeModeHandler = null;
     if (previous && previous !== next) void previous.unsubscribeMonitor?.().catch(() => undefined);
     this.client = next;
+    if (next) this.observeMode(next);
     if (!next || !this.visible) {
       this.publish({ loadingRuns: false, stale: this.state.runs.length > 0 || this.state.trajectory !== undefined });
       return;
@@ -113,22 +126,45 @@ class MonitorControllerImpl implements MonitorController {
 
   private attach(target: WsClient): void {
     const candidate = this.generation;
+    const modeEpoch = this.modeEpoch;
     this.removeLiveHandler = target.onMonitorEvent((event) => {
       if (this.current(candidate, target)) this.selection.onLive(event);
     });
-    this.publish({ loadingRuns: true, error: null });
+    this.publish({ loadingRuns: true, error: null, retryRunKey: undefined });
     void target.monitorState().then(async (monitor) => {
       if (!this.current(candidate, target)) return;
-      this.publish({ mode: monitor.mode });
-      if (!monitor.enabled) {
-        this.selection.clear();
-        this.publish({ runs: [], nextCursor: undefined, loadingRuns: false, stale: false });
-        return;
-      }
-      await this.refresh();
+      if (modeEpoch === this.modeEpoch) this.acceptMode(monitor.mode);
+      if (this.state.mode !== "DISABLED") await this.refresh();
     }).catch((cause: unknown) => {
-      if (this.current(candidate, target)) this.publish({ error: monitorError(cause), loadingRuns: false, stale: true });
+      if (!this.current(candidate, target)) return;
+      if (monitorUnavailable(cause) === "monitor") this.selection.failed(cause);
+      else this.publish({ error: monitorError(cause), loadingRuns: false, stale: true });
     });
+  }
+
+  private observeMode(target: WsClient): void {
+    const binding = this.binding;
+    // Home's availability owner already subscribes this client to config changes. Keep only this cheap
+    // authority listener while hidden, so re-entry cannot briefly reveal detail known to be restricted.
+    this.removeModeHandler = target.onConfigChanged?.((change) => {
+      if (this.binding !== binding || this.client !== target || change.key !== MONITOR_MODE_CONFIG_KEY) return;
+      const mode = MonitorModeSchema.safeParse(change.value);
+      if (!mode.success) return;
+      this.modeEpoch += 1;
+      this.acceptMode(mode.data);
+    }) ?? null;
+  }
+
+  private acceptMode(mode: MonitorMode): void {
+    if (mode === "DISABLED") {
+      this.listEpoch += 1;
+      void this.client?.unsubscribeMonitor?.().catch(() => undefined);
+      this.selection.clear({ mode, runs: [], nextCursor: undefined, loadingRuns: false, stale: false, error: null });
+      return;
+    }
+    // Detail and its displayed identity retire in the same publication; ordinary Run rows are mode-independent.
+    const restricted = this.state.mode === "FULL_LOCAL" && mode === "FEEDBACK_ONLY";
+    this.publish({ mode, ...(restricted ? this.selection.details.reset() : {}) });
   }
 
   setVisible(visible: boolean): void {
@@ -146,12 +182,15 @@ class MonitorControllerImpl implements MonitorController {
 
   dispose(): void {
     const previous = this.client;
+    this.binding += 1;
     this.generation += 1;
     this.listEpoch += 1;
     this.selection.retire();
     this.client = null;
     this.removeLiveHandler?.();
     this.removeLiveHandler = null;
+    this.removeModeHandler?.();
+    this.removeModeHandler = null;
     if (previous) void previous.unsubscribeMonitor?.().catch(() => undefined);
   }
 
@@ -170,7 +209,7 @@ class MonitorControllerImpl implements MonitorController {
     if (!target || !this.visible) return;
     const candidate = this.generation;
     const epoch = ++this.listEpoch;
-    this.publish({ loadingRuns: true, error: null });
+    this.publish({ loadingRuns: true, error: null, retryRunKey: undefined });
     try {
       const result = await target.monitorList(this.listParams());
       if (!this.current(candidate, target) || epoch !== this.listEpoch) return;
@@ -180,7 +219,8 @@ class MonitorControllerImpl implements MonitorController {
       else this.publish({ stale: false });
     } catch (cause) {
       if (this.current(candidate, target) && epoch === this.listEpoch) {
-        this.publish({ error: monitorError(cause), loadingRuns: false, stale: this.state.runs.length > 0 });
+        if (monitorUnavailable(cause) === "monitor") this.selection.failed(cause);
+        else this.publish({ error: monitorError(cause), loadingRuns: false, stale: this.state.runs.length > 0 });
       }
     }
   }
@@ -191,7 +231,7 @@ class MonitorControllerImpl implements MonitorController {
     if (!target || !cursor || this.state.loadingRuns || !this.visible) return;
     const candidate = this.generation;
     const epoch = ++this.listEpoch;
-    this.publish({ loadingRuns: true, error: null });
+    this.publish({ loadingRuns: true, error: null, retryRunKey: undefined });
     try {
       const result = await target.monitorList(this.listParams(cursor));
       if (!this.current(candidate, target) || epoch !== this.listEpoch) return;
@@ -200,15 +240,22 @@ class MonitorControllerImpl implements MonitorController {
         nextCursor: result.nextCursor, loadingRuns: false });
     } catch (cause) {
       if (this.current(candidate, target) && epoch === this.listEpoch) {
-        this.publish({ error: monitorError(cause), loadingRuns: false });
+        if (monitorUnavailable(cause) === "monitor") this.selection.failed(cause);
+        else this.publish({ error: monitorError(cause), loadingRuns: false });
       }
     }
   }
 
   select(runKey: string): Promise<void> { return this.selection.select(runKey); }
-  loadMoreTrajectory(): Promise<void> { return this.selection.loadOlder(); }
-  inspect(rowKey: string): Promise<void> { return this.selection.details.inspect(rowKey); }
-  closeInspector(): void { this.selection.details.closeInspector(); }
+  loadMoreTrajectory(displayedRunKey = this.state.selectedRunKey): Promise<void> {
+    return displayedRunKey === this.state.selectedRunKey ? this.selection.loadOlder() : Promise.resolve();
+  }
+  inspect(rowKey: string, displayedRunKey = this.state.selectedRunKey): Promise<void> {
+    return displayedRunKey === this.state.selectedRunKey ? this.selection.details.inspect(rowKey) : Promise.resolve();
+  }
+  closeInspector(displayedRunKey = this.state.selectedRunKey): void {
+    if (displayedRunKey === this.state.selectedRunKey) this.selection.details.closeInspector();
+  }
 
   private listParams(cursor?: RunMonitorCursor) {
     const filters = this.state.filters;

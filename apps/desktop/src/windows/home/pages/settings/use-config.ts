@@ -1,6 +1,6 @@
 /**
  * INPUT:  Home's authenticated client, effective Settings visibility and current config snapshots.
- * OUTPUT: useConfig() — truthful read/observation state plus current-attempt save outcomes and notices.
+ * OUTPUT: useConfig() — truthful read/observation state plus current-attempt save outcomes.
  * POS:    Home Settings composition hook; read observation, write lifetime and editable drafts have separate owners.
  */
 import type { ConfigEntry, ConfigValue } from "@taki/shared";
@@ -18,7 +18,6 @@ export interface ConfigView {
   error: string | null;
   refreshing: boolean;
   observationGap: boolean;
-  notices: Record<string, { ok: boolean; message: string }>;
   save(key: string, value: ConfigValue | null): Promise<ConfigSaveOutcome>;
   refresh(): Promise<void>;
 }

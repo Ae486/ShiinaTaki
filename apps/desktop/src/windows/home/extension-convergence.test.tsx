@@ -57,7 +57,7 @@ describe("ExtensionConvergenceStrip", () => {
 
   it.each([
     { kind: "idle", notice: "等待连接，显示上次结果" },
-    { kind: "loading", notice: "刷新中" },
+    { kind: "loading", notice: 'aria-busy="true"' },
     { kind: "failure", notice: "刷新失败，显示上次结果" },
   ] as const)("keeps previous counts explicitly qualified during $kind", ({ kind, notice }) => {
     const state = kind === "failure"
@@ -68,6 +68,7 @@ describe("ExtensionConvergenceStrip", () => {
     expect(html).toContain("扩展 2");
     expect(html).toContain("名称冲突 1");
     expect(html).toContain(notice);
+    if (kind === "loading") expect(html.replace(/<[^>]*>/g, "")).not.toContain("刷新中");
     expect(html).not.toContain(HOST);
     expect(html).not.toContain("复制");
   });

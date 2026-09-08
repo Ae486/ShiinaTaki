@@ -15,6 +15,7 @@ import { FAILURE_REASON_LABEL, PHASE_LABEL, transportLine } from "./mcp-labels.t
 export interface McpServerCardActions {
   server: McpServerView;
   disabled: boolean;
+  pending?: string | null;
   confirmRemove: boolean;
   /** Whether THIS server's current diagnostics banner was dismissed (keyed per outcome, see mcpDiagnosticKey). */
   diagnosticsDismissed: boolean;
@@ -72,13 +73,13 @@ function Actions(input: McpServerCardActions) {
   const { server, disabled } = input;
   return (
     <div className="mt-3 flex flex-wrap gap-2">
-      <ActionButton tone="primary" disabled={disabled} onClick={input.onTest}>测试</ActionButton>
-      <ActionButton disabled={disabled || !server.enabled} onClick={input.onReconnect}>重连</ActionButton>
-      <ActionButton disabled={disabled} onClick={input.onToggleEnabled}>{server.enabled ? "停用" : "启用"}</ActionButton>
+      <ActionButton tone="primary" busy={input.pending === `test:${server.serverId}`} disabled={disabled} onClick={input.onTest}>测试</ActionButton>
+      <ActionButton busy={input.pending === `reconnect:${server.serverId}`} disabled={disabled || !server.enabled} onClick={input.onReconnect}>重连</ActionButton>
+      <ActionButton busy={input.pending === `${server.enabled ? "disable" : "enable"}:${server.serverId}`} disabled={disabled} onClick={input.onToggleEnabled}>{server.enabled ? "停用" : "启用"}</ActionButton>
       <ActionButton disabled={disabled} onClick={input.onEdit}>编辑</ActionButton>
       {input.confirmRemove ? (
         <>
-          <ActionButton tone="danger" disabled={disabled} onClick={input.onConfirmRemove}>确认移除</ActionButton>
+          <ActionButton tone="danger" busy={input.pending === `remove:${server.serverId}`} disabled={disabled} onClick={input.onConfirmRemove}>确认移除</ActionButton>
           <ActionButton disabled={disabled} onClick={input.onCancelRemove}>取消</ActionButton>
         </>
       ) : (

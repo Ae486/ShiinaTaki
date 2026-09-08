@@ -17,7 +17,7 @@ import { ApprovalDecisionsSection } from "./approval-decisions-section.tsx";
 import { configLabelOf, filterConfigEntries, groupConfigEntries } from "./config-groups.ts";
 
 export function SettingsPage() {
-  const { entries, hasSnapshot, connectionReady, loading, error, refreshing, observationGap, notices, save, refresh } = useConfig();
+  const { entries, hasSnapshot, connectionReady, loading, error, refreshing, observationGap, save, refresh } = useConfig();
   const [query, setQuery] = useState("");
   const groups = useMemo(() => groupConfigEntries(filterConfigEntries(entries, query)), [entries, query]);
 
@@ -49,7 +49,6 @@ export function SettingsPage() {
                 hint={group.hint}
                 groupEntries={groupEntries}
                 connectionReady={connectionReady}
-                notices={notices}
                 onSave={save}
               />
             ))}
@@ -66,12 +65,11 @@ interface KnobGroupProps {
   hint: string;
   groupEntries: ReturnType<typeof groupConfigEntries>[number]["entries"];
   connectionReady: boolean;
-  notices: ReturnType<typeof useConfig>["notices"];
   onSave: ReturnType<typeof useConfig>["save"];
 }
 
 /** One group header (Chinese + one-line explanation) and its card of knob rows in server order. */
-function KnobGroup({ label, hint, groupEntries, connectionReady, notices, onSave }: KnobGroupProps) {
+function KnobGroup({ label, hint, groupEntries, connectionReady, onSave }: KnobGroupProps) {
   return (
     <section className="flex flex-col gap-2">
       <div>
@@ -85,7 +83,6 @@ function KnobGroup({ label, hint, groupEntries, connectionReady, notices, onSave
             entry={entry}
             chineseLabel={configLabelOf(entry.key) ?? undefined}
             connectionReady={connectionReady}
-            notice={notices[entry.key]}
             onSave={onSave}
           />
         ))}

@@ -1,7 +1,7 @@
 # Reactive Read-Models: Push, Generations, Visibility & Scroll Discipline
 
 > Home pages are disposable read-models over Core truth. These contracts include the event/demand refresh
-> work in 09-08-uiux-triggered-refresh and retain the accepted Chat/Monitor lifecycle and reading behavior.
+> work in 09-08-uiux-triggered-refresh and the visual-continuity follow-up, retaining the accepted Chat/Monitor lifecycle and reading behavior.
 > They create no second authority, polling loop or mutation replay (state-management.md).
 
 ## (a) Push-driven pages update from WS events through generation-guarded handlers
@@ -43,10 +43,12 @@
 - `setInterval` for data is forbidden (quality-guidelines.md). Data arrives via WS push: `chat.delta`,
   `timeline.appended`, `config.changed`, `observability.event`. If a page needs fresher data than the
   push stream provides, the answer is a Core push or an operator-triggered refetch — never a timer.
-- The only legitimate timers are ONE-SHOT deadlines and backstops, never re-arming fetch loops: RPC
+- Legitimate data-lifetime timers are ONE-SHOT deadlines and backstops, never re-arming fetch loops: RPC
   deadlines (`rpc-deadline.ts`), the timeline load-older backstop (`use-timeline-scroll.ts`
   `LOAD_BACKSTOP_MS`), costume result deadlines. Coalescing timers that BATCH already-pushed data
   (`chat-delta-coalescer.ts` ~40ms trailing edge) are allowed — they fetch nothing.
+- Presentation-only one-shots may delay a busy indicator or expire a transient Toast. They fetch nothing,
+  authorize nothing, never delay a ready result, and clean up with their signal/owner.
 - Core's absolute pause-expiry projection wake-up is a producer-owned deadline, not a browser poll or a
   second pause writer. Browser time never authoritatively resumes observation.
 
@@ -65,6 +67,13 @@
   state cannot be observed, so only its gap/version bookkeeping changes. Perception/extension hints also
   remain cheap and targeted. Return reconciles one uncovered gap; permission/approval snapshots instead
   follow their demand policy and do not pretend a permission push channel exists.
+- Monitor also retains one cheap mode-authority listener on Home's already subscribed client. A valid live mode
+  change retires affected detail even while hidden, without publishing hidden React updates. Physical binding and
+  mode epochs reject retired callbacks and mode snapshots predating the push; no second subscription/read loop is added.
+- HomeShell publishes the actual shown route in a layout effect. Monitor applies route visibility before client
+  binding in layout effects, so a returning retained page reconciles the current controller snapshot before paint.
+  Passive effects can expose the cached React view for one reveal frame even when hidden controller authority was
+  already retired. Preserve Monitor's route-only semantics and verify this chain in the native renderer.
 - A hidden page must not drive React renders: the monitor suppresses `emit` while hidden and
   reconciles from its page memory on reactivation.
 - Hiding must never rebind a mutation controller to null or discard its lock/outcome. A pending command
@@ -114,8 +123,9 @@ is not an authority for selected-Run freshness. Preserve the one in-flight plus 
 
 ## (g) Stale/busy indications come from real signals only — never invented states
 
-- `PageHeader busy` is fed by actual in-flight loads (`loadingRuns || loadingTrajectory` in the monitor;
-  `refreshing` from `useCachedFetch` for cached pages). No simulated busy state, no artificial delay.
+- `PageHeader busy` and pending controls use actual request flags or `refreshing` from their read owner.
+  `PendingIndicator` reveals work only after 250 ms in a reserved inline slot. No simulated work or minimum
+  result delay is allowed; a request completing before the threshold never flashes a progress label.
 - The monitor's `stale` flag follows actual connection retirement, invalidation or failed recovery and
   clears only through real restoration/reconciliation — never a timer or guess. The cached-fetch `refreshing` marker is driven by the load state machine
   (`cached-fetch-state.ts`), and its error line by the actual rejection.
@@ -259,7 +269,107 @@ return loading ? <Skeleton /> : <Editor key={requestRevision} data={data} />;
 useEffect(() => setDraft(serverValue), [serverValue]);
 await save(); setDirty(false);
 
-// Correct: stable parent/key and separate resource metadata; explicit local outcome/draft epoch.
-return <>{refreshing && <RefreshNotice />}<Editor key={entityId} data={permittedData} /></>;
+// Correct: stable parent/key and a fixed metadata slot; explicit local outcome/draft epoch.
+return <PageCard title="Configuration" action={<PendingIndicator active={refreshing} label="Updating configuration" />}>
+  <Editor key={entityId} data={permittedData} />
+</PageCard>;
 // The draft owner applies a saved/current result only to its matching unchanged attempt.
+```
+
+## Scenario: Coherent target replacement and transient feedback
+
+### 1. Scope / Trigger
+
+Apply to a same-authority Run/detail change, warm card/list refresh, or one-time operator action outcome.
+Keep first load, successful empty results, persistent read failures and authority loss distinct.
+
+### 2. Signatures
+
+```ts
+import type { JSX } from "react";
+
+type PendingIndicatorProps = { active: boolean; label: string; className?: string };
+declare function PendingIndicator(props: PendingIndicatorProps): JSX.Element;
+
+type ToastTone = "error" | "info" | "success" | "warn";
+type ToastOptions = { eventKey?: object; replaceKey?: string };
+declare function pushToast(message: string, tone?: ToastTone, options?: ToastOptions): void;
+declare function dismissToastGroup(replaceKey: string): void;
+```
+
+Monitor separates `requestedRunKey` / `requestedRowKey` from committed `selectedRunKey` /
+`inspectedRowKey` and their trajectory/Inspector payloads. UI actions carry the displayed Run identity
+so a callback from older DOM cannot silently act on a newly committed Run.
+
+### 3. Contracts
+
+- Stage a different target independently; publish matching identity, payload, cursors and related detail reset
+  together. Never reuse A's warm trajectory path/cursor for B merely because some trajectory exists.
+- Keep the committed entity key and subtree until a valid replacement is ready. Same-entity refresh preserves
+  mounted editors, rows and reading state. A new committed entity may deliberately reset entity-local state.
+- React's batching/reconciliation handles the coherent tree. Do not wrap every imperative controller notification
+  in `startTransition`: controller state could advance before the displayed DOM/action bindings. Transitions and
+  `useDeferredValue` address measured React rendering cost; they do not supply RPC readiness or request ordering.
+- Close, hide, replacement clients and newer candidates retire old success and failure. Real deletion, forbidden
+  access and known downgrade of detail visibility take effect immediately; visual retention does not grant access.
+- Ordinary pending metadata lives in an existing header/control slot. Keep action labels stable and disable them
+  from actual readiness immediately. Perception does not insert temporary warning paragraphs above its activity card.
+  Reserve both the slot dimensions and its alignment: a PendingIndicator in a baseline-aligned flex row must use
+  its own center alignment, so adding the SVG cannot change the header baseline or downstream card positions.
+- Notify from a guarded action outcome, never from render, `useMemo`, a state updater or every loaded snapshot.
+  Reuse an event object to deduplicate delivery; the window-local WeakSet consumes that event even after its Toast
+  is dismissed. A later distinct attempt gets another object even if its message is identical. `replaceKey` and
+  explicit group dismissal remove superseded feedback for the same operation/target.
+- Chat file-pick results belong to their draft lifetime. Sending/clearing or unmounting retires in-flight decoding
+  for both attachments and notifications; multiple picks within the same still-active draft remain additive.
+- Default unheld Toasts expire after six unpaused seconds. Hover/keyboard focus pause the remaining timer;
+  deliberate click-to-hold retains A4's reading affordance. Cleanup, labelled close, Escape/outside dismissal and
+  selectable text remain required. Expiration or appearance changes no normal-flow page height.
+- Validation, unsaved drafts/conflicts, partial-commit diagnostics and useful operation results stay with their
+  owning views. A Toast cannot be the only retained explanation or retry path for a continuing failure.
+  A conflict does not prove that its following reconciliation succeeded: retain the conflict and any read failure
+  separately, without promising that Core state was refreshed before a successful read establishes that fact.
+  An interrupted submitted write's unknown-outcome diagnostic survives the null-to-replacement client transition;
+  restored transport alone cannot confirm the prior operation. Never replay it or publish its retired completion.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required behavior |
+| --- | --- |
+| Loaded A; B pending; then C wins before B | A remains coherent until C commits; B success/failure cannot overwrite C. |
+| Displayed A action fires after B commits | Reject the mismatched displayed identity; never issue an A-row request against B. |
+| Missing pending target vs missing displayed target | Keep separately permitted old content / remove the actually missing projection. |
+| Known detail downgrade or monitoring disabled | Retire pending detail and remove affected content immediately. |
+| Populated same-resource refresh | Same nodes/reading geometry; no skeleton or temporary blank frame. |
+| Fast pending vs slow pending | No flashed label / delayed reserved indicator; ready content is never held back. |
+| Repeated event vs new same-message attempt | One consumed notification / a fresh notification with its own lifetime. |
+| New failure after an old success | Supersede the old operation feedback; retain needed diagnostics and retry. |
+
+### 5. Good/Base/Bad Cases
+
+- Good: retain one committed snapshot, atomically replace it, and notify once from the actual mutation callback.
+- Base: a cold read displays truthful local loading and ends in data, empty or a retryable failure.
+- Bad: clear data at request start, change only a payload's label/key, insert transient banners in flow, or
+  enqueue a "saved" message whenever a server snapshot is re-read.
+
+### 6. Tests Required
+
+- Monitor controller/presentation cases cover candidate races, title/payload/cursor identity, stale action callbacks,
+  close/deselect, unavailable scope and mode downgrade. Existing live recovery and history tests remain mandatory.
+- `resource-state-pages.test.tsx`, Perception and Skills tests cover retained content and quiet fast metadata;
+  `home-action-readiness.test.tsx` verifies disabling independently of decorative pending indication.
+- Toast queue/timer and mutation-controller tests cover replay after dismissal, distinct attempts, replacement,
+  guarded completion, keyboard/pointer pause combinations and deterministic expiry.
+- Native/browser evidence covers actual frames across held and settled reads, original nodes, card rectangles,
+  scroll/focus/selection, notification height/expiry and reduced motion. Static markup does not prove these properties.
+
+### 7. Wrong vs Correct
+
+```ts
+// Wrong: an ordinary list read replays a previous operation's success.
+loaded(snapshot) { apply(snapshot); pushToast(snapshot.previousOutcome.message); }
+
+// Correct: the guarded action owner consumes one event; reads only reconcile data.
+completed(outcome) { pushToast(outcome.message, "success", { eventKey: outcome, replaceKey: operationKey }); }
+loaded(snapshot) { apply(snapshot); }
 ```

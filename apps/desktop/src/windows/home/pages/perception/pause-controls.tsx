@@ -9,6 +9,7 @@ import type { PerceptionPauseSetParams, PerceptionPauseState } from "@taki/share
 import { ActionButton } from "../../action-button.tsx";
 import { PageCard } from "../../page-card.tsx";
 import { midnightAfter, pauseLabel } from "./perception-view.ts";
+import { PendingIndicator } from "@/components/ui/pending-indicator.js";
 
 export interface PauseControlsProps {
   pause: PerceptionPauseState | null;
@@ -21,9 +22,8 @@ export function PauseControls({ pause, connectionReady, onSet, read }: PauseCont
   const paused = pause?.paused ?? false;
   const disabled = !connectionReady || read?.pending === true;
   return (
-    <PageCard title="隐私暂停">
-      <p className="mb-3 text-xs text-text-body">{pause ? `${read?.stale ? "上次确认：" : ""}${pauseLabel(pause)}` : read?.loading ? "读取隐私状态中…" : "隐私暂停状态尚未确认"}</p>
-      {pause && read?.refreshing && <p className="mb-2 text-xs text-text-secondary">正在更新隐私状态…</p>}
+    <PageCard title="隐私暂停" action={<PendingIndicator active={read?.refreshing === true || read?.pending === true} label="正在确认隐私状态" className="text-text-secondary" />}>
+      <p className="mb-3 text-xs text-text-body">{pause ? `上次确认：${pauseLabel(pause)}` : read?.loading ? "读取隐私状态中…" : "隐私暂停状态尚未确认"}</p>
       <div className="flex flex-wrap gap-2">
         <ActionButton
           tone="primary"

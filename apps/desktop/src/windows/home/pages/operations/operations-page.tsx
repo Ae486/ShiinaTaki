@@ -30,7 +30,7 @@ export function OperationsPage() {
             onClick={() => void ops.runTidy()}
             disabled={!ops.connectionReady || ops.tidying}
           >
-            {ops.tidying ? "整理中…" : "立即整理"}
+            立即整理
           </ActionButton>
           {ops.tidy && (
             <div className="mt-3 flex flex-col gap-1.5">

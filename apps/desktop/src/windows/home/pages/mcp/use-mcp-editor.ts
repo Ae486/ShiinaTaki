@@ -5,7 +5,8 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { createMcpEditor, initialMcpEditor } from "./mcp-editor-controller.ts";
-import { previousMcpData } from "./mcp-state.ts";
+import { previousMcpData, type McpServerDraft } from "./mcp-state.ts";
+import { dismissToastGroup } from "@/components/toast/toast-store.js";
 import type { McpServersView } from "./use-mcp.ts";
 
 export function useMcpEditor(mcp: McpServersView) {
@@ -14,10 +15,13 @@ export function useMcpEditor(mcp: McpServersView) {
   useEffect(() => () => editor.retire(), [editor]);
   return {
     ...state,
-    setDraft: editor.setDraft,
+    setDraft: (draft: McpServerDraft) => { dismissToastGroup(`mcp:${draft.serverId}`); editor.setDraft(draft); },
     startAdd: editor.startAdd,
     startEdit: editor.startEdit,
     clearEditor: editor.clearEditor,
-    saveDraft: () => editor.save({ servers: previousMcpData(mcp.state), add: mcp.add, edit: mcp.edit }),
+    saveDraft: () => {
+      if (state.draft) dismissToastGroup(`mcp:${state.draft.serverId}`);
+      return editor.save({ servers: previousMcpData(mcp.state), add: mcp.add, edit: mcp.edit });
+    },
   };
 }

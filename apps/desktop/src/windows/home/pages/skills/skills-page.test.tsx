@@ -16,6 +16,30 @@ function card(overrides: Partial<SkillCardProps> = {}): string {
 
 beforeEach(() => useSkills.mockReturnValue({ state: { kind: "loading", packages: null, inspected: null, pending: null, message: null }, controller, status: { kind: "connected" }, connectionReady: true }));
 describe("Skills page states", () => {
+  it("does not insert an empty result section while the first inspection is pending", () => {
+    const html = card({ inspection: { open: true, pending: true, stale: false, error: null } });
+    expect(html).toContain('aria-busy="true"');
+    expect(html).not.toMatch(/检查结果|正在检查/u);
+  });
+
+  it("keeps the expanded result during reinspection without a transient message row", () => {
+    const html = card({ inspected: { package: ROW, metadata: null, files: ["SKILL.md", "references/a.txt"] },
+      inspection: { open: true, pending: true, stale: false, error: null } });
+    expect(html).toContain("SKILL.md\nreferences/a.txt");
+    expect(html).toContain("收起");
+    expect(html).toContain('aria-busy="true"');
+    expect(html.replace(/<[^>]*>/g, "")).not.toContain("正在检查");
+  });
+
+  it.each([true, false])("exposes the retained inspection's actual disclosure state: %s", (open) => {
+    const html = card({ inspected: { package: ROW, metadata: null, files: ["SKILL.md"] },
+      inspection: { open, pending: true, stale: false, error: null } });
+    const disclosure = html.match(/<button\b[^>]*aria-expanded="(?:true|false)"[^>]*>[\s\S]*?<\/button>/u)?.[0] ?? "";
+    expect(disclosure).toContain(`aria-expanded="${String(open)}"`);
+    expect(disclosure).toContain(open ? "收起" : "展开");
+    expect(html.includes("SKILL.md")).toBe(open);
+  });
+
   it("renders loading and empty states", () => { expect(renderToStaticMarkup(<SkillsPage />)).toContain("animate-pulse"); useSkills.mockReturnValue({ state: { kind: "ready", packages: [], inspected: null, pending: null, message: null }, controller, status: { kind: "connected" }, connectionReady: true }); expect(renderToStaticMarkup(<SkillsPage />)).toContain("尚未安装 Skill"); });
   it("renders reconnecting and rejected states truthfully in Chinese", () => { useSkills.mockReturnValue({ state: { kind: "failure", packages: [{ ...ROW, skillName: null, description: null, lifecycleState: "rejected", runtimeState: "invalid", scanVerdict: "rejected", failureReason: "invalid-package" }], inspected: null, pending: null, message: "read failed" }, controller, status: { kind: "reconnecting" }, connectionReady: false }); const html = renderToStaticMarkup(<SkillsPage />); expect(html).toContain("正在重新连接，暂时无法更改技能"); expect(html).toContain("未通过验证的包"); expect(html).toContain("invalid-package"); expect(html).toContain("扫描拒绝"); expect(html).toContain("不可用"); });
   it("renders curated package declarations, relative files and actions without bookkeeping or custom metadata", () => {
