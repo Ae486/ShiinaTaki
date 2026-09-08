@@ -3,7 +3,7 @@
  * INPUT:  process env (bootstrap) + the config store's resolved knobs, and OS signals
  * OUTPUT: a running headless Agent Core — WS server bound to loopback; exits 0 on SIGINT/SIGTERM
  * POS:    core — the process entry/composition root; wires boot (config store → logger → model(s) → db) →
- *         atomic Timeline/activity delivery, bounded Run-event backfill, and deferred MCP approval names → ws-server
+ *         Timeline/activity delivery, Perception/extension invalidation, bounded Run-event backfill, and MCP names → WS
  */
 import { join } from "node:path";
 import type { ToolSet } from "ai";
@@ -49,6 +49,7 @@ import { createRunSnapshotCapture } from "./harness/run-snapshot-capture.ts";
 import { createDeviceRegistry } from "./devices/device-registry.ts";
 import { createPairedDeviceStore } from "./devices/paired-device-store.ts";
 import { createExtensionComposition } from "./extensions/extension-composition.ts";
+import { createExtensionSubscriptions } from "./extensions/extension-subscriptions.ts";
 import { createHostCatalogStore } from "./hosts/host-catalog.ts";
 import { bindHostGenerationRetirement } from "./hosts/host-generation-retirement.ts";
 import { loadOrCreateHostIdentity } from "./hosts/host-identity.ts";
@@ -82,6 +83,7 @@ import { characterListMethod } from "./server/methods/character-list.ts";
 import { registerConfigMethods } from "./server/methods/config-methods.ts";
 import { connectMethod } from "./server/methods/connect.ts";
 import { extensionStatusMethod } from "./server/methods/extension-status.ts";
+import { extensionSubscribeMethod } from "./server/methods/extension-subscribe.ts";
 import { hostCatalogPublishMethod } from "./server/methods/host-catalog-publish.ts";
 import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
@@ -195,7 +197,8 @@ const deviceRegistry = createDeviceRegistry({
   store: createPairedDeviceStore(join(serverConfig.dataDir, "devices.json")),
 });
 const connectionRegistry = createConnectionRegistry();
-const hostCatalogs = createHostCatalogStore();
+const extensionSubscriptions = createExtensionSubscriptions();
+const hostCatalogs = createHostCatalogStore({ onChange: extensionSubscriptions.publish });
 const registry = createMethodRegistry();
 // Approval boots first; its read-only MCP name source is attached only after the manager exists.
 let resolveApprovalLabels: ApprovalLabelResolver = () => new Map();
@@ -206,7 +209,7 @@ const { approval, coreToolGovernance } = composeApprovalRuntime({
 });
 
 // Skills: durable lifecycle rows plus an immutable runtime catalog. Legacy files are read once as a seed and never written.
-const skillBoot = await bootSkillLifecycle({ db, dataDir: serverConfig.dataDir, ownerHostId: coreHostId, logger });
+const skillBoot = await bootSkillLifecycle({ db, dataDir: serverConfig.dataDir, ownerHostId: coreHostId, logger, onChange: extensionSubscriptions.publish });
 const { loader: skillsLoader, service: skillLifecycle, log: skillsLog } = skillBoot;
 
 // Secret catalog (08-12): the Core-owned encrypted credential store. Master key from the credentials directory
@@ -225,11 +228,11 @@ migrateMcpPlaintextSecrets({ catalog: secretCatalog, configPath: join(serverConf
 // a SEED-ONLY legacy input; the runtime manager owns in-memory generations (candidate → publish → lease → drain).
 // Boot reconcile is non-blocking so the WS server starts while candidates connect; a locked catalog skips only
 // the servers whose refs it cannot resolve, truthfully — one bad server never disables its siblings.
-const mcpBoot = bootMcpLifecycle({ db, dataDir: serverConfig.dataDir, coreHostId, secretCatalog, governance, approval, logger });
+const mcpBoot = bootMcpLifecycle({ db, dataDir: serverConfig.dataDir, coreHostId, secretCatalog, governance, approval, logger, onChange: extensionSubscriptions.publish });
 resolveApprovalLabels = createMcpApprovalLabelResolver(() => mcpBoot.manager.snapshot());
 void mcpBoot.manager.reconcile(mcpBoot.desired.list()).then(() => undefined, () => undefined); // desired → candidates → publish
 registerSecretMethods(registry, { service: mcpBoot.catalog, logger: secretLog });
-registerMcpMethods(registry, { service: createMcpLifecycleService({ repo: mcpBoot.desired, manager: mcpBoot.manager }), logger: mcpBoot.log });
+registerMcpMethods(registry, { service: createMcpLifecycleService({ repo: mcpBoot.desired, manager: mcpBoot.manager, onChange: extensionSubscriptions.publish }), logger: mcpBoot.log });
 registerSkillMethods(registry, { service: skillLifecycle, logger: skillsLog });
 // Hindsight B3 setup is an operator-only inactive control plane. Composition registers methods and SQLite state only;
 // it makes no boot request, performs no LLM health probe, and has no Memory Authority writer/provider registration.
@@ -436,6 +439,7 @@ registry.register(chatCancelMethod(turnControls.turns, runService));
 registry.register(chatActivityReadMethod(chatActivity));
 registry.register(hostCatalogPublishMethod(hostCatalogs, connectionRegistry));
 registry.register(extensionStatusMethod({ coreHostId, snapshot: () => extensions.runContext().snapshot }));
+registry.register(extensionSubscribeMethod(extensionSubscriptions));
 registry.register(capabilityRespondMethod(capabilityBroker, connectionRegistry));
 registry.register(timelineHistoryMethod(timelineRepo));
 registry.register(timelineSubscribeMethod(timelineSubscriptions));
@@ -512,12 +516,14 @@ function shutdown(signal: string): void {
   if (shuttingDown) return;
   shuttingDown = true;
   logger.info({ signal }, "shutting down");
+  perception.dispose();
   const schedulerStopped = scheduleEngine.stop();
   runService.seal();
   recovery.close();
   cancelDurableWorkForShutdown();
   void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => server.close()).then(async () => {
     chatActivity.dispose();
+    extensionSubscriptions.dispose();
     skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients
     // (each exactly once), before the db handle and process go away.

@@ -1,6 +1,6 @@
 # Server-Push Channels & Connection Auth (established #16)
 
-Two reusable backend patterns from the avatar/bubble work.
+Producer-backed fan-out, operator observation and authenticated connection lifetimes.
 
 ## Server→client push channel (the timeline/avatar fan-out pattern)
 
@@ -10,7 +10,10 @@ When the Core must push events to a subscribed client mid-turn (timeline entries
 - `server/methods/<x>-subscribe.ts` — role-gated (`["operator"]`), calls `subscriptions.subscribe(characterId, connection, (p) => ctx.notify(METHOD, p))` and `ctx.onClose(() => unsubscribe(...))` for auto-cleanup on socket close.
 - The producer (conversation store's `onAppend`, an avatar tool's `execute`) calls `subscriptions.publish(...)`. Fan-out is synchronous → the event reaches the client the instant it's produced, even mid-turn.
 - Reference impls: `server/timeline-subscriptions.ts` + `server/methods/timeline-subscribe.ts`; `avatar/avatar-subscriptions.ts` + `server/methods/avatar-subscribe.ts`.
-- **A snapshot with no producer is a READ, not a channel.** The perception/activity card shipped as the operator-only one-shot `perception.card` (T3b) because nothing PUBLISHES a perception change — the state is polled in the background and read on demand. Clone the fan-out when a producer exists and the client must learn mid-turn; otherwise a `media.usage`-shaped read method is the honest surface (a subscription with no publisher is dead wiring).
+- A snapshot needs actual producers before it can promise change notifications. `perception.card` remains a read;
+  accepted activity/scheduling/pause facts now publish opt-in `perception.changed` invalidations. The extension
+  channel similarly observes real MCP/Skill/Host lifecycle commits. `media.usage` remains demand-driven; no UI
+  polling or empty subscription is introduced for resources without change coverage.
 
 ### Per-generation reconnect restoration (D59)
 
@@ -23,7 +26,9 @@ When the Core must push events to a subscribed client mid-turn (timeline entries
   connected UI with a dead channel.
 - `config.subscribe` is idempotent per connection. The desktop `WsClient` memoizes the request and fans one
   `config.changed` notification to multiple local consumers, so timing sync and the Settings page cannot create
-  duplicate Core memberships.
+  duplicate Core memberships. Only an accepted setup is retained indefinitely: a rejected/invalid setup may be
+  deliberately retried on the same client. Recovery reconciles the existing timing owner once, including changes
+  missed during the setup gap; no new timing authority or recurring retry is introduced.
 - Producers remain fire-and-forget with respect to subscriber count. Zero subscribers is valid Core behavior; window
   recovery and honest connection status, not a fabricated tool failure, repair the owner-reported long-idle avatar
   symptom.
@@ -129,4 +134,111 @@ await server.close();
 await closeRemainingResources();
 db.close();
 process.exitCode = 0;
+```
+
+## Scenario: Operator resource invalidation
+
+### 1. Scope / Trigger
+
+Home's visible Perception, MCP/Skills lists and extension strip must learn actual asynchronous or cross-operator
+changes. Notifications indicate that a projection needs reconciliation; existing read methods remain authoritative.
+They do not execute operations, carry private snapshots, or grant permission.
+
+### 2. Signatures
+
+```ts
+perception.subscribe({}) -> { status: "ok" }
+perception.changed      -> { revision: number }
+extension.subscribe({}) -> { status: "ok" }
+extension.changed       -> { revision: number, targets: ("mcp" | "skills" | "extension-status")[] }
+```
+
+The strict contracts live in Shared `perception-schema.ts` and `extension-change-schema.ts`. Revisions are
+nonnegative safe integers. Extension targets are nonempty, unique and limited to the three named projections.
+These operator-only frames have no Rust mirror, database migration, extra socket or environment variable.
+
+Core owns `createPerceptionChanges(...)` / its connection-keyed subscriptions and
+`createExtensionSubscriptions()`. `subscribe(connection, sink)` returns true only for a new member, so each
+method registers one `ctx.onClose` cleanup. Repeated subscribe replaces the sink without duplicating membership.
+Perception layer `dispose()` retires its interest/deadline owner; extension `dispose()` clears membership and any
+queued target union during normal Core shutdown.
+
+### 3. Contracts
+
+- Authenticate and check operator role before membership. Install the sink before acknowledging setup. A rejected
+  or lost acknowledgement is safe to retry idempotently; physical connection replacement needs fresh membership.
+- Revisions order one process/channel's invalidations. They are neither durable replay cursors nor versions of
+  the existing unversioned read responses. The browser installs its handler, acknowledges subscription, then reads.
+  An invalidation during that read leaves a trailing obligation before the view can claim current coverage.
+- Notifications contain only the fields above: no titles, app identity, screenshot content, package paths/IDs,
+  config, credential refs/values, errors, tool arguments or output. Every observer is isolated from others and
+  from the already committed operation. Zero subscribers is valid and never starts a query, test or producer.
+- Perception sources are accepted/scrubbed ActivityState changes, effective seals/prunes, changed foreground or
+  ambient scheduled-running flags, and successfully persisted pause transitions. Sampling cadence, dwell, privacy
+  screening and retention stay under their existing owners. `current` is the latest sampled stretch; scheduled
+  running does not prove a currently available Host or an in-progress capture.
+- Pause persistence succeeds before its live state or notification changes. The only production mutator caller
+  remains operator `perception.pauseSet`. While subscribers exist, one bounded unref'd absolute-deadline timer
+  invokes the existing `pause.state(now)` read. It handles hydration/replacement/long deadlines/lazy settlement,
+  never calls `resume`, writes the DB, restarts sampling or invokes a model, and retires on last close/disposal.
+- MCP observes desired commits (including disabled adds and surviving partial commits), current candidate
+  start/outcome/removal, active publication/withdrawal and status-changing closure. Immediate `onClosedState`
+  follows `closed = true`; existing deferred `onClosed` remains transport cleanup. Closing a draining fallback
+  can change tool count while the displayed phase is still connecting. Ordinary leases and private Test results
+  do not notify; no independent remote MCP death/list-change detection is claimed.
+- Skills observes committed operator rows, including rejected imports without catalog advancement, and coherent
+  catalog publication. Ordinary reads, leases and GC are quiet. Host catalogs observe accepted `live.set` and
+  actual matching `live.delete`; invalid current-candidate retirement is covered and stale old close cannot retire
+  a replacement. Existing generation/authorization checks and immutable Run snapshots are unchanged.
+- Extension target coalescing unions already-produced targets in one microtask; it neither drops one producer's
+  target nor invents a catalog change. Install the observer before Host/Skill/MCP boot and reconciliation.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required result |
+| --- | --- |
+| Anonymous / authenticated Node subscribe | Existing authentication/role refusal; no membership or notification. |
+| Duplicate subscribe or retry after lost acknowledgement | One connection member and one close cleanup. |
+| Empty/duplicate/unknown extension targets or extra private fields | Shared validation rejects the payload; Desktop does not invalidate from it. |
+| One throwing sink / no sinks | Other observers and committed outcomes remain correct; no new producer work. |
+| Real commit followed by fallible DTO read-back | The surviving commit still invalidates; a pre-commit refusal does not. |
+| Pause write fails | Live consent and notification remain unchanged. |
+| Last observer closes / shutdown / replaced deadline callback | Retire obsolete interest/timer; never lift a replacement pause. |
+| Older Core returns `-32601` for subscribe | Explicit entry/manual-read fallback with automatic-refresh-unavailable feedback, never UI polling. |
+| Forbidden, malformed acknowledgement, timeout or other setup failure | Retain truthful error/gap and deliberate retry; do not relabel as unsupported or authorize a fallback. |
+
+### 5. Good/Base/Bad Cases
+
+- Good: operator A commits a rejected Skill row; B receives only `skills`, then reads the new row without a catalog
+  generation change. A later accepted publication invalidates both `skills` and `extension-status`.
+- Base: no open observer; existing lifecycle and capture behavior continue with no extra read or model work.
+- Bad: send a full private card to every connection, notify each tool lease, call reconnect on a list event, or
+  treat the notification revision as the version of an older `mcp.list` reply.
+
+### 6. Tests Required
+
+- Shared schema suites reject private/extra fields and invalid revisions/targets. Core subscription/method tests
+  prove roles, duplicates, exceptions, membership cleanup and bounded target union.
+- Perception source/deadline tests cover accepted/sensitive/malformed samples, scheduling changes, persistence
+  failure, hydrated/replaced/expired/long deadlines, lazy prior settlement and stopped-sampler expiry.
+- MCP/Skill/Host tests cover partial commits, current candidates, last-good/draining closure including connecting
+  fallback, rejected Skill rows, publication, accepted set/matching delete and quiet read/lease paths.
+- `e2e/src/perception-refresh.e2e.test.ts` and `extension-refresh.e2e.test.ts` use actual isolated Core with separate
+  operators, synthetic sources and no user accounts/data. Native UI fixtures separately prove consumption and
+  interaction continuity; neither kind substitutes for the other or for personal owner inspection.
+
+### 7. Wrong vs Correct
+
+```ts
+// Wrong: waits for deferred transport cleanup after the observable state already changed.
+record.onClosed = () => invalidateStatus();
+// Wrong: a rejected package may be committed without any catalog generation change.
+if (catalogGenerationChanged) invalidateSkills();
+
+// Correct: observe actual state/commit boundaries with data-free targets.
+record.closed = true;
+record.closePromise = closeMcpClient(record.client).finally(() => record.onClosed?.(record));
+notifyExtensionChange(record.onClosedState, ["mcp"]); // deferred onClosed still owns cleanup
+// At the successful Skill row commit boundary, independently from later catalog publication:
+notifyExtensionChange(onChange, ["skills"]);
 ```

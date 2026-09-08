@@ -21,6 +21,8 @@ export function useMediaClear(client: WsClient | null, onSettled: () => void): M
   const phaseRef = useRef<ClearPhase>("idle");
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const currentClient = useRef(client);
+  currentClient.current = client;
 
   const onEvent = useCallback(
     (event: ClearEvent) => {
@@ -38,12 +40,17 @@ export function useMediaClear(client: WsClient | null, onSettled: () => void): M
       setError(null);
       void client
         .mediaClear()
-        .then((result) => setNotice(`已清除 ${result.removedCount} 个附件，释放 ${result.freedBytes} 字节`))
-        .catch((cause: unknown) => setError(cause instanceof Error ? cause.message : String(cause)))
+        .then((result) => {
+          if (currentClient.current !== client) return;
+          setNotice(`已清除 ${result.removedCount} 个附件，释放 ${result.freedBytes} 字节`);
+          onSettled();
+        })
+        .catch((cause: unknown) => {
+          if (currentClient.current === client) setError(cause instanceof Error ? cause.message : String(cause));
+        })
         .finally(() => {
           phaseRef.current = "idle";
           setPhase("idle");
-          onSettled();
         });
     },
     [client, onSettled],

@@ -1,13 +1,7 @@
 /**
- * INPUT:  a route fn (partial-applied routeCapability), a per-capability hasNode / isPaused / isSensitive predicates,
- *         the CURRENT foreground entry the T3a sampler recorded, an optional VLM describe bridge, an AmbientShotStore
- *         + a ScreenContext sink, a Logger, cadence/retention config
- * OUTPUT: createAmbientScreenshotSampler(deps) -> { start, stop, running }; the ambient screen poll, DEFAULT OFF
- * POS:    core/perception — the HIGH-SENSITIVITY sibling of activity-sampler: capture → Gate (`screenshot-ambient`,
- *         its own grant) → VLM describe (which doubles as the semantic privacy screen) → PII scrub → screen context
- *         (fenced at render). Two independent gates must both open: the enable flag decides whether the loop is
- *         scheduled AT ALL (off = zero captures, zero dialogs, zero logs), the Gate cell decides each capture.
- *         Never throws; a denied grant stops it for the session.
+ * INPUT:  governed routes, privacy/foreground facts, optional VLM, frame/context stores and change observer
+ * OUTPUT: start/stop/running; screened ambient context and data-free scheduling transitions
+ * POS:    core/perception — default-off high-sensitivity sampler; deterministic pre-capture and semantic privacy gates
  */
 import { ScreenshotOutputSchema } from "@taki/shared";
 import type { RouteFailureCode, RouteResult } from "../capabilities/route-capability.ts";
@@ -15,6 +9,7 @@ import type { Logger } from "../logging/logger.ts";
 import type { AmbientShotStore } from "./ambient-shot-store.ts";
 import { foregroundKey, screenForegroundNow, FOREGROUND_CAPABILITY } from "./foreground-screen.ts";
 import { scrubPii } from "./pii-scrub.ts";
+import { notifyPerceptionChange } from "./notify-perception-change.ts";
 import type { ScreenContext } from "./screen-context.ts";
 import { AMBIENT_DESCRIBE_FOCUS, isSensitiveScreenVerdict } from "./sensitive-screen.ts";
 
@@ -60,6 +55,8 @@ export interface AmbientScreenshotSamplerDeps {
   config: AmbientScreenshotSamplerConfig;
   /** Injected epoch-ms clock (defaults to Date.now); tests pass a synthetic clock. */
   now?: () => number;
+  /** Called after running() changes; capture, description and GC results are not card changes. */
+  onChange?: () => void;
 }
 
 export interface AmbientScreenshotSampler {
@@ -123,11 +120,13 @@ function captureTarget(rt: AmbientRuntime, at: number): boolean {
 }
 
 function stop(rt: AmbientRuntime): void {
+  const wasRunning = rt.timer !== undefined && !rt.stopped;
   rt.stopped = true;
   if (rt.timer) {
     clearInterval(rt.timer);
     rt.timer = undefined;
   }
+  if (wasRunning) notifyPerceptionChange(rt.deps.onChange);
 }
 
 function handleFailure(rt: AmbientRuntime, code: RouteFailureCode, at: number): void {
@@ -295,6 +294,7 @@ export function createAmbientScreenshotSampler(deps: AmbientScreenshotSamplerDep
       if (rt.timer || rt.stopped) return;
       rt.timer = setInterval(() => void tick(rt), deps.config.pollMs);
       rt.timer.unref();
+      notifyPerceptionChange(deps.onChange);
     },
     stop: () => stop(rt),
     running: () => rt.timer !== undefined && !rt.stopped,

@@ -4,11 +4,14 @@
  * POS: Home MCP framework-free authority guard; timed-out mutations are never replayed automatically
  */
 import type { WsClient } from "@/lib/ws-client.js";
-import type { McpServerView, McpTestResult } from "@taki/shared";
+import type { McpListResult, McpServerView, McpTestResult } from "@taki/shared";
+import { createReadCoordinator, type ReadCoordinator } from "@/lib/read-coordinator.js";
+import { createReadObservation, type ReadObservation, type ReadObservationState } from "@/lib/read-observation.js";
 import {
   draftSelectedTools,
   draftToConfig,
   mcpAppError,
+  mcpMutationFeedback,
   secretValuesToStore,
   type McpFeedback,
   type McpServerDraft,
@@ -20,11 +23,17 @@ export interface McpControllerSink {
   loadFailed(cause: unknown, previous: McpServerView[] | null): void;
   mutationStarted(key: string): void;
   mutationFailed(cause: unknown): void;
+  idle?(previous: McpServerView[] | null): void;
+  feedback?(feedback: McpFeedback): void;
+  mutationSettled?(): void;
+  observation?(state: ReadObservationState): void;
 }
 
 export interface McpController {
   replace(client: McpPageClient | null): void;
   refresh(feedback?: McpFeedback): Promise<void>;
+  invalidate(): Promise<void>;
+  setVisible(visible: boolean): void;
   add(draft: McpServerDraft): Promise<McpEditorMutationResult>;
   edit(draft: McpServerDraft, expectedRevision: number): Promise<McpEditorMutationResult>;
   setEnabled(input: { serverId: string; enabled: boolean; expectedRevision: number }): Promise<void>;
@@ -35,19 +44,27 @@ export interface McpController {
 }
 
 export type McpEditorMutationResult =
-  | { ok: true }
+  | { ok: true; committedRevision?: number }
   | { ok: false; committedRevision?: number };
 
 export type McpPageClient = Pick<
   WsClient,
   "mcpList" | "mcpAdd" | "mcpEdit" | "mcpEnable" | "mcpDisable" | "mcpRemove" | "mcpTest" | "mcpReconnect" | "secretSet"
+  | "subscribeExtensions" | "onExtensionChanged"
 >;
 
 interface ControllerState {
   client: McpPageClient | null;
   epoch: number;
+  readEpoch: number;
   lastGood: McpServerView[] | null;
   mutating: boolean;
+  visible: boolean;
+  reads: ReadCoordinator<McpListResult>;
+  feedback: McpFeedback | undefined;
+  restoreAfterMutation: boolean;
+  needsRead: boolean;
+  observation: ReadObservation;
 }
 
 function isCurrent(state: ControllerState, candidate: McpPageClient, token: number): boolean {
@@ -55,23 +72,28 @@ function isCurrent(state: ControllerState, candidate: McpPageClient, token: numb
 }
 
 async function refreshController(state: ControllerState, sink: McpControllerSink, feedback?: McpFeedback): Promise<void> {
-  const candidate = state.client;
-  if (!candidate) return;
-  const token = state.epoch;
-  sink.loading(state.lastGood);
-  try {
-    const { servers } = await candidate.mcpList();
-    if (!isCurrent(state, candidate, token)) return;
-    state.lastGood = servers;
-    sink.loaded(servers, feedback);
-  } catch (cause) {
-    if (isCurrent(state, candidate, token)) sink.loadFailed(cause, state.lastGood);
+  if (feedback) {
+    state.feedback = feedback;
+    sink.feedback?.(feedback);
+    state.reads.acceptUpdate();
   }
+  if (!state.client || !state.visible || (state.mutating && feedback === undefined)) return;
+  const token = state.readEpoch;
+  if (!state.observation.usable() && !await state.observation.prepare()) return;
+  if (token !== state.readEpoch || !state.visible || (state.mutating && feedback === undefined)) return;
+  state.reads.setActive(true);
+  if (feedback && state.visible) state.restoreAfterMutation = false;
+  return state.reads.demand();
+}
+
+function invalidateController(state: ControllerState): Promise<void> {
+  state.needsRead = true;
+  return state.reads.invalidate();
 }
 
 interface MutationSpec {
   key: string;
-  operation: (candidate: McpPageClient) => Promise<{ feedback?: McpFeedback } | void>;
+  operation: (candidate: McpPageClient) => Promise<{ feedback?: McpFeedback; committedRevision?: number } | void>;
   feedback: McpFeedback;
 }
 
@@ -95,12 +117,41 @@ async function mutateController(
   if (!candidate || state.mutating) return { ok: false };
   const token = state.epoch;
   state.mutating = true;
+  state.readEpoch += 1;
+  state.needsRead = true;
+  state.reads.setActive(false);
+  state.feedback = undefined;
   sink.mutationStarted(spec.key);
+  let result: McpEditorMutationResult;
+  try {
+    result = await completeMutation(state, sink, { candidate, token, spec });
+  } finally {
+    if (isCurrent(state, candidate, token)) {
+      state.mutating = false;
+      state.reads.setActive(state.visible && state.observation.usable());
+      sink.mutationSettled?.();
+      if (state.visible && state.restoreAfterMutation) {
+        state.restoreAfterMutation = false;
+        await refreshController(state, sink);
+      }
+    }
+  }
+  // All awaited reconciliation, including hide/show recovery above, belongs to the captured client.
+  // A retired success or partial-commit revision cannot acknowledge another generation's editor.
+  return isCurrent(state, candidate, token) ? result : { ok: false };
+}
+
+async function completeMutation(
+  state: ControllerState,
+  sink: McpControllerSink,
+  input: { candidate: McpPageClient; token: number; spec: MutationSpec },
+): Promise<McpEditorMutationResult> {
+  const { candidate, token, spec } = input;
   try {
     const operation = await spec.operation(candidate);
     if (!isCurrent(state, candidate, token)) return { ok: false };
     await refreshController(state, sink, operation?.feedback ?? spec.feedback);
-    return { ok: true };
+    return { ok: true, ...(operation?.committedRevision === undefined ? {} : { committedRevision: operation.committedRevision }) };
   } catch (cause) {
     if (!isCurrent(state, candidate, token)) return { ok: false };
     const failure = cause instanceof PostCommitMutationError ? cause.failureCause : cause;
@@ -115,10 +166,8 @@ async function mutateController(
     if (mcpAppError(cause).code === "MCP_CONFIG_CONFLICT") {
       // A conflict means the desired row moved: refetch Core truth; the operator retries explicitly.
       await refreshController(state, sink, { kind: "conflict", message: "配置已在别处修改；已从 Core 重新读取" });
-    }
+    } else await refreshController(state, sink, mcpMutationFeedback(failure));
     return { ok: false };
-  } finally {
-    if (state.epoch === token) state.mutating = false;
   }
 }
 
@@ -130,16 +179,39 @@ async function storeSecretValues(candidate: McpPageClient, draft: McpServerDraft
 }
 
 export function createMcpController(sink: McpControllerSink): McpController {
-  const state: ControllerState = { client: null, epoch: 0, lastGood: null, mutating: false };
+  const state = createControllerState(sink);
   return {
     replace(next) {
+      if (state.client === next) return;
       state.epoch += 1;
+      state.readEpoch += 1;
       state.client = next;
       state.mutating = false;
+      state.feedback = undefined;
+      state.restoreAfterMutation = false;
+      state.needsRead = true;
+      state.reads.setActive(false);
+      state.reads.replace(next ? () => next.mcpList() : null);
+      state.observation.replace(next ? {
+        subscribe: () => next.subscribeExtensions(),
+        onChanged: (changed) => next.onExtensionChanged((event) => { if (event.targets.includes("mcp")) changed(event.revision); }),
+      } : null);
+      sink.mutationSettled?.();
       if (next) void refreshController(state, sink);
-      else sink.loading(state.lastGood);
+      else sink.idle?.(state.lastGood);
     },
     refresh: (feedback) => refreshController(state, sink, feedback),
+    invalidate: () => invalidateController(state),
+    setVisible(visible) {
+      if (state.visible === visible) return;
+      state.visible = visible;
+      state.readEpoch += 1;
+      state.reads.setActive(visible && !state.mutating && state.observation.usable());
+      if (!visible) return;
+      sink.observation?.(state.observation.state());
+      if (state.mutating) state.restoreAfterMutation = true;
+      else if (state.needsRead || state.observation.state() !== "live") void refreshController(state, sink);
+    },
     add: (draft) => mutateController(state, sink, addSpec(draft)),
     edit: (draft, expectedRevision) => mutateController(state, sink, editSpec(draft, expectedRevision)),
     setEnabled: async (input) => void (await mutateController(state, sink, setEnabledSpec(input))),
@@ -148,10 +220,35 @@ export function createMcpController(sink: McpControllerSink): McpController {
     test: async (serverId) => void (await mutateController(state, sink, testSpec(serverId))),
     dispose() {
       state.epoch += 1;
+      state.readEpoch += 1;
       state.client = null;
       state.mutating = false;
+      state.reads.replace(null);
+      state.observation.replace(null);
     },
   };
+}
+
+function createControllerState(sink: McpControllerSink): ControllerState {
+  const state: ControllerState = {
+    client: null, epoch: 0, readEpoch: 0, lastGood: null, mutating: false, visible: true, feedback: undefined, restoreAfterMutation: false, needsRead: true,
+    reads: createReadCoordinator<McpListResult>({
+      started: () => { state.needsRead = true; sink.loading(state.lastGood); },
+      loaded: ({ servers }) => { state.needsRead = false; state.lastGood = servers; sink.loaded(servers, state.feedback); },
+      failed: (cause) => sink.loadFailed(cause, state.lastGood),
+      retired: () => { if (state.visible && state.needsRead) sink.idle?.(state.lastGood); },
+    }),
+    observation: createReadObservation({
+      changed: (observation) => {
+        if (!state.visible) return;
+        sink.observation?.(observation);
+        if (observation === "subscribing") sink.loading(state.lastGood);
+      },
+      failed: (cause) => { if (state.visible) sink.loadFailed(cause, state.lastGood); },
+      invalidated: () => { void invalidateController(state); },
+    }),
+  };
+  return state;
 }
 
 function addSpec(draft: McpServerDraft): MutationSpec {
@@ -159,7 +256,8 @@ function addSpec(draft: McpServerDraft): MutationSpec {
     key: `add:${draft.serverId}`,
     operation: async (candidate) => {
       await storeSecretValues(candidate, draft);
-      await candidate.mcpAdd({ serverId: draft.serverId, config: draftToConfig(draft), selectedTools: draftSelectedTools(draft) });
+      const { server } = await candidate.mcpAdd({ serverId: draft.serverId, config: draftToConfig(draft), selectedTools: draftSelectedTools(draft) });
+      return { committedRevision: server.configRevision };
     },
     feedback: { kind: "saved", message: `已添加 ${draft.serverId}` },
   };
@@ -182,6 +280,7 @@ function editSpec(draft: McpServerDraft, expectedRevision: number): MutationSpec
       } catch (cause) {
         throw new PostCommitMutationError(server.configRevision, cause);
       }
+      return { committedRevision: server.configRevision };
     },
     feedback: { kind: "saved", message: `已保存 ${draft.serverId}` },
   };

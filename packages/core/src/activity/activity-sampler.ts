@@ -1,18 +1,13 @@
 /**
- * INPUT:  a route fn (partial-applied routeCapability), hasNode / isPaused / isSensitive predicates, an ActivityState
- *         sink, a Logger, cadence/backoff config
- * OUTPUT: createActivitySampler(deps) -> { start, stop, running }; a self-scheduling poll that feeds the activity layer
- * POS:    core/activity — the SYSTEM-initiated poll loop (no LLM, no tool()): calls the foreground-window capability
- *         directly over the WS→Gate seam. setInterval(...).unref() per the attachment-GC precedent (main.ts:337).
- *         Never throws; a denied grant stops the loop for the session (at most ONE approval dialog ever originates here).
- *         Privacy controls (T3b) gate it on BOTH sides of the route: Privacy Pause before, sensitive-process skip +
- *         PII scrub after — a title is minimized HERE, at the sense seam, before it can be stored or rendered, and a
- *         sensitive hit SEALS the state so no sibling sampler can keep acting on the last non-sensitive foreground.
+ * INPUT:  governed foreground route, privacy/availability predicates, ActivityState, cadence and change observer
+ * OUTPUT: start/stop/running; admitted scrubbed samples and data-free scheduling transitions
+ * POS:    core/activity — system sampling only; pause before route, sensitive seal + scrub before state publication
  */
 import { ForegroundWindowOutputSchema, type ForegroundWindowOutput } from "@taki/shared";
 import type { Logger } from "../logging/logger.ts";
 import type { RouteFailureCode, RouteResult } from "../capabilities/route-capability.ts";
 import { scrubPii } from "../perception/pii-scrub.ts";
+import { notifyPerceptionChange } from "../perception/notify-perception-change.ts";
 import type { ActivityState } from "./activity-state.ts";
 
 const CAPABILITY = "foreground-window";
@@ -39,6 +34,8 @@ export interface ActivitySamplerDeps {
   config: ActivitySamplerConfig;
   /** Injected epoch-ms clock (defaults to Date.now); tests pass a synthetic clock. */
   now?: () => number;
+  /** Called after running() changes, never for an attempted/skipped capture. */
+  onChange?: () => void;
 }
 
 export interface ActivitySampler {
@@ -108,11 +105,13 @@ function scrubSample(sample: ForegroundWindowOutput): ForegroundWindowOutput {
 }
 
 function stop(rt: SamplerRuntime): void {
+  const wasRunning = rt.timer !== undefined && !rt.stopped;
   rt.stopped = true;
   if (rt.timer) {
     clearInterval(rt.timer);
     rt.timer = undefined;
   }
+  if (wasRunning) notifyPerceptionChange(rt.deps.onChange);
 }
 
 function handleFailure(rt: SamplerRuntime, code: RouteFailureCode, at: number): void {
@@ -199,6 +198,7 @@ export function createActivitySampler(deps: ActivitySamplerDeps): ActivitySample
       if (rt.timer || rt.stopped) return;
       rt.timer = setInterval(() => void tick(rt), deps.config.pollMs);
       rt.timer.unref();
+      notifyPerceptionChange(deps.onChange);
     },
     stop: () => stop(rt),
     running: () => rt.timer !== undefined && !rt.stopped,

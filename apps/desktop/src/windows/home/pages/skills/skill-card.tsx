@@ -4,10 +4,10 @@
  * POS:    disposable Home Skills detail; bookkeeping, arbitrary metadata, absolute paths, and package bytes stay out
  */
 
-import { useState } from "react";
 import type { SkillInspectResult, SkillPackageView, SkillStandardMetadata } from "@taki/shared";
 import { Badge } from "../../badge.tsx";
 import { ActionButton } from "../../action-button.tsx";
+import { FeedbackLine } from "@/components/ui/feedback-line.js";
 import { LabeledRows, PageCard } from "../../page-card.tsx";
 import { REJECTED_PACKAGE_TITLE, lifecycleLabel, runtimeLabel, runtimeTone, scanLabel, scanTone, sourceLabel, trustLabel } from "./skill-labels.ts";
 
@@ -16,8 +16,10 @@ export interface SkillCardProps {
   disabled: boolean;
   confirming: boolean;
   inspected: SkillInspectResult | null;
+  inspection: { open: boolean; pending: boolean; stale: boolean; error: string | null };
   actions: {
     inspect(): void;
+    setInspectionOpen(open: boolean): void;
     toggle(): void;
     replaceDirectory(): void;
     replaceZip(): void;
@@ -47,9 +49,9 @@ export function SkillCard(input: SkillCardProps) {
           { label: "状态", value: `${lifecycleLabel(row.lifecycleState)} / ${row.enabled ? "已启用" : "已停用"}` },
         ]} />
       </div>
-      {input.inspected && <InspectSection inspected={input.inspected} />}
+      {(input.inspected || input.inspection.pending || input.inspection.error) && <InspectSection input={input} />}
       <div className="mt-4 flex flex-wrap justify-end gap-2">
-        <ActionButton tone="primary" disabled={input.disabled} onClick={actions.inspect}>检查</ActionButton>
+        <ActionButton tone="primary" disabled={input.disabled || input.inspection.pending} onClick={actions.inspect}>检查</ActionButton>
         {!rejected && <ActionButton disabled={input.disabled} onClick={actions.toggle}>{row.enabled ? "停用" : "启用"}</ActionButton>}
         {!rejected && <ActionButton disabled={input.disabled} onClick={actions.replaceDirectory}>替换目录</ActionButton>}
         {!rejected && <ActionButton disabled={input.disabled} onClick={actions.replaceZip}>替换 ZIP</ActionButton>}
@@ -65,17 +67,20 @@ export function SkillCard(input: SkillCardProps) {
 }
 
 /** Inspection keeps its current validated result when collapsed; only another inspect action refetches it. */
-function InspectSection({ inspected }: { inspected: SkillInspectResult }) {
-  const [collapsed, setCollapsed] = useState(false);
+function InspectSection({ input }: { input: SkillCardProps }) {
+  const { inspected, inspection, actions } = input;
   return (
     <div className="mt-3 border-t border-border-subtle pt-3">
       <div className="flex items-center justify-between gap-2">
         <p className="text-xs font-medium text-text-body">检查结果</p>
-        <ActionButton tone="ghost" onClick={() => setCollapsed((value) => !value)}>
-          {collapsed ? "展开" : "收起"}
+        <ActionButton tone="ghost" aria-expanded={inspection.open} onClick={() => actions.setInspectionOpen(!inspection.open)}>
+          {inspection.open ? "收起" : "展开"}
         </ActionButton>
       </div>
-      {!collapsed && (
+      {inspection.pending && <FeedbackLine tone="info">正在检查…</FeedbackLine>}
+      {inspection.error && <FeedbackLine tone="danger">检查失败：{inspection.error}，可再次点击检查。</FeedbackLine>}
+      {inspection.stale && <FeedbackLine tone="warn">技能包已变化；下方为上次检查结果，请点击检查以读取最新内容。</FeedbackLine>}
+      {inspection.open && inspected && (
         <>
           {inspected.metadata && <LabeledRows rows={metadataRows(inspected.metadata)} />}
           <p className="mb-1 mt-3 text-xs font-medium text-text-body">包文件（{inspected.files.length}）</p>

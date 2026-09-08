@@ -66,7 +66,9 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
 - Mutations are serialized. Revision conflict refetches Core truth. A desired edit committed before secret rotation or
   reconnect failure keeps the editor open, preserves the draft, and advances its retry revision to the committed row.
 - Test result truth is preserved: a failed diagnostic never renders as success, and `test` never publishes tools.
-- Disabled servers cannot reconnect. Cancel, New, and successful Save clear stale editor revision and validation state.
+- Disabled servers cannot reconnect. Cancel and New start a fresh editor session. A successful Save clears only its
+  current unchanged submitted draft; newer edits stay open. Only a matching current-client commit may advance the
+  same server/session's retry revision, never a background refresh or a retired completion.
 - Full backend/runtime/secret and verification requirements live in
   [`mcp-lifecycle.md`](../backend/mcp-lifecycle.md).
 

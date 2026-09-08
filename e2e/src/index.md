@@ -5,6 +5,8 @@ Headless end-to-end scenarios (PRD 07-11-e2e-test-harness layer B). Run with `pn
 
 - fixture/ — the reusable withStack harness (see fixture/index.md)
 - core-shutdown.e2e.test.ts — isolated real Core and local HTTP rejection prove natural graceful exit after SDK fetch, including Windows native async-handle cleanup
+- perception-refresh.e2e.test.ts — real Core with separate operator sockets proves opt-in pause/absolute-expiry invalidation, duplicate subscription behavior and content-free frames without a sensing Host
+- extension-refresh.e2e.test.ts — real Core and synthetic local MCP/Skill sources prove targeted cross-operator commit/publication invalidation and quiet read paths
 - reconnect.e2e.test.ts — node pairs once, reconnects by persisted token (no second pairing code)
 - governance-authority.e2e.test.ts — real Core + external taki-node: compatible catalog, relaxed auto, Core deny, Host stricter deny, and higher-generation projection replacement
 - governance-stale-projection.e2e.test.ts — test-only loopback relay proves stale N-1 and same-N valid-digest projection tampering are rejected without execution/replay, then settles Core through bounded Host-generation retirement and verifies cleanup

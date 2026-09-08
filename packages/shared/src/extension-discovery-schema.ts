@@ -6,7 +6,11 @@
 import { z } from "zod";
 
 export const EXTENSION_KINDS = ["skill", "mcp-tool", "capability"] as const;
-export const EXTENSION_METHODS = { status: "extension.status" } as const;
+export const EXTENSION_METHODS = {
+  status: "extension.status",
+  subscribe: "extension.subscribe",
+  changed: "extension.changed",
+} as const;
 export const ExtensionKindSchema = z.enum(EXTENSION_KINDS);
 export type ExtensionKind = z.infer<typeof ExtensionKindSchema>;
 

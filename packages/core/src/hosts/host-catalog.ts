@@ -1,6 +1,6 @@
 /**
  * INPUT:  authenticated Host provenance plus complete HostCatalogPublishParams candidates
- * OUTPUT: createHostCatalogStore() -> publish/retire/get/list/routable capability ownership
+ * OUTPUT: live publish/retire/read/routing ownership and bounded observations after accepted mutations
  * POS:    core/hosts — atomic observed catalog authority; payload owns local readiness, Core owns live availability
  */
 import type {
@@ -12,6 +12,7 @@ import type {
   HostSkillDescriptor,
   HostWorkspaceDescriptor,
 } from "@taki/shared";
+import { notifyExtensionChange, type ExtensionChangeObserver } from "../extensions/notify-extension-change.ts";
 
 type LiveWorkspaceDescriptor = Readonly<Omit<HostWorkspaceDescriptor, "transferCapabilityIds">> & {
   readonly transferCapabilityIds: readonly string[];
@@ -43,7 +44,7 @@ export interface HostCatalogStore {
   hostsForCapability(capabilityId: string): readonly LiveHostCatalog[];
 }
 
-export function createHostCatalogStore(): HostCatalogStore {
+export function createHostCatalogStore(options: { onChange?: ExtensionChangeObserver } = {}): HostCatalogStore {
   const live = new Map<string, LiveHostCatalog>();
 
   return {
@@ -66,11 +67,14 @@ export function createHostCatalogStore(): HostCatalogStore {
         return { accepted: false, reason: "stale_generation" };
       }
       live.set(candidate.hostId, snapshot(candidate, now));
+      notifyExtensionChange(options.onChange, ["extension-status"]);
       return { accepted: true };
     },
     retire(hostId, connectionGeneration) {
       const current = live.get(hostId);
-      if (current?.connectionGeneration === connectionGeneration) live.delete(hostId);
+      if (current?.connectionGeneration === connectionGeneration && live.delete(hostId)) {
+        notifyExtensionChange(options.onChange, ["extension-status"]);
+      }
     },
     get: (hostId) => live.get(hostId),
     list: () => Object.freeze([...live.values()]),

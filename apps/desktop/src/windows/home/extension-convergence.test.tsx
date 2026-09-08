@@ -33,8 +33,18 @@ const data: ExtensionConvergenceResult = {
 };
 
 describe("ExtensionConvergenceStrip", () => {
+  it("exposes bounded manual fallback even when the older Core's first status read fails", () => {
+    const html = renderToStaticMarkup(<ExtensionConvergenceStrip
+      state={{ kind: "failure", previous: null, message: "读取失败", observation: "unsupported" }}
+      onRefresh={async () => undefined} connectionReady={true} />);
+    expect(html).toContain("不支持自动更新");
+    expect(html).toContain("手动刷新");
+    expect(html).toContain("读取失败");
+    expect(html).toContain("重试");
+  });
+
   it("renders actual availability and extension/conflict counts without Host identity or copy controls", () => {
-    const html = renderToStaticMarkup(<ExtensionConvergenceStrip state={{ kind: "ready", data }} />);
+    const html = renderToStaticMarkup(<ExtensionConvergenceStrip state={{ kind: "ready", data, observation: "live" }} onRefresh={async () => undefined} connectionReady={true} />);
     expect(html).not.toContain(HOST);
     expect(html).not.toContain(OTHER_HOST);
     expect(html).not.toContain("11111111…1111");
@@ -53,7 +63,7 @@ describe("ExtensionConvergenceStrip", () => {
     const state = kind === "failure"
       ? { kind, previous: data, message: "读取失败" }
       : { kind, previous: data };
-    const html = renderToStaticMarkup(<ExtensionConvergenceStrip state={state} />);
+    const html = renderToStaticMarkup(<ExtensionConvergenceStrip state={{ ...state, observation: "live" }} onRefresh={async () => undefined} connectionReady={true} />);
     expect(html).toContain("可用主机 1/2");
     expect(html).toContain("扩展 2");
     expect(html).toContain("名称冲突 1");
@@ -70,7 +80,7 @@ describe("ExtensionConvergenceStrip", () => {
     const state = kind === "failure"
       ? { kind, previous: null, message: "读取失败" }
       : { kind, previous: null };
-    const html = renderToStaticMarkup(<ExtensionConvergenceStrip state={state} />);
+    const html = renderToStaticMarkup(<ExtensionConvergenceStrip state={{ ...state, observation: "live" }} onRefresh={async () => undefined} connectionReady={true} />);
     expect(html).toContain('role="status"');
     expect(html).toContain(notice);
     expect(html).not.toContain("可用主机");

@@ -1,10 +1,7 @@
 /**
- * INPUT:  none (page root); reads Core permission policy and every generic knob through focused hooks.
- * OUTPUT: <SettingsPage> — permission governance first, then the knob list regrouped client-side (U7) into
- *         权限与审批/模型与上下文/感知与隐私/存储与缓存/高级 sections with a key/description search box.
- * POS:    ui/windows/home/pages/settings — the Settings composition root; grouping/filtering live in config-groups.ts
- *         (pure), Core order inside a group is preserved, and no knob is removed or hidden. Loading rides the shared
- *         Skeleton and the failed list read carries a retry (batch-2 U5).
+ * INPUT:  Core permission/Approval projections and the config read/draft/save owners.
+ * OUTPUT: grouped searchable settings with distinct read phases, observation gaps and stable field identities.
+ * POS:    Home Settings composition — Core order and existing group/key identities preserve active editing.
  */
 
 import { useMemo, useState } from "react";
@@ -12,6 +9,7 @@ import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { Field, FIELD_CONTROL } from "@/components/ui/field.js";
 import { EmptyState } from "@/components/ui/empty-state.js";
 import { Skeleton } from "@/components/ui/skeleton.js";
+import { FeedbackLine } from "@/components/ui/feedback-line.js";
 import { useConfig } from "./use-config.ts";
 import { KnobField } from "./knob-field.tsx";
 import { PermissionSection } from "./permission-section.tsx";
@@ -19,7 +17,7 @@ import { ApprovalDecisionsSection } from "./approval-decisions-section.tsx";
 import { configLabelOf, filterConfigEntries, groupConfigEntries } from "./config-groups.ts";
 
 export function SettingsPage() {
-  const { entries, connectionReady, error, refreshing, notices, save, refresh } = useConfig();
+  const { entries, hasSnapshot, connectionReady, loading, error, refreshing, observationGap, notices, save, refresh } = useConfig();
   const [query, setQuery] = useState("");
   const groups = useMemo(() => groupConfigEntries(filterConfigEntries(entries, query)), [entries, query]);
 
@@ -30,7 +28,10 @@ export function SettingsPage() {
         <PermissionSection />
         <ApprovalDecisionsSection />
         {error && <PageAlert action={{ label: "重试", onClick: () => void refresh() }}>读取配置失败：{error}</PageAlert>}
-        {entries.length === 0 && !error && <Skeleton lines={6} />}
+        {observationGap && hasSnapshot && <FeedbackLine tone="warn">配置自动更新尚未确认，当前显示上次结果。</FeedbackLine>}
+        {loading && !hasSnapshot && <Skeleton lines={6} />}
+        {!hasSnapshot && !loading && !error && <p className="text-xs text-text-secondary">等待连接以读取配置。</p>}
+        {hasSnapshot && entries.length === 0 && <EmptyState title="暂无配置项" />}
         {entries.length > 0 && (
           <>
             <Field label="搜索配置项（按键名、中文名称或说明过滤）">

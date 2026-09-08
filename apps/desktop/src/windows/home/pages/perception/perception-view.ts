@@ -9,15 +9,15 @@ import type { PerceptionActivityEntry, PerceptionCard, PerceptionPauseState } fr
 import type { LabeledRow } from "../../page-card.tsx";
 
 export function pauseLabel(state: PerceptionPauseState): string {
-  if (!state.paused) return "观察进行中";
+  if (!state.paused) return "未启用隐私暂停";
   if (state.until === null) return "已暂停，需手动恢复";
   return `已暂停至 ${new Date(state.until).toLocaleString()}`;
 }
 
 export function samplingRows(card: PerceptionCard): LabeledRow[] {
   return [
-    { label: "前台活动采样", value: card.samplingStatus.foreground ? "进行中" : "未采样" },
-    { label: "环境截屏采样", value: card.samplingStatus.ambientScreen ? "进行中" : "未采样" },
+    { label: "前台活动采样调度", value: card.samplingStatus.foreground ? "已安排" : "未安排" },
+    { label: "环境截屏采样调度", value: card.samplingStatus.ambientScreen ? "已安排" : "未安排" },
   ];
 }
 
@@ -32,8 +32,12 @@ function activityLine(entry: PerceptionActivityEntry): string {
 
 /** Newest first: the current stretch, then the recent ones the core already coalesced. */
 export function activityRows(card: PerceptionCard): LabeledRow[] {
-  const current = card.current ? [{ label: "当前", value: activityLine(card.current) }] : [];
-  return [...current, ...card.recent.map((entry, index) => ({ label: `最近 ${index + 1}`, value: activityLine(entry) }))];
+  const current = card.current ? [{ id: activityIdentity(card.current), label: "最新采样", value: activityLine(card.current) }] : [];
+  return [...current, ...card.recent.map((entry, index) => ({ id: activityIdentity(entry), label: `最近 ${index + 1}`, value: activityLine(entry) }))];
+}
+
+function activityIdentity(entry: PerceptionActivityEntry): string {
+  return JSON.stringify([entry.startedAt, entry.processName, entry.windowTitle, entry.idle]);
 }
 
 /** Local midnight strictly after `now` — the epoch-ms deadline the "暂停到明天" shortcut sends. */

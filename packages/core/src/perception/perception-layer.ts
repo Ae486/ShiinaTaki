@@ -1,12 +1,7 @@
 /**
- * INPUT:  a route fn (partial-applied routeCapability), a per-capability hasNode predicate, the optional VLM describe
- *         bridge, the ambient enable/retention config + the ambient frame directory, the pause store, a Logger
- * OUTPUT: createPerceptionLayer(deps) -> { pause, isSensitive, activity, screen, ambient, start, renderContext, card }
- * POS:    core/perception — the SINGLE composition point for everything that observes the user. The privacy controls
- *         are built HERE, once, and shared by every sampler (the T3a foreground poll, the T3b ambient screen loop), so
- *         adding a sampler never grows the composition root: main.ts constructs this, calls start(), and joins
- *         renderContext() into the turn prompt. On-demand chat captures are not part of this layer and are never
- *         gated by its pause.
+ * INPUT:  governed routes, availability, optional VLM, ambient config/store, durable pause store and Logger
+ * OUTPUT: shared privacy, activity/screen producers, card reads and opt-in content-free invalidations
+ * POS:    core/perception — single ambient composition; subscribing never captures or mutates pause consent
  */
 import type { PerceptionCard } from "@taki/shared";
 import { createActivityLayer, ACTIVITY_POLL_MS, type ActivityLayer } from "../activity/activity-layer.ts";
@@ -23,6 +18,7 @@ import {
 import { startAmbientShotGc } from "./ambient-shot-gc.ts";
 import { createAmbientShotStore } from "./ambient-shot-store.ts";
 import { buildPerceptionCard, type PerceptionCardDeps } from "./perception-card.ts";
+import { createPerceptionChanges, type PerceptionChanges } from "./perception-changes.ts";
 import { createPrivacyPause, type PrivacyPause, type PrivacyPauseStore } from "./privacy-pause.ts";
 import { createScreenContext, renderScreenContext, type ScreenContext } from "./screen-context.ts";
 import { createSensitiveProcessCheck } from "./sensitive-processes.ts";
@@ -64,8 +60,11 @@ export interface PerceptionLayer {
   activity: ActivityLayer;
   screen: ScreenContext;
   ambient: AmbientScreenshotSampler;
+  changes: PerceptionChanges;
   /** Start every ambient sampler + the retention sweeper (one call from the composition root). */
   start(): void;
+  /** Retire projection interest/deadlines and stop sampler schedules at Core shutdown. */
+  dispose(): void;
   /** The fenced ambient prompt sections (activity + screen), joined; "" when nothing is reportable. */
   renderContext(now: number): string;
   /** The human-facing status card served by `perception.card` (panel at #26) — never a prompt surface. */
@@ -105,9 +104,18 @@ function cardDepsOf(parts: { activity: ActivityLayer; ambient: AmbientScreenshot
   };
 }
 
+function disposePerception(parts: Pick<PerceptionLayer, "changes" | "activity" | "ambient">): void {
+  // Retire interest before stopping schedules so Core shutdown cannot publish new view work.
+  parts.changes.dispose();
+  parts.activity.sampler.stop();
+  parts.ambient.stop();
+}
+
 export function createPerceptionLayer(deps: PerceptionLayerDeps): PerceptionLayer {
+  // The pause thunk is not read until interest exists; every producer hook is installed before start().
+  const changes = createPerceptionChanges({ pauseState: (at) => pause.state(at) });
   // Hydrated from the store by the FACTORY: restoring a pause must never look like a mutation (privacy-pause.ts).
-  const pause = createPrivacyPause({ store: deps.pauseStore });
+  const pause = createPrivacyPause({ store: deps.pauseStore, onChange: changes.pauseChanged });
   const isSensitive = createSensitiveProcessCheck();
   const activity = createActivityLayer({
     route: deps.route,
@@ -115,6 +123,7 @@ export function createPerceptionLayer(deps: PerceptionLayerDeps): PerceptionLaye
     isPaused: () => pause.isPaused(),
     isSensitive,
     logger: deps.logger,
+    onChange: changes.changed,
   });
   const screen = createScreenContext({ staleAfterMs: SCREEN_STALE_MS });
   const store = createAmbientShotStore({ ambientDir: deps.ambientShotsDir });
@@ -131,6 +140,7 @@ export function createPerceptionLayer(deps: PerceptionLayerDeps): PerceptionLaye
     context: screen,
     logger: deps.logger,
     config: ambientConfigOf(deps.ambient),
+    onChange: changes.changed,
   });
   const cardDeps = cardDepsOf({ activity, ambient, pause });
   return {
@@ -139,6 +149,7 @@ export function createPerceptionLayer(deps: PerceptionLayerDeps): PerceptionLaye
     activity,
     screen,
     ambient,
+    changes,
     start() {
       activity.sampler.start();
       ambient.start();
@@ -146,6 +157,7 @@ export function createPerceptionLayer(deps: PerceptionLayerDeps): PerceptionLaye
       // still expire. `keep` schedules nothing at all.
       startAmbientShotGc({ store, retention: deps.ambient.retention, logger: deps.logger });
     },
+    dispose: () => disposePerception({ changes, activity, ambient }),
     renderContext: (now) =>
       [renderActivityContext(activity.state, now), renderScreenContext(screen, now)]
         .filter((section) => section.length > 0)

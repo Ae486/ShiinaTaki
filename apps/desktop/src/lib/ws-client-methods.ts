@@ -1,6 +1,6 @@
 /**
  * INPUT:  a JSON-RPC client bound to the operator socket + call params from the UI hooks.
- * OUTPUT: echo-verified handshake() plus typed request methods for governance, lifecycle and extension convergence
+ * OUTPUT: echo-verified handshake() plus schema-verified operator read, write and subscription methods
  * POS:    ui/lib — the outbound half of ws-client (no turn/stream state lives here). Every result is parsed through a
  *         @taki/shared schema: the zod boundary holds for every inbound frame.
  */
@@ -14,7 +14,6 @@ import {
   CanonicalApprovalRespondResultSchema,
   CHARACTER_METHODS,
   CHAT_METHODS,
-  CONFIG_METHODS,
   CONNECT_METHOD,
   CharacterCostumeResolutionResultSchema,
   CharacterCostumesResultSchema,
@@ -22,9 +21,6 @@ import {
   CharacterListResultSchema,
   ChatCancelResultSchema,
   ChatActivityReadResultSchema,
-  ConfigListResultSchema,
-  ConfigSetResultSchema,
-  ConfigSubscribeResultSchema,
   ConnectResultSchema,
   ErrorCodeSchema,
   EXTENSION_METHODS,
@@ -71,7 +67,6 @@ import {
   type ApprovalRevokeParams,
   type CanonicalApprovalRespondParams,
   type CharacterImportParams,
-  type ConfigSetParams,
   type ConnectParams,
   type ConnectResult,
   type ErrorCode,
@@ -93,6 +88,8 @@ import {
   type TrajectoryParams,
 } from "@taki/shared";
 import { requestWithDeadline } from "./rpc-deadline.ts";
+import { configMethods } from "./ws-config-methods.ts";
+import { readSubscriptionMethods } from "./ws-read-subscriptions.ts";
 
 function permissionMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
   return {
@@ -196,10 +193,8 @@ function avatarMethods(request: <T>(method: string, params: JSONRPCParams) => Pr
   };
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => TimingPolicy) {
   const request = <T>(method: string, params: JSONRPCParams): Promise<T> => requestWithDeadline({ rpc, timing, method, params });
-  let configSubscription: Promise<void> | null = null;
   return {
     ...avatarMethods(request),
     chatCancel: async (characterId: string, runId?: string) =>
@@ -219,15 +214,8 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
       CharacterCostumeResolutionResultSchema.parse(
         await request(CHARACTER_METHODS.costumeResolution, { characterId, costume }),
       ),
-    configList: async () => ConfigListResultSchema.parse(await request(CONFIG_METHODS.list, {})),
-    configSet: async (params: ConfigSetParams) =>
-      ConfigSetResultSchema.parse(await request(CONFIG_METHODS.set, params)),
-    subscribeConfig: () => {
-      configSubscription ??= request<unknown>(CONFIG_METHODS.subscribe, {}).then((result) => {
-        ConfigSubscribeResultSchema.parse(result);
-      });
-      return configSubscription;
-    },
+    ...configMethods(request),
+    ...readSubscriptionMethods(request),
     memoryTidy: async (characterId: string) =>
       MemoryTidyResultSchema.parse(await request(MEMORY_METHODS.tidy, { characterId })),
     memoryStatus: async (characterId: string) =>

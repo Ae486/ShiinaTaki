@@ -1,6 +1,6 @@
 /**
  * INPUT: WsTransport plus Core JSON-RPC frames parsed by ws-client-routes
- * OUTPUT: createWsClient() with chat, operator lifecycle, and extension convergence request families
+ * OUTPUT: createWsClient() with typed operator requests, retryable subscriptions and producer invalidation observers
  * POS:    ui/lib operator transport composition root over inbound routes and typed outbound methods
  */
 
@@ -28,6 +28,7 @@ import type {
   ConfigSetResult,
   ConnectParams,
   ExtensionConvergenceResult,
+  ExtensionChanged,
   MediaClearResult,
   MediaGetResult,
   MediaUsageResult,
@@ -53,6 +54,7 @@ import type {
   SecretSetParams,
   SecretSetResult,
   PerceptionCard,
+  PerceptionChanged,
   PerceptionPauseSetParams,
   PerceptionPauseState,
   PermissionCellSetParams,
@@ -77,11 +79,14 @@ import type {
   RunMonitorEvent,
 } from "@taki/shared";
 import { requestWithDeadline } from "./rpc-deadline.ts";
+import type { ReadSubscriptionSupport } from "./ws-read-subscriptions.ts";
 import { createTimingPolicyStore, type TimingPolicyStore } from "./timing-policy.ts";
 import { createTimingPolicySync, type TimingPolicySync } from "./timing-policy-sync.ts";
 import { handshake, requestMethods, type ConnectOutcome } from "./ws-client-methods.ts";
 import {
   addConfigChangedHandler,
+  addPerceptionChangedHandler,
+  addExtensionChangedHandler,
   addChatActivityHandler,
   addTimelineCommittedHandler,
   addApprovalHandler,
@@ -137,12 +142,15 @@ export interface WsClient {
   mediaUsage(): Promise<MediaUsageResult>;
   /** Purges every retained attachment byte — destructive, so the page confirms before calling it. */
   mediaClear(): Promise<MediaClearResult>;
-  /** Reads the Privacy Pause snapshot (a lapsed deadline self-resumes on this read). */
+  /** Reads the effective Privacy Pause snapshot; deadline projection does not write persistence. */
   perceptionPauseGet(): Promise<PerceptionPauseState>;
   /** Pauses (optionally until an epoch-ms deadline) or resumes ambient sampling; echoes the resulting state. */
   perceptionPauseSet(params: PerceptionPauseSetParams): Promise<PerceptionPauseState>;
   /** Reads the activity card: current + recent foreground stretches, sampling status, pause state. */
   perceptionCard(): Promise<PerceptionCard>;
+  /** One opt-in membership per physical socket; only an exact missing-method reply enables manual fallback. */
+  subscribePerception(): Promise<ReadSubscriptionSupport>;
+  onPerceptionChanged(handler: (changed: PerceptionChanged) => void): () => void;
   /** Reads the Core-authoritative global Permission Level and durable policy generation. */
   permissionLevelGet(): Promise<PermissionLevelState>;
   /** Mutates the global Level with optimistic generation matching; timed-out outcomes are never replayed. */
@@ -153,6 +161,8 @@ export interface WsClient {
   permissionCellSet(params: PermissionCellSetParams): Promise<PermissionCellSetResult>;
   /** Reads current owner/generation convergence facts; this is not an executable Agent Run snapshot. */
   extensionStatus(): Promise<ExtensionConvergenceResult>;
+  subscribeExtensions(): Promise<ReadSubscriptionSupport>;
+  onExtensionChanged(handler: (changed: ExtensionChanged) => void): () => void;
   /** Reads the merged desired + runtime view of every configured MCP server (the MCP page's read). */
   mcpList(): Promise<McpListResult>;
   /** Reads one MCP server's desired row plus its live runtime status. */
@@ -218,7 +228,7 @@ interface TimingSyncInput {
   deps: WsClientDeps;
   store: TimingPolicyStore;
   state: ReturnType<typeof createRoutes>;
-  methods: ReturnType<typeof requestMethods>;
+  methods: Pick<ReturnType<typeof requestMethods>, "configList" | "subscribeConfig" | "onConfigSubscriptionRecovered">;
 }
 
 function createClientTimingSync(input: TimingSyncInput): TimingPolicySync | null {
@@ -228,6 +238,7 @@ function createClientTimingSync(input: TimingSyncInput): TimingPolicySync | null
     list: input.methods.configList,
     subscribe: input.methods.subscribeConfig,
     onConfigChanged: (handler) => addConfigChangedHandler(input.state, handler),
+    onSubscriptionRecovered: input.methods.onConfigSubscriptionRecovered,
     onDiagnostic: input.deps.onTimingPolicyDiagnostic ?? ((message) => console.warn(`[timing-policy] ${message}`)),
   });
 }
@@ -255,7 +266,10 @@ export function createWsClient(deps: WsClientDeps): WsClient {
   const state = createRoutes();
   installRoutes(rpc, state);
   const { whenOpen, isClosed, retire } = bindTransport(transport, rpc, state);
-  const methods = requestMethods(rpc, timing);
+  const { invalidateConfigList, ...methods } = requestMethods(rpc, timing);
+  // Register before timing and page observers: a verified push retires stale list sharing before
+  // any consumer can synchronously request its next baseline. Raw/malformed frames never reach it.
+  addConfigChangedHandler(state, invalidateConfigList);
   const timingSync = createClientTimingSync({ deps, store: timingPolicy, state, methods });
   transport.onClose(() => timingSync?.dispose());
 
@@ -283,6 +297,8 @@ export function createWsClient(deps: WsClientDeps): WsClient {
     onChatActivity: (handler) => addChatActivityHandler(state, handler),
     onTimelineCommitted: (handler) => addTimelineCommittedHandler(state, handler),
     onConfigChanged: (handler) => addConfigChangedHandler(state, handler),
+    onPerceptionChanged: (handler) => addPerceptionChangedHandler(state, handler),
+    onExtensionChanged: (handler) => addExtensionChangedHandler(state, handler),
     onApproval: (handler) => addApprovalHandler(state, handler),
     onMonitorEvent: (handler) => addMonitorHandler(state, handler),
     currentTimingPolicy: timing,

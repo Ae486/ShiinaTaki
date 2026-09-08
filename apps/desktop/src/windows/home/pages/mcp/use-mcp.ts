@@ -4,8 +4,9 @@
  *         refetch; no snapshot persistence (permission-snapshot discipline applies to MCP desired state too).
  * POS:    ui/windows/home/pages/mcp — the only React MCP seam; never persists or replays mutations.
  */
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import type { McpServerDraft } from "./mcp-state.ts";
+import type { ReadObservationState } from "@/lib/read-observation.js";
 import {
   applyMcpLoad,
   beginMcpLoad,
@@ -13,10 +14,12 @@ import {
   failMcpLoad,
   failMcpMutation,
   previousMcpData,
+  mcpMutationFeedback,
   type McpFeedback,
   type McpViewState,
 } from "./mcp-state.ts";
 import { useHomeClient } from "../../home-client-context.ts";
+import { usePageActive } from "../../page-visibility-store.ts";
 import {
   createMcpController,
   type McpEditorMutationResult,
@@ -26,6 +29,9 @@ import {
 export interface McpServersView {
   state: McpViewState;
   connectionReady: boolean;
+  pending: string | null;
+  feedback: McpFeedback | null;
+  observation: ReadObservationState;
   refresh(): Promise<void>;
   add(draft: McpServerDraft): Promise<McpEditorMutationResult>;
   edit(draft: McpServerDraft, expectedRevision: number): Promise<McpEditorMutationResult>;
@@ -38,17 +44,26 @@ export interface McpServersView {
 export function useMcpServers(): McpServersView {
   const { client, status } = useHomeClient();
   const ready: McpPageClient | null = client && status.kind === "connected" ? client : null;
-  const [state, setState] = useState<McpViewState>(() => beginMcpLoad(0, null));
+  const visible = usePageActive("mcp");
+  const [pending, setPending] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<McpFeedback | null>(null);
+  const [observation, setObservation] = useState<ReadObservationState>("idle");
+  const [state, setState] = useState<McpViewState>({ kind: "idle", token: 0, previous: null });
   const controller = useMemo(() => createMcpController({
     loading: (previous) => setState((current) => beginMcpLoad(current.token, previous)),
     loaded: (servers, feedback) => setState((current) => applyMcpLoad(current, { token: current.token, servers, feedback: feedback ?? null })),
     loadFailed: (cause) => setState((current) => failMcpLoad(current, current.token, cause)),
-    mutationStarted: (key) => setState((current) => beginMcpMutation(current, current.token, key)),
-    mutationFailed: (cause) => setState((current) => failMcpMutation(current, current.token, cause)),
+    mutationStarted: (key) => { setPending(key); setFeedback(null); setState((current) => beginMcpMutation(current, current.token, key)); },
+    mutationFailed: (cause) => { setFeedback(mcpMutationFeedback(cause)); setState((current) => failMcpMutation(current, current.token, cause)); },
+    idle: (previous) => setState((current) => ({ kind: "idle", token: current.token, previous })),
+    feedback: setFeedback,
+    mutationSettled: () => setPending(null),
+    observation: setObservation,
   }), []);
 
-  useEffect(() => {
-    setState((current) => beginMcpLoad(current.token + 1, previousMcpData(current)));
+  useLayoutEffect(() => controller.setVisible(visible), [controller, visible]);
+  useLayoutEffect(() => {
+    setState((current) => ({ kind: "idle", token: current.token + 1, previous: previousMcpData(current) }));
     controller.replace(ready);
     return () => controller.replace(null);
   }, [controller, ready]);
@@ -64,5 +79,5 @@ export function useMcpServers(): McpServersView {
   const reconnect = useCallback(async (serverId: string) => void (await controller.reconnect(serverId)), [controller]);
   const test = useCallback(async (serverId: string) => void (await controller.test(serverId)), [controller]);
 
-  return { state, connectionReady: ready !== null, refresh, add, edit, setEnabled, remove, reconnect, test };
+  return { state, connectionReady: ready !== null, observation, pending, feedback, refresh, add, edit, setEnabled, remove, reconnect, test };
 }

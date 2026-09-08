@@ -59,11 +59,13 @@ export const RPC_METHOD_POLICIES: ReadonlyMap<string, RpcMethodPolicy> = new Map
   [PERCEPTION_METHODS.pauseGet, INTERACTIVE_READ],
   [PERCEPTION_METHODS.pauseSet, INTERACTIVE_MUTATION],
   [PERCEPTION_METHODS.card, INTERACTIVE_READ],
+  [PERCEPTION_METHODS.subscribe, INTERACTIVE_READ],
   [PERMISSION_METHODS.levelGet, INTERACTIVE_READ],
   [PERMISSION_METHODS.levelSet, INTERACTIVE_MUTATION],
   [PERMISSION_METHODS.cellsGet, INTERACTIVE_READ],
   [PERMISSION_METHODS.cellSet, INTERACTIVE_MUTATION],
   [EXTENSION_METHODS.status, INTERACTIVE_READ],
+  [EXTENSION_METHODS.subscribe, INTERACTIVE_READ],
   // MCP lifecycle: reads are interactive; every write/test/reconnect runs a bounded network candidate, so it
   // rides the long deadline like media.clear / character.import (outcome unknown on timeout — never replayed).
   [MCP_METHODS.list, INTERACTIVE_READ],

@@ -28,12 +28,13 @@
 - permission-level-schema.ts — Core-owned permission.* generation/concurrency schemas plus isolated legacy Rust-compatible leaves for pre-projection golden fixtures
 - governance-schema.ts — extension-neutral canonical identity, descriptor registry, override, and evaluation schemas
 - extension-discovery-schema.ts — bounded host-qualified Skill/MCP/capability identity, Run snapshot, progressive discovery, and call-result schemas
+- extension-change-schema.ts — strict operator-only aggregate subscription, unique closed change targets and process-local invalidation revision; no source content or Rust mirror
 - governance-registry.ts — validated versioned canonical descriptor registry and collision-safe lookup helpers
 - governance-evaluator.ts — pure fail-closed effective posture evaluator (Approval deliberately absent)
 - governance-api.ts — focused named public facade for governance and permission exports
 - governance-presentation.ts — exact-key Chinese capability/cell descriptions and posture/override labels, separate from authority and safe for unknown historical keys
 - tool-presentation.ts — fixed/MCP readable names, bounded optional label validation, and frozen own-key display-name snapshots; unknown routing keys stay unresolved
-- perception-schema.ts — PERCEPTION_METHODS + Privacy Pause state/set + activity-card schemas (current/recent/samplingStatus/pauseState) (T3b; panel UI at #26); operator-only, NO Rust mirror
+- perception-schema.ts — strict operator Privacy Pause/card reads and writer plus opt-in subscribe/changed schemas; changes carry only a process-local invalidation revision, with no Rust mirror
 - capability-schema.ts — compatibility entry re-exporting the canonical Host-bound capability channel schemas
 - capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec/ForegroundWindow); mirrored in Rust serde
 - secret-catalog-schema.ts — SECRET_METHODS + write-only secret.set/clear/presence/list schemas + SecretRef charset + SecretRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)

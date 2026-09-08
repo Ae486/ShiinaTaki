@@ -10,6 +10,7 @@ import type {
   PermissionLevelState,
 } from "@taki/shared";
 import type { WsClient } from "@/lib/ws-client.js";
+import { createReadCoordinator, type ReadCoordinator } from "@/lib/read-coordinator.js";
 import { PermissionSnapshotValidationError, permissionAppError, type PermissionFeedback } from "./permission-state.ts";
 
 export interface PermissionSnapshot {
@@ -23,11 +24,15 @@ export interface PermissionControllerSink {
   loadFailed(cause: unknown, previous: PermissionCellsState | null): void;
   mutationStarted(key: string): void;
   mutationFailed(cause: unknown): void;
+  idle?(previous: PermissionCellsState | null): void;
+  feedback?(feedback: PermissionFeedback): void;
+  mutationSettled?(): void;
 }
 
 export interface PermissionController {
   replace(client: PermissionClient | null): void;
   refresh(feedback?: PermissionFeedback): Promise<void>;
+  setVisible(visible: boolean): void;
   setLevel(level: PermissionLevel, expectedPolicyGeneration: number): Promise<void>;
   setCell(input: Omit<PermissionCellSetParams, "expectedPolicyGeneration">, expectedPolicyGeneration: number): Promise<void>;
   dispose(): void;
@@ -38,30 +43,30 @@ interface ControllerState {
   epoch: number;
   lastGood: PermissionCellsState | null;
   mutating: boolean;
+  visible: boolean;
+  fresh: boolean;
+  feedback: PermissionFeedback | undefined;
+  reads: ReadCoordinator<PermissionSnapshot>;
+  restoreAfterMutation: boolean;
 }
 
 function isCurrent(state: ControllerState, candidate: PermissionClient, token: number): boolean {
   return state.client === candidate && state.epoch === token;
 }
 
-async function refreshController(
+function refreshController(
   state: ControllerState,
   sink: PermissionControllerSink,
   feedback?: PermissionFeedback,
 ): Promise<void> {
-  const candidate = state.client;
-  if (!candidate) return;
-  const token = state.epoch;
-  sink.loading(state.lastGood);
-  try {
-    const [level, cells] = await Promise.all([candidate.permissionLevelGet(), candidate.permissionCellsGet()]);
-    if (!isCurrent(state, candidate, token)) return;
-    assertConsistent(level, cells);
-    state.lastGood = cells;
-    sink.loaded({ level, cells }, feedback);
-  } catch (cause) {
-    if (isCurrent(state, candidate, token)) sink.loadFailed(cause, state.lastGood);
+  if (feedback) {
+    state.feedback = feedback;
+    sink.feedback?.(feedback);
+    state.reads.acceptUpdate();
   }
+  state.reads.setActive(state.visible && (!state.mutating || feedback !== undefined));
+  if (feedback && state.visible) state.restoreAfterMutation = false;
+  return state.reads.demand();
 }
 
 async function mutateController(
@@ -70,9 +75,11 @@ async function mutateController(
   input: { key: string; operation: (candidate: PermissionClient) => Promise<void>; feedback: PermissionFeedback },
 ): Promise<void> {
   const candidate = state.client;
-  if (!candidate || state.mutating) return;
+  if (!candidate || state.mutating || !state.fresh) return;
   const token = state.epoch;
   state.mutating = true;
+  state.reads.setActive(false);
+  state.feedback = undefined;
   sink.mutationStarted(input.key);
   try {
     await input.operation(candidate);
@@ -84,22 +91,45 @@ async function mutateController(
       await refreshController(state, sink, { kind: "conflict", message: "Policy changed elsewhere; refreshed from Core" });
     }
   } finally {
-    if (state.epoch === token) state.mutating = false;
+    if (state.epoch === token) {
+      state.mutating = false;
+      state.reads.setActive(state.visible);
+      sink.mutationSettled?.();
+      if (state.visible && state.restoreAfterMutation) {
+        state.restoreAfterMutation = false;
+        await state.reads.demand();
+      }
+    }
   }
 }
 
 export function createPermissionController(sink: PermissionControllerSink): PermissionController {
-  const state: ControllerState = { client: null, epoch: 0, lastGood: null, mutating: false };
+  const state = createControllerState(sink);
 
   return {
     replace(next) {
+      if (state.client === next) return;
       state.epoch += 1;
       state.client = next;
       state.mutating = false;
+      state.fresh = false;
+      state.feedback = undefined;
+      state.restoreAfterMutation = false;
+      state.reads.replace(next ? () => readSnapshot(next) : null);
+      state.reads.setActive(state.visible);
+      sink.mutationSettled?.();
       if (next) void refreshController(state, sink);
-      else sink.loading(state.lastGood);
+      else sink.idle?.(state.lastGood);
     },
     refresh: (feedback) => refreshController(state, sink, feedback),
+    setVisible(visible) {
+      if (state.visible === visible) return;
+      state.visible = visible;
+      state.fresh = false;
+      state.reads.setActive(visible && !state.mutating);
+      if (visible && !state.mutating) void state.reads.demand();
+      else if (visible) state.restoreAfterMutation = true;
+    },
     setLevel: (level, expectedPolicyGeneration) => mutateController(state, sink, {
       key: "level",
       operation: async (candidate) => void (await candidate.permissionLevelSet({ level, expectedPolicyGeneration })),
@@ -114,8 +144,29 @@ export function createPermissionController(sink: PermissionControllerSink): Perm
       state.epoch += 1;
       state.client = null;
       state.mutating = false;
+      state.fresh = false;
+      state.reads.replace(null);
     },
   };
+}
+
+function createControllerState(sink: PermissionControllerSink): ControllerState {
+  const state: ControllerState = {
+    client: null, epoch: 0, lastGood: null, mutating: false, visible: true, fresh: false, feedback: undefined, restoreAfterMutation: false,
+    reads: createReadCoordinator<PermissionSnapshot>({
+      started: () => sink.loading(state.lastGood),
+      loaded: (snapshot) => { state.lastGood = snapshot.cells; state.fresh = true; sink.loaded(snapshot, state.feedback); },
+      failed: (cause) => { state.fresh = false; sink.loadFailed(cause, state.lastGood); },
+      retired: () => sink.idle?.(state.lastGood),
+    }),
+  };
+  return state;
+}
+
+async function readSnapshot(client: PermissionClient): Promise<PermissionSnapshot> {
+  const [level, cells] = await Promise.all([client.permissionLevelGet(), client.permissionCellsGet()]);
+  assertConsistent(level, cells);
+  return { level, cells };
 }
 
 export type PermissionClient = Pick<

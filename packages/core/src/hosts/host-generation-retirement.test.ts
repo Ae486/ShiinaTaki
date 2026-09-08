@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { CapabilityRequest, HostCatalogPublishParams } from "@taki/shared";
 import { createCapabilityBroker } from "../capabilities/capability-broker.ts";
 import { createConnectionRegistry } from "../server/connection-registry.ts";
@@ -14,7 +14,8 @@ const hostSelection = { protocolVersion: 2, catalogSchemaVersion: 2 };
 describe("bindHostGenerationRetirement", () => {
   it("retires only the replaced Host generation before the old socket closes", async () => {
     const connections = createConnectionRegistry();
-    const catalogs = createHostCatalogStore();
+    const changed = vi.fn();
+    const catalogs = createHostCatalogStore({ onChange: changed });
     const { logger } = createCaptureLogger();
     const broker = createCapabilityBroker({ logger, approval: testApproval() });
     bindHostGenerationRetirement({ connections, catalogs, broker });
@@ -31,12 +32,17 @@ describe("bindHostGenerationRetirement", () => {
     const pendingB = broker.request(target(HOST_B, (_method, params) => (sentB = params as CapabilityRequest)), {});
 
     const replacementA = connections.create();
-    connections.authenticate(replacementA, hostIdentity(HOST_A));
+    const replacementProvenance = connections.authenticate(replacementA, hostIdentity(HOST_A));
 
     expect(catalogs.get(HOST_A)).toBeUndefined();
     expect(catalogs.get(HOST_B)).toBeDefined();
     expect(connections.isCurrentHost(oldA)).toBe(false);
     expect(connections.isCurrentHost(replacementA)).toBe(true);
+    expect(changed).toHaveBeenCalledTimes(3);
+    catalogs.publish({ ...catalog(HOST_A), connectionGeneration: 2 }, replacementProvenance!);
+    connections.remove(oldA);
+    expect(catalogs.get(HOST_A)?.connectionGeneration).toBe(2);
+    expect(changed).toHaveBeenCalledTimes(4);
     await expect(pendingA).resolves.toMatchObject({ ok: false, code: "CANCELLED", state: "cancelled" });
 
     expect(broker.resolve({

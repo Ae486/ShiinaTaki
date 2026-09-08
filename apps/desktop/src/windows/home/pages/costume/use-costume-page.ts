@@ -1,10 +1,7 @@
 /**
- * INPUT:  the home shell's WsClient (character.costumes), the remembered costume in localStorage, and the pet window's
- *         pet:costume-result reports.
- * OUTPUT: useCostumePage() -> { view, listError, loading, refreshing, error, selected, pending, select, cancel, refresh }.
- * POS:    ui/windows/home/pages/costume — the ONLY ws/event touchpoint of the page. A pick COMMANDS the pet window (the
- *         live PetScene lives there) and the pet's REPORT drives every state move; the deadline here is the page's own
- *         guarantee that a pet which never answers cannot wedge it.
+ * INPUT:  Home client, effective page visibility, remembered costume and validated Pet result events.
+ * OUTPUT: demand-driven costume reads plus independently owned switch/cancel/result/deadline state.
+ * POS:    Home Costume — hiding retires reads only; the existing Pet scene remains the executor and result authority.
  */
 
 import { useCallback, useEffect, useMemo, useReducer, type Dispatch } from "react";
@@ -20,6 +17,7 @@ import { loadLastCostume } from "@/lib/last-costume.js";
 import { useCachedFetch } from "@/lib/use-cached-fetch.js";
 import { useTauriEvent } from "@/lib/use-tauri-event.js";
 import { useHomeClient } from "../../home-client-context.ts";
+import { usePageActive } from "../../page-visibility-store.ts";
 import { costumeListView, type CostumeListView } from "./costume-view.ts";
 import { IDLE, reduceCostumeSelect, type CostumeSelectAction } from "./costume-select-state.ts";
 import { startCostumeResultDeadline } from "./costume-result-deadline.ts";
@@ -28,6 +26,7 @@ const EMPTY: CostumeListView = { rows: [], missingPacks: [], current: null };
 
 export interface CostumePageView {
   view: CostumeListView;
+  hasSnapshot: boolean;
   connectionReady: boolean;
   /** The list could not be re-read; the previous list stays on screen behind this message. */
   listError: string | null;
@@ -42,6 +41,7 @@ export interface CostumePageView {
   select: (costumeId: string) => Promise<void>;
   cancel: () => void;
   refresh: () => Promise<void>;
+  invalidate: () => Promise<void>;
 }
 
 /** The page's own guarantee: a pet that never answers still releases the pending row (nothing else bounds that wait). */
@@ -58,11 +58,19 @@ function useResultDeadline(
   }, [pending, dispatch, currentTimingPolicy]);
 }
 
+function applyCostumeResult(payload: unknown, actions: { dispatch: Dispatch<CostumeSelectAction>; invalidate(): Promise<void> }): void {
+  handleCostumeResult(payload, {
+    apply: (result) => { actions.dispatch({ kind: "result", result }); void actions.invalidate(); },
+    warn: (message, dropped) => console.warn(message, dropped),
+  });
+}
+
 export function useCostumePage(): CostumePageView {
   const { client, status, currentTimingPolicy } = useHomeClient();
   const connected = status.kind === "connected";
+  const visible = usePageActive("costume");
   const load = useMemo(() => (client && connected ? () => client.characterCostumes(ACTIVE_CHARACTER_ID) : null), [client, connected]);
-  const costumes = useCachedFetch("costume-list", load, { schema: CharacterCostumesResultSchema, persist: true });
+  const costumes = useCachedFetch("costume-list", load, { schema: CharacterCostumesResultSchema, persist: true, enabled: visible });
   const [state, dispatch] = useReducer(reduceCostumeSelect, IDLE);
   const { pending } = state;
 
@@ -71,12 +79,7 @@ export function useCostumePage(): CostumePageView {
     [costumes.data],
   );
 
-  useTauriEvent(COSTUME_RESULT_EVENT, (payload) =>
-    handleCostumeResult(payload, {
-      apply: (result) => dispatch({ kind: "result", result }),
-      warn: (message, dropped) => console.warn(message, dropped),
-    }),
-  );
+  useTauriEvent(COSTUME_RESULT_EVENT, (payload) => applyCostumeResult(payload, { dispatch, invalidate: costumes.invalidate }));
 
   useResultDeadline(pending, dispatch, currentTimingPolicy);
 
@@ -102,6 +105,7 @@ export function useCostumePage(): CostumePageView {
 
   return {
     view,
+    hasSnapshot: costumes.data !== null,
     connectionReady: client !== null && connected,
     listError: costumes.error,
     loading: costumes.loading,
@@ -112,5 +116,6 @@ export function useCostumePage(): CostumePageView {
     select,
     cancel,
     refresh: costumes.refresh,
+    invalidate: costumes.invalidate,
   };
 }

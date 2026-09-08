@@ -1,6 +1,6 @@
 /**
  * INPUT: desired-state repo, runtime manager, and operator mcp.* parameters
- * OUTPUT: typed CRUD/test/reconnect orchestration that persists desired truth before runtime reconciliation
+ * OUTPUT: typed CRUD/test/reconnect orchestration with post-commit invalidation before runtime reconciliation
  * POS: core/mcp operator controller; merged views expose opaque markers and never secret values
  */
 import type {
@@ -22,6 +22,7 @@ import type {
 import type { McpDesiredRepo } from "./mcp-desired-repo.ts";
 import { sanitizeKey } from "./mcp-tool-identity.ts";
 import type { McpManager } from "./mcp-manager.ts";
+import type { ExtensionChangeObserver } from "../extensions/notify-extension-change.ts";
 
 /** A lifecycle refusal the methods layer converts to MCP_REFUSED + reason before any registry echo point. */
 export class McpRefusedError extends Error {
@@ -49,10 +50,11 @@ export interface McpLifecycleService {
 interface LifecycleContext {
   repo: McpDesiredRepo;
   manager: McpManager;
+  onChange?: ExtensionChangeObserver;
 }
 
 export function createMcpLifecycleService(deps: LifecycleContext): McpLifecycleService {
-  const context: LifecycleContext = { repo: deps.repo, manager: deps.manager };
+  const context: LifecycleContext = { ...deps };
   return {
     list: () => context.repo.list().map((row) => viewOf(context, row)),
     get: (params) => viewOf(context, requireRow(context, params.serverId)),
@@ -120,14 +122,14 @@ async function addServer(context: LifecycleContext, params: McpAddParams): Promi
     config: params.config,
     selectedTools: params.selectedTools ?? [],
     enabled: params.enabled ?? true,
-  });
+  }, context.onChange);
   if (row.enabled) await context.manager.applyDesired(row);
   return viewOf(context, context.repo.get(row.serverId) ?? row);
 }
 
 async function editServer(context: LifecycleContext, params: McpEditParams): Promise<McpServerView> {
   requireRow(context, params.serverId);
-  const row = context.repo.edit(params);
+  const row = context.repo.edit(params, context.onChange);
   if (row.enabled) await context.manager.applyDesired(row);
   else context.manager.disableServer(row);
   return viewOf(context, context.repo.get(row.serverId) ?? row);
@@ -135,21 +137,21 @@ async function editServer(context: LifecycleContext, params: McpEditParams): Pro
 
 async function enableServer(context: LifecycleContext, params: McpEnableParams): Promise<McpServerView> {
   requireRow(context, params.serverId);
-  const row = context.repo.setEnabled({ serverId: params.serverId, enabled: true, expectedConfigRevision: params.expectedConfigRevision });
+  const row = context.repo.setEnabled({ serverId: params.serverId, enabled: true, expectedConfigRevision: params.expectedConfigRevision }, context.onChange);
   await context.manager.applyDesired(row);
   return viewOf(context, context.repo.get(row.serverId) ?? row);
 }
 
 function disableServer(context: LifecycleContext, params: McpDisableParams): McpServerView {
   requireRow(context, params.serverId);
-  const row = context.repo.setEnabled({ serverId: params.serverId, enabled: false, expectedConfigRevision: params.expectedConfigRevision });
+  const row = context.repo.setEnabled({ serverId: params.serverId, enabled: false, expectedConfigRevision: params.expectedConfigRevision }, context.onChange);
   context.manager.disableServer(row); // lease blocking + drain/close exactly once (no restart)
   return viewOf(context, context.repo.get(row.serverId) ?? row);
 }
 
 function removeServer(context: LifecycleContext, params: McpRemoveParams): McpRemoveResult {
   requireRow(context, params.serverId);
-  context.repo.remove(params);
+  context.repo.remove(params, context.onChange);
   context.manager.removeServer(params.serverId);
   return { status: "removed" as const, serverId: params.serverId };
 }

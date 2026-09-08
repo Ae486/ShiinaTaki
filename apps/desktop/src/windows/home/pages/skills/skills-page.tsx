@@ -1,14 +1,13 @@
 /**
- * INPUT: controller-owned Core Skill state, browser ZIP/directory picks, selection memory and the confirm flag
- * OUTPUT: master-detail lifecycle page (L2): package list pane + detail pane, import kept toolbar-level, complete
- *         inspect/enable/replace/reconcile/confirmed-removal states
- * POS:    Home Skills presentation; no transport ownership, write replay, or authoritative local cache. Selection is
- *         component memory, loading/empty/failure ride the shared primitives, and the failed list read keeps its retry.
+ * INPUT:  current-generation Skill state, file picks, selected package and disclosure demand.
+ * OUTPUT: retained master/detail lifecycle page with independent list and inspection error states.
+ * POS:    Home Skills presentation — explicit actions only; the controller owns read scopes, mutations and inspections.
  */
 import { useRef, useState, type ReactNode, type RefObject } from "react";
 import type { SkillPackageView } from "@taki/shared";
 import { ActionButton } from "../../action-button.tsx";
 import { ExtensionConvergenceStrip, useExtensionConvergence } from "../../extension-convergence.tsx";
+import { ReadObservationNotice } from "../../read-observation-notice.tsx";
 import { PageAlert, PageBody, PageHeader } from "../../page-chrome.tsx";
 import { PageCard } from "../../page-card.tsx";
 import { MasterDetail } from "@/components/ui/master-detail.js";
@@ -41,11 +40,12 @@ export function SkillsPage() {
       ...(replacing ? { replacePackageId: replacing.packageId, expectedConfigRevision: replacing.configRevision } : {}),
     });
   };
-  const convergence = useExtensionConvergence(skillConvergenceKey(skills.state.packages));
+  const convergence = useExtensionConvergence("skills", skillConvergenceKey(skills.state.packages));
   return (
     <>
-      <PageHeader title="Skills" hint="导入标准 SKILL.md 技能包；通过验证并启用后即可供助手使用，无需重启。" busy={busy} />
-      <ExtensionConvergenceStrip state={convergence} />
+      <PageHeader title="Skills" hint="导入标准 SKILL.md 技能包；通过验证并启用后即可供助手使用，无需重启。" busy={busy || skills.state.kind === "loading"} />
+      <ExtensionConvergenceStrip state={convergence.state} onRefresh={convergence.refresh} connectionReady={convergence.connectionReady} />
+      <ReadObservationNotice observation={skills.state.observation} onRefresh={() => skills.controller.refresh()} disabled={!skills.connectionReady} />
       <SkillsBody input={{
         skills, selectedId, setSelectedId, confirmRemove, setConfirmRemove, fileError, busy,
         zipRef, directoryRef,
@@ -81,24 +81,25 @@ function SkillsBody({ input }: { input: SkillsBodyInput }) {
   const { skills } = input;
   const rows = skills.state.packages;
   const selected = resolveSelectedRow(rows, input.selectedId);
-  const failedListRead = input.fileError === null && skills.state.kind === "failure";
+  const failedListRead = skills.state.kind === "failure";
   return (
     <PageBody>
       {skills.status.kind === "reconnecting" && <PageAlert>正在重新连接，暂时无法更改技能；未确认的操作不会自动重试，恢复后请核对结果并按需手动重试。</PageAlert>}
-      {(skills.state.message || input.fileError) && (
+      {(skills.state.readError || skills.state.message || input.fileError) && (
         <PageAlert action={failedListRead ? { label: "重试", onClick: () => void skills.controller.refresh() } : undefined}>
-          Skill 操作失败：{input.fileError ?? skills.state.message}
+          Skill 操作失败：{input.fileError ?? skills.state.readError ?? skills.state.message}
         </PageAlert>
       )}
       <Pickers input={input} />
       <Toolbar input={input} />
       {skills.state.kind === "loading" && rows === null && <Skeleton lines={4} />}
+      {skills.state.kind === "idle" && rows === null && <p className="text-xs text-text-secondary">等待连接以读取技能列表。</p>}
       {rows?.length === 0 && <EmptySkillState />}
       {rows !== null && rows.length > 0 && selected !== null && (
         <SkillsMasterDetail
           rows={rows}
           selectedId={selected.packageId}
-          onSelect={input.setSelectedId}
+          onSelect={(packageId) => { input.setSelectedId(packageId); skills.controller.select(packageId); }}
           detailElement={<SelectedSkillCard selected={selected} input={input} />}
         />
       )}
@@ -122,6 +123,7 @@ function Toolbar({ input }: { input: SkillsBodyInput }) {
   return (
     <div className="flex justify-end gap-2">
       <ActionButton disabled={disabled} onClick={() => void input.skills.controller.reconcile()}>校验并协调</ActionButton>
+      <ActionButton disabled={!input.skills.connectionReady} onClick={() => void input.skills.controller.refresh()}>刷新列表</ActionButton>
       <ActionButton disabled={disabled} onClick={() => input.pick("directory")}>导入目录</ActionButton>
       <ActionButton tone="primary" disabled={disabled} onClick={() => input.pick("zip")}>导入 ZIP</ActionButton>
     </div>
@@ -136,8 +138,11 @@ function SelectedSkillCard({ selected, input }: { selected: SkillPackageView; in
       disabled={!skills.connectionReady || input.busy}
       confirming={input.confirmRemove === selected.packageId}
       inspected={skills.state.inspected?.package.packageId === selected.packageId ? skills.state.inspected : null}
+      inspection={{ open: skills.state.inspectOpen, pending: skills.state.inspectPending === selected.packageId,
+        stale: skills.state.inspectStale, error: skills.state.inspectError }}
       actions={{
         inspect: () => void skills.controller.inspect(selected.packageId),
+        setInspectionOpen: (open) => skills.controller.setInspectionOpen(open),
         toggle: () => void skills.controller.setEnabled(selected),
         replaceDirectory: () => input.pick("directory", selected.packageId),
         replaceZip: () => input.pick("zip", selected.packageId),
@@ -174,8 +179,8 @@ function Pickers({ input }: { input: SkillsBodyInput }) {
   );
 }
 
-function skillConvergenceKey(rows: SkillPackageView[] | null): string {
-  return (rows ?? []).map((row) => [row.packageId, row.configRevision, row.catalogGeneration ?? 0, row.runtimeState].join(":")).join("|");
+function skillConvergenceKey(rows: SkillPackageView[] | null): string | null {
+  return rows?.map((row) => [row.packageId, row.configRevision, row.catalogGeneration ?? 0, row.runtimeState].join(":")).join("|") ?? null;
 }
 
 function readable(error: unknown): string {

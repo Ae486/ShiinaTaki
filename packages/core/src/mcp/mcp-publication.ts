@@ -1,9 +1,10 @@
 /**
  * INPUT:  one durable desired revision plus the manager's active generations and candidate ownership token
- * OUTPUT: publishDesiredGeneration(state, input) — candidate validation and atomic last-good replacement
+ * OUTPUT: candidate validation, atomic last-good replacement and bounded publication/close invalidation
  * POS:    core/mcp — publication transaction boundary; stale candidates close and can never mutate runtime truth
  */
 import type { McpCandidateOutcome, McpToolKeyCollision } from "@taki/shared";
+import { notifyExtensionChange } from "../extensions/notify-extension-change.ts";
 import { closeMcpClient } from "./mcp-client-close.ts";
 import { McpCandidateError, prepareCandidate, sanitizeCandidateFailure, type PreparedCandidate } from "./mcp-candidate.ts";
 import { makeGenerationRecord, type GenerationRecord } from "./mcp-generations.ts";
@@ -91,9 +92,11 @@ async function acceptCandidate(
     refs: prepared.refs,
     secretRefs: tracking.secretRefs,
     onClosed: (closed) => state.draining.delete(closed),
+    onClosedState: state.onChange,
   });
   state.active.set(tracking.serverId, record);
   if (previous) retireRecord(state, previous);
+  notifyExtensionChange(state.onChange, ["mcp", "extension-status"]);
   return record;
 }
 

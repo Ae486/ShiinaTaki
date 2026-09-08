@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import type { ConfigEntry } from "@taki/shared";
 import { KnobField } from "./knob-field.tsx";
 
-const noop = () => undefined;
+const noop = async () => ({ kind: "saved" as const, display: "gpt-x", current: true });
 
 function entry(overrides: Partial<ConfigEntry> = {}): ConfigEntry {
   return {

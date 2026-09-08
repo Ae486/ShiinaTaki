@@ -11,12 +11,15 @@ export function PermissionCellsCard(props: {
   data: PermissionCellsState;
   disabled: boolean;
   pending: string | null;
+  onInspect?(): void;
   onSet(input: Pick<PermissionCellSetParams, "key" | "level" | "posture" | "secondConfirm">): void;
 }) {
   const activeCells = props.data.cells.filter((cell) => cell.level === props.data.level);
   const groups = groupCells(activeCells);
   return (
-    <details className="rounded-xl border border-border bg-surface shadow-card">
+    <details className="rounded-xl border border-border bg-surface shadow-card" onToggle={(event) => {
+      if (event.currentTarget.open) props.onInspect?.();
+    }}>
       <summary className="cursor-pointer list-none px-5 py-4 text-sm font-semibold text-text-body">
         高级权限设置
         <span className="ml-2 text-xs font-normal text-text-secondary">默认折叠</span>

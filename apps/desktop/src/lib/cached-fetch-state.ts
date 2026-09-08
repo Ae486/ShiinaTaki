@@ -1,9 +1,7 @@
 /**
- * INPUT:  the load lifecycle of one cached page read — a cache seed, a resolved value, a rejection.
- * OUTPUT: initialCachedFetch / reduceCachedFetch + the two rendering questions a page asks (isLoading, isRefreshing).
- * POS:    ui/lib — the node-testable core of use-cached-fetch. The rule that lives here rather than in the hook: a
- *         REJECTED load keeps the last good value on screen behind an error line, because blanking a page on a failed
- *         re-read is how a working surface starts looking broken.
+ * INPUT:  cache seeds, actual read start/retirement, validated results, failures and local view updates.
+ * OUTPUT: pure retained-snapshot transitions and truthful cold-loading/background-refresh queries.
+ * POS:    ui/lib — useCachedFetch state core; request ownership and disk privacy remain separate.
  */
 
 export interface CachedFetchState<T> {
@@ -14,6 +12,7 @@ export interface CachedFetchState<T> {
 
 export type CachedFetchAction<T> =
   | { kind: "start" }
+  | { kind: "retired" }
   | { kind: "loaded"; value: T }
   | { kind: "failed"; reason: string }
   /** A local edit of the loaded value (a server push, an echoed write); ignored before anything is loaded. */
@@ -27,6 +26,8 @@ export function reduceCachedFetch<T>(state: CachedFetchState<T>, action: CachedF
   switch (action.kind) {
     case "start":
       return state.running ? state : { ...state, running: true };
+    case "retired":
+      return state.running ? { ...state, running: false } : state;
     case "loaded":
       return { data: action.value, error: null, running: false };
     case "failed":
@@ -36,9 +37,9 @@ export function reduceCachedFetch<T>(state: CachedFetchState<T>, action: CachedF
   }
 }
 
-/** No answer of any kind yet — the page shows its placeholder. */
+/** A cold read is actually running; missing data alone is never evidence of loading. */
 export function isLoading<T>(state: CachedFetchState<T>): boolean {
-  return state.data === null && state.error === null;
+  return state.running && state.data === null;
 }
 
 /** A load is running over content already on screen — the page shows its refreshing marker. */

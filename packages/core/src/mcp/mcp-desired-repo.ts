@@ -2,7 +2,7 @@
  * INPUT:  Core Database wrapper plus validated desired-state MCP server mutations (config carries opaque
  *         `secret-ref:` markers ONLY — never values) and the legacy mcp-servers.json seed path
  * OUTPUT: createMcpDesiredRepo(db, { ownerHostId, now? }) — plane-1 CRUD with transactional per-row
- *         optimistic configRevision writes; seedFromLegacyFile imports ONLY when the table is empty AND the
+ *         optimistic writes observed after commit but before read-back; legacy seed runs only when empty AND the
  *         secret migration has already rewritten every plaintext value to markers (governance-repo exemplar)
  * POS:    core/mcp — the sole durable desired-state writer; runtime generations are NEVER persisted here
  */
@@ -17,6 +17,7 @@ import { readFileSync } from "node:fs";
 import { z } from "zod";
 import type { Database, SqlStatement } from "../db/sqlite.ts";
 import type { Logger } from "../logging/logger.ts";
+import { notifyExtensionChange, type ExtensionChangeObserver } from "../extensions/notify-extension-change.ts";
 import { parseMcpServers } from "./mcp-config.ts";
 import { MCP_SECRET_REF_MARKER } from "@taki/shared";
 
@@ -43,12 +44,13 @@ export interface McpDesiredWrite {
 export interface McpDesiredRepo {
   list(): McpDesiredServer[];
   get(serverId: string): McpDesiredServer | null;
-  add(input: McpDesiredWrite & { enabled: boolean }): McpDesiredServer;
-  edit(input: McpDesiredWrite & { expectedConfigRevision: number }): McpDesiredServer;
-  setEnabled(input: { serverId: string; enabled: boolean; expectedConfigRevision: number }): McpDesiredServer;
-  remove(input: { serverId: string; expectedConfigRevision: number }): void;
+  /** Commit observation precedes fallible projection read-back; a later refusal cannot hide a surviving write. */
+  add(input: McpDesiredWrite & { enabled: boolean }, onCommitted?: ExtensionChangeObserver): McpDesiredServer;
+  edit(input: McpDesiredWrite & { expectedConfigRevision: number }, onCommitted?: ExtensionChangeObserver): McpDesiredServer;
+  setEnabled(input: { serverId: string; enabled: boolean; expectedConfigRevision: number }, onCommitted?: ExtensionChangeObserver): McpDesiredServer;
+  remove(input: { serverId: string; expectedConfigRevision: number }, onCommitted?: ExtensionChangeObserver): void;
   /** Legacy seed: reads mcp-servers.json ONCE when the table is empty, after the secret migration rewrote it. */
-  seedFromLegacyFile(filePath: string, log: Logger): McpLegacySeedOutcome;
+  seedFromLegacyFile(filePath: string, log: Logger, onCommitted?: ExtensionChangeObserver): McpLegacySeedOutcome;
 }
 
 const RowSchema = z.object({
@@ -94,11 +96,11 @@ export function createMcpDesiredRepo(db: Database, deps: { ownerHostId: string; 
   return {
     list: () => statements.list.all().map(readRow),
     get: (serverId) => readOne(statements, serverId),
-    add: (input) => addServer(context, input),
-    edit: (input) => editServer(context, input),
-    setEnabled: (input) => setServerEnabled(context, input),
-    remove: (input) => removeServer(context, input),
-    seedFromLegacyFile: (filePath, log) => seedLegacy(db, statements, { filePath, ownerHostId: context.ownerHostId, now: context.now, log }),
+    add: (input, onCommitted) => addServer(context, input, onCommitted),
+    edit: (input, onCommitted) => editServer(context, input, onCommitted),
+    setEnabled: (input, onCommitted) => setServerEnabled(context, input, onCommitted),
+    remove: (input, onCommitted) => removeServer(context, input, onCommitted),
+    seedFromLegacyFile: (filePath, log, onCommitted) => seedLegacy(db, statements, { filePath, ownerHostId: context.ownerHostId, now: context.now, log, onCommitted }),
   };
 }
 
@@ -132,25 +134,29 @@ function readOne(statements: RepoStatements, serverId: string): McpDesiredServer
   return raw === undefined ? null : readRow(raw);
 }
 
-function addServer(context: RepoContext, input: McpDesiredWrite & { enabled: boolean }): McpDesiredServer {
+function addServer(context: RepoContext, input: McpDesiredWrite & { enabled: boolean }, onCommitted?: ExtensionChangeObserver): McpDesiredServer {
   context.db.transaction(() =>
     context.statements.insert.run({ ...configRow(input, context.now()), ownerHostId: context.ownerHostId, enabled: input.enabled ? 1 : 0 }));
+  notifyExtensionChange(onCommitted, ["mcp"]);
   return readOne(context.statements, input.serverId) ?? unreachable(input.serverId);
 }
 
-function editServer(context: RepoContext, input: McpDesiredWrite & { expectedConfigRevision: number }): McpDesiredServer {
+function editServer(context: RepoContext, input: McpDesiredWrite & { expectedConfigRevision: number }, onCommitted?: ExtensionChangeObserver): McpDesiredServer {
   mutateRow(context, input, () => context.statements.updateConfig.run(configRow(input, context.now())));
+  notifyExtensionChange(onCommitted, ["mcp"]);
   return readOne(context.statements, input.serverId) ?? unreachable(input.serverId);
 }
 
-function setServerEnabled(context: RepoContext, input: { serverId: string; enabled: boolean; expectedConfigRevision: number }): McpDesiredServer {
+function setServerEnabled(context: RepoContext, input: { serverId: string; enabled: boolean; expectedConfigRevision: number }, onCommitted?: ExtensionChangeObserver): McpDesiredServer {
   mutateRow(context, input, () =>
     context.statements.updateEnabled.run({ serverId: input.serverId, enabled: input.enabled ? 1 : 0, at: context.now() }));
+  notifyExtensionChange(onCommitted, ["mcp"]);
   return readOne(context.statements, input.serverId) ?? unreachable(input.serverId);
 }
 
-function removeServer(context: RepoContext, input: { serverId: string; expectedConfigRevision: number }): void {
+function removeServer(context: RepoContext, input: { serverId: string; expectedConfigRevision: number }, onCommitted?: ExtensionChangeObserver): void {
   mutateRow(context, input, () => context.statements.delete.run({ serverId: input.serverId }));
+  notifyExtensionChange(onCommitted, ["mcp"]);
 }
 
 // node:sqlite rejects named params the statement does not bind, so each statement gets exactly its own object.
@@ -182,7 +188,7 @@ function unreachable(serverId: string): never {
 function seedLegacy(
   db: Database,
   statements: Pick<RepoStatements, "count" | "insert">,
-  deps: { filePath: string; ownerHostId: string; now: () => string; log: Logger },
+  deps: { filePath: string; ownerHostId: string; now: () => string; log: Logger; onCommitted?: ExtensionChangeObserver },
 ): McpLegacySeedOutcome {
   if (Number(statements.count.get()?.n ?? 0) > 0) return { status: "skipped", reason: "table-not-empty" };
   const raw = readFile(deps.filePath, deps.log);
@@ -206,6 +212,7 @@ function seedLegacy(
   db.transaction(() => {
     for (const row of rows) statements.insert.run(row);
   });
+  notifyExtensionChange(deps.onCommitted, ["mcp"]);
   deps.log.info({ servers: rows.length }, "legacy mcp-servers.json seeded into desired state (seed-only; the file is no longer authoritative)");
   return { status: "seeded", servers: rows.length };
 }

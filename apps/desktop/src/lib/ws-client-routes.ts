@@ -1,5 +1,5 @@
 /**
- * INPUT:  inbound JSON-RPC notification frames from the Core (chat stream + avatar/timeline/config/Approval pushes) and the
+ * INPUT:  inbound JSON-RPC notification frames from the Core (chat stream and typed operator pushes) and the
  *         transport's open/message/close events.
  * OUTPUT: Routes state (in-flight turn + push slots), installRoutes(), parseFrame(), abortTurn(), bindTransport().
  * POS:    ui/lib — the inbound half of ws-client: THE zod boundary (past it, data is trusted typed data). No
@@ -20,6 +20,10 @@ import {
   ChatErrorSchema,
   ChatActivitySchema,
   ConfigChangedSchema,
+  EXTENSION_METHODS,
+  ExtensionChangedSchema,
+  PERCEPTION_METHODS,
+  PerceptionChangedSchema,
   OBSERVABILITY_METHODS,
   RunMonitorEventSchema,
   JsonRpcClientFrameSchema,
@@ -32,6 +36,8 @@ import {
   type ApprovalClosed,
   type CanonicalApprovalRequest,
   type ConfigChanged,
+  type ExtensionChanged,
+  type PerceptionChanged,
   type RunMonitorEvent,
   type JsonRpcClientFrame,
   type TimelineEntry,
@@ -46,6 +52,8 @@ interface PushSlots {
   timeline: ((entry: TimelineEntry) => void) | null;
   timelineRemoved: ((ref: TimelineRemoved) => void) | null;
   config: Set<(changed: ConfigChanged) => void>;
+  perception: Set<(changed: PerceptionChanged) => void>;
+  extension: Set<(changed: ExtensionChanged) => void>;
   approval: Set<(event: ApprovalPushEvent) => void>;
   monitor: Set<(event: RunMonitorEvent) => void>;
   activity: Set<(event: ChatActivity) => void>;
@@ -63,7 +71,7 @@ export interface Routes {
 
 export function createRoutes(): Routes {
   return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(),
-    approval: new Set(), monitor: new Set(), activity: new Set(), committed: new Set() } };
+    approval: new Set(), monitor: new Set(), activity: new Set(), committed: new Set(), perception: new Set(), extension: new Set() } };
 }
 
 export function addChatActivityHandler(state: Routes, handler: (event: ChatActivity) => void): () => void {
@@ -79,6 +87,16 @@ export function addTimelineCommittedHandler(state: Routes, handler: (batch: Time
 export function addConfigChangedHandler(state: Routes, handler: (changed: ConfigChanged) => void): () => void {
   state.push.config.add(handler);
   return () => state.push.config.delete(handler);
+}
+
+export function addPerceptionChangedHandler(state: Routes, handler: (changed: PerceptionChanged) => void): () => void {
+  state.push.perception.add(handler);
+  return () => state.push.perception.delete(handler);
+}
+
+export function addExtensionChangedHandler(state: Routes, handler: (changed: ExtensionChanged) => void): () => void {
+  state.push.extension.add(handler);
+  return () => state.push.extension.delete(handler);
 }
 
 export function addApprovalHandler(state: Routes, handler: (event: ApprovalPushEvent) => void): () => void {
@@ -99,6 +117,8 @@ function clearPushHandlers(state: Routes): void {
   state.push.timeline = null;
   state.push.timelineRemoved = null;
   state.push.config.clear();
+  state.push.perception.clear();
+  state.push.extension.clear();
   state.push.approval.clear();
   state.push.monitor.clear();
   state.push.activity.clear();
@@ -145,12 +165,18 @@ export function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void 
   rpc.addMethod(OBSERVABILITY_METHODS.event, (params: unknown) => {
     notifyMonitorHandlers(state, RunMonitorEventSchema.parse(params));
   });
+  rpc.addMethod(PERCEPTION_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.perception, PerceptionChangedSchema.parse(params));
+  });
+  rpc.addMethod(EXTENSION_METHODS.changed, (params: unknown) => {
+    publishHandlers(state.push.extension, ExtensionChangedSchema.parse(params));
+  });
   installApprovalRoutes(rpc, state);
 }
 
 function publishHandlers<T>(handlers: Set<(value: T) => void>, value: T): void {
   for (const handler of [...handlers]) {
-    try { handler(value); } catch { console.warn("[ws-client] activity/timeline handler failed"); }
+    try { handler(value); } catch { console.warn("[ws-client] push handler failed"); }
   }
 }
 

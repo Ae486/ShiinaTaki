@@ -1,9 +1,7 @@
 /**
- * INPUT:  a card title (+ an optional header control) and children, or a list of label/value rows.
- * OUTPUT: <PageCard> and <LabeledRows> — the two layout primitives the settings-family pages share, plus
- *         CARD_ROW: the one content-row padding every card-internal row uses (knob rows, permission rows).
- * POS:    ui/windows/home — shared page chrome, so a page component stays its own content and nothing re-declares the
- *         card/definition-list markup. Purely presentational: restyling every card is an edit here, not in the pages.
+ * INPUT:  card content and label/value rows with optional stable internal identities.
+ * OUTPUT: PageCard, LabeledRows and the common CARD_ROW spacing token.
+ * POS:    ui/home — presentation primitives; row identity can survive label changes without becoming visible metadata.
  */
 
 import type { ReactNode } from "react";
@@ -12,6 +10,8 @@ import type { ReactNode } from "react";
 export const CARD_ROW = "px-5 py-3.5";
 
 export interface LabeledRow {
+  /** Internal stable identity for rows whose presentation label/position can change. Never rendered as content. */
+  id?: string;
   label: string;
   value: string;
 }
@@ -33,7 +33,7 @@ export function LabeledRows({ rows, empty }: { rows: LabeledRow[]; empty?: strin
   return (
     <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1.5 text-xs">
       {rows.map((row) => (
-        <div key={row.label} className="contents">
+        <div key={row.id ?? row.label} className="contents">
           <dt className="text-text-secondary">{row.label}</dt>
           <dd className="min-w-0 truncate font-medium text-text-body">{row.value}</dd>
         </div>

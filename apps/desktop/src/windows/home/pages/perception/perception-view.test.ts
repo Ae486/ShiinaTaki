@@ -17,22 +17,22 @@ const CARD: PerceptionCard = {
 
 describe("perception view models", () => {
   it("words each pause state distinctly", () => {
-    expect(pauseLabel({ paused: false, until: null })).toContain("进行中");
+    expect(pauseLabel({ paused: false, until: null })).toBe("未启用隐私暂停");
     expect(pauseLabel({ paused: true, until: null })).toContain("手动恢复");
     expect(pauseLabel({ paused: true, until: Date.now() + 3_600_000 })).toContain("已暂停至");
   });
 
   it("reports each sampler's status separately", () => {
     expect(samplingRows(CARD)).toEqual([
-      { label: "前台活动采样", value: "进行中" },
-      { label: "环境截屏采样", value: "未采样" },
+      { label: "前台活动采样调度", value: "已安排" },
+      { label: "环境截屏采样调度", value: "未安排" },
     ]);
   });
 
   it("lists the current stretch first, then the recent ones, marking idle", () => {
     const rows = activityRows(CARD);
 
-    expect(rows[0]?.label).toBe("当前");
+    expect(rows[0]?.label).toBe("最新采样");
     expect(rows[0]?.value).toContain("Code.exe · main.ts");
     expect(rows[1]?.value).toContain("空闲");
   });

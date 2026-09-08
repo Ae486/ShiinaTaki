@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Children, isValidElement, type ReactElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { getCapabilityLabel, type ApprovalDecisionListItem, type ApprovalListResult } from "@taki/shared";
@@ -57,6 +57,27 @@ function deferred<T>() {
 }
 
 describe("Approval decisions controller", () => {
+  it("shares initial demand and restores after hide/show during revoke reconciliation", async () => {
+    const pending = deferred<ApprovalListResult>();
+    const read = vi.fn().mockResolvedValueOnce(EMPTY_LIST).mockReturnValueOnce(pending.promise)
+      .mockResolvedValue({ ...EMPTY_LIST, approvalGeneration: 9 });
+    const revoke = vi.fn(async () => ({ status: "revoked" as const, approvalGeneration: 5 }));
+    const states: ApprovalDecisionsState[] = [];
+    const controller = createApprovalDecisionsController((state) => states.push(state));
+    controller.replace({ approvalList: read, approvalRevoke: revoke });
+    await controller.refresh();
+    expect(read).toHaveBeenCalledTimes(1);
+    const done = controller.revoke("11111111-1111-4111-8111-111111111111");
+    await new Promise((resolve) => setImmediate(resolve));
+    controller.setVisible(false);
+    controller.setVisible(true);
+    pending.resolve(EMPTY_LIST);
+    await done;
+    expect(read).toHaveBeenCalledTimes(3);
+    expect(revoke).toHaveBeenCalledTimes(1);
+    expect(states.at(-1)).toMatchObject({ kind: "ready", data: { approvalGeneration: 9 } });
+  });
+
   it("suppresses an old client's late list result after generation replacement", async () => {
     const oldList = deferred<ApprovalListResult>();
     const states: ApprovalDecisionsState[] = [];
@@ -113,7 +134,7 @@ describe("Approval decisions controller", () => {
     controller.replace(null);
     revoke.resolve({ status: "revoked", approvalGeneration: 5 });
     await pending;
-    expect(states.at(-1)).toEqual({ kind: "loading", data: EMPTY_LIST, message: null });
+    expect(states.at(-1)).toEqual({ kind: "idle", data: EMPTY_LIST, message: null });
   });
 });
 

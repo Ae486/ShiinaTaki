@@ -1,6 +1,6 @@
 /**
  * INPUT:  manager dependencies plus desired-server operations and candidate ownership changes
- * OUTPUT: process-local ManagerState helpers for revision tokens, candidate cancellation, locking, and retirement
+ * OUTPUT: process-local ownership, cancellation, locking and retirement with bounded change observations
  * POS:    core/mcp — plane-3 coordination state; no state here is durable or restored after a process restart
  */
 import type { McpCandidateOutcome, McpServerConfig } from "@taki/shared";
@@ -10,6 +10,7 @@ import type { McpConnect } from "./mcp-connect.ts";
 import { defaultConnect } from "./mcp-connect.ts";
 import { retireGeneration, type GenerationRecord } from "./mcp-generations.ts";
 import type { TurnGovernance } from "./mcp-turn-tools.ts";
+import { notifyExtensionChange, type ExtensionChangeObserver } from "../extensions/notify-extension-change.ts";
 
 export interface McpDesiredRuntime {
   serverId: string;
@@ -37,6 +38,7 @@ export interface CandidateTracking {
 
 export interface ManagerState {
   log: Logger;
+  onChange?: ExtensionChangeObserver;
   connect: McpConnect;
   resolveSecret?: (ref: string) => string | null;
   governance?: TurnGovernance;
@@ -59,6 +61,7 @@ export interface ManagerState {
 
 export interface ManagerStateDeps {
   logger: Logger;
+  onChange?: ExtensionChangeObserver;
   connect?: McpConnect;
   resolveSecret?: (ref: string) => string | null;
   governance?: TurnGovernance;
@@ -71,6 +74,7 @@ export interface ManagerStateDeps {
 export function createManagerState(deps: ManagerStateDeps): ManagerState {
   return {
     log: deps.logger.child({ mod: "mcp" }),
+    onChange: deps.onChange,
     connect: deps.connect ?? defaultConnect,
     resolveSecret: deps.resolveSecret,
     governance: deps.governance,
@@ -140,13 +144,17 @@ export function beginCandidate(state: ManagerState, tracking: DesiredTracking): 
     settle,
   };
   state.candidates.set(tracking.serverId, candidate);
+  notifyExtensionChange(state.onChange, ["mcp"]);
   return candidate;
 }
 
 export function finishCandidate(state: ManagerState, candidate: CandidateTracking): void {
   candidate.done = true;
   candidate.settle();
-  if (state.candidates.get(candidate.serverId) === candidate) state.candidates.delete(candidate.serverId);
+  if (state.candidates.get(candidate.serverId) === candidate) {
+    state.candidates.delete(candidate.serverId);
+    notifyExtensionChange(state.onChange, ["mcp"]);
+  }
 }
 
 export function candidateIsCurrent(
@@ -174,9 +182,11 @@ export function retireRecord(state: ManagerState, record: GenerationRecord): voi
   retireGeneration(record, state.drainBudgetMs);
 }
 
-export function disconnectActive(state: ManagerState, serverId: string): void {
+export function disconnectActive(state: ManagerState, serverId: string): boolean {
   const record = state.active.get(serverId);
-  if (!record) return;
+  if (!record) return false;
   state.active.delete(serverId);
   retireRecord(state, record);
+  notifyExtensionChange(state.onChange, ["mcp", "extension-status"]);
+  return true;
 }

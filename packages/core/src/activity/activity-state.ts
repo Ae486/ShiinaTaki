@@ -1,10 +1,10 @@
 /**
- * INPUT:  parsed ForegroundWindowOutput samples + an injected epoch-ms clock (never reads the OS/Date itself)
- * OUTPUT: createActivityState(config) -> { push, seal, entries, current }; a bounded, coalesced rolling window of activity
- * POS:    core/activity — the OS-neutral activity layer (invariant 8); pure/deterministic, zero timers, zero Windows deps.
- *         T4's heartbeat reason-gate reads entries()/current(); the sampler feeds push(). In-memory only (no DB in T3a).
+ * INPUT:  admitted scrubbed foreground samples, epoch-ms sample times and an optional data-free change observer
+ * OUTPUT: bounded rolling activity with dwell-filtered entries, latest current and post-change notification
+ * POS:    core/activity — in-memory, OS-neutral state; no timers, capture, persistence or permission decisions
  */
 import type { ForegroundWindowOutput } from "@taki/shared";
+import { notifyPerceptionChange } from "../perception/notify-perception-change.ts";
 
 export interface ActivityConfig {
   /** Merge a sample into the live entry only if it lands within this gap of the entry's end (ActivityWatch pulsetime). */
@@ -59,7 +59,7 @@ function prune(list: ActivityEntry[], config: ActivityConfig, at: number): void 
   while (list.length > config.maxEntries) list.shift();
 }
 
-export function createActivityState(config: ActivityConfig): ActivityState {
+export function createActivityState(config: ActivityConfig, onChange?: () => void): ActivityState {
   const list: ActivityEntry[] = [];
   // A sealed live entry has ended: the next available sample always opens a fresh entry, so idle/away gaps (and the
   // sensitive-app skip, which pushes nothing at all) never silently extend a stretch the user has left.
@@ -68,7 +68,9 @@ export function createActivityState(config: ActivityConfig): ActivityState {
   // The ONE writer of the flag — push's unavailable branch delegates here, so "the foreground left" means exactly the
   // same thing whichever caller says it.
   function seal(): void {
+    const changed = !sealed && list.length > 0;
     sealed = true;
+    if (changed) notifyPerceptionChange(onChange);
   }
 
   return {
@@ -98,6 +100,7 @@ export function createActivityState(config: ActivityConfig): ActivityState {
       }
       sealed = false;
       prune(list, config, at);
+      notifyPerceptionChange(onChange);
     },
     seal,
     entries() {

@@ -1,7 +1,7 @@
 import { linkSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
@@ -10,6 +10,18 @@ const OWNER = "11111111-1111-4111-8111-111111111111"; const roots: string[] = []
 afterEach(() => { for (const db of dbs.splice(0)) db.close(); for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true }); });
 function open(path: string) { const db = openDatabase({ path, migrations: MIGRATIONS }); dbs.push(db); return db; }
 describe("Skill lifecycle boot", () => {
+  it("installs observation before legacy seed and initial publication without changing seed or read authority", async () => {
+    const dataDir = mkdtempSync(join(tmpdir(), "skill-boot-change-")); roots.push(dataDir);
+    const dir = join(dataDir, "skills", "demo"); mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, "SKILL.md"), "---\nname: demo\ndescription: legacy\n---\nbody");
+    const onChange = vi.fn(() => { throw new Error("observer failure"); });
+    const boot = await bootSkillLifecycle({ db: open(":memory:"), dataDir, ownerHostId: OWNER, logger: createCaptureLogger().logger, onChange });
+    expect(boot.service.list().packages).toEqual([expect.objectContaining({ lifecycleState: "active", runtimeState: "available" })]);
+    expect(onChange.mock.calls).toEqual([[["skills"]], [["skills", "extension-status"]]]);
+    boot.loader.load("demo"); boot.catalog.list(); boot.catalog.collectGarbage();
+    expect(onChange).toHaveBeenCalledTimes(2);
+    boot.catalog.close();
+  });
   it("seeds legacy content and disabled state once, then durable truth wins on reopen", async () => { const dataDir = mkdtempSync(join(tmpdir(), "skill-boot-")); roots.push(dataDir); const dir = join(dataDir, "skills", "demo"); mkdirSync(dir, { recursive: true }); const skill = join(dir, "SKILL.md"); writeFileSync(skill, "---\nname: demo\ndescription: legacy\n---\none"); writeFileSync(join(dataDir, "skills-state.json"), JSON.stringify({ disabled: ["demo"] })); const dbPath = join(dataDir, "taki.db"); const firstDb = open(dbPath); const first = await bootSkillLifecycle({ db: firstDb, dataDir, ownerHostId: OWNER, logger: createCaptureLogger().logger }); const row = first.service.list().packages[0]!; expect(row).toMatchObject({ skillName: "demo", enabled: false, trust: "legacy-local" }); expect(first.service.inspect({ packageId: row.packageId }).files).toContain("SKILL.md"); firstDb.close(); dbs.splice(dbs.indexOf(firstDb), 1); writeFileSync(skill, "---\nname: demo\ndescription: edited\n---\ntwo"); const second = await bootSkillLifecycle({ db: open(dbPath), dataDir, ownerHostId: OWNER, logger: createCaptureLogger().logger }); expect(second.service.list().packages[0]).toMatchObject({ packageId: row.packageId, contentHash: row.contentHash, description: "legacy" }); });
   it("keeps malformed legacy packages visible but inert", async () => { const dataDir = mkdtempSync(join(tmpdir(), "skill-boot-")); roots.push(dataDir); const dir = join(dataDir, "skills", "broken"); mkdirSync(dir, { recursive: true }); writeFileSync(join(dir, "SKILL.md"), "not frontmatter"); const boot = await bootSkillLifecycle({ db: open(":memory:"), dataDir, ownerHostId: OWNER, logger: createCaptureLogger().logger }); expect(boot.service.list().packages).toEqual([expect.objectContaining({ lifecycleState: "rejected", runtimeState: "invalid", enabled: false })]); });
   it("seeds and loads block-scalar metadata through the standard parser", async () => { const dataDir = mkdtempSync(join(tmpdir(), "skill-boot-")); roots.push(dataDir); const dir = join(dataDir, "skills", "demo"); mkdirSync(dir, { recursive: true }); writeFileSync(join(dir, "SKILL.md"), "---\nname: demo\ndescription: |\n  Legacy demo.\nmetadata:\n  team: tools\n---\n\n# Body"); const boot = await bootSkillLifecycle({ db: open(":memory:"), dataDir, ownerHostId: OWNER, logger: createCaptureLogger().logger }); expect(boot.service.list().packages[0]).toMatchObject({ skillName: "demo", description: "Legacy demo.\n", lifecycleState: "active" }); expect(boot.loader.load("demo")).toMatchObject({ ok: true, content: "\n# Body" }); });

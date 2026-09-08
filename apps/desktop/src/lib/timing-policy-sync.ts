@@ -1,6 +1,6 @@
 /**
  * INPUT:  one authenticated WsClient's config list/subscribe callbacks and a window-owned TimingPolicyStore.
- * OUTPUT: createTimingPolicySync() - exact-once subscription plus serialized, last-good full-policy refresh.
+ * OUTPUT: createTimingPolicySync() — serialized last-good policy refresh after changes or recovered subscription.
  * POS:    ui/lib - per-connection config observer; no persistence and no React ownership.
  */
 import { isTimingConfigKey, type ConfigChanged, type ConfigListResult } from "@taki/shared";
@@ -11,6 +11,7 @@ export interface TimingPolicySyncDeps {
   list: () => Promise<ConfigListResult>;
   subscribe: () => Promise<void>;
   onConfigChanged: (handler: (change: ConfigChanged) => void) => () => void;
+  onSubscriptionRecovered?: (handler: () => void) => () => void;
   onDiagnostic: (message: string) => void;
 }
 
@@ -37,10 +38,10 @@ export function createTimingPolicySync(deps: TimingPolicySyncDeps): TimingPolicy
         try {
           const listed = await deps.list();
           if (disposed) return;
-          const update = deps.store.apply(listed.entries);
-          if (!update.ok) deps.onDiagnostic(`invalid config refresh; keeping last-good timing policy: ${update.diagnostic}`);
+          if (!applyPolicy(deps, listed)) rerun = false;
         } catch (cause) {
-          deps.onDiagnostic(`config.list refresh failed; keeping last-good timing policy: ${String(cause)}`);
+          if (!disposed) deps.onDiagnostic(`config.list refresh failed; keeping last-good timing policy: ${String(cause)}`);
+          rerun = false;
         }
       } while (rerun && !disposed);
     })().finally(() => {
@@ -51,23 +52,35 @@ export function createTimingPolicySync(deps: TimingPolicySyncDeps): TimingPolicy
   };
 
   const unsubscribe = deps.onConfigChanged((change) => {
-    if (isTimingConfigKey(change.key)) void refresh();
+    if (started && isTimingConfigKey(change.key)) void refresh();
   });
+  const unsubscribeRecovery = deps.onSubscriptionRecovered?.(() => { if (started) void refresh(); });
 
   return {
     start() {
       if (started || disposed) return;
       started = true;
-      void deps
-        .subscribe()
-        .catch((cause: unknown) => deps.onDiagnostic(`config.subscribe failed; live timing refresh is unavailable: ${String(cause)}`))
-        .then(refresh);
+      startTimingObservation(deps, { refresh, active: () => !disposed });
     },
     dispose() {
       if (disposed) return;
       disposed = true;
       rerun = false;
       unsubscribe();
+      unsubscribeRecovery?.();
     },
   };
+}
+
+function applyPolicy(deps: TimingPolicySyncDeps, listed: ConfigListResult): boolean {
+  const update = deps.store.apply(listed.entries);
+  if (update.ok) return true;
+  deps.onDiagnostic(`invalid config refresh; keeping last-good timing policy: ${update.diagnostic}`);
+  return false;
+}
+
+function startTimingObservation(deps: TimingPolicySyncDeps, actions: { refresh(): Promise<void>; active(): boolean }): void {
+  void deps.subscribe().catch((cause: unknown) => {
+    if (actions.active()) deps.onDiagnostic(`config.subscribe failed; live timing refresh is unavailable: ${String(cause)}`);
+  }).then(() => { if (actions.active()) return actions.refresh(); });
 }

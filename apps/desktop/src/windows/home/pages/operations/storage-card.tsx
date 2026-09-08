@@ -8,6 +8,7 @@
 import type { MediaUsageResult } from "@taki/shared";
 import { ActionButton } from "../../action-button.tsx";
 import { LabeledRows, PageCard } from "../../page-card.tsx";
+import { PageAlert } from "../../page-chrome.tsx";
 import { FeedbackLine } from "@/components/ui/feedback-line.js";
 import { Skeleton } from "@/components/ui/skeleton.js";
 import { formatBytes } from "./operations-state.ts";
@@ -17,13 +18,16 @@ export function StorageCard({
   usage,
   clear,
   connectionReady,
+  read,
 }: {
   usage: MediaUsageResult | null;
   clear: MediaClearControl;
   connectionReady: boolean;
+  read: { loading: boolean; error: string | null; retry(): Promise<void> };
 }) {
   return (
     <PageCard title="存储占用">
+      {read.error && <PageAlert action={{ label: "重试", onClick: () => void read.retry() }}>读取存储占用失败：{read.error}</PageAlert>}
       {usage ? (
         <LabeledRows
           rows={[
@@ -31,10 +35,19 @@ export function StorageCard({
             { label: "记忆文本", value: formatBytes(usage.memoryTextBytes) },
           ]}
         />
-      ) : (
+      ) : read.loading ? (
         <Skeleton lines={2} />
-      )}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+      ) : !read.error && <p className="text-xs text-text-secondary">等待连接以读取存储占用。</p>}
+      <ClearControls clear={clear} connectionReady={connectionReady} />
+      {clear.notice && <div className="mt-2"><FeedbackLine tone="ok">{clear.notice}</FeedbackLine></div>}
+      {clear.error && <div className="mt-2"><FeedbackLine tone="danger">{clear.error}</FeedbackLine></div>}
+    </PageCard>
+  );
+}
+
+function ClearControls({ clear, connectionReady }: { clear: MediaClearControl; connectionReady: boolean }) {
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-2">
         {clear.phase === "idle" ? (
           <ActionButton tone="danger-soft" onClick={() => clear.onEvent("request")} disabled={!connectionReady}>
             清除全部附件字节
@@ -55,9 +68,6 @@ export function StorageCard({
             </ActionButton>
           </>
         )}
-      </div>
-      {clear.notice && <div className="mt-2"><FeedbackLine tone="ok">{clear.notice}</FeedbackLine></div>}
-      {clear.error && <div className="mt-2"><FeedbackLine tone="danger">{clear.error}</FeedbackLine></div>}
-    </PageCard>
+    </div>
   );
 }

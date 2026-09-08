@@ -124,7 +124,15 @@ interface TimingPolicy {
 - The development fallback is available before any Core connection exists. An invalid or failed `config.list`
   refresh keeps the last-good policy and emits a diagnostic; it never disables bootstrap reconnect.
 - One `WsClient` fan-outs `config.changed` to multiple local handlers and memoizes `config.subscribe`, so timing sync
-  and the Settings page share exactly one Core subscription request per generation.
+  and Settings share one accepted Core membership. Concurrent setup joins one request; rejection, invalid
+  acknowledgement or lost-ack timeout retires only that attempt so deliberate retry works on the same client.
+- Recovery after a config observation gap triggers one reconciliation through the existing timing owner even if no
+  later `config.changed` arrives. Genuinely concurrent `config.list` requests share one physical request; there is
+  no new timing store, persistent cache, recurring setup retry, or mutation replay.
+- Config list sharing is valid only while no verified `config.changed`, successful `config.set` or acknowledged
+  recovery gap intervenes. Retire that old flight's reuse eligibility before notifying consumers; keep its existing
+  promises intact for their own generation/update guards. An old success/failure finalizer must not clear a newer
+  shared flight. A malformed push or refused write does not invent an accepted config change.
 - A relevant change triggers a serialized full `config.list` reread. In-flight operations keep the duration captured
   when they began; a new value applies to later requests/retry attempts only.
 - No timing policy or connection authority is persisted to `localStorage`.
@@ -148,12 +156,13 @@ interface TimingPolicy {
 
 ### Mounted-page revalidation
 
-- Navigation away and back is never the refresh mechanism for mutable server-owned data. A mounted page either consumes
-  a committed notification with a durable cursor, or performs bounded idempotent revalidation on a named lifecycle
-  signal such as focus, visibility restoration, config/client generation replacement, or explicit invalidation.
+- A resource with meaningful producer events cannot require navigation away/back as its only way to become current.
+  Perception and extension resources subscribe to data-free hints and reconcile visible demand. Query-only management
+  snapshots deliberately reread on entry/re-entry, relevant outcome or explicit refresh. Ordinary focus is not a
+  generic refresh trigger; route and actual document visibility follow reactive-read-models.md.
 - Prefer a real producer notification when Core already owns a meaningful event. Do not invent a dead subscription for
-  data that has no producer, and do not create unrelated per-page polling loops. A bounded timer is allowed only when
-  the source has no event seam and the child task defines interval, visibility pause, cancellation, and request budget.
+  data that has no producer, and do not add page polling as a fallback. Resource reads use one owned flight plus one
+  trailing dirty obligation; real one-shot request/operation deadlines and existing transport liveness stay separate.
 - A background refresh preserves last-good content and sets `refreshing`; it does not regress to first-load `loading`.
   Failed revalidation marks the view stale/error without discarding readable last-good data. Retired-generation results
   are ignored through the same generation guard as restoration.

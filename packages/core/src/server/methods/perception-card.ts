@@ -2,9 +2,8 @@
  * INPUT:  PerceptionCardParams from a dispatched perception.card request + a card thunk (perception-layer.card)
  * OUTPUT: perceptionCardMethod(card) -> MethodDefinition (operator-only); one { current, recent, samplingStatus,
  *         pauseState } snapshot
- * POS:    core/server/methods — one file per WS method; a THIN delegation to perception/perception-card (the panel at
- *         #26 reads it). A one-shot READ, not a subscription: nothing publishes perception changes today, so a live
- *         feed would mean a change bus in both samplers — the UI polls this instead. Operator-only, NO Rust mirror.
+ * POS:    core/server/methods — thin operator read over the existing Perception owner. Opt-in perception.changed
+ *         hints trigger a covering card read; the snapshot carries no invalidation revision or new sampling action.
  */
 import { PERCEPTION_METHODS, PerceptionCardParamsSchema, type PerceptionCard, type PerceptionCardParams } from "@taki/shared";
 import type { MethodDefinition } from "../method-registry.ts";

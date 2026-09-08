@@ -18,6 +18,7 @@ import { useApprovalDialog } from "@/components/approval/use-approval-dialog.js"
 import { appendVisitedPage } from "./visited-page-ids.ts";
 import { usePageVisibilityStore } from "./page-visibility-store.ts";
 import { useMonitorAvailability } from "./use-monitor-availability.ts";
+import { observeHomeDocumentVisibility } from "./home-document-visibility.ts";
 
 const BRAND_MARK = "flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-xs font-semibold text-white";
 
@@ -72,6 +73,7 @@ export function HomeShell() {
   // ignores the signal by contract). Written from visiblePage, not currentPage, so the monitor-disabled fallback is truth.
   const setActivePage = usePageVisibilityStore((state) => state.setActivePage);
   useEffect(() => { setActivePage(visiblePage.id); }, [visiblePage.id, setActivePage]);
+  useEffect(() => observeHomeDocumentVisibility(document, usePageVisibilityStore.getState().setDocumentVisible), []);
 
   return (
     <HomeClientContext.Provider value={connection}>

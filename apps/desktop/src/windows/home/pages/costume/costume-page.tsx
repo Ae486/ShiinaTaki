@@ -53,6 +53,7 @@ function ImportRow({
 
 function CostumeList({ costume }: { costume: CostumePageView }) {
   if (costume.loading) return <Skeleton lines={4} />;
+  if (!costume.hasSnapshot) return costume.listError ? null : <p className="text-xs text-text-secondary">等待连接以读取服装列表。</p>;
   if (costume.view.rows.length === 0) return <EmptyState title="尚未导入角色" hint="开发环境使用内置模型。" />;
   return (
     <div className="flex flex-col gap-0.5">
@@ -104,13 +105,13 @@ export function CostumePage() {
         {error && <PageAlert>{error}</PageAlert>}
         {costume.listError && (
           <PageAlert action={{ label: "重试", onClick: () => void costume.refresh() }}>
-            服装列表读取失败（下方为上次结果）：{costume.listError}
+            服装列表读取失败{costume.hasSnapshot ? "（下方为上次结果）" : ""}：{costume.listError}
           </PageAlert>
         )}
 
         <PageCard title="导入模型">
           <ImportRow
-            onPick={(file) => void importState.importFile(file).then(costume.refresh)}
+            onPick={(file) => void importState.importFile(file).then(costume.invalidate)}
             isImporting={importState.isImporting}
             connectionReady={costume.connectionReady}
           />

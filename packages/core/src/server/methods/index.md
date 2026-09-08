@@ -1,7 +1,8 @@
 # core/server/methods/
 - connect.ts — the only pre-auth method: token/pairing/loopback authentication and offered operator-display support echo on every success path
-- host-catalog-publish.ts — host.catalogPublish (node-only): provenance-bound complete publication with fail-closed retirement for rejected current-generation candidates
+- host-catalog-publish.ts — host.catalogPublish (node-only): provenance-bound publication and fail-closed retirement; accepted mutations are observed inside the Host catalog owner
 - extension-status.ts — operator-only extension.status convergence projection over current Host/Skill/MCP owner generations
+- extension-subscribe.ts — operator-only opt-in extension change membership before acknowledgement; idempotent retries and one close cleanup, with no read/probe/reconcile
 - chat-send.ts — durable send admission/ack, queue-owner activity replacement plus legacy stream settlement, exact captured observer wiring and unchanged initiator cancellation
 - chat-activity-read.ts — operator-only Character recovery snapshot; read-only, complete or explicitly unavailable, with no execution/replay path
 - chat-cancel.ts — chat.cancel (operator-only): legacy character-only active-turn abort plus optional exact runId durable cancellation for queued work; idempotent ({cancelled:false} when absent/mismatched)
@@ -17,10 +18,11 @@
 - memory-tidy.ts — memory.tidy (operator-only): run the store-maintenance tidy pass NOW; responds with per-class defect counts, edits, steps and the utility slot's cumulative spend — never memory content
 - memory-status.ts — memory.status (operator-only): the settings panel's maintenance counters — window calibration per slot, compaction summary coverage + LENGTH, auto-write/tidy watermarks; counts only
 - memory-migration.ts — memory.migration.* (operator-only): on-demand legacy migration control, bounded reports, verification and activation
-- perception-methods.ts — the perception surface's registration seam: one call registers pauseGet/pauseSet/card so the composition root never grows per method
+- perception-methods.ts — one registration seam for the operator pauseGet/pauseSet/card/subscribe surface
 - perception-pause-get.ts — perception.pauseGet (operator-only): the Privacy Pause snapshot (a lapsed deadline self-resumes on this read)
 - perception-pause-set.ts — perception.pauseSet (operator-only): pause until resumed / until a caller-supplied epoch-ms deadline / resume; the ONLY production writer of the pause state (the agent has no path — swept by privacy-pause-writer.test.ts)
-- perception-card.ts — perception.card (operator-only): one activity-card snapshot { current, recent, samplingStatus, pauseState }; a READ, not a subscription (nothing publishes perception changes today) — panel at #26
+- perception-card.ts — perception.card (operator-only): unchanged strict activity/pause read, independently usable with or without producer invalidation membership
+- perception-subscribe.ts — perception.subscribe (authenticated operator-only): idempotent content-free changed notifications with one connection-close cleanup; no baseline push or capture/write
 - character-import.ts — character.import (operator-only): extract an uploaded model archive into the Workspace characters/ subtree; thin delegation to the characters importer
 - character-list.ts — character.list (operator-only): enumerate imported characters from their character.json markers
 - character-costumes.ts — character.costumes (operator-only): one character's costumes + settings filenames + on-demand availability (renderable / missing motions+packs)

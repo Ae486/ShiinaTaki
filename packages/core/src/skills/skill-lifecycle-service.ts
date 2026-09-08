@@ -1,6 +1,6 @@
 /**
  * INPUT: operator Skill lifecycle requests plus the Core repository, store, and catalog
- * OUTPUT: serialized import and optimistic lifecycle operations with prebuilt runtime candidates
+ * OUTPUT: serialized lifecycle operations with commit/publication observations and prebuilt runtime candidates
  * POS:    core/skills control plane; SQLite commit precedes a synchronous no-I/O catalog publication
  */
 import { mkdirSync } from "node:fs";
@@ -11,6 +11,7 @@ import type { SkillCatalogCandidate, SkillCatalogManager } from "./skill-catalog
 import { SkillConfigConflictError, type SkillPackageRepo, type SkillPackageWrite } from "./skill-package-repo.ts";
 import { enumerateSource, SkillSourceError } from "./skill-package-source.ts";
 import type { SkillPackageRow } from "./skill-package-types.ts";
+import { notifyExtensionChange, type ExtensionChangeObserver } from "../extensions/notify-extension-change.ts";
 
 export type SkillRefusalReason = "unknown-package" | "duplicate-skill" | "invalid-package" | "unsafe-package" | "package-disabled" | "revision-conflict" | "source-too-large";
 export class SkillRefusedError extends Error { readonly reason: SkillRefusalReason; constructor(reason: SkillRefusalReason, message = "Skill lifecycle operation refused") { super(message); this.name = "SkillRefusedError"; this.reason = reason; } }
@@ -23,7 +24,7 @@ export interface SkillLifecycleService {
   remove(params: SkillMutationParams): Promise<{ status: "removed"; packageId: string }>;
   reconcile(): Promise<SkillReconcileResult>;
 }
-interface ServiceDeps { repo: SkillPackageRepo; catalog: SkillCatalogManager; storeRoot: string; ownerHostId: string; }
+interface ServiceDeps { repo: SkillPackageRepo; catalog: SkillCatalogManager; storeRoot: string; ownerHostId: string; onChange?: ExtensionChangeObserver; }
 
 export function createSkillLifecycleService(deps: ServiceDeps): SkillLifecycleService {
   let tail = Promise.resolve();
@@ -44,18 +45,19 @@ export function createSkillLifecycleService(deps: ServiceDeps): SkillLifecycleSe
       if (row.lifecycleState !== "active" || !row.contentHash) throw new SkillRefusedError("invalid-package");
       const prospective = { ...row, enabled: true, configRevision: row.configRevision + 1 }; const nextRows = replaceRow(rows, prospective); const candidate = deps.catalog.prepare(nextRows);
       if (candidate.invalidated.includes(row.packageId)) throw new SkillRefusedError("invalid-package");
-      const next = deps.repo.update({ packageId: row.packageId, expectedConfigRevision: params.expectedConfigRevision, enabled: true });
+      const next = deps.repo.update({ packageId: row.packageId, expectedConfigRevision: params.expectedConfigRevision, enabled: true }, deps.onChange);
       publishCommitted(deps, candidate, replaceRow(rows, next)); return { package: view(next) };
     }); },
     disable(params) { return serialize(async () => {
       const rows = deps.repo.list(); const row = rowById(rows, params.packageId); const prospective = { ...row, enabled: false, configRevision: row.configRevision + 1 };
       const candidate = deps.catalog.prepare(replaceRow(rows, prospective));
-      const next = deps.repo.update({ packageId: row.packageId, expectedConfigRevision: params.expectedConfigRevision, enabled: false });
+      const next = deps.repo.update({ packageId: row.packageId, expectedConfigRevision: params.expectedConfigRevision, enabled: false }, deps.onChange);
       publishCommitted(deps, candidate, replaceRow(rows, next)); return { package: view(next) };
     }); },
     remove(params) { return serialize(async () => {
       const rows = deps.repo.list(); rowById(rows, params.packageId); const nextRows = rows.filter((row) => row.packageId !== params.packageId); const candidate = deps.catalog.prepare(nextRows);
-      deps.repo.remove(params); publishCommitted(deps, candidate, nextRows);
+      deps.repo.remove(params, deps.onChange);
+      publishCommitted(deps, candidate, nextRows);
       return { status: "removed", packageId: params.packageId };
     }); },
     reconcile() { return serialize(async () => reconcilePackages(deps)); },
@@ -80,7 +82,7 @@ async function importPackage(deps: ServiceDeps, params: SkillImportParams): Prom
   const write = activeWrite({ deps, params, packageId, validated }); const prospective = prospectiveRow(write, replacement); const nextRows = replacement ? replaceRow(rows, prospective) : [...rows, prospective];
   const candidate = deps.catalog.prepare(nextRows);
   if (candidate.invalidated.includes(packageId)) throw new SkillRefusedError("unsafe-package");
-  const row = replacement ? deps.repo.update(replacementUpdate(write, packageId, params.expectedConfigRevision as number)) : deps.repo.insert({ ...write, packageId: content.packageId });
+  const row = replacement ? deps.repo.update(replacementUpdate(write, packageId, params.expectedConfigRevision as number), deps.onChange) : deps.repo.insert({ ...write, packageId: content.packageId }, deps.onChange);
   publishCommitted(deps, candidate, replacement ? replaceRow(rows, row) : [...rows, row]);
   return { package: packageView(deps, row) };
 }
@@ -90,7 +92,7 @@ interface RejectedImport { deps: ServiceDeps; params: SkillImportParams; reason:
 function rejectedImport(input: RejectedImport): { package: SkillPackageView } {
   const { deps, params, reason, files } = input; const packageId = randomUUID();
   if (files) { try { quarantine(deps.storeRoot, packageId, files); } catch { /* the inert durable refusal remains authoritative */ } }
-  const row = deps.repo.insert({ packageId, skillName: null, description: null, ownerHostId: deps.ownerHostId, contentHash: null, lifecycleState: "rejected", enabled: false, sourceKind: params.source.kind, sourceLocator: sourceLocator(params), trust: "blocked", scanVersion: "skill-scan-v1", scanVerdict: "rejected", scanFindings: [], failureReason: reason });
+  const row = deps.repo.insert({ packageId, skillName: null, description: null, ownerHostId: deps.ownerHostId, contentHash: null, lifecycleState: "rejected", enabled: false, sourceKind: params.source.kind, sourceLocator: sourceLocator(params), trust: "blocked", scanVersion: "skill-scan-v1", scanVerdict: "rejected", scanFindings: [], failureReason: reason }, deps.onChange);
   return { package: packageView(deps, row) };
 }
 
@@ -114,7 +116,11 @@ function replacementBase(deps: ServiceDeps, params: SkillImportParams): SkillPac
 function prospectiveRow(write: SkillPackageWrite, previous: SkillPackageRow | null): SkillPackageRow {
   return { ...write, packageId: write.packageId ?? randomUUID(), configRevision: previous ? previous.configRevision + 1 : 1, createdAt: previous?.createdAt ?? "1970-01-01T00:00:00.000Z", updatedAt: previous?.updatedAt ?? "1970-01-01T00:00:00.000Z" };
 }
-function publishCommitted(deps: ServiceDeps, candidate: SkillCatalogCandidate, rows: SkillPackageRow[]): void { deps.catalog.publish(candidate, rows); deps.catalog.collectGarbage(); }
+function publishCommitted(deps: ServiceDeps, candidate: SkillCatalogCandidate, rows: SkillPackageRow[]): void {
+  deps.catalog.publish(candidate, rows);
+  notifyExtensionChange(deps.onChange, ["skills", "extension-status"]);
+  deps.catalog.collectGarbage();
+}
 function replaceRow(rows: SkillPackageRow[], next: SkillPackageRow): SkillPackageRow[] { return rows.map((row) => row.packageId === next.packageId ? next : row); }
 function rowById(rows: SkillPackageRow[], packageId: string): SkillPackageRow { const row = rows.find((candidate) => candidate.packageId === packageId); if (!row) throw new SkillRefusedError("unknown-package"); return row; }
 
@@ -122,7 +128,10 @@ function reconcilePackages(deps: ServiceDeps): SkillReconcileResult {
   const rows = deps.repo.list(); const candidate = deps.catalog.prepare(rows); let currentRows = rows; let invalidated = 0;
   for (const id of candidate.invalidated) {
     const row = currentRows.find((item) => item.packageId === id); if (!row) continue;
-    try { const next = deps.repo.update({ packageId: id, expectedConfigRevision: row.configRevision, enabled: false, lifecycleState: "rejected", failureReason: "published content verification failed", scanVerdict: "rejected" }); currentRows = replaceRow(currentRows, next); invalidated += 1; }
+    try {
+      const next = deps.repo.update({ packageId: id, expectedConfigRevision: row.configRevision, enabled: false, lifecycleState: "rejected", failureReason: "published content verification failed", scanVerdict: "rejected" }, deps.onChange);
+      currentRows = replaceRow(currentRows, next); invalidated += 1;
+    }
     catch (error) { if (!(error instanceof SkillConfigConflictError)) throw error; }
   }
   publishCommitted(deps, candidate, currentRows);

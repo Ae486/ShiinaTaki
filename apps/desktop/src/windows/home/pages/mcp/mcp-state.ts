@@ -14,6 +14,7 @@ export type McpFeedback =
   | { kind: "error"; message: string };
 
 export type McpViewState =
+  | { kind: "idle"; token: number; previous: McpServerView[] | null }
   | { kind: "loading"; token: number; previous: McpServerView[] | null }
   | { kind: "ready"; token: number; data: McpServerView[]; feedback: McpFeedback | null; pending: string | null }
   | { kind: "failure"; token: number; previous: McpServerView[] | null; failureKind: "read" | "validation"; message: string };
@@ -59,6 +60,10 @@ export function applyMcpRemoved(state: McpViewState, token: number, serverId: st
 
 export function failMcpMutation(state: McpViewState, token: number, cause: unknown): McpViewState {
   if (state.kind !== "ready" || state.token !== token) return state;
+  return { ...state, feedback: mcpMutationFeedback(cause), pending: null };
+}
+
+export function mcpMutationFeedback(cause: unknown): McpFeedback {
   const app = mcpAppError(cause);
   const feedback: McpFeedback =
     app.code === ErrorCodeSchema.enum.MCP_CONFIG_CONFLICT
@@ -66,7 +71,7 @@ export function failMcpMutation(state: McpViewState, token: number, cause: unkno
       : app.code === ErrorCodeSchema.enum.MCP_REFUSED
         ? { kind: "refused", reason: app.reason, message: refusalMessage(app.reason, errorMessage(cause)) }
         : { kind: "error", message: errorMessage(cause) };
-  return { ...state, feedback, pending: null };
+  return feedback;
 }
 
 export function applyMcpFeedback(state: McpViewState, token: number, feedback: McpFeedback): McpViewState {

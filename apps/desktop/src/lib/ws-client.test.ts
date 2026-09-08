@@ -19,6 +19,9 @@ import {
   PERMISSION_METHODS,
   TIMELINE_METHODS,
   TIMING_POLICY_DEVELOPMENT_DEFAULTS,
+  TIMING_CONFIG_KEYS,
+  type TimingPolicy,
+  type TimingPolicyField,
 } from "@taki/shared";
 import { createTimingPolicyStore } from "./timing-policy.ts";
 import { createWsClient } from "./ws-client.ts";
@@ -57,6 +60,14 @@ const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 function lastRequestId(sent: string[]): number | string {
   return JSON.parse(sent[sent.length - 1] ?? "{}").id;
+}
+
+function timingEntries(policy: TimingPolicy) {
+  return Object.entries(TIMING_CONFIG_KEYS).map(([field, key]) => ({
+    key, value: policy[field as TimingPolicyField], default: policy[field as TimingPolicyField],
+    stored: false, envLocked: false, apply: "live", secret: false, secretSet: false,
+    input: { kind: "int", min: 1 }, description: field,
+  }));
 }
 
 describe("createWsClient inbound routing", () => {
@@ -717,5 +728,92 @@ describe("createWsClient config methods", () => {
     expect(h.sent.map((payload) => JSON.parse(payload).method)).toEqual([CONFIG_METHODS.subscribe]);
     h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "ok" } });
     await expect(Promise.all([first, second])).resolves.toEqual([undefined, undefined]);
+  });
+
+  it.each(["refused", "malformed"])("allows same-client config subscription recovery after %s setup", async (failure) => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const first = client.subscribeConfig();
+    const rejected = expect(first).rejects.toThrow();
+    h.deliver(failure === "refused"
+      ? { jsonrpc: "2.0", id: lastRequestId(h.sent), error: { code: -32_000, message: "unavailable" } }
+      : { jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "invalid" } });
+    await rejected;
+    const retry = client.subscribeConfig();
+    expect(h.sent).toHaveLength(2);
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "ok" } });
+    await retry;
+    await client.subscribeConfig();
+    expect(h.sent).toHaveLength(2);
+    client.close();
+  });
+
+  it("shares only concurrent identical config lists, then allows deliberate later reads", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    h.open();
+    const first = client.configList();
+    const second = client.configList();
+    expect(h.sent).toHaveLength(1);
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { entries: [] } });
+    await Promise.all([first, second]);
+    const later = client.configList();
+    expect(h.sent).toHaveLength(2);
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { entries: [] } });
+    await later;
+    client.close();
+  });
+
+  it("reconciles the existing timing owner when a failed shared subscription later recovers without a push", async () => {
+    const h = harness();
+    const store = createTimingPolicyStore();
+    const client = createWsClient({ transport: h.transport, timingPolicy: store, onTimingPolicyDiagnostic: vi.fn() });
+    h.open();
+    const connecting = client.connect({ deviceId: "d", deviceName: "home", role: "operator", capabilities: [] });
+    await flush();
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "ok", token: "tok" } });
+    await connecting;
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), error: { code: -32_000, message: "setup lost" } });
+    await flush();
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { entries: timingEntries(TIMING_POLICY_DEVELOPMENT_DEFAULTS) } });
+    await flush();
+    const retry = client.subscribeConfig();
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "ok" } });
+    await retry;
+    const concurrentSettingsRead = client.configList();
+    expect(h.sent.map((payload) => JSON.parse(payload).method).filter((method) => method === CONFIG_METHODS.list)).toHaveLength(2);
+    const current = { ...TIMING_POLICY_DEVELOPMENT_DEFAULTS, interactiveRpcMs: 18_000 };
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { entries: timingEntries(current) } });
+    await concurrentSettingsRead;
+    await flush();
+    expect(client.currentTimingPolicy().interactiveRpcMs).toBe(18_000);
+    expect(h.sent.map((payload) => JSON.parse(payload).method).filter((method) => method === CONFIG_METHODS.subscribe)).toHaveLength(2);
+    client.close();
+  });
+
+  it("retries a lost config acknowledgement without letting its late response replace the new attempt", async () => {
+    vi.useFakeTimers();
+    const h = harness();
+    const client = createWsClient({ transport: h.transport,
+      timingPolicy: createTimingPolicyStore({ ...TIMING_POLICY_DEVELOPMENT_DEFAULTS, interactiveRpcMs: 10 }) });
+    try {
+      h.open();
+      const first = client.subscribeConfig();
+      const oldId = lastRequestId(h.sent);
+      const rejected = expect(first).rejects.toMatchObject({ name: "RpcDeadlineExceededError" });
+      await vi.advanceTimersByTimeAsync(10);
+      await rejected;
+      const second = client.subscribeConfig();
+      const currentId = lastRequestId(h.sent);
+      h.deliver({ jsonrpc: "2.0", id: oldId, result: { status: "ok" } });
+      expect(client.subscribeConfig()).toBe(second);
+      h.deliver({ jsonrpc: "2.0", id: currentId, result: { status: "ok" } });
+      await second;
+      expect(h.sent).toHaveLength(2);
+    } finally {
+      client.close();
+      vi.useRealTimers();
+    }
   });
 });

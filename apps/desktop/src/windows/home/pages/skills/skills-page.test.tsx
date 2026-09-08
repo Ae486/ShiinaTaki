@@ -7,10 +7,11 @@ const useSkills = vi.hoisted(() => vi.fn()); vi.mock("./use-skills.ts", () => ({
 const ROW: SkillPackageView = { packageId: "11111111-1111-4111-8111-111111111111", skillName: "demo", description: "demo", ownerHostId: "22222222-2222-4222-8222-222222222222", contentHash: null, enabled: false, configRevision: 1, sourceKind: "directory", sourceLocator: "browser-directory", trust: "operator-local", scanVersion: "v1", scanVerdict: "passed", scanFindings: [], lifecycleState: "active", runtimeState: "disabled", catalogGeneration: null, createdAt: "2026-08-18T00:00:00.000Z", updatedAt: "2026-08-18T00:00:00.000Z", failureReason: null };
 const controller = { bind: vi.fn(), refresh: vi.fn(), inspect: vi.fn(), importPackage: vi.fn(), setEnabled: vi.fn(), remove: vi.fn(), reconcile: vi.fn() };
 const noop = () => undefined;
-const actions = { inspect: noop, toggle: noop, replaceDirectory: noop, replaceZip: noop, askRemove: noop, cancelRemove: noop, remove: noop };
+const actions = { inspect: noop, setInspectionOpen: noop, toggle: noop, replaceDirectory: noop, replaceZip: noop, askRemove: noop, cancelRemove: noop, remove: noop };
 
 function card(overrides: Partial<SkillCardProps> = {}): string {
-  return renderToStaticMarkup(<SkillCard row={ROW} disabled={false} confirming={false} inspected={null} actions={actions} {...overrides} />);
+  return renderToStaticMarkup(<SkillCard row={ROW} disabled={false} confirming={false} inspected={null}
+    inspection={{ open: true, pending: false, stale: false, error: null }} actions={actions} {...overrides} />);
 }
 
 beforeEach(() => useSkills.mockReturnValue({ state: { kind: "loading", packages: null, inspected: null, pending: null, message: null }, controller, status: { kind: "connected" }, connectionReady: true }));

@@ -44,6 +44,49 @@ async function flush(): Promise<void> {
 }
 
 describe("permission controller generations", () => {
+  it("joins coincident pair reads and retires both old successes and failures while hidden", async () => {
+    const pending = deferred<PermissionLevelState>();
+    const active = client({ permissionLevelGet: vi.fn(() => pending.promise) });
+    const h = harness();
+    h.controller.replace(active);
+    const done = h.controller.refresh();
+    void h.controller.refresh();
+    expect(active.permissionLevelGet).toHaveBeenCalledTimes(1);
+    expect(active.permissionCellsGet).toHaveBeenCalledTimes(1);
+    h.controller.setVisible(false);
+    pending.reject(new Error("retired"));
+    await done;
+    expect(h.events.some((event) => event.kind === "loadFailed")).toBe(false);
+    vi.mocked(active.permissionLevelGet).mockResolvedValue({ level: "standard", policyGeneration: 1, registryRevision: 1 });
+    h.controller.setVisible(true);
+    await h.controller.refresh();
+    expect(active.permissionCellsGet).toHaveBeenCalledTimes(2);
+  });
+
+  it("restores a post-mutation read retired by hide/show without replaying the policy write", async () => {
+    const oldLevel = deferred<PermissionLevelState>();
+    const oldCells = deferred<PermissionCellsState>();
+    const active = client();
+    vi.mocked(active.permissionLevelGet).mockResolvedValueOnce({ level: "standard", policyGeneration: 1, registryRevision: 1 })
+      .mockReturnValueOnce(oldLevel.promise).mockResolvedValue({ level: "strict", policyGeneration: 3, registryRevision: 1 });
+    vi.mocked(active.permissionCellsGet).mockResolvedValueOnce(snapshot()).mockReturnValueOnce(oldCells.promise)
+      .mockResolvedValue({ ...snapshot(3), level: "strict" });
+    const h = harness();
+    h.controller.replace(active);
+    await h.controller.refresh();
+    const done = h.controller.setLevel("relaxed", 1);
+    await flush();
+    h.controller.setVisible(false);
+    h.controller.setVisible(true);
+    oldLevel.resolve({ level: "relaxed", policyGeneration: 2, registryRevision: 1 });
+    oldCells.resolve({ ...snapshot(2), level: "relaxed" });
+    await done;
+    expect(active.permissionLevelGet).toHaveBeenCalledTimes(3);
+    expect(active.permissionCellsGet).toHaveBeenCalledTimes(3);
+    expect(active.permissionLevelSet).toHaveBeenCalledTimes(1);
+    expect(h.events.at(-1)).toMatchObject({ kind: "loaded", value: { value: { cells: { policyGeneration: 3 } } } });
+  });
+
   it("refetches every replacement client and suppresses late retired-client results", async () => {
     const oldLevel = deferred<PermissionLevelState>();
     const oldCells = deferred<PermissionCellsState>();

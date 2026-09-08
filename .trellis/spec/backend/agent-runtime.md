@@ -206,6 +206,15 @@ explicit in-the-moment consent through the Gate, and the pause never gates them.
   hydrated through the FACTORY, never through a mutator: restoring must not look like a mutation, because the mutators
   have exactly ONE production caller — the operator-only `perception.pauseSet`. That single-writer property is the
   proof the agent cannot un-pause its own observation; it is source-swept by `privacy-pause-writer.test.ts`.
+- Pause writes persist successfully before changing live consent or notifying observers. A failed durable resume
+  must leave the previous pause effective. The interested-operator projection owns one bounded absolute-deadline
+  wake-up through the existing `pause.state(now)` read, including when samplers have stopped; it never becomes
+  another writer or calls a resume/capture/model path. See
+  [operator resource invalidation](server-push-and-connection-auth.md#scenario-operator-resource-invalidation).
+- Perception refresh observes accepted/scrubbed source and scheduled-loop transitions. `current` means the latest
+  sampled stretch, including its pre-dwell stage; `recent` still applies the existing dwell filter. A scheduled
+  sampler flag does not prove current foreground identity, Host availability or capture progress. Refresh adds no
+  faster sampling, raw window listener, stronger in-flight cancellation, or resolution of the D48 timing gap.
 - **Retention is enforced by a sweeper, and ambient frames live in their own store.** A retention policy nobody sweeps
   is not a policy: `perception/ambient-shot-gc.ts` sweeps at boot and on an interval regardless of the enable flag
   (frames captured before ambient sensing was switched off must still expire). Ambient frames get their own directory

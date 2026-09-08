@@ -2,7 +2,7 @@
 - harness/ — Core-owned Trigger admission and Run/Attempt lifecycle service above the existing ToolLoopAgent
 - scheduler/ — durable Scheduled Task definitions, calendar evaluation, occurrence outbox, and canonical Run adapter
 - index.ts — package public entry; empty until an external consumer exists (core runs as a process)
-- main.ts — process entry with unchanged Memory/Replay authorities, atomic Timeline delivery, runtime-owned bounded activity recovery, operator registries, bounded Run backfill and orderly resource disposal
+- main.ts — process entry with unchanged Memory/Replay authorities, atomic Timeline/activity delivery, opt-in Perception and extension observation before producer boot, operator registries and orderly resource disposal
 - config/ — env → validated boot config; plus the operator-facing settings store (knob registry, precedence source, writer, change fan-out)
 - boot/ — the composition root's config+storage phase: open the DB on the env-only data root, then resolve every other knob (env > stored > default) for the loaders
 - logging/ — pino root logger factory
@@ -10,9 +10,9 @@
 - devices/ — paired-device store + pairing/token registry (device identity security state)
 - db/ — SQLite wrapper + migrations + repos (the only node:sqlite importer; single-writer durable store)
 - agents/ — streaming chat agent + SQLite-backed conversation store + collision-safe governed ToolSet assembly
-- extensions/ — immutable per-Run host-qualified Skill/MCP/capability registry, progressive discovery/call tools, and explicit transfer adapter
+- extensions/ — immutable per-Run Skill/MCP/Host discovery/call/transfer and a separate bounded, opt-in operator invalidation projection
 - activity/ — OS-neutral perception activity layer (#19 T3a): foreground-sample rolling state + system-initiated poll sampler + fenced prompt renderer
-- perception/ — perception composition + privacy controls (#20 T3b): Privacy Pause (db-persisted, restart-proof), sensitive-process skip, the VLM sensitive-screen verdict, deterministic PII scrub + the DEFAULT-OFF ambient screen sampler (own grant, own frame store, enforced retention) + the human-facing activity card; shared by every ambient sampler, never by on-demand captures
+- perception/ — shared ambient privacy/sampling composition, durable Privacy Pause, human-facing card and opt-in content-free producer invalidation; interested-operator expiry observation never becomes a pause writer or capture trigger
 - memory/ — layer-generic memory engine: files-as-truth store + FTS5 index + retriever + assembler + tools + the always-visible block tier, its boot wiring, the background utility slot and the retention sweeper
 - media/ — content-addressed attachment store (chat image bytes) under the Workspace; the DB never holds bytes (#17)
 - scheduler/ — the shared sweep runner every retention arm rides (boot sweep + unref'd interval + count-only log)

@@ -9,6 +9,7 @@ import { PerceptionPage } from "./pages/perception/perception-page.tsx";
 import { KnobField } from "./pages/settings/knob-field.tsx";
 
 const CLIENT = {} as WsClient;
+const refuseSave = async () => ({ kind: "refused" as const, message: "unavailable" });
 
 function pageMarkup(page: React.ReactNode, connected: boolean): string {
   return renderToStaticMarkup(
@@ -45,10 +46,10 @@ const EDITABLE_KNOB: ConfigEntry = {
 describe("Home connection-dependent action readiness", () => {
   it("disables otherwise-editable settings fields while the shared Home client is unavailable", () => {
     const disconnected = renderToStaticMarkup(
-      <KnobField entry={EDITABLE_KNOB} connectionReady={false} notice={undefined} onSave={() => undefined} />,
+      <KnobField entry={EDITABLE_KNOB} connectionReady={false} notice={undefined} onSave={refuseSave} />,
     );
     const connected = renderToStaticMarkup(
-      <KnobField entry={EDITABLE_KNOB} connectionReady notice={undefined} onSave={() => undefined} />,
+      <KnobField entry={EDITABLE_KNOB} connectionReady notice={undefined} onSave={refuseSave} />,
     );
 
     expect(disconnected).toContain('disabled=""');

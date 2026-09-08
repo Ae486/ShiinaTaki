@@ -43,6 +43,7 @@ function fakeStore() {
 }
 
 interface HarnessOptions {
+  onChange?: () => void;
   config?: Partial<AmbientScreenshotSamplerConfig>;
   isPaused?: () => boolean;
   isSensitive?: (processName: string | null) => boolean;
@@ -89,6 +90,7 @@ function harness(route: (capability: string, input: unknown) => Promise<RouteRes
     context,
     logger,
     now,
+    onChange: opts.onChange,
     config: { ...CONFIG, ...opts.config },
   });
   return { sampler, records, context, saved, discarded, describe, allRoutes };
@@ -111,6 +113,55 @@ describe("createAmbientScreenshotSampler", () => {
     vi.useFakeTimers();
   });
   afterEach(() => vi.useRealTimers());
+
+  it("publishes only actual scheduling changes, including capture denial", async () => {
+    const onChange = vi.fn();
+    const route = vi.fn(async (): Promise<RouteResult> => ({ ok: false, code: "DENIED", message: "denied" }));
+    const { sampler } = harness(route, { onChange });
+    sampler.start();
+    sampler.start();
+    expect(sampler.running()).toBe(true);
+    expect(onChange).toHaveBeenCalledExactlyOnceWith();
+    await step();
+    expect(sampler.running()).toBe(false);
+    sampler.stop();
+    sampler.start();
+    expect(onChange.mock.calls).toEqual([[], []]);
+  });
+
+  it("does not publish for off/no-VLM, accepted descriptions, sensitive verdicts or retention cleanup", async () => {
+    const onChange = vi.fn();
+    for (const opts of [{ config: { enabled: false } }, { noDescribe: true }]) {
+      const off = harness(okRoute(), { ...opts, onChange });
+      off.sampler.start();
+      off.sampler.stop();
+    }
+    expect(onChange).not.toHaveBeenCalled();
+    const describe = vi.fn(async () => "an editor");
+    const active = harness(okRoute(), { describe, onChange });
+    active.sampler.start();
+    await step();
+    expect(active.discarded).toHaveLength(1);
+    describe.mockResolvedValue("SENSITIVE_SCREEN");
+    clock += REFRESH_MS;
+    await vi.advanceTimersByTimeAsync(REFRESH_MS);
+    expect(active.discarded).toHaveLength(2);
+    expect(onChange).toHaveBeenCalledExactlyOnceWith();
+    active.sampler.stop();
+    expect(onChange).toHaveBeenCalledTimes(2);
+  });
+
+  it("isolates scheduling observers and notifies a fresh-screen denial after stopping", async () => {
+    const observed: boolean[] = [];
+    const { sampler } = harness(okRoute(), {
+      fresh: () => ({ ok: false, code: "DENIED", message: "denied" }),
+      onChange: () => { observed.push(sampler.running()); throw new Error("retired observer"); },
+    });
+    expect(() => sampler.start()).not.toThrow();
+    await step();
+    expect(observed).toEqual([true, false]);
+    expect(sampler.running()).toBe(false);
+  });
 
   it("is never scheduled while the enable flag is off — zero captures, zero dialogs, zero logs", async () => {
     const route = okRoute();

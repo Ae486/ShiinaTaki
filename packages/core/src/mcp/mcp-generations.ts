@@ -1,13 +1,14 @@
 /**
  * INPUT:  one connected MCP client plus its published namespaced tools/refs (a runtime generation record)
  * OUTPUT: acquireLease/releaseLease/retireGeneration/closeGeneration — the frozen drain/close machinery: a
- *         draining generation accepts no new leases, closes exactly once at lease-zero or at the drain budget
+ *         draining generation rejects new leases and observes closed state before deferred transport cleanup
  * POS:    core/mcp — plane-3 in-memory truth ONLY: generations and leases are never persisted, never restored
  */
 import type { ToolSet } from "ai";
 import type { McpClient } from "./mcp-connect.ts";
 import { closeMcpClient } from "./mcp-client-close.ts";
 import type { McpToolRef } from "./mcp-tool-identity.ts";
+import { notifyExtensionChange, type ExtensionChangeObserver } from "../extensions/notify-extension-change.ts";
 
 export interface GenerationRecord {
   serverId: string;
@@ -26,6 +27,7 @@ export interface GenerationRecord {
   closeTimer: ReturnType<typeof setTimeout> | null;
   closePromise: Promise<void> | null;
   onClosed?: (record: GenerationRecord) => void;
+  onClosedState?: ExtensionChangeObserver;
 }
 
 export function makeGenerationRecord(input: {
@@ -38,6 +40,7 @@ export function makeGenerationRecord(input: {
   refs: Map<string, McpToolRef>;
   secretRefs: ReadonlySet<string>;
   onClosed?: (record: GenerationRecord) => void;
+  onClosedState?: ExtensionChangeObserver;
 }): GenerationRecord {
   return {
     ...input,
@@ -84,5 +87,8 @@ export function closeGeneration(record: GenerationRecord, force = false): Promis
   if (record.closeTimer !== null) clearTimeout(record.closeTimer);
   record.closeTimer = null;
   record.closePromise = closeMcpClient(record.client).finally(() => record.onClosed?.(record));
+  // Install the shared close promise before observing this state so reentrant closes join it. The old
+  // onClosed callback still owns cleanup only after the potentially deferred transport close settles.
+  notifyExtensionChange(record.onClosedState, ["mcp"]);
   return record.closePromise;
 }

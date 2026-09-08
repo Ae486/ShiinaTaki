@@ -1,15 +1,13 @@
 /**
- * INPUT:  one config entry's editor descriptor + the current draft and the commit callback.
- * OUTPUT: <KnobInput> — the editor the metadata prescribes (checkbox / select / text / number), or the secret's
- *         set-not-set readout. Controls carry the knob key as their accessible name and the tokenized control class.
- * POS:    ui/windows/home/pages/settings — the editor half of a knob row, split out so the row itself stays a card of
- *         description + badges + outcome. The visible knob header (key + description) is the label, so the controls
- *         get an aria-label instead of a duplicate visible Field label (noted deviation from design §2.3).
+ * INPUT:  config editor metadata, retained draft and explicit edit/focus/composition/commit handlers.
+ * OUTPUT: accessible typed controls or the existing secret-presence display.
+ * POS:    Home Settings input leaf — forwards interaction facts; never decides persistence or submits composing blur.
  */
 
 import type { ConfigEntry } from "@taki/shared";
 import { Badge } from "../../badge.tsx";
 import type { KnobEditor } from "./knob-editor.ts";
+import type { useKnobDraft } from "./use-knob-draft.ts";
 
 // The knob key/description header is the row's visible label; this class only styles the control.
 const FIELD_CLASS =
@@ -20,8 +18,7 @@ export interface KnobInputProps {
   entry: ConfigEntry;
   editor: KnobEditor;
   draft: string;
-  onDraft: (value: string) => void;
-  onCommit: (raw: string | boolean) => void;
+  events: ReturnType<typeof useKnobDraft>["events"];
 }
 
 function BooleanField({ on, disabled, onCommit }: { on: boolean; disabled: boolean; onCommit: (raw: boolean) => void }) {
@@ -39,7 +36,7 @@ function BooleanField({ on, disabled, onCommit }: { on: boolean; disabled: boole
   );
 }
 
-export function KnobInput({ entry, editor, draft, onDraft, onCommit }: KnobInputProps) {
+export function KnobInput({ entry, editor, draft, events }: KnobInputProps) {
   if (editor.kind === "secret") {
     return (
       <span className="flex">
@@ -49,7 +46,7 @@ export function KnobInput({ entry, editor, draft, onDraft, onCommit }: KnobInput
   }
 
   if (editor.kind === "boolean") {
-    return <BooleanField on={draft === "true"} disabled={editor.disabled} onCommit={onCommit} />;
+    return <BooleanField on={draft === "true"} disabled={editor.disabled} onCommit={(value) => { events.change(String(value)); events.commit(); }} />;
   }
 
   if (editor.kind === "enum") {
@@ -59,8 +56,8 @@ export function KnobInput({ entry, editor, draft, onDraft, onCommit }: KnobInput
         disabled={editor.disabled}
         aria-label={entry.key}
         onChange={(e) => {
-          onDraft(e.target.value);
-          onCommit(e.target.value);
+          events.change(e.target.value);
+          events.commit();
         }}
         className={FIELD_CLASS}
       >
@@ -80,8 +77,11 @@ export function KnobInput({ entry, editor, draft, onDraft, onCommit }: KnobInput
       disabled={editor.disabled}
       aria-label={entry.key}
       placeholder={entry.default === null ? "未设置" : String(entry.default)}
-      onChange={(e) => onDraft(e.target.value)}
-      onBlur={() => onCommit(draft)}
+      onChange={(e) => events.change(e.target.value)}
+      onFocus={events.focus}
+      onBlur={events.blur}
+      onCompositionStart={events.compositionStart}
+      onCompositionEnd={(event) => events.compositionEnd(event.currentTarget.value)}
       className={FIELD_CLASS}
     />
   );

@@ -55,13 +55,14 @@ type CacheKey =
 useCachedFetch<T>(
   key: CacheKey,
   load: (() => Promise<T>) | null,
-  options: { schema: CacheSchema<T>; persist?: boolean },
+  options: { schema: CacheSchema<T>; persist?: boolean; enabled?: boolean; automatic?: boolean },
 ): {
   data: T | null;
   loading: boolean;
   refreshing: boolean;
   error: string | null;
   refresh(): Promise<void>;
+  invalidate(): Promise<void>;
   mutate(update: (previous: T) => T): void;
 };
 
@@ -82,8 +83,14 @@ writeCache(key: CacheKey, value: unknown, storage: Storage): void;
   refresh marker. A rejected revalidation keeps the last good data behind an error line and a retry action.
 - Storage absence, corruption, quota failure, or blocked writes degrade to memory-only behavior. They must not break the
   page. `load === null` means there is currently no transport and `refresh()` is a no-op; D59 owns connection status and
-  reconnection rather than this cache hook.
-- `mutate` edits only an already-loaded view and the next successful load replaces it. It does not create authority.
+  reconnection rather than this cache hook. Null/replacement/disabled reads retire pending success and failure alike;
+  an old completion cannot restore current data or leave a permanent loading flag.
+- `enabled` gates disposable read work, while `automatic: false` lets a feature's acknowledged observer initiate its
+  baseline. Neither option cancels, unlocks or replays a Core/Host mutation; command lifetime is owned separately.
+- `refresh` joins an owned flight. `invalidate` records a real change and leaves at most one trailing obligation.
+  Failure keeps the dirty gap and ends the active read; it does not start a retry loop. See `read-coordinator.ts`.
+- `mutate` edits only an already-loaded view and marks the accepted push/echo newer than preceding reads. A covering
+  current read can replace it; an uncovered older response/error cannot regress it. It does not create authority.
 
 ### 4. Validation & Error Matrix
 
@@ -97,6 +104,9 @@ writeCache(key: CacheKey, value: unknown, storage: Storage): void;
 | Revalidation rejects with prior data | Keep prior data, expose error, stop refreshing |
 | Revalidation rejects cold | Keep `data: null`, expose error, do not claim loading forever |
 | A newer load starts before an older one resolves | Ignore the older generation's result |
+| Null loader, hidden/disabled consumer or retired scope during a read | Ignore its late success/failure and clear actual in-flight presentation |
+| Duplicate demand / finite invalidation burst during a read | Join one flight / retain one trailing covering read |
+| Accepted push or write echo races an older snapshot | Preserve the accepted update; reconcile uncovered changes before claiming freshness |
 
 ### 5. Good/Base/Bad Cases
 
@@ -109,8 +119,8 @@ writeCache(key: CacheKey, value: unknown, storage: Storage): void;
 
 - `lib/cache-persist.test.ts`: exact allow-list, perception/pause rejection, schema-drift/corrupt reads, storage failure,
   and secret-row stripping.
-- `lib/cached-fetch-state.test.ts`: cache seed, cold loading, visible refreshing, replacement on success, stale retention
-  on failure, and local mutate behavior.
+- `lib/cached-fetch-state.test.ts` and `read-coordinator.test.ts`: cache seed, cold/retired loading, refresh retention,
+  demand joining, trailing invalidation, old success/failure suppression and newer push/echo protection.
 - Each wired page: assert the matching shared schema, `persist` posture, refresh marker, last-good error presentation,
   and manual Refresh action where the operator can recover.
 - Privacy regression: source/test sweep must keep perception payloads, pause state, chat content, and secrets out of

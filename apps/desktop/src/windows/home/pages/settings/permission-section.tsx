@@ -16,8 +16,8 @@ export function PermissionSection() {
   const permissions = usePermissions();
   const data = previousData(permissions.state);
   const disconnected = !permissions.connectionReady;
-  const pending = permissions.state.kind === "ready" ? permissions.state.pending : null;
-  const feedback = permissions.state.kind === "ready" ? permissions.state.feedback : null;
+  const { pending, feedback } = permissions;
+  const unavailable = disconnected || permissions.state.kind !== "ready";
 
   return (
     <section className="space-y-4" aria-label="权限治理">
@@ -36,8 +36,9 @@ export function PermissionSection() {
       )}
       {data && (
         <>
-          <PermissionLevelCard data={data} disabled={disconnected} pending={pending !== null} onSetLevel={(level) => void permissions.setLevel(level)} />
-          <PermissionCellsCard data={data} disabled={disconnected || pending !== null} pending={pending} onSet={(input) => void permissions.setCell(input)} />
+          <PermissionLevelCard data={data} disabled={unavailable} pending={pending !== null} onSetLevel={(level) => void permissions.setLevel(level)} />
+          <PermissionCellsCard data={data} disabled={unavailable || pending !== null} pending={pending}
+            onInspect={() => void permissions.refresh()} onSet={(input) => void permissions.setCell(input)} />
         </>
       )}
     </section>
