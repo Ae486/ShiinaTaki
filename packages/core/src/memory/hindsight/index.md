@@ -1,8 +1,9 @@
 # core/memory/hindsight/
-- hindsight-contracts.ts — bounded Hindsight 0.9.0 raw-wire schemas and safe projections
+- hindsight-contracts.ts — bounded Hindsight 0.9.0 raw-wire schemas and independently negotiated G1/D78 capabilities
 - hindsight-endpoint-policy.ts — endpoint normalization and SSRF/redirect policy for explicit operator endpoints
 - hindsight-errors.ts — sanitized Hindsight setup failure code and retry projection
 - hindsight-client.ts — authenticated REST client with streaming response bounds, cancellation, and typed conditional failures for setup/import/replica/recovery
+- hindsight-http-transport.ts — single HTTP/HTTPS request under the captured total deadline, bounded decompression, and no redirect/retry or hidden fetch phase timeout
 - hindsight-pending-client.ts — canonical retain-to-native wire mapping and B0 expected-revision/mutation-ID replay with bounded native receipts
 - hindsight-pending-retain.ts — native operation/document/fact completion proof; pruned responses remain unknown and never cause blind resubmission
 - hindsight-pending-replay.ts — frozen idempotent native replay, expected-revision supersession, and stage-preserving per-operation failures
@@ -13,7 +14,7 @@
 - hindsight-native-proof.ts — frozen dispatch encoding, portable producer hashes and bounded full-page proof verification
 - hindsight-pending-native-result.ts — tracked replay/progress, safe missing-claim retry and factual receipt publication
 - hindsight-secret-refs.ts — fixed provider-neutral Secret Catalog refs and connection-only trusted resolver marker
-- hindsight-compatibility-service.ts — ordered exact-build health/version/manifest gate and safe configuration fingerprint
+- hindsight-compatibility-service.ts — ordered exact-build health/version/manifest gate, independent cutover support and stable settings fingerprint
 - hindsight-bank-identity.ts — versioned deterministic opaque Global/Character external Bank ids
 - taki-bank-template-v1.ts — fixed secret-free additive template, canonical digest, and Taki-owned read-back verification
 - hindsight-setup-service.ts — resumable validate/setup/disable/explicit LLM-health state machine; never owns Memory Authority
@@ -24,9 +25,24 @@
 - hindsight-import-ledger-repo.ts — resumable B4 operation and one-to-many fact ledger repository
 - hindsight-import-orchestrator.ts — deadline-bounded idempotent retain and derived fact mapping orchestration
 - hindsight-snapshot-contracts.ts — bounded provider wire schemas and collision-rejecting logical payload normalization with opaque nested JSON keys
-- hindsight-snapshot-validator.ts — page/order/count/hash/manifest and provider-lineage integrity gate
+- hindsight-snapshot-validator.ts — page/order/count/hash/manifest integrity with ordinary TTL and separately certificate-bound D78 retention
 - hindsight-replica-builder.ts — cursor-bound snapshot capture, staging, reconciliation callback, and checkpoint publication
 - hindsight-replica-projection.ts — source-grounded canonical Taki policy/provenance projection for snapshot and journal records
+- hindsight-current-local-source.ts — writer-reserved frozen Local coverage to durable source evidence preparation, without remote dispatch
+- hindsight-source-preparation.ts — immutable v1 native-item preparation and complete typed provenance with explicit representation gaps
+- hindsight-source-binding-proof.ts — native request/result/page and actual snapshot/journal proof for exact source/unit bindings
+- hindsight-source-evidence-projection.ts — repository-backed typed source/unit enrichment with native field ownership and exact-version checks
+- hindsight-current-baseline.ts — complete native Bank/B3 control witnesses and explicit target-content accounting
+- hindsight-current-request.ts — full current Local structured adapter, preserving independent typed fields and reporting representation gaps
+- hindsight-current-request-preflight.ts — native PostgreSQL NUL, JSON depth and model subtype limits checked before submission
+- hindsight-current-state-hash.ts — D78 native-compatible tagged/binary64 request and evidence hashes
+- hindsight-current-client.ts — authenticated structured-transfer and finite-verification methods with bounded endpoint-specific failure envelopes
+- hindsight-current-import-proof.ts — complete transfer result/page/source/target/journal-boundary integrity checks
+- hindsight-current-verification-identity.ts — immutable candidate/request and exact transfer-result identity binding
+- hindsight-current-maintenance-hash.ts — native requirement, input-group, witness-list and action key composition
+- hindsight-current-maintenance-stream.ts — complete required-set/outcome/action/input/model evidence validation
+- hindsight-current-maintenance-proof.ts — complete native maintenance certificate and exact immutable retained snapshot proof
+- hindsight-current-orchestrator.ts — current-state import, ACK-loss recovery, finite verification, known-native-drift persistence and raw replica publication
 - hindsight-journal-contracts.ts — authenticated changes endpoint wire normalization with complete transaction bounds
 - hindsight-incremental-sync.ts — one admitted Bank journal page pulled, projected, and transactionally applied under captured Authority/Bank binding, lease, and deadline
 - hindsight-replica-scheduler.ts — asynchronous all-Bank single-flight execution, persisted wakes, bounded supervisor retries, manual/reconnection requests, and truthful status

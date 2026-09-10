@@ -75,6 +75,8 @@ function seed(state: State, input: ReplicaSnapshotInput, mode: "seed" | "reconci
   if (snapshot.metadata.manifest.bankGeneration !== input.expectedBankGeneration) throw new Error("HINDSIGHT_REPLICA_GENERATION_MISMATCH");
   const records = snapshot.records.map((record) => projectHindsightReplicaRecord(record, {
     bankId: input.lease.bankId, authorityEpochId: input.authorityEpochId, projection: state.projection,
+    providerLineageId: snapshot.metadata.manifest.providerLineage,
+    bankGeneration: snapshot.metadata.manifest.bankGeneration,
   }));
   assertSnapshotRecords(records, input.lease.bankId);
   assertBankBinding(input.lease.bankId, input.expectedBank, records);

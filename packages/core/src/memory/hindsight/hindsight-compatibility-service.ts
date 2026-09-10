@@ -8,6 +8,7 @@ import {
   HINDSIGHT_API_VERSION,
   HINDSIGHT_COMPATIBILITY_BUILD,
   HINDSIGHT_NATIVE_RESULT_BUILD,
+  HINDSIGHT_CURRENT_STATE_BUILD,
   HINDSIGHT_COMPATIBILITY_VERSION,
   HindsightCompatibilityProjectionSchema,
   type HindsightCompatibilityProjection,
@@ -56,7 +57,7 @@ async function validateCompatibility(input: {
 function projectManifest(manifest: HindsightCompatibilityWire): HindsightCompatibilityProjection {
   const build = manifest.source_identity.compatibility_build;
   if (manifest.base_api_version !== HINDSIGHT_API_VERSION || manifest.compatibility_version !== HINDSIGHT_COMPATIBILITY_VERSION ||
-      (build !== HINDSIGHT_COMPATIBILITY_BUILD && build !== HINDSIGHT_NATIVE_RESULT_BUILD)) {
+      ![HINDSIGHT_COMPATIBILITY_BUILD, HINDSIGHT_NATIVE_RESULT_BUILD, HINDSIGHT_CURRENT_STATE_BUILD].includes(build)) {
     throw hindsightError("HINDSIGHT_EXTENSION_UNSUPPORTED");
   }
   if (manifest.provider.database_dialect !== "postgresql" || manifest.provider.storage_mode !== "sql_rows" || manifest.provider.lineage === null) {
@@ -87,6 +88,8 @@ function projectManifest(manifest: HindsightCompatibilityWire): HindsightCompati
       additiveObservationInstructions: manifest.contracts.additive_observation_instructions,
       controlledLayerProjection: manifest.contracts.controlled_layer_projection,
       ...(manifest.contracts.native_results ? { nativeResults: manifest.contracts.native_results } : {}),
+      ...(manifest.contracts.current_state_transfer ? { currentStateTransfer: manifest.contracts.current_state_transfer } : {}),
+      ...(manifest.contracts.cutover_verification ? { cutoverVerification: manifest.contracts.cutover_verification } : {}),
     },
   });
 }
@@ -100,6 +103,8 @@ export function hindsightConnectionFingerprint(connection: HindsightConnectionPr
 }
 
 function fingerprint(connection: HindsightConnectionProjection, secretMarker: string): string {
+  // This is the established settings/secret identity, not a hash of the accepted-build list. New independently
+  // negotiated cutover capabilities must not change already-frozen G1 dispatch or B3 configuration identities.
   return createHash("sha256").update(JSON.stringify({
     endpoint: connection.endpoint,
     deploymentMode: connection.deploymentMode,

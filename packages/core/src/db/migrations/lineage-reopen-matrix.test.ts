@@ -24,6 +24,11 @@ import { conversationCompactionLifecycleMigration032 } from "./032-conversation-
 import { hindsightReplicaSyncMigration033 } from "./033-hindsight-replica-sync.ts";
 import { hindsightReplicaSchedulerMigration034 } from "./034-hindsight-replica-scheduler.ts";
 import { pendingMemoryMigration035 } from "./035-pending-memory.ts";
+import { memoryTimelineConvergenceMigration036 } from "./036-memory-timeline-convergence.ts";
+import { hindsightLocalCoverageMigration037 } from "./037-hindsight-local-coverage.ts";
+import { hindsightSourceEvidenceMigration038 } from "./038-hindsight-source-evidence.ts";
+import { hindsightCurrentStateMigration039 } from "./039-hindsight-current-state.ts";
+import { hindsightCutoverConvergenceMigration040 } from "./040-hindsight-cutover-convergence.ts";
 import { canonicalPayloadHash } from "../../memory/legacy-migration/legacy-identities.ts";
 import { createIntlSegmenterTokenizer } from "../../memory/search-tokenizer.ts";
 import { createReplicaRecordStore } from "../hindsight-replica-record-store.ts";
@@ -60,7 +65,7 @@ function close(db: Database): void {
 }
 
 function expectFinalSchema(db: Database): void {
-  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(35);
+  expect(db.prepare("SELECT max(version) AS version FROM migrations").get()?.version).toBe(40);
   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all().map((row) => row.name);
   expect(tables).toEqual(expect.arrayContaining([
     "canonical_memory_units",
@@ -79,6 +84,11 @@ function expectFinalSchema(db: Database): void {
     "hindsight_replica_sync_schedule",
     "hindsight_replica_sync_snapshot_cache",
     "pending_memory",
+    "hindsight_local_coverage_manifests",
+    "hindsight_cutover_local_coverage",
+    "hindsight_source_evidence",
+    "hindsight_source_unit_evidence",
+    "hindsight_source_object_bindings",
     "hindsight_authority_activation_receipts",
     "runs",
     "run_attempts",
@@ -95,6 +105,8 @@ function expectFinalSchema(db: Database): void {
     "conversation_compaction_events",
   ]));
   expect(db.prepare("PRAGMA table_info(schedule_occurrences)").all().map((row) => row.name)).toContain("character_id");
+  expect(db.prepare("PRAGMA table_xinfo(timeline_messages)").all().find((row) => row.name === "presentation"))
+    .toEqual(expect.objectContaining({ type: "TEXT", notnull: 0, dflt_value: null, pk: 0, hidden: 0 }));
   expect(db.prepare("PRAGMA table_info(run_usage)").all().map((row) => row.name)).toEqual(expect.arrayContaining([
     "input_no_cache_tokens", "cache_read_tokens", "cache_write_tokens", "output_text_tokens", "reasoning_tokens",
   ]));
@@ -111,16 +123,55 @@ function expectReopenNoOp(path: string): Database {
   return reopened;
 }
 
+function memoryTimelineData(db: Database) {
+  const columns = db.prepare("PRAGMA table_info(timeline_messages)").all();
+  const hasPending = db.prepare("SELECT name FROM sqlite_schema WHERE type='table' AND name='pending_memory'").get();
+  return {
+    timeline: db.prepare("SELECT * FROM timeline_messages ORDER BY seq").all(),
+    presentationBytes: columns.some((column) => column.name === "presentation")
+      ? db.prepare("SELECT seq,hex(CAST(presentation AS BLOB)) AS bytes FROM timeline_messages ORDER BY seq").all() : null,
+    pending: hasPending
+      ? db.prepare("SELECT *,hex(CAST(state_json AS BLOB)) AS bytes FROM pending_memory ORDER BY sequence").all() : [],
+    watermarks: db.prepare("SELECT name,seq FROM sqlite_sequence WHERE name IN ('timeline_messages','pending_memory') ORDER BY name").all(),
+  };
+}
+
+function seedMemoryTimelineData(db: Database, history: "034" | "main" | "t4" | "both"): void {
+  db.exec(`INSERT INTO timeline_messages (seq,id,character_id,role,content,parts,created_at) VALUES
+    (7,'old-user','taki','user','Original text.',NULL,'2026-09-07T00:00:00.000Z'),
+    (19,'old-tool','taki','tool','Original projection.','[]','2026-09-07T00:01:00.000Z'),
+    (28,'old-reply','taki','assistant','Original reply.','[]','2026-09-07T00:02:00.000Z'),
+    (90,'deleted-tail','taki','assistant','Deleted fixture.',NULL,'2026-09-07T00:03:00.000Z');
+    DELETE FROM timeline_messages WHERE seq=90;`);
+  if (history === "t4" || history === "both") {
+    db.prepare("UPDATE timeline_messages SET presentation=:presentation WHERE seq=19")
+      .run({ presentation: '{ "kind": "avatar", "value": "wave 🐈" }\r\n' });
+    db.prepare("UPDATE timeline_messages SET presentation='' WHERE seq=28").run();
+  }
+  if (history === "main" || history === "both") {
+    db.exec(`INSERT INTO canonical_memory_authority_epochs
+      (epoch_id,provider_id,provider_lineage_id,status,predecessor_epoch_id,started_at,ended_at,reason)
+      VALUES ('old-epoch','local','local-lineage','active',NULL,'2026-09-07T00:00:00.000Z',NULL,'initial-local');`);
+    const insert = db.prepare(`INSERT INTO pending_memory
+      (sequence,authority_epoch_id,bank_id,operation_id,operation_kind,intent_hash,phase,version,state_json)
+      VALUES (:sequence,'old-epoch','bank',:operation_id,'retain',:hash,'outcome_unknown',3,:state)`);
+    const state = '{\n "requestHash": "' + "b".repeat(64) + '", "fields": { "n": 1, "s": "1", "nil": null, "empty": "" }\n}\r\n';
+    insert.run({ sequence: 41, operation_id: "old-operation", hash: "a".repeat(64), state });
+    insert.run({ sequence: 120, operation_id: "deleted-operation", hash: "a".repeat(64), state });
+    db.prepare("DELETE FROM pending_memory WHERE sequence=120").run();
+  }
+}
+
 describe("migration lineage reopen matrix", () => {
   it("converges a fresh database and is a no-op after reopen", () => {
     const path = createPath();
     const firstApplied: number[][] = [];
     const first = open(path, MIGRATIONS, (applied) => firstApplied.push(applied));
     expectFinalSchema(first);
-    expect(firstApplied).toEqual([Array.from({ length: 35 }, (_, index) => index + 1)]);
+    expect(firstApplied).toEqual([Array.from({ length: 40 }, (_, index) => index + 1)]);
     close(first);
     const reopened = expectReopenNoOp(path);
-    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(35);
+    expect(reopened.prepare("SELECT count(*) AS count FROM migrations").get()?.count).toBe(40);
   });
 
   it("converges the historical T4 17/18 MCP-Skill lineage through 024", () => {
@@ -150,11 +201,16 @@ describe("migration lineage reopen matrix", () => {
       hindsightReplicaSyncMigration033,
       hindsightReplicaSchedulerMigration034,
       pendingMemoryMigration035,
+      memoryTimelineConvergenceMigration036,
+      hindsightLocalCoverageMigration037,
+      hindsightSourceEvidenceMigration038,
+      hindsightCurrentStateMigration039,
+      hindsightCutoverConvergenceMigration040,
     ], (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]]);
+    expect(tailApplied).toEqual([[19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT version FROM migrations ORDER BY version").all().map((row) => row.version)).toEqual(
-      Array.from({ length: 35 }, (_, index) => index + 1),
+      Array.from({ length: 40 }, (_, index) => index + 1),
     );
     close(reopened);
     expectReopenNoOp(path);
@@ -167,7 +223,7 @@ describe("migration lineage reopen matrix", () => {
     close(first);
     const tailApplied: number[][] = [];
     const reopened = open(path, MIGRATIONS, (applied) => tailApplied.push(applied));
-    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35]]);
+    expect(tailApplied).toEqual([[21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]]);
     expectFinalSchema(reopened);
     expect(reopened.prepare("SELECT mode FROM memory_authority_selection WHERE singleton=1").get()?.mode)
       .toBe("legacy-markdown");
@@ -184,7 +240,7 @@ describe("migration lineage reopen matrix", () => {
 
     const applied: number[][] = [];
     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([[32, 33, 34, 35]]);
+    expect(applied).toEqual([[32, 33, 34, 35, 36, 37, 38, 39, 40]]);
     expect(upgraded.prepare(`SELECT through_seq,text,revision,last_operation_id,source_from_seq,source_through_seq,
       source_digest,captured_tail_seq FROM conversation_summary WHERE character_id='taki'`).get()).toEqual({
       through_seq: 12,
@@ -232,7 +288,7 @@ describe("migration lineage reopen matrix", () => {
       .toBe("hindsight-tx");
   });
 
-  it("adds versions 034 and 035 without rewriting an existing replica, checkpoint, or usable lease", () => {
+  it("adds the current tail without rewriting an existing replica, checkpoint, or usable lease", () => {
     const path = createPath(); const first = open(path, MIGRATIONS.slice(0, 33));
     const at = "2026-09-06T00:00:00.000Z"; const uuid = "11111111-1111-4111-8111-111111111111";
     const record = { bankId: "bank", objectKind: "memory_unit", objectId: "removed", objectRevision: 2, operation: "tombstone", payload: null };
@@ -248,7 +304,7 @@ describe("migration lineage reopen matrix", () => {
     const leases = first.prepare("SELECT * FROM hindsight_replica_sync_leases").all();
     close(first); const applied: number[][] = [];
     const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([[34, 35]]);
+    expect(applied).toEqual([[34, 35, 36, 37, 38, 39, 40]]);
     expectFinalSchema(upgraded);
     expect(upgraded.prepare("SELECT * FROM hindsight_replica_sync_records").all()).toEqual(records);
     expect(createReplicaRecordStore(upgraded, createIntlSegmenterTokenizer({ stoplist: true })).get({
@@ -264,5 +320,35 @@ describe("migration lineage reopen matrix", () => {
     expect(reopened.prepare("SELECT * FROM hindsight_replica_sync_records").all()).toEqual(records);
     expect(reopened.prepare("SELECT * FROM hindsight_replica_sync_leases").all()).toEqual(leases);
     expect(() => createHindsightReplicaLeaseRepo(reopened, () => at).assert(lease)).not.toThrow();
+  });
+
+  it.each(["034", "main", "t4", "both"] as const)("preserves the %s history and data through all B4 storage and reopen", (history) => {
+    const path = createPath();
+    const first = open(path, MIGRATIONS.filter((migration) => migration.version <= 34));
+    const timeline035: Migration = { version: 35, sql: "ALTER TABLE timeline_messages ADD COLUMN presentation TEXT;" };
+    if (history !== "034") runMigrations(first, [history === "t4" ? timeline035 : pendingMemoryMigration035]);
+    if (history === "both") first.exec(timeline035.sql);
+    seedMemoryTimelineData(first, history);
+    const receipts = first.prepare("SELECT version,applied_at FROM migrations ORDER BY version").all();
+    const before = memoryTimelineData(first);
+    close(first);
+
+    const applied: number[][] = [];
+    const upgraded = open(path, MIGRATIONS, (versions) => applied.push(versions));
+    expect(applied).toEqual([history === "034" ? [35, 36, 37, 38, 39, 40] : [36, 37, 38, 39, 40]]);
+    expectFinalSchema(upgraded);
+    expect(upgraded.prepare("SELECT version,applied_at FROM migrations WHERE version<=:version ORDER BY version")
+      .all({ version: history === "034" ? 34 : 35 })).toEqual(receipts);
+    const after = memoryTimelineData(upgraded);
+    expect(after.timeline).toEqual(before.timeline.map((row) => ({ ...row, presentation: row.presentation ?? null })));
+    if (before.presentationBytes) expect(after.presentationBytes).toEqual(before.presentationBytes);
+    expect(after.pending).toEqual(before.pending);
+    expect(after.watermarks).toEqual(before.watermarks);
+    expect(upgraded.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
+    close(upgraded);
+    const reopened = expectReopenNoOp(path);
+    expect(memoryTimelineData(reopened)).toEqual(after);
+    expect(reopened.prepare("SELECT version,applied_at FROM migrations WHERE version<=:version ORDER BY version")
+      .all({ version: history === "034" ? 34 : 35 })).toEqual(receipts);
   });
 });

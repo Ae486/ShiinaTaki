@@ -203,6 +203,10 @@ class GeneratorRun:
                 "vectorize-io",
                 "--git-repo-id",
                 "hindsight/hindsight-clients/go",
+                "--type-mappings",
+                "integer=int64",
+                "--additional-properties",
+                "useOneOfDiscriminatorLookup=true",
                 "--global-property",
                 "apiDocs=false,apiTests=false,modelDocs=false,modelTests=false",
             ],
@@ -213,6 +217,12 @@ class GeneratorRun:
             content = files_api.read_text(encoding="utf-8")
             if "os.File" in content and '"os"' not in content:
                 files_api.write_text(content.replace('"net/url"', '"net/url"\n\t"os"'), encoding="utf-8", newline="\n")
+        self.run(
+            "go-discriminator-postprocess",
+            [str(PYTHON), str(HINDSIGHT_ROOT / "scripts/postprocess-go-client.py"),
+             "--spec", str(SPEC), "--directory", str(stage)],
+            HINDSIGHT_ROOT,
+        )
         normalize_generated_text(stage, ".go")
         patterns = ("api_*.go", "model_*.go", "client.go", "configuration.go", "response.go", "utils.go")
         incoming = {path.name: path for pattern in patterns for path in stage.glob(pattern)}

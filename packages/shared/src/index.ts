@@ -1,6 +1,6 @@
 /**
  * INPUT:  n/a
- * OUTPUT: the @taki/shared public API — named re-exports of every protocol schema + type
+ * OUTPUT: the @taki/shared schemas, types and helpers consumed across package boundaries
  * POS:    shared — the package's only public entry (no export *; no internal barrels)
  */
 export { PingSchema, PongSchema } from "./ping-schema.ts";
@@ -357,3 +357,55 @@ export type {
   HindsightLogicalSnapshotCounts, HindsightLogicalSnapshotManifest, HindsightLogicalSnapshotMetadata,
   HindsightLogicalSnapshotPage,
 } from "./hindsight-cutover-schema.ts";
+export {
+  HINDSIGHT_LOCAL_COVERAGE_MAX_RECORDS, HINDSIGHT_LOCAL_COVERAGE_ENCODING,
+  HindsightLocalCoverageRecordSchema, HindsightLocalCoverageCatchUpSchema,
+  HindsightLocalCoverageManifestSchema, HindsightLocalCoverageComparisonSchema,
+} from "./hindsight-local-coverage-schema.ts";
+export type {
+  HindsightLocalCoverageKind, HindsightLocalCoverageRecord, HindsightLocalCoverageCatchUp,
+  HindsightLocalCoverageManifest, HindsightLocalCoverageDifference, HindsightLocalCoverageComparison,
+  HindsightLocalCoverageStatus,
+} from "./hindsight-local-coverage-schema.ts";
+export {
+  HINDSIGHT_SOURCE_EVIDENCE_VERSION, HINDSIGHT_SOURCE_GAP_LIMIT,
+  HindsightPreparedSourceSchema, HindsightSourceProjectionScopeSchema,
+  HindsightSourceBindingKeySchema, HindsightSourceObjectBindingSchema, HindsightSourceConfirmationSchema,
+  HindsightSourceBankBindingSchema,
+} from "./hindsight-source-evidence-schema.ts";
+export type {
+  HindsightSourcePreparationGap, HindsightPreparedSource,
+  HindsightSourceProjectionScope, HindsightSourceBindingKey, HindsightSourceObjectBinding, HindsightSourceConfirmation,
+  HindsightSourceBankBinding,
+} from "./hindsight-source-evidence-schema.ts";
+export { HindsightCurrentCaptureSchema } from "./hindsight-current-capture-schema.ts";
+export type { HindsightCurrentDisposition, HindsightCurrentCapture } from "./hindsight-current-capture-schema.ts";
+export { HindsightCurrentJsonObjectSchema, HindsightCurrentCanonicalDerivedPayloadSchema } from "./hindsight-current-canonical-schema.ts";
+export {
+  HINDSIGHT_CURRENT_STATE_BUILD, HINDSIGHT_CURRENT_STATE_VERSION, HINDSIGHT_CURRENT_STATE_ENCODING,
+  HINDSIGHT_CURRENT_STATE_MAX_RECORDS, HINDSIGHT_CURRENT_STATE_MAX_BYTES,
+  HindsightCurrentTransferRequestSchema, HindsightCurrentTransferResultSchema,
+  HindsightCurrentMappingPageSchema, HindsightCurrentTransferFailureSchema,
+} from "./hindsight-current-state-schema.ts";
+export type { HindsightCurrentSourceWitness, HindsightCurrentTransferRequest,
+  HindsightCurrentMapping, HindsightCurrentTransferResult, HindsightCurrentMappingPage,
+  HindsightCurrentTransferFailure } from "./hindsight-current-state-schema.ts";
+export { hindsightCurrentStateJson } from "./hindsight-current-state-encoding.ts";
+export { HindsightSnapshotRecordWireSchema, HindsightSnapshotMetadataWireSchema,
+  HindsightSnapshotPageWireSchema } from "./hindsight-native-snapshot-schema.ts";
+export type { HindsightSnapshotMetadataWire, HindsightSnapshotPageWire, HindsightSnapshotRecordWire } from "./hindsight-native-snapshot-schema.ts";
+export { HindsightPreparedCurrentBankSchema, HindsightCurrentImportEvidenceSchema } from "./hindsight-current-evidence-schema.ts";
+export type { HindsightCurrentPreparationGap, HindsightPreparedCurrentBank,
+  HindsightCurrentImportEvidence } from "./hindsight-current-evidence-schema.ts";
+export { HindsightCurrentStatusSchema } from "./hindsight-current-status-schema.ts";
+export type { HindsightCurrentStatus } from "./hindsight-current-status-schema.ts";
+export { HindsightCurrentNativeObservationSchema, HindsightCurrentNativeInvalidationSchema,
+  hindsightCurrentObservationProvesDrift } from "./hindsight-current-invalidation-schema.ts";
+export type { HindsightCurrentNativeObservation, HindsightCurrentNativeInvalidation } from "./hindsight-current-invalidation-schema.ts";
+export { HindsightCutoverVerificationRequestSchema, HindsightCutoverCertificateSchema,
+  HindsightCutoverEvidencePageSchema, HindsightCutoverVerificationStatusSchema, HindsightCutoverVerificationFailureSchema,
+  HindsightCurrentVerificationCandidateSchema, HindsightCurrentVerificationEvidenceSchema } from "./hindsight-cutover-verification-schema.ts";
+export type { HindsightCutoverVerificationRequest, HindsightCutoverRequirement, HindsightCutoverEvidenceRecord,
+  HindsightCutoverCertificate, HindsightCutoverEvidencePage, HindsightCutoverVerificationStatus,
+  HindsightCutoverVerificationFailure, HindsightCurrentVerificationCandidate,
+  HindsightCurrentVerificationEvidence } from "./hindsight-cutover-verification-schema.ts";

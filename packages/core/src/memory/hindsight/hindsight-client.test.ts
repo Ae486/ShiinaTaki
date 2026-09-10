@@ -18,6 +18,25 @@ function client(transport: HindsightTransport, resolveApiKey: () => string | nul
 const context = { timeoutMs: 1_000 };
 
 describe("Hindsight client", () => {
+  it.each(["deadline", "caller"])("preserves the first %s when transport settles after both abort signals", async (first) => {
+    vi.useFakeTimers();
+    try {
+      for (const settle of ["resolve", "reject"]) {
+        const caller = new AbortController();
+        const transport: HindsightTransport = async () => new Promise((resolve, reject) => {
+          setTimeout(() => settle === "resolve" ? resolve({ status: 200, body: '{"status":"healthy","database":"connected"}' })
+            : reject(new Error("private late provider failure")), 100);
+        });
+        setTimeout(() => caller.abort("private caller reason"), first === "caller" ? 10 : 30);
+        const call = client(transport).health({ timeoutMs: 20, signal: caller.signal });
+        const settled = call.catch((error: unknown) => error);
+        await vi.advanceTimersByTimeAsync(100);
+        expect(await settled).toMatchObject({ code: first === "caller" ? "HINDSIGHT_CANCELLED" : "HINDSIGHT_TIMEOUT" });
+        expect(JSON.stringify(await settled)).not.toContain("private");
+      }
+    } finally { vi.useRealTimers(); }
+  });
+
   it("sends Bearer authentication on every read-only connection check", async () => {
     const transport = vi.fn<HindsightTransport>(async () => ({ status: 200, body: JSON.stringify(manifest) }));
     await client(transport).compatibility(context);

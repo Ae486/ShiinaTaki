@@ -58,6 +58,25 @@ FULL_FILES = frozenset(
         "test_migrations_thread_safety.py",
         "test_admin_backup_restore.py",
         "test_extension_bank_tables.py",
+        "test_async_submit_bank_not_found.py",
+        "test_consolidation_submit_atomic_dedup.py",
+        "test_maintenance_loop.py",
+    }
+)
+# These worker cases use the owned PG and deterministic executors/validators.
+# Require class-qualified selectors before collection; the rest of this large
+# module has not been admitted to this mechanical-model validation path.
+WORKER_SELECTORS = frozenset(
+    {
+        "TestBrokerTaskBackend::test_submit_task_updates_existing_operation",
+        "TestBrokerTaskBackend::test_submit_task_creates_new_operation",
+        "TestBrokerTaskBackend::test_submit_task_preserves_existing_payload",
+        "TestWorkerPoller::test_executor_exception_triggers_retry",
+        "TestWorkerPoller::test_executor_failed_status_not_overridden",
+        "TestWorkerPoller::test_executor_defer_requeues_without_bumping_retry_count",
+        "TestWorkerPoller::test_deferred_task_not_picked_up_until_exec_date",
+        "TestWorkerPoller::test_extension_validate_retain_defer_propagates_to_poller",
+        "TestWorkerPoller::test_memory_engine_execute_task_passes_through_defer_operation",
     }
 )
 APPEND_NAMES = frozenset(
@@ -109,8 +128,12 @@ def pytest_sessionstart(session: pytest.Session) -> None:
     # Reject broad/unreviewed collection paths before importing test modules.
     # The later item check also enforces exact names in the partially allowed files.
     for selection in session.config.args:
-        path = Path(str(selection).split("::", 1)[0]).resolve()
+        selected = str(selection).split("::", 1)
+        path = Path(selected[0]).resolve()
         if path.is_relative_to(TEST_ROOT / "native_results"):
+            continue
+        if (path.parent == TEST_ROOT and path.name == "test_worker.py" and len(selected) == 2
+                and selected[1].split("[", 1)[0] in WORKER_SELECTORS):
             continue
         if path.parent == TEST_ROOT and path.name in FULL_FILES | {
             "test_retain_append_mode.py",
@@ -174,6 +197,9 @@ def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
             allowed = allowed or path.name in FULL_FILES
             allowed = allowed or (path.name == "test_retain_append_mode.py" and name in APPEND_NAMES)
             allowed = allowed or (path.name == "test_delta_retain.py" and name in DELTA_NAMES)
+            if path.name == "test_worker.py":
+                selector = item.nodeid.split("::", 1)[1].split("[", 1)[0]
+                allowed = selector in WORKER_SELECTORS
         markers = {marker.name for marker in item.iter_markers()}
         fixtures = set(getattr(item, "fixturenames", ()))
         if not allowed or markers & FORBIDDEN_MARKERS or fixtures & FORBIDDEN_FIXTURES:

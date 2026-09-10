@@ -39,6 +39,11 @@ import { conversationCompactionLifecycleMigration032 } from "./032-conversation-
 import { hindsightReplicaSyncMigration033 } from "./033-hindsight-replica-sync.ts";
 import { hindsightReplicaSchedulerMigration034 } from "./034-hindsight-replica-scheduler.ts";
 import { pendingMemoryMigration035 } from "./035-pending-memory.ts";
+import { memoryTimelineConvergenceMigration036 } from "./036-memory-timeline-convergence.ts";
+import { hindsightLocalCoverageMigration037 } from "./037-hindsight-local-coverage.ts";
+import { hindsightSourceEvidenceMigration038 } from "./038-hindsight-source-evidence.ts";
+import { hindsightCurrentStateMigration039 } from "./039-hindsight-current-state.ts";
+import { hindsightCutoverConvergenceMigration040 } from "./040-hindsight-cutover-convergence.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -76,4 +81,9 @@ export const MIGRATIONS: Migration[] = [
   hindsightReplicaSyncMigration033,
   hindsightReplicaSchedulerMigration034,
   pendingMemoryMigration035,
+  memoryTimelineConvergenceMigration036,
+  hindsightLocalCoverageMigration037,
+  hindsightSourceEvidenceMigration038,
+  hindsightCurrentStateMigration039,
+  hindsightCutoverConvergenceMigration040,
 ];

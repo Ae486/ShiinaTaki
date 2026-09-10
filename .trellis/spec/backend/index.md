@@ -18,11 +18,15 @@ Before writing backend code:
 |-------|-------------|
 | [Directory Structure](./directory-structure.md) | Where files go in `packages/core` and `src-tauri` |
 | [Database Guidelines](./database-guidelines.md) | SQLite single-writer, wrapper, migrations, and fenced canonical Memory Replica synchronization |
+| [SQLite Migration Lineage](./sqlite-migration-lineage.md) | Immutable recorded versions, guarded schema branches and convergence of historical SQLite schemas |
+| [SQLite Transaction Failure Isolation](./sqlite-transaction-isolation.md) | Commit-failure rollback, nested savepoint boundaries and SQL isolation after an implicit whole-transaction abort |
 | [Memory Replica Sync](./memory-replica-sync.md) | B5 transactional Authority/Bank guards, verified reconciliation and durable recovery; legacy derived-wait rules and G1 tracked native-result/checkpoint contracts |
 | [G1 Native Result Recovery](./memory-native-result-recovery.md) | Tracked request identity, exact native historical proof, compact paging, old-row safety and actual SQLite factual confirmation; independent cutover boundaries |
-| [Error Handling](./error-handling.md) | Structured tool errors, Rust error types, IPC error shape |
+| [Current Local Cutover Coverage](./memory-local-cutover-coverage.md) | Immutable complete Local manifests, writer-reserved cutover refusal, typed source evidence and exact native-object projection bindings |
+| [Current-State Transfer and First Activation](./memory-current-state-cutover.md) | D78 structured Bank import, typed hash/mapping evidence, native input/outcome certificate, retained snapshot, drift invalidation and actual B4 raw staging/guards |
+| [Error Handling](./error-handling.md) | Structured tool errors, Rust/IPC errors, and Hindsight total-deadline/abort/response contracts |
 | [Quality Guidelines](./quality-guidelines.md) | Size/responsibility guard, lint, tests, forbidden patterns |
-| [Logging Guidelines](./logging-guidelines.md) | pino / tracing, audit log |
+| [Logging Guidelines](./logging-guidelines.md) | pino / tracing, audit log, and non-interfering provider instrumentation |
 | [E2E Harness](./e2e-harness.md) | Headless `withStack` fixture; L1 (deterministic) + L2 (real-agent) dual-track per capability |
 | [Permission Authorization](./permission-authorization.md) | Executable canonical governance contract: Core-owned durable Level/overrides/generation; extension-neutral identity/registry; complete Host projection, trusted local classification, stricter-only final enforcement/evidence; legacy deny migration; Home and real-process gates |
 | [Server-Push & Connection Auth](./server-push-and-connection-auth.md) | Fan-out channel pattern (timeline/avatar, no Rust mirror for operator-only); per-generation reconnect restoration; connection auth vs Core governance vs Host final enforcement; loopback auto-trust (P3) fail-closed rules |

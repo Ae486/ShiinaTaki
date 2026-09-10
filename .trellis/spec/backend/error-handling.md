@@ -54,3 +54,83 @@ A failing Capability or tool call must degrade into a **structured error the LLM
 - Panic across the FFI/IPC boundary.
 - An error path that skips the audit log for a gated action.
 - Retrying a side-effecting action without an idempotency check.
+
+## Scenario: Hindsight HTTP deadlines and bounded responses
+
+### 1. Scope / Trigger
+
+Applies when changing `hindsight-client.ts`, its default network delegate, or a Hindsight endpoint consumer. A finite
+application timeout does not override an HTTP library's separate header/body timers. The actual D78 investigation
+reproduced early Undici phase timeouts while the longer application signal was still active.
+
+### 2. Signatures
+
+- `createHindsightClient({ endpoint, resolveApiKey, transport? }): HindsightClient` retains the injected transport seam.
+- `HindsightCallContext` carries `timeoutMs: number` and optional `signal: AbortSignal`.
+- `hindsightHttpTransport(input, init, { maxBytes?, responseStatuses? })` is the default HTTP/HTTPS delegate.
+- `HindsightTransportResponse` contains `status`, optional `Headers`, and decoded `body: string`.
+
+### 3. Contracts
+
+- The timeout is a positive safe integer no greater than `2_147_483_647` milliseconds. Reject unsupported values before
+  dispatch rather than letting Node clamp an overflowing timer to one millisecond. Public connection defaults are
+  independent of a task's explicit long-running validation budget.
+- Capture one total deadline before transport dispatch. Its signal covers connection, headers, body and decompression;
+  neither receiving headers nor another body chunk resets the budget. The default delegate has no shorter implicit
+  phase timer, global dispatcher mutation, redirect following or automatic retry.
+- Retain the first abort cause. A later caller cancellation cannot relabel an earlier deadline, and vice versa.
+  Observe the composed signal immediately, including for injected transports that do not subscribe themselves;
+  Node's unobserved `AbortSignal.any` may resolve its reason lazily. Dispose the listener and timer in `finally`.
+- Preserve endpoint policy, current API-key resolution and HTTPS certificate validation. Reject unsupported request
+  shapes before dispatch; do not allow embedded URL credentials, alternate transport schemes or transfer/upgrade
+  headers to introduce an unreviewed path.
+- Count decoded UTF-8 bytes while streaming, including after gzip/deflate/Brotli decompression. The ordinary response
+  limit remains 512 KiB; only the explicit D78 methods receive their separate 16 MiB limit. Exceeding a limit destroys
+  the owned stream/request and refuses the response. Never truncate JSON into an accepted result.
+- HEAD and bodyless statuses do not decode an absent representation merely because a content-encoding header exists.
+- Parse only an endpoint's declared refusal envelopes before generic HTTP classification. An unrelated 403 body is
+  authentication failure; a matching typed operational refusal retains its endpoint meaning. Unknown error text,
+  caller abort reasons and private response contents never become public diagnostic messages.
+- Timeout/disconnect does not prove that a mutation was absent or rolled back. Recovery reads the existing durable
+  operation/verification identity; transport never automatically dispatches that mutation again.
+
+### 4. Validation & Error Matrix
+
+| Condition | Required behavior |
+| --- | --- |
+| Slow headers/body within the captured budget | Complete normally without a hidden phase deadline. |
+| Total deadline expires across phases or while decoding | `HINDSIGHT_TIMEOUT`; stop the owned request. |
+| Caller cancellation wins, including delayed settlement | `HINDSIGHT_CANCELLED`; do not acknowledge a mutation. |
+| Both abort sources have fired before transport settles | Preserve the first cause, independent of source-array order. |
+| Oversized body, bad JSON or invalid declared payload | `HINDSIGHT_RESPONSE_INVALID`; no partial accepted evidence. |
+| Matching declared native 403/413/503 refusal | Validate and retain the typed refusal. |
+| Undeclared 401/403, redirect, connection/TLS failure | Existing sanitized classification; no credential forwarding, TLS bypass or retry. |
+| Committed mutation followed by a lost response | Unknown until the original durable identity is read; no second dispatch. |
+
+### 5. Good / Base / Bad Cases
+
+- Good: a split multibyte response exactly at the byte limit is decoded intact; a larger response is stopped.
+- Base: a healthy default-client call and a deliberately injected transport keep the same cancellation/error contract.
+- Bad: increase an outer timeout while leaving an independent HTTP timer active, or replay a POST after its response is lost.
+
+### 6. Tests Required
+
+Use owned real loopback HTTP/TLS servers for the default delegate: delayed headers/body at different timings, total
+budget across phases, both cancellation orders, gzip/deflate/Brotli, empty bodies, exact/over-limit UTF-8, refusal
+envelopes, redirects, connection reset and certificate rejection. Verify one request per mutation and status-read
+recovery after acknowledgement loss. Keep late-settlement tests for an injected transport that ignores abort.
+
+Changing the default delegate requires updating tests that stub `globalThis.fetch` to reach the actual supported seam.
+Preserve their byte-limit, early-stop and error-envelope assertions; do not let a disconnected mock create false coverage.
+Run the Core suite and the owned native HTTP-to-SQLite cutover fixture before actual-data acceptance.
+
+### 7. Wrong vs Correct
+
+```ts
+// Wrong: this alone does not override a fetch implementation's internal phase timers.
+await fetch(url, { signal: AbortSignal.timeout(longBudget) });
+
+// Correct: the production client owns the complete transport/deadline/error contract.
+const client = createHindsightClient({ endpoint, resolveApiKey });
+await client.health({ timeoutMs: 10_000, signal: callerSignal });
+```

@@ -43,4 +43,23 @@ export default tseslint.config(
       "max-lines-per-function": "off",
     },
   },
+  {
+    // The sole Shared public entry names cross-package contracts without owning
+    // implementation. Its reviewed size allowance depends on that AST boundary.
+    files: ["packages/shared/src/index.ts"],
+    rules: {
+      "max-lines": ["error", { max: 420, skipBlankLines: true, skipComments: true }],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Program > :not(ExportNamedDeclaration)",
+          message: "The Shared public entry permits only named re-exports with a source module.",
+        },
+        {
+          selector: "Program > ExportNamedDeclaration:not([source])",
+          message: "The Shared public entry cannot declare or export local implementation; re-export from its source module.",
+        },
+      ],
+    },
+  },
 );

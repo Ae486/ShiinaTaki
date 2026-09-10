@@ -1,5 +1,21 @@
 # 延期决定登记册 (Deferred Decisions)
 
+## Memory interoperability follow-up (updated 2026-09-10)
+
+| ID | Deferred contract | Reason | Completion trigger | Evidence | Status |
+| --- | --- | --- | --- | --- | --- |
+| D77 | Hindsight-only reconstruction of all original Taki fields and binding evolution after arbitrary native edits. Durable Taki provenance survives raw replica reseeding but cannot be recreated after all Taki evidence is lost. | D78 preserves native typed JSON/current state and full original Local artifacts. Taki-only provenance/policy/Blocks, new-observation policy and arbitrary later native-version rebinding still need a documented provider representation and projection. | Before claiming full B4 field fidelity, provider-only recovery or complete B6 native-edit interoperability: implement the source-backed representation, replication/backup policy, capacity handling and exact-version rebinding; test evidence loss and later native edits. | B4 `research/current-local-first-slice.md`; `research/d78-execution-contract.md`; `.trellis/spec/backend/memory-current-state-cutover.md`; ADR 0009 | OPEN |
+| D78 | Complete current-version Local-to-Hindsight import and independent required-maintenance proof for first activation. | B2 import history and routine G1 completion cannot prove current-version coverage or actual source/scope/model maintenance. | Structured atomic Bank import, complete durable mappings, native input/action/outcome evidence, sealed retained snapshot, full Taki validation/raw staging and actual final writer guards are implemented, including empty Banks. Preserve separate runtime/field-fidelity and production activation gates. | B4 `research/d78-execution-contract.md`; `research/d78-validation-2026-09-09.md`; `research/d78-real-data-validation-2026-09-09.md`; native `TAKI_PATCHES.md` / `TAKI-HS-010` and `TAKI-HS-011` | IMPLEMENTED; isolated full-source actual-model validation PASSED (2026-09-10); D77/B6/B7 and production/manual activation OPEN; unchanged Windows native typecheck limitations recorded |
+
+D78 uses new current-state command identities and full source-to-native mapping pages; old B2/source-evidence-v1
+identities are preserved and cannot substitute for this proof. Empty bound Banks now require an explicit current
+transfer/maintenance certificate, with no fabricated source operation. A certificate attests its historical snapshot;
+it does not freeze future remote writes. Initial activation still requires D77/B6 and the remaining B4/live gates.
+The passing third actual-data run preserved all 722 sources/units and 21 invalidated units, completed both native
+certificates and all 1,944 raw snapshot records, recovered lost import/verification responses without replay, and
+passed B4 readiness after SQLite reopen. Original storage and Local authority stayed unchanged; all owned services
+stopped without forced cleanup. This result does not establish complete runtime interoperability or semantic quality.
+
 > **目的**：任何"这一版先不做、留到后续补"的决定,必须在**立项时**登记于此。
 >
 > 延期本身不是问题,**追踪失败**才是。一个埋在代码注释或口头里的延期决定,会在下一个里程碑被漏掉——于是"计划中的延后"悄悄变成"永久缺陷"。这里是唯一的集中登记锚点:醒目、集中、每项带**补齐触发条件**。

@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { HindsightConnectionProjection } from "@taki/shared";
+import { HINDSIGHT_CURRENT_STATE_BUILD, HINDSIGHT_NATIVE_RESULT_BUILD, type HindsightConnectionProjection } from "@taki/shared";
 import type { HindsightClient } from "./hindsight-client.ts";
 import { createHindsightCompatibilityService } from "./hindsight-compatibility-service.ts";
+import { HindsightCompatibilityWireSchema } from "./hindsight-contracts.ts";
 
 const connection: HindsightConnectionProjection = {
   enabled: true, deploymentMode: "existing-instance", endpoint: "http://localhost:8888",
@@ -53,5 +54,33 @@ describe("Hindsight compatibility service", () => {
     const first = await service.validate({ connection, secretMarker: "a", client: fake() });
     const second = await service.validate({ connection, secretMarker: "b", client: fake() });
     expect(first.fingerprint).not.toBe(second.fingerprint);
+  });
+
+  it("negotiates cutover independently without changing an existing G1 settings identity", async () => {
+    const service = createHindsightCompatibilityService();
+    const native = { ...manifest, source_identity: { ...manifest.source_identity, compatibility_build: HINDSIGHT_NATIVE_RESULT_BUILD },
+      contracts: { ...manifest.contracts, native_results: contract } };
+    const before = await service.validate({ connection, secretMarker: "same", client: fake({ compatibility: async () => native }) });
+    const incomplete = { state: "unsupported" as const, reason: "cutover_verification_schema_unavailable" as const };
+    const wire = HindsightCompatibilityWireSchema.parse({ ...native,
+      source_identity: { ...native.source_identity, compatibility_build: HINDSIGHT_CURRENT_STATE_BUILD },
+      contracts: { ...native.contracts, current_state_transfer: contract,
+        cutover_verification: { version: "1.0.0", support: incomplete } } });
+    const after = await service.validate({ connection, secretMarker: "same", client: fake({ compatibility: async () => wire }) });
+    expect(after.fingerprint).toBe(before.fingerprint);
+    expect(after.compatibility.contracts.nativeResults).toEqual(contract);
+    expect(after.compatibility.contracts.currentStateTransfer).toEqual(contract);
+    expect(after.compatibility.contracts.cutoverVerification?.support).toEqual(incomplete);
+  });
+
+  it("does not infer cutover support from an admitted build or accept an unknown future build", async () => {
+    const service = createHindsightCompatibilityService();
+    const result = await service.validate({ connection, secretMarker: "m", client: fake({ compatibility: async () => ({ ...manifest,
+      source_identity: { ...manifest.source_identity, compatibility_build: HINDSIGHT_CURRENT_STATE_BUILD } }) }) });
+    expect(result.compatibility.contracts.currentStateTransfer).toBeUndefined();
+    expect(result.compatibility.contracts.cutoverVerification).toBeUndefined();
+    await expect(service.validate({ connection, secretMarker: "m", client: fake({ compatibility: async () => ({ ...manifest,
+      source_identity: { ...manifest.source_identity, compatibility_build: `${HINDSIGHT_CURRENT_STATE_BUILD}-unknown` } }) }) }))
+      .rejects.toMatchObject({ code: "HINDSIGHT_EXTENSION_UNSUPPORTED" });
   });
 });

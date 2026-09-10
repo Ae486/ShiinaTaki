@@ -4,7 +4,7 @@
 - observability-schema.ts — bounded monitor mode, real-field Run query, Chinese semantic trajectory, inspector, and live notification contracts
 - observability-presentation.ts — closed English-wire to Simplified-Chinese Monitor presentation mapper
 - scheduled-task-schema.ts — canonical durable schedule definitions and operator management protocol
-- index.ts — package public entry; named re-exports of the protocol surface
+- index.ts — package public entry; named cross-package protocol exports, with D78 composition-only schemas kept in their defining modules
 - ping-schema.ts — scaffold ping/pong smoke schema (desktop IPC smoke; untouched this slice)
 - json-rpc-schema.ts — JSON-RPC 2.0 envelope schemas + JSON_RPC_ERROR_CODES + JSON_RPC_APP_ERROR + client-frame union
 - error-code-schema.ts — closed cross-process ErrorCode union
@@ -33,7 +33,7 @@
 - capability-schema.ts — compatibility entry re-exporting the canonical Host-bound capability channel schemas
 - capability-outputs.ts — per-capability output schemas (Screenshot/ProcessList/ClipboardRead/ClipboardWrite/ShellOpen/Exec/ForegroundWindow); mirrored in Rust serde
 - secret-catalog-schema.ts — SECRET_METHODS + write-only secret.set/clear/presence/list schemas + SecretRef charset + SecretRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)
-- hindsight-connection-schema.ts — exact Hindsight 0.9.0 connection, compatibility, Bank, LLM-health, and sanitized-error contracts
+- hindsight-connection-schema.ts — exact Hindsight 0.9.0 connection, independent G1/D78 compatibility, Bank, LLM-health, and sanitized-error contracts
 - hindsight-setup-schema.ts — operator-only Hindsight setup state, managed receipt, and memory.hindsight.* method schemas
 - mcp-lifecycle-schema.ts — MCP_METHODS + marker-only desired-server wire schemas + expectedConfigRevision writes + bounded tool-name/list contracts + sanitized active/draining runtime diagnostics + McpRefusalReason (operator-only, NO Rust mirror — own schema test, never protocol-fixtures)
 - skill-lifecycle-schema.ts — strict Skill package lifecycle/operator protocol, import limits, provenance, trust, scan, and runtime projections
@@ -49,4 +49,16 @@
 - hindsight-journal-schema.ts — complete Hindsight transaction batches, per-change lineage, cursor windows, and unique object transitions
 - memory-migration-schema.ts — strict operator-only migration control and bounded report contracts
 - hindsight-cutover-schema.ts — strict B4 import, logical snapshot/page/record, staging checkpoint, fact mapping, activation, and operator status/verification contracts
+- hindsight-local-coverage-schema.ts — complete current Local manifest witnesses, bounded change comparisons and truthful cutover coverage status
+- hindsight-source-evidence-schema.ts — versioned typed source/unit evidence, representation gaps and exact native-object confirmation contracts
+- hindsight-current-capture-schema.ts — complete typed current Local state and an explicit disposition for every frozen witness
+- hindsight-current-canonical-schema.ts — existing Canonical constraints with lossless JSON validators for the new D78 adapter
+- hindsight-json-schema.ts — bounded own-key JSON validation preserving prototype-shaped keys as inert data
+- hindsight-current-state-schema.ts — mirrored D78 structured transfer, stable native object mappings and typed refusal contracts
+- hindsight-current-state-encoding.ts — separate tagged JSON/binary64 codec with cross-language Unicode ordering
+- hindsight-native-snapshot-schema.ts — strict original logical snapshot wire envelopes and bounded structured payload values
+- hindsight-current-evidence-schema.ts — immutable D78 preparation and validated current import evidence contracts
+- hindsight-cutover-verification-schema.ts — finite native requirement/input/action/model/certificate evidence and retained-snapshot binding
+- hindsight-current-status-schema.ts — versioned durable current-import/verification counts, independent of historical B2 counters
+- hindsight-current-invalidation-schema.ts — authenticated native drift observations, exact proof bindings and exclusion of transport uncertainty
 - run-event-schema.ts — versioned durable Run/Event contracts, including model/tool/context/governance observability facts

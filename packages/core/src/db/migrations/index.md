@@ -22,6 +22,13 @@
 - 033-hindsight-replica-sync.ts — migration 33: canonical incremental replica records, FTS projection, checkpoints, and Bank leases
 - 034-hindsight-replica-scheduler.ts — migration 34: durable scheduler/run state and the current verified single-record snapshot cache
 - 035-pending-memory.ts — migration 35: idempotent Pending Memory intents, persisted recovery phases, retry state, and safe terminal diagnostics
+- 036-memory-timeline-convergence.ts — preserves applied 035 histories while converging Pending Memory and nullable Timeline presentation
+- 037-hindsight-local-coverage.ts — immutable current Local manifest versions and lease-owned B4 run selection
+- 038-hindsight-source-evidence.ts — durable typed source/unit evidence and exact native-object bindings independent of replica caches
+- 039-hindsight-current-state.ts — immutable D78 Local captures, frozen transfers, mappings, finite verification and proven native invalidation evidence
+- 040-hindsight-cutover-convergence.ts — recognized early-023 convergence without changing authority or old receipts; unmappable imports refuse
+- 040-hindsight-cutover-schema.ts — explicit early/current B4 schema signatures and forward DDL for 040
+- 040-hindsight-cutover-convergence-fixtures.ts — independent schema-only historical 023 reproduction for migration tests
 - 013-config.ts — migration 13: config (the sparse operator-set settings store: key/JSON value/updated_at; a row exists only for a knob the panel actually set)
 - 014-governance-policy.ts — migration 14: Core-owned global Level/policy generation singleton + sparse validated cell overrides
 - 015-approval.ts — migration 15: Core Approval generation/revision singleton + canonical durable always-allow decisions

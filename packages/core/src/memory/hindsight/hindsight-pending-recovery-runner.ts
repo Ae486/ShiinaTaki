@@ -6,7 +6,7 @@
 import { z } from "zod";
 import {
   MemoryReplicaBankSchema, MemoryReplicaScheduledRunSchema,
-  HINDSIGHT_NATIVE_RESULT_BUILD, HINDSIGHT_NATIVE_RESULT_VERSION,
+  HINDSIGHT_CURRENT_STATE_BUILD, HINDSIGHT_NATIVE_RESULT_BUILD, HINDSIGHT_NATIVE_RESULT_VERSION,
   type HindsightConnectionProjection, type MemoryAuthorityEpoch, type MemoryReplicaCheckpoint, type MemoryReplicaRunResult, type PendingMemoryRecord,
 } from "@taki/shared";
 import type { CanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
@@ -125,7 +125,10 @@ async function nativeResultSupported(context: RecoveryContext): Promise<boolean>
   context.request();
   if (manifest.provider.lineage !== context.authority.providerLineageId) throw new Error("HINDSIGHT_PENDING_AUTHORITY_MISMATCH");
   const contract = manifest.contracts.native_results;
-  return manifest.source_identity.compatibility_build === HINDSIGHT_NATIVE_RESULT_BUILD
+  // A D78 build keeps the same G1 factual contract. Requiring cutover verification here would make ordinary
+  // pending writes depend on first-activation maintenance again, contrary to the accepted routine recovery rule.
+  return (manifest.source_identity.compatibility_build === HINDSIGHT_NATIVE_RESULT_BUILD
+      || manifest.source_identity.compatibility_build === HINDSIGHT_CURRENT_STATE_BUILD)
     && contract?.version === HINDSIGHT_NATIVE_RESULT_VERSION && contract.support.state === "supported"
     && contract.support.reason === "all_contracts_available";
 }

@@ -1,11 +1,13 @@
 /**
- * INPUT:  an injected fetch transport, endpoint policy, and just-in-time API-key resolver
+ * INPUT:  an optional injected transport, endpoint policy, and just-in-time API-key resolver
  * OUTPUT: authenticated, bounded Hindsight 0.9.0 endpoint operations with sanitized errors
  * POS:    core/memory/hindsight — OS-neutral REST seam; no retries, process, filesystem, or authority wiring
  */
 import { type HindsightBankLlmHealthProjection, type HindsightErrorCode } from "@taki/shared";
+import { addAbortListener } from "node:events";
 import { normalizeHindsightEndpoint } from "./hindsight-endpoint-policy.ts";
 import { HindsightError, hindsightError } from "./hindsight-errors.ts";
+import { HINDSIGHT_DEFAULT_RESPONSE_BYTES, hindsightHttpTransport } from "./hindsight-http-transport.ts";
 import {
   HindsightBankLlmHealthWireSchema,
   HindsightBankTemplateManifestSchema,
@@ -26,19 +28,20 @@ import type { HindsightJournalPage } from "@taki/shared";
 import { HindsightJournalWireSchema, normalizeHindsightJournal } from "./hindsight-journal-contracts.ts";
 import { createHindsightPendingMethods, type HindsightPendingClient } from "./hindsight-pending-client.ts";
 import { createHindsightNativeResultMethods, type HindsightNativeResultClient } from "./hindsight-native-result-client.ts";
+import { createHindsightCurrentMethods, type HindsightCurrentStateClient } from "./hindsight-current-client.ts";
 
 export interface HindsightTransportResponse {
   status: number;
   headers?: Headers;
   body: string;
 }
-export type HindsightTransport = (input: string | URL, init?: RequestInit) => Promise<HindsightTransportResponse>;
+export type HindsightTransport = (input: string | URL, init?: RequestInit, maxResponseBytes?: number) => Promise<HindsightTransportResponse>;
 export interface HindsightCallContext {
   signal?: AbortSignal;
   timeoutMs: number;
   attemptId?: string;
 }
-export interface HindsightClient extends Partial<HindsightPendingClient>, Partial<HindsightNativeResultClient> {
+export interface HindsightClient extends Partial<HindsightPendingClient>, Partial<HindsightNativeResultClient>, Partial<HindsightCurrentStateClient> {
   health(context: HindsightCallContext): Promise<{ status: "healthy"; database: "connected" }>;
   version(context: HindsightCallContext): Promise<{ apiVersion: string }>;
   compatibility(context: HindsightCallContext): Promise<HindsightCompatibilityWire>;
@@ -62,7 +65,7 @@ export interface HindsightClient extends Partial<HindsightPendingClient>, Partia
   changesAfter?: (input: { bankId: string; afterCursor: number; limit: number; context: HindsightCallContext }) => Promise<HindsightJournalPage>;
 }
 
-const MAX_RESPONSE_BYTES = 512 * 1024;
+const MAX_TIMEOUT_MS = 2_147_483_647;
 
 export function createHindsightClient(deps: {
   endpoint: string;
@@ -70,8 +73,11 @@ export function createHindsightClient(deps: {
   transport?: HindsightTransport;
 }): HindsightClient {
   const endpoint = normalizeHindsightEndpoint(deps.endpoint);
-  const transport = deps.transport ?? defaultTransport;
-  const request = <T>(input: HindsightRequestInput<T>): Promise<T> => requestJson({ ...input, endpoint, transport, resolveApiKey: deps.resolveApiKey });
+  const request = <T>(input: HindsightRequestInput<T>): Promise<T> => {
+    const transport: HindsightTransport = deps.transport ?? ((url, init, maxBytes) => hindsightHttpTransport(url, init,
+      { maxBytes, responseStatuses: Object.keys(input.responses ?? {}).map(Number) }));
+    return requestJson({ ...input, endpoint, transport, resolveApiKey: deps.resolveApiKey });
+  };
   return createClientMethods(request);
 }
 
@@ -122,7 +128,7 @@ function createClientMethods(request: <T>(input: HindsightRequestInput<T>) => Pr
     },
   };
   return Object.assign(methods, createSnapshotMethods(request), createJournalMethods(request),
-    createHindsightPendingMethods(request), createHindsightNativeResultMethods(request));
+    createHindsightPendingMethods(request), createHindsightNativeResultMethods(request), createHindsightCurrentMethods(request));
 }
 
 function createJournalMethods(request: <T>(input: HindsightRequestInput<T>) => Promise<T>): Pick<HindsightClient, "changesAfter"> {
@@ -172,6 +178,7 @@ export interface HindsightRequestInput<T> {
   context: HindsightCallContext;
   schema: { parse: (value: unknown) => T };
   responses?: Partial<Record<number, { parse: (value: unknown) => T }>>;
+  maxResponseBytes?: number;
 }
 
 interface RequestJsonInput<T> extends HindsightRequestInput<T> {
@@ -182,36 +189,49 @@ interface RequestJsonInput<T> extends HindsightRequestInput<T> {
 
 async function requestJson<T>(input: RequestJsonInput<T>): Promise<T> {
   if (input.context.signal?.aborted) throw hindsightError("HINDSIGHT_CANCELLED");
-  if (!Number.isSafeInteger(input.context.timeoutMs) || input.context.timeoutMs <= 0) throw hindsightError("HINDSIGHT_TIMEOUT");
+  if (!Number.isSafeInteger(input.context.timeoutMs) || input.context.timeoutMs <= 0
+    || input.context.timeoutMs > MAX_TIMEOUT_MS) throw hindsightError("HINDSIGHT_TIMEOUT");
   const apiKey = input.resolveApiKey();
   if (!apiKey) throw hindsightError("HINDSIGHT_SECRET_UNAVAILABLE");
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), input.context.timeoutMs);
   const signal = composeSignal(input.context.signal, controller.signal);
+  // Observe immediately: Node may resolve an unobserved composite lazily after both sources have aborted.
+  // This also preserves first-cause semantics for injected transports that never subscribe to the signal.
+  const firstAbort = { reason: signal.aborted ? signal.reason : undefined };
+  const abortListener = addAbortListener(signal, () => { firstAbort.reason = signal.reason; });
   try {
-    const response = await input.transport(new URL(input.path, input.endpoint), { ...input.init, signal, redirect: "manual", headers: { ...(input.init?.headers ?? {}), authorization: `Bearer ${apiKey}`, "content-type": "application/json", accept: "application/json" } });
-    if (input.context.signal?.aborted) throw hindsightError("HINDSIGHT_CANCELLED");
-    if (controller.signal.aborted) throw hindsightError("HINDSIGHT_TIMEOUT");
+    const response = await input.transport(new URL(input.path, input.endpoint), { ...input.init, signal, redirect: "manual", headers: { ...(input.init?.headers ?? {}), authorization: `Bearer ${apiKey}`, "content-type": "application/json", accept: "application/json" } }, input.maxResponseBytes);
+    requireActiveRequest(signal, controller.signal, firstAbort.reason);
     const expectedResponse = input.responses?.[response.status];
-    if (expectedResponse) return parseResponse(response, expectedResponse);
+    if (expectedResponse) {
+      try { return parseResponse(response, expectedResponse, input.maxResponseBytes); }
+      catch (error) {
+        // Only a matching endpoint envelope overrides transport/authentication classification.
+        if (response.status === 403) throw hindsightError("HINDSIGHT_AUTHENTICATION_FAILED");
+        if (response.status === 503) throw hindsightError("HINDSIGHT_UNREACHABLE");
+        throw error;
+      }
+    }
     if (response.status >= 300 && response.status < 400) throw hindsightError("HINDSIGHT_UNREACHABLE");
     if (response.status === 401 || response.status === 403) throw hindsightError("HINDSIGHT_AUTHENTICATION_FAILED");
     if (response.status === 500 && input.path.includes("/snapshots")) throw hindsightError("HINDSIGHT_SNAPSHOT_INTEGRITY");
     if (response.status >= 500) throw hindsightError("HINDSIGHT_UNREACHABLE");
     if (response.status < 200 || response.status >= 300) throw mapHttpFailure(response.status, input.path);
-    return parseResponse(response, input.schema);
+    return parseResponse(response, input.schema, input.maxResponseBytes);
   } catch (error) {
+    requireActiveRequest(signal, controller.signal, firstAbort.reason);
     if (error instanceof HindsightError) throw error;
-    if (input.context.signal?.aborted) throw hindsightError("HINDSIGHT_CANCELLED");
     if (error instanceof DOMException && error.name === "AbortError") throw hindsightError("HINDSIGHT_TIMEOUT");
     throw hindsightError("HINDSIGHT_UNREACHABLE");
   } finally {
+    abortListener[Symbol.dispose]();
     clearTimeout(timer);
   }
 }
 
-function parseResponse<T>(response: HindsightTransportResponse, schema: { parse: (value: unknown) => T }): T {
-  if (new TextEncoder().encode(response.body).byteLength > MAX_RESPONSE_BYTES) throw hindsightError("HINDSIGHT_RESPONSE_INVALID");
+function parseResponse<T>(response: HindsightTransportResponse, schema: { parse: (value: unknown) => T }, maxBytes = HINDSIGHT_DEFAULT_RESPONSE_BYTES): T {
+  if (new TextEncoder().encode(response.body).byteLength > maxBytes) throw hindsightError("HINDSIGHT_RESPONSE_INVALID");
   try { return schema.parse(response.body === "" ? null : JSON.parse(response.body)); }
   catch { throw hindsightError("HINDSIGHT_RESPONSE_INVALID"); }
 }
@@ -219,6 +239,13 @@ function parseResponse<T>(response: HindsightTransportResponse, schema: { parse:
 function composeSignal(caller: AbortSignal | undefined, deadline: AbortSignal): AbortSignal {
   if (!caller) return deadline;
   return AbortSignal.any([caller, deadline]);
+}
+
+function requireActiveRequest(signal: AbortSignal, deadline: AbortSignal, firstReason: unknown): void {
+  if (!signal.aborted) return;
+  // Late settlement must not relabel an earlier deadline because the caller cancelled afterwards.
+  // Caller-supplied reasons never enter an error or log.
+  throw hindsightError(deadline.aborted && firstReason === deadline.reason ? "HINDSIGHT_TIMEOUT" : "HINDSIGHT_CANCELLED");
 }
 
 function mapHttpFailure(status: number, path: string): HindsightError {
@@ -232,33 +259,4 @@ function mapHttpFailure(status: number, path: string): HindsightError {
               : status === 409 ? "HINDSIGHT_TEMPLATE_CONFLICT"
               : status === 422 || status === 400 ? "HINDSIGHT_TEMPLATE_INVALID" : "HINDSIGHT_RESPONSE_INVALID";
   return hindsightError(code);
-}
-
-async function defaultTransport(input: string | URL, init?: RequestInit): Promise<HindsightTransportResponse> {
-  const response = await fetch(input, init);
-  if (!response.ok && response.status !== 409 && response.status !== 412 && response.status !== 404) {
-    await response.body?.cancel();
-    return { status: response.status, headers: response.headers, body: "" };
-  }
-  return { status: response.status, headers: response.headers, body: await readBoundedBody(response) };
-}
-
-async function readBoundedBody(response: Response): Promise<string> {
-  if (!response.body) return "";
-  const reader = response.body.getReader(); const decoder = new TextDecoder();
-  let bytes = 0; let body = "";
-  try {
-    while (true) {
-      const chunk = await reader.read();
-      if (chunk.done) return body + decoder.decode();
-      bytes += chunk.value.byteLength;
-      if (bytes > MAX_RESPONSE_BYTES) {
-        await reader.cancel();
-        throw hindsightError("HINDSIGHT_RESPONSE_INVALID");
-      }
-      body += decoder.decode(chunk.value, { stream: true });
-    }
-  } finally {
-    reader.releaseLock();
-  }
 }

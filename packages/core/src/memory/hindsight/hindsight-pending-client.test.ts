@@ -1,6 +1,7 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { MutationRequest, RetainRequest } from "@taki/shared";
 import { createHindsightClient, type HindsightTransport } from "./hindsight-client.ts";
+import { withOpenHindsightResponse } from "../../testing/hindsight-http-test-fixture.ts";
 
 const memoryId = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const operationId = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
@@ -9,8 +10,7 @@ const at = "2026-09-06T00:00:00.000Z";
 const context = { timeoutMs: 1000 };
 const edit: MutationRequest = { kind: "edit", bankId: "bank", memoryId, expectedRevision: 2,
   patch: { text: "corrected fact", context: null, occurredStart: null, occurredEnd: null, entities: ["Alice"] } };
-afterEach(() => { vi.restoreAllMocks(); });
-function client(transport?: HindsightTransport) {
+function client(transport: HindsightTransport) {
   return createHindsightClient({ endpoint: "http://127.0.0.1:8888", resolveApiKey: () => "dummy-key", transport });
 }
 function native(overrides: Record<string, unknown> = {}) {
@@ -76,11 +76,12 @@ describe("Pending Memory native client contracts", () => {
   });
 
   it("cancels an oversized streamed conditional-error body before buffering its remainder", async () => {
-    const cancel = vi.fn();
-    const stream = new ReadableStream<Uint8Array>({ start(controller) { controller.enqueue(new Uint8Array(512 * 1024 + 1)); }, cancel });
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(stream, { status: 412 }));
-    await expect(client().mutatePending!({ request: edit, operationId, context })).rejects.toMatchObject({ code: "HINDSIGHT_RESPONSE_INVALID" });
-    expect(cancel).toHaveBeenCalledTimes(1);
+    await withOpenHindsightResponse({ status: 412, chunks: [new Uint8Array(512 * 1024 + 1)], run: async (endpoint, response) => {
+      const subject = createHindsightClient({ endpoint, resolveApiKey: () => "dummy-key" });
+      await expect(subject.mutatePending!({ request: edit, operationId, context })).rejects.toMatchObject({ code: "HINDSIGHT_RESPONSE_INVALID" });
+      await expect.poll(() => response.closes).toBe(1);
+      expect(response).toMatchObject({ requests: 1, finishes: 0, bytesOffered: 512 * 1024 + 1 });
+    } });
   });
 });
 

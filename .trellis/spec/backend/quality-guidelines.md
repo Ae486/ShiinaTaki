@@ -11,6 +11,10 @@
 
 Exemptions: generated code, migrations, test files.
 
+`packages/shared/src/index.ts` has a reviewed 420-line limit as the single public named-re-export entry. This allowance
+applies only to that exact file: ESLint permits only source-bearing `ExportNamedDeclaration` statements and rejects
+`export *`, imports, local declarations and side effects. All implementation modules retain the 360-line limit.
+
 The 300-line figure is a design signal, not a mechanical formatting target. A cohesive file may use the roughly 20%
 tolerance up to about 360 lines when that keeps one responsibility readable. Do not compress statements, remove useful
 whitespace, or create artificial helper files merely to pass the check. Split a file when it combines distinct
