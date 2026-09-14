@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TakiAgent — Avatar Presentation Lab</title>
+    <!--
+      Cubism runtime globals must load before the module (Live2DCubismCore for moc3, Live2DModelWebGL for moc).
+      Served from public/vendor/live2d (git-ignored, fetched by scripts/vendor-live2d-runtimes.mjs). Lab-only page:
+      registered in vite.config.ts under command === "serve" only, so `vite build` never emits it.
+    -->
+    <script src="/vendor/live2d/live2dcubismcore.min.js"></script>
+    <script src="/vendor/live2d/live2d.min.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #0f0f16;
+        color: #d8dee9;
+        font: 12px/1.5 ui-monospace, Consolas, monospace;
+      }
+      #root {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 380px;
+        height: 100vh;
+      }
+      #stage {
+        position: relative;
+        min-width: 0;
+        height: 100vh;
+      }
+      #controls {
+        min-width: 0;
+        height: 100vh;
+        overflow-y: auto;
+        padding: 8px 12px 24px;
+        box-sizing: border-box;
+        background: #14141f;
+        border-left: 1px solid #262636;
+      }
+      section {
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #262636;
+      }
+      section > h2 {
+        margin: 0 0 6px;
+        font-size: 12px;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        color: #8fbcbb;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 4px 0;
+      }
+      .row > label {
+        flex: 0 0 96px;
+        color: #9aa4b5;
+      }
+      .row > select,
+      .row > input[type="text"],
+      .row > input[type="password"],
+      .row > input[type="file"],
+      .row > textarea {
+        flex: 1;
+        min-width: 0;
+        max-width: 100%;
+      }
+      .row > input[type="range"] {
+        flex: 1;
+      }
+      select,
+      input,
+      textarea,
+      button {
+        font: inherit;
+        color: inherit;
+        background: #1e1e2c;
+        border: 1px solid #33334a;
+        border-radius: 3px;
+        padding: 2px 6px;
+      }
+      button {
+        cursor: pointer;
+      }
+      textarea {
+        resize: vertical;
+      }
+      button:disabled {
+        cursor: default;
+        opacity: 0.45;
+      }
+      button:hover {
+        background: #2a2a3c;
+      }
+      .badge {
+        display: inline-block;
+        padding: 0 6px;
+        border-radius: 8px;
+        background: #2e3440;
+        color: #ebcb8b;
+      }
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-all;
+        color: #cfe;
+      }
+      @media (max-width: 720px) {
+        #root {
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: 48vh minmax(0, 1fr);
+          height: 100dvh;
+        }
+        #stage {
+          height: 48vh;
+        }
+        #controls {
+          height: auto;
+          border-left: 0;
+          border-top: 1px solid #262636;
+        }
+        .row {
+          flex-wrap: wrap;
+        }
+        .row > input[type="range"] {
+          min-width: 80px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="stage"></div>
+      <div id="controls"></div>
+    </div>
+    <script type="module" src="/lab/page/main.ts"></script>
+  </body>
+</html>
