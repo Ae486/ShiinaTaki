@@ -41,6 +41,12 @@ cue/clock/profile/writer adapter, benchmark `wawa-lipsync` first, and initially 
 locale-specific Mandarin/Japanese G2P. Evaluate MFA only as an optional buffered alignment service; consider Azure
 timed visemes only with a provider change. HeadAudio, wLipSync and MotionSync remain secondary compatibility studies.
 
+**Owner perceptual verdict (2026-09-19):** after hands-on comparison of the three arms on real Fish audio, the owner
+judged the native engine lip-sync sufficient on its own and found the envelope/pose-driven output odd by comparison.
+The custom mouth path stops here: no G2P/acoustic source, no `wawa-lipsync` benchmark, no profile calibration for
+further costumes. The Lab modules remain experimental evidence only and leave with the lab directory. Production
+speech adoption is #31's native `speak()` path; the measured `lipSyncWeight = 0.4` ceiling is a tuning input there.
+
 Consequences, binding on implementation:
 
 **Owner authorization (2026-09-11): connect the existing custom mouth experiment to the ordinary Lab panel so its
@@ -112,6 +118,10 @@ Out:
 - Packaging, Tauri integration, CI wiring.
 
 ## Acceptance criteria
+
+Outcome (2026-09-19): criteria 1, 2, 4, 6, 7 and 8 met by automated evidence in `research/`; criterion 3 was
+withdrawn by the 2026-09-08 ruling (native blink/sway accepted); criterion 5 was answered by the three-arm
+comparison and the owner's native verdict rather than by adopting the envelope path.
 
 1. `pnpm --filter @taki/desktop dev` → the page lists all 147 costumes and loads both a Cubism 2 (`taki/arbeit`) and
    a Cubism 3 (`taki/live_01`) costume; system-B costumes load with a "N refs pruned" badge.

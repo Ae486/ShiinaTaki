@@ -514,6 +514,11 @@ in the asset, we declare relinquishment at the call site. The proposed layering:
 The face set to relinquish does not need a hand-written list: **it is exactly the parameter set declared by the
 costume's expression files**, readable at load time (22 ids for Cubism 2, 69 for Cubism 3 in the sampled costumes).
 
+**Lab facts (2026-09-07/18):** `ignoreParamIds` mutates the cached motion object (C2 `motion.motions`, C3
+`_motionData.curves`), so one filtered play changes that motion for every later play on the primary and all parallel
+channels until the cache slot is reset to `undefined`. These costumes declare no `idle`/`Idle` group, so after
+"Stop all" the queue is simply finished and the engine's own blink/breath runs between motions.
+
 ### 6.3 Per-frame parameter writing is available, with the right hook
 
 ```
@@ -529,6 +534,12 @@ same position as AgentAtelierR's `_applySpeakingHeadMotion`, which mutates bone 
 
 `addParameterValueById` is a better fit than the prototype's approach: the motion's own `ParamAngleX` curve keeps
 playing and the sway is summed on top, instead of read-modify-write.
+
+**Measured order (engine 1.3.1, 2026-09-18):** `update()` emits `beforeMotionUpdate` → motion/expression update →
+`afterMotionUpdate` → `beforeModelUpdate` → `coreModel.update()` → `loadParam()`, which restores the saved parameter
+snapshot. A per-frame writer or reader must act synchronously inside one of those events; anything deferred to a
+microtask or timer sees the restored values, not the frame's. The lab's mouth writer therefore used `beforeModelUpdate`
+with plain `set`.
 
 The parameters sway needs are present in both generations (`ParamAngleX/Y/Z`, `ParamBodyAngleX/Y/Z`, `ParamBreath`),
 and the assets exercise them at usable amplitude — measured Cubism 2 range for `PARAM_ANGLE_Y` reaches −22°..+17°.
@@ -573,6 +584,14 @@ Two paths, to be decided by measurement: (a) ship the engine's own lip-sync and 
 of pure TS, unit-testable against synthetic PCM). Testing (a) first also validates the engine-selection assumption
 recorded in `TTS-INTERFACE.md:34`.
 
+**Decided (2026-09-19): path (a).** The lab compared three arms on the same real Fish clip and both costumes —
+native default, native with `lipSyncWeight = 1.0`, and a custom envelope writer over measured costume profiles.
+Final `MOUTH_OPEN` ranges were `0..0.400` / `0..1.000` / `0..0.6` respectively: the default arm's small opening is
+the 0.4 weight ceiling, not a detection difference. The owner judged native lip-sync sufficient by ear and eye and
+found the custom arms odd; the custom mouth path (envelope, profiles, viseme cues, `wawa-lipsync` benchmark) is
+closed. Production speech (#31) uses `speak()` with gain/weight as tuning inputs. Evidence:
+[`panel-integration-findings-2026-09-18.md`](../.trellis/tasks/09-03-avatar-presentation-lab/research/panel-integration-findings-2026-09-18.md).
+
 The other three speaking sub-behaviours map cleanly:
 
 **Owner scope (2026-09-08):** existing native blink and sway are sufficient for this experiment. The mapping below
@@ -606,7 +625,7 @@ System A/B costumes have no equivalent emotion channels, so any use must degrade
 | --- | --- | --- | --- |
 | Layered composition (§5.1) | **Positive on the two tested costumes** | `ignoreParamIds`, expression update order, and hook position | later overlays still need their own verification |
 | Speaking state (§5.4) | **Yes** | per-frame parameter writes | none — parameters confirmed present |
-| Lip-sync (§5.5) | **Yes, engine-native** | `speak()` / `mouthSync()` | forced closures need custom work |
+| Lip-sync (§5.5) | **Yes, engine-native — adopted (owner, 2026-09-19)** | `speak()` / `mouthSync()` | custom closures rejected by ear; `lipSyncWeight` is the tuning lever |
 | Expression surviving a motion | **Observed with and without face filtering** | C2 effective set / C3 effective blend and authored motion values | one parameter alone cannot certify the whole face |
 
 No track bookkeeping is needed — primary motion, expression layer, and a per-frame hook cover what the prototype
@@ -649,7 +668,11 @@ Not registered in `deferred-decisions.md` by this document — they need an owne
 4. **D69 (`deferred-decisions.md:97`) remains open and independent.** The vocabulary work will *reduce* the malformed
    -call surface (smaller choice space, fewer parameters) but cannot be assumed to fix it. If the root cause is that
    `presentationTailStop` ends the loop before the model reads the tool error and corrects, that is unrelated to the
-   vocabulary. D69's requirement — layered reproduction before any fix — stands unchanged.
+   vocabulary. D69's requirement — layered reproduction before any fix — stands unchanged. **Lab finding (D80,
+   2026-09-08):** the tools return `{ok:true}` at publication and the renderer discards the engine's boolean;
+   repeating the current expression or playing a NORMAL motion over a NORMAL motion returns `false` in the engine
+   while the agent is told success. Any presentation feature that relies on tool success needs that outcome surfaced
+   first (`deferred-decisions.md` D80).
 
 5. **D40 (`deferred-decisions.md:109`)** can be collapsed rather than deferred if §4.5 removes `priority`/`loop`
    from the model-facing schema. Worth confirming when that change is scheduled.
@@ -667,23 +690,31 @@ Not registered in `deferred-decisions.md` by this document — they need an owne
    speaking state, TakiAgent's timer would start at the expression command itself. Needs a ruling on duration (a
    pet that returns to neutral too fast looks indifferent; too slow looks stuck) and on whether the relax target is
    "neutral" or the character's mood-derived resting face once §5.8 exists. Renderer-only; no Core change.
+   **Ruled (2026-09-08):** no fixed 4.6 s neutral reset. Relax belongs to the mood system: after a transient
+   expression ends, return to the mood preset's presentation. Schedule with §5.8, not alone.
 
 8. **Pre-TTS presentation batch (§5.11, first six rows) — schedule or fold into #31?** These are renderer-only and
    independent of TTS. Doing them first gives the character visible life before any audio work and de-risks the
    layered-composition discipline (§5.1) that #31 will need. Recommendation: schedule as its own small task ahead of
-   #31 — **gated on the §6.6 experiment**.
+   #31 — **gated on the §6.6 experiment**. **Gate cleared (2026-09-07)**; blink/sway overlays were dropped because
+   the engine's own blink/breath is accepted (2026-09-08), so the batch is ambient recency/exploration, mood-weighted
+   ambient, reaction lock, costume-swap SFX, and the mood-bound relax of item 7.
 
 9. **§6.6 gating experiment — run before scheduling anything in §4.5 or §8 above.** `ignoreParamIds` and
    `parallelMotion` are read from the installed typings only; their runtime behaviour in this engine fork is
    unverified. Every layered-presentation item depends on a motion being able to relinquish the face parameters.
    A negative result forces mutually exclusive expression-and-motion scheduling and invalidates the §5.11 cost
-   column, so this is a prerequisite, not a task step.
+   column, so this is a prerequisite, not a task step. **Answered positive (2026-09-07, §6.6).** Expressions survive
+   motions with and without filtering on both tested costumes; filtering mutates the shared motion cache (§6.2).
 
 10. **Lip-sync path (§6.4) — engine-native or custom envelope?** Decide by measuring the engine's own `speak()` /
     `mouthSync()` on real utterances before committing ~150 lines of envelope code. This also tests the
-    engine-selection assumption recorded in `TTS-INTERFACE.md:34`. Belongs to #31.
+    engine-selection assumption recorded in `TTS-INTERFACE.md:34`. Belongs to #31. **Answered: engine-native
+    (owner, 2026-09-19, §6.4).** The engine-selection assumption holds; the custom envelope is closed.
 
 11. **Semantic emotion parameters (§6.5) — verify and decide whether to use.** Cubism 3 costumes expose named
     emotion channels that could give continuous emotional intensity instead of discrete preset switching. Needs
     verification of their semantics and of the numeric `Blend` encoding. System A/B costumes lack them entirely, so
     any use must degrade cleanly — which argues for treating it as an enhancement layer, never a base mechanism.
+    **Partially answered (2026-09-07):** numeric `Blend` 1/2 both fall back to additive in the installed parser, so
+    the channels are applied as `add`. Their visual semantics as continuous intensity remain unverified; still open.

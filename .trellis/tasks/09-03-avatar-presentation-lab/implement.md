@@ -136,6 +136,7 @@ This is a parameter/geometry investigation. A static pose result does not activa
   wired, extended or exercised in this subset. The wawa benchmark stays deferred until the owner's perceptual verdict.
 - Owner perceptual acceptance decides the branch: native tuned sufficient → the custom path stops here and no
   G2P/acoustic work follows; otherwise proceed in the 2026-09-09 order (wawa benchmark first).
+  **Decided 2026-09-19: native sufficient (owner found the custom arms odd). Custom path closed; wawa not run.**
 
 This subset supersedes the historical block below only for explicit panel playback and pose observation. It does
 not activate fake speech, composite blink/sway/relax, recognition or production wiring.
@@ -155,6 +156,10 @@ normalisation; `envelopeValueAt` interpolation and out-of-range 0), `lipsync-dri
 phase, duration clamp), `speaking-state` (start/stop; energy passthrough).
 
 ## Phase 6 — record findings
+
+**Done 2026-09-19.** §6.2 (cache mutation shared across channels, no idle group), §6.3 (measured per-frame order and
+`loadParam()` restore), §6.4 (three-arm result and the native decision), §6.6 (lip-sync row) and §7 items 4, 7-11
+carry the lab's observed answers. Item 11 (semantic emotion channels) stays open by design.
 
 Update `docs/AVATAR-PRESENTATION.md` §6 with the engine corrections established during design and execution (hook
 semantics; no matching automatic idle group in these costumes; lipsync floor `[0.1,1] × 0.4`; dB-normalised analyser;
