@@ -1455,3 +1455,26 @@ Closed the owner-accepted Home continuity work, recorded deferred permission UX 
 ### Next Steps
 
 - Complete Heartbeat scope/design and review incoming Memory lineage before implementation.
+
+
+## Session 32: Avatar lab panel acceptance, native lip-sync verdict and closeout
+
+**Date**: 2026-09-19
+**Task**: Avatar lab panel acceptance, native lip-sync verdict and closeout
+**Branch**: `task/t4-skills-mcp-productization`
+
+### Summary
+
+Implemented and formally checked the Lab three-arm mouth comparison, pose preview and face view; browser acceptance 24/24 on real Fish audio. Owner judged native lip-sync sufficient; custom mouth path closed, wawa benchmark not run. Recorded engine per-frame order in live2d-renderer.md, wrote AVATAR-PRESENTATION section 6/7 answers, archived the lab task. Next: D80/D69 avatar command outcome, then the A-series renderer batch.
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8694355` | (see git log) |
+| `328c5ea` | (see git log) |
+| `7814a5e` | (see git log) |
+
+### Status
+
+[OK] **Completed**
