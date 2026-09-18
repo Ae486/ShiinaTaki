@@ -380,7 +380,8 @@ export type {
 } from "./hindsight-source-evidence-schema.ts";
 export { HindsightCurrentCaptureSchema } from "./hindsight-current-capture-schema.ts";
 export type { HindsightCurrentDisposition, HindsightCurrentCapture } from "./hindsight-current-capture-schema.ts";
-export { HindsightCurrentJsonObjectSchema, HindsightCurrentCanonicalDerivedPayloadSchema } from "./hindsight-current-canonical-schema.ts";
+export { HindsightCurrentJsonObjectSchema, HindsightCurrentCanonicalBankSchema, HindsightCurrentCanonicalSourceSchema,
+  HindsightCurrentCanonicalUnitSchema, HindsightCurrentCanonicalRecordSchema, HindsightCurrentCanonicalDerivedPayloadSchema } from "./hindsight-current-canonical-schema.ts";
 export {
   HINDSIGHT_CURRENT_STATE_BUILD, HINDSIGHT_CURRENT_STATE_VERSION, HINDSIGHT_CURRENT_STATE_ENCODING,
   HINDSIGHT_CURRENT_STATE_MAX_RECORDS, HINDSIGHT_CURRENT_STATE_MAX_BYTES,
@@ -409,3 +410,65 @@ export type { HindsightCutoverVerificationRequest, HindsightCutoverRequirement, 
   HindsightCutoverCertificate, HindsightCutoverEvidencePage, HindsightCutoverVerificationStatus,
   HindsightCutoverVerificationFailure, HindsightCurrentVerificationCandidate,
   HindsightCurrentVerificationEvidence } from "./hindsight-cutover-verification-schema.ts";
+export { TAKI_MEMORY_DEFAULT_IMPORTANCE, TakiApplicationPolicyBasisSchema, TakiApplicationAssessmentFailureSchema,
+  TakiApplicationAssessmentSchema, TakiApplicationMemoryBodySchema } from "./memory-policy-assessment-schema.ts";
+export type { TakiApplicationPolicyBasis, TakiApplicationAssessmentFailure, TakiApplicationAssessment,
+  TakiApplicationMemoryBody } from "./memory-policy-assessment-schema.ts";
+export { HINDSIGHT_APPLICATION_STATE_VERSION, HINDSIGHT_APPLICATION_STATE_BUILD, HINDSIGHT_APPLICATION_PART_BYTES, HINDSIGHT_APPLICATION_RESPONSE_BYTES,
+  HINDSIGHT_APPLICATION_UPLOAD_BYTES, TakiApplicationNamespaceSchema, TakiApplicationNativeVersionSchema,
+  TakiApplicationNativeTombstoneSchema, TakiApplicationArtifactKeySchema, TakiApplicationArtifactVersionSchema,
+  TakiApplicationCheckpointSchema, TakiApplicationBodyRefSchema, TakiApplicationInitializeResponseSchema,
+  TakiApplicationFailureCodeSchema, TakiApplicationTimeSchema, TakiApplicationIdSchema,
+  TakiApplicationObjectKindSchema } from "./hindsight-application-primitives-schema.ts";
+export { HINDSIGHT_APPLICATION_DEFAULT_TTL_SECONDS, HINDSIGHT_APPLICATION_MAX_TTL_SECONDS } from "./hindsight-application-primitives-schema.ts";
+export type { TakiApplicationNamespace, TakiApplicationNativeVersion, TakiApplicationNativeTombstone,
+  TakiApplicationArtifactKey, TakiApplicationArtifactVersion, TakiApplicationCheckpoint, TakiApplicationBodyRef,
+  TakiApplicationBodySchema, TakiApplicationFailureCode, TakiApplicationInitializeResponse } from "./hindsight-application-primitives-schema.ts";
+export { TakiApplicationJsonValueSchema, TakiApplicationJsonObjectSchema, hindsightApplicationWireJson } from "./hindsight-application-json.ts";
+export { parseHindsightApplicationJson } from "./hindsight-application-json-reader.ts";
+export { HINDSIGHT_APPLICATION_ENCODING, HINDSIGHT_APPLICATION_NATIVE_ENCODING,
+  hindsightApplicationDigestJson, hindsightApplicationTaggedJson } from "./hindsight-application-encoding.ts";
+export type { HindsightApplicationDigestDomain } from "./hindsight-application-encoding.ts";
+export { RecallPendingOverlayEntrySchema, RecallPendingMutationOverlayEntrySchema,
+  PendingMutationResultSchema } from "./memory-provider-operation-schema.ts";
+export type { RecallPendingOverlayEntry, RecallPendingMutationOverlayEntry, PendingMutationResult } from "./memory-provider-operation-schema.ts";
+export { HindsightNativeRecallRequestSchema, HindsightNativeRecallResponseSchema,
+  HindsightNativeReflectRequestSchema, HindsightNativeReflectResponseSchema } from "./hindsight-native-runtime-schema.ts";
+export type { HindsightNativeRecallRequest, HindsightNativeRecallResponse,
+  HindsightNativeReflectRequest, HindsightNativeReflectResponse } from "./hindsight-native-runtime-schema.ts";
+export { TakiApplicationBankBodySchema, TakiApplicationSourceBodySchema, TakiApplicationBlockBodySchema,
+  TakiApplicationBindingSchema, TakiApplicationArtifactSchema, TakiApplicationActorSchema, TakiApplicationCommandSchema,
+  TakiApplicationCommandsSchema, TakiApplicationCommitRequestSchema, TakiApplicationCommitReceiptSchema,
+  TakiApplicationCommitStatusSchema, TakiApplicationErrorResponseSchema, TakiApplicationAffectedVersionsSchema } from "./hindsight-application-artifact-schema.ts";
+export type { TakiApplicationBankBody, TakiApplicationSourceBody, TakiApplicationBlockBody, TakiApplicationBinding,
+  TakiApplicationArtifact, TakiApplicationActor, TakiApplicationCommand, TakiApplicationCommands,
+  TakiApplicationCommitRequest, TakiApplicationCommitReceipt, TakiApplicationCommitStatus,
+  TakiApplicationErrorResponse, TakiApplicationAffectedVersions } from "./hindsight-application-artifact-schema.ts";
+export { TakiApplicationBodyUploadRequestSchema, TakiApplicationBodyUploadStatusSchema, TakiApplicationBodyPartRequestSchema,
+  TakiApplicationBodyPartReceiptSchema, TakiApplicationBodyPartSchema } from "./hindsight-application-body-schema.ts";
+export type { TakiApplicationBodyUploadRequest, TakiApplicationBodyUploadStatus, TakiApplicationBodyPartRequest,
+  TakiApplicationBodyPartReceipt, TakiApplicationBodyPart } from "./hindsight-application-body-schema.ts";
+export { TakiApplicationNativePayloadSchema, TakiApplicationNativeRecordSchema, TakiApplicationNativeSourceEvidenceSchema,
+  TakiApplicationNativeHeadSchema } from "./hindsight-application-native-schema.ts";
+export type { TakiApplicationNativePayload, TakiApplicationNativeRecord, TakiApplicationNativeSourceEvidence,
+  TakiApplicationNativeHead } from "./hindsight-application-native-schema.ts";
+export { TakiApplicationSelectorSchema, TakiApplicationRecordDescriptorSchema, TakiApplicationRecordPageSchema,
+  TakiApplicationReadBundleManifestSchema, TakiApplicationSnapshotRequestSchema, TakiApplicationHydrateRequestSchema,
+  TakiApplicationStateChangeManifestSchema, TakiApplicationStateChangePageSchema, TakiApplicationPruneRequestSchema,
+  TakiApplicationReadContextSchema, TakiApplicationReflectAdmissionSchema, TakiApplicationReflectRequestSchema,
+  TakiApplicationReflectResponseSchema } from "./hindsight-application-read-schema.ts";
+export type { TakiApplicationSelector, TakiApplicationRecordDescriptor, TakiApplicationRecordPage,
+  TakiApplicationReadBundleManifest, TakiApplicationSnapshotRequest, TakiApplicationHydrateRequest,
+  TakiApplicationStateChangeManifest, TakiApplicationStateChangePage, TakiApplicationReadContext,
+  TakiApplicationReflectAdmission, TakiApplicationReflectRequest, TakiApplicationReflectResponse } from "./hindsight-application-read-schema.ts";
+export { TakiApplicationBodyContentSchema, parseTakiApplicationBody } from "./hindsight-application-content-schema.ts";
+export type { TakiApplicationBodyContent } from "./hindsight-application-content-schema.ts";
+export { HindsightApplicationStateContractSchema, HindsightApplicationReflectContractSchema } from "./hindsight-connection-schema.ts";
+export { HindsightApplicationReplicaPayloadSchema, HindsightApplicationReplicaRecordSchema } from "./hindsight-application-replica-schema.ts";
+export type { HindsightApplicationReplicaPayload, HindsightApplicationReplicaRecord } from "./hindsight-application-replica-schema.ts";
+export { HindsightMemoryRecallResultV1Schema, HindsightMemoryReflectResultV1Schema, HindsightMemoryMutationResultV1Schema,
+  HindsightMemoryRetainResultV1Schema, HindsightMemoryRetainCompletedResultV1Schema,
+  HindsightMemoryRecallEnvelopeV1Schema, HindsightMemoryReflectEnvelopeV1Schema,
+  HindsightMemoryMutationEnvelopeV1Schema, HindsightMemoryRetainEnvelopeV1Schema } from "./hindsight-memory-consumer-schema.ts";
+export type { HindsightMemoryRecallResultV1, HindsightMemoryReflectResultV1, HindsightMemoryMutationResultV1,
+  HindsightMemoryRetainResultV1, HindsightMemoryRetainCompletedResultV1 } from "./hindsight-memory-consumer-schema.ts";

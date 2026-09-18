@@ -5,12 +5,12 @@
  * POS:    core/memory — T5 Q11-1 policy: the auto path picks its own layer but can never reach the always-visible
  *         rung. Choice set and ceiling are both DERIVED from the layer registry; nothing here hardcodes a threshold.
  */
+import { TAKI_MEMORY_DEFAULT_IMPORTANCE } from "@taki/shared";
 import { AUTO_WRITABLE_LAYER_IDS, getLayer } from "./layer-registry.ts";
 
 // Bounds for a layer that pins nothing: the auto path stays mid-range because it judges from a transcript alone.
 const AUTO_IMPORTANCE_MIN = 3;
 const AUTO_IMPORTANCE_MAX = 7;
-const AUTO_IMPORTANCE_DEFAULT = 5;
 
 // Used when the model omits `layer` — the least-visible per-character layer, which is what the auto path wrote
 // unconditionally before T5. Asserted to be a real choice so a registry edit cannot leave it dangling.
@@ -56,6 +56,6 @@ export function autoImportanceCeiling(threshold: number | undefined): number {
  */
 export function clampAutoImportance(layer: string, value: number | undefined): number {
   const max = autoImportanceCeiling(getLayer(layer)?.pinnedImportanceThreshold);
-  const rounded = Math.round(value ?? AUTO_IMPORTANCE_DEFAULT);
+  const rounded = Math.round(value ?? TAKI_MEMORY_DEFAULT_IMPORTANCE);
   return Math.max(AUTO_IMPORTANCE_MIN, Math.min(max, rounded));
 }

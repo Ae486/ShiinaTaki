@@ -58,7 +58,7 @@ export function createImageDescriptionWriter(deps: ImageDescriptionWriterDeps): 
         // assembler renders stored entries later without it, so a fenced string would be stored, not fenced. The entry
         // instead carries origin "observed" (Q8), which is what lets the render sites fence it (D47 closes in T5).
         // ONE entry via the EXISTING episodic write path (no new memory machinery — D28); the prefix keeps recall readable.
-        deps.writeEpisode({
+        await deps.writeEpisode({
           characterId,
           layer: IMAGE_LAYER,
           content: `[image] ${scrubPii(description)}`,

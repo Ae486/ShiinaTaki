@@ -9,7 +9,7 @@
  *         a classified context-overflow retries ONCE against the same captured Run extension context
  */
 import { ToolLoopAgent, isStepCount, type LanguageModel, type ModelMessage, type StopCondition, type Telemetry, type ToolSet } from "ai";
-import type { ChatSendParams, ImageAttachment } from "@taki/shared";
+import type { ChatSendParams, ImageAttachment, RunMemoryReference, TimelineEntry } from "@taki/shared";
 import type { ApprovalGate } from "../approval/approval-gate.ts";
 import type { Connection } from "../server/connection-registry.ts";
 import { COSTUME_CHANGE_NOTICE } from "../avatar/costume-notice.ts";
@@ -27,6 +27,8 @@ import { measurePostTurnRequest, prepareOutgoingRequest, type RequestPreparation
 import type { TurnMessage, UserImageInput } from "./turn-mapping.ts";
 import type { EffectLifecycleService } from "../harness/effect-lifecycle-service.ts";
 import { createRunObservabilityModel, type ToolEffectObserver } from "./run-observability-telemetry.ts";
+import type { AutomaticMemoryRecall } from "../memory/automatic-memory-recall.ts";
+import type { PrimaryConversationCommit } from "../memory/canonical-ingestion-source.ts";
 
 /** Per-turn execution handle. Primary chat supplies a WS connection; unattended non-primary Runs omit it. */
 export interface TurnContext {
@@ -70,6 +72,10 @@ export interface AgentRunContext {
   readonly tools?: ToolSet;
   /** Memory authority tool closures captured at Admission so a queued Run cannot switch epochs before execution. */
   readonly memoryTools?: ToolSet;
+  readonly memorySnapshot?: RunMemoryReference;
+  readonly automaticMemoryRecall?: AutomaticMemoryRecall;
+  readonly memoryPrompt?: string;
+  readonly assembleMemory?: (currentMessage: string) => string;
   readonly instructions?: string;
   dispose?(): void;
 }
@@ -83,6 +89,8 @@ export interface ChatAgentDeps {
   memoryPrompt?: string | (() => string);
   /** Optional auto-write orchestrator; when present, fired detached after each turn (existing tests omit it). */
   autoMemory?: AutoMemory;
+  /** Exact committed primary rows, never a queried seq range. The composition root persists source witnesses. */
+  onPrimaryCommitted?: (input: PrimaryConversationCommit) => void;
   /** Vision model slot (TAKI_VLM_*, #17 decision 5); image-bearing turns route here. Absent = image turns rejected. */
   visionModel?: LanguageModel;
   /** Content-addressed attachment writer — a NARROW structural type (zero coupling to the media module). */
@@ -154,8 +162,10 @@ interface TurnAttempt {
   images: UserImageInput[];
   vision: VisionDeps | null;
   userSeq?: number;
+  userEntry?: TimelineEntry;
   primary: boolean;
   runContext?: AgentRunContext;
+  recall: { result?: Promise<string> };
   state: AttemptState;
 }
 
@@ -185,7 +195,7 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
   if (approval && turn) wireApprovalDenial(approval, turn);
   const runContext = turn?.runContext ?? deps.runContext?.(turn);
   const ownsRunContext = turn?.runContext === undefined;
-  const base = { characterId, message, attachments, images, vision, userSeq: userEntry?.seq, primary, runContext };
+  const base = { characterId, message, attachments, images, vision, userSeq: userEntry?.seq, userEntry, primary, runContext, recall: {} };
   // R2 retry seam (batch 6): ONE overflow-classified retry around the whole attempt. Retry ONLY when the failed
   // attempt was provably side-effect-free — zero text yielded (nothing user-visible lost) AND zero completed steps
   // (no tool can have acted; re-running the model after a completed tool step could act twice — the error-handling
@@ -229,7 +239,8 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   const controlMessage = turn?.controlInput ?? message; const replay = store.project(characterId); const history = replay.messages;
   // ONE clock read per attempt: the instructions' day line and the tail's time line must agree (Q4).
   const now = Date.now();
-  const instructions = composeInstructions(deps, { characterId, message: controlMessage, runInstructions: attempt.runContext?.instructions }, now);
+  const memoryContext = attempt.runContext?.assembleMemory?.(controlMessage) ?? deps.memory.assemble({ characterId, currentMessage: controlMessage });
+  const instructions = composeInstructions(deps, { characterId, memoryContext, memoryPrompt: attempt.runContext?.memoryPrompt, runInstructions: attempt.runContext?.instructions }, now);
   const selectedModel = vision ? vision.model : deps.model; const { model, observability } = createRunObservabilityModel({ model: selectedModel, lifecycle: deps.effectLifecycle, runId: turn?.runId, attemptId: turn?.attemptId });
   if (turn && observability) turn.toolObserver = observability.tools;
   const tools = assembleTurnTools(deps, attempt, turn); const toolOrder = Object.keys(tools).sort((left, right) => left < right ? -1 : left > right ? 1 : 0);
@@ -260,7 +271,9 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
   // consumeCostumeChanged fires here even if the turn is later cancelled/retracted or R2-retried (baseline advances
   // anyway, and a retry attempt carries no second notice → a rare skipped notice, backstopped by the 1e enum;
   // accepted narrow edge).
-  const initialOutgoing = buildOutgoing({ history, isImageTurn: vision !== null, message: controlMessage, attachments, changed: primary ? (deps.costumeChanged?.(characterId) ?? false) : false, tail: buildTurnTail(now, deps.volatileContext), primary });
+  attempt.recall.result ??= recallMemory(attempt, { query: message, visibleContext: memoryContext, now, signal: turn?.signal });
+  const recalled = await attempt.recall.result;
+  const initialOutgoing = buildOutgoing({ history, isImageTurn: vision !== null, message: controlMessage, attachments, changed: primary ? (deps.costumeChanged?.(characterId) ?? false) : false, tail: buildTurnTail(now, deps.volatileContext, recalled), primary });
   // Provider maintenance may still be pending when an autonomous Run starts. Its ephemeral control envelope must
   // not replace the last primary pressure snapshot used to decide whether the relationship Timeline needs compaction.
   const preparationDeps = primary ? deps : { ...deps, onRequestMeasured: undefined };
@@ -275,6 +288,7 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
 
   // finish-step clears in-flight text once that step is present in responseMessages, avoiding duplicate persistence.
   let pendingStepText = ""; let streamEnded = false;
+  const committed = attempt.userEntry ? [attempt.userEntry] : [];
   try {
     try {
       // Iterate result.stream (not textStream) so a provider failure surfaces as an error part rather than being
@@ -293,16 +307,18 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
       observability?.assertHealthy(); streamEnded = true;
     } finally {
       // Persist whatever the turn produced — completed steps AND partial text — even on abort/error (D1 #1/#5).
-      if (primary) await persistTurn(store, characterId, { result, pendingStepText, streamEnded });
+      if (primary) await persistTurn(store, characterId, { result, pendingStepText, streamEnded, onCommitted: (entry) => committed.push(entry) });
     }
   } catch (error) {
     // Throw ending of a cancel: the transport rejects the read with our string reason (fails isAbortError), so the
     // SDK errors the stream — same retract rule as the graceful ending (see retractIfCancelledSilent); else propagate.
     if (primary && userSeq !== undefined && await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
+    if (primary && committed.length > 1) deps.onPrimaryCommitted?.({ characterId, entries: committed, runId: turn?.runId });
     throw error;
   }
   // Graceful ending (the SDK emitted an `abort` part then closed): the same retract check on the clean path.
   if (primary && userSeq !== undefined && await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
+  if (primary) deps.onPrimaryCommitted?.({ characterId, entries: committed, runId: turn?.runId });
   if (primary) measurePostTurnRequest(deps, { characterId, instructions, tools, toolOrder, toolSchemaTokens: prepared.toolSchemaTokens, store });
   if (primary) fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
   if (primary) fireUsageReport(deps, { characterId, usage: result.usage, instructions, outgoing, tools, toolOrder, preparedTools, replay: replay.measurement });
@@ -407,10 +423,16 @@ function buildOutgoing(args: {
 // an <untrusted-observation> fence inside it keeps conveying "data, never instructions" — two orthogonal contracts,
 // two tags. The tag NAME is a LOCAL choice (grep-verified unused in-tree); the PATTERN is Claude Code's
 // <system-reminder> / Codex's <environment_context> (rb §P1 verdict).
-function buildTurnTail(now: number, volatileContext?: (now: number) => string): string {
+function buildTurnTail(now: number, volatileContext?: (now: number) => string, recalled = ""): string {
   const volatile = volatileContext?.(now) ?? "";
-  const body = volatile.length > 0 ? `${renderCurrentTime(now)}\n\n${volatile}` : renderCurrentTime(now);
+  const body = [renderCurrentTime(now), volatile, recalled].filter((part) => part.length > 0).join("\n\n");
   return `<turn-context>\n${body}\n</turn-context>`;
+}
+
+async function recallMemory(attempt: TurnAttempt, input: Parameters<AutomaticMemoryRecall>[0]): Promise<string> {
+  if (!attempt.primary) return "";
+  try { return await attempt.runContext?.automaticMemoryRecall?.(input) ?? ""; }
+  catch { return ""; } // A failed optional read must not prevent the foreground response.
 }
 
 // The canonical v7 multimodal user message: a FilePart per attachment (ImagePart is @deprecated in v7), `data` = RAW
@@ -424,6 +446,7 @@ interface TurnOutcome {
   result: { responseMessages: PromiseLike<TurnMessage[]> };
   pendingStepText: string;
   streamEnded: boolean;
+  onCommitted?: (entry: TimelineEntry) => void;
 }
 
 // On a clean end (including a graceful abort) the stream was fully consumed, so responseMessages settles: it
@@ -435,12 +458,12 @@ async function persistTurn(store: ConversationStore, characterId: string, outcom
       (messages) => messages,
       () => [] as TurnMessage[],
     );
-    if (completed.length > 0) store.appendTurn(characterId, completed);
+    if (completed.length > 0) store.appendTurn(characterId, completed, outcome.onCommitted);
   }
   // The interrupted step's partial text exists only in our accumulator (the SDK never finalizes that step); the
   // transcript must never lose what the user already saw — on abort AND on a thrown mid-stream error (D1 #5).
   // A clean completion cleared it at the final finish-step, so this only fires for interrupted turns.
-  if (outcome.pendingStepText.length > 0) store.appendAssistant(characterId, outcome.pendingStepText);
+  if (outcome.pendingStepText.length > 0) store.appendAssistant(characterId, outcome.pendingStepText, outcome.onCommitted);
 }
 
 // Instructions = the stable base prompt (identity + the "never claim a tool ran without a tool-result" floor, D1 #2),
@@ -451,14 +474,13 @@ async function persistTurn(store: ConversationStore, characterId: string, outcom
 // dropped; the skills list enters HERE, never through the memory assembler (module boundary, ruling 10).
 function composeInstructions(
   deps: ChatAgentDeps,
-  turn: { characterId: string; message: string; runInstructions?: string },
+  turn: { characterId: string; memoryContext: string; memoryPrompt?: string; runInstructions?: string },
   now: number,
 ): string {
-  const assembled = deps.memory.assemble({ characterId: turn.characterId, currentMessage: turn.message });
   return [
-    resolveMemoryPrompt(deps.memoryPrompt),
+    turn.memoryPrompt ?? resolveMemoryPrompt(deps.memoryPrompt),
     renderDayDate(now),
-    assembled,
+    turn.memoryContext,
     deps.instructionsExtra?.(turn.characterId) ?? "",
     turn.runInstructions ?? "",
   ]

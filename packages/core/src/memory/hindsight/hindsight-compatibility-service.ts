@@ -9,6 +9,7 @@ import {
   HINDSIGHT_COMPATIBILITY_BUILD,
   HINDSIGHT_NATIVE_RESULT_BUILD,
   HINDSIGHT_CURRENT_STATE_BUILD,
+  HINDSIGHT_APPLICATION_STATE_BUILD,
   HINDSIGHT_COMPATIBILITY_VERSION,
   HindsightCompatibilityProjectionSchema,
   type HindsightCompatibilityProjection,
@@ -50,14 +51,14 @@ async function validateCompatibility(input: {
   const version = await input.client.version(context);
   if (version.apiVersion !== HINDSIGHT_API_VERSION) throw hindsightError("HINDSIGHT_VERSION_UNSUPPORTED");
   const manifest = await input.client.compatibility(context);
-  const compatibility = projectManifest(manifest);
+  const compatibility = projectHindsightCompatibilityManifest(manifest);
   return { fingerprint: fingerprint(input.connection, input.secretMarker), compatibility };
 }
 
-function projectManifest(manifest: HindsightCompatibilityWire): HindsightCompatibilityProjection {
+export function projectHindsightCompatibilityManifest(manifest: HindsightCompatibilityWire): HindsightCompatibilityProjection {
   const build = manifest.source_identity.compatibility_build;
   if (manifest.base_api_version !== HINDSIGHT_API_VERSION || manifest.compatibility_version !== HINDSIGHT_COMPATIBILITY_VERSION ||
-      ![HINDSIGHT_COMPATIBILITY_BUILD, HINDSIGHT_NATIVE_RESULT_BUILD, HINDSIGHT_CURRENT_STATE_BUILD].includes(build)) {
+      ![HINDSIGHT_COMPATIBILITY_BUILD, HINDSIGHT_NATIVE_RESULT_BUILD, HINDSIGHT_CURRENT_STATE_BUILD, HINDSIGHT_APPLICATION_STATE_BUILD].includes(build)) {
     throw hindsightError("HINDSIGHT_EXTENSION_UNSUPPORTED");
   }
   if (manifest.provider.database_dialect !== "postgresql" || manifest.provider.storage_mode !== "sql_rows" || manifest.provider.lineage === null) {
@@ -90,6 +91,10 @@ function projectManifest(manifest: HindsightCompatibilityWire): HindsightCompati
       ...(manifest.contracts.native_results ? { nativeResults: manifest.contracts.native_results } : {}),
       ...(manifest.contracts.current_state_transfer ? { currentStateTransfer: manifest.contracts.current_state_transfer } : {}),
       ...(manifest.contracts.cutover_verification ? { cutoverVerification: manifest.contracts.cutover_verification } : {}),
+      ...(manifest.contracts.application_state ? { applicationState: {
+        version: manifest.contracts.application_state.version, support: manifest.contracts.application_state.support } } : {}),
+      ...(manifest.contracts.application_reflect ? { applicationReflect: {
+        version: manifest.contracts.application_reflect.version, support: manifest.contracts.application_reflect.support } } : {}),
     },
   });
 }

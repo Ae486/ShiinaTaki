@@ -11,5 +11,9 @@
 - ws-test-client.ts — WS integration-test client harness (makeClient/openClient + frame helpers); test-only
 - hindsight-http-test-fixture.ts — ephemeral loopback HTTP servers and observable unfinished-response cancellation for Hindsight clients; test-only
 - capability-tool-harness.ts — ConnectionRegistry + CapabilityBroker doubles, a REAL in-memory Approval service, and operator/Host Connection fakes for the Shell-backed capability tools; test-only
-- run-service-stub.ts — in-memory RunService contract for transport tests that do not exercise SQLite lifecycle semantics; test-only
+- run-service-stub.ts — in-memory RunService contract including the internal admission manifest for transport tests that do not exercise SQLite lifecycle semantics; test-only
 - seed-timeline-cli.ts — pre-boot CLI seeding timeline rows into <dataDir>/taki.db via the real migrations + repo (e2e polluted-history); test-only
+- hindsight-application-fixtures.ts — complete hash-consistent D77 bundles/events and V1 baseline manifest fixtures
+- hindsight-application-runtime-fixtures.ts — bound native/artifact fixtures, an admitted capability manifest and an isolated SQLite authority
+
+- hindsight-runtime-composition-fixtures.ts — isolated SQLite/B3 runtime construction with exact native selectors and complete application history

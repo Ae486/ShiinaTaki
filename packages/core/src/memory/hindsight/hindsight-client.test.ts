@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createHindsightClient, type HindsightTransport } from "./hindsight-client.ts";
+import { createHindsightClient, type HindsightTransport, type HindsightTransportResponse } from "./hindsight-client.ts";
 
 const key = "hindsight-test-secret";
 const manifest = {
@@ -18,6 +18,31 @@ function client(transport: HindsightTransport, resolveApiKey: () => string | nul
 const context = { timeoutMs: 1_000 };
 
 describe("Hindsight client", () => {
+  it.each(["caller", "deadline"])("settles on %s interruption even when transport ignores abort and contains its late outcome", async (cause) => {
+    vi.useFakeTimers();
+    try {
+      for (const ending of ["resolve", "reject"]) {
+        let resolve!: (value: HindsightTransportResponse) => void; let reject!: (error: Error) => void;
+        const transport = vi.fn<HindsightTransport>(() => new Promise((yes, no) => { resolve = yes; reject = no; }));
+        const caller = new AbortController(); const readLateBody = vi.fn(() => '{"status":"healthy","database":"connected"}');
+        const response = { status: 200, get body() { return readLateBody(); } };
+        let observed: unknown;
+        const result = client(transport).health({ timeoutMs: 20, signal: caller.signal })
+          .catch((error: unknown) => { observed = error; return error; });
+        try {
+          if (cause === "caller") caller.abort("private caller reason");
+          await vi.advanceTimersByTimeAsync(cause === "caller" ? 0 : 20);
+          expect(observed).toMatchObject({ code: cause === "caller" ? "HINDSIGHT_CANCELLED" : "HINDSIGHT_TIMEOUT" });
+          expect(vi.getTimerCount()).toBe(0);
+          if (ending === "resolve") resolve(response); else reject(new Error("private late rejection"));
+          await vi.advanceTimersByTimeAsync(0);
+          expect(readLateBody).not.toHaveBeenCalled(); expect(transport).toHaveBeenCalledOnce();
+          expect(JSON.stringify(await result)).not.toContain("private");
+        } finally { resolve(response); await vi.advanceTimersByTimeAsync(0); await result; }
+      }
+    } finally { vi.useRealTimers(); }
+  });
+
   it.each(["deadline", "caller"])("preserves the first %s when transport settles after both abort signals", async (first) => {
     vi.useFakeTimers();
     try {

@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { createMemoryRunReference } from "../memory/memory-capability-snapshot.ts";
 import type { ExtensionRunContext } from "../extensions/extension-run-context.ts";
 import { createRunSnapshotCapture } from "./run-snapshot-capture.ts";
 
@@ -23,9 +24,8 @@ describe("createRunSnapshotCapture", () => {
       extensions: { runContext: () => context },
       governance: { level: () => ({ level: "standard", policyGeneration: 4, registryRevision: 2 }) },
       approval: { approvalGeneration: () => 7 },
-      memory: { snapshot: () => ({ providerId: "local", authorityEpochId: "epoch-1", contractVersion: 1,
-        capabilities: memoryCapabilities }),
-        createTools: () => memoryTools },
+      memory: { captureRun: async () => ({ snapshot: createMemoryRunReference({ providerId: "local", providerLineageId: "lineage-1", authorityEpochId: "epoch-1", contractVersion: 1,
+        capabilities: memoryCapabilities }), tools: memoryTools }) },
       provider: "openai-compatible",
       modelId: "model",
     });
@@ -33,7 +33,7 @@ describe("createRunSnapshotCapture", () => {
       characterId: "taki", initiator: "primary", provenance: { provider: "chat" },
       deliveryClass: "class_a", contextMode: "primary" }, context.snapshot.runId);
     expect(result.context).toMatchObject({ tools: context.tools, instructions: context.instructions });
-    expect(result.context?.memoryTools).toBe(memoryTools);
+    expect(result.context?.memoryTools).toEqual(memoryTools);
     expect(result.snapshot).toMatchObject({ primaryHostId: hostId,
       hosts: [{ hostId, connectionGeneration: 2, catalogGeneration: 3 }],
       extensions: [{ extensionId, subjectRevision: "rev" }],
@@ -47,5 +47,37 @@ describe("createRunSnapshotCapture", () => {
     expect(persisted).not.toContain("secret prompt instructions");
     expect(persisted).not.toContain("Secret display");
     expect(persisted).not.toContain("Secret description");
+  });
+
+  it("captures memory once and keeps its exact immutable snapshot plus process-local ports", async () => {
+    const caps = { ...memoryCapabilities };
+    const snapshot = createMemoryRunReference({ providerId: "local", providerLineageId: "lineage", authorityEpochId: "epoch",
+      contractVersion: 1, capabilities: caps });
+    const automaticRecall = vi.fn(async () => "PRIVATE_RECALLED_CONTENT");
+    const assemble = vi.fn(() => "PRIVATE_STABLE_MEMORY");
+    const memoryTools = { recall: { description: "original", execute: vi.fn() } as never };
+    const captureRun = vi.fn(async () => ({ snapshot, tools: memoryTools, automaticRecall, assemble, prompt: "PRIVATE_PROCEDURE" }));
+    const capture = createRunSnapshotCapture({ memory: { captureRun },
+      extensions: { runContext: () => ({ tools: {}, instructions: "", snapshot: { runId: "run", hosts: [], entries: [],
+        primaryHostId: hostId, collisions: [], budget: { maxEntries: 1, maxDescriptionChars: 1, maxSearchResults: 1, maxCalls: 1 } } }) },
+      governance: { level: () => ({ level: "standard", policyGeneration: 1, registryRevision: 1 }) },
+      provider: "test", modelId: "test" });
+    const result = await capture.capture({ triggerRequestId: "trigger", idempotencyKey: "idempotency", characterId: "taki",
+      initiator: "primary", provenance: { provider: "chat" }, deliveryClass: "class_a", contextMode: "primary" }, "run");
+    expect(captureRun).toHaveBeenCalledExactlyOnceWith("taki");
+    expect(result.snapshot.memory).toBe(snapshot);
+    expect(result.context?.memorySnapshot).toBe(snapshot);
+    expect(result.context?.automaticMemoryRecall).toBe(automaticRecall);
+    expect(result.context?.assembleMemory).toBe(assemble);
+    expect(result.context?.memoryPrompt).toBe("PRIVATE_PROCEDURE");
+    caps.recall = false;
+    memoryTools.recall = { description: "replacement" } as never;
+    expect(result.context?.memoryTools?.recall?.description).toBe("original");
+    expect(snapshot.capabilities.recall).toBe(true);
+    expect(Object.isFrozen(result.context?.memoryTools?.recall)).toBe(true);
+    expect(Object.isFrozen(snapshot.capabilities)).toBe(true);
+    expect(JSON.stringify(result.snapshot)).not.toContain("PRIVATE_");
+    expect(automaticRecall).not.toHaveBeenCalled();
+    expect(assemble).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,6 @@
 /**
  * INPUT:  an optional injected transport, endpoint policy, and just-in-time API-key resolver
- * OUTPUT: authenticated, bounded Hindsight 0.9.0 endpoint operations with sanitized errors
+ * OUTPUT: authenticated, bounded Hindsight 0.9.0 operations with prompt cancellation and sanitized errors
  * POS:    core/memory/hindsight — OS-neutral REST seam; no retries, process, filesystem, or authority wiring
  */
 import { type HindsightBankLlmHealthProjection, type HindsightErrorCode } from "@taki/shared";
@@ -29,6 +29,8 @@ import { HindsightJournalWireSchema, normalizeHindsightJournal } from "./hindsig
 import { createHindsightPendingMethods, type HindsightPendingClient } from "./hindsight-pending-client.ts";
 import { createHindsightNativeResultMethods, type HindsightNativeResultClient } from "./hindsight-native-result-client.ts";
 import { createHindsightCurrentMethods, type HindsightCurrentStateClient } from "./hindsight-current-client.ts";
+import { createHindsightRuntimeMethods, type HindsightRuntimeClient } from "./hindsight-runtime-client.ts";
+import { createHindsightApplicationMethods, type HindsightApplicationClient } from "./hindsight-application-client.ts";
 
 export interface HindsightTransportResponse {
   status: number;
@@ -41,7 +43,7 @@ export interface HindsightCallContext {
   timeoutMs: number;
   attemptId?: string;
 }
-export interface HindsightClient extends Partial<HindsightPendingClient>, Partial<HindsightNativeResultClient>, Partial<HindsightCurrentStateClient> {
+export interface HindsightClient extends Partial<HindsightPendingClient>, Partial<HindsightNativeResultClient>, Partial<HindsightCurrentStateClient>, Partial<HindsightRuntimeClient>, Partial<HindsightApplicationClient> {
   health(context: HindsightCallContext): Promise<{ status: "healthy"; database: "connected" }>;
   version(context: HindsightCallContext): Promise<{ apiVersion: string }>;
   compatibility(context: HindsightCallContext): Promise<HindsightCompatibilityWire>;
@@ -128,7 +130,8 @@ function createClientMethods(request: <T>(input: HindsightRequestInput<T>) => Pr
     },
   };
   return Object.assign(methods, createSnapshotMethods(request), createJournalMethods(request),
-    createHindsightPendingMethods(request), createHindsightNativeResultMethods(request), createHindsightCurrentMethods(request));
+    createHindsightPendingMethods(request), createHindsightNativeResultMethods(request), createHindsightCurrentMethods(request),
+    createHindsightRuntimeMethods(request), createHindsightApplicationMethods(request));
 }
 
 function createJournalMethods(request: <T>(input: HindsightRequestInput<T>) => Promise<T>): Pick<HindsightClient, "changesAfter"> {
@@ -201,7 +204,7 @@ async function requestJson<T>(input: RequestJsonInput<T>): Promise<T> {
   const firstAbort = { reason: signal.aborted ? signal.reason : undefined };
   const abortListener = addAbortListener(signal, () => { firstAbort.reason = signal.reason; });
   try {
-    const response = await input.transport(new URL(input.path, input.endpoint), { ...input.init, signal, redirect: "manual", headers: { ...(input.init?.headers ?? {}), authorization: `Bearer ${apiKey}`, "content-type": "application/json", accept: "application/json" } }, input.maxResponseBytes);
+    const response = await awaitTransport(signal, () => input.transport(new URL(input.path, input.endpoint), { ...input.init, signal, redirect: "manual", headers: { ...(input.init?.headers ?? {}), authorization: `Bearer ${apiKey}`, "content-type": "application/json", accept: "application/json" } }, input.maxResponseBytes));
     requireActiveRequest(signal, controller.signal, firstAbort.reason);
     const expectedResponse = input.responses?.[response.status];
     if (expectedResponse) {
@@ -230,6 +233,21 @@ async function requestJson<T>(input: RequestJsonInput<T>): Promise<T> {
   }
 }
 
+function awaitTransport<T>(signal: AbortSignal, dispatch: () => Promise<T>): Promise<T> {
+  if (signal.aborted) return Promise.reject(hindsightError("HINDSIGHT_CANCELLED"));
+  return new Promise((resolve, reject) => {
+    const listener = addAbortListener(signal, () => {
+      listener[Symbol.dispose](); reject(hindsightError("HINDSIGHT_CANCELLED"));
+    });
+    // Cancellation ends only our wait. Keep both handlers attached so a late
+    // delegate outcome is consumed without parsing or acknowledging a write.
+    try {
+      void dispatch().then((value) => { listener[Symbol.dispose](); resolve(value); },
+        (error: unknown) => { listener[Symbol.dispose](); reject(error); });
+    } catch (error) { listener[Symbol.dispose](); reject(error); }
+  });
+}
+
 function parseResponse<T>(response: HindsightTransportResponse, schema: { parse: (value: unknown) => T }, maxBytes = HINDSIGHT_DEFAULT_RESPONSE_BYTES): T {
   if (new TextEncoder().encode(response.body).byteLength > maxBytes) throw hindsightError("HINDSIGHT_RESPONSE_INVALID");
   try { return schema.parse(response.body === "" ? null : JSON.parse(response.body)); }
@@ -250,6 +268,7 @@ function requireActiveRequest(signal: AbortSignal, deadline: AbortSignal, firstR
 
 function mapHttpFailure(status: number, path: string): HindsightError {
   const snapshot = path.includes("/snapshots");
+  const nativeRead = /^\/v1\/default\/banks\/[^/]+\/(?:memories\/recall|reflect)$/.test(path);
   const code: HindsightErrorCode = status === 408 ? "HINDSIGHT_TIMEOUT"
     : (snapshot || path.includes("/changes?")) && status === 409 ? "HINDSIGHT_CURSOR_RESET_REQUIRED"
       : snapshot && status === 410 ? "HINDSIGHT_SNAPSHOT_EXPIRED"
@@ -257,6 +276,7 @@ function mapHttpFailure(status: number, path: string): HindsightError {
           : snapshot && status === 404 ? "HINDSIGHT_SNAPSHOT_NOT_FOUND"
             : status === 409 && path.endsWith("/memories") ? "HINDSIGHT_OPERATION_IDENTITY_CONFLICT"
               : status === 409 ? "HINDSIGHT_TEMPLATE_CONFLICT"
+              : (status === 422 || status === 400) && nativeRead ? "HINDSIGHT_RESPONSE_INVALID"
               : status === 422 || status === 400 ? "HINDSIGHT_TEMPLATE_INVALID" : "HINDSIGHT_RESPONSE_INVALID";
   return hindsightError(code);
 }

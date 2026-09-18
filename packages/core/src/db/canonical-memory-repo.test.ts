@@ -5,9 +5,51 @@ import { createCanonicalMemorySparseRepo } from "./canonical-memory-sparse-repo.
 import { MIGRATIONS } from "./migrations/index-list.ts";
 import { openDatabase } from "./sqlite.ts";
 import { createIntlSegmenterTokenizer } from "../memory/search-tokenizer.ts";
+import { createCanonicalMaintenanceFixture } from "./canonical-memory-maintenance-fixtures.ts";
+import { insertCanonicalUnitAndPolicy } from "./canonical-memory-maintenance-records.ts";
 
 const at = "2026-08-19T00:00:00.000Z";
 describe("canonical source-to-many repository", () => {
+  it.each(["valid", "invalidated"] as const)("replays an unchanged lifecycle result for a source-free imported %s record", (state) => {
+    const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+    try {
+      const fixture = createCanonicalMaintenanceFixture(db);
+      const imported = fixture.make({ unit: { documentId: null, factType: "observation", state,
+        invalidationReason: state === "invalidated" ? "imported" : null,
+        invalidatedAt: state === "invalidated" ? at : null } });
+      insertCanonicalUnitAndPolicy(db, { unit: imported.unit, policy: imported.policy, searchTerms: "imported" });
+      const request = { epochId: fixture.epochId, bankId: "global", memoryId: imported.unit.memoryId,
+        expectedRevision: 1, requestId: "unchanged-import", requestHash: "a".repeat(64), now: at, searchTerms: "imported" };
+      const mutate = () => state === "valid" ? fixture.records.restore(request)
+        : fixture.records.invalidate({ ...request, reason: "imported" });
+      expect(db.prepare("SELECT COUNT(*) AS n FROM canonical_memory_revision_snapshots").get()?.n).toBe(0);
+      const first = mutate();
+      expect(first.outcome).toBe("unchanged");
+      expect(mutate()).toEqual(first);
+      fixture.records.edit({ ...request, requestId: "later-edit", requestHash: "b".repeat(64), patch: { text: "A later revision." } });
+      expect(mutate()).toEqual(first);
+      expect(fixture.records.record(fixture.epochId, "global", imported.unit.memoryId)?.unit.revision).toBe(2);
+    } finally { db.close(); }
+  });
+
+  it("rolls a newly captured unchanged-result snapshot back when its receipt cannot commit", () => {
+    const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+    try {
+      const fixture = createCanonicalMaintenanceFixture(db);
+      const imported = fixture.make({ unit: { documentId: null, factType: "observation" } });
+      insertCanonicalUnitAndPolicy(db, { unit: imported.unit, policy: imported.policy, searchTerms: "imported" });
+      const request = { epochId: fixture.epochId, bankId: "global", memoryId: imported.unit.memoryId,
+        expectedRevision: 1, requestId: "unchanged-import", requestHash: "a".repeat(64), now: at, searchTerms: "imported" };
+      db.exec("CREATE TRIGGER refuse_unchanged_receipt BEFORE INSERT ON canonical_memory_operation_receipts BEGIN SELECT RAISE(ABORT,'fixture receipt failure'); END");
+      expect(() => fixture.records.restore(request)).toThrow("fixture receipt failure");
+      expect(db.prepare("SELECT COUNT(*) AS n FROM canonical_memory_revision_snapshots").get()?.n).toBe(0);
+      expect(fixture.records.receipt(fixture.epochId, request.requestId)).toBeUndefined();
+      db.exec("DROP TRIGGER refuse_unchanged_receipt");
+      const result = fixture.records.restore(request);
+      expect(fixture.records.restore(request)).toEqual(result);
+    } finally { db.close(); }
+  });
+
   it("atomically stores two units, policies, FTS rows, and deterministic sparse ties", () => {
     const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
     const authority = createCanonicalMemoryAuthorityRepo(db); const epoch = authority.initializeLocalAuthority(at);

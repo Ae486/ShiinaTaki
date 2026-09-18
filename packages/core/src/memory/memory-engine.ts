@@ -38,6 +38,10 @@ const ALL_LAYER_IDS = V1_MEMORY_LAYERS.map((layer) => layer.id);
 
 /** The tidy pass's engine surface (batch 4b): deterministic report reads + the maintenance toolset. */
 export interface TidyEngineView {
+  /** Freeze canonical row and block revisions before the report can wait for the Utility Slot. */
+  captureReview?(characterId: string): TidyEngineView;
+  /** Failed canonical CAS/authority work keeps the report eligible for retry. */
+  reviewHealthy?(): boolean;
   /** Every active in-scope row across all layers — the report's raw material. */
   listActive(characterId: string): MemoryEntryRow[];
   /** Writes-since-mark for the trigger; updated_at counts — a reinforced store is a changed store. */

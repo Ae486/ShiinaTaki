@@ -5,7 +5,7 @@
  */
 import {
   MemoryReplicaBankSchema, type HindsightConnectionProjection, type MemoryReplicaBank,
-  type MemoryAuthorityEpoch, type MemoryReplicaCheckpoint, type MemoryReplicaRunResult, type MemoryReplicaScheduledRun,
+  type MemoryAuthorityEpoch, type MemoryReplicaCheckpoint, type MemoryReplicaRunResult, type MemoryReplicaScheduledRun, type MemoryReplicaLease,
 } from "@taki/shared";
 import { z } from "zod";
 import type { HindsightReplicaSyncRepo } from "../../db/hindsight-replica-sync-repo.ts";
@@ -16,10 +16,16 @@ import { syncHindsightBankPage } from "./hindsight-incremental-sync.ts";
 import type { HindsightReplicaProjection } from "./hindsight-replica-projection.ts";
 import { loadHindsightReplicaSnapshot } from "./hindsight-replica-snapshot-loader.ts";
 
+/** Process-local foreground ownership; scheduled receipts and their fixed deadlines never carry this callback. */
+export interface HindsightForegroundRunOwner {
+  request(): HindsightCallContext;
+  current(): MemoryReplicaLease;
+}
 export interface HindsightReplicaRunInput {
   bank: MemoryReplicaBank; run: MemoryReplicaScheduledRun; signal: AbortSignal;
   deadlineAt?: string;
   expectedAuthority?: Pick<MemoryAuthorityEpoch, "epochId" | "providerLineageId">;
+  foreground?: HindsightForegroundRunOwner;
 }
 export interface HindsightReplicaSchedulerRunner {
   run(input: HindsightReplicaRunInput): Promise<MemoryReplicaRunResult>;

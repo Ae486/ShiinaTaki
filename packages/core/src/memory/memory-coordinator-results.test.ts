@@ -59,6 +59,6 @@ function coordinator(result: (context: MemoryProviderCallContext) => unknown) {
   const invoke = async (context: MemoryProviderCallContext) => result(context);
   const provider = { providerId: epoch.providerId, providerLineageId: epoch.providerLineageId,
     capabilities: async () => caps, retain: invoke, mutate: invoke, recall: invoke, reflect: invoke } as MemoryProvider;
-  return createMemoryCoordinator({ authority: { activeEpoch: () => epoch } as never,
+  return createMemoryCoordinator({ authority: { authorityEpoch: () => epoch } as never,
     providers: new Map([[epoch.providerId, provider]]) });
 }

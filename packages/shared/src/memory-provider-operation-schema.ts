@@ -69,17 +69,6 @@ export const RecallRequestSchema = z.strictObject({
 export type RecallRequest = z.infer<typeof RecallRequestSchema>;
 export const RecallScoreSchema = z.strictObject({ source: z.enum(["sparse", "vector", "hybrid", "provider"]), value: z.number().finite(), higherIsBetter: z.boolean() });
 export const RecallHitSchema = z.strictObject({ record: CanonicalMemoryRecordSchema, scores: z.array(RecallScoreSchema).max(8), confirmed: z.boolean() });
-export const RecallResultSchema = z.strictObject({ hits: z.array(RecallHitSchema).max(100), returned: z.int().min(0).max(100), truncated: z.boolean(), vectorState: z.enum(["unavailable", "building", "ready", "degraded"]), partial: z.boolean(), branchFailures: z.array(z.strictObject({ scope: z.enum(["global", "character"]), code: MemoryErrorCodeSchema, retryable: z.boolean(), nextAction: z.enum(["fix-request", "refresh-memory", "retry", "check-provider", "none"]) })).max(2) }).superRefine((value, context) => {
-  if (value.returned !== value.hits.length) context.addIssue({ code: "custom", path: ["returned"], message: "returned must equal hit count" });
-  if (value.partial !== (value.branchFailures.length > 0)) context.addIssue({ code: "custom", path: ["partial"], message: "partial must match branch failures" });
-  if (new Set(value.branchFailures.map((failure) => failure.scope)).size !== value.branchFailures.length) context.addIssue({ code: "custom", path: ["branchFailures"], message: "branch failure scopes must be unique" });
-  for (const [index, failure] of value.branchFailures.entries()) {
-    const [, retryable, nextAction] = MEMORY_ERROR_POLICY[failure.code];
-    if (failure.retryable !== retryable || failure.nextAction !== nextAction) context.addIssue({ code: "custom", path: ["branchFailures", index], message: "branch failure disposition contradicts code" });
-  }
-});
-export type RecallResult = z.infer<typeof RecallResultSchema>;
-
 export const ReflectRequestSchema = z.strictObject({ bankId: Id, query: z.string().min(1).max(16_384), budget: z.enum(["low", "mid", "high"]), maxTokens: z.int().min(1).max(32_000) });
 export type ReflectRequest = z.infer<typeof ReflectRequestSchema>;
 const JsonObject = z.record(z.string().min(1).max(128), JsonValueSchema).refine((value) => Object.keys(value).length <= 256);
@@ -101,6 +90,56 @@ export const MutationRequestSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("restore"), bankId: Id, memoryId: Id, expectedRevision: z.int().min(1) }),
 ]);
 export type MutationRequest = z.infer<typeof MutationRequestSchema>;
+
+// Consumer projections reuse the original requests rather than inventing extracted facts or revisions.
+// This schema lives below those requests so Pending persistence can import it without an ESM cycle.
+const RecallPendingMutationOperationSchema = z.strictObject({ kind: z.literal("mutation"), request: MutationRequestSchema });
+export const PendingMemoryOverlayEntrySchema = z.strictObject({
+  confirmed: z.literal(false), authorityEpochId: Id, bankId: Id, operationId: Id, originalAt: Timestamp,
+  phase: z.enum(["queued", "submitted", "awaiting_derived", "awaiting_pull", "outcome_unknown"]),
+  operation: z.discriminatedUnion("kind", [
+    z.strictObject({ kind: z.literal("retain"), request: RetainRequestSchema, zeroResultAllowed: z.boolean() }),
+    RecallPendingMutationOperationSchema,
+  ]),
+}).refine((entry) => entry.operation.request.bankId === entry.bankId, "overlay belongs to another Bank");
+// Target evidence is a read-side attachment only. It never enters durable Pending intent or G1 identity.
+export const RecallPendingOverlayEntrySchema = PendingMemoryOverlayEntrySchema.safeExtend({
+  targetRecord: CanonicalMemoryRecordSchema.optional(),
+}).superRefine((entry, context) => {
+  if (!entry.targetRecord) return;
+  const unit = entry.targetRecord.unit;
+  if (entry.operation.kind !== "mutation") {
+    context.addIssue({ code: "custom", path: ["targetRecord"], message: "only mutation overlays carry target evidence" });
+  } else if (unit.authorityEpochId !== entry.authorityEpochId || unit.bankId !== entry.bankId
+    || unit.memoryId !== entry.operation.request.memoryId || unit.revision !== entry.operation.request.expectedRevision) {
+    context.addIssue({ code: "custom", path: ["targetRecord"], message: "pending target evidence identity disagrees" });
+  }
+});
+export type RecallPendingOverlayEntry = z.infer<typeof RecallPendingOverlayEntrySchema>;
+export const RecallPendingMutationOverlayEntrySchema = RecallPendingOverlayEntrySchema.safeExtend({
+  operation: RecallPendingMutationOperationSchema,
+});
+export type RecallPendingMutationOverlayEntry = z.infer<typeof RecallPendingMutationOverlayEntrySchema>;
+
+export const RecallResultSchema = z.strictObject({
+  hits: z.array(RecallHitSchema).max(100), returned: z.int().min(0).max(100),
+  // Omission preserves old provider results; returned still counts Canonical hits, not source/intent entries.
+  pending: z.array(RecallPendingOverlayEntrySchema).max(100).optional(),
+  truncated: z.boolean(), vectorState: z.enum(["unavailable", "building", "ready", "degraded"]), partial: z.boolean(),
+  branchFailures: z.array(z.strictObject({ scope: z.enum(["global", "character"]), code: MemoryErrorCodeSchema,
+    retryable: z.boolean(), nextAction: z.enum(["fix-request", "refresh-memory", "retry", "check-provider", "none"]) })).max(2),
+}).superRefine((value, context) => {
+  if (value.returned !== value.hits.length) context.addIssue({ code: "custom", path: ["returned"], message: "returned must equal hit count" });
+  if (value.hits.length + (value.pending?.length ?? 0) > 100) context.addIssue({ code: "custom", path: ["pending"], message: "combined recall result exceeds limit" });
+  if (value.partial !== (value.branchFailures.length > 0)) context.addIssue({ code: "custom", path: ["partial"], message: "partial must match branch failures" });
+  if (new Set(value.branchFailures.map((failure) => failure.scope)).size !== value.branchFailures.length) context.addIssue({ code: "custom", path: ["branchFailures"], message: "branch failure scopes must be unique" });
+  for (const [index, failure] of value.branchFailures.entries()) {
+    const [, retryable, nextAction] = MEMORY_ERROR_POLICY[failure.code];
+    if (failure.retryable !== retryable || failure.nextAction !== nextAction) context.addIssue({ code: "custom", path: ["branchFailures", index], message: "branch failure disposition contradicts code" });
+  }
+});
+export type RecallResult = z.infer<typeof RecallResultSchema>;
+
 export const UpdateMemoryRequestSchema = z.strictObject({ bankId: Id, memoryId: Id, expectedRevision: z.int().min(1), patch: EditableMemoryPatchSchema });
 export const InvalidateMemoryRequestSchema = z.strictObject({ bankId: Id, memoryId: Id, expectedRevision: z.int().min(1), reason: z.string().max(512).nullable() });
 export const RestoreMemoryRequestSchema = z.strictObject({ bankId: Id, memoryId: Id, expectedRevision: z.int().min(1) });
@@ -110,7 +149,11 @@ export type RestoreMemoryRequest = z.infer<typeof RestoreMemoryRequestSchema>;
 export const AppliedMutationResultSchema = z.strictObject({ outcome: z.enum(["applied", "unchanged"]), record: CanonicalMemoryRecordSchema });
 const SupersededMutationResultSchema = z.strictObject({ outcome: z.literal("superseded"), record: CanonicalMemoryRecordSchema.nullable() });
 const MissingMutationResultSchema = z.strictObject({ outcome: z.literal("not_found"), record: z.null() });
-export const MutationResultSchema = z.union([AppliedMutationResultSchema, SupersededMutationResultSchema, MissingMutationResultSchema]);
+export const PendingMutationResultSchema = z.strictObject({
+  outcome: z.literal("pending"), record: z.null(), pending: RecallPendingMutationOverlayEntrySchema,
+});
+export type PendingMutationResult = z.infer<typeof PendingMutationResultSchema>;
+export const MutationResultSchema = z.union([AppliedMutationResultSchema, SupersededMutationResultSchema, MissingMutationResultSchema, PendingMutationResultSchema]);
 export type MutationResult = z.infer<typeof MutationResultSchema>;
 export type AppliedMutationResult = z.infer<typeof AppliedMutationResultSchema>;
 export const EditResultSchema = MutationResultSchema;

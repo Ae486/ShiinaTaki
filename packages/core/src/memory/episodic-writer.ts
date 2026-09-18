@@ -20,7 +20,8 @@ export interface MemoryWriteOp {
     disclosure?: string;
     origin?: MemoryOrigin;
     turnSeq?: number;
-  }): { id: string };
+  }): { id: string; kind?: "memory" | "source" | "pending-operation" }
+    | Promise<{ id: string; kind?: "memory" | "source" | "pending-operation" }>;
 }
 
 export interface EpisodicWriter {
@@ -67,7 +68,7 @@ export function createEpisodicWriter(deps: { model: LanguageModel; writeMemory: 
       const entryIds: string[] = [];
       for (const summary of summaries) {
         const layer = resolveAutoLayer(summary.layer);
-        const written = deps.writeMemory({
+        const written = await deps.writeMemory({
           characterId,
           layer,
           content: summary.content,
@@ -87,3 +88,8 @@ function parseJsonPayload(text: string): unknown {
   const stripped = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
   return JSON.parse(stripped);
 }
+
+// Canonical ingestion applies eligibility once before extraction. Reuse only the
+// established fact codec/runaway bound here, never this legacy writer's gate.
+export { MAX_SUMMARIES as AUTOMATIC_MEMORY_MAX_FACTS, SummariesSchema as AutomaticMemorySummariesSchema,
+  parseJsonPayload as parseAutomaticMemoryPayload };

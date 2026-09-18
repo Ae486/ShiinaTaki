@@ -3,7 +3,6 @@
  * OUTPUT: atomic Run admission, start/retry/settlement/cancel transitions, and bounded status reads
  * POS:    core/db — sole SQLite persistence boundary for the Slice 1 Run aggregate and its child records
  */
-/* eslint-disable max-lines */
 import { randomUUID } from "node:crypto";
 import {
   RunSnapshotSchema,
@@ -40,6 +39,8 @@ export interface RunAdmissionInput {
 export interface RunAdmissionResult {
   run: Run;
   attempt: Attempt;
+  /** Internal complete admission manifest; public Run/status responses keep their bounded snapshot reference. */
+  snapshot: RunSnapshot;
   eventTail: RunEventCursor;
   reused: boolean;
 }
@@ -99,7 +100,7 @@ export function createRunRepo(db: Database, eventRepo: RunEventRepo = createRunE
         ]);
       });
       liveBus?.publish(committed);
-      return { run: readRunById(db, input.runId), attempt: readAttemptById(db, attemptId), eventTail: eventRepo.tail(input.runId), reused: false };
+      return { run: readRunById(db, input.runId), attempt: readAttemptById(db, attemptId), snapshot: manifest, eventTail: eventRepo.tail(input.runId), reused: false };
     },
     status: (runId) => readStatus(db, runId),
     start(runId, attemptId) {
@@ -262,7 +263,8 @@ function reuseAdmission(input: { db: Database; eventRepo: RunEventRepo; row: Rec
   if (row.request_hash !== requestHash) throw new Error("RUN_IDEMPOTENCY_CONFLICT");
   const run = readRunRow(row);
   if (!run.activeAttemptId) throw new Error("RUN_ATTEMPT_MISSING");
-  return { run, attempt: readAttemptById(db, run.activeAttemptId), eventTail: eventRepo.tail(run.runId), reused: true };
+  const snapshot = RunSnapshotSchema.parse(JSON.parse(String(row.manifest_json)));
+  return { run, attempt: readAttemptById(db, run.activeAttemptId), snapshot, eventTail: eventRepo.tail(run.runId), reused: true };
 }
 
 function settle(deps: { db: Database; eventRepo: RunEventRepo; liveBus?: RunEventLiveBus }, status: RunStatusResult, input: {

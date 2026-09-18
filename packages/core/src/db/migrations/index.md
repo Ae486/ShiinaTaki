@@ -42,3 +42,10 @@
 - 023-hindsight-initial-cutover.ts — B4 cutover lifecycle lease, import mappings, logical replica/checkpoints, Hindsight marker, and activation receipts
 - 024-harness-runs.ts — Slice 1 additive Run, Attempt, immutable snapshot, and bounded Receipt current-state tables
 - index-list.ts — the explicit ordered MIGRATIONS registry (no fs/glob discovery)
+- 041-canonical-memory-maintenance.ts — deletion-independent canonical snapshots, shared maintenance request receipts, and durable ingestion plans
+- 042-hindsight-application-state.ts — immutable body/artifact/publication history, exact native heads and paired application checkpoint storage
+- 043-hindsight-ingestion.ts — independent Hindsight source witnesses, ingestion plans and source-coverage receipts
+- 044-hindsight-application-commands.ts — durable command identities, immutable byte-body preparation and historical remote receipts
+- 045-hindsight-policy-work.ts — durable curator claims, exact original targets, saved proposals and local retry state
+- 046-hindsight-runtime-admission.ts — durable last-verified runtime admission for truthful offline capability reporting
+- 047-hindsight-memory-writes.ts — durable original requests, exact mutation targets and stable whole-operation results

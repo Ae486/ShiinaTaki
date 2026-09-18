@@ -48,7 +48,7 @@ function readAuthority(db: Database, expected?: string): MemoryAuthorityEpoch {
   return epoch;
 }
 function requireActiveLocal(epoch: MemoryAuthorityEpoch): MemoryAuthorityEpoch {
-  if (epoch.status !== "active" || epoch.providerId !== "local" || epoch.reason !== "initial-local") {
+  if (epoch.status !== "active" || epoch.providerId !== "local") {
     throw new Error("MEMORY_INTEGRITY_ERROR: Local authority is not active");
   }
   return epoch;

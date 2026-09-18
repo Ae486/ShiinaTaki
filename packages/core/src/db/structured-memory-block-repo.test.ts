@@ -5,6 +5,18 @@ import { createStructuredMemoryBlockRepo } from "./structured-memory-block-repo.
 import { getBlock } from "../memory/block-registry.ts";
 
 describe("structured Memory Blocks", () => {
+  it("CAS-creates an absent block and refuses a stale absent snapshot without replacing its content", () => {
+    const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
+    const repo = createStructuredMemoryBlockRepo(db);
+    const scope = { kind: "global" as const, characterId: null };
+    try {
+      const created = repo.replace({ blockId: "user-model", scope, content: "first", actor: "background", expectedRevision: 0 });
+      expect(created.revision).toBe(1);
+      expect(() => repo.replace({ blockId: "user-model", scope, content: "stale overwrite", actor: "background", expectedRevision: 0 }))
+        .toThrow("MEMORY_REVISION_MISMATCH");
+      expect(repo.read("user-model", scope)?.content).toBe("first");
+    } finally { db.close(); }
+  });
   it("enforces writer policy and revisioned whole-document replacement", () => {
     const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); const repo = createStructuredMemoryBlockRepo(db);
     expect(() => repo.replace({ blockId: "user-card", scope: { kind: "global", characterId: null }, content: "x", actor: "background" })).toThrow(/writer/);

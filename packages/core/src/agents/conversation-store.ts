@@ -1,6 +1,6 @@
 /**
  * INPUT:  TimelineRepo, append/remove sinks, optional token budget + SummaryReader, and wall/backstop observers
- * OUTPUT: append/remove APIs plus one project() source for history(), windowStart(), and estimatedTokens()
+ * OUTPUT: append/remove APIs with exact optional commit receipts, plus one project() source for history/pressure
  * POS:    core/agents — names-only persistence and the Character-scoped Replay View projection boundary (ADR 0008)
  */
 import type { ModelMessage } from "ai";
@@ -64,12 +64,12 @@ export interface ConversationStore {
    * images = a legacy text-only row. The seq is returned so a cancel-before-reply can retract exactly this row.
    */
   appendUser(characterId: string, text: string, images?: UserImageInput[]): TimelineEntry;
-  appendAssistant(characterId: string, text: string): void;
+  appendAssistant(characterId: string, text: string, onCommitted?: (entry: TimelineEntry) => void): void;
   /**
    * Persists a whole turn's response tail (names-only assistant tool-call parts + tool-result messages + final text),
    * oldest-first, as returned by `result.responseMessages` — the fix for cross-turn tool-record loss (D1 #1).
    */
-  appendTurn(characterId: string, messages: TurnMessage[]): void;
+  appendTurn(characterId: string, messages: TurnMessage[], onCommitted?: (entry: TimelineEntry) => void): void;
   /** Deletes one row by seq (cancel-retract) + fires onRemove; single Workspace/DB writer (invariant 2). */
   removeEntry(characterId: string, seq: number): void;
   /** The replay window as AI SDK messages, oldest-first (summary head first when one is substituted — R3). */
@@ -138,11 +138,14 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
   return {
     // No images = toUserEntryInput returns the legacy `{role:"user", content}` row (byte-identical to before #17).
     appendUser: (characterId, text, images = []) => commit(characterId, toUserEntryInput(text, images)),
-    appendAssistant: (characterId, text) => void commit(characterId, { role: "assistant", content: text }),
-    appendTurn: (characterId, messages) => {
+    appendAssistant: (characterId, text, onCommitted) => {
+      const entry = commit(characterId, { role: "assistant", content: text });
+      onCommitted?.(entry);
+    },
+    appendTurn: (characterId, messages, onCommitted) => {
       for (const message of messages) {
         const input = toEntryInput(message);
-        if (input) commit(characterId, input);
+        if (input) { const entry = commit(characterId, input); onCommitted?.(entry); }
       }
     },
     removeEntry: (characterId, seq) => {

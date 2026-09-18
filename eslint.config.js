@@ -45,10 +45,11 @@ export default tseslint.config(
   },
   {
     // The sole Shared public entry names cross-package contracts without owning
-    // implementation. Its reviewed size allowance depends on that AST boundary.
+    // implementation. D77 adds independent native/application contracts; the
+    // reviewed entry allowance still depends on this strict AST boundary.
     files: ["packages/shared/src/index.ts"],
     rules: {
-      "max-lines": ["error", { max: 420, skipBlankLines: true, skipComments: true }],
+      "max-lines": ["error", { max: 500, skipBlankLines: true, skipComments: true }],
       "no-restricted-syntax": [
         "error",
         {

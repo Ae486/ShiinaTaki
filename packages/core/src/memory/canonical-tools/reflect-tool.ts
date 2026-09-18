@@ -5,4 +5,20 @@
  */
 import { tool, type Tool } from "ai";
 import { z } from "zod";
-export function createReflectTool(execute: (input: { query: string; scope: "global" | "character"; budget: "low" | "mid" | "high"; maxTokens: number }, options?: unknown) => Promise<unknown>): Tool { return tool({ description: "Reflect across durable memory when ordinary recall cannot provide enough synthesis. Select one trusted scope and a bounded reasoning budget. Evidence identities remain explicit.", inputSchema: z.strictObject({ query: z.string().min(1).max(16_384).describe("Bounded question that requires synthesis across durable memory."), scope: z.enum(["global", "character"]).describe("One trusted memory scope for reflection."), budget: z.enum(["low", "mid", "high"]).describe("Provider reasoning budget for this reflection."), maxTokens: z.int().min(1).max(8_192).describe("Maximum returned reflection tokens.") }), execute }); }
+export function createReflectTool(execute: (input: {
+  query: string;
+  scope: "global" | "character";
+  budget: "low" | "mid" | "high";
+  maxTokens: number;
+}, options?: unknown) => Promise<unknown>): Tool {
+  return tool({
+    description: "Reflect across durable memory when ordinary recall cannot provide enough synthesis. Select one trusted scope and a bounded reasoning budget. Evidence identities remain explicit.",
+    inputSchema: z.strictObject({
+      query: z.string().min(1).max(16_384).describe("Bounded question that requires synthesis across durable memory."),
+      scope: z.enum(["global", "character"]).describe("One trusted memory scope for reflection."),
+      budget: z.enum(["low", "mid", "high"]).describe("Provider retrieval and reasoning work budget for this reflection."),
+      maxTokens: z.int().min(1).max(8_192).describe("Completion-token allowance for reflection generation; some providers count internal reasoning here. Prefer 4096-8192 for reasoning models, even when requesting a short answer."),
+    }),
+    execute,
+  });
+}

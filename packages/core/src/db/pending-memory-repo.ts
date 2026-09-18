@@ -8,6 +8,7 @@ import {
   MemoryReplicaRecordSchema, PendingMemoryOverlayEntrySchema, PendingMemoryStateSchema, PendingMemorySummarySchema,
   type PendingMemoryIntent, type PendingMemoryOverlayEntry, type PendingMemoryRecord, type PendingMemoryRef,
   type PendingMemorySummary, type MemoryReplicaCheckpoint, type MemoryReplicaLease,
+  type CanonicalMemoryBank,
 } from "@taki/shared";
 import type { Database } from "./sqlite.ts";
 import { createCanonicalMemoryAuthorityRepo } from "./canonical-memory-authority-repo.ts";
@@ -37,13 +38,16 @@ export interface PendingMemoryRepo {
 }
 interface Context {
   db: Database; now: () => string;
+  readVerifiedBank?: (bankId: string) => Pick<CanonicalMemoryBank, "authorityEpochId" | "bankId" | "scope"> | undefined;
   leases: ReturnType<typeof createHindsightReplicaLeaseRepo>;
   authority: ReturnType<typeof createCanonicalMemoryAuthorityRepo>;
 }
 
-export function createPendingMemoryRepo(db: Database, now: () => string = () => new Date().toISOString()): PendingMemoryRepo {
+export function createPendingMemoryRepo(db: Database, now: () => string = () => new Date().toISOString(),
+  readVerifiedBank?: Context["readVerifiedBank"]): PendingMemoryRepo {
   const clock = () => z.iso.datetime({ offset: true }).parse(now());
-  const context: Context = { db, now: clock, leases: createHindsightReplicaLeaseRepo(db, clock), authority: createCanonicalMemoryAuthorityRepo(db) };
+  const context: Context = { db, now: clock, readVerifiedBank,
+    leases: createHindsightReplicaLeaseRepo(db, clock), authority: createCanonicalMemoryAuthorityRepo(db) };
   return {
     enqueue: (intent) => enqueue(context, intent), get: (ref) => readPendingMemory(db, ref),
     list: (input) => listPendingMemory(db, input), summary: (ref) => summary(db, ref),
@@ -156,14 +160,24 @@ function requireBinding(context: Context, intent: PendingMemoryIntent): MemoryRe
     || authority.providerLineageId !== intent.providerLineageId || !checkpoint || checkpoint.authorityEpochId !== intent.authorityEpochId
     || checkpoint.providerLineageId !== intent.providerLineageId || checkpoint.bankGeneration !== intent.bankGeneration
     || checkpoint.endCursor < intent.baseCursor) throw new Error("HINDSIGHT_PENDING_AUTHORITY_MISMATCH");
-  const bank = context.db.prepare(`SELECT record_json,record_hash FROM hindsight_replica_sync_records
-    WHERE bank_id=:bank AND object_kind='bank' AND object_id=:bank`).get({ bank: intent.bank.bankId });
-  const record = bank ? MemoryReplicaRecordSchema.parse(JSON.parse(String(bank.record_json))) : null;
-  if (record?.payload?.kind !== "bank" || canonicalPayloadHash(record) !== bank?.record_hash
-    || record.payload.value.scope.kind !== intent.bank.scope || record.payload.value.scope.characterId !== intent.bank.characterId) {
+  // An installed application reader owns this decision. Missing or invalid
+  // application evidence must never fall back to a stale native-only projection.
+  const bank = context.readVerifiedBank ? context.readVerifiedBank(intent.bank.bankId) : readNativeBank(context.db, intent.bank.bankId);
+  if (!bank || bank.authorityEpochId !== intent.authorityEpochId || bank.bankId !== intent.bank.bankId
+    || bank.scope.kind !== intent.bank.scope || bank.scope.characterId !== intent.bank.characterId) {
     throw new Error("HINDSIGHT_REPLICA_BANK_BINDING_MISMATCH");
   }
   return checkpoint;
+}
+
+function readNativeBank(db: Database, bankId: string): CanonicalMemoryBank | undefined {
+  const bank = db.prepare(`SELECT record_json,record_hash FROM hindsight_replica_sync_records
+    WHERE bank_id=:bank AND object_kind='bank' AND object_id=:bank`).get({ bank: bankId });
+  const record = bank ? MemoryReplicaRecordSchema.parse(JSON.parse(String(bank.record_json))) : null;
+  if (record?.payload?.kind !== "bank" || canonicalPayloadHash(record) !== bank?.record_hash) {
+    throw new Error("HINDSIGHT_REPLICA_BANK_BINDING_MISMATCH");
+  }
+  return record.payload.value;
 }
 
 function assertReflected(context: Context, record: PendingMemoryRecord, expected?: MemoryReplicaCheckpoint): void {

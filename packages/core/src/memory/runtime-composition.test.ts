@@ -9,7 +9,7 @@ import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createSummaryRepo } from "../db/summary-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
-import { generatingModel } from "../testing/mock-language-model.ts";
+import { scriptedGenerateModel, type ScriptStep } from "../testing/mock-language-model.ts";
 import { rmTempDir } from "../testing/rm-temp.ts";
 import { composeMemoryRuntime } from "./runtime-composition.ts";
 
@@ -26,13 +26,19 @@ afterEach(() => {
   }
 });
 
-function boot(canonical: boolean, beforeCompose?: (db: Database) => void) {
+async function boot(canonical: boolean, beforeCompose?: (db: Database) => void) {
   const dataDir = mkdtempSync(join(tmpdir(), "taki-runtime-composition-"));
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   opened.push({ db, dataDir });
   const timeline = createTimelineRepo(db);
   const summaries = createSummaryRepo(db);
-  const model = generatingModel("rolling summary");
+  const script: ScriptStep[] = canonical ? [] : [
+    { kind: "text", deltas: ["[]"] },
+    { kind: "text", deltas: ["legacy rolling summary"] },
+  ];
+  script.push({ kind: "text", deltas: ['{"decision":"skip"}'] },
+    { kind: "text", deltas: ["canonical rolling summary"] });
+  const model = scriptedGenerateModel(script);
   const { logger, records } = createCaptureLogger();
   const epoch = createCanonicalMemoryAuthorityRepo(db).initializeLocalAuthority("2026-08-29T00:00:00.000Z");
   if (canonical) activateMarker(db, epoch.epochId);
@@ -51,13 +57,16 @@ function boot(canonical: boolean, beforeCompose?: (db: Database) => void) {
     env: {},
     logger,
   });
+  await runtime.captureRun("taki");
   return { db, timeline, summaries, model, records, runtime, epochId: epoch.epochId };
 }
 
-function seed(timeline: ReturnType<typeof createTimelineRepo>, from: number, through: number): void {
+function seed(fixture: Awaited<ReturnType<typeof boot>>, from: number, through: number): void {
+  const entries = [];
   for (let seq = from; seq <= through; seq += 1) {
-    timeline.append({ characterId: "taki", role: "user", content: `m${seq}` });
+    entries.push(fixture.timeline.append({ characterId: "taki", role: "user", content: `m${seq}` }));
   }
+  fixture.runtime.recordPrimaryCommitted({ characterId: "taki", entries });
 }
 
 function activateMarker(db: Database, epochId: string): void {
@@ -67,8 +76,8 @@ function activateMarker(db: Database, epochId: string): void {
 
 describe("provider-independent Compaction composition", () => {
   it("constructs Legacy Compaction in the shared maintenance chain and keeps it detached", async () => {
-    const fixture = boot(false);
-    seed(fixture.timeline, 1, 10);
+    const fixture = await boot(false);
+    seed(fixture, 1, 10);
 
     const completed = fixture.runtime.autoMemory.onTurnCompleted("taki");
     expect(fixture.model.doGenerateCalls).toHaveLength(0);
@@ -78,48 +87,49 @@ describe("provider-independent Compaction composition", () => {
     expect(fixture.model.doGenerateCalls).toHaveLength(2);
   });
 
-  it("constructs Canonical Local Compaction with an explicit no-flush-required path", async () => {
-    const fixture = boot(true);
-    seed(fixture.timeline, 1, 10);
+  it("constructs Canonical Local Compaction after one durable Write Gate shared with its retirement flush", async () => {
+    const fixture = await boot(true);
+    seed(fixture, 1, 10);
 
     expect(fixture.runtime.autoMemory).toBeDefined();
     await fixture.runtime.autoMemory.onTurnCompleted("taki");
 
     expect(fixture.summaries.get("taki")?.throughSeq).toBe(6);
-    expect(fixture.model.doGenerateCalls).toHaveLength(1);
+    expect(fixture.model.doGenerateCalls).toHaveLength(2);
   });
 
   it("retires the Legacy maintenance and flush writer after in-process activation", async () => {
-    const fixture = boot(false);
-    seed(fixture.timeline, 1, 10);
+    const fixture = await boot(false);
+    seed(fixture, 1, 10);
     await fixture.runtime.autoMemory.onTurnCompleted("taki");
     expect(fixture.model.doGenerateCalls).toHaveLength(2);
 
     activateMarker(fixture.db, fixture.epochId);
     fixture.runtime.selected.bindCanonical(fixture.epochId);
     expect(fixture.runtime.selected.legacy).toBeNull();
-    seed(fixture.timeline, 11, 16);
+    await fixture.runtime.captureRun("taki");
+    seed(fixture, 11, 16);
     await fixture.runtime.autoMemory.onTurnCompleted("taki");
 
     expect(fixture.summaries.get("taki")?.throughSeq).toBeGreaterThan(6);
-    expect(fixture.model.doGenerateCalls).toHaveLength(3);
+    expect(fixture.model.doGenerateCalls).toHaveLength(4);
   });
 
   it("serializes duplicate Canonical triggers so only one summary call runs", async () => {
-    const fixture = boot(true);
-    seed(fixture.timeline, 1, 10);
+    const fixture = await boot(true);
+    seed(fixture, 1, 10);
 
     await Promise.all([
       fixture.runtime.autoMemory.onTurnCompleted("taki"),
       fixture.runtime.autoMemory.onTurnCompleted("taki"),
     ]);
 
-    expect(fixture.model.doGenerateCalls).toHaveLength(1);
+    expect(fixture.model.doGenerateCalls).toHaveLength(2);
     expect(fixture.summaries.get("taki")?.throughSeq).toBe(6);
   });
 
-  it("exposes the internal typed cancel/reconcile lifecycle and reconciles expired work at composition", () => {
-    const fixture = boot(true, (db) => {
+  it("exposes the internal typed cancel/reconcile lifecycle and reconciles expired work at composition", async () => {
+    const fixture = await boot(true, (db) => {
       createCompactionOperationRepo(db).begin({
         operationId: "compact:" + "a".repeat(64),
         characterId: "taki",

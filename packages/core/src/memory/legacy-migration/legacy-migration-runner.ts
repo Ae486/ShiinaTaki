@@ -11,7 +11,7 @@ import { createCanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-au
 import type { Database } from "../../db/sqlite.ts";
 import { convertLegacyBlock, convertLegacyEntry } from "./legacy-canonical-converter.ts";
 import { createLegacyCanonicalImportRepo } from "./legacy-canonical-import-repo.ts";
-import { activateCanonicalLocal } from "./legacy-activation-repo.ts";
+import { activateCanonicalLocal, readMemoryAuthoritySelection } from "./legacy-activation-repo.ts";
 import { canonicalJson, legacyHash, sourceIdentity } from "./legacy-identities.ts";
 import { createLegacyMigrationLedgerRepo, type Lease } from "./legacy-migration-ledger-repo.ts";
 import { normalizeLegacySource } from "./legacy-source-normalizer.ts";
@@ -39,12 +39,22 @@ export function createLegacyMigrationRunner(deps: { db: Database; destinationRoo
     verify: (runId) => verify(deps.db, runId, now()),
     exceptions: (input) => exceptions(deps.db, input),
     exclude: (input) => exclude(deps.db, { ...input, now: now() }),
-    activate: (input) => deps.fence.quiesce({ timeoutMs: input.timeoutMs, retireOnSuccess: true }, async () => {
-      const result = await activate(deps.db, { ...input, now: now() });
-      if (result.activated && result.epochId) deps.onActivated?.(result.epochId);
-      return result;
+    activate: (input) => deps.fence.quiesce({ timeoutMs: input.timeoutMs }, async () => {
+      try {
+        const result = await activate(deps.db, { ...input, now: now() });
+        if (result.activated) deps.fence.retire();
+        if (result.activated && result.epochId) await deps.onActivated?.(result.epochId);
+        return result;
+      } finally { retireUnlessLegacy(deps.db, deps.fence); }
     }),
   };
+}
+
+function retireUnlessLegacy(db: Database, fence: MemoryAuthorityFence): void {
+  // Even the marker read after COMMIT can fail. Only a positively verified legacy selection permits reopening.
+  let legacy = false;
+  try { legacy = readMemoryAuthoritySelection(db).mode === "legacy-markdown"; }
+  finally { if (!legacy) fence.retire(); }
 }
 
 function resume(db: Database, input: { runId: string; owner: string; destinationRoot: string; now: string }): MemoryMigrationStatus {

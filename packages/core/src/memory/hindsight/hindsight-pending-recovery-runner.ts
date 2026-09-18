@@ -7,6 +7,7 @@ import { z } from "zod";
 import {
   MemoryReplicaBankSchema, MemoryReplicaScheduledRunSchema,
   HINDSIGHT_CURRENT_STATE_BUILD, HINDSIGHT_NATIVE_RESULT_BUILD, HINDSIGHT_NATIVE_RESULT_VERSION,
+  HINDSIGHT_APPLICATION_STATE_BUILD,
   type HindsightConnectionProjection, type MemoryAuthorityEpoch, type MemoryReplicaCheckpoint, type MemoryReplicaRunResult, type PendingMemoryRecord,
 } from "@taki/shared";
 import type { CanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
@@ -26,6 +27,8 @@ interface RecoveryDependencies {
   authority: CanonicalMemoryAuthorityRepo; projection: HindsightReplicaProjection;
   connection: HindsightConnectionProjection; secretMarker: string; derivedCompletion?: MemoryDerivedCompletionPort;
   now?: () => string; deadlineMs?: number;
+  syncRunner?: HindsightReplicaSchedulerRunner;
+  beforeNativeDispatch?: PendingReplayContext["beforeNativeDispatch"];
 }
 interface RecoveryContext extends PendingReplayContext {
   input: HindsightReplicaRunInput; authority: MemoryAuthorityEpoch; sync: HindsightReplicaSchedulerRunner;
@@ -33,7 +36,7 @@ interface RecoveryContext extends PendingReplayContext {
 
 export function createHindsightPendingRecoveryRunner(deps: RecoveryDependencies): HindsightReplicaSchedulerRunner {
   const deadlineMs = z.int().min(1).max(3_600_000).parse(deps.deadlineMs ?? 60_000);
-  const sync = createHindsightReplicaSyncRunner({ ...deps, repo: deps.replica, deadlineMs });
+  const sync = deps.syncRunner ?? createHindsightReplicaSyncRunner({ ...deps, repo: deps.replica, deadlineMs });
   const running = new Map<string, Promise<MemoryReplicaRunResult>>();
   const execute = (input: HindsightReplicaRunInput, rebuild: boolean) => {
     const key = input.run.lease.runId;
@@ -83,6 +86,7 @@ function captureContext(deps: RecoveryDependencies, work: { input: HindsightRepl
     run: MemoryReplicaScheduledRunSchema.parse(work.input.run), deadlineAt, expectedAuthority: authority };
   const request = () => requestContext(deps, { input, authority, now });
   return { client: deps.client, pending: deps.pending, replica: deps.replica,
+    beforeNativeDispatch: deps.beforeNativeDispatch,
     guard: { lease: input.run.lease, deadlineAt }, request, now, input, authority, sync: work.sync };
 }
 
@@ -128,7 +132,8 @@ async function nativeResultSupported(context: RecoveryContext): Promise<boolean>
   // A D78 build keeps the same G1 factual contract. Requiring cutover verification here would make ordinary
   // pending writes depend on first-activation maintenance again, contrary to the accepted routine recovery rule.
   return (manifest.source_identity.compatibility_build === HINDSIGHT_NATIVE_RESULT_BUILD
-      || manifest.source_identity.compatibility_build === HINDSIGHT_CURRENT_STATE_BUILD)
+      || manifest.source_identity.compatibility_build === HINDSIGHT_CURRENT_STATE_BUILD
+      || manifest.source_identity.compatibility_build === HINDSIGHT_APPLICATION_STATE_BUILD)
     && contract?.version === HINDSIGHT_NATIVE_RESULT_VERSION && contract.support.state === "supported"
     && contract.support.reason === "all_contracts_available";
 }

@@ -117,6 +117,13 @@ const boot = bootstrapCore(process.env);
 const { logger, db, serverConfig, contextConfig, model, visionModel } = boot;
 const coreHostId = loadOrCreateHostIdentity(join(serverConfig.dataDir, "host-identity.json"));
 logger.info("Core Host identity loaded");
+// The selected memory runtime and inactive B3 setup share the same just-in-time
+// connection secret source. Opening the catalog itself performs no model/network work.
+const secretLog = logger.child({ mod: "secrets" });
+const secretCatalog = await createSecretCatalogService({
+  filePath: join(serverConfig.dataDir, "secret-catalog.bin"), storeId: coreHostId,
+  keySource: resolveMasterKeySource(process.env), logger: secretLog,
+});
 const governance = createGovernancePolicyService(createGovernancePolicyRepo(db));
 const runEventRepo = createRunEventRepo(db);
 const runEventLive = createRunEventLiveBus((runId, afterSeq) => runEventRepo.list(runId, afterSeq));
@@ -161,7 +168,8 @@ const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, 
   estimatedTokens: conversationStore.estimatedTokens, budget: historyBudget,
   measureRequest: (characterId) => latestRequestMeasurements.get(characterId),
   effectiveWindowTokens: () => windowCalibrator.effectiveWindow(),
-  compact: contextConfig.compact, env: boot.env, logger });
+  compact: contextConfig.compact, env: boot.env, logger,
+  hindsight: { source: boot.config.source, secrets: secretCatalog } });
 const { selected: selectedMemory, memory, autoMemory, tidy, memoryRoot, writeMemory } = memoryRuntime;
 
 // Attachment store (#17): the sanctioned content-addressed Workspace R/W site for chat image attachments — the DB never
@@ -200,14 +208,6 @@ const { approval, coreToolGovernance } = composeApprovalRuntime({
 const skillBoot = await bootSkillLifecycle({ db, dataDir: serverConfig.dataDir, ownerHostId: coreHostId, logger });
 const { loader: skillsLoader, service: skillLifecycle, log: skillsLog } = skillBoot;
 
-// Secret catalog (08-12): the Core-owned encrypted credential store. Master key from the credentials directory
-// (systemd) or the taki-secret-key helper; no key source = locked, every mutation fails closed — never a fresh
-// store over existing ciphertext. Boot survives a locked/unreadable catalog (integrations degrade, core lives).
-const secretLog = logger.child({ mod: "secrets" });
-const secretCatalog = await createSecretCatalogService({
-  filePath: join(serverConfig.dataDir, "secret-catalog.bin"), storeId: coreHostId,
-  keySource: resolveMasterKeySource(process.env), logger: secretLog,
-});
 // AC4 ordering: copy env/headers into the catalog, verify the encrypted read-back, only then rewrite the source
 // to opaque refs (every failure leaves the source untouched); refs resolve just-in-time at connect below.
 migrateMcpPlaintextSecrets({ catalog: secretCatalog, configPath: join(serverConfig.dataDir, "mcp-servers.json"), logger: secretLog });
@@ -307,7 +307,7 @@ const runService = createRunService({
     extensions,
     governance,
     approval,
-    memory: { snapshot: memoryRuntime.snapshot, createTools: (characterId) => memory.createTools(characterId) },
+    memory: { captureRun: memoryRuntime.captureRun },
     provider: modelProvider,
     modelId,
     effects: effectLifecycle,
@@ -347,6 +347,7 @@ const chatAgent = createChatAgent({
       memory,
        memoryPrompt: () => selectedMemory.canonical ? CANONICAL_MEMORY_SYSTEM_PROMPT : BASE_SYSTEM_PROMPT,
       autoMemory,
+      onPrimaryCommitted: memoryRuntime.recordPrimaryCommitted,
       maxSteps: boot.agentConfig.maxSteps,
       // Presentation tools (avatar expression/motion) return nothing to read; stop the loop after a spoken,
       // presentation-only step so the SDK does not force a padded filler generation (1c). See presentation-stop.ts.
@@ -357,7 +358,7 @@ const chatAgent = createChatAgent({
       attachments: attachmentStore,
       // Detached, fire-and-forget (mirrors autoMemory) — present only when a vision slot is configured.
       imageMemory: imageDescriptionWriter
-        ? { onImageTurn: (input) => { if (!selectedMemory.canonical) void imageDescriptionWriter.onImageTurn(input); } }
+        ? { onImageTurn: (input) => { void imageDescriptionWriter.onImageTurn(input); } }
         : undefined,
       // Compatibility tools remain available when no interactive socket exists. The same Skill tools are reused in
       // the interactive bag below; MCP and progressive discovery are captured by runContext once per Run.
@@ -494,6 +495,7 @@ const server = await startWsServer({
   connectionRegistry,
   logger,
 });
+memoryRuntime.start();
 
 let shuttingDown = false;
 function shutdown(signal: string): void {
@@ -504,13 +506,17 @@ function shutdown(signal: string): void {
   runService.seal();
   recovery.close();
   cancelDurableWorkForShutdown();
-  void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => server.close()).then(async () => {
+  const memoryStopped = memoryRuntime.stop();
+  void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => memoryStopped).then(() => server.close()).then(async () => {
     skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients
     // (each exactly once), before the db handle and process go away.
     await mcpBoot.manager.close();
     db.close(); // release the sqlite file handle (and checkpoint the WAL) before exit
     process.exit(0);
+  }).catch(() => {
+    logger.error({ code: "CORE_SHUTDOWN_FAILED" }, "Core shutdown could not settle all owned work");
+    process.exit(1);
   });
 }
 

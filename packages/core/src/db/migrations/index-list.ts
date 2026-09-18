@@ -44,6 +44,13 @@ import { hindsightLocalCoverageMigration037 } from "./037-hindsight-local-covera
 import { hindsightSourceEvidenceMigration038 } from "./038-hindsight-source-evidence.ts";
 import { hindsightCurrentStateMigration039 } from "./039-hindsight-current-state.ts";
 import { hindsightCutoverConvergenceMigration040 } from "./040-hindsight-cutover-convergence.ts";
+import { canonicalMemoryMaintenanceMigration041 } from "./041-canonical-memory-maintenance.ts";
+import { hindsightApplicationStateMigration042 } from "./042-hindsight-application-state.ts";
+import { hindsightIngestionMigration043 } from "./043-hindsight-ingestion.ts";
+import { hindsightApplicationCommandsMigration044 } from "./044-hindsight-application-commands.ts";
+import { hindsightPolicyWorkMigration045 } from "./045-hindsight-policy-work.ts";
+import { hindsightRuntimeAdmissionMigration046 } from "./046-hindsight-runtime-admission.ts";
+import { hindsightMemoryWritesMigration047 } from "./047-hindsight-memory-writes.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -86,4 +93,11 @@ export const MIGRATIONS: Migration[] = [
   hindsightSourceEvidenceMigration038,
   hindsightCurrentStateMigration039,
   hindsightCutoverConvergenceMigration040,
+  canonicalMemoryMaintenanceMigration041,
+  hindsightApplicationStateMigration042,
+  hindsightIngestionMigration043,
+  hindsightApplicationCommandsMigration044,
+  hindsightPolicyWorkMigration045,
+  hindsightRuntimeAdmissionMigration046,
+  hindsightMemoryWritesMigration047,
 ];

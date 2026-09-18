@@ -1,7 +1,7 @@
 /**
  * INPUT:  canonical Retain/Recall/Mutation requests plus persisted Local authority and repositories
  * OUTPUT: async Local MemoryProvider with sparse recall, CAS mutations, and optional vector projection
- * POS:    core/memory — dormant provider implementation; never wired into production bootstrap in Batch 1
+ * POS:    core/memory — canonical Local authority provider and internal automatic-ingestion boundary
  */
 import { createHash, randomUUID } from "node:crypto";
 import {
@@ -12,25 +12,42 @@ import {
 } from "@taki/shared";
 import type { z } from "zod";
 import type { CanonicalMemoryAuthorityRepo } from "../db/canonical-memory-authority-repo.ts";
+import type { CanonicalMemoryMaintenanceRepo } from "../db/canonical-memory-maintenance-contract.ts";
 import { stableRequestHash, type CanonicalMemoryRepo } from "../db/canonical-memory-repo.ts";
 import type { CanonicalMemorySparseRepo, SparseRow } from "../db/canonical-memory-sparse-repo.ts";
 import { fenceUntrusted } from "../agents/untrusted-fence.ts";
-import { DEFAULT_INTENTIONS_DAYS } from "../config/memory-config.ts";
 import { getLayer, type MemoryLayerDefinition } from "./layer-registry.ts";
+import { projectRetention, requireLayerOwnership } from "./canonical-layer-policy.ts";
+import { clampAutoImportance } from "./auto-layer-policy.ts";
+import { isSafeAutomaticMemoryText } from "./canonical-ingestion-source.ts";
+import { prepareLocalIngestionBatch, type PrepareLocalIngestionInput } from "./canonical-local-ingestion-batch.ts";
+import { PreparedLocalIngestionSchema, type PreparedLocalIngestion, type LocalIngestionReceipt } from "./canonical-ingestion-plan.ts";
 import type { MemoryProvider, MemoryProviderCallContext, MemoryVectorProjection } from "./memory-provider.ts";
 import type { SearchTokenizer } from "./search-tokenizer.ts";
 import { estimateTokens } from "./token-estimator.ts";
 
 type RecallHit = z.infer<typeof RecallHitSchema>;
 interface ProviderState { vectorDegraded: boolean }
+/** Stable no-vector Local contract, shared with synchronous legacy-shaped runtime adapters. */
+export const LOCAL_MEMORY_CAPABILITIES = Object.freeze({ providerId: "local", contractVersion: 1,
+  retain: true, recall: true, reflect: false, edit: true, invalidate: true, restore: true,
+  conditionalMutation: true, idempotentWrites: true, sparseRetrieval: true,
+  vectorRetrieval: "unavailable", derivedMemoryRead: false } satisfies MemoryProviderCapabilities);
 export interface LocalMemoryProviderDeps {
   authority: CanonicalMemoryAuthorityRepo; records: CanonicalMemoryRepo; sparse: CanonicalMemorySparseRepo;
   tokenizer: SearchTokenizer; vector?: MemoryVectorProjection; now?: () => string; providerLineageId?: string;
+  maintenance?: CanonicalMemoryMaintenanceRepo; intentionsDefaultDays?: number;
 }
 
 export interface LocalMemoryProvider extends MemoryProvider {
   retain(context: MemoryProviderCallContext, request: RetainRequest): Promise<MemoryResult<RetainResult>>;
   mutate(context: MemoryProviderCallContext, request: MutationRequest): Promise<MemoryResult<MutationResult>>;
+  /** Internal Local extraction port; not advertised as a public retain strategy/capability. */
+  prepareIngestion(input: PrepareLocalIngestionInput): PreparedLocalIngestion;
+  ingest(context: MemoryProviderCallContext, input: PreparedLocalIngestion): Promise<MemoryResult<LocalIngestionReceipt>>;
+  ingestionReceipt(input: PreparedLocalIngestion): LocalIngestionReceipt | undefined;
+  /** Synchronous adapter for the existing trusted image-description writer; no primary-conversation claim. */
+  retainObserved(context: MemoryProviderCallContext, request: RetainRequest): RetainResult;
 }
 
 export function createLocalMemoryProvider(deps: LocalMemoryProviderDeps): LocalMemoryProvider {
@@ -43,7 +60,37 @@ export function createLocalMemoryProvider(deps: LocalMemoryProviderDeps): LocalM
     recall: (context, request) => recall({ deps, state, context, request }),
     reflect: async (context) => failure({ context, caps: await capabilities(deps, state), code: "MEMORY_CAPABILITY_UNSUPPORTED", message: "reflect is unavailable for Local provider" }),
     mutate: (context, request) => mutate({ deps, state, context, request }),
+    prepareIngestion: (input) => prepareLocalIngestionBatch({ ...deps, maintenance: requireMaintenance(deps), now: () => now(deps) }, input),
+    ingest: (context, request) => ingest({ deps, state, context, request }),
+    ingestionReceipt: (input) => requireMaintenance(deps).ingestReceipt(input),
+    retainObserved: (context, request) => retainObserved({ deps, state, context, request }),
   };
+}
+
+function requireMaintenance(deps: LocalMemoryProviderDeps): CanonicalMemoryMaintenanceRepo {
+  if (!deps.maintenance) throw new Error("MEMORY_CAPABILITY_UNSUPPORTED");
+  return deps.maintenance;
+}
+
+async function ingest(input: {
+  deps: LocalMemoryProviderDeps; state: ProviderState; context: MemoryProviderCallContext; request: PreparedLocalIngestion;
+}): Promise<MemoryResult<LocalIngestionReceipt>> {
+  const { deps, state, context } = input;
+  const caps = await capabilities(deps, state);
+  if (context.signal?.aborted) return failure({ context, caps, code: "MEMORY_OPERATION_CANCELLED", message: "memory operation cancelled" });
+  try {
+    const request = PreparedLocalIngestionSchema.parse(input.request);
+    if (context.actor !== "background-policy" || context.authorityEpochId !== request.epochId
+      || context.requestId !== request.requestId || request.source.provenance.origin !== "auto-gate") {
+      return failure({ context, caps, code: "MEMORY_INVALID_REQUEST", message: "automatic ingestion context is invalid" });
+    }
+    const result = requireMaintenance(deps).ingest(request);
+    for (const ref of [...result.memories, ...result.reinforced]) {
+      const record = deps.records.record(context.authorityEpochId, request.bankId, ref.memoryId);
+      if (record) scheduleVectorUpsert(deps, state, record);
+    }
+    return success(context, await capabilities(deps, state), result);
+  } catch (error) { return mappedFailure({ context, caps, error, fallback: "automatic memory ingestion failed" }); }
 }
 
 async function capabilities(deps: LocalMemoryProviderDeps, state: ProviderState): Promise<MemoryProviderCapabilities> {
@@ -52,7 +99,7 @@ async function capabilities(deps: LocalMemoryProviderDeps, state: ProviderState)
     try { vectorRetrieval = state.vectorDegraded ? "degraded" : await deps.vector.status(); }
     catch { state.vectorDegraded = true; vectorRetrieval = "degraded"; }
   }
-  return { providerId: "local", contractVersion: 1, retain: true, recall: true, reflect: false, edit: true, invalidate: true, restore: true, conditionalMutation: true, idempotentWrites: true, sparseRetrieval: true, vectorRetrieval, derivedMemoryRead: false };
+  return { ...LOCAL_MEMORY_CAPABILITIES, vectorRetrieval };
 }
 
 async function retain(input: { deps: LocalMemoryProviderDeps; state: ProviderState; context: MemoryProviderCallContext; request: RetainRequest }): Promise<MemoryResult<RetainResult>> {
@@ -63,13 +110,40 @@ async function retain(input: { deps: LocalMemoryProviderDeps; state: ProviderSta
   if (!parsed.success) return failure({ context, caps, code: "MEMORY_INVALID_REQUEST", message: "memory retain request is invalid" });
   if (parsed.data.updateMode !== "replace" || parsed.data.strategy !== null) return failure({ context, caps, code: "MEMORY_CAPABILITY_UNSUPPORTED", message: "Local retain supports replace without strategy" });
   try {
-    const epoch = deps.authority.activeEpoch(context.authorityEpochId); const bank = requireBank(deps, epoch.epochId, parsed.data.bankId);
-    const layer = requirePolicy(bank, parsed.data); const built = buildRetain({ deps, context, request: parsed.data, layer });
-    const result = deps.records.retain({ epochId: context.authorityEpochId, bankId: parsed.data.bankId, requestId: context.requestId, requestHash: stableRequestHash(parsed.data), ...built });
-    const record = deps.records.record(context.authorityEpochId, parsed.data.bankId, result.memories[0]!.memoryId);
-    if (record) scheduleVectorUpsert(deps, state, record);
+    const result = persistRetain({ deps, state, context, request: parsed.data });
     return success(context, await capabilities(deps, state), { status: "completed", ...result });
   } catch (error) { return mappedFailure({ context, caps, error, fallback: "memory retain failed" }); }
+}
+
+function persistRetain(input: {
+  deps: LocalMemoryProviderDeps; state: ProviderState; context: MemoryProviderCallContext; request: RetainRequest;
+}) {
+  const { deps, state, context, request } = input;
+  const epoch = deps.authority.activeEpoch(context.authorityEpochId);
+  const bank = requireBank(deps, epoch.epochId, request.bankId);
+  const layer = requirePolicy(bank, request);
+  const built = buildRetain({ deps, context, request, layer });
+  const result = deps.records.retain({ epochId: context.authorityEpochId, bankId: request.bankId,
+    requestId: context.requestId, requestHash: stableRequestHash(request), ...built });
+  const record = deps.records.record(context.authorityEpochId, request.bankId, result.memories[0]!.memoryId);
+  if (record) scheduleVectorUpsert(deps, state, record);
+  return result;
+}
+
+function retainObserved(input: {
+  deps: LocalMemoryProviderDeps; state: ProviderState; context: MemoryProviderCallContext; request: RetainRequest;
+}): RetainResult {
+  const parsed = RetainRequestSchema.safeParse(input.request);
+  if (!parsed.success) throw new Error("MEMORY_INVALID_REQUEST");
+  const request = parsed.data;
+  if (input.context.signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
+  if (input.context.actor !== "background-policy" || request.provenance.origin !== "machine-observed"
+    || request.policy.origin !== "observed" || request.policy.visibility === "pinned"
+    || request.policy.importance > clampAutoImportance(request.policy.layerId, request.policy.importance)
+    || !isSafeAutomaticMemoryText(request.content) || request.updateMode !== "replace" || request.strategy !== null) {
+    throw new Error("MEMORY_INVALID_REQUEST");
+  }
+  return { status: "completed", ...persistRetain({ ...input, request }) };
 }
 
 function buildRetain(input: { deps: LocalMemoryProviderDeps; context: MemoryProviderCallContext; request: RetainRequest; layer: MemoryLayerDefinition }) {
@@ -124,7 +198,8 @@ async function addVectorHits(input: { deps: LocalMemoryProviderDeps; state: Prov
 }
 
 function eligible(record: CanonicalMemoryRecord, request: RecallRequest): boolean {
-  return record.unit.bankId === request.bankId && record.unit.state === "valid" && request.factTypes.includes(record.unit.factType)
+  return record.unit.bankId === request.bankId && record.unit.state === "valid" && record.policy.visibility !== "hidden"
+    && request.factTypes.includes(record.unit.factType)
     && (request.layerIds.length === 0 || request.layerIds.includes(record.policy.layerId));
 }
 
@@ -185,23 +260,11 @@ function requirePolicy(bank: CanonicalMemoryBank, request: RetainRequest): Memor
   return layer;
 }
 
-function requireLayerOwnership(bank: CanonicalMemoryBank, layer: MemoryLayerDefinition): void {
-  const expected = layer.ownership === "global" ? "global" : "character";
-  if (bank.scope.kind !== expected) throw new Error("MEMORY_INVALID_REQUEST: layer and Bank scope mismatch");
-}
-
 function retentionMatches(layer: MemoryLayerDefinition, retention: TakiMemoryPolicyProjection["retention"]): boolean {
   if (layer.retention === "permanent") return retention.kind === "permanent";
   if (layer.retention === "expiring") return retention.kind === "expiring";
   if ("rollingDays" in layer.retention) return retention.kind === "rolling-window" && retention.days === layer.retention.rollingDays;
   return retention.kind === "importance-decay" && retention.archiveBelowImportance === layer.retention.archiveBelowImportance && retention.afterDays === layer.retention.afterDays;
-}
-
-function projectRetention(layer: MemoryLayerDefinition, previous: TakiMemoryPolicyProjection["retention"] | undefined, at: string): TakiMemoryPolicyProjection["retention"] {
-  if (layer.retention === "permanent") return { kind: "permanent" };
-  if (layer.retention === "expiring") return previous?.kind === "expiring" ? previous : { kind: "expiring", expiresAt: new Date(Date.parse(at) + DEFAULT_INTENTIONS_DAYS * 86_400_000).toISOString() };
-  if ("rollingDays" in layer.retention) return { kind: "rolling-window", days: layer.retention.rollingDays };
-  return { kind: "importance-decay", archiveBelowImportance: layer.retention.archiveBelowImportance, afterDays: layer.retention.afterDays };
 }
 
 function projectionTerms(input: { tokenizer: SearchTokenizer; text: string; context: string | null; disclosure: string | null }): string {
@@ -248,3 +311,5 @@ function failure<T>(input: { context: MemoryProviderCallContext; caps: MemoryPro
   const error = MemoryErrorSchema.parse({ code: input.code, category, message: input.message, retryable, nextAction, ...(input.currentRevision === undefined ? {} : { currentRevision: input.currentRevision }) });
   return { ok: false, requestId: input.context.requestId, providerId: "local", authorityEpochId: input.context.authorityEpochId, capabilities: input.caps, error };
 }
+
+export { projectRetention, requireLayerOwnership } from "./canonical-layer-policy.ts";

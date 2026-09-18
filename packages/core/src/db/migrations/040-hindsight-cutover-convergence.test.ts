@@ -5,12 +5,15 @@ import { basename, dirname, join, resolve } from "node:path";
 import { openDatabase, type Database, type SqlRow } from "../sqlite.ts";
 import { runMigrations, type Migration } from "../migration-runner.ts";
 import { createLocalCoverageFixture, seedLocalB2CoverageFixture } from "../hindsight-local-coverage-fixtures.ts";
-import { MIGRATIONS } from "./index-list.ts";
+import { MIGRATIONS as CURRENT_MIGRATIONS } from "./index-list.ts";
 import { earlyHindsightMigration023 } from "./040-hindsight-cutover-convergence-fixtures.ts";
 import { hindsightCutoverConvergenceMigration040 } from "./040-hindsight-cutover-convergence.ts";
 
 const roots: string[] = [];
 const dbs: Database[] = [];
+// This suite proves 040's exact historical transformation. Successor migrations have their own
+// upgrade tests; applying them here would invalidate the deliberate whole-schema no-op assertion.
+const MIGRATIONS = CURRENT_MIGRATIONS.filter(({ version }) => version <= 40);
 const missingEarlyTables = [
   "hindsight_cutover_runs", "hindsight_replica_staging_runs", "hindsight_replica_staging_records",
   "hindsight_replica_records", "hindsight_replica_checkpoints", "hindsight_authority_activation_receipts",

@@ -13,7 +13,7 @@ import type { FlushWriter } from "./flush-writer.ts";
 import type { UtilitySlot } from "./utility-slot.ts";
 
 // Summarize into episodes once this many new messages have accrued since the last summary (config-later per prd §3).
-const EPISODIC_EVERY_N = 20;
+export const EPISODIC_EVERY_N = 20;
 
 /**
  * What kind of turn triggered this pass (M-A2 seam). T5 only carries the value; T4 gives heartbeat turns their own
@@ -91,15 +91,20 @@ export function createMaintenanceAutoMemory(input: {
   maintenance: () => AutoMemoryMaintenance | undefined;
   compact?: AutoMemoryCompact;
   logger: AutoMemoryLogger;
-}): AutoMemory {
+}): AutoMemory & { stop(): Promise<void>; settle(): Promise<void> } {
   // Per-character promise chain: a second trigger waits for the first, so it reads the advanced watermark (no double-fire).
   const chains = new Map<string, Promise<void>>();
+  let stopped = false;
 
   function onTurnCompleted(characterId: string, origin: TurnOrigin = "primary"): Promise<void> {
+    if (stopped) return Promise.resolve();
     const prev = chains.get(characterId) ?? Promise.resolve();
     // Defer to a macrotask so the just-finished chat turn returns to the caller before any auto-write work begins.
     const next = prev.then(() => new Promise<void>((resolve) => {
-      setImmediate(() => void runMaintenanceChain(input, characterId, origin).then(resolve, resolve));
+      setImmediate(() => {
+        if (stopped) { resolve(); return; }
+        void runMaintenanceChain({ ...input, stopped: () => stopped }, characterId, origin).then(resolve, resolve);
+      });
     }));
     chains.set(characterId, next);
     void next.finally(() => {
@@ -108,11 +113,12 @@ export function createMaintenanceAutoMemory(input: {
     return next;
   }
 
-  return { onTurnCompleted };
+  const settle = async () => { while (chains.size > 0) await Promise.allSettled([...chains.values()]); };
+  return { onTurnCompleted, settle, stop: () => { stopped = true; return settle(); } };
 }
 
 async function runMaintenanceChain(
-  input: { maintenance: () => AutoMemoryMaintenance | undefined; compact?: AutoMemoryCompact; logger: AutoMemoryLogger },
+  input: { maintenance: () => AutoMemoryMaintenance | undefined; compact?: AutoMemoryCompact; logger: AutoMemoryLogger; stopped?: () => boolean },
   characterId: string,
   origin: TurnOrigin,
 ): Promise<void> {
@@ -123,7 +129,7 @@ async function runMaintenanceChain(
     // exception outside its own sub-path.
     input.logger.warn({ kind: "provider", characterId, code: maintenanceFailureCode(error) }, "memory provider maintenance failed; will retry");
   }
-  await maybeCompact({ compact: input.compact, logger: input.logger }, characterId);
+  if (!input.stopped?.()) await maybeCompact({ compact: input.compact, logger: input.logger }, characterId);
 }
 
 // A provider pass never throws (each sub-path is guarded) so the outer coordinator remains detached and reusable.

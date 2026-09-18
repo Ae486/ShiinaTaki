@@ -66,6 +66,8 @@ const EXPECTED_KEYS = [
   "TAKI_HINDSIGHT_EMBEDDING_MODEL",
   "TAKI_HINDSIGHT_RERANKER_PROVIDER",
   "TAKI_HINDSIGHT_RERANKER_MODEL",
+  "TAKI_HINDSIGHT_POLICY_TIMEOUT_MS",
+  "TAKI_HINDSIGHT_POLICY_PROMPT",
 ];
 
 describe("CONFIG_KNOBS", () => {
@@ -73,7 +75,7 @@ describe("CONFIG_KNOBS", () => {
     const keys = CONFIG_KNOBS.map((knob) => knob.key);
     expect(new Set(keys).size).toBe(keys.length);
     expect([...keys].sort()).toEqual([...EXPECTED_KEYS].sort());
-    expect(CONFIG_KNOBS).toHaveLength(60);
+    expect(CONFIG_KNOBS).toHaveLength(62);
   });
 
   it("flags exactly the three API keys as secrets", () => {
@@ -113,6 +115,8 @@ describe("CONFIG_KNOBS", () => {
       "TAKI_HINDSIGHT_EMBEDDING_MODEL",
       "TAKI_HINDSIGHT_RERANKER_PROVIDER",
       "TAKI_HINDSIGHT_RERANKER_MODEL",
+      "TAKI_HINDSIGHT_POLICY_TIMEOUT_MS",
+      "TAKI_HINDSIGHT_POLICY_PROMPT",
     ]);
   });
 

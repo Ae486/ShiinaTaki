@@ -62,3 +62,16 @@
 - hindsight-current-status-schema.ts — versioned durable current-import/verification counts, independent of historical B2 counters
 - hindsight-current-invalidation-schema.ts — authenticated native drift observations, exact proof bindings and exclusion of transport uncertainty
 - run-event-schema.ts — versioned durable Run/Event contracts, including model/tool/context/governance observability facts
+- hindsight-application-artifact-schema.ts — typed application bodies, bindings, immutable CAS commands and historical receipts
+- hindsight-application-body-schema.ts — bounded multipart wire schemas with separate byte and semantic checksums
+- hindsight-application-content-schema.ts — the matching typed application body without treating arbitrary JSON as another protocol
+- hindsight-application-encoding.ts — iterative tagged binary64 JSON matching native application_state/codec.py
+- hindsight-application-json-reader.ts — strict JSON values with duplicate-key refusal and no container-recursion limit
+- hindsight-application-json.ts — lossless JSON validation and iterative wire serialization without an inherited depth quota
+- hindsight-application-native-schema.ts — kind-checked native evidence and separately hashed original document evidence
+- hindsight-application-primitives-schema.ts — closed wire primitives matching the native TakiApplication models
+- hindsight-application-read-schema.ts — closed paired-checkpoint read contracts and guarded reflection policy context
+- hindsight-application-replica-schema.ts — lossless replica payload and record contracts with unchanged logical identity and credential checks
+- hindsight-memory-consumer-schema.ts — versioned consumer validators that preserve supported JSON and all factual result references
+- hindsight-native-runtime-schema.ts — validated native fields, preserving omitted values, nulls, and typed JSON
+- memory-policy-assessment-schema.ts — strict D77 memory-body and assessment contracts, plus the shared importance default

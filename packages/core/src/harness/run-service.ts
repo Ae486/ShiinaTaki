@@ -7,13 +7,17 @@ import { randomUUID } from "node:crypto";
 import type { ToolSet } from "ai";
 import {
   TriggerRequestSchema,
+  MemoryErrorEnvelopeSchema,
   type RunOutcome,
   type RunSnapshot,
+  type RunMemoryReference,
   type RunStatusResult,
   type TriggerRequest,
   type QueueListParams, type QueueListResult,
 } from "@taki/shared";
 import type { RunAdmissionInput, RunAdmissionResult, RunRepo } from "../db/run-repo.ts";
+import type { AutomaticMemoryRecall } from "../memory/automatic-memory-recall.ts";
+import { sameMemoryCapabilities } from "../memory/memory-capability-snapshot.ts";
 
 type SnapshotDraft = Omit<RunSnapshot, "snapshotId" | "runId" | "capturedAt" | "manifestDigest">;
 
@@ -25,6 +29,10 @@ export interface CapturedRunSnapshot {
 export interface RunExecutionContext {
   readonly tools?: ToolSet;
   readonly memoryTools?: ToolSet;
+  readonly memorySnapshot?: RunMemoryReference;
+  readonly automaticMemoryRecall?: AutomaticMemoryRecall;
+  readonly memoryPrompt?: string;
+  readonly assembleMemory?: (currentMessage: string) => string;
   readonly instructions?: string;
   dispose?(): void;
 }
@@ -74,11 +82,7 @@ export function createRunService<TAdmission = unknown>(deps: {
         captured.context?.dispose?.();
         throw error;
       }
-      // A duplicate admission must not replace the process-local context of an already admitted Run. A scheduler
-      // retry may arrive after the original context was released, in which case the new capture becomes authoritative.
-      const terminal = ["completed", "failed", "cancelled", "skipped", "deadline_exceeded", "outcome_unknown"].includes(result.run.state);
-      if (result.reused && (terminal || contexts.has(result.run.runId))) captured.context?.dispose?.();
-      else if (captured.context) contexts.set(result.run.runId, captured.context);
+      bindCapturedContext(contexts, result, captured);
       return result;
     },
     start(runId, attemptId) {
@@ -114,4 +118,28 @@ export function createRunService<TAdmission = unknown>(deps: {
 function release(contexts: Map<string, RunExecutionContext>, runId: string): void {
   contexts.get(runId)?.dispose?.();
   contexts.delete(runId);
+}
+
+function bindCapturedContext(contexts: Map<string, RunExecutionContext>, result: RunAdmissionResult, captured: CapturedRunSnapshot): void {
+  const terminal = ["completed", "failed", "cancelled", "skipped", "deadline_exceeded", "outcome_unknown"].includes(result.run.state);
+  // An in-process duplicate keeps its original executable closures. After process-local context loss, persisted
+  // admission evidence is still authoritative: rebuilding a context may not silently select a different memory.
+  if (result.reused && (terminal || contexts.has(result.run.runId))) { captured.context?.dispose?.(); return; }
+  if (result.reused && !sameMemoryReference(result.snapshot.memory, captured.snapshot.memory)) {
+    captured.context?.dispose?.();
+    const memory = result.snapshot.memory;
+    const refusal = MemoryErrorEnvelopeSchema.parse({ ok: false, requestId: result.run.runId,
+      providerId: memory.providerId, authorityEpochId: memory.authorityEpochId ?? null, capabilities: memory.capabilities,
+      error: { code: "MEMORY_AUTHORITY_MISMATCH", category: "authority", message: "memory differs from the admitted Run",
+        retryable: false, nextAction: "check-provider" } });
+    // Keep the ordinary Error boundary and the existing Shared structured memory disposition together.
+    throw Object.assign(new Error(refusal.error.code), refusal);
+  }
+  if (captured.context) contexts.set(result.run.runId, captured.context);
+}
+
+function sameMemoryReference(left: RunMemoryReference, right: RunMemoryReference): boolean {
+  return left.providerId === right.providerId && left.providerLineageId === right.providerLineageId
+    && left.authorityEpochId === right.authorityEpochId && left.contractVersion === right.contractVersion
+    && left.capabilityDigest === right.capabilityDigest && sameMemoryCapabilities(left.capabilities, right.capabilities);
 }

@@ -17,11 +17,27 @@ function replace(db: Database, input: { blockId: string; scope: BlockScope; cont
   const def = getBlock(input.blockId); if (!def) throw new Error("MEMORY_INVALID_REQUEST: unknown block");
   if ((def.ownership === "global" ? "global" : "character") !== input.scope.kind) throw new Error("MEMORY_INVALID_REQUEST: block scope mismatch");
   if (def.writer !== input.actor) throw new Error("MEMORY_CAPABILITY_UNSUPPORTED: block writer");
-  const old = read(db, input.blockId, input.scope);
-  if (input.expectedRevision !== undefined && old?.revision !== input.expectedRevision) throw new Error("MEMORY_REVISION_MISMATCH");
-  const now = input.now ?? new Date().toISOString(); const revision = (old?.revision ?? 0) + 1;
-  db.transaction(() => { if (old) db.prepare("UPDATE taki_memory_blocks SET content=:content,revision=:revision,updated_at=:updated_at WHERE block_id=:id AND scope_kind=:kind AND ifnull(character_id,'')=ifnull(:character,'')").run({ content: input.content, revision, updated_at: now, id: input.blockId, kind: input.scope.kind, character: input.scope.characterId }); else db.prepare("INSERT INTO taki_memory_blocks (block_id,scope_kind,character_id,content,revision,updated_at) VALUES (:id,:kind,:character,:content,:revision,:updated_at)").run({ id: input.blockId, kind: input.scope.kind, character: input.scope.characterId, content: input.content, revision, updated_at: now }); });
-  return { blockId: input.blockId, scope: input.scope, content: input.content, revision, updatedAt: now };
+  if (input.expectedRevision !== undefined && (!Number.isSafeInteger(input.expectedRevision) || input.expectedRevision < 0)) {
+    throw new Error("MEMORY_INVALID_REQUEST: invalid block revision");
+  }
+  const now = input.now ?? new Date().toISOString();
+  let result: StructuredMemoryBlock | undefined;
+  db.transaction(() => {
+    const old = read(db, input.blockId, input.scope);
+    // Zero means the reviewer saw an absent block. A concurrent creation must not be overwritten.
+    if (input.expectedRevision !== undefined && (old?.revision ?? 0) !== input.expectedRevision) throw new Error("MEMORY_REVISION_MISMATCH");
+    const revision = (old?.revision ?? 0) + 1;
+    if (old) {
+      db.prepare("UPDATE taki_memory_blocks SET content=:content,revision=:revision,updated_at=:updated_at WHERE block_id=:id AND scope_kind=:kind AND ifnull(character_id,'')=ifnull(:character,'')")
+        .run({ content: input.content, revision, updated_at: now, id: input.blockId, kind: input.scope.kind, character: input.scope.characterId });
+    } else {
+      db.prepare("INSERT INTO taki_memory_blocks (block_id,scope_kind,character_id,content,revision,updated_at) VALUES (:id,:kind,:character,:content,:revision,:updated_at)")
+        .run({ id: input.blockId, kind: input.scope.kind, character: input.scope.characterId, content: input.content, revision, updated_at: now });
+    }
+    result = { blockId: input.blockId, scope: input.scope, content: input.content, revision, updatedAt: now };
+  });
+  if (!result) throw new Error("MEMORY_INTERNAL_ERROR: block replacement did not settle");
+  return result;
 }
 function parse(row: SqlRow): StructuredMemoryBlock { return { blockId: String(row.block_id), scope: row.scope_kind === "global" ? { kind: "global", characterId: null } : { kind: "character", characterId: String(row.character_id) }, content: String(row.content), revision: Number(row.revision), updatedAt: String(row.updated_at) }; }
 function render(db: Database, scopes: BlockScope[]): string {

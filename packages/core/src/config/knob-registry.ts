@@ -21,6 +21,7 @@ import {
   type TimingPolicyField,
 } from "@taki/shared";
 import { DEFAULT_MAX_STEPS } from "./agent-config.ts";
+import { DEFAULT_HINDSIGHT_POLICY_PROMPT, DEFAULT_HINDSIGHT_POLICY_TIMEOUT_MS } from "./hindsight-policy-config.ts";
 import { DEFAULT_TTL_DAYS } from "./attachment-config.ts";
 import { DEFAULT_COMPACT_KEEP_MESSAGES, DEFAULT_COMPACT_TRIGGER_RATIO, DEFAULT_CONTEXT_TOKENS, DEFAULT_HISTORY_RATIO } from "./context-config.ts";
 import { DEFAULT_LOG_LEVEL, DEFAULT_TRUST_LOOPBACK, LOG_LEVELS } from "./server-config.ts";
@@ -199,6 +200,10 @@ export const CONFIG_KNOBS: Knob[] = [
   { key: "TAKI_HINDSIGHT_EMBEDDING_MODEL", ...str(), default: null, apply: "live", description: "Desired managed-deployment embedding model identifier." },
   { key: "TAKI_HINDSIGHT_RERANKER_PROVIDER", ...str(), default: null, apply: "live", description: "Desired managed-deployment reranker provider identifier." },
   { key: "TAKI_HINDSIGHT_RERANKER_MODEL", ...str(), default: null, apply: "live", description: "Desired managed-deployment reranker model identifier." },
+  { key: "TAKI_HINDSIGHT_POLICY_TIMEOUT_MS", ...int({ min: 1, max: 2_147_483_647 }), default: DEFAULT_HINDSIGHT_POLICY_TIMEOUT_MS,
+    apply: "live", description: "Whole-pass deadline for the narrow Hindsight policy curator; captured at each pass." },
+  { key: "TAKI_HINDSIGHT_POLICY_PROMPT", schema: z.string(), input: { kind: "string" }, default: DEFAULT_HINDSIGHT_POLICY_PROMPT,
+    apply: "live", description: "Additional Hindsight policy review instructions; the fixed ownership and safety rules remain in force." },
 ];
 
 const BY_KEY = new Map(CONFIG_KNOBS.map((knob) => [knob.key, knob]));

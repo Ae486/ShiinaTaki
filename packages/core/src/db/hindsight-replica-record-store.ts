@@ -1,6 +1,6 @@
 /**
  * INPUT:  validated canonical replica records and one shared search tokenizer
- * OUTPUT: full record reads, revision-safe writes, atomic FTS updates, and full-state manifest digests
+ * OUTPUT: full record reads, revision-safe writes, visibility-safe sparse search, and full-state manifest digests
  * POS:    core/db — synchronous B5 record projection used only inside the sync repository transaction
  */
 import { z } from "zod";
@@ -9,6 +9,9 @@ import type { Database, SqlRow } from "./sqlite.ts";
 import { canonicalJson, canonicalPayloadHash } from "../memory/legacy-migration/legacy-identities.ts";
 import type { SearchTokenizer } from "../memory/search-tokenizer.ts";
 import { buildFtsQuery } from "../memory/fts5-query.ts";
+import { applicationReplicaDigest, getApplicationReplicaRecord, reprojectApplicationReplicaRecord, searchApplicationReplicaRecords,
+  type ApplicationReplicaReprojection, type ApplicationReplicaSearch } from "./hindsight-application-replica-records.ts";
+import type { TakiApplicationNamespace } from "@taki/shared";
 
 export interface ReplicaRecordRead {
   bankId: string; objectKind: MemoryReplicaObjectKind; objectId: string;
@@ -23,10 +26,18 @@ export interface ReplicaRecordStore {
   entries(bankId: string): Array<{ objectKind: MemoryReplicaObjectKind; objectId: string; recordHash: string }>;
   reconcile(bankId: string, records: MemoryReplicaRecord[]): void;
   clear(bankId: string): void;
+  applicationReproject(input: ApplicationReplicaReprojection): void;
+  applicationGet(input: ReplicaRecordRead): MemoryReplicaRecord | undefined;
+  applicationSearch(input: ApplicationReplicaSearch): CanonicalMemoryRecord[];
+  applicationDigest(input: { bankId: string; namespace: TakiApplicationNamespace }): string;
 }
 
 export function createReplicaRecordStore(db: Database, tokenizer: SearchTokenizer): ReplicaRecordStore {
   return {
+    applicationReproject: (input) => reprojectApplicationReplicaRecord({ db, tokenizer }, input),
+    applicationGet: (input) => getApplicationReplicaRecord(db, input),
+    applicationSearch: (input) => searchApplicationReplicaRecords({ db, tokenizer }, input),
+    applicationDigest: (input) => applicationReplicaDigest(db, input),
     write: (record, sourceCursor) => write({ db, tokenizer }, record, sourceCursor),
     replace: (record, sourceCursor) => replace({ db, tokenizer }, record, sourceCursor),
     get: (input) => get(db, input), search: (input) => search({ db, tokenizer }, input),
@@ -82,7 +93,9 @@ function writeFts(deps: { db: Database; tokenizer: SearchTokenizer }, record: Me
 }
 
 function ftsRow(record: MemoryReplicaRecord, tokenizer: SearchTokenizer): SqlRow | null {
-  if (record.payload?.kind !== "memory_unit" || record.payload.value.unit.state !== "valid") return null;
+  // Visibility belongs to the searchable projection; hidden logical records remain available for recovery and audit.
+  if (record.payload?.kind !== "memory_unit" || record.payload.value.unit.state !== "valid"
+    || record.payload.value.policy.visibility === "hidden") return null;
   const { unit, policy } = record.payload.value;
   const text = [unit.text, unit.context, policy.disclosure].filter((value) => value !== null).join(" ");
   return { bank_id: record.bankId, object_id: record.objectId, text: unit.text, context: unit.context,
@@ -142,8 +155,17 @@ function search(deps: { db: Database; tokenizer: SearchTokenizer }, input: { ban
   const where = query.kind === "match" ? "hindsight_replica_sync_fts MATCH :query"
     : "(text LIKE :query ESCAPE '\\' OR context LIKE :query ESCAPE '\\' OR disclosure LIKE :query ESCAPE '\\')";
   const rank = query.kind === "match" ? "bm25(hindsight_replica_sync_fts,0,0,1,1,2,2),object_id" : "object_id";
+  // Older or damaged FTS rows can still contain excluded memories. Filter against the full record before LIMIT
+  // so a stale high-ranked row cannot disclose hidden content or crowd a valid lower-ranked memory out of recall.
   const rows = deps.db.prepare(`SELECT object_id FROM hindsight_replica_sync_fts
-    WHERE bank_id=:bank AND ${where} ORDER BY ${rank} LIMIT :limit`)
+    WHERE bank_id=:bank AND ${where} AND EXISTS (
+      SELECT 1 FROM hindsight_replica_sync_records r
+      WHERE r.bank_id=hindsight_replica_sync_fts.bank_id AND r.object_kind='memory_unit'
+        AND r.object_id=hindsight_replica_sync_fts.object_id AND r.operation='upsert'
+        AND json_extract(r.record_json,'$.payload.kind')='memory_unit'
+        AND json_extract(r.record_json,'$.payload.value.unit.state')='valid'
+        AND json_extract(r.record_json,'$.payload.value.policy.visibility')<>'hidden'
+    ) ORDER BY ${rank} LIMIT :limit`)
     .all({ bank: request.bankId, query: query.kind === "match" ? query.match : query.like, limit: request.limit });
   return rows.flatMap((row) => {
     const record = get(deps.db, { bankId: request.bankId, objectKind: "memory_unit", objectId: String(row.object_id) });

@@ -18,6 +18,7 @@ export interface PendingReplayContext {
   client: HindsightClient; pending: PendingMemoryRepo; replica: HindsightReplicaSyncRepo;
   guard: PendingMemoryGuard; request: () => HindsightCallContext; now: () => string;
   nativeResultSupported?: boolean;
+  beforeNativeDispatch?: (input: { record: PendingMemoryRecord; context: HindsightCallContext }) => Promise<void>;
 }
 
 export async function replayPendingNative(context: PendingReplayContext, raw: PendingMemoryRecord): Promise<PendingMemoryRecord> {
@@ -42,8 +43,13 @@ export async function replayPendingNative(context: PendingReplayContext, raw: Pe
         if (!context.nativeResultSupported && record.intent.operation.request.updateMode !== "replace") throw new Error("HINDSIGHT_PENDING_PAYLOAD_UNSUPPORTED");
         const request = record.intent.operation.request;
         const documentId = record.documentId;
+        const dispatch = context.nativeResultSupported ? prepareTrackedDispatch(record, null) : undefined;
+        // D77 persists the complete original source remotely before the first
+        // native request. Historical replay still uses its frozen G1 identity.
+        await context.beforeNativeDispatch?.({ record, context: context.request() });
+        context.request();
         record = change(context, record, { kind: "dispatch", preparedMutation: null,
-          dispatch: context.nativeResultSupported ? prepareTrackedDispatch(record, null) : undefined });
+          dispatch });
         if (record.dispatch?.protocol === "tracked_native_v1") return await submitTrackedPending(nativeContext(context), record);
         if (!context.client.retainPending) throw new Error("HINDSIGHT_PENDING_CLIENT_UNAVAILABLE");
         await context.client.retainPending({ request, documentId,

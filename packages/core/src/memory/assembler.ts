@@ -19,8 +19,8 @@ import { selectPinned } from "./pinned-block.ts";
 import { estimateTokens, fitToBudget } from "./token-estimator.ts";
 
 // Emotion capsule is a static placeholder (D9, docs/deferred-decisions.md); the persona card now loads from disk (#16).
-const EMOTION_CAPSULE = "Current mood: neutral.";
-const PINNED_HEADER = "Promises and facts you always keep in mind:";
+export const EMOTION_CAPSULE = "Current mood: neutral.";
+export const PINNED_HEADER = "Promises and facts you always keep in mind:";
 // A block over its budget is trimmed in the PROMPT only — the file on disk stays whole. The visible cut is the signal
 // to consolidate (an always-loaded curated file behaves the same way in OpenClaw), never a silent deletion.
 const BLOCK_TRIM_NOTE = "(… trimmed to fit this block's budget; the full text is still on disk.)";
@@ -124,7 +124,7 @@ interface RenderRow {
 // A reinforced entry (R9) ages from its LAST reinforcement: the duplicate write proved it was live again.
 // Observed-origin rows are grouped into ONE fence per section: the label is what makes the payload
 // data-never-instructions, and repeating it per bullet would cost tokens without adding a guarantee.
-function renderBlock(header: string, rows: RenderRow[], nowMs: number): string {
+export function renderBlock(header: string, rows: RenderRow[], nowMs: number): string {
   const bullet = (row: RenderRow): string =>
     `- (${formatRelativeAge(row.updatedAt ?? row.createdAt, nowMs)}) ${row.content}`;
   const parts = [header, ...rows.filter((row) => !isObserved(row)).map(bullet)];
@@ -135,7 +135,7 @@ function renderBlock(header: string, rows: RenderRow[], nowMs: number): string {
 
 // The single-row render site (the intention line) fences on the same rule, so no write path can ever put sensed
 // content in front of the model unfenced.
-function rowContent(row: MemoryEntryRow): string {
+export function rowContent(row: MemoryEntryRow): string {
   return isObserved(row) ? fenceUntrusted({ source: "memory", content: row.content }) : row.content;
 }
 

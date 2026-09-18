@@ -4,7 +4,7 @@
  * POS:    shared memory contract — independent of Run Effects and confirmed replica records
  */
 import { z } from "zod";
-import { MutationRequestSchema, RetainRequestSchema } from "./memory-provider-operation-schema.ts";
+import { MutationRequestSchema, PendingMemoryOverlayEntrySchema as OriginalPendingMemoryOverlayEntrySchema, RetainRequestSchema } from "./memory-provider-operation-schema.ts";
 import { MemoryReplicaBankSchema, MemoryReplicaErrorCodeSchema } from "./memory-replica-schedule-schema.ts";
 import { MemoryReplicaLeaseSchema } from "./memory-replica-schema.ts";
 import {
@@ -91,11 +91,7 @@ export const PendingMemorySummarySchema = z.strictObject({
 });
 export type PendingMemorySummary = z.infer<typeof PendingMemorySummarySchema>;
 
-export const PendingMemoryOverlayEntrySchema = z.strictObject({
-  confirmed: z.literal(false), authorityEpochId: Id, bankId: Id, operationId: Id, originalAt: Timestamp,
-  phase: z.enum(["queued", "submitted", "awaiting_derived", "awaiting_pull", "outcome_unknown"]),
-  operation: PendingMemoryOperationSchema,
-}).refine((entry) => entry.operation.request.bankId === entry.bankId, "overlay belongs to another Bank");
+export const PendingMemoryOverlayEntrySchema = OriginalPendingMemoryOverlayEntrySchema;
 export type PendingMemoryOverlayEntry = z.infer<typeof PendingMemoryOverlayEntrySchema>;
 
 function validatePendingState(value: z.infer<typeof PendingMemoryStateBase>, context: z.RefinementCtx): void {
