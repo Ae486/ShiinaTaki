@@ -21,6 +21,7 @@ describe("ErrorCodeSchema", () => {
     "SCHEDULE_REFUSED",
     "SCHEDULE_CONFLICT",
     "HINDSIGHT_REFUSED",
+    "MEMORY_OPERATION_REFUSED",
     "GOVERNANCE_DENIED",
     "APPROVAL_REQUIRED",
   ])("accepts the %s code", (code) => {

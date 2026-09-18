@@ -472,3 +472,22 @@ export { HindsightMemoryRecallResultV1Schema, HindsightMemoryReflectResultV1Sche
   HindsightMemoryMutationEnvelopeV1Schema, HindsightMemoryRetainEnvelopeV1Schema } from "./hindsight-memory-consumer-schema.ts";
 export type { HindsightMemoryRecallResultV1, HindsightMemoryReflectResultV1, HindsightMemoryMutationResultV1,
   HindsightMemoryRetainResultV1, HindsightMemoryRetainCompletedResultV1 } from "./hindsight-memory-consumer-schema.ts";
+export {
+  MEMORY_OPERATION_METHODS, MEMORY_OPERATION_TERMINAL_STATES, MemoryOperationKindSchema, MemoryOperationStateSchema,
+  MemoryOperationReasonSchema, MemoryOperationRefusalReasonSchema, MemoryOperationRequestSchema, MemoryOperationProducerRefSchema,
+  MemoryReplicaNextActionSchema, MemoryOperationResultSchema, MemoryOperationSchema, MemoryOperationSubmitParamsSchema,
+  MemoryOperationSubmitResultSchema, MemoryOperationStatusParamsSchema, MemoryOperationStatusResultSchema,
+  MemoryOperationListParamsSchema, MemoryOperationListResultSchema, MemoryOperationCancelParamsSchema,
+  MemoryOperationCancelResultSchema, MemoryOperationSubscribeParamsSchema, MemoryOperationSubscribeResultSchema,
+  MemoryOperationChangedSchema,
+} from "./memory-operation-schema.ts";
+export type {
+  MemoryOperationKind, MemoryOperationState, MemoryOperationReason, MemoryOperationRefusalReason, MemoryOperationRequest,
+  MemoryOperationProducerRef, MemoryOperationResult, MemoryOperation, MemoryOperationSubmitParams, MemoryOperationSubmitResult,
+  MemoryOperationStatusParams, MemoryOperationStatusResult, MemoryOperationListParams, MemoryOperationListResult,
+  MemoryOperationCancelParams, MemoryOperationCancelResult, MemoryOperationSubscribeResult, MemoryOperationChanged,
+} from "./memory-operation-schema.ts";
+export {
+  MEMORY_AUTHORITY_METHODS, MemoryRuntimeUnavailableReasonSchema, MemoryAuthorityStatusParamsSchema, MemoryAuthorityStatusSchema,
+} from "./memory-authority-status-schema.ts";
+export type { MemoryRuntimeUnavailableReason, MemoryAuthorityStatus, MemoryAuthorityStatusParams } from "./memory-authority-status-schema.ts";
