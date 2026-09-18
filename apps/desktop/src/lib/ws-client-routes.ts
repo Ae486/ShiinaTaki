@@ -1,5 +1,5 @@
 /**
- * INPUT:  inbound JSON-RPC notification frames from the Core (chat stream + avatar/timeline/config/Approval pushes) and the
+ * INPUT:  inbound JSON-RPC notification frames from the Core (chat stream + avatar/timeline/config/Approval/monitor/memory-operation pushes) and the
  *         transport's open/message/close events.
  * OUTPUT: Routes state (in-flight turn + push slots), installRoutes(), parseFrame(), abortTurn(), bindTransport().
  * POS:    ui/lib — the inbound half of ws-client: THE zod boundary (past it, data is trusted typed data). No
@@ -15,6 +15,8 @@ import {
   AvatarCommandSchema,
   CHAT_METHODS,
   CONFIG_METHODS,
+  MEMORY_OPERATION_METHODS,
+  MemoryOperationChangedSchema,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
@@ -29,6 +31,7 @@ import {
   type ApprovalClosed,
   type CanonicalApprovalRequest,
   type ConfigChanged,
+  type MemoryOperation,
   type RunMonitorEvent,
   type ErrorCode,
   type JsonRpcClientFrame,
@@ -59,6 +62,7 @@ interface PushSlots {
   config: Set<(changed: ConfigChanged) => void>;
   approval: Set<(event: ApprovalPushEvent) => void>;
   monitor: Set<(event: RunMonitorEvent) => void>;
+  memoryOperation: Set<(operation: MemoryOperation) => void>;
 }
 
 export type ApprovalPushEvent =
@@ -71,7 +75,7 @@ export interface Routes {
 }
 
 export function createRoutes(): Routes {
-  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(), approval: new Set(), monitor: new Set() } };
+  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(), approval: new Set(), monitor: new Set(), memoryOperation: new Set() } };
 }
 
 export function addConfigChangedHandler(state: Routes, handler: (changed: ConfigChanged) => void): () => void {
@@ -84,6 +88,10 @@ export function addApprovalHandler(state: Routes, handler: (event: ApprovalPushE
   return () => state.push.approval.delete(handler);
 }
 export function addMonitorHandler(state: Routes, handler: (event: RunMonitorEvent) => void): () => void { state.push.monitor.add(handler); return () => state.push.monitor.delete(handler); }
+export function addMemoryOperationHandler(state: Routes, handler: (operation: MemoryOperation) => void): () => void {
+  state.push.memoryOperation.add(handler);
+  return () => state.push.memoryOperation.delete(handler);
+}
 
 function notifyMonitorHandlers(state: Routes, event: RunMonitorEvent): void {
   for (const handler of [...state.push.monitor]) {
@@ -99,6 +107,7 @@ function clearPushHandlers(state: Routes): void {
   state.push.config.clear();
   state.push.approval.clear();
   state.push.monitor.clear();
+  state.push.memoryOperation.clear();
 }
 
 /** Routes the Core's notifications (chat stream + avatar/timeline/config pushes) to their handlers; each zod-validated. */
@@ -136,6 +145,12 @@ export function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void 
   rpc.addMethod(TIMELINE_METHODS.removed, (params: unknown) => {
     state.push.timelineRemoved?.(TimelineRemovedSchema.parse(params));
   });
+  installFanOutRoutes(rpc, state);
+  installApprovalRoutes(rpc, state);
+}
+
+/** Multi-handler pushes: one throwing handler never starves its siblings. */
+function installFanOutRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
   rpc.addMethod(CONFIG_METHODS.changed, (params: unknown) => {
     const changed = ConfigChangedSchema.parse(params);
     for (const handler of [...state.push.config]) {
@@ -149,7 +164,12 @@ export function installRoutes(rpc: JSONRPCServerAndClient, state: Routes): void 
   rpc.addMethod(OBSERVABILITY_METHODS.event, (params: unknown) => {
     notifyMonitorHandlers(state, RunMonitorEventSchema.parse(params));
   });
-  installApprovalRoutes(rpc, state);
+  rpc.addMethod(MEMORY_OPERATION_METHODS.changed, (params: unknown) => {
+    const { operation } = MemoryOperationChangedSchema.parse(params);
+    for (const handler of [...state.push.memoryOperation]) {
+      try { handler(operation); } catch { console.warn("[ws-client] memory.operations.changed handler failed"); }
+    }
+  });
 }
 
 function installApprovalRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {

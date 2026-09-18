@@ -5,7 +5,9 @@ import {
   CHAT_METHODS,
   CONFIG_METHODS,
   EXTENSION_METHODS,
+  MEMORY_AUTHORITY_METHODS,
   MEMORY_METHODS,
+  MEMORY_OPERATION_METHODS,
   PERMISSION_METHODS,
   SKILL_METHODS,
   TIMING_POLICY_DEVELOPMENT_DEFAULTS,
@@ -40,6 +42,11 @@ describe("RPC deadline method policy", () => {
     expect(rpcMethodPolicy(EXTENSION_METHODS.status).timeoutOutcome).toBe("read-only");
     expect(rpcMethodPolicy(SKILL_METHODS.list).timeoutOutcome).toBe("read-only");
     expect(rpcMethodPolicy(SKILL_METHODS.import)).toEqual({ class: "long", timing: "longRpcMs", timeoutOutcome: "unknown" });
+    expect(rpcMethodPolicy(MEMORY_AUTHORITY_METHODS.status).timeoutOutcome).toBe("read-only");
+    expect(rpcMethodPolicy(MEMORY_OPERATION_METHODS.status).timeoutOutcome).toBe("read-only");
+    expect(rpcMethodPolicy(MEMORY_OPERATION_METHODS.list).timeoutOutcome).toBe("read-only");
+    expect(rpcMethodPolicy(MEMORY_OPERATION_METHODS.submit)).toEqual({ class: "interactive", timing: "interactiveRpcMs", timeoutOutcome: "unknown" });
+    expect(rpcMethodPolicy(MEMORY_OPERATION_METHODS.cancel).timeoutOutcome).toBe("unknown");
   });
 });
 

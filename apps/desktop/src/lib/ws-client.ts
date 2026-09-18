@@ -1,6 +1,6 @@
 /**
  * INPUT: WsTransport plus Core JSON-RPC frames parsed by ws-client-routes
- * OUTPUT: createWsClient() with chat, operator lifecycle, and extension convergence request families
+ * OUTPUT: createWsClient() with chat, operator lifecycle, extension convergence and memory operation request families
  * POS:    ui/lib operator transport composition root over inbound routes and typed outbound methods
  */
 
@@ -22,6 +22,7 @@ import type {
   CanonicalApprovalRespondResult,
   ConfigChanged,
   ConfigListResult,
+  MemoryOperation,
   ConfigSetParams,
   ConfigSetResult,
   ConnectParams,
@@ -76,10 +77,12 @@ import type {
 import { requestWithDeadline } from "./rpc-deadline.ts";
 import { createTimingPolicyStore, type TimingPolicyStore } from "./timing-policy.ts";
 import { createTimingPolicySync, type TimingPolicySync } from "./timing-policy-sync.ts";
+import type { MemoryOperationMethods } from "./ws-client-memory-operations.ts";
 import { handshake, requestMethods, type ConnectOutcome } from "./ws-client-methods.ts";
 import {
   addConfigChangedHandler,
   addApprovalHandler,
+  addMemoryOperationHandler,
   addMonitorHandler,
   bindTransport,
   createRoutes,
@@ -93,7 +96,7 @@ import type { WsTransport } from "./ws-transport.ts";
 
 export type { ChatHandlers, ConnectOutcome };
 
-export interface WsClient {
+export interface WsClient extends MemoryOperationMethods {
   connect(params: ConnectParams): Promise<ConnectOutcome>;
   chat(params: ChatSendParams, handlers: ChatHandlers): Promise<void>;
   /** Cancels the character's in-flight turn (idempotent; false = nothing was running). The composer's abort entry. */
@@ -184,6 +187,8 @@ export interface WsClient {
   subscribeMonitor(params: RunMonitorSubscribeParams): Promise<void>;
   unsubscribeMonitor(): Promise<void>;
   onMonitorEvent(handler: (event: RunMonitorEvent) => void): () => void;
+  /** Registers a memory.operations.changed sink (the Operations page refetches the composite status on each push). */
+  onMemoryOperationChanged(handler: (operation: MemoryOperation) => void): () => void;
   /** Registers the fire-and-forget avatar command sink (core -> operator push). Replaces any prior handler. */
   onAvatarCommand(handler: (command: AvatarCommand) => void): void;
   /** Registers the optional live-timeline sink (shared with the chat page server-side). */
@@ -276,14 +281,21 @@ export function createWsClient(deps: WsClientDeps): WsClient {
       await done;
     },
     ...methods,
-    onAvatarCommand: (handler) => (state.push.avatar = handler),
-    onTimelineAppended: (handler) => (state.push.timeline = handler),
-    onTimelineRemoved: (handler) => (state.push.timelineRemoved = handler),
-    onConfigChanged: (handler) => addConfigChangedHandler(state, handler),
-    onApproval: (handler) => addApprovalHandler(state, handler),
-    onMonitorEvent: (handler) => addMonitorHandler(state, handler),
+    ...pushRegistrations(state),
     currentTimingPolicy: timing,
     onClose: (handler) => transport.onClose(handler),
     close: () => closeClient(timingSync, retire, transport),
+  };
+}
+
+function pushRegistrations(state: ReturnType<typeof createRoutes>) {
+  return {
+    onAvatarCommand: (handler: (command: AvatarCommand) => void) => void (state.push.avatar = handler),
+    onTimelineAppended: (handler: (entry: TimelineEntry) => void) => void (state.push.timeline = handler),
+    onTimelineRemoved: (handler: (ref: TimelineRemoved) => void) => void (state.push.timelineRemoved = handler),
+    onConfigChanged: (handler: (changed: ConfigChanged) => void) => addConfigChangedHandler(state, handler),
+    onApproval: (handler: (event: ApprovalPushEvent) => void) => addApprovalHandler(state, handler),
+    onMonitorEvent: (handler: (event: RunMonitorEvent) => void) => addMonitorHandler(state, handler),
+    onMemoryOperationChanged: (handler: (operation: MemoryOperation) => void) => addMemoryOperationHandler(state, handler),
   };
 }

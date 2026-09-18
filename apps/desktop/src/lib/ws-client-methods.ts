@@ -91,6 +91,7 @@ import {
   type TrajectoryParams,
 } from "@taki/shared";
 import { requestWithDeadline } from "./rpc-deadline.ts";
+import { memoryOperationMethods } from "./ws-client-memory-operations.ts";
 
 function permissionMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
   return {
@@ -240,5 +241,6 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
     ...extensionMethods(request),
     ...mcpMethods(request),
     ...skillMethods(request),
+    ...memoryOperationMethods(request),
   };
 }

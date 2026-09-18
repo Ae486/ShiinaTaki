@@ -16,6 +16,7 @@ import {
   CONNECT_METHOD,
   JSON_RPC_APP_ERROR,
   MEDIA_METHODS,
+  MEMORY_OPERATION_METHODS,
   PERMISSION_METHODS,
   TIMELINE_METHODS,
   TIMING_POLICY_DEVELOPMENT_DEFAULTS,
@@ -631,5 +632,36 @@ describe("createWsClient config methods", () => {
     expect(h.sent.map((payload) => JSON.parse(payload).method)).toEqual([CONFIG_METHODS.subscribe]);
     h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "ok" } });
     await expect(Promise.all([first, second])).resolves.toEqual([undefined, undefined]);
+  });
+
+  it("routes memory.operations.changed through the schema boundary, memoizes subscribe, and unwraps operation results", async () => {
+    const h = harness();
+    const client = createWsClient({ transport: h.transport });
+    const received: unknown[] = [];
+    const unsubscribe = client.onMemoryOperationChanged((operation) => received.push(operation));
+    h.open();
+    const first = client.subscribeMemoryOperations();
+    const second = client.subscribeMemoryOperations();
+    await flush();
+    expect(h.sent.map((payload) => JSON.parse(payload).method)).toEqual([MEMORY_OPERATION_METHODS.subscribe]);
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { status: "ok" } });
+    await expect(Promise.all([first, second])).resolves.toEqual([undefined, undefined]);
+    const at = "2026-09-19T00:00:00.000Z";
+    const operation = {
+      operationId: "11111111-1111-4111-8111-111111111111", kind: "replica.sync", state: "admitted", reason: null, authorityEpochId: "epoch",
+      request: { kind: "replica.sync", bankId: "global", syncKind: "incremental" }, producer: { kind: "replica", bankId: "global", admittedAt: at },
+      result: null, errorCode: null, createdAt: at, updatedAt: at, terminalAt: null,
+    };
+    h.deliver({ jsonrpc: "2.0", method: MEMORY_OPERATION_METHODS.changed, params: { operation } });
+    h.deliver({ jsonrpc: "2.0", method: MEMORY_OPERATION_METHODS.changed, params: { operation: { ...operation, state: "completed" } } }); // invalid: terminal without terminalAt
+    expect(received).toEqual([operation]);
+    unsubscribe();
+    h.deliver({ jsonrpc: "2.0", method: MEMORY_OPERATION_METHODS.changed, params: { operation } });
+    expect(received).toHaveLength(1);
+    const submitted = client.memoryOperationSubmit({ kind: "replica.sync", bankId: "global", syncKind: "full" });
+    await flush();
+    expect(JSON.parse(h.sent[h.sent.length - 1]!)).toMatchObject({ method: MEMORY_OPERATION_METHODS.submit, params: { request: { kind: "replica.sync", bankId: "global", syncKind: "full" } } });
+    h.deliver({ jsonrpc: "2.0", id: lastRequestId(h.sent), result: { operation } });
+    expect(await submitted).toEqual(operation);
   });
 });
