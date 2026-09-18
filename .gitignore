@@ -24,3 +24,9 @@ scripts/migrate-node-to-g.ps1
 
 # Claude Code local worktrees (agent isolation scratch — never commit)
 .claude/worktrees/
+
+# Live user-data backups taken before memory migrations (protected; never commit)
+.backup-*/
+
+# Exported agent session transcripts (local working notes)
+codex-session-*.md
