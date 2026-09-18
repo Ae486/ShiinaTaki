@@ -86,6 +86,21 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
 - Full storage/runtime/governance and verification requirements live in
   [`skill-lifecycle.md`](../backend/skill-lifecycle.md).
 
+### Memory authority and operations card (Operations page)
+
+- The card is a disposable projection of `memory.authority.status` plus the `memory.operations.changed` push. It owns
+  no authority, progress, checkpoint or setup state; the legacy `memory-status` counter cache never stores any of it.
+- Each authenticated Home client generation subscribes once and refetches the composite status on every push, on
+  reconnect and on remount. There is no polling; results from a retired client are ignored; nothing is replayed.
+- Actions (立即同步 / 完整对账 / 重试 / 取消) are serialized `memory.operations.*` submits; the card enables Retry only when
+  the Bank reports `explicit_retry_required` and Cancel only for an `admitted` `replica.sync`. Availability follows the
+  current Core status, never a stale snapshot.
+- Unknown values render as 未知; the card never shows `0` pending, a health badge or freshness that the producer did
+  not report. Setup validate/apply and every later workflow (activation, transitions, backup, upgrade) are not on
+  this card until their Core operations exist.
+- Full operation ownership and verification requirements live in
+  [`memory-operations.md`](../backend/memory-operations.md).
+
 ## Cross-window commands (the pet owns the scene, the pages own the surface)
 
 A page that needs something only the pet window can do COMMANDS it and does not reach into it:
