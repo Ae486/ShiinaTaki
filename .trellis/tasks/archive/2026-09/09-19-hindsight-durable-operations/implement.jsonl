@@ -1,0 +1,18 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend pre-dev checklist and quality gate commands"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "SQLite single-writer, wrapper usage, migration and fenced replica rules for the new memory_operations table"}
+{"file": ".trellis/spec/backend/sqlite-migration-lineage.md", "reason": "How to allocate migration 048 and keep lineage/reopen tests valid"}
+{"file": ".trellis/spec/backend/memory-replica-sync.md", "reason": "B5 scheduler/lease/CAS contract the manual-sync operation wraps; cancelManual must respect it"}
+{"file": ".trellis/spec/backend/hindsight-application-runtime.md", "reason": "D77 runtime lifetime, Pending/parent-write separation and truthful status rules"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Structured errors, closed code unions, Hindsight error projection conventions"}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "Fan-out subscription pattern and read-vs-channel rule for memory.operations.subscribe"}
+{"file": ".trellis/spec/backend/host-operation-lifecycle.md", "reason": "State vocabulary (outcome_unknown, explicit resume, no replay) the memory operation owner mirrors for Core-only operations"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Size/responsibility guard, headers, index.md, forbidden patterns"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend pre-dev checklist and quality gate commands"}
+{"file": ".trellis/spec/frontend/home-window.md", "reason": "Operations page primitives (PageCard, LabeledRows, badges) and Home page conventions"}
+{"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "Push handlers with generation guards, per-generation refetch, no polling, real-signal-only stale/busy"}
+{"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "Client replacement, unknown mutation outcome on timeout, restoration ordering for the operations subscription"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Disposable views; what may and may not be cached client-side"}
+{"file": ".trellis/spec/frontend/hook-guidelines.md", "reason": "Custom hook and WS subscription patterns for use-memory-operations"}
+{"file": ".trellis/spec/guides/source-grounding-guide.md", "reason": "Fill gaps by reading installed code/types, never by invention"}
+{"file": ".trellis/tasks/09-19-hindsight-durable-operations/research/stage1-seams.md", "reason": "Verified producer seams, boot order and classification facts for this slice"}
+{"file": ".trellis/tasks/09-14-hindsight-integration-completeness-audit/research/closure-plan.md", "reason": "Acceptance cases C02/C06/C09 this slice advances and the preserved scope decisions"}

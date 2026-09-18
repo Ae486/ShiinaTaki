@@ -1,0 +1,37 @@
+{
+  "id": "hindsight-durable-operations",
+  "name": "hindsight-durable-operations",
+  "title": "Durable memory operations, setup recovery and manual sync control",
+  "description": "Hindsight closure Stage 1: Core-owned durable memory operation owner (setup validate/apply, manual replica sync) with discovery/status/cancel/subscription, orphaned-setup and stale-compatibility fixes, composite memory.authority.status read, and a minimal Home Operations card. Advances matrix A17/A21/A30/A32/A34 (A31 status only).",
+  "status": "completed",
+  "dev_type": null,
+  "scope": "memory-operations-durable-owner",
+  "package": null,
+  "priority": "P2",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-09-19",
+  "completedAt": "2026-09-19",
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "08-09-hindsight-memory-provider",
+  "relatedFiles": [],
+  "notes": "Created 2026-09-19 under the owner's autonomy grant (Trellis flow without per-step consent; commit/archive pre-authorized on clean completion). Planning artifacts: prd.md, design.md, implement.md, research/stage1-seams.md. Stage allocation per 09-14 plan-review-2026-09-18.md. U1 and PR02 remain owner questions for Stage 4 / Stage 3. Completed 2026-09-19: implement + check (pass-with-fixes: same-millisecond claim guard, status/list reads in the interactive deadline class, fixture/fake fidelity). Gates: typecheck 5/5, lint clean, Shared 512 / Core 3088 (381 files) / Desktop 567 tests green, isolated boot through migration 048 on a non-default port. Matrix: A17/A21/A30/A32/A34 closed, A31 status-only. Open: A16 first-activation not wired (Stage 2), replica.sync attribution limits recorded as D84, spec memory-operations.md. Manual acceptance NOT run.",
+  "meta": {
+    "stage": "S1",
+    "parent_plan": ".trellis/tasks/09-14-hindsight-integration-completeness-audit/research/plan-review-2026-09-18.md",
+    "matrix_entries": [
+      "A17",
+      "A21",
+      "A30",
+      "A32",
+      "A34",
+      "A31(status)"
+    ]
+  }
+}

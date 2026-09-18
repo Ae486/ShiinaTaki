@@ -1,0 +1,13 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend quality gate commands"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Size/responsibility guard, headers, index.md, forbidden patterns to verify"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Verify migration 048 and repo transactions follow the single-writer/wrapper rules"}
+{"file": ".trellis/spec/backend/sqlite-migration-lineage.md", "reason": "Verify lineage and reopen matrix coverage for 048"}
+{"file": ".trellis/spec/backend/memory-replica-sync.md", "reason": "Verify cancelManual and the manual-sync wrapper do not weaken B5 lease/CAS guarantees"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Verify closed error unions and sanitized projections"}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "Verify subscription cleanup on close and operator-only roles"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend quality gate commands"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "Frontend size/perf/test rules"}
+{"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "Verify generation guards, refetch-not-replay and no polling in the controller"}
+{"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "Verify retired-client result handling and unknown-outcome presentation"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "Cross-layer consistency check Shared -> Core -> Home"}
+{"file": ".trellis/tasks/09-19-hindsight-durable-operations/research/stage1-seams.md", "reason": "Seam facts to verify the implementation against"}
