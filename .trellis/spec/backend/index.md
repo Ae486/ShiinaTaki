@@ -22,6 +22,9 @@ Before writing backend code:
 | [SQLite Transaction Failure Isolation](./sqlite-transaction-isolation.md) | Commit-failure rollback, nested savepoint boundaries and SQL isolation after an implicit whole-transaction abort |
 | [Memory Replica Sync](./memory-replica-sync.md) | B5 transactional Authority/Bank guards, verified reconciliation and durable recovery; legacy derived-wait rules and G1 tracked native-result/checkpoint contracts |
 | [G1 Native Result Recovery](./memory-native-result-recovery.md) | Tracked request identity, exact native historical proof, compact paging, old-row safety and actual SQLite factual confirmation; independent cutover boundaries |
+| [Canonical Local Memory Runtime](./canonical-local-memory-runtime.md) | Exact primary-source ingestion, immutable Run/recall binding, complete Local maintenance, retirement durability and irreversible Legacy fencing |
+| [Hindsight Native Runtime Reads](./hindsight-runtime-reads.md) | Authenticated native recall/reflect wire methods, lossless metadata, bounded responses and the separate Canonical hydration boundary |
+| [Hindsight Application State and Runtime](./hindsight-application-runtime.md) | D77 original evidence, paired publication, immediate neutral policy, durable compound writes, source flush, guarded reflection and complete runtime lifetime |
 | [Current Local Cutover Coverage](./memory-local-cutover-coverage.md) | Immutable complete Local manifests, writer-reserved cutover refusal, typed source evidence and exact native-object projection bindings |
 | [Current-State Transfer and First Activation](./memory-current-state-cutover.md) | D78 structured Bank import, typed hash/mapping evidence, native input/outcome certificate, retained snapshot, drift invalidation and actual B4 raw staging/guards |
 | [Error Handling](./error-handling.md) | Structured tool errors, Rust/IPC errors, and Hindsight total-deadline/abort/response contracts |

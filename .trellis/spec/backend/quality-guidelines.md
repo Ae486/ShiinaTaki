@@ -11,7 +11,8 @@
 
 Exemptions: generated code, migrations, test files.
 
-`packages/shared/src/index.ts` has a reviewed 420-line limit as the single public named-re-export entry. This allowance
+`packages/shared/src/index.ts` has a reviewed 500-line limit as the single public named-re-export entry, including the
+independently versioned D77 application-state contracts. This allowance
 applies only to that exact file: ESLint permits only source-bearing `ExportNamedDeclaration` statements and rejects
 `export *`, imports, local declarations and side effects. All implementation modules retain the 360-line limit.
 
