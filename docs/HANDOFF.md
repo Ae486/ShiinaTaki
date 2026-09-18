@@ -180,12 +180,19 @@ generation and restore through D59, never create a second reconnect system.
 
 ### 3.2 Memory/Hindsight program
 
-The active main-worktree task is `.trellis/tasks/08-09-hindsight-compatibility-extensions`. In the separate Hindsight
-repository, Slice 0A and PostgreSQL Slice 0B have Leader acceptance; Slice 0C and the final combined gate remain the
-recorded next work. Treat that statement as a handoff clue and verify the live task and repository.
+Batches B0-B6 plus the D77/D78 rulings are committed on `main` (through `118d87f`). The completeness audit
+`.trellis/tasks/09-14-hindsight-integration-completeness-audit` is the requirement ledger (54-entry matrix, C01-C16,
+closure stages S1-S6) and its `research/plan-review-2026-09-18.md` fixes the delivery allocation and the PR01-PR05
+amendments. Stage 1 (durable memory operations, setup recovery, manual sync control, composite
+`memory.authority.status`, Home operations card) is archived as `09-19-hindsight-durable-operations`; its contract is
+`.trellis/spec/backend/memory-operations.md` and its known limits are D84. Stage 2 (Local-only onboarding,
+existing-instance first activation with PR03 source custody, active Bank/configuration lifecycle) is the next work.
+Owner questions still open: PR02 administration custody before Stage 3 and U1 before Stage 4. Under the owner's
+2026-09-19 autonomy grant the Leader may run the Trellis flow, commit and archive cleanly completed stages without
+per-step consent; manual acceptance is never marked passed and nothing is pushed.
 
-The Hindsight production patch has no T4 production-file overlap because it lives under `H:/hindsight`. Later
-TakiAgent Memory provider children can overlap T4 integration seams. The main merge hotspots are expected to be:
+The Hindsight production patch lives under `H:/hindsight` and has no T4 production-file overlap. Later Memory children
+can overlap T4 integration seams. The main merge hotspots are expected to be:
 
 - `packages/core/src/main.ts`;
 - `packages/core/src/agents/chat-agent.ts`;
