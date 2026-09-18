@@ -50,6 +50,11 @@ modern.coreModel.setParameterValueById(modern.idParamAngleX, v);
 
 Reference implementation: `apps/desktop/src/renderer/spike/param-probe.ts`.
 
+Per-frame order (engine 1.3.1, lab-verified 2026-09-18): `internalModel.update()` emits `beforeMotionUpdate` →
+motion/expression update → `afterMotionUpdate` → `beforeModelUpdate` → `coreModel.update()` → `loadParam()`
+(restores the saved snapshot). Any parameter written or read for a frame must happen synchronously inside one of
+those events; a deferred read (microtask/timeout) after `beforeModelUpdate` sees the restored values, not the frame's.
+
 ## BanG Dream model facts (verified on taki assets)
 
 - Manifests define NO standard SDK hit areas (`hitTest` returns `[]`); Cubism 2 files carry a BandoriPet-custom `hit_areas_custom` field instead → click reactions need the custom hit-area increment (#16).

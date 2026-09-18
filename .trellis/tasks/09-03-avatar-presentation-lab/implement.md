@@ -117,12 +117,25 @@ This is a parameter/geometry investigation. A static pose result does not activa
 
 ### 2026-09-11 panel integration (authorized subset)
 
-- [ ] Connect Native/Envelope controls, automatic audio analysis, preparation readout and costume profile resolution.
-- [ ] Add direct authored pose preview controls and expose them beside Speech without raw parameter setup.
-- [ ] Use the playing audio source position; restore native lip-sync and detach custom writing on every terminal path.
-- [ ] Cover cancellation, unsupported profile, preview transitions and audio suspension with focused tests.
-- [ ] Verify normal panel actions on C2/C3 at desktop/mobile sizes with real retained Fish audio and screenshots.
-- [ ] Record validation and limitations; keep task in progress for owner perceptual acceptance.
+- [x] Connect Native/Envelope controls, automatic audio analysis, preparation readout and costume profile resolution.
+- [x] Add direct authored pose preview controls and expose them beside Speech without raw parameter setup.
+- [x] Use the playing audio source position; restore native lip-sync and detach custom writing on every terminal path.
+- [x] Cover cancellation, unsupported profile, preview transitions and audio suspension with focused tests.
+- [x] Verify normal panel actions on C2/C3 at desktop/mobile sizes with real retained Fish audio and screenshots
+  (24/24 on 2026-09-18, evidence under ignored `.trellis/.runtime/avatar-lab-panel-20260918/`).
+- [x] Record validation and limitations (`research/panel-integration-findings-2026-09-18.md`); the task stays in
+  progress for owner perceptual acceptance, which decides the branch below.
+
+**Direction review (2026-09-14) — binding amendments to this subset:**
+
+- The A/B must not compare envelope against native at its default `lipSyncWeight = 0.4`. Every comparison and the
+  panel readout expose three arms on the same retained clip and costume: native default, **native tuned** (weight
+  and gain sliders, default tuned preset weight 1.0), and envelope. The readout shows each arm's final mouth-parameter
+  range side by side so amplitude cap differences are not mistaken for algorithm differences.
+- `mouth-language.ts` is frozen: no timing source exists for text-derived cues (Fish returns audio only), so it is not
+  wired, extended or exercised in this subset. The wawa benchmark stays deferred until the owner's perceptual verdict.
+- Owner perceptual acceptance decides the branch: native tuned sufficient → the custom path stops here and no
+  G2P/acoustic work follows; otherwise proceed in the 2026-09-09 order (wawa benchmark first).
 
 This subset supersedes the historical block below only for explicit panel playback and pose observation. It does
 not activate fake speech, composite blink/sway/relax, recognition or production wiring.
