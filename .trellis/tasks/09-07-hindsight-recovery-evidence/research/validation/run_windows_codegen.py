@@ -234,6 +234,12 @@ class GeneratorRun:
                 previous.unlink()
         for name, path in incoming.items():
             shutil.copy2(path, checked_path(target / name, target))
+        # This tracked specification is generator-owned documentation, not a
+        # maintained wrapper. Refuse redirection before mirroring its directory.
+        api_target = checked_path(target / "api", target)
+        if api_target != target / "api":
+            raise RuntimeError(f"Go generated documentation target was redirected: {api_target}")
+        mirror_generated_tree(stage / "api", api_target)
         # Maintained module/test/wrapper/README files were never copied from the generator.
         self.run("go-tidy", [str(GO), "mod", "tidy"], target)
         self.run("go-build", [str(GO), "build", "./..."], target)

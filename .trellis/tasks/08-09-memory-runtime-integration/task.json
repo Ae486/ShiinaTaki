@@ -3,7 +3,7 @@
   "name": "memory-runtime-integration",
   "title": "Runtime recall tools and memory policy",
   "description": "Wire provider-neutral automatic recall, canonical memory tools, Write Gate routing, and Taki-specific maintenance policy into the agent runtime.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": "backend-agent-memory-runtime",
   "package": null,
@@ -21,6 +21,6 @@
   "children": [],
   "parent": "08-09-hindsight-memory-provider",
   "relatedFiles": [],
-  "notes": "",
+  "notes": "2026-09-13 owner-approved bounded closeout verified. Removed the temporary blanket observation guard; retained exact own-policy, required-pin rebinding, lifetime/cancellation/CAS and Reflect-budget fixes. Independent review fixed native null/blank mood disclosure admission and task-only dispatch/completion evidence. Final Core 3055 tests/373 files, five workspace typechecks, lint, scoped native tests and final actual HTTP/Core reconstruction passed. Real api-b6-closeout-1 passed six scoped checks: original Recall targets rank 2, ordinary observations, automatic Recall and completed grounded Reflect; two real curator passes applied eight new assessments and resolved the four old work records. The original three memory policies remain failed/retryable; eventual completion is not proven. D81 derived nickname content remains a known failure. All 2779 source files, three original DB files and 1612 prior-acceptance files unchanged; owned services stopped without force/remaining processes. See research/b6-closeout-validation-2026-09-13.md. Continue existing B7 design/grill before implementation; D79-D83 remain later. Owner/manual acceptance and original activation remain open. No Git publication, staging, archive or other worktree access.",
   "meta": {}
 }

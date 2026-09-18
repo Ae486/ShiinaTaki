@@ -214,6 +214,19 @@ Batch 0 and Batch 1 may proceed independently. After Batch 1, legacy migration c
 - Existing shipped memory task: `.trellis/tasks/archive/2026-08/07-28-memory-context/`.
 - Existing WebSocket task remains `in_progress` and unarchived for later owner manual acceptance; this task must not alter its files or claim its acceptance.
 
+## Interposed Completeness Research (2026-09-14)
+
+The owner requested and approved [an independent completeness/usability audit](../09-14-hindsight-integration-completeness-audit/prd.md)
+before further B7 grill. It covers all accepted requirements, actual Hindsight/Local runtime and switching operations,
+memory-related multi-endpoint use, administration/deployment and existing acceptance. Its findings must expose missing
+or unconnected functions and a dependency-ordered closure route. Research does not implement the gaps, reopen settled
+preservation rules, expand unrelated T4 scope, or change D79-D83 deferral. B7 U1 remains unanswered.
+
+The [delivered research](../09-14-hindsight-integration-completeness-audit/research/README.md) records 54 traceable entries
+covering R1-R10 and later rulings, plus the [dependency order and 16 acceptance cases](../09-14-hindsight-integration-completeness-audit/research/closure-plan.md).
+Treat it as the current completeness ledger; scoped batch tests and data reconstruction do not prove missing operator
+journeys. Implementation, deployment and owner/manual acceptance remain separate work.
+
 ## Open Questions
 
 No owner-blocking product question is currently known. Technical unknowns must be resolved from the live Taki and Hindsight repositories and persisted as research rather than returned to the owner unless multiple equally valid product choices remain.

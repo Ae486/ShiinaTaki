@@ -1,0 +1,8 @@
+{"file": ".trellis/tasks/08-09-hindsight-memory-provider/prd.md", "reason": "Accepted parent requirement inventory and original batch ownership; later amendments supersede historical implementation-status prose."}
+{"file": ".trellis/tasks/08-09-hindsight-memory-provider/info.md", "reason": "Accepted component, operation, switching, deployment and verification design."}
+{"file": "docs/adr/0009-single-memory-authority-with-local-replica.md", "reason": "Authority, checkpoint, recovery, interoperability, setup and operations contract."}
+{"file": ".trellis/tasks/08-09-memory-operations-ui/grill.md", "reason": "Grounded B7 scope, withdrawn R1, existing transition gaps and the owner-requested interposed audit."}
+{"file": ".trellis/tasks/08-09-memory-runtime-integration/research/memory-capability-followups-2026-09-13.md", "reason": "Preserve explicit D79-D83 deferral and actual policy/derived-content limitations."}
+{"file": ".trellis/spec/frontend/operator-connection-recovery.md", "reason": "Actual Home/Pet/Chat connection ownership and reconnection boundaries for memory-related multi-endpoint use."}
+{"file": ".trellis/tasks/09-14-hindsight-integration-completeness-audit/research/completeness-matrix.md", "reason": "Current 54-entry accepted-design completeness ledger; distinguish real implementation, reachable operations, explicit deferrals and unperformed acceptance."}
+{"file": ".trellis/tasks/09-14-hindsight-integration-completeness-audit/research/closure-plan.md", "reason": "Dependency order and 16 concrete acceptance cases for first activation, lifecycle, repeated switching, administration and multi-client use; no implementation authorization."}
