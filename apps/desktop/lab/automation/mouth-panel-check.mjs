@@ -29,6 +29,8 @@ const { chromium } = await import(pathToFileURL(resolve(installed)).href);
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true, args: ["--enable-unsafe-swiftshader"] });
 const results = [];
+/** Per costume/viewport: the final side-by-side ranges of the three arms on the same retained clip. */
+const armRanges = {};
 let providerEvidence = null;
 
 async function synthesize(page) {
@@ -67,6 +69,7 @@ async function runScenario(test, id, run) {
     const evidence = await run(test);
     const errors = [...new Set(test.errors)];
     assert.equal(errors.length, 0, `Page errors: ${errors.join(", ")}`);
+    if (evidence?.ranges) armRanges[test.label] = evidence.ranges;
     results.push({ label: `${test.label}-${id}`, passed: true, evidence });
     console.log(JSON.stringify({ label: `${test.label}-${id}`, passed: true }));
   } catch (error) {
@@ -82,7 +85,7 @@ async function runScenario(test, id, run) {
 
 async function saveReport() {
   await writeFile(resolve(output, "summary.json"), JSON.stringify({ browser: browser.version(), fixture,
-    clipSha256: createHash("sha256").update(audioBytes).digest("hex"), providerEvidence, results }, null, 2));
+    clipSha256: createHash("sha256").update(audioBytes).digest("hex"), providerEvidence, armRanges, results }, null, 2));
 }
 
 async function runSuite(costume, viewport) {
@@ -94,6 +97,7 @@ async function runSuite(costume, viewport) {
     if (providerEvidence === null) providerEvidence = await synthesize(page);
     else await loadPanelClip(page, fixture);
     await runScenario(test, "native", (value) => comparePlayback(value, "native"));
+    await runScenario(test, "native-tuned", (value) => comparePlayback(value, "native-tuned"));
     await runScenario(test, "envelope", (value) => comparePlayback(value, "envelope"));
     await runScenario(test, "suspend-resume", checkSuspendResume);
     await runScenario(test, "poses", checkPoses);

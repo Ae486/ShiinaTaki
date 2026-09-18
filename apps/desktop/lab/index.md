@@ -20,10 +20,11 @@ Delete this directory plus those config lines to remove the experiment (task `09
 - expression-actions.ts — bind applied-expression state to the scene, sampler and settle timer; cancel on reset/disposal and report idle references separately
 - panel-params.ts — param id (+datalist), value slider, hook position, write mode, Hold overlay; feeds the sampler
 - panel-readout.ts — 10 Hz `<pre>` (costume, motion + parallel channel state, lipSyncIds, face-set size, sampled before/after/final + drift), explicit n/a values, and findings log ring
-- panel-speech.ts - local audio and provider synthesis controls, native Play/Stop/Resume, snapshot and disposer
-- speech-actions.ts - scene-bound source cancellation, retained clip replay, native target attachment and monitor lifecycle
+- panel-speech.ts - local audio and provider synthesis controls, native Play/Stop/Resume, mouth controls mount, snapshot and disposer
+- mouth-controls.ts - mouth mode (native / native-tuned / envelope), pose preview and model view selects; locks gain/weight sliders on the engine-default arm
+- speech-actions.ts - scene-bound source cancellation, retained clip replay, native target attachment, three-arm lip-sync settings and per-arm range observation
 - speech-fields.ts - runtime provider/transport/request inputs; API key stays in the page's memory only
-- speech-readout.ts - playback and computed/observed mouth values with explicit unavailable states and control guards
+- speech-readout.ts - playback and computed/observed mouth values, native arm in effect and side-by-side per-arm ranges with explicit unavailable states
 
 ## scene/ (browser: engine-facing glue + pure behaviours)
 - lab-scene.ts — owns app + current `ModelContext`; `load(entry)` with teardown order + stale-load ticket (also covers the expression-file fetch); `onModel` / `onBeforeDispose`; `dispose`
@@ -42,6 +43,9 @@ Delete this directory plus those config lines to remove the experiment (task `09
 - mouth-envelope.ts — buffered PCM envelope, pause closure and attack/release shaping
 - mouth-profile.ts — measured C2/C3 costume mappings and declared-range clamping
 - mouth-writer.ts — opt-in `beforeModelUpdate` set-only writer; skips undeclared IDs and exposes fallback state
+- mouth-control.ts - scoped native lip-sync ownership across the three arms, clip preparation, envelope playback, pose preview and fallback state
+- mouth-arm-ranges.ts - pure per-arm min/max/frame accumulator of final mouth parameters while audio plays
+- model-view.ts - pure full-body (production fit) / magnified face placement transform and structural applier
 - native-speech-monitor.ts - read-only native analyser/final mouth observations, computed contribution and browser observation timing
 
 ## speech/ (browser: whole-utterance input and native engine playback)
@@ -53,6 +57,8 @@ Delete this directory plus those config lines to remove the experiment (task `09
 - native-clip-source.ts - in-memory retained bytes, file input, synthesis cancellation and stale-response rejection
 - native-speech-playback.ts - native speak/stop/resume, per-play object URLs and retired uncancellable-load cleanup
 - native-lipsync.ts - pure calculation of the installed engine's gain, power, positive floor, cap and weight
+- native-audio-clock.ts - clip-relative position from the engine-owned @pixi/sound instance progress; unavailable without one playing source
+- mouth-preparation.ts - offline decode of the retained clip into an envelope MouthTrack with decode/analysis timings
 
 ## automation/ (local browser acceptance, never imported by the lab page)
 - browser-check.mjs — isolated real-browser scenario runner with frame, cache, application-state and pixel assertions; incremental JSON results
@@ -64,6 +70,9 @@ Delete this directory plus those config lines to remove the experiment (task `09
 - speech-check.mjs - native audio, replay, resume, switching and failed/cancelled input browser scenarios
 - speech-observations.mjs - per-frame audio/final mouth samples and screenshot/layout evidence; never writes parameters
 - fish-mouth-check.mjs - real Fish request plus native/custom C2/C3 mouth evidence; reads credentials only from process environment
+- mouth-panel-check.mjs - normal-panel three-arm / suspension / pose / replacement acceptance with intercepted retained Fish audio; per-arm ranges in summary.json
+- mouth-panel-scenarios.mjs - UI-driven arm selection with slider-lock assertions, playback comparison, suspend/resume, face-view poses and replacement
+- mouth-panel-observations.mjs - frame capture after all writers, per-arm range summaries and page/canvas pictures
 
 See `automation/README.md` for the installed Playwright prerequisite and command. Evidence stays under the ignored
 `.trellis/.runtime/` tree; model images are never committed or included in a production build.

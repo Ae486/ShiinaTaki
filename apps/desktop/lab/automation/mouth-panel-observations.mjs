@@ -3,11 +3,13 @@
  * OUTPUT: final mouth parameter frames, readable timing summaries and real canvas/layout evidence.
  * POS:    experimental / lab - not in production path; read-only observations, no custom writer injection.
  */
-/* global window, document, performance, queueMicrotask */
+/* global window, document, performance */
 
 import { resolve } from "node:path";
 import { inspectPixels } from "./browser-images.mjs";
 
+/** Call after playback has started: the hook must be subscribed after the writer, and it must read synchronously,
+ *  because the engine restores the motion snapshot (`loadParam`) right after the `beforeModelUpdate` frame. */
 export async function startMouthObservation(page) {
   await page.evaluate(() => {
     const test = window.__avatarLabTest;
@@ -17,12 +19,11 @@ export async function startMouthObservation(page) {
       : ["ParamMouthOpenY", "ParamMouthForm", "ParamMouthupdawn", "Param31", "Param16"];
     const frames = [];
     let active = true;
-    // Run after all writers in this frame, regardless of hook subscription order.
-    const off = ctx.hooks.add("beforeModelUpdate", () => queueMicrotask(() => {
+    const off = ctx.hooks.add("beforeModelUpdate", () => {
       if (!active || test.scene.current !== ctx || frames.length >= 2000) return;
       frames.push({ atMs: performance.now(), speech: test.speech.snapshot(),
         final: Object.fromEntries(ids.map((id) => [id, ctx.params.get(id)])) });
-    }));
+    });
     test.mouthObservation = { frames, stop() { active = false; off(); } };
   });
 }

@@ -23,7 +23,7 @@ async function boot(): Promise<void> {
   const app = await createStage(stageHost);
   const scene = createLabScene(app);
   const findings = createFindingsLog();
-  const deps = { host: controls, scene, log: findings.log };
+  const deps = { host: controls, scene, log: findings.log, screen: () => ({ width: app.screen.width, height: app.screen.height }) };
 
   mountPanelModel(deps);
   mountPanelMotion(deps);

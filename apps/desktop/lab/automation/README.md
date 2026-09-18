@@ -102,3 +102,34 @@ accepts `https://api.fish.audio/v1/tts` or the configured local `/v1/audio/speec
 `TAKI_LAB_TTS_LOCAL_TARGET` before starting Vite to configure that local target, including an optional path prefix.
 Other services require direct mode and their browser CORS support. Keys are never persisted; automated captures
 use empty key fields. Synthesized bytes remain in memory and can be replayed without another upstream request.
+
+## Phase 5 mouth panel
+
+Normal-panel acceptance for the three comparison arms (`native` = engine defaults with locked sliders, `native-tuned`
+= slider values with the full-weight preset, `envelope` = the custom writer with native lip-sync disabled), audio
+suspension, authored pose previews in the magnified `face` view, and mode/costume replacement. Both costumes and both
+viewports run by default; the retained real Fish WAV is served through route interception of the normal proxy path.
+
+```powershell
+$env:TAKI_LAB_PLAYWRIGHT_MODULE = 'G:/Roaming/Python/Python312/site-packages/playwright/driver/package/index.mjs'
+$env:TAKI_LAB_FISH_FIXTURE = '.trellis/.runtime/avatar-lab-fish-mouth-20260910-final/fish-live.wav'
+node apps/desktop/lab/automation/mouth-panel-check.mjs .trellis/.runtime/avatar-lab-panel
+```
+
+Environment:
+
+- `TAKI_LAB_FISH_FIXTURE`: WAV returned for the intercepted Fish request (default: the retained 2026-09-10 clip).
+- `TAKI_LAB_PANEL_DESKTOP_ONLY=1`: run 1440 x 1000 only instead of desktop plus 390 x 844.
+- `TAKI_LAB_CASES`: comma-separated ids from `native,native-tuned,envelope,suspend-resume,poses,replacement`.
+- `TAKI_LAB_FISH_LIVE=1` with `TAKI_LAB_FISH_API_KEY` / `TAKI_LAB_FISH_VOICE_ID`: one real Fish request instead of
+  interception; credentials stay in process memory and are redacted from failure text. Not used for acceptance runs.
+- Positional costume names after the output directory narrow the matrix (`arbeit`, `live_01`).
+
+Evidence layout under the output directory: `summary.json` (provider evidence, `armRanges` per costume/viewport with
+the three arms' final mouth-parameter min/max/frame counts, per-scenario snapshots), `<costume>-<width>-<arm>-frames.json`
+(per-frame speech snapshot and final mouth parameters), `<costume>-<width>-<arm>-page.png` / `-model.png` /
+`-model-next.png`, `<costume>-<width>-pose-<pose>.png` (face-view canvas crops), and `*-failure.png` on assertion failure.
+
+Files: `mouth-panel-check.mjs` (orchestration, synthesis interception, summary), `mouth-panel-scenarios.mjs`
+(UI-driven arms, suspension, poses, replacement), `mouth-panel-observations.mjs` (frame capture after all writers,
+range summaries, pictures), `fish-mouth-check.mjs` (earlier direct-injection capability run, kept for comparison).

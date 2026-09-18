@@ -4,7 +4,9 @@
  * POS:    experimental / lab — not in production path; measured final parameters remain separate from estimates.
  */
 
-import type { SpeechPanelSnapshot } from "./speech-actions.ts";
+import { MOUTH_ARMS, type MouthArmRangesSnapshot } from "../scene/mouth-arm-ranges.ts";
+import type { CustomMouthSnapshot } from "../scene/mouth-control.ts";
+import type { NativeArmSnapshot, SpeechPanelSnapshot } from "./speech-actions.ts";
 
 export function renderSpeechSnapshot(snapshot: SpeechPanelSnapshot): string {
   const { clip, audio, timing, mouth } = snapshot;
@@ -22,7 +24,43 @@ export function renderSpeechSnapshot(snapshot: SpeechPanelSnapshot): string {
     `performance.now request / resolved: ${fmt(timing.requestedAtMs)} / ${fmt(timing.resolvedAtMs)} ms`,
     `observed audio start / positive contribution: ${fmt(timing.observedAudioStartAtMs)} / ${fmt(mouth.firstNonzeroMouthAtMs)} ms`,
     `observation delta: ${fmt(mouth.observedAudioToMouthMs)} ms (not speaker latency)`,
+    nativeArmLine(snapshot.nativeArm),
+    ...customLines(snapshot.custom),
+    ...rangeLines(snapshot.ranges),
   ].join("\n");
+}
+
+function nativeArmLine(arm: NativeArmSnapshot): string {
+  const source = arm.mode === "native" ? "engine defaults" : "sliders";
+  return `native arm: gain ${fmt(arm.gain)} / weight ${fmt(arm.weight)} (${source}); sliders ${arm.slidersLive ? "live" : "locked"}`;
+}
+
+/** One line per observed id with all three arms side by side, so amplitude caps read next to algorithm differences. */
+function rangeLines(ranges: MouthArmRangesSnapshot): string[] {
+  const ids = [...new Set(MOUTH_ARMS.flatMap((arm) => Object.keys(ranges[arm] ?? {})))];
+  if (ids.length === 0) return ["mouth ranges: n/a"];
+  return ids.map((id) => `range ${id}: ${MOUTH_ARMS.map((arm) => {
+    const stat = ranges[arm]?.[id];
+    return `${arm} ${stat === undefined ? "n/a" : `${fmt(stat.min)}..${fmt(stat.max)} (${stat.frames}f)`}`;
+  }).join(" | ")}`);
+}
+
+function customLines(custom: CustomMouthSnapshot): string[] {
+  const { preparation, clock, writer } = custom;
+  const timings = preparation.status === "ready"
+    ? ` (decode ${fmt(preparation.decodeMs)} ms, analysis ${fmt(preparation.envelopeMs)} ms, ${fmt(preparation.durationMs)} ms clip)` : "";
+  return [
+    `mouth mode: ${custom.mode} (effective ${custom.effectiveMode}); profile: ${custom.profileId ?? "none"}`,
+    ...(custom.fallbackReason === null ? [] : [`fallback: ${custom.fallbackReason}`]),
+    `envelope: ${preparation.status}${timings}`,
+    `audio clock: ${fmt(clock.positionMs)} ms (${clock.source ?? "n/a"})`,
+    `custom writer: ${writer === null || !writer.enabled ? "detached" : writerLine(writer)}`,
+  ];
+}
+
+function writerLine(writer: NonNullable<CustomMouthSnapshot["writer"]>): string {
+  const writes = writer.writes.map((write) => `${write.id}=${fmt(write.value)}`).join(", ");
+  return `${writer.active ? "active" : "rest"}; ${writes || "no writes"}${writer.skippedIds.length === 0 ? "" : `; skipped ${writer.skippedIds.join(", ")}`}`;
 }
 
 export function updateSpeechButtons(buttons: { synthesize: HTMLButtonElement; play: HTMLButtonElement; stop: HTMLButtonElement; resume: HTMLButtonElement; file: HTMLInputElement }, snapshot: SpeechPanelSnapshot): void {

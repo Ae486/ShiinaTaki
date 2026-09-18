@@ -11,7 +11,8 @@ import { getMouthProfile, mouthPreviewProfile, type MouthPreview, type MouthProf
 import { createMouthTrack } from "./mouth-track.ts";
 import { createMouthWriter, type MouthWriter, type MouthWriterSnapshot } from "./mouth-writer.ts";
 
-export type MouthMode = "native" | "envelope";
+/** Comparison arms: both native arms keep engine lip-sync; only "envelope" owns a custom writer. */
+export type MouthMode = "native" | "native-tuned" | "envelope";
 export interface MouthPreparationSnapshot {
   status: "empty" | "preparing" | "ready" | "error";
   decodeMs: number | null;
@@ -39,7 +40,7 @@ export class MouthControl {
   private preparation = emptyPreparation();
   private revision = 0;
   private disposed = false;
-  private mode: MouthMode = "envelope";
+  private mode: MouthMode = "native";
   private preview: MouthPreview = "off";
   private nativeBefore: boolean | null = null;
   private runFallback: string | null = null;
@@ -89,6 +90,11 @@ export class MouthControl {
     this.stop();
     this.mode = mode;
     this.runFallback = null;
+  }
+
+  /** Declared ids of the resolved costume profile; empty when this rig has no calibrated profile. */
+  parameterIds(): string[] {
+    return this.profile === null ? [] : Object.values(this.profile.ids);
   }
 
   startPlayback(): void {
@@ -153,7 +159,7 @@ export class MouthControl {
   }
 
   private fallbackReason(): string | null {
-    if (this.mode === "native" || this.preview !== "off") return null;
+    if (this.mode !== "envelope" || this.preview !== "off") return null;
     if (this.runFallback !== null) return this.runFallback;
     if (this.profile === null) return "No calibrated profile for this character/costume";
     if (this.preparation.status === "error") return this.preparation.error;

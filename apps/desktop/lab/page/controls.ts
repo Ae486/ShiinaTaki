@@ -1,7 +1,7 @@
 /**
  * INPUT:  labels, option lists and change handlers from the panels.
  * OUTPUT: tiny plain-DOM builders (section, row, button, select + setOptions, slider, checkbox, textInput, badge) and
- *         the PanelDeps contract every panel mount receives { host, scene, log }.
+ *         the PanelDeps contract every panel mount receives { host, scene, log, screen }.
  * POS:    experimental / lab — not in production path; the lab's whole UI toolkit (no React, no Tailwind — the page
  *         is a control bench, styled by lab.html).
  */
@@ -14,6 +14,8 @@ export interface PanelDeps {
   host: HTMLElement;
   scene: LabScene;
   log: LogLine;
+  /** Current Pixi screen size; the scene owns the app, so panels never receive it directly. */
+  screen: () => { width: number; height: number };
 }
 
 export interface SelectOption {
