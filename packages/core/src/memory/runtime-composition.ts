@@ -1,6 +1,6 @@
 /**
  * INPUT:  Core boot dependencies for Legacy, Local and explicitly selected Hindsight memory runtimes
- * OUTPUT: authority-selected engine, immutable Run capture, background maintenance and durability
+ * OUTPUT: authority-selected engine, immutable Run capture, background maintenance, durability and the operations() live accessor
  * POS:    core/memory — process composition seam; one Utility Slot and one selected provider-specific chain
  */
 import type { LanguageModel } from "ai";
@@ -31,6 +31,7 @@ import { createMemoryRunReference } from "./memory-capability-snapshot.ts";
 import { createMemoryFlushBinding, type MemoryFlushPort } from "./memory-flush-port.ts";
 import { createMemoryAuthorityFence } from "./legacy-migration/memory-authority-fence.ts";
 import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
+import type { MemoryOperationsRuntime } from "./operations/memory-operation-contract.ts";
 import { selectMemoryRuntime } from "./runtime-selector.ts";
 import { createUtilitySlot, type UtilitySlot } from "./utility-slot.ts";
 import { MEMORY_VOICE_RULE } from "./write-convention.ts";
@@ -58,6 +59,8 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
   return {
     selected, memory: selected.memory, fence,
     snapshot: () => { alive(); return scope.hindsight ? scope.hindsight.snapshot() : diagnosticSnapshot(input.db); },
+    // The ONE live accessor the memory operation owner uses (D-S1-1): resolved per call, never a captured subsystem.
+    operations: (): MemoryOperationsRuntime | null => scope.hindsight ? operationsRuntime(scope.hindsight) : null,
     captureRun: async (characterId: string, signal?: AbortSignal): Promise<CapturedMemoryRun> => {
       alive(); if (signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
       return scope.hindsight ? scope.hindsight.captureRun(characterId, signal) : scope.canonical ? scope.canonical.captureRun(characterId)
@@ -150,6 +153,12 @@ function captureLegacyRun(db: Database, subsystem: SelectedSubsystem, characterI
   return Object.freeze({ snapshot: createMemoryRunReference(snapshot),
     tools: Object.freeze(engine.createTools(characterId)), prompt: BASE_SYSTEM_PROMPT,
     assemble: (currentMessage: string) => engine.assemble({ characterId, currentMessage }) });
+}
+
+function operationsRuntime(hindsight: HindsightSubsystem): MemoryOperationsRuntime {
+  const { runtime, pending } = hindsight.state;
+  return { epochId: runtime.epoch.epochId, scheduler: hindsight.scheduler, banks: runtime.banks, assertConnection: runtime.assertConnection,
+    pendingSummary: (bankId) => pending.summary({ authorityEpochId: runtime.epoch.epochId, bankId }) };
 }
 
 function diagnosticSnapshot(db: Database) {

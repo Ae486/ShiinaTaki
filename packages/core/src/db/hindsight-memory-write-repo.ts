@@ -1,6 +1,6 @@
 /**
  * INPUT:  active Hindsight authority/Bank guards and immutable foreground write intents
- * OUTPUT: original target capture, independent child evidence and stable full-operation receipts
+ * OUTPUT: original target capture, independent child evidence, stable full-operation receipts and a pending count read
  * POS:    core/db — parent write journal; an old G1 receipt never certifies an unapplied policy change
  */
 import { z } from "zod";
@@ -89,6 +89,11 @@ function pending(deps: Dependencies, input: PendingInput): HindsightMemoryWriteJ
       AND (:lineage IS NULL OR provider_lineage=:lineage) AND (:generation IS NULL OR bank_generation=:generation)
     ORDER BY sequence LIMIT :limit`).all(args);
   return rows.map((row) => { const job = decodeHindsightMemoryWrite(row); assertActive(deps, job.identity); return job; });
+}
+/** Count-only diagnostic read for operator status; it decodes no job and therefore needs no activity guard. */
+export function countPendingHindsightMemoryWrites(db: Database, input: { authorityEpochId: string; bankId: string }): number {
+  const args = { epoch: z.string().min(1).max(256).parse(input.authorityEpochId), bank: z.string().min(1).max(256).parse(input.bankId) };
+  return Number(db.prepare("SELECT count(*) AS n FROM hindsight_memory_write_intents WHERE authority_epoch_id=:epoch AND bank_id=:bank AND state='pending'").get(args)?.n ?? 0);
 }
 function immutable<T>(previous: T | null, next: T): T {
   if (previous !== null && !sameApplicationValue(previous, next)) throw new Error("MEMORY_REQUEST_ID_CONFLICT");

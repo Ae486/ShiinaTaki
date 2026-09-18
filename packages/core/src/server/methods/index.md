@@ -39,4 +39,6 @@
 - skill-methods.ts — operator-only skill.* lifecycle registration seam; strict Shared schemas plus bounded conflict/refusal errors
 - hindsight-setup-methods.ts — operator-only memory.hindsight.* setup/status/disable/explicit LLM-health controllers with bounded refusals
 - hindsight-cutover-methods.ts — operator-only memory.hindsight.cutover.status/verify projections; read-only, stale-epoch-aware, and privacy-bounded
+- memory-operation-methods.ts — operator-only memory.operations.submit/status/list/cancel/subscribe over the durable operation owner; refusals ride MEMORY_OPERATION_REFUSED + a closed reason (busy carries activeOperationId); subscribe pushes memory.operations.changed until the socket closes
+- memory-authority-status.ts — memory.authority.status (operator-only): the strict composite read (authority, runtime availability, setup, per-Bank replica/Pending, operations); a read, never a subscription
 - observability-methods.ts — operator-only monitor state/list/trajectory/inspector and connection-scoped live subscription

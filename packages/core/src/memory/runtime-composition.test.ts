@@ -75,6 +75,11 @@ function activateMarker(db: Database, epochId: string): void {
 }
 
 describe("provider-independent Compaction composition", () => {
+  it("exposes a null operations() accessor outside the Hindsight runtime", async () => {
+    const fixture = await boot(true);
+    expect(fixture.runtime.operations()).toBeNull();
+    expect((await boot(false)).runtime.operations()).toBeNull();
+  });
   it("constructs Legacy Compaction in the shared maintenance chain and keeps it detached", async () => {
     const fixture = await boot(false);
     seed(fixture, 1, 10);

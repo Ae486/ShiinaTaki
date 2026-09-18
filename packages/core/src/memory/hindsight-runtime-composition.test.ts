@@ -36,6 +36,20 @@ function knownPinBank(text: string, expiresAt?: string) {
 }
 
 describe("production Hindsight runtime composition", () => {
+  it("exposes the operations() live accessor only for the selected Hindsight subsystem", async () => {
+    expect(fixture({ mode: "local" }).compose().operations()).toBeNull();
+    const f = fixture(); const runtime = f.compose();
+    const operations = runtime.operations();
+    expect(operations).not.toBeNull();
+    expect(operations!.epochId).toBe("epoch");
+    expect(operations!.scheduler.started()).toBe(false);
+    expect(operations!.banks().map((bank) => bank.bankId).sort()).toEqual(["bank-a", "bank-taki"]);
+    expect(() => operations!.assertConnection()).not.toThrow();
+    expect(operations!.pendingSummary("bank-a")).toMatchObject({ pendingCount: 0, failedCount: 0, unknownCount: 0 });
+    runtime.start(); expect(runtime.operations()!.scheduler.started()).toBe(true);
+    expect(f.remote.calls).toEqual([]);
+  });
+
   it.each(["local", "legacy"] as const)("keeps %s independent of configured Hindsight and preserves its directory layout", async (mode) => {
     const withHindsight = fixture({ mode }); const withoutHindsight = fixture({ mode });
     const first = withHindsight.compose(); const baseline = withoutHindsight.compose(false);

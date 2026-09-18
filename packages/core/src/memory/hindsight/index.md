@@ -18,7 +18,8 @@
 - hindsight-compatibility-service.ts — ordered exact-build health/version/manifest gate, independent cutover support and stable settings fingerprint
 - hindsight-bank-identity.ts — versioned deterministic opaque Global/Character external Bank ids
 - taki-bank-template-v1.ts — fixed secret-free additive template, canonical digest, and Taki-owned read-back verification
-- hindsight-setup-service.ts — resumable validate/setup/disable/explicit LLM-health state machine; never owns Memory Authority
+- hindsight-setup-service.ts — resumable validate/setup/disable/explicit LLM-health state machine (a failed validate withdraws compatibility, keeps the fingerprint); never owns Memory Authority
+- hindsight-setup-recovery.ts — boot reconciliation: a busy phase left by a dead process becomes failed/HINDSIGHT_SETUP_INTERRUPTED and intermediate Bank rows return to pending
 - hindsight-bank-setup.ts — idempotent Bank/template application, operation polling, and verified projection
 - hindsight-setup-stages.ts — deterministic setup targets and dry-run preflight orchestration
 - hindsight-import-contracts.ts — bounded retain/operation/document/fact data-plane wire schemas
@@ -46,7 +47,7 @@
 - hindsight-current-orchestrator.ts — current-state import, ACK-loss recovery, finite verification, known-native-drift persistence and raw replica publication
 - hindsight-journal-contracts.ts — authenticated changes endpoint wire normalization with complete transaction bounds
 - hindsight-incremental-sync.ts — one admitted Bank journal page pulled, projected, and transactionally applied under captured Authority/Bank binding, lease, and deadline
-- hindsight-replica-scheduler.ts — asynchronous all-Bank single-flight execution, persisted wakes, bounded supervisor retries, manual/reconnection requests, and truthful status
+- hindsight-replica-scheduler.ts — asynchronous all-Bank single-flight execution, persisted wakes, bounded supervisor retries, manual request/cancel-before-claim, reconnection requests, started() and truthful status
 - hindsight-replica-run-execution.ts — captured absolute run/reset deadline, bounded cancellation, reset escalation, and lease-fenced completion
 - hindsight-replica-sync-runner.ts — admitted B5 catch-up and reconciliation/reset with fixed deadlines; shared internal run contract also carries process-local foreground lease ownership
 - hindsight-replica-snapshot-loader.ts — verified one-record snapshot transfer with current-manifest cache reuse and bounded requests

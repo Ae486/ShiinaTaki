@@ -50,7 +50,7 @@
 - hindsight-replica-record-store.ts — strict native B5 persistence and explicit lossless application projection branches, kind-aware FTS repair/search and separate current projection digests
 - hindsight-replica-checkpoint-store.ts — checkpoint read and predecessor CAS publication
 - hindsight-replica-lease-repo.ts — persisted per-Bank owner/run/fence lease lifecycle and exact-token expiry CAS renewal
-- hindsight-replica-scheduler-repo.ts — durable Bank configuration, manual/catch-up claims, lease-bound settlement, and restart recovery
+- hindsight-replica-scheduler-repo.ts — durable Bank configuration, manual/catch-up claims and unclaimed-manual cancel, lease-bound settlement, and restart recovery
 - hindsight-replica-schedule-state.ts — deterministic retry precedence, independent due intervals, and manual-mode transitions
 - hindsight-replica-snapshot-cache.ts — payload-and-witness digests bound to Bank/lineage/generation/page hash, with atomic pruning and journal invalidation
 - pending-memory-repo.ts — idempotent Pending Memory admission, Bank/authority/lease/CAS guards, truthful summaries, and separate overlay reads
@@ -97,7 +97,8 @@
 - hindsight-ingestion-repo.ts — restart-safe Hindsight source ingestion journal and receipt-verified retirement coverage
 - hindsight-ingestion-source-repo.ts — durable source witnesses, immutable eligibility baseline and claim/coverage checks
 - hindsight-memory-write-contract.ts — lossless internal parent-intent state and an immutable operation identity
-- hindsight-memory-write-repo.ts — original target capture, independent child evidence and stable full-operation receipts
+- hindsight-memory-write-repo.ts — original target capture, independent child evidence, stable full-operation receipts and the count-only pending parent-write read
+- memory-operation-repo.ts — durable memory_operations ledger: admitted insert (partial-unique-index single flight), state-CAS transition, active/recent reads, restart reconciliation by owner boot id
 - hindsight-memory-write-storage.ts — independently hashed byte-preserving state reads and CAS replacement
 - hindsight-policy-work-contract.ts — exact durable work identities, lease/result schemas and immutable proposal validation
 - hindsight-policy-work-repo.ts — durable claims, original prompt/results, explicit retry and terminal queue progress

@@ -51,6 +51,7 @@ import { hindsightApplicationCommandsMigration044 } from "./044-hindsight-applic
 import { hindsightPolicyWorkMigration045 } from "./045-hindsight-policy-work.ts";
 import { hindsightRuntimeAdmissionMigration046 } from "./046-hindsight-runtime-admission.ts";
 import { hindsightMemoryWritesMigration047 } from "./047-hindsight-memory-writes.ts";
+import { memoryOperationsMigration048 } from "./048-memory-operations.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -100,4 +101,5 @@ export const MIGRATIONS: Migration[] = [
   hindsightPolicyWorkMigration045,
   hindsightRuntimeAdmissionMigration046,
   hindsightMemoryWritesMigration047,
+  memoryOperationsMigration048,
 ];

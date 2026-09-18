@@ -51,7 +51,7 @@
 - canonical-memory-view.ts — revision-bearing opaque references and canonical row projection for reused T5 policy/report code
 - canonical-memory-assembly.ts — admission-frozen canonical prompt data, complete pinned relationships, deliberate profile promotion, intention selection and observed fences
 - runtime-selector.ts — marker-first Legacy/Local/Hindsight routing; committed canonical selection retires Legacy before construction and remains unavailable on failure
-- runtime-composition.ts — selected Local/Hindsight/Legacy subsystem, one Utility Slot, provider-independent Compaction, caller-cancellable Run capture, explicit Legacy retirement and awaited process shutdown
+- runtime-composition.ts — selected Local/Hindsight/Legacy subsystem, one Utility Slot, provider-independent Compaction, caller-cancellable Run capture, explicit Legacy retirement, awaited process shutdown, and the operations() live accessor for the operation owner
 - authority-aware-legacy-surfaces.ts — mutable authority wrappers that retire legacy auto-memory, tidy, and direct writes after canonical activation
 - memory-coordinator.ts — provider-neutral authority dispatch and immutable Run capture; rejects registry/operation/stable-capability drift while allowing honest recall vector-health changes
 - memory-capability-snapshot.ts — detached immutable capabilities and one canonical Run/tool/coordinator digest; keeps dynamic vector health separate from stable operation identity
@@ -60,6 +60,7 @@
 - pending-memory-safety.ts — bounded canonical outbox payload admission with credential and hidden-envelope refusal
 - pending-memory-writer.ts — explicit canonical outage-write admission with captured authority/Bank identity and unchanged replay timestamps
 - hindsight/ — Hindsight setup/cutover clients and offline-testable replica sync/reconciliation/recovery; runtime authority composition remains separate
+- operations/ — the durable memory operation owner (Stage 1): kind registry over the B3 setup service and B5 scheduler, restart reconciliation, and the composite memory.authority.status read
 - canonical-tools/ — admission-bound capability-filtered canonical tool adapters and non-advertised compatibility aliases
 - image-description-writer.ts — thin, DELETABLE image→text bridge (#17 decision 6, D28): VLM describes a turn's images, PII-scrubs the text, writes ONE episode via the existing store path with origin "observed" (the marker the render sites fence on — D47); detached, warn+drop
 - memory-recall-selection.ts — policy-filtered Canonical hits and separate unconfirmed source/mutation intents

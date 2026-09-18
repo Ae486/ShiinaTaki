@@ -6,6 +6,7 @@
  *         store/media/subscriptions → ws-server
  */
 import { join } from "node:path";
+import { randomUUID } from "node:crypto";
 import type { ToolSet } from "ai";
 import { MONITOR_MODE_CONFIG_KEY, MonitorModeSchema } from "@taki/shared";
 import { CANONICAL_MEMORY_SYSTEM_PROMPT, createChatAgent } from "./agents/chat-agent.ts";
@@ -58,6 +59,8 @@ import { createAttachmentStore } from "./media/attachment-store.ts";
 import { directoryByteSize } from "./media/directory-size.ts";
 import { composeMemoryRuntime } from "./memory/runtime-composition.ts";
 import { createImageDescriptionWriter } from "./memory/image-description-writer.ts";
+import { readMemoryAuthorityStatus } from "./memory/operations/memory-authority-status.ts";
+import { createMemoryOperationService } from "./memory/operations/memory-operation-service.ts";
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
 import { migrateMcpPlaintextSecrets } from "./secrets/mcp-secret-migration.ts";
 import { resolveMasterKeySource } from "./secrets/master-key.ts";
@@ -82,6 +85,8 @@ import { hostCatalogPublishMethod } from "./server/methods/host-catalog-publish.
 import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
 import { mediaUsageMethod } from "./server/methods/media-usage.ts";
+import { memoryAuthorityStatusMethod } from "./server/methods/memory-authority-status.ts";
+import { registerMemoryOperationMethods } from "./server/methods/memory-operation-methods.ts";
 import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
 import { memoryStatusMethod } from "./server/methods/memory-status.ts";
 import { runStatusMethod } from "./server/methods/run-status.ts";
@@ -97,6 +102,7 @@ import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts"
 import { bootSkillLifecycle } from "./skills/skill-boot.ts";
 import { createCurrentTimeTool } from "./time/current-time-tool.ts";
 import { createTimelineSubscriptions } from "./server/timeline-subscriptions.ts";
+import { createMemoryOperationSubscriptions } from "./server/memory-operation-subscriptions.ts";
 import { startWsServer } from "./server/ws-server.ts";
 import { createReadFileTool } from "./workspace/read-file-tool.ts";
 import { createWorkspacePaths } from "./workspace/workspace-paths.ts";
@@ -223,7 +229,17 @@ registerMcpMethods(registry, { service: createMcpLifecycleService({ repo: mcpBoo
 registerSkillMethods(registry, { service: skillLifecycle, logger: skillsLog });
 // Hindsight B3 setup is an operator-only inactive control plane. Composition registers methods and SQLite state only;
 // it makes no boot request, performs no LLM health probe, and has no Memory Authority writer/provider registration.
-composeHindsightSetup({ db, config: boot.config.source, secrets: secretCatalog, registry, logger });
+const hindsightSetup = composeHindsightSetup({ db, config: boot.config.source, secrets: secretCatalog, registry, logger });
+// Durable memory operations (Stage 1): one Core-owned owner over the B3 setup service and the B5 scheduler. Construction
+// reconciles rows another boot left open (outcome_unknown); the per-process boot id is what tells those rows apart.
+const memoryOperationSubscriptions = createMemoryOperationSubscriptions();
+const memoryOperations = createMemoryOperationService({
+  db, live: memoryRuntime.operations, setup: hindsightSetup, bootId: randomUUID(), logger,
+  onChanged: memoryOperationSubscriptions.publish,
+});
+registerMemoryOperationMethods(registry, { service: memoryOperations, subscriptions: memoryOperationSubscriptions, logger });
+registry.register(memoryAuthorityStatusMethod({ logger,
+  read: () => readMemoryAuthorityStatus({ db, live: memoryRuntime.operations, setup: hindsightSetup, operations: memoryOperations }) }));
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
@@ -507,7 +523,9 @@ function shutdown(signal: string): void {
   recovery.close();
   cancelDurableWorkForShutdown();
   const memoryStopped = memoryRuntime.stop();
-  void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => memoryStopped).then(() => server.close()).then(async () => {
+  // The memory runtime stop settles the scheduler (and any manual tick an operation awaits); the operation owner then
+  // has nothing left in flight to wait for except setup calls bounded by their own deadlines.
+  void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => memoryStopped).then(() => memoryOperations.stop()).then(() => server.close()).then(async () => {
     skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients
     // (each exactly once), before the db handle and process go away.

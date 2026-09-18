@@ -49,3 +49,4 @@
 - 045-hindsight-policy-work.ts — durable curator claims, exact original targets, saved proposals and local retry state
 - 046-hindsight-runtime-admission.ts — durable last-verified runtime admission for truthful offline capability reporting
 - 047-hindsight-memory-writes.ts — durable original requests, exact mutation targets and stable whole-operation results
+- 048-memory-operations.ts — Core-minted durable memory operation ledger; partial unique index = single-flight per family; owner boot id drives restart reconciliation
