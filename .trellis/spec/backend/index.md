@@ -28,6 +28,7 @@ Before writing backend code:
 | [Current Local Cutover Coverage](./memory-local-cutover-coverage.md) | Immutable complete Local manifests, writer-reserved cutover refusal, typed source evidence and exact native-object projection bindings |
 | [Current-State Transfer and First Activation](./memory-current-state-cutover.md) | D78 structured Bank import, typed hash/mapping evidence, native input/outcome certificate, retained snapshot, drift invalidation and actual B4 raw staging/guards |
 | [Durable Memory Operations](./memory-operations.md) | Core-owned operation owner over B3/B5 producers: single-flight families, Core-minted identity, derived settlement, stage-aware cancel, restart reconciliation, composite `memory.authority.status` read and the operations push channel |
+| [Local Onboarding](./memory-local-onboarding.md) | `local.onboard.*` over the B2 producer: complete-inventory candidates, isolated replacement epochs, pure verification, trusted primary custody in the Chat path, one published Local runtime binding with receipt-proven recovery, and the `memory.onboarding.*` operator surface |
 | [Error Handling](./error-handling.md) | Structured tool errors, Rust/IPC errors, and Hindsight total-deadline/abort/response contracts |
 | [Quality Guidelines](./quality-guidelines.md) | Size/responsibility guard, lint, tests, forbidden patterns |
 | [Logging Guidelines](./logging-guidelines.md) | pino / tracing, audit log, and non-interfering provider instrumentation |

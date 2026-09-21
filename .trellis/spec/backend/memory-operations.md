@@ -17,16 +17,21 @@ MEMORY_OPERATION_METHODS = { submit: "memory.operations.submit", status: "memory
   list: "memory.operations.list", cancel: "memory.operations.cancel", subscribe: "memory.operations.subscribe",
   changed: "memory.operations.changed" };
 MEMORY_AUTHORITY_METHODS = { status: "memory.authority.status" };
-MemoryOperationKind = "setup.validate" | "setup.apply" | "replica.sync";
+MemoryOperationKind = "setup.validate" | "setup.apply" | "replica.sync" | "local.onboard.prepare" | "local.onboard.activate";
 MemoryOperationState = "admitted" | "running" | "completed" | "failed" | "cancelled" | "outcome_unknown";
-MemoryOperationReason = "core_restart" | "producer_refused" | "producer_failed" | "cancelled_before_claim" | "runtime_unavailable";
-MemoryOperationRefusalReason = "MEMORY_OPERATION_NOT_FOUND" | "…_BUSY" | "…_RUNNING" | "…_SETTLED" | "…_UNSUPPORTED" | "…_BANK_UNKNOWN";
+MemoryOperationReason = "core_restart" | "producer_refused" | "producer_failed" | "cancelled_before_claim" | "runtime_unavailable"
+  | "producer_incomplete" | "commitment_unknown";
+MemoryOperationRefusalReason = "MEMORY_OPERATION_NOT_FOUND" | "…_BUSY" | "…_RUNNING" | "…_SETTLED" | "…_UNSUPPORTED" | "…_BANK_UNKNOWN"
+  | "MEMORY_OPERATION_REQUIRED";
+MemoryOperationErrorCode = MemoryReplicaErrorCode | MemoryLocalErrorCode;   // producer/result arms must agree on kind
 ```
 
 Core: `createMemoryOperationService({ db, live, setup, bootId, onChanged, logger })` ->
-`{ submit, status, list, recent, cancel, stop }`; kind handlers implement
-`{ family(request), admit(request, ctx) -> producerRef, execute({ request, producer, ctx, running }) -> settlement | null,
-observe?(operation, ctx), cancel?(operation, ctx) }` and are registered once in `memory-operation-kinds.ts`.
+`{ submit, status, list, recent, latest(family), cancel, stop }`; kind handlers implement
+`{ family(request), admit(request, ctx) -> producerRef, execute({ request, producer, ctx, running, tryClaim, checkpoint })
+-> settlement | null, observe?(operation, ctx), observeBoot?(operation, ctx), cancel?(operation, ctx) }` and are
+registered once in `memory-operation-kinds.ts`. `running()` is a notification; `tryClaim(): boolean` is the repo CAS
+admitted -> running and the only claim proof. `checkpoint(progress)` persists producer progress independently of `result`.
 `composeMemoryRuntime(...).operations()` is the live accessor to the selected Hindsight subsystem
 (`scheduler`, `state`, `banks()`, `assertConnection()`), or `null` under Local authority.
 `readMemoryAuthorityStatus({ db, live, setup, operations })` produces `MemoryAuthorityStatus`.
@@ -67,6 +72,13 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
   attribute a run to the operation. A same-millisecond overlap with a previous run must never settle `completed`.
 - Adding a kind = one handler file + one registry row + Shared request/result arms. Handlers call live producers; they
   do not own timers, leases or retry loops.
+- Family `local-onboarding` (both `local.onboard.*` kinds): `admit` is synchronous and side-effect free; the producer
+  ref is persisted before execution; claim is deferred one macrotask and taken by `tryClaim`, so a pre-claim cancel
+  wins the CAS and no producer side effect happens. A kind's `observeBoot` runs read-only before the generic foreign-row
+  reconciliation: outcomes provable from the durable receipt/run are reconstructed, everything else becomes
+  `outcome_unknown` with `commitment_unknown` (COMMIT not provable) or `producer_incomplete` (run never published) and
+  an explicit recovery action. Setup/replica kinds have no `observeBoot` and keep the `core_restart` fallback. The
+  full producer, custody and binding contract is [`memory-local-onboarding.md`](./memory-local-onboarding.md).
 
 ### Known precision limits (recorded 2026-09-19, see deferred-decisions D84)
 
@@ -94,6 +106,8 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 | Core restart with a busy setup phase | `failed` / `HINDSIGHT_SETUP_INTERRUPTED`; evidence preserved; Banks -> `pending` |
 | status read while the runtime throws | `runtime.available=false` with a closed reason; the read still succeeds |
 | scheduler drain threw during a manual run | `failed` with `scheduler.lastError()` |
+| production `memory.migration.stage/resume/verify/exclude/activate` | `MEMORY_OPERATION_REFUSED` / `MEMORY_OPERATION_REQUIRED`; only dryRun/status/exceptions reads remain |
+| Core restart with a non-terminal `local.onboard.*` row | `observeBoot` classifies from the receipt; otherwise `outcome_unknown` / `commitment_unknown` or `producer_incomplete` |
 
 ## 5. Good / Base / Bad Cases
 
@@ -115,7 +129,11 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 - Core setup: interrupted-phase reconciliation and failed-validate evidence clearing; existing setup tests unchanged.
 - Desktop: view-model fixtures for Local / Hindsight / failed / unavailable; controller serialization, coalesced
   refetch, retired-client results ignored; card render states.
-- Isolated Core boot on a non-default port through migration 048 with clean SIGINT exit whenever composition changes.
+- Isolated Core boot on a non-default port through the current head migration with clean SIGINT exit whenever
+  composition changes.
+- Local kinds: claim race / pre-claim cancel, `retry` resolving the reserved run from the prior row, boot observation
+  (unknown stays unknown, no run created), terminal rows immutable after a later binding repair
+  (`memory-operation-kind-local.test.ts`).
 
 ## 7. Wrong vs Correct
 

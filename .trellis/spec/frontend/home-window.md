@@ -96,10 +96,23 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
   the Bank reports `explicit_retry_required` and Cancel only for an `admitted` `replica.sync`. Availability follows the
   current Core status, never a stale snapshot.
 - Unknown values render as 未知; the card never shows `0` pending, a health badge or freshness that the producer did
-  not report. Setup validate/apply and every later workflow (activation, transitions, backup, upgrade) are not on
-  this card until their Core operations exist.
+  not report. Setup validate/apply and every later workflow (transitions, backup, upgrade) are not on this card until
+  their Core operations exist.
 - Full operation ownership and verification requirements live in
   [`memory-operations.md`](../backend/memory-operations.md).
+
+### Local onboarding card (Operations page)
+
+- A separate focused card (`local-onboarding-card.tsx`, `use-local-onboarding.ts`, controller/state/actions modules)
+  projects `memory.onboarding.status` plus the `memory.onboarding.changed` invalidation. It subscribes before the
+  initial read and refetches on push, reconnect, remount and visibility restoration; it never polls and never replays
+  a write — a timed-out mutation triggers rediscovery, not resubmission.
+- Actions come only from the server-derived `actions` (preview, prepare, resume, replace, exclude, activate, cancel
+  before claim, recover binding); they are disabled while status is stale, the client is disconnected or a mutation
+  is pending. Client identity and generation are both guarded; late replies from a retired client are ignored.
+- The card renders producer counts and source-relative diagnostics; it never carries filesystem paths or memory bodies,
+  and technical receipt hashes stay in diagnostics. Accepted (admitted) and completed states are shown distinctly.
+- Contract: [`memory-local-onboarding.md`](../backend/memory-local-onboarding.md).
 
 ## Cross-window commands (the pet owns the scene, the pages own the surface)
 
