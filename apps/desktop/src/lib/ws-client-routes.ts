@@ -1,5 +1,5 @@
 /**
- * INPUT:  inbound JSON-RPC notification frames from the Core (chat stream + avatar/timeline/config/Approval/monitor/memory-operation pushes) and the
+ * INPUT:  Core notification frames (chat, avatar, timeline, config, Approval, monitor and memory invalidations) and the
  *         transport's open/message/close events.
  * OUTPUT: Routes state (in-flight turn + push slots), installRoutes(), parseFrame(), abortTurn(), bindTransport().
  * POS:    ui/lib — the inbound half of ws-client: THE zod boundary (past it, data is trusted typed data). No
@@ -16,7 +16,9 @@ import {
   CHAT_METHODS,
   CONFIG_METHODS,
   MEMORY_OPERATION_METHODS,
+  MEMORY_ONBOARDING_METHODS,
   MemoryOperationChangedSchema,
+  MemoryOnboardingChangedSchema,
   ChatCompleteSchema,
   ChatDeltaSchema,
   ChatErrorSchema,
@@ -32,6 +34,7 @@ import {
   type CanonicalApprovalRequest,
   type ConfigChanged,
   type MemoryOperation,
+  type MemoryOnboardingChanged,
   type RunMonitorEvent,
   type ErrorCode,
   type JsonRpcClientFrame,
@@ -63,6 +66,7 @@ interface PushSlots {
   approval: Set<(event: ApprovalPushEvent) => void>;
   monitor: Set<(event: RunMonitorEvent) => void>;
   memoryOperation: Set<(operation: MemoryOperation) => void>;
+  memoryOnboarding: Set<(changed: MemoryOnboardingChanged) => void>;
 }
 
 export type ApprovalPushEvent =
@@ -75,7 +79,7 @@ export interface Routes {
 }
 
 export function createRoutes(): Routes {
-  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(), approval: new Set(), monitor: new Set(), memoryOperation: new Set() } };
+  return { current: null, push: { avatar: null, timeline: null, timelineRemoved: null, config: new Set(), approval: new Set(), monitor: new Set(), memoryOperation: new Set(), memoryOnboarding: new Set() } };
 }
 
 export function addConfigChangedHandler(state: Routes, handler: (changed: ConfigChanged) => void): () => void {
@@ -93,6 +97,11 @@ export function addMemoryOperationHandler(state: Routes, handler: (operation: Me
   return () => state.push.memoryOperation.delete(handler);
 }
 
+export function addMemoryOnboardingHandler(state: Routes, handler: (changed: MemoryOnboardingChanged) => void): () => void {
+  state.push.memoryOnboarding.add(handler);
+  return () => state.push.memoryOnboarding.delete(handler);
+}
+
 function notifyMonitorHandlers(state: Routes, event: RunMonitorEvent): void {
   for (const handler of [...state.push.monitor]) {
     try { handler(event); } catch { console.warn("[ws-client] monitor handler failed"); }
@@ -108,6 +117,7 @@ function clearPushHandlers(state: Routes): void {
   state.push.approval.clear();
   state.push.monitor.clear();
   state.push.memoryOperation.clear();
+  state.push.memoryOnboarding.clear();
 }
 
 /** Routes the Core's notifications (chat stream + avatar/timeline/config pushes) to their handlers; each zod-validated. */
@@ -168,6 +178,12 @@ function installFanOutRoutes(rpc: JSONRPCServerAndClient, state: Routes): void {
     const { operation } = MemoryOperationChangedSchema.parse(params);
     for (const handler of [...state.push.memoryOperation]) {
       try { handler(operation); } catch { console.warn("[ws-client] memory.operations.changed handler failed"); }
+    }
+  });
+  rpc.addMethod(MEMORY_ONBOARDING_METHODS.changed, (params: unknown) => {
+    const changed = MemoryOnboardingChangedSchema.parse(params);
+    for (const handler of [...state.push.memoryOnboarding]) {
+      try { handler(changed); } catch { console.warn("[ws-client] memory.onboarding.changed handler failed"); }
     }
   });
 }

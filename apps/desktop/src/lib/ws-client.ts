@@ -1,6 +1,6 @@
 /**
  * INPUT: WsTransport plus Core JSON-RPC frames parsed by ws-client-routes
- * OUTPUT: createWsClient() with chat, operator lifecycle, extension convergence and memory operation request families
+ * OUTPUT: createWsClient() with chat, operator lifecycle, extension convergence and memory operation/onboarding families
  * POS:    ui/lib operator transport composition root over inbound routes and typed outbound methods
  */
 
@@ -23,6 +23,7 @@ import type {
   ConfigChanged,
   ConfigListResult,
   MemoryOperation,
+  MemoryOnboardingChanged,
   ConfigSetParams,
   ConfigSetResult,
   ConnectParams,
@@ -78,11 +79,13 @@ import { requestWithDeadline } from "./rpc-deadline.ts";
 import { createTimingPolicyStore, type TimingPolicyStore } from "./timing-policy.ts";
 import { createTimingPolicySync, type TimingPolicySync } from "./timing-policy-sync.ts";
 import type { MemoryOperationMethods } from "./ws-client-memory-operations.ts";
+import type { MemoryOnboardingMethods } from "./ws-client-memory-onboarding.ts";
 import { handshake, requestMethods, type ConnectOutcome } from "./ws-client-methods.ts";
 import {
   addConfigChangedHandler,
   addApprovalHandler,
   addMemoryOperationHandler,
+  addMemoryOnboardingHandler,
   addMonitorHandler,
   bindTransport,
   createRoutes,
@@ -96,7 +99,7 @@ import type { WsTransport } from "./ws-transport.ts";
 
 export type { ChatHandlers, ConnectOutcome };
 
-export interface WsClient extends MemoryOperationMethods {
+export interface WsClient extends MemoryOperationMethods, MemoryOnboardingMethods {
   connect(params: ConnectParams): Promise<ConnectOutcome>;
   chat(params: ChatSendParams, handlers: ChatHandlers): Promise<void>;
   /** Cancels the character's in-flight turn (idempotent; false = nothing was running). The composer's abort entry. */
@@ -189,6 +192,8 @@ export interface WsClient extends MemoryOperationMethods {
   onMonitorEvent(handler: (event: RunMonitorEvent) => void): () => void;
   /** Registers a memory.operations.changed sink (the Operations page refetches the composite status on each push). */
   onMemoryOperationChanged(handler: (operation: MemoryOperation) => void): () => void;
+  /** Invalidates the Local onboarding read model after committed producer, exclusion, candidate or binding changes. */
+  onMemoryOnboardingChanged(handler: (changed: MemoryOnboardingChanged) => void): () => void;
   /** Registers the fire-and-forget avatar command sink (core -> operator push). Replaces any prior handler. */
   onAvatarCommand(handler: (command: AvatarCommand) => void): void;
   /** Registers the optional live-timeline sink (shared with the chat page server-side). */
@@ -297,5 +302,6 @@ function pushRegistrations(state: ReturnType<typeof createRoutes>) {
     onApproval: (handler: (event: ApprovalPushEvent) => void) => addApprovalHandler(state, handler),
     onMonitorEvent: (handler: (event: RunMonitorEvent) => void) => addMonitorHandler(state, handler),
     onMemoryOperationChanged: (handler: (operation: MemoryOperation) => void) => addMemoryOperationHandler(state, handler),
+    onMemoryOnboardingChanged: (handler: (changed: MemoryOnboardingChanged) => void) => addMemoryOnboardingHandler(state, handler),
   };
 }

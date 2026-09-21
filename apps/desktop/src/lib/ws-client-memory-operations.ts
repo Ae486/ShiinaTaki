@@ -49,6 +49,10 @@ export function memoryOperationMethods(request: <T>(method: string, params: JSON
     subscribeMemoryOperations: () => {
       subscription ??= request<unknown>(MEMORY_OPERATION_METHODS.subscribe, {}).then((result) => {
         MemoryOperationSubscribeResultSchema.parse(result);
+      }).catch((cause: unknown) => {
+        // Explicit read-model recovery may retry a failed subscription; successful subscriptions remain shared.
+        subscription = null;
+        throw cause;
       });
       return subscription;
     },

@@ -48,7 +48,10 @@ const UNAVAILABLE_LABEL: Record<NonNullable<MemoryAuthorityStatus["runtime"]["un
 const STATE_LABEL: Record<MemoryOperation["state"], string> = {
   admitted: "已受理（未认领）", running: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消", outcome_unknown: "结果未知（Core 重启）",
 };
-const KIND_LABEL: Record<MemoryOperation["kind"], string> = { "setup.validate": "校验连接", "setup.apply": "应用配置", "replica.sync": "同步副本" };
+const KIND_LABEL: Record<MemoryOperation["kind"], string> = {
+  "setup.validate": "校验连接", "setup.apply": "应用配置", "replica.sync": "同步副本",
+  "local.onboard.prepare": "准备本地记忆", "local.onboard.activate": "启用 / 恢复本地记忆",
+};
 const UNKNOWN = "未知";
 
 export function memoryAuthorityView(status: MemoryAuthorityStatus): MemoryAuthorityView {

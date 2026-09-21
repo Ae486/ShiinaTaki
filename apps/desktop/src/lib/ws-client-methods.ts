@@ -92,6 +92,7 @@ import {
 } from "@taki/shared";
 import { requestWithDeadline } from "./rpc-deadline.ts";
 import { memoryOperationMethods } from "./ws-client-memory-operations.ts";
+import { memoryOnboardingMethods } from "./ws-client-memory-onboarding.ts";
 
 function permissionMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>) {
   return {
@@ -242,5 +243,6 @@ export function requestMethods(rpc: JSONRPCServerAndClient, timing: () => Timing
     ...mcpMethods(request),
     ...skillMethods(request),
     ...memoryOperationMethods(request),
+    ...memoryOnboardingMethods(request),
   };
 }
