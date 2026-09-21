@@ -3,6 +3,19 @@
 Research delivered: 2026-09-16. Task: 09-14-hindsight-integration-completeness-audit, under the existing Hindsight parent.
 Scope: accepted memory integration and operations design, including relevant multi-client/Core ownership boundaries.
 
+## Current continuation (2026-09-19)
+
+The [overall completion review](overall-grill-2026-09-19.md) covers all remaining stages. The owner's latest direction
+makes grill conditional on major unresolved requirements; no currently known owner question blocks continuation.
+Resume Stage 2a research/planning and reopen grill only for a concrete material issue. Stage 1 durable
+operations/setup recovery/manual sync and its minimal Home card are now committed
+and archived; the corresponding missing-foundation findings below are historical. D84 and later lifecycle gaps remain.
+U1 is answered: one normal-switch confirmation, completion after all checks pass, separate emergency confirmation.
+The dated report below retains its original evidence scope; use the new grill record and Stage 1 contract for current
+continuation. This update adds no runtime or manual acceptance.
+
+## Original audit summary
+
 The project has working provider/runtime, migration/proof, replica/Pending recovery and field-preservation foundations.
 It does not yet have the complete first-enable, repeated provider-switching, administration and operator journeys.
 The remaining work includes backend operations and lifecycle handling as well as B7 UI.

@@ -1,0 +1,30 @@
+{
+  "id": "hindsight-first-activation",
+  "name": "hindsight-first-activation",
+  "title": "Existing-instance first Hindsight activation as one recoverable operation",
+  "description": "Hindsight closure Stage 2b (PR03): production start/resume/activate orchestration over the B4 substrate (current Local capture, complete Bank coverage, native import, required-maintenance proof, replica verification, fenced promotion) with committed-source custody during the fence, runtime rebind after the committed marker, pre/post-commit recovery, and a minimal guided existing-instance Home path; isolated data only.",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-09-19",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "08-09-hindsight-memory-provider",
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "stage": "S2b",
+    "matrix_entries": "A10,A11,A12,A38-first-activation",
+    "parent_plan": ".trellis/tasks/09-14-hindsight-integration-completeness-audit/research/plan-review-2026-09-18.md"
+  }
+}

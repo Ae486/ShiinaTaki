@@ -3,7 +3,12 @@
 Status: planning. Follow [design.md](design.md) and [prd.md](prd.md); no B7 production code has been changed.
 The owner approved B6 closeout before B7; [bounded B6 verification](../08-09-memory-runtime-integration/research/b6-closeout-validation-2026-09-13.md)
 is now available. The previous R1 premise is withdrawn; [grill.md](grill.md) records the accepted continuation contract,
-actual implementation gaps and pending interaction U1. Do not start implementation from this draft.
+actual implementation gaps and accepted U1. Do not start implementation from this draft.
+
+2026-09-19 current direction: grill is conditional on major unresolved requirements; no currently known owner
+question blocks continuation. Follow the [overall review](../09-14-hindsight-integration-completeness-audit/research/overall-grill-2026-09-19.md).
+Stage 1 is committed/archived; reuse its operation owner and Home card. Resume the existing Stage 2a research/planning
+task and complete its artifacts/readiness review before implementation. Older grill-first sequencing below is historical.
 
 2026-09-18: the [current-code recheck](../09-14-hindsight-integration-completeness-audit/research/source-recheck-2026-09-18.md)
 is recorded. The owner is still discussing overall gaps/closure; resume the interaction grill only after that discussion.
@@ -15,8 +20,9 @@ This update records source findings, not implementation approval or completed pr
 - [x] Re-read existing designs and grills; apply the verified-baseline/mapping/change-reuse rule to repeated switching.
 - [x] Complete the owner-requested integration completeness research before further interaction questions; include all
       accepted parent requirements and memory-related multi-endpoint use, with implementation/reachability/acceptance evidence.
-- [ ] Finish the overall gap/closure discussion using the current-code recheck, keeping backend prerequisites explicit.
-- [ ] Then complete the interaction grill, starting with U1's normal switch confirmation flow.
+- [x] Review the overall gap/closure findings; no currently known owner question blocks continuation.
+- [x] Record U1's single-confirmation selection and withdraw G1's premature administration choice. Reopen grill only
+      if a material unresolved product issue emerges; remaining engineering prerequisites are still required.
 - [ ] Specify and independently verify the missing backend transition prerequisites before advertising working UI actions.
 - [ ] Ground incremental re-entry, managed helper/backup commands, provider-side fence/drain proof and dynamic runtime replacement against
       actual source; record exact contracts and refusal boundaries in `design.md`.

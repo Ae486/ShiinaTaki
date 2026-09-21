@@ -1,0 +1,30 @@
+{
+  "id": "active-bank-lifecycle",
+  "name": "active-bank-lifecycle",
+  "title": "Active Bank and configuration lifecycle under Hindsight authority",
+  "description": "Hindsight closure Stage 2c: new-Character Bank provisioning/verification before Run admission, active provider health/revalidation/rebind, and the verified provider-reconnect catch-up trigger, all as durable memory operations with truthful readiness state.",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-09-19",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "08-09-hindsight-memory-provider",
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "stage": "S2c",
+    "matrix_entries": "A27,A31,A16",
+    "parent_plan": ".trellis/tasks/09-14-hindsight-integration-completeness-audit/research/plan-review-2026-09-18.md"
+  }
+}

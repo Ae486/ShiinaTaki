@@ -2,6 +2,13 @@
 
 ## Status
 
+2026-09-19 current direction: the
+[overall Memory/Hindsight review](../09-14-hindsight-integration-completeness-audit/research/overall-grill-2026-09-19.md)
+covers all remaining stages. The owner clarified that grill is conditional, not a mandatory interview before delivery.
+No currently known owner question blocks continuation; resume Stage 2a research/planning, retaining the engineering
+readiness gates. Stage 1 is committed and archived. U1 is accepted; G1's premature administration choice is withdrawn.
+Earlier mandatory-grill and U1-unanswered statements are superseded. B7 remains planning.
+
 2026-09-14: the owner required a review of the existing designs, discussions and grill records before continuing B7.
 This is a planning correction and source audit, not implementation or switching acceptance. B7 remains planning.
 
@@ -103,18 +110,17 @@ Source paths in the table are under `packages/core/src/db/`, `packages/core/src/
 `packages/core/src/server/methods/`. This is static source evidence; no new service run or round-trip acceptance was
 performed. The bounded B6 closeout remains evidence for its stated runtime scope, not for unimplemented B7 operations.
 
-## U1 - Normal switch confirmation flow (deferred; no owner answer)
+## U1 - Normal switch confirmation flow (accepted; recorded 2026-09-19)
 
 Scenario: the operator has reviewed the planned Local return and explicitly confirms it. The accepted synchronization,
 integrity, write-fence and new-epoch gates remain mandatory in either option.
 
-- Recommended: that one explicit confirmation authorizes the background operation to complete the guarded switch once
-  its checks pass. A blocking condition stops the operation with actionable status; it never becomes emergency takeover.
-- Alternative: finish preparation, then pause for a second explicit confirmation before the final authority switch.
+The owner selected one explicit confirmation: the background operation completes the guarded switch once all checks
+pass, without another confirmation after preparation. A blocking condition stops the operation with actionable status;
+it never becomes emergency takeover. Emergency takeover retains its separate explicit confirmation.
 
-This is an interaction choice about a second confirmation, not a choice of replication algorithm, data preservation,
-Bank identity or required checks. Neither option is recorded as accepted yet. Emergency takeover retains its separate
-explicit confirmation in both cases.
+This settles the confirmation flow only. Replication, preservation, Bank identity and all required checks remain
+unchanged. It does not authorize a real switch or mark implementation or manual acceptance complete.
 
 ## Interposed audit delivered (2026-09-16)
 

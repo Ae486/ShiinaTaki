@@ -2,9 +2,12 @@
 
 ## Status and sources
 
-Status: planning, for the required B7 grill. The owner approved proceeding after bounded B6 closeout; B7 production
+Status: planning, subject to contract/readiness review. The owner approved proceeding after bounded B6 closeout; B7 production
 implementation has not started. The previous R1 destination premise is withdrawn; see [the grounded grill](grill.md).
-U1 below is an interaction proposal awaiting owner feedback.
+U1 below is accepted. The owner's latest direction makes
+[overall grill](../09-14-hindsight-integration-completeness-audit/research/overall-grill-2026-09-19.md) conditional on
+major unresolved requirements; none is currently known to block continuation. Remaining engineering contracts in
+this draft still require review, and Stage 1's delivered operations foundation must be reused.
 
 Authoritative inputs:
 
@@ -160,10 +163,10 @@ Loading, empty, degraded, recovering, conflict, unknown outcome and failed upgra
 Action availability follows current Core status and captured revision; a stale UI snapshot cannot authorize an
 operation. Rebind subscriptions on authenticated client replacement and discard results from retired connections.
 
-U1 (not yet accepted): after preview and one explicit normal-switch confirmation, should the background operation
-finish the guarded switch when checks pass, or pause after preparation for another confirmation? Recommend one explicit
-confirmation with truthful background progress and refusal on blockers. Emergency takeover always has its own explicit
-confirmation. The question does not change any synchronization, completeness or authority gate.
+U1 (accepted; recorded 2026-09-19): after preview and one explicit normal-switch confirmation, the background operation
+finishes the guarded switch when all checks pass, without a second confirmation after preparation. Show truthful
+background progress and refuse on blockers. Emergency takeover retains its own explicit confirmation. All
+synchronization, completeness and authority gates remain mandatory.
 
 ## Validation and rollout boundaries
 
@@ -178,5 +181,6 @@ confirmation. The question does not change any synchronization, completeness or 
 - Run package-appropriate types/lint/tests and real Core startup. Use isolated copies for integration. Original-data
   activation, destructive administration, publication and owner/manual acceptance remain explicit operations.
 
-Before implementation, complete the interaction grill, ground incremental re-entry and the missing helper/fence/runtime-handoff details, update this draft and
-`implement.md`, complete the required design/grill, and activate this existing task through the normal review gate.
+Before implementation, ground incremental re-entry and the missing helper/fence/runtime-handoff details, update this
+draft and `implement.md`, complete design/readiness review, and activate the relevant existing task through its normal
+gate. Reopen grill only if a material unresolved product issue emerges.

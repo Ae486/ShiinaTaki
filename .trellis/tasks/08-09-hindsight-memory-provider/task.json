@@ -28,11 +28,14 @@
     "08-09-memory-runtime-integration",
     "08-09-memory-operations-ui",
     "09-14-hindsight-integration-completeness-audit",
-    "09-19-hindsight-durable-operations"
+    "09-19-hindsight-durable-operations",
+    "09-19-local-onboarding-operation",
+    "09-19-hindsight-first-activation",
+    "09-19-active-bank-lifecycle"
   ],
   "parent": null,
   "relatedFiles": [],
-  "notes": "2026-09-16: 09-14-hindsight-integration-completeness-audit research delivered. Use its research/README.md, completeness-matrix.md and closure-plan.md as the 54-entry completeness ledger and 16-case acceptance route before further B7 design. Backend operation/lifecycle gaps remain explicit; D23 and D79-D83 keep their scope; U1 remains unanswered. No implementation or manual acceptance is implied.",
+  "notes": "2026-09-16: 09-14-hindsight-integration-completeness-audit research delivered. Use its research/README.md, completeness-matrix.md and closure-plan.md as the 54-entry completeness ledger and 16-case acceptance route before further B7 design. Backend operation/lifecycle gaps remain explicit; D23 and D79-D83 keep their scope; U1 remains unanswered. No implementation or manual acceptance is implied.\n2026-09-20 continuation: owner authorized Trellis leader-driven delivery; grill is conditional and no owner-blocking question is known. U1 selected one confirmation; G1 manual-vs-automatic administration choice withdrawn, PR01/PR02 remain engineering work. Stage 1 is committed/archived. Stage 2a research and full artifacts passed independent Astra readiness review, task activated and Core/Shared implementation dispatched. See 09-19-local-onboarding-operation/implement.md and the overall-grill record. No new runtime/manual acceptance or parent completion is claimed.",
   "meta": {
     "completeness_audit": "09-14-hindsight-integration-completeness-audit",
     "completeness_audit_status": "delivered"

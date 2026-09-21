@@ -61,8 +61,10 @@ code implements initial promotion foundations and Hindsight-authority checkpoint
 healthy return, Local-authority re-entry or repeated runtime handoff. These are explicit implementation prerequisites;
 neither B6 closeout nor an available status RPC proves they are complete.
 
-The [grounded grill record](grill.md) maps existing rulings to current source evidence. Its pending U1 concerns the
-normal switch confirmation flow only. B7 remains planning; the synchronization and preservation principles are settled.
+The [grounded grill record](grill.md) maps existing rulings to current source evidence. U1 is accepted: one normal-switch
+confirmation, completion after all checks pass, and separate emergency confirmation. The owner's latest direction
+makes grill conditional on major unresolved requirements; no currently known owner question blocks continuation.
+B7 remains planning; the synchronization and preservation principles are settled and engineering readiness is required.
 
 ## Completeness audit delivery (2026-09-16)
 
