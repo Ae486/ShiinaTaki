@@ -1,6 +1,6 @@
 /**
  * INPUT:  verified run identity, readiness/manifest digests, prepared epoch, and current fenced lease
- * OUTPUT: atomic canonical-local authority marker plus immutable activation receipt
+ * OUTPUT: atomic canonical-local authority marker plus immutable activation receipt, and the receipt proof recovery requires
  * POS:    core/memory/legacy-migration — sole migration cutover transaction; no filesystem or async work inside
  */
 import type { Database } from "../../db/sqlite.ts";
@@ -41,6 +41,20 @@ function verifyHindsightSelection(db: Database, row: Record<string, unknown>): v
     || Number(receipt.bank_count) < 1 || Number(receipt.bank_count) !== Number(banks?.n ?? -1)
     || !authority || authority.provider_id !== "hindsight" || authority.status !== "active"
     || authority.provider_lineage_id !== row.provider_lineage_id) throw new Error("MEMORY_INTEGRITY_ERROR");
+}
+
+/** Same-epoch recovery proof: the marker must join one receipt on run, snapshot, epoch and transaction; mode alone is not proof. */
+export function verifyCanonicalLocalReceipt(db: Database, selection: MemoryAuthoritySelection): void {
+  if (selection.mode !== "canonical-local") throw new Error("MEMORY_AUTHORITY_MISMATCH");
+  const receipt = db.prepare(`SELECT 1 AS proven FROM memory_migration_activation_receipts receipt
+    JOIN memory_migration_runs run ON run.run_id=receipt.run_id
+    JOIN canonical_memory_authority_state state ON state.singleton=1 AND state.active_epoch_id=receipt.epoch_id
+    JOIN canonical_memory_authority_epochs epoch ON epoch.epoch_id=receipt.epoch_id
+    WHERE receipt.transaction_id=:tx AND receipt.epoch_id=:epoch AND receipt.snapshot_id=:snapshot AND receipt.marker_mode='canonical-local'
+    AND run.epoch_id=receipt.epoch_id AND run.snapshot_id=receipt.snapshot_id AND run.activation_transaction_id=receipt.transaction_id
+    AND run.phase='activated' AND run.status='completed' AND epoch.provider_id='local' AND epoch.status='active'`)
+    .get({ tx: selection.transactionId, epoch: selection.epochId, snapshot: selection.snapshotId });
+  if (!receipt) throw new Error("MEMORY_INTEGRITY_ERROR");
 }
 
 export function activateCanonicalLocal(db: Database, input: { lease: Lease; manifestDigest: string; readinessDigest: string; transactionId: string; now: string }): MemoryAuthoritySelection {

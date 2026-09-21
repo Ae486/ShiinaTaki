@@ -15,7 +15,7 @@
 - media-usage.ts — media.usage (operator-only): attachment + memory-text byte footprint; RESERVED for the M5 settings UI (D27)
 - memory-tidy.ts — memory.tidy (operator-only): run the store-maintenance tidy pass NOW; responds with per-class defect counts, edits, steps and the utility slot's cumulative spend — never memory content
 - memory-status.ts — memory.status (operator-only): the settings panel's maintenance counters — window calibration per slot, compaction summary coverage + LENGTH, auto-write/tidy watermarks; counts only
-- memory-migration.ts — memory.migration.* (operator-only): on-demand legacy migration control, bounded reports, verification and activation
+- memory-migration.ts — memory.migration.* (operator-only): dryRun/status/exceptions reads confined to the Core workspace; stage/resume/verify/exclude/activate refuse with MEMORY_OPERATION_REQUIRED (use memory.operations.submit)
 - perception-methods.ts — the perception surface's registration seam: one call registers pauseGet/pauseSet/card so the composition root never grows per method
 - perception-pause-get.ts — perception.pauseGet (operator-only): the Privacy Pause snapshot (a lapsed deadline self-resumes on this read)
 - perception-pause-set.ts — perception.pauseSet (operator-only): pause until resumed / until a caller-supplied epoch-ms deadline / resume; the ONLY production writer of the pause state (the agent has no path — swept by privacy-pause-writer.test.ts)
@@ -40,5 +40,6 @@
 - hindsight-setup-methods.ts — operator-only memory.hindsight.* setup/status/disable/explicit LLM-health controllers with bounded refusals
 - hindsight-cutover-methods.ts — operator-only memory.hindsight.cutover.status/verify projections; read-only, stale-epoch-aware, and privacy-bounded
 - memory-operation-methods.ts — operator-only memory.operations.submit/status/list/cancel/subscribe over the durable operation owner; refusals ride MEMORY_OPERATION_REFUSED + a closed reason (busy carries activeOperationId); subscribe pushes memory.operations.changed until the socket closes
-- memory-authority-status.ts — memory.authority.status (operator-only): the strict composite read (authority, runtime availability, setup, per-Bank replica/Pending, operations); a read, never a subscription
+- memory-onboarding-methods.ts — operator-only memory.onboarding.preview/status/exceptions/exclude/subscribe over the Local onboarding service (Core workspace, authenticated device as exclusion actor); closed local codes and owner refusals ride MEMORY_OPERATION_REFUSED; subscribe pushes memory.onboarding.changed {reason} until the socket closes
+- memory-authority-status.ts — memory.authority.status (operator-only): the strict composite read (authority, runtime availability from the Hindsight probe or the pure Local binding snapshot, setup, per-Bank replica/Pending, operations); a read, never a subscription
 - observability-methods.ts — operator-only monitor state/list/trajectory/inspector and connection-scoped live subscription

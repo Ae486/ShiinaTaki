@@ -8,10 +8,11 @@
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import type { ToolSet } from "ai";
-import { MONITOR_MODE_CONFIG_KEY, MonitorModeSchema } from "@taki/shared";
+import { MONITOR_MODE_CONFIG_KEY, MonitorModeSchema, type MemoryOnboardingChanged, type TimelineEntry } from "@taki/shared";
 import { CANONICAL_MEMORY_SYSTEM_PROMPT, createChatAgent } from "./agents/chat-agent.ts";
 import { BASE_SYSTEM_PROMPT } from "./agents/base-prompt.ts";
 import { createConversationStore } from "./agents/conversation-store.ts";
+import { createPrimaryPersistence } from "./agents/primary-persistence.ts";
 import { mergeToolSets } from "./agents/tool-set-assembly.ts";
 import { createTurnQueue } from "./agents/turn-queue.ts";
 import { createTurnRegistry } from "./agents/turn-registry.ts";
@@ -59,6 +60,8 @@ import { createAttachmentStore } from "./media/attachment-store.ts";
 import { directoryByteSize } from "./media/directory-size.ts";
 import { composeMemoryRuntime } from "./memory/runtime-composition.ts";
 import { createImageDescriptionWriter } from "./memory/image-description-writer.ts";
+import { createLocalOnboardingService } from "./memory/local-onboarding/local-onboarding-service.ts";
+import { readLocalOnboardingStatus } from "./memory/local-onboarding/local-onboarding-status.ts";
 import { readMemoryAuthorityStatus } from "./memory/operations/memory-authority-status.ts";
 import { createMemoryOperationService } from "./memory/operations/memory-operation-service.ts";
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
@@ -86,13 +89,14 @@ import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
 import { mediaUsageMethod } from "./server/methods/media-usage.ts";
 import { memoryAuthorityStatusMethod } from "./server/methods/memory-authority-status.ts";
+import { registerMemoryOnboardingMethods } from "./server/methods/memory-onboarding-methods.ts";
 import { registerMemoryOperationMethods } from "./server/methods/memory-operation-methods.ts";
 import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
 import { memoryStatusMethod } from "./server/methods/memory-status.ts";
 import { runStatusMethod } from "./server/methods/run-status.ts";
 import { runQueueMethod } from "./server/methods/run-queue.ts";
 import { createRecoveryCoordinator } from "./harness/recovery-coordinator.ts";
-import { createAsyncOnDemandMemoryMigrationMethods } from "./server/methods/memory-migration.ts";
+import { createMemoryMigrationMethods } from "./server/methods/memory-migration.ts";
 import { registerPerceptionMethods } from "./server/methods/perception-methods.ts";
 import { registerSecretMethods } from "./server/methods/secret-methods.ts";
 import { registerMcpMethods } from "./server/methods/mcp-methods.ts";
@@ -102,7 +106,7 @@ import { timelineSubscribeMethod } from "./server/methods/timeline-subscribe.ts"
 import { bootSkillLifecycle } from "./skills/skill-boot.ts";
 import { createCurrentTimeTool } from "./time/current-time-tool.ts";
 import { createTimelineSubscriptions } from "./server/timeline-subscriptions.ts";
-import { createMemoryOperationSubscriptions } from "./server/memory-operation-subscriptions.ts";
+import { createConnectionSubscriptions, createMemoryOperationSubscriptions } from "./server/memory-operation-subscriptions.ts";
 import { startWsServer } from "./server/ws-server.ts";
 import { createReadFileTool } from "./workspace/read-file-tool.ts";
 import { createWorkspacePaths } from "./workspace/workspace-paths.ts";
@@ -152,10 +156,11 @@ const chatLog = logger.child({ mod: "chat" });
 const historyBudget = () => Math.floor(windowCalibrator.effectiveWindow() * contextConfig.historyRatio);
 const summaryRepo = createSummaryRepo(db);
 const latestRequestMeasurements = new Map<string, RequestMeasurement>();
+const timelineFanout = { onAppend: (entry: TimelineEntry) => timelineSubscriptions.publish(entry),
+  onRemove: (ref: { characterId: string; seq: number }) => timelineSubscriptions.publishRemoved(ref) };
 const conversationStore = createConversationStore({
   repo: timelineRepo,
-  onAppend: (entry) => timelineSubscriptions.publish(entry),
-  onRemove: (ref) => timelineSubscriptions.publishRemoved(ref),
+  ...timelineFanout,
   window: { budget: historyBudget },
   // R3: the rolling summary substitutes as the replay head; the wall-hit warn means the compactor is being outrun.
   summaries: summaryRepo,
@@ -168,8 +173,10 @@ const conversationStore = createConversationStore({
 const avatarSubscriptions = createAvatarSubscriptions();
 const avatarVocabulary = createAvatarVocabulary();
 
+// One per-process boot id tells rows this boot owns apart from rows an earlier boot left open (operations, custody).
+const bootId = randomUUID();
 // Marker-first composition owns every legacy/canonical reader, writer, prompt, scheduler, and migration cutover seam.
-const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, promptDir: serverConfig.promptDir, model,
+const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, promptDir: serverConfig.promptDir, model, bootId,
   timeline: timelineRepo, windowStart: conversationStore.windowStart, summaries: summaryRepo,
   estimatedTokens: conversationStore.estimatedTokens, budget: historyBudget,
   measureRequest: (characterId) => latestRequestMeasurements.get(characterId),
@@ -232,14 +239,22 @@ registerSkillMethods(registry, { service: skillLifecycle, logger: skillsLog });
 const hindsightSetup = composeHindsightSetup({ db, config: boot.config.source, secrets: secretCatalog, registry, logger });
 // Durable memory operations (Stage 1): one Core-owned owner over the B3 setup service and the B5 scheduler. Construction
 // reconciles rows another boot left open (outcome_unknown); the per-process boot id is what tells those rows apart.
+// Local onboarding (Stage 2a) is the only caller of the B2 producer; its kinds observe their own receipts at boot first.
 const memoryOperationSubscriptions = createMemoryOperationSubscriptions();
+const memoryOnboardingSubscriptions = createConnectionSubscriptions<MemoryOnboardingChanged>();
+const localOnboarding = createLocalOnboardingService({
+  db, workspaceRoot: join(serverConfig.dataDir, "workspace"), runner: memoryRuntime.migrationRunner, runtime: memoryRuntime, owner: bootId,
+  onChanged: (reason) => memoryOnboardingSubscriptions.publish({ reason }),
+});
 const memoryOperations = createMemoryOperationService({
-  db, live: memoryRuntime.operations, setup: hindsightSetup, bootId: randomUUID(), logger,
+  db, live: memoryRuntime.operations, setup: hindsightSetup, local: localOnboarding, bootId, logger,
   onChanged: memoryOperationSubscriptions.publish,
 });
 registerMemoryOperationMethods(registry, { service: memoryOperations, subscriptions: memoryOperationSubscriptions, logger });
+registerMemoryOnboardingMethods(registry, { local: localOnboarding, subscriptions: memoryOnboardingSubscriptions, logger,
+  status: () => readLocalOnboardingStatus({ local: localOnboarding, operations: memoryOperations }) });
 registry.register(memoryAuthorityStatusMethod({ logger,
-  read: () => readMemoryAuthorityStatus({ db, live: memoryRuntime.operations, setup: hindsightSetup, operations: memoryOperations }) }));
+  read: () => readMemoryAuthorityStatus({ db, live: memoryRuntime.operations, binding: memoryRuntime.bindingSnapshot, setup: hindsightSetup, operations: memoryOperations }) }));
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
@@ -364,6 +379,8 @@ const chatAgent = createChatAgent({
        memoryPrompt: () => selectedMemory.canonical ? CANONICAL_MEMORY_SYSTEM_PROMPT : BASE_SYSTEM_PROMPT,
       autoMemory,
       onPrimaryCommitted: memoryRuntime.recordPrimaryCommitted,
+      // Trusted primary custody: every primary turn's rows are members of one durable group finalized when the turn ends.
+      primaryPersistence: createPrimaryPersistence({ custody: memoryRuntime.custody, repo: timelineRepo, ...timelineFanout }),
       maxSteps: boot.agentConfig.maxSteps,
       // Presentation tools (avatar expression/motion) return nothing to read; stop the loop after a spoken,
       // presentation-only step so the SDK does not force a padded filler generation (1c). See presentation-stop.ts.
@@ -461,7 +478,7 @@ registry.register(characterCostumeResolutionMethod({ store: characterStore, char
 // Perception and memory maintenance remain operator-only.
 registerPerceptionMethods(registry, perception);
 if (tidy) registry.register(memoryTidyMethod(tidy));
-for (const method of createAsyncOnDemandMemoryMigrationMethods(memoryRuntime.migrationRunner)) registry.register(method);
+for (const method of createMemoryMigrationMethods({ runner: memoryRuntime.migrationRunner, workspaceRoot: join(serverConfig.dataDir, "workspace") })) registry.register(method);
 registry.register(
   memoryStatusMethod({ windowState: windowStateRepo, summaries: summaryRepo, autoState: createMemoryAutoRepo(db) }),
 );
@@ -522,9 +539,11 @@ function shutdown(signal: string): void {
   runService.seal();
   recovery.close();
   cancelDurableWorkForShutdown();
-  const memoryStopped = memoryRuntime.stop();
-  // The memory runtime stop settles the scheduler (and any manual tick an operation awaits); the operation owner then
-  // has nothing left in flight to wait for except setup calls bounded by their own deadlines.
+  // Local onboarding first refuses new claims and lets the active producer checkpoint (conversion stops between sources,
+  // activation finishes its commit); only then does the memory runtime stop. That stop settles the B5 scheduler (and any
+  // manual tick a replica operation awaits), so the operation owner has nothing left in flight afterwards except setup
+  // calls bounded by their own deadlines.
+  const memoryStopped = localOnboarding.stop().then(() => memoryRuntime.stop());
   void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => memoryStopped).then(() => memoryOperations.stop()).then(() => server.close()).then(async () => {
     skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients

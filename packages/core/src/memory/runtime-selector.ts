@@ -1,69 +1,99 @@
 /**
  * INPUT:  open Database and explicit Legacy, canonical Local and Hindsight subsystem factories
- * OUTPUT: marker-first runtime selection and irreversible post-commit retirement, including failed rebinding
+ * OUTPUT: marker-first runtime selection, irreversible post-commit retirement (failed rebinding included), observable
+ *         unavailable Local boot and same-epoch recovery that never re-activates
  * POS:    core/memory — authority marker routing seam; canonical mode never invokes the legacy factory
  */
 import type { Database } from "../db/sqlite.ts";
 import type { MemoryEngine } from "./memory-engine.ts";
 import type { MemorySubsystem } from "./bootstrap.ts";
-import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
+import { readMemoryAuthoritySelection, type MemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
 
 export interface SelectedMemoryRuntime {
   memory: MemoryEngine;
   legacy: MemorySubsystem | null;
   readonly canonical: boolean;
   bindCanonical(epochId: string): void;
+  /** Same-epoch repair of an unavailable committed Local runtime; never re-activates and never revives Legacy. */
+  recoverCanonical(epochId: string): "healthy" | "published";
   stop(): void;
 }
-export function selectMemoryRuntime(input: {
+export interface SelectMemoryRuntimeInput {
   db: Database;
   createLegacy: () => MemorySubsystem;
   createCanonical: (epochId: string) => MemoryEngine;
   createHindsight?: (epochId: string) => MemoryEngine;
   onLegacyRetired?: () => void;
   onCanonicalBound?: () => void;
-}): SelectedMemoryRuntime {
+  /** Present = a committed Local runtime that fails to construct at boot stays observable and unavailable instead of aborting boot. */
+  onBootUnavailable?: (error: unknown) => void;
+}
+interface SelectorState { canonical: boolean; legacy: MemorySubsystem | null; current: MemoryEngine | undefined }
+
+export function selectMemoryRuntime(input: SelectMemoryRuntimeInput): SelectedMemoryRuntime {
   const selection = readMemoryAuthoritySelection(input.db);
   if (selection.mode === "hindsight" && !input.createHindsight) {
     throw new Error("MEMORY_INTEGRITY_ERROR: Hindsight authority runtime is not installed");
   }
-  let canonical = selection.mode !== "legacy-markdown";
-  let legacy: MemorySubsystem | null = null;
-  let current: MemoryEngine | undefined;
+  const state: SelectorState = { canonical: selection.mode !== "legacy-markdown", legacy: null, current: undefined };
   if (selection.mode === "hindsight") {
-    current = input.createHindsight!(selection.epochId as string);
-  } else if (canonical) {
-    current = input.createCanonical(selection.epochId as string);
+    state.current = input.createHindsight!(selection.epochId as string);
+  } else if (state.canonical) {
+    state.current = bootCanonical(input, selection.epochId as string);
   } else {
-    legacy = input.createLegacy();
-    current = legacy.engine;
+    state.legacy = input.createLegacy();
+    state.current = state.legacy.engine;
   }
   const readCurrent = (): MemoryEngine => {
-    if (!current) throw new Error("MEMORY_INTEGRITY_ERROR: canonical Local runtime is unavailable");
-    return current;
+    if (!state.current) throw new Error("MEMORY_INTEGRITY_ERROR: canonical Local runtime is unavailable");
+    return state.current;
   };
-  const memory = delegatingEngine(readCurrent);
   return {
-    memory,
-    get legacy() { return legacy; },
-    get canonical() { return canonical; },
-    stop: () => { current = undefined; },
-    bindCanonical(epochId) {
-      const committed = readMemoryAuthoritySelection(input.db);
-      if (committed.mode === "legacy-markdown") throw new Error("MEMORY_AUTHORITY_MISMATCH");
-      const wasCanonical = canonical;
-      // The marker is already durable. A failed constructor cannot restore the old provider or its detached writes.
-      if (!wasCanonical) {
-        canonical = true; legacy = null; current = undefined;
-        input.onLegacyRetired?.();
-      }
-      if (committed.mode !== "canonical-local" || committed.epochId !== epochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
-      if (wasCanonical) { readCurrent(); return; }
-      const next = input.createCanonical(epochId);
-      input.onCanonicalBound?.();
-      current = next;
+    memory: delegatingEngine(readCurrent),
+    get legacy() { return state.legacy; },
+    get canonical() { return state.canonical; },
+    stop: () => { state.current = undefined; },
+    bindCanonical: (epochId) => bindCanonical(input, state, epochId),
+    recoverCanonical: (epochId) => {
+      if (!state.canonical) throw new Error("MEMORY_AUTHORITY_MISMATCH");
+      committedEpoch(readMemoryAuthoritySelection(input.db), epochId);
+      if (state.current) return "healthy";
+      state.current = input.createCanonical(epochId);
+      return "published";
     },
   };
+}
+
+function committedEpoch(committed: MemoryAuthoritySelection, epochId: string): void {
+  if (committed.mode !== "canonical-local" || committed.epochId !== epochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
+}
+
+function bindCanonical(input: SelectMemoryRuntimeInput, state: SelectorState, epochId: string): void {
+  const committed = readMemoryAuthoritySelection(input.db);
+  if (committed.mode === "legacy-markdown") throw new Error("MEMORY_AUTHORITY_MISMATCH");
+  const wasCanonical = state.canonical;
+  // The marker is already durable. A failed constructor cannot restore the old provider or its detached writes.
+  if (!wasCanonical) {
+    state.canonical = true; state.legacy = null; state.current = undefined;
+    input.onLegacyRetired?.();
+  }
+  committedEpoch(committed, epochId);
+  if (wasCanonical) {
+    if (!state.current) throw new Error("MEMORY_INTEGRITY_ERROR: canonical Local runtime is unavailable");
+    return;
+  }
+  const next = input.createCanonical(epochId);
+  input.onCanonicalBound?.();
+  state.current = next;
+}
+
+function bootCanonical(input: SelectMemoryRuntimeInput, epochId: string): MemoryEngine | undefined {
+  try { return input.createCanonical(epochId); }
+  catch (error) {
+    if (!input.onBootUnavailable) throw error;
+    input.onBootUnavailable(error);
+    return undefined;
+  }
 }
 
 function delegatingEngine(current: () => MemoryEngine): MemoryEngine {

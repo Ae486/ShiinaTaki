@@ -4,5 +4,5 @@
 - connection-registry.ts — per-socket auth state + Core-assigned per-Host generation and replacement-socket retirement
 - app-error.ts — app-error envelope helpers (JSON_RPC_APP_ERROR + error.data.code)
 - timeline-subscriptions.ts — timeline.appended/removed fan-out registry (characterId→connection→sink); disconnect cleanup
-- memory-operation-subscriptions.ts — memory.operations.changed fan-out registry (one channel, connection→sink); disconnect cleanup driven by ctx.onClose
+- memory-operation-subscriptions.ts — generic connection-scoped fan-out registry (connection→sink) plus the memory.operations.changed instance; memory.onboarding.changed reuses it; disconnect cleanup driven by ctx.onClose
 - methods/ — one handler file per WS method

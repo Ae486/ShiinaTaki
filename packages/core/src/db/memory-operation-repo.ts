@@ -22,13 +22,19 @@ export interface MemoryOperationRepo {
   transition(input: TransitionInput): MemoryOperation;
   get(operationId: string): MemoryOperation | undefined;
   activeInFamily(family: string): MemoryOperation | undefined;
+  /** The newest row of a family, terminal or not; the per-family read the onboarding status derives actions from. */
+  latestInFamily(family: string): MemoryOperation | undefined;
   listActive(): MemoryOperation[];
   listRecent(limit: number): MemoryOperation[];
+  /** Non-terminal rows another boot owns, oldest first; read-only input for per-kind boot observation. */
+  listForeign(bootId: string): MemoryOperation[];
   /** Rows a previous process left non-terminal become outcome_unknown/core_restart; returns the reconciled rows. */
   reconcileForeign(bootId: string): MemoryOperation[];
 }
 
 const COLUMNS = "operation_id,kind,family,state,reason,authority_epoch_id,request_json,producer_json,result_json,error_code,owner_boot_id,created_at,updated_at,terminal_at";
+
+const FOREIGN_OPEN = `SELECT ${COLUMNS} FROM memory_operations WHERE terminal_at IS NULL AND owner_boot_id<>:boot ORDER BY created_at,operation_id`;
 
 export function createMemoryOperationRepo(db: Database, now: () => string = () => new Date().toISOString()): MemoryOperationRepo {
   const clock = () => z.iso.datetime({ offset: true }).parse(now());
@@ -37,9 +43,11 @@ export function createMemoryOperationRepo(db: Database, now: () => string = () =
     transition: (input) => transition(db, input, clock()),
     get: (operationId) => optional(db.prepare(`SELECT ${COLUMNS} FROM memory_operations WHERE operation_id=:id`).get({ id: operationId })),
     activeInFamily: (family) => optional(db.prepare(`SELECT ${COLUMNS} FROM memory_operations WHERE family=:family AND terminal_at IS NULL`).get({ family })),
+    latestInFamily: (family) => optional(db.prepare(`SELECT ${COLUMNS} FROM memory_operations WHERE family=:family ORDER BY created_at DESC,rowid DESC LIMIT 1`).get({ family })),
     listActive: () => db.prepare(`SELECT ${COLUMNS} FROM memory_operations WHERE terminal_at IS NULL ORDER BY created_at,operation_id`).all().map(parseRow),
     listRecent: (limit) => db.prepare(`SELECT ${COLUMNS} FROM memory_operations WHERE terminal_at IS NOT NULL ORDER BY terminal_at DESC,operation_id LIMIT :limit`)
       .all({ limit: z.int().min(1).max(50).parse(limit) }).map(parseRow),
+    listForeign: (bootId) => db.prepare(FOREIGN_OPEN).all({ boot: bootId }).map(parseRow),
     reconcileForeign: (bootId) => reconcileForeign(db, bootId, clock()),
   };
 }
@@ -84,8 +92,7 @@ function transition(db: Database, input: TransitionInput, at: string): MemoryOpe
 function reconcileForeign(db: Database, bootId: string, at: string): MemoryOperation[] {
   const reconciled: MemoryOperation[] = [];
   db.transaction(() => {
-    const rows = db.prepare(`SELECT ${COLUMNS} FROM memory_operations WHERE terminal_at IS NULL AND owner_boot_id<>:boot ORDER BY created_at,operation_id`)
-      .all({ boot: bootId }).map(parseRow);
+    const rows = db.prepare(FOREIGN_OPEN).all({ boot: bootId }).map(parseRow);
     for (const row of rows) {
       const next = MemoryOperationSchema.parse({ ...row, state: "outcome_unknown", reason: "core_restart", updatedAt: at, terminalAt: at });
       db.prepare("UPDATE memory_operations SET state='outcome_unknown',reason='core_restart',updated_at=:at,terminal_at=:at WHERE operation_id=:id")

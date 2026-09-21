@@ -1,9 +1,10 @@
 /**
  * INPUT:  ChatSendParams (+optional attachments) + an injected LanguageModel (AI SDK v7), ConversationStore,
- *         MemoryEngine, optional AutoMemory/visionModel/attachment store/imageMemory/onUsage hooks
+ *         MemoryEngine, optional AutoMemory/visionModel/attachment store/imageMemory/onUsage/primaryPersistence hooks
  * OUTPUT: createChatAgent({model, store, memory, ...}) -> ChatAgent whose stream() yields text deltas; persists the
  *         FULL turn (tool-calls + tool-results + text) after the loop; abort-aware, partial text never lost;
- *         a cancel before any output retracts the just-appended user row (deletes it + skips the memory writes)
+ *         a cancel before any output retracts the just-appended user row (deletes it + skips the memory writes);
+ *         a primary turn's rows are custody members of one group, finalized once when the turn ends
  * POS:    core/agents — the streaming chat loop; DAY-STABLE instructions (base prompt + day line + memory context)
  *         with the volatile <turn-context> tail riding the outgoing user message (Q4/ADR 0008); auto-writes detached;
  *         a classified context-overflow retries ONCE against the same captured Run extension context
@@ -18,7 +19,9 @@ import type { MemoryEngine } from "../memory/memory-engine.ts";
 import { renderCurrentTime, renderDayDate } from "../time/time-context.ts";
 import { BASE_SYSTEM_PROMPT } from "./base-prompt.ts";
 import type { ConversationStore } from "./conversation-store.ts";
+import type { ConversationWriter } from "./conversation-writer.ts";
 import { isContextOverflowError, observedTokensOf } from "./overflow-error.ts";
+import type { PrimaryPersistence } from "./primary-persistence.ts";
 import { mergeToolSets } from "./tool-set-assembly.ts";
 import { fireUsageReport, type TurnUsageReport } from "./turn-usage-report.ts";
 import { estimateMessagesTokens, estimateTokens } from "../memory/token-estimator.ts";
@@ -91,6 +94,8 @@ export interface ChatAgentDeps {
   autoMemory?: AutoMemory;
   /** Exact committed primary rows, never a queried seq range. The composition root persists source witnesses. */
   onPrimaryCommitted?: (input: PrimaryConversationCommit) => void;
+  /** Durable per-turn primary custody: one group per primary turn, shared by its overflow retry, finalized once. */
+  primaryPersistence?: PrimaryPersistence;
   /** Vision model slot (TAKI_VLM_*, #17 decision 5); image-bearing turns route here. Absent = image turns rejected. */
   visionModel?: LanguageModel;
   /** Content-addressed attachment writer — a NARROW structural type (zero coupling to the media module). */
@@ -164,6 +169,8 @@ interface TurnAttempt {
   userSeq?: number;
   userEntry?: TimelineEntry;
   primary: boolean;
+  /** The turn's Timeline writer: the custody-bound writer for primary turns with persistence, else the store. */
+  writer: ConversationWriter;
   runContext?: AgentRunContext;
   recall: { result?: Promise<string> };
   state: AttemptState;
@@ -190,12 +197,15 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
     ? attachments.map((a) => ({ mediaType: a.mediaType, ref: vision.store.save(a.dataBase64, a.mediaType).ref }))
     : [];
   // Capture the committed user row so a cancel-before-reply can retract exactly this seq (the retract seam in the
-  // attempt). Appended ONCE — an R2 retry replays the same committed row, never a second one.
-  const userEntry = primary ? store.appendUser(characterId, message, images) : undefined;
+  // attempt). Appended ONCE — an R2 retry replays the same committed row, never a second one. The custody group is
+  // opened before that first append and shared by the retry; it is finalized exactly once when the turn ends.
+  const persistence = primary ? deps.primaryPersistence?.begin({ characterId, runId: turn?.runId }) : undefined;
+  const writer = persistence?.writer ?? store;
+  const userEntry = primary ? writer.appendUser(characterId, message, images) : undefined;
   if (approval && turn) wireApprovalDenial(approval, turn);
   const runContext = turn?.runContext ?? deps.runContext?.(turn);
   const ownsRunContext = turn?.runContext === undefined;
-  const base = { characterId, message, attachments, images, vision, userSeq: userEntry?.seq, userEntry, primary, runContext, recall: {} };
+  const base = { characterId, message, attachments, images, vision, userSeq: userEntry?.seq, userEntry, primary, writer, runContext, recall: {} };
   // R2 retry seam (batch 6): ONE overflow-classified retry around the whole attempt. Retry ONLY when the failed
   // attempt was provably side-effect-free — zero text yielded (nothing user-visible lost) AND zero completed steps
   // (no tool can have acted; re-running the model after a completed tool step could act twice — the error-handling
@@ -224,6 +234,7 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
       }
     }
   } finally {
+    persistence?.finalize();
     if (ownsRunContext) runContext?.dispose?.();
   }
 }
@@ -235,7 +246,7 @@ async function* runTurn(deps: ChatAgentDeps, params: ChatSendParams, turn?: Turn
 // eslint-disable-next-line max-lines-per-function
 async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: TurnContext): AsyncIterable<string> {
   const { store, approval } = deps;
-  const { characterId, message, attachments, images, vision, userSeq, primary, state } = attempt;
+  const { characterId, message, attachments, images, vision, userSeq, primary, writer, state } = attempt;
   const controlMessage = turn?.controlInput ?? message; const replay = store.project(characterId); const history = replay.messages;
   // ONE clock read per attempt: the instructions' day line and the tail's time line must agree (Q4).
   const now = Date.now();
@@ -307,17 +318,17 @@ async function* runAttempt(deps: ChatAgentDeps, attempt: TurnAttempt, turn?: Tur
       observability?.assertHealthy(); streamEnded = true;
     } finally {
       // Persist whatever the turn produced — completed steps AND partial text — even on abort/error (D1 #1/#5).
-      if (primary) await persistTurn(store, characterId, { result, pendingStepText, streamEnded, onCommitted: (entry) => committed.push(entry) });
+      if (primary) await persistTurn(writer, characterId, { result, pendingStepText, streamEnded, onCommitted: (entry) => committed.push(entry) });
     }
   } catch (error) {
     // Throw ending of a cancel: the transport rejects the read with our string reason (fails isAbortError), so the
     // SDK errors the stream — same retract rule as the graceful ending (see retractIfCancelledSilent); else propagate.
-    if (primary && userSeq !== undefined && await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
+    if (primary && userSeq !== undefined && await retractIfCancelledSilent(writer, { characterId, userSeq, result, pendingStepText, turn })) return;
     if (primary && committed.length > 1) deps.onPrimaryCommitted?.({ characterId, entries: committed, runId: turn?.runId });
     throw error;
   }
   // Graceful ending (the SDK emitted an `abort` part then closed): the same retract check on the clean path.
-  if (primary && userSeq !== undefined && await retractIfCancelledSilent(store, { characterId, userSeq, result, pendingStepText, turn })) return;
+  if (primary && userSeq !== undefined && await retractIfCancelledSilent(writer, { characterId, userSeq, result, pendingStepText, turn })) return;
   if (primary) deps.onPrimaryCommitted?.({ characterId, entries: committed, runId: turn?.runId });
   if (primary) measurePostTurnRequest(deps, { characterId, instructions, tools, toolOrder, toolSchemaTokens: prepared.toolSchemaTokens, store });
   if (primary) fireDetachedTurnWrites(deps, { characterId, imageRefs: images.map((img) => img.ref), message });
@@ -379,7 +390,7 @@ interface RetractInput {
 // step (responseMessages settles to [] / rejects — verified it does NOT hang after the error ending) and no partial
 // text. On retract: delete exactly the appended user row (DB + timeline.removed) and signal the pump to restore the
 // draft; the message never enters memory. Attachments are NOT restored client-side (bytes stay until TTL GC).
-async function retractIfCancelledSilent(store: ConversationStore, input: RetractInput): Promise<boolean> {
+async function retractIfCancelledSilent(store: ConversationWriter, input: RetractInput): Promise<boolean> {
   if (!(input.turn?.signal?.aborted ?? false) || input.pendingStepText.length > 0) return false;
   if ((await Promise.resolve(input.result.responseMessages).then((m) => m.length, () => 0)) !== 0) return false;
   store.removeEntry(input.characterId, input.userSeq);
@@ -452,7 +463,7 @@ interface TurnOutcome {
 // On a clean end (including a graceful abort) the stream was fully consumed, so responseMessages settles: it
 // resolves with every COMPLETED step's messages, or rejects when none completed (abort during step 0). After a
 // THROWN error the loop exited early — the pipeline may never flush its promises, so they are not awaited.
-async function persistTurn(store: ConversationStore, characterId: string, outcome: TurnOutcome): Promise<void> {
+async function persistTurn(store: ConversationWriter, characterId: string, outcome: TurnOutcome): Promise<void> {
   if (outcome.streamEnded) {
     const completed = await Promise.resolve(outcome.result.responseMessages).then(
       (messages) => messages,

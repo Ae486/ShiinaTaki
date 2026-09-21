@@ -1,10 +1,12 @@
 import { mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import type { Tool, ToolExecutionOptions } from "ai";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCanonicalMemoryAuthorityRepo } from "../db/canonical-memory-authority-repo.ts";
 import { MIGRATIONS } from "../db/migrations/index-list.ts";
+import { createPrimaryMemoryCustody } from "../db/primary-memory-custody-repo.ts";
 import { openDatabase, type Database } from "../db/sqlite.ts";
 import { createSummaryRepo } from "../db/summary-repo.ts";
 import { createTimelineRepo } from "../db/timeline-repo.ts";
@@ -13,7 +15,7 @@ import { scriptedGenerateModel } from "../testing/mock-language-model.ts";
 import { rmTempDir } from "../testing/rm-temp.ts";
 import * as canonicalSubsystem from "./canonical-local-subsystem.ts";
 import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
-import { createLegacyMigrationRunner } from "./legacy-migration/legacy-migration-runner.ts";
+import { createLegacyMigrationRunner, type LegacyMigrationRunner } from "./legacy-migration/legacy-migration-runner.ts";
 import { composeMemoryRuntime } from "./runtime-composition.ts";
 
 const opened: Array<{ db: Database; dataDir: string }> = [];
@@ -33,7 +35,7 @@ function setup() {
   const timeline = createTimelineRepo(db);
   const model = scriptedGenerateModel([]);
   const { logger } = createCaptureLogger();
-  const runtime = composeMemoryRuntime({ db, dataDir, promptDir: join(dataDir, "prompt"), model, timeline,
+  const runtime = composeMemoryRuntime({ db, dataDir, promptDir: join(dataDir, "prompt"), model, timeline, bootId: "boot-a",
     windowStart: () => 1, summaries: createSummaryRepo(db), estimatedTokens: () => 90, budget: () => 100,
     compact: { triggerRatio: 0.8, keepMessages: 3 }, env: {}, logger });
   const legacy = runtime.selected.legacy!;
@@ -53,6 +55,13 @@ function setup() {
 }
 
 type Fixture = ReturnType<typeof setup>;
+const workspaceOf = (fixture: Fixture) => join(fixture.dataDir, "workspace");
+async function prepared(fixture: Fixture, runner: LegacyMigrationRunner, runId: string) {
+  const status = await runner.prepare({ runId, workspaceRoot: workspaceOf(fixture), previewId: runner.dryRun(workspaceOf(fixture)).reportId, owner: "test" });
+  expect(status.status).toBe("ready");
+  expect(runner.verify(runId).verified).toBe(true);
+  return () => runner.activate({ runId, workspaceRoot: workspaceOf(fixture), timeoutMs: 1_000, transactionId: `tx-${runId}`, owner: "test" });
+}
 const options: ToolExecutionOptions<unknown> = { toolCallId: "held-tool", messages: [], context: undefined };
 async function execute(tool: Tool, input: unknown) {
   if (!tool.execute) throw new Error("Expected executable legacy tool");
@@ -92,16 +101,14 @@ describe("durable activation cannot restore legacy on runtime failure", () => {
   it("retires old references and exposes unavailable canonical runtime when construction fails after commit", async () => {
     const fixture = setup();
     const runner = await fixture.runtime.migrationRunner();
-    const staged = runner.stage({ workspaceRoot: join(fixture.dataDir, "workspace"), owner: "test" });
-    expect(runner.verify(staged.runId).verified).toBe(true);
+    const activate = await prepared(fixture, runner, "run-constructor");
     const failure = new Error("synthetic canonical constructor failure");
     vi.spyOn(canonicalSubsystem, "createCanonicalLocalSubsystem").mockImplementationOnce(() => { throw failure; });
 
-    await expect(runner.activate({ runId: staged.runId, workspaceRoot: join(fixture.dataDir, "workspace"), timeoutMs: 1_000 }))
-      .rejects.toBe(failure);
+    await expect(activate()).rejects.toBe(failure);
 
     expect(readMemoryAuthoritySelection(fixture.db).mode).toBe("canonical-local");
-    expect(runner.status(staged.runId)).toMatchObject({ phase: "activated", status: "completed" });
+    expect(runner.status("run-constructor")).toMatchObject({ phase: "activated", status: "completed" });
     expect(fixture.runtime.selected.canonical).toBe(true);
     expect(fixture.runtime.selected.legacy).toBeNull();
     expect(fixture.runtime.snapshot().providerId).toBe("local");
@@ -122,6 +129,26 @@ describe("durable activation cannot restore legacy on runtime failure", () => {
     expect(createSummaryRepo(fixture.db).get("taki")).toBeNull();
     expect(fixture.model.doGenerateCalls).toHaveLength(0);
 
+    // Same-epoch explicit recovery: receipt proven, custody reconciled, construction only because the binding is unavailable.
+    const epochId = readMemoryAuthoritySelection(fixture.db).epochId!;
+    const epochs = () => fixture.db.prepare("SELECT count(*) AS n FROM canonical_memory_authority_epochs").get()?.n;
+    const epochCount = epochs();
+    expect(fixture.runtime.bindingSnapshot()).toMatchObject({ selection: "canonical-local", selectedEpochId: epochId,
+      binding: { kind: "unavailable", epochId }, flush: "failing" });
+    expect(() => fixture.runtime.recoverLocalBinding("another-epoch")).toThrow("MEMORY_AUTHORITY_MISMATCH");
+    expect(fixture.runtime.recoverLocalBinding(epochId)).toEqual({ binding: "published", reconciledGroups: 0 });
+    expect(fixture.runtime.bindingSnapshot()).toMatchObject({ binding: { kind: "published", epochId }, flush: "available" });
+    expect(Object.keys(fixture.runtime.memory.createTools("taki"))).not.toHaveLength(0);
+    // A healthy binding still reconciles dead custody on explicit recovery, without reconstructing or re-activating.
+    const dead = createPrimaryMemoryCustody({ db: fixture.db, bootId: "boot-dead" }).begin({ characterId: "taki", repo: fixture.timeline });
+    const crashed = dead.repo.append({ characterId: "taki", role: "user", content: "crashed before finalize" });
+    expect(fixture.runtime.recoverLocalBinding(epochId)).toEqual({ binding: "healthy", reconciledGroups: 1 });
+    expect(fixture.db.prepare("SELECT state FROM primary_memory_groups WHERE group_id=:id").get({ id: dead.groupId })?.state).toBe("finalized");
+    expect(fixture.db.prepare("SELECT authority_epoch_id FROM canonical_memory_primary_commits WHERE timeline_seq=:seq").get({ seq: crashed.seq })?.authority_epoch_id).toBe(epochId);
+    expect(epochs()).toBe(epochCount);
+    expect(fixture.db.prepare("SELECT count(*) AS n FROM memory_migration_activation_receipts").get()?.n).toBe(1);
+    await assertRetired(fixture);
+
     const reopened = openDatabase({ path: fixture.dbPath, migrations: MIGRATIONS });
     try {
       expect(readMemoryAuthoritySelection(reopened).mode).toBe("canonical-local");
@@ -136,49 +163,52 @@ describe("durable activation cannot restore legacy on runtime failure", () => {
     const runner = createLegacyMigrationRunner({ db: fixture.db,
       destinationRoot: join(fixture.dataDir, "snapshots"), fence: fixture.runtime.fence,
       onActivated: mode === "synchronous" ? () => { throw failure; } : async () => { await Promise.resolve(); throw failure; } });
-    const staged = runner.stage({ workspaceRoot: join(fixture.dataDir, "workspace"), owner: "test" });
-    expect(runner.verify(staged.runId).verified).toBe(true);
+    const activate = await prepared(fixture, runner, `run-${mode}`);
 
-    await expect(runner.activate({ runId: staged.runId, workspaceRoot: join(fixture.dataDir, "workspace"), timeoutMs: 1_000 }))
-      .rejects.toBe(failure);
+    await expect(activate()).rejects.toBe(failure);
     expect(readMemoryAuthoritySelection(fixture.db).mode).toBe("canonical-local");
-    expect(runner.status(staged.runId)).toMatchObject({ phase: "activated", status: "completed" });
+    expect(runner.status(`run-${mode}`)).toMatchObject({ phase: "activated", status: "completed" });
     await assertRetired(fixture);
   });
 
   it.each([1, 2])("retires after committed marker read failure even when %i read attempts fail", async (failures) => {
     const fixture = setup();
     const runner = await fixture.runtime.migrationRunner();
-    const staged = runner.stage({ workspaceRoot: join(fixture.dataDir, "workspace"), owner: "test" });
-    expect(runner.verify(staged.runId).verified).toBe(true);
+    const activate = await prepared(fixture, runner, "run-marker-read");
     const failure = new Error("synthetic post-commit marker read failure");
     const prepare = fixture.db.prepare.bind(fixture.db);
+    const marker = "SELECT * FROM memory_authority_selection WHERE singleton=1";
+    // A second WAL reader sees only committed rows, so failures are injected strictly after COMMIT: the activation
+    // transaction's own integrity read must succeed for the marker to commit at all.
+    const observer = new DatabaseSync(fixture.dbPath, { readOnly: true });
+    const committed = () => observer.prepare("SELECT 1 FROM memory_migration_activation_receipts WHERE run_id='run-marker-read'").get() !== undefined;
     let remaining = failures;
     vi.spyOn(fixture.db, "prepare").mockImplementation((sql) => {
-      if (sql === "SELECT * FROM memory_authority_selection WHERE singleton=1" && remaining > 0) {
+      if (sql === marker && remaining > 0 && committed()) {
         remaining -= 1;
         throw failure;
       }
       return prepare(sql);
     });
 
-    await expect(runner.activate({ runId: staged.runId, workspaceRoot: join(fixture.dataDir, "workspace"), timeoutMs: 1_000 }))
-      .rejects.toBe(failure);
-    expect(readMemoryAuthoritySelection(fixture.db).mode).toBe("canonical-local");
-    expect(runner.status(staged.runId)).toMatchObject({ phase: "activated", status: "completed" });
-    await assertRetired(fixture);
+    try {
+      await expect(activate()).rejects.toBe(failure);
+      expect(fixture.db.prepare("SELECT mode FROM memory_authority_selection WHERE singleton=1").get()?.mode).toBe("canonical-local");
+      expect(runner.status("run-marker-read")).toMatchObject({ phase: "activated", status: "completed" });
+      await assertRetired(fixture);
+      vi.restoreAllMocks();
+      expect(readMemoryAuthoritySelection(fixture.db).mode).toBe("canonical-local");
+    } finally { observer.close(); }
   });
 
   it("releases temporary quiescence when the activation transaction rolls back before commit", async () => {
     const fixture = setup();
     const runner = await fixture.runtime.migrationRunner();
-    const staged = runner.stage({ workspaceRoot: join(fixture.dataDir, "workspace"), owner: "test" });
-    expect(runner.verify(staged.runId).verified).toBe(true);
+    const activate = await prepared(fixture, runner, "run-rollback");
     fixture.db.exec(`CREATE TRIGGER fail_activation_receipt BEFORE INSERT ON memory_migration_activation_receipts
       BEGIN SELECT RAISE(ABORT, 'synthetic receipt failure'); END`);
 
-    await expect(runner.activate({ runId: staged.runId, workspaceRoot: join(fixture.dataDir, "workspace"), timeoutMs: 1_000 }))
-      .rejects.toThrow("synthetic receipt failure");
+    await expect(activate()).rejects.toThrow("synthetic receipt failure");
     expect(readMemoryAuthoritySelection(fixture.db).mode).toBe("legacy-markdown");
     expect(fixture.db.prepare("SELECT count(*) AS n FROM memory_migration_activation_receipts").get()?.n).toBe(0);
     expect(fixture.runtime.selected.canonical).toBe(false);
@@ -186,5 +216,44 @@ describe("durable activation cannot restore legacy on runtime failure", () => {
     await expect(execute(fixture.heldTools.foreground,
       { type: "profile", content: "Allowed after rollback", importance: 6 })).resolves.toMatchObject({ ok: true });
     expect(fixture.runtime.fence.admitSync(() => "legacy resumed")).toBe("legacy resumed");
+  });
+});
+
+describe("durable activation binds a usable Local runtime", () => {
+  async function recalled(runtime: Fixture["runtime"], query: string): Promise<string[]> {
+    const result = await runtime.memory.createTools("taki").recall!.execute!({ query, scope: "both", limit: 8, maxTokens: 1024 }, options as never) as
+      { ok: boolean; data?: { hits: Array<{ record: { unit: { text: string } } }> } };
+    expect(result.ok).toBe(true);
+    return (result.data?.hits ?? []).map((hit) => hit.record.unit.text);
+  }
+
+  it("recalls migrated and freshly retained memory through the published binding, and again after reopening", async () => {
+    const fixture = setup();
+    const runner = await fixture.runtime.migrationRunner();
+    const activate = await prepared(fixture, runner, "run-usable");
+    await expect(activate()).resolves.toMatchObject({ activated: true, mode: "canonical-local" });
+    expect(fixture.runtime.bindingSnapshot()).toMatchObject({ selection: "canonical-local", binding: { kind: "published" }, flush: "available" });
+    await fixture.runtime.writeMemory({ characterId: "taki", layer: "profile", content: "Retained after cutover", importance: 6, origin: "observed" });
+    expect((await recalled(fixture.runtime, "Synthetic source")).some((text) => text.includes("Synthetic source before cutover"))).toBe(true);
+    expect((await recalled(fixture.runtime, "Retained after cutover")).some((text) => text.includes("Retained after cutover"))).toBe(true);
+    await assertRetired(fixture);
+    expect(fixture.model.doGenerateCalls).toHaveLength(0);
+    await fixture.runtime.stop();
+
+    // A fresh process composes from the committed marker alone: no activation, the same epoch, both memories still recallable.
+    const reopened = openDatabase({ path: fixture.dbPath, migrations: MIGRATIONS });
+    const runtime = composeMemoryRuntime({ db: reopened, dataDir: fixture.dataDir, promptDir: join(fixture.dataDir, "prompt"), model: fixture.model,
+      timeline: createTimelineRepo(reopened), bootId: "boot-b", windowStart: () => 1, summaries: createSummaryRepo(reopened), estimatedTokens: () => 90,
+      budget: () => 100, compact: { triggerRatio: 0.8, keepMessages: 3 }, env: {}, logger: createCaptureLogger().logger });
+    try {
+      expect(runtime.selected.canonical).toBe(true);
+      expect(runtime.bindingSnapshot()).toMatchObject({ binding: { kind: "published", epochId: readMemoryAuthoritySelection(reopened).epochId }, flush: "available" });
+      expect((await recalled(runtime, "Synthetic source")).some((text) => text.includes("Synthetic source before cutover"))).toBe(true);
+      expect((await recalled(runtime, "Retained after cutover")).some((text) => text.includes("Retained after cutover"))).toBe(true);
+      expect(reopened.prepare("SELECT count(*) AS n FROM memory_migration_activation_receipts").get()?.n).toBe(1);
+    } finally {
+      await runtime.stop();
+      reopened.close();
+    }
   });
 });

@@ -1,7 +1,7 @@
 /**
  * INPUT:  active Local epoch, timeline, canonical repositories and the process Utility Slot
- * OUTPUT: real Local ingestion/tidy/retention, source witnessing and pre-retirement durability
- * POS:    core/memory — provider-specific background composition; Compaction remains Core-owned
+ * OUTPUT: real Local ingestion/tidy/retention, source witnessing and pre-retirement durability; start() owns the retention worker
+ * POS:    core/memory — provider-specific background composition built as a draft and started by the runtime binding; Compaction remains Core-owned
  */
 import type { MemoryConfig } from "../config/memory-config.ts";
 import { createCanonicalIngestionRepo } from "../db/canonical-ingestion-repo.ts";
@@ -34,9 +34,13 @@ export function createCanonicalLocalSubsystem(input: {
   for (const bank of engine.authority.listBanks(input.epochId)) {
     if (bank.scope.kind === "character") ingestion.initializeBaseline(bank.scope.characterId);
   }
-  const retention = startSweeper({ name: "memory-retention", message: "canonical memory retention swept",
-    sweep: engine.retentionSweep, logger: input.logger,
-    enabled: () => engine.authority.authorityEpoch().epochId === input.epochId });
+  // Retention starts only once the binding is published: a draft that fails installation must leave no worker behind.
+  let retention: { stop(): void } | undefined;
+  const start = (): void => {
+    retention ??= startSweeper({ name: "memory-retention", message: "canonical memory retention swept",
+      sweep: engine.retentionSweep, logger: input.logger,
+      enabled: () => engine.authority.authorityEpoch().epochId === input.epochId });
+  };
   const maintenance: AutoMemoryMaintenance = { run: async (characterId, origin) => {
     if (origin === "primary") {
       try { await ingestion.maybeRun({ characterId }); }
@@ -45,7 +49,7 @@ export function createCanonicalLocalSubsystem(input: {
     await tidy.maybeRun(characterId);
   } };
   const writeMemory: MemoryWriteOp = ({ layer, ...request }) => engine.writeEntry({ ...request, type: layer });
-  return { engine, maintenance, memoryFlush: ingestion.flushPort, tidy, writeMemory, stop: retention.stop,
+  return { engine, maintenance, memoryFlush: ingestion.flushPort, tidy, writeMemory, start, stop: () => retention?.stop(),
     captureRun: (characterId: string) => {
       engine.banks(characterId);
       ingestion.initializeBaseline(characterId);

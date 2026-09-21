@@ -1,5 +1,6 @@
 /**
- * INPUT:  operator operation requests, the kind registry, the live Hindsight runtime accessor and the B3 setup service
+ * INPUT:  operator operation requests, the kind registry, the live Hindsight runtime accessor, the B3 setup service and the
+ *         optional Local onboarding service
  * OUTPUT: createMemoryOperationService() — durable admit/execute/observe/settle/cancel with transition fan-out
  * POS:    core/memory/operations — the single operation owner (D-S1-1); every state change is a repo CAS, then onChanged
  */
@@ -10,6 +11,7 @@ import type { Database } from "../../db/sqlite.ts";
 import type { Logger } from "../../logging/logger.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
+import type { LocalOnboardingService } from "../local-onboarding/local-onboarding-service.ts";
 import {
   MemoryOperationRefusal, type MemoryOperationContext, type MemoryOperationKindHandler, type MemoryOperationSettlement,
   type MemoryOperationsRuntime,
@@ -22,6 +24,8 @@ export interface MemoryOperationService {
   list(params: MemoryOperationListParams): MemoryOperation[];
   /** Terminal rows, newest settlement first, for the composite status read. */
   recent(limit: number): MemoryOperation[];
+  /** The newest row of one family, refreshed when still open; the onboarding status derives its actions from it. */
+  latest(family: string): MemoryOperation | undefined;
   cancel(operationId: string): MemoryOperation;
   /** Awaits in-flight settlements; producers are stopped by their own owners (memory runtime, setup deadlines). */
   stop(): Promise<void>;
@@ -31,6 +35,7 @@ export interface MemoryOperationServiceInput {
   db: Database;
   live(): MemoryOperationsRuntime | null;
   setup: HindsightSetupService;
+  local?: LocalOnboardingService;
   bootId: string;
   onChanged(operation: MemoryOperation): void;
   logger: Logger;
@@ -46,10 +51,12 @@ interface Owner {
 
 export function createMemoryOperationService(input: MemoryOperationServiceInput): MemoryOperationService {
   const now = input.now ?? (() => new Date().toISOString());
+  const repo = input.repo ?? createMemoryOperationRepo(input.db, now);
   const owner: Owner = {
-    repo: input.repo ?? createMemoryOperationRepo(input.db, now), kinds: input.kinds ?? MEMORY_OPERATION_KINDS,
-    ctx: { live: input.live, setup: input.setup, now }, input, inflight: new Set(),
+    repo, kinds: input.kinds ?? MEMORY_OPERATION_KINDS,
+    ctx: { live: input.live, setup: input.setup, local: input.local, lookup: (operationId) => repo.get(operationId), now }, input, inflight: new Set(),
   };
+  observeBoot(owner);
   // A previous process cannot report what happened to its open rows; unknown stays unknown (D-S1-3).
   for (const operation of owner.repo.reconcileForeign(input.bootId)) input.onChanged(operation);
   return {
@@ -57,9 +64,23 @@ export function createMemoryOperationService(input: MemoryOperationServiceInput)
     status: (operationId) => refresh(owner, requireOperation(owner, operationId)),
     list: (params) => list(owner, params),
     recent: (limit) => owner.repo.listRecent(limit),
+    latest: (family) => { const row = owner.repo.latestInFamily(family); return row ? refresh(owner, row) : undefined; },
     cancel: (operationId) => cancel(owner, operationId),
     stop: async () => { while (owner.inflight.size > 0) await Promise.allSettled([...owner.inflight]); },
   };
+}
+
+/** Kinds with durable producer receipts reconstruct proven outcomes before the generic fallback; observation never dispatches work. */
+function observeBoot(owner: Owner): void {
+  for (const operation of owner.repo.listForeign(owner.input.bootId)) {
+    const handler = memoryOperationHandler(owner.kinds, operation.kind);
+    let settlement: MemoryOperationSettlement | null = null;
+    try { settlement = handler.observeBoot?.(operation, owner.ctx) ?? null; }
+    catch (error) {
+      owner.input.logger.child({ mod: "memory-operations" }).warn({ operationId: operation.operationId, err: error instanceof Error ? error.name : "unknown" }, "boot observation failed; row stays unknown");
+    }
+    if (settlement) settle(owner, operation.operationId, settlement);
+  }
 }
 
 function submit(owner: Owner, request: MemoryOperationRequest): MemoryOperation {
@@ -84,9 +105,13 @@ function submit(owner: Owner, request: MemoryOperationRequest): MemoryOperation 
 
 async function execute(owner: Owner, handler: MemoryOperationKindHandler, input: { operationId: string; request: MemoryOperationRequest; producer: MemoryOperationProducerRef }): Promise<void> {
   const { operationId } = input;
-  const running = () => transition(owner, operationId, (current) => current.state === "admitted" ? { state: "running" } : null);
+  const claim = () => transition(owner, operationId, (current) => current.state === "admitted" ? { state: "running" } : null);
   try {
-    const settlement = await handler.execute({ request: input.request, producer: input.producer, ctx: owner.ctx, running });
+    const settlement = await handler.execute({
+      request: input.request, producer: input.producer, ctx: owner.ctx, running: () => { claim(); },
+      tryClaim: () => claim()?.state === "running",
+      checkpoint: (producer) => { transition(owner, operationId, (current) => current.state === "running" ? { producer } : null); },
+    });
     if (settlement) settle(owner, operationId, settlement);
   } catch (error) {
     owner.input.logger.child({ mod: "memory-operations" }).error({ operationId, err: error instanceof Error ? error.name : "unknown" }, "memory operation execution threw");

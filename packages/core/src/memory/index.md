@@ -30,7 +30,7 @@
 - episodic-writer.ts — auto-write path 2: segment -> 0..3 entries in the layer the model chooses, write-gated (silence is the normal outcome), importance clamped below the pin line
 - flush-writer.ts — auto-write path 3: pre-compaction flush as one SILENT tool-enabled turn on the BACKGROUND toolset (prose discarded, successful-write count returned); optionally runs through the shared Utility Slot and shares the write-convention fragments
 - auto-memory.ts — shared detached per-Character maintenance chain plus Legacy provider pass: episodic → ordinary flush → tidy → provider-neutral Compaction; dynamic provider retirement cannot create a second chain
-- memory-flush-port.ts — typed pre-retirement Memory Provider boundary: fenced Legacy watermark and actual Canonical Local ingestion receipts, unavailable Hindsight failure, and switchable activation binding
+- memory-flush-port.ts — typed pre-retirement Memory Provider boundary: fenced Legacy watermark and actual Canonical Local ingestion receipts, unavailable Hindsight failure
 - tidy-report.ts — the tidy pass's deterministic health report (rc five-class contract): facts flat (missing trigger, over-budget incl. block used/limit beside full content), hypotheses as questions (stale, near-duplicate) + the new-writes slice carrying the misfiled question; per-class caps with dropped counts stated; observed content fenced; never prescribes an action
 - tidy-tools.ts — the maintenance verbs the foreground agent never gets: memory_reinforce / memory_archive_supersede (the sanctioned promotion route) / memory_set_disclosure / memory_refile / block_rethink (background blocks only) / memory_finish_edits (the structural terminal); never-throw envelopes
 - tidy-pass.ts — the model-led maintenance pass: write-count trigger (maybeRun) + operator runNow over one execute path; clean store = zero model calls; system-reminder input framing; six refinement principles + do-nothing permission + imported R10 voice; stopWhen finish-tool/step-cap; watermark advances only on success; tidy event + counts-only log line
@@ -38,7 +38,7 @@
 - local-memory-provider.ts — structured Local provider with completed-only retain, applied/unchanged CAS mutations, and sparse recall
 - canonical-local-runtime.ts — canonical Local engine with real maintenance, observed writes and admission-bound tools/recall/prompt capture
 - canonical-local-banks.ts — preserves existing Local Bank identities and initializes scopes for a new Character
-- canonical-local-subsystem.ts — Local ingestion, precise source witnesses, tidy, retention and pre-retirement flush on the shared Utility Slot
+- canonical-local-subsystem.ts — Local ingestion, precise source witnesses, tidy, retention and pre-retirement flush on the shared Utility Slot; built as a draft, retention starts only via start() after binding publication
 - canonical-ingestion-source.ts — exact primary commit witnesses, sanitized original conversational spans and reversible source metadata
 - canonical-ingestion-model.ts — one Write Gate and source-grounded Local extraction through the process Utility Slot
 - canonical-ingestion-plan.ts — durable gate/extraction plan and stable routed write identities
@@ -50,8 +50,9 @@
 - canonical-observed-write.ts — trusted image-description writes via the Local provider with observed provenance and automatic visibility limits
 - canonical-memory-view.ts — revision-bearing opaque references and canonical row projection for reused T5 policy/report code
 - canonical-memory-assembly.ts — admission-frozen canonical prompt data, complete pinned relationships, deliberate profile promotion, intention selection and observed fences
-- runtime-selector.ts — marker-first Legacy/Local/Hindsight routing; committed canonical selection retires Legacy before construction and remains unavailable on failure
-- runtime-composition.ts — selected Local/Hindsight/Legacy subsystem, one Utility Slot, provider-independent Compaction, caller-cancellable Run capture, explicit Legacy retirement, awaited process shutdown, and the operations() live accessor for the operation owner
+- runtime-selector.ts — marker-first Legacy/Local/Hindsight routing; committed canonical selection retires Legacy before construction and remains unavailable on failure; observable unavailable Local boot and same-epoch recoverCanonical that never re-activates
+- local-runtime-binding.ts — the ONE published Local binding: draft → install → publish → start, disposal plus unavailable state on any failure, current() accessor and the pure binding snapshot (no captureRun/Bank probe)
+- runtime-composition.ts — selected Local/Hindsight/Legacy subsystem, one Utility Slot, provider-independent Compaction whose flush resolves from the published binding per call, caller-cancellable Run capture, explicit Legacy retirement, trusted primary custody, bindingSnapshot()/recoverLocalBinding(), awaited process shutdown, and the operations() live accessor for the operation owner
 - authority-aware-legacy-surfaces.ts — mutable authority wrappers that retire legacy auto-memory, tidy, and direct writes after canonical activation
 - memory-coordinator.ts — provider-neutral authority dispatch and immutable Run capture; rejects registry/operation/stable-capability drift while allowing honest recall vector-health changes
 - memory-capability-snapshot.ts — detached immutable capabilities and one canonical Run/tool/coordinator digest; keeps dynamic vector health separate from stable operation identity
@@ -60,7 +61,8 @@
 - pending-memory-safety.ts — bounded canonical outbox payload admission with credential and hidden-envelope refusal
 - pending-memory-writer.ts — explicit canonical outage-write admission with captured authority/Bank identity and unchanged replay timestamps
 - hindsight/ — Hindsight setup/cutover clients and offline-testable replica sync/reconciliation/recovery; runtime authority composition remains separate
-- operations/ — the durable memory operation owner (Stage 1): kind registry over the B3 setup service and B5 scheduler, restart reconciliation, and the composite memory.authority.status read
+- operations/ — the durable memory operation owner (Stage 1 + 2a): kind registry over the B3 setup service, B5 scheduler and the Local onboarding service; per-kind boot observation before restart reconciliation; the composite memory.authority.status read
+- local-onboarding/ — the Local onboarding service (Stage 2a): the only caller of the B2 runner mutations, read projections (discovered run, exceptions, runtime availability), the memory.onboarding.status composite with server-derived actions, and shutdown checkpointing
 - canonical-tools/ — admission-bound capability-filtered canonical tool adapters and non-advertised compatibility aliases
 - image-description-writer.ts — thin, DELETABLE image→text bridge (#17 decision 6, D28): VLM describes a turn's images, PII-scrubs the text, writes ONE episode via the existing store path with origin "observed" (the marker the render sites fence on — D47); detached, warn+drop
 - memory-recall-selection.ts — policy-filtered Canonical hits and separate unconfirmed source/mutation intents

@@ -1,6 +1,6 @@
 /**
  * INPUT:  TimelineRepo, append/remove sinks, optional token budget + SummaryReader, and wall/backstop observers
- * OUTPUT: append/remove APIs with exact optional commit receipts, plus one project() source for history/pressure
+ * OUTPUT: the shared conversation writer plus one project() source for history/pressure
  * POS:    core/agents — names-only persistence and the Character-scoped Replay View projection boundary (ADR 0008)
  */
 import type { ModelMessage } from "ai";
@@ -8,9 +8,10 @@ import type { TimelineEntry } from "@taki/shared";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import { estimateMessageTokens } from "../memory/token-estimator.ts";
 import { selectWindow } from "./context-window.ts";
+import { createConversationWriter, type ConversationWriter, type ConversationWriterDeps } from "./conversation-writer.ts";
 import { foldUnderPressure } from "./replay-folds.ts";
 import { loadReplaySource, REPLAY_SOURCE_BACKSTOP, type ReplaySource } from "./replay-source-loader.ts";
-import { toEntryInput, toModelMessage, toUserEntryInput, type TurnEntryInput, type TurnMessage, type UserImageInput } from "./turn-mapping.ts";
+import { toModelMessage } from "./turn-mapping.ts";
 
 // Legacy no-budget compatibility only. Measured production replay uses the separately observable source backstop.
 export const REPLAY_WINDOW = 200;
@@ -58,20 +59,7 @@ export interface SourceBackstopHit {
   newestLoadedSeq?: number;
 }
 
-export interface ConversationStore {
-  /**
-   * Persists the user turn and RETURNS the committed entry; images (#17) add image parts (mediaType + ref) — no
-   * images = a legacy text-only row. The seq is returned so a cancel-before-reply can retract exactly this row.
-   */
-  appendUser(characterId: string, text: string, images?: UserImageInput[]): TimelineEntry;
-  appendAssistant(characterId: string, text: string, onCommitted?: (entry: TimelineEntry) => void): void;
-  /**
-   * Persists a whole turn's response tail (names-only assistant tool-call parts + tool-result messages + final text),
-   * oldest-first, as returned by `result.responseMessages` — the fix for cross-turn tool-record loss (D1 #1).
-   */
-  appendTurn(characterId: string, messages: TurnMessage[], onCommitted?: (entry: TimelineEntry) => void): void;
-  /** Deletes one row by seq (cancel-retract) + fires onRemove; single Workspace/DB writer (invariant 2). */
-  removeEntry(characterId: string, seq: number): void;
+export interface ConversationStore extends ConversationWriter {
   /** The replay window as AI SDK messages, oldest-first (summary head first when one is substituted — R3). */
   history(characterId: string): ModelMessage[];
   /**
@@ -86,12 +74,8 @@ export interface ConversationStore {
   project(characterId: string): ReplayProjection;
 }
 
-export interface ConversationStoreDeps {
+export interface ConversationStoreDeps extends ConversationWriterDeps {
   repo: TimelineRepo;
-  /** Fired after each committed append; the server fans it out as timeline.appended (write→event colocation). */
-  onAppend?: (entry: TimelineEntry) => void;
-  /** Fired after a retract delete; the server fans it out as timeline.removed (mirrors onAppend). */
-  onRemove?: (ref: { characterId: string; seq: number }) => void;
   /**
    * Token budget (estimator units) for replayed history; production wires calibrator.effectiveWindow ×
    * historyRatio. Absent = legacy REPLAY_WINDOW-only behavior (message-count window, byte-identical).
@@ -112,11 +96,6 @@ export interface ConversationStoreDeps {
 
 export function createConversationStore(deps: ConversationStoreDeps): ConversationStore {
   const { repo, onAppend, onRemove, window, summaries, onWallHit, onSourceBackstopHit, source } = deps;
-  const commit = (characterId: string, input: TurnEntryInput): TimelineEntry => {
-    const entry = repo.append({ characterId, ...input });
-    onAppend?.(entry);
-    return entry;
-  };
   const wallWarnedAt = new Map<string, number>();
   const reportWallHit = (hit: WallHit): void => {
     if (!onWallHit || (wallWarnedAt.get(hit.characterId) ?? 0) >= hit.windowStartSeq) return;
@@ -136,22 +115,7 @@ export function createConversationStore(deps: ConversationStoreDeps): Conversati
     return { messages: view.head === null ? messages : [view.head, ...messages], windowStartSeq: view.windowStartSeq, measurement: view.measurement };
   };
   return {
-    // No images = toUserEntryInput returns the legacy `{role:"user", content}` row (byte-identical to before #17).
-    appendUser: (characterId, text, images = []) => commit(characterId, toUserEntryInput(text, images)),
-    appendAssistant: (characterId, text, onCommitted) => {
-      const entry = commit(characterId, { role: "assistant", content: text });
-      onCommitted?.(entry);
-    },
-    appendTurn: (characterId, messages, onCommitted) => {
-      for (const message of messages) {
-        const input = toEntryInput(message);
-        if (input) { const entry = commit(characterId, input); onCommitted?.(entry); }
-      }
-    },
-    removeEntry: (characterId, seq) => {
-      repo.deleteEntry(characterId, seq);
-      onRemove?.({ characterId, seq });
-    },
+    ...createConversationWriter({ repo, onAppend, onRemove }),
     // Legacy text-only rows reconstruct via content; tool calls replay with empty input placeholders, never raw args.
     history: (characterId) => {
       return project(characterId).messages;

@@ -50,3 +50,4 @@
 - 046-hindsight-runtime-admission.ts — durable last-verified runtime admission for truthful offline capability reporting
 - 047-hindsight-memory-writes.ts — durable original requests, exact mutation targets and stable whole-operation results
 - 048-memory-operations.ts — Core-minted durable memory operation ledger; partial unique index = single-flight per family; owner boot id drives restart reconciliation
+- 049-local-onboarding.ts — additive Local onboarding storage: migration candidates/supersession, run-scoped Block plans, source effect proofs, primary group/member custody

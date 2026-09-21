@@ -71,6 +71,7 @@
 - canonical-memory-maintenance-ingestion.ts — atomic original-source/new-fact/duplicate-proof batches and receipt reads
 - canonical-ingestion-repo.ts — durable fixed-span Write Gate/extraction state, per-Bank receipts and atomic completion
 - canonical-ingestion-source-repo.ts — exact primary commit evidence, epoch/span assignment, persistent eligibility baseline and guarded retirement coverage
+- primary-memory-custody-repo.ts — trusted primary group/member custody: candidate-attached group open, atomic append+member enrolment, whole-group witness finalization (closed-empty / header-only Legacy), silent retraction, dead/settled reconciliation and candidate adoption/relocation with consumption refusal
 - canonical-memory-maintenance-copy.ts — same-Bank copies and complete cross-Bank support/source remapping with retirement
 - canonical-memory-maintenance-retention.ts — activity-only rolling deletion with source cleanup and historical identity retention
 - canonical-memory-maintenance-fixtures.ts — owned SQLite-only canonical test fixtures; no runtime wiring
@@ -98,7 +99,7 @@
 - hindsight-ingestion-source-repo.ts — durable source witnesses, immutable eligibility baseline and claim/coverage checks
 - hindsight-memory-write-contract.ts — lossless internal parent-intent state and an immutable operation identity
 - hindsight-memory-write-repo.ts — original target capture, independent child evidence, stable full-operation receipts and the count-only pending parent-write read
-- memory-operation-repo.ts — durable memory_operations ledger: admitted insert (partial-unique-index single flight), state-CAS transition, active/recent reads, restart reconciliation by owner boot id
+- memory-operation-repo.ts — durable memory_operations ledger: admitted insert (partial-unique-index single flight), state-CAS transition, active/recent/latest-in-family reads, foreign-row listing for per-kind boot observation, restart reconciliation by owner boot id
 - hindsight-memory-write-storage.ts — independently hashed byte-preserving state reads and CAS replacement
 - hindsight-policy-work-contract.ts — exact durable work identities, lease/result schemas and immutable proposal validation
 - hindsight-policy-work-repo.ts — durable claims, original prompt/results, explicit retry and terminal queue progress

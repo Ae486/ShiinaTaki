@@ -64,7 +64,7 @@ export function hindsightRuntimeFixture(input: { mode?: "hindsight" | "local" | 
     bankScope: (bankId) => banks.find((bank) => bank.scope.bankId === bankId)!.bankScope });
   if (mode === "hindsight" && input.seed !== false) for (const bank of banks) seedReplica(replica, bank);
   const timeline = createTimelineRepo(db); const summaries = createSummaryRepo(db); const owners: Array<() => Promise<void>> = [];
-  const boot = { db, dataDir, promptDir: join(dataDir, "prompt"), model, timeline, summaries, env: {}, logger,
+  const boot = { db, dataDir, promptDir: join(dataDir, "prompt"), model, timeline, summaries, env: {}, logger, bootId: "fixture-boot",
     windowStart: () => 1, estimatedTokens: () => 0, budget: () => 100_000, compact: { triggerRatio: 0.8, keepMessages: 3 } };
   let closed = false;
   return { ...boot, config, source, secrets, banks, replica, authority, setup, remote, logs,

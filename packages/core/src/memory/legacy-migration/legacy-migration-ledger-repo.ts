@@ -14,9 +14,15 @@ export interface LedgerSourceInput {
 }
 export interface LedgerResultInput { memoryId: string; revision: number; payloadHash: string }
 
+export interface LeaseRequest { runId: string; owner: string; now: string; expiresAt: string; recoverFailed?: boolean }
+
 export interface LegacyMigrationLedgerRepo {
   createRun(input: MigrationRunInput): void;
-  acquireLease(input: { runId: string; owner: string; now: string; expiresAt: string }): Lease;
+  /**
+   * `recoverFailed` moves an interrupted failed run back to running in the same claim statement. Callers reject a
+   * superseded run through `requireMigrationRun` first; the ledger stays usable against pre-049 lineage fixtures.
+   */
+  acquireLease(input: LeaseRequest): Lease;
   renewLease(input: { lease: Lease; now: string; expiresAt: string }): void;
   releaseLease(input: { lease: Lease; now: string }): void;
   addSource(input: LedgerSourceInput): void;
@@ -49,13 +55,24 @@ function createRun(db: Database, input: MigrationRunInput): void {
     .run({ run: input.runId, snapshot: input.snapshotId, epoch: input.epochId, now: input.now });
 }
 
-function acquireLease(db: Database, input: { runId: string; owner: string; now: string; expiresAt: string }): Lease {
+function acquireLease(db: Database, input: LeaseRequest): Lease {
   let fence = 0;
+  const statuses = input.recoverFailed ? "('running','ready','failed')" : "('running','ready')";
   db.transaction(() => {
-    const result = db.prepare(`UPDATE memory_migration_runs SET lease_owner=:owner,lease_fence=lease_fence+1,
-      lease_expires_at=:expires,updated_at=:now WHERE run_id=:run AND status IN ('running','ready')
-      AND (lease_owner IS NULL OR lease_expires_at<=:now OR lease_owner=:owner)`)
-      .run({ owner: input.owner, expires: input.expiresAt, now: input.now, run: input.runId });
+    let result: { changes: number };
+    try {
+      result = db.prepare(`UPDATE memory_migration_runs SET lease_owner=:owner,lease_fence=lease_fence+1,
+        lease_expires_at=:expires,updated_at=:now,
+        status=CASE WHEN status='failed' THEN 'running' ELSE status END,
+        phase=CASE WHEN status='failed' THEN 'staged' ELSE phase END
+        WHERE run_id=:run AND status IN ${statuses}
+        AND (lease_owner IS NULL OR lease_expires_at<=:now OR lease_owner=:owner)`)
+        .run({ owner: input.owner, expires: input.expiresAt, now: input.now, run: input.runId });
+    } catch (error) {
+      // The one-live-run index refuses reviving a failed run while another run is live.
+      if (error instanceof Error && /idx_memory_migration_one_live_run/.test(error.message)) throw new Error("MIGRATION_BUSY", { cause: error });
+      throw error;
+    }
     if (result.changes !== 1) throw new Error("LEASE_LOST");
     fence = Number(db.prepare("SELECT lease_fence FROM memory_migration_runs WHERE run_id=:run").get({ run: input.runId })?.lease_fence ?? 0);
   });

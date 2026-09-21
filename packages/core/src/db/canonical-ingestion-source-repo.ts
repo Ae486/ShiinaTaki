@@ -193,6 +193,14 @@ function assertNoMissingPrimary(db: Database, input: SourceRange): void {
   if (missing) throw new Error("MEMORY_INGESTION_SOURCE_UNPROVEN");
 }
 
+/** Exact members of a still-open trusted group at or below the target are unfinalized sources; retirement waits for them. */
+function assertNoOpenCustody(db: Database, input: SourceRange): void {
+  const open = db.prepare(`SELECT 1 AS open FROM primary_memory_members m JOIN primary_memory_groups g ON g.group_id=m.group_id
+    WHERE g.character_id=:character AND g.state='open' AND m.timeline_seq<=:through LIMIT 1`)
+    .get({ character: input.characterId, through: input.throughSeq });
+  if (open) throw new Error("MEMORY_INGESTION_INCOMPLETE");
+}
+
 function verifySource(db: Database, input: IngestionScope & { source: SanitizedCommittedSpan }, spanId: string | null): void {
   assertCanonicalIngestionScope(db, input);
   assertNoMissingPrimary(db, { ...input, throughSeq: input.source.throughSeq });
@@ -225,6 +233,7 @@ function advanceCoverage(db: Database, input: SourceRange & { now: string }): nu
   return canonicalMemoryAtomic(db, () => {
     assertCanonicalIngestionScope(db, input);
     assertNoMissingPrimary(db, input);
+    assertNoOpenCustody(db, input);
     const pending = db.prepare(`SELECT 1 AS pending FROM canonical_memory_primary_commits p
       LEFT JOIN canonical_memory_ingestion_spans s ON s.authority_epoch_id=p.authority_epoch_id
       AND s.character_id=p.character_id AND s.span_id=p.ingestion_span_id

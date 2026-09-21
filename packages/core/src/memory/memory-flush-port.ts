@@ -1,6 +1,6 @@
 /**
  * INPUT:  a compaction retirement range and the active Memory Provider flush contract
- * OUTPUT: typed pre-retirement outcomes plus receipt-guarded Legacy/Local adapters and a switchable binding
+ * OUTPUT: typed pre-retirement outcomes plus receipt-guarded Legacy/Local adapters and the unavailable Hindsight port
  * POS:    core/memory — provider boundary used by Core-owned Compaction; never owns summary or Timeline state
  */
 import type { MemoryAutoRepo } from "../db/memory-auto-repo.ts";
@@ -23,11 +23,6 @@ export type MemoryFlushOutcome =
 
 export interface MemoryFlushPort {
   prepareRetirement(input: MemoryFlushRequest): Promise<MemoryFlushOutcome>;
-}
-
-export interface MemoryFlushBinding {
-  port: MemoryFlushPort;
-  bind(next: MemoryFlushPort): void;
 }
 
 export function createLegacyMemoryFlushPort(input: {
@@ -78,16 +73,6 @@ export function unavailableHindsightMemoryFlushPort(): MemoryFlushPort {
       status: "permanent_unavailable",
       code: "HINDSIGHT_RUNTIME_UNAVAILABLE",
     }),
-  };
-}
-
-export function createMemoryFlushBinding(initial: MemoryFlushPort): MemoryFlushBinding {
-  let current = initial;
-  return {
-    port: { prepareRetirement: (input) => current.prepareRetirement(input) },
-    bind(next) {
-      current = next;
-    },
   };
 }
 

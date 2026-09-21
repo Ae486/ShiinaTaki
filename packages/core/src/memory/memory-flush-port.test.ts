@@ -7,9 +7,7 @@ import { createMemoryAuthorityFence } from "./legacy-migration/memory-authority-
 import {
   canonicalLocalMemoryFlushPort,
   createLegacyMemoryFlushPort,
-  createMemoryFlushBinding,
   unavailableHindsightMemoryFlushPort,
-  type MemoryFlushPort,
 } from "./memory-flush-port.ts";
 
 const fixtures: CompanionFixture[] = [];
@@ -74,19 +72,6 @@ describe("MemoryFlushPort", () => {
       status: "permanent_unavailable",
       code: "HINDSIGHT_RUNTIME_UNAVAILABLE",
     });
-  });
-
-  it("replaces the active adapter so a retired Legacy writer is no longer reachable", async () => {
-    const legacy = vi.fn(async () => ({ status: "success", writes: 0, throughSeq: 3 }) as const);
-    const canonical = vi.fn(async () => ({ status: "not_required", reason: "canonical_local_records_are_authoritative" }) as const);
-    const binding = createMemoryFlushBinding({ prepareRetirement: legacy });
-
-    await binding.port.prepareRetirement(request);
-    binding.bind({ prepareRetirement: canonical } satisfies MemoryFlushPort);
-    await binding.port.prepareRetirement({ ...request, throughSeq: 4 });
-
-    expect(legacy).toHaveBeenCalledOnce();
-    expect(canonical).toHaveBeenCalledOnce();
   });
 
   it("holds the authority fence for the full Legacy flush before activation can retire it", async () => {

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -11,6 +11,7 @@ import { createTimelineRepo } from "../db/timeline-repo.ts";
 import { createCaptureLogger } from "../testing/capture-logger.ts";
 import { scriptedGenerateModel, type ScriptStep } from "../testing/mock-language-model.ts";
 import { rmTempDir } from "../testing/rm-temp.ts";
+import * as canonicalSubsystem from "./canonical-local-subsystem.ts";
 import { composeMemoryRuntime } from "./runtime-composition.ts";
 
 interface Opened {
@@ -20,13 +21,14 @@ interface Opened {
 
 const opened: Opened[] = [];
 afterEach(() => {
+  vi.restoreAllMocks();
   for (const item of opened.splice(0)) {
     item.db.close();
     rmTempDir(item.dataDir);
   }
 });
 
-async function boot(canonical: boolean, beforeCompose?: (db: Database) => void) {
+async function boot(canonical: boolean, beforeCompose?: (db: Database) => void, capture = true) {
   const dataDir = mkdtempSync(join(tmpdir(), "taki-runtime-composition-"));
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS });
   opened.push({ db, dataDir });
@@ -46,6 +48,7 @@ async function boot(canonical: boolean, beforeCompose?: (db: Database) => void) 
   const runtime = composeMemoryRuntime({
     db,
     dataDir,
+    bootId: "boot-a",
     promptDir: join(dataDir, "prompt"),
     model,
     timeline,
@@ -57,7 +60,7 @@ async function boot(canonical: boolean, beforeCompose?: (db: Database) => void) 
     env: {},
     logger,
   });
-  await runtime.captureRun("taki");
+  if (capture) await runtime.captureRun("taki");
   return { db, timeline, summaries, model, records, runtime, epochId: epoch.epochId };
 }
 
@@ -160,5 +163,35 @@ describe("provider-independent Compaction composition", () => {
       state: "abandoned",
       failure_code: "LEASE_EXPIRED",
     });
+  });
+
+  it("boots with an observable unavailable Local binding and a failing flush when construction fails", async () => {
+    vi.spyOn(canonicalSubsystem, "createCanonicalLocalSubsystem").mockImplementationOnce(() => { throw new Error("MEMORY_AUTHORITY_MISMATCH"); });
+    const fixture = await boot(true, undefined, false);
+    expect(fixture.runtime.bindingSnapshot()).toMatchObject({ selection: "canonical-local", selectedEpochId: fixture.epochId,
+      binding: { kind: "unavailable", epochId: fixture.epochId, code: "MEMORY_AUTHORITY_MISMATCH" }, lifetime: "running", flush: "failing" });
+    await expect(fixture.runtime.captureRun("taki")).rejects.toThrow("MEMORY_INTEGRITY_ERROR");
+    expect(() => fixture.runtime.writeMemory({ characterId: "taki", layer: "profile", content: "no fallback", importance: 6 })).toThrow("MEMORY_INTEGRITY_ERROR");
+    expect(() => fixture.runtime.memory.createTools("taki")).toThrow("MEMORY_INTEGRITY_ERROR");
+    for (let seq = 1; seq <= 10; seq += 1) fixture.timeline.append({ characterId: "taki", role: "user", content: `m${seq}` });
+    fixture.runtime.recordPrimaryCommitted({ characterId: "taki", entries: [] });
+    await fixture.runtime.compaction.maybeRun("taki");
+    expect(fixture.db.prepare("SELECT failure_code FROM conversation_compaction_operations").get()?.failure_code).toBe("MEMORY_FLUSH_FAILED");
+    expect(fixture.model.doGenerateCalls).toHaveLength(0);
+    // A marker without its joined activation receipt is corrupt state: recovery fails closed and never constructs.
+    expect(() => fixture.runtime.recoverLocalBinding(fixture.epochId)).toThrow("MEMORY_INTEGRITY_ERROR");
+    expect(fixture.runtime.bindingSnapshot().binding.kind).toBe("unavailable");
+    await expect(fixture.runtime.stop()).resolves.toBeUndefined();
+    expect(fixture.runtime.bindingSnapshot()).toMatchObject({ lifetime: "stopped", flush: "failing" });
+  });
+
+  it("refuses Local binding recovery while Legacy is selected and never creates an epoch", async () => {
+    const fixture = await boot(false);
+    const epochs = () => fixture.db.prepare("SELECT count(*) AS n FROM canonical_memory_authority_epochs").get()?.n;
+    const before = epochs();
+    expect(() => fixture.runtime.recoverLocalBinding(fixture.epochId)).toThrow("MEMORY_AUTHORITY_MISMATCH");
+    expect(fixture.runtime.bindingSnapshot()).toMatchObject({ selection: "legacy-markdown", binding: { kind: "none" } });
+    expect(epochs()).toBe(before);
+    expect(fixture.runtime.selected.legacy).not.toBeNull();
   });
 });
