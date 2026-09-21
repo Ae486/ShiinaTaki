@@ -1,0 +1,30 @@
+{
+  "id": "local-onboarding-operation",
+  "name": "local-onboarding-operation",
+  "title": "Local-only onboarding operation: guided new/legacy workspace path to Canonical Local",
+  "description": "Hindsight closure Stage 2a (PR05): explicit Local-only onboarding over the B2 producers as durable memory operations (preview/exclusions/stage/resume/verify/activate) for empty and supported legacy workspaces, plus a minimal guided Home path; Local chat/retain/recall/maintenance without Hindsight or vectors.",
+  "status": "completed",
+  "dev_type": null,
+  "scope": "memory-local-onboarding",
+  "package": null,
+  "priority": "P2",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-09-19",
+  "completedAt": "2026-09-22",
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "08-09-hindsight-memory-provider",
+  "relatedFiles": [],
+  "notes": "2026-09-20: resumed session 01a0b444-0f71-7492-9ddf-c2cb47553c23 on main 516e151 and rebound the existing task to codex_01a0be83-0c6c-7402-b989-83d7614fc442. Reviewed PRD/design/implement and 20-entry context manifests remain authoritative; planning review closed six bounded contracts. Astra s2a_backend_resume owns Core/Shared waves A-C; s2a_home_resume owns Desktop wave D after protocol freeze; leader owns task/spec/docs and final evidence. Prior Shared edits are unverified WIP. Implementation and validation remain in progress, not accepted.\n2026-09-21: recovered the requested original session from its persisted transcript and rebound the existing task to codex_01a0c1ca-f090-7230-8822-4fb89e158913 on main 516e151. Astra s2a_backend owns Core/Shared waves A-C; Astra s2a_home owns Desktop wave D after the verified Shared contract freeze. Leader owns task/spec/handoff evidence. Shared typecheck and seven focused schema tests pass; implementation and full validation remain pending.\n2026-09-21 13:00: Claude leader session 2462d73f took over on main 516e151 (Codex workers idle since 10:50). Verified: Shared 516 and Desktop 600 tests green, Desktop wave D complete against the frozen contract; Core wave A partial and not compiling (registry/SqlRow errors, 3 lint errors), waves B-C not started, nothing wired into runner/chat-agent/composition/main. Remaining backend work dispatched as one serial trellis-implement plus one formal check. No acceptance claimed.",
+  "meta": {
+    "stage": "S2a",
+    "matrix_entries": "A03,A09",
+    "parent_plan": ".trellis/tasks/09-14-hindsight-integration-completeness-audit/research/plan-review-2026-09-18.md"
+  }
+}

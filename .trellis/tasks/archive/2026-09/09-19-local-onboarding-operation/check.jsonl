@@ -1,0 +1,20 @@
+{"file":".trellis/spec/backend/index.md","reason":"Backend conventions and final gates"}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"SQLite single writer and transactions"}
+{"file":".trellis/spec/backend/sqlite-migration-lineage.md","reason":"Immutable additive migration and reopen tests"}
+{"file":".trellis/spec/backend/sqlite-transaction-isolation.md","reason":"Atomic source and primary persistence"}
+{"file":".trellis/spec/backend/canonical-local-memory-runtime.md","reason":"Local exact sources, maintenance and binding"}
+{"file":".trellis/spec/backend/memory-operations.md","reason":"Existing owner, family CAS and Stage 1 compatibility"}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Closed error and retry truth"}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Operator authentication and subscriptions"}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Headers, indexes, lint and real boot"}
+{"file":".trellis/spec/frontend/index.md","reason":"Frontend conventions and gates"}
+{"file":".trellis/spec/frontend/reactive-read-models.md","reason":"Push, visibility/generation, no polling/replay"}
+{"file":".trellis/spec/frontend/operator-connection-recovery.md","reason":"Client generation and deadlines"}
+{"file":".trellis/spec/frontend/state-management.md","reason":"Core truth and disposable views"}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Operations page patterns"}
+{"file":".trellis/spec/frontend/quality-guidelines.md","reason":"Frontend quality"}
+{"file":".trellis/spec/guides/source-grounding-guide.md","reason":"Resolve unknowns from source"}
+{"file":".trellis/tasks/09-19-local-onboarding-operation/research/stage2a-context.md","reason":"Compact selected contracts and source index; open full research sections as needed without injection truncation"}
+{"file":".trellis/tasks/09-19-local-onboarding-operation/research/stage2a-home.md","reason":"Verified S2a contracts and verification requirements"}
+{"file":".trellis/tasks/09-19-local-onboarding-operation/research/contract-review-2026-09-20.md","reason":"Verified S2a contracts and verification requirements"}
+{"file":".trellis/tasks/09-14-hindsight-integration-completeness-audit/research/overall-grill-2026-09-19.md","reason":"Current owner direction and preserved scope"}
