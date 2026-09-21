@@ -1464,3 +1464,47 @@ Core-owned durable operation owner (setup validate/apply, manual replica sync), 
 
 - Stage 2: Local-only onboarding, existing-instance first activation (PR03 source custody, PR05 Local-only slice), active Bank/configuration lifecycle
 - Scoped grill for PR02 before Stage 3; U1 before Stage 4
+
+
+## Session 32: Hindsight closure Stage 2a: durable Local onboarding
+
+**Date**: 2026-09-22
+**Task**: Hindsight closure Stage 2a: durable Local onboarding
+**Branch**: `main`
+
+### Summary
+
+Took over the Codex-led S2a tree, completed Core waves A-C with one implementer per wave, formal check fixed a swallowed repair failure, archived the task.
+
+### Main Changes
+
+- Shared: local.onboard.* arms, memory.onboarding.* contracts, MEMORY_OPERATION_REQUIRED refusal
+- Core: B2 complete-inventory candidates, isolated replacement, pure verify, primary custody in Chat path, one published Local binding, local operation kinds/service/methods, migration 049
+- Desktop: Local onboarding card/controller/hook on the Operations page
+- Specs: memory-local-onboarding.md, memory-operations.md, home-window.md; D85/D86 deferred
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `b095477` | (see git log) |
+| `93febe4` | (see git log) |
+| `dfe994e` | (see git log) |
+| `4224b7d` | (see git log) |
+| `6d60004` | (see git log) |
+| `4b225b8` | (see git log) |
+
+### Testing
+
+- [OK] pnpm typecheck 5/5; pnpm lint clean; Shared 56/516, Core 392/3152, Desktop 108/600; Desktop build; isolated boot smoke on ports 8304/8307 with migrations 1..49 and 0 external fetches
+- [OK] Known Hindsight suite load flake (5000 ms timeout under full parallel load, passes in isolation) left untouched
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- AC10 owner manual acceptance of the Local onboarding journey
+- Stage 2b 09-19-hindsight-first-activation: re-run PR03 seam research against primary-memory-custody-repo.ts, then plan
+- Stage 2c 09-19-active-bank-lifecycle

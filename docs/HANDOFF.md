@@ -185,11 +185,25 @@ Batches B0-B6 plus the D77/D78 rulings are committed on `main` (through `118d87f
 closure stages S1-S6) and its `research/plan-review-2026-09-18.md` fixes the delivery allocation and the PR01-PR05
 amendments. Stage 1 (durable memory operations, setup recovery, manual sync control, composite
 `memory.authority.status`, Home operations card) is archived as `09-19-hindsight-durable-operations`; its contract is
-`.trellis/spec/backend/memory-operations.md` and its known limits are D84. Stage 2 (Local-only onboarding,
-existing-instance first activation with PR03 source custody, active Bank/configuration lifecycle) is the next work.
-Owner questions still open: PR02 administration custody before Stage 3 and U1 before Stage 4. Under the owner's
+`.trellis/spec/backend/memory-operations.md` and its known limits are D84. Stage 2a (Local-only onboarding over the B2
+producer: complete-inventory candidates, isolated replacement, pure verification, trusted primary custody in the Chat
+path, one published Local runtime binding, `local.onboard.*` operations and the `memory.onboarding.*` Home card) is
+archived as `09-19-local-onboarding-operation` (commits `b095477` shared, `93febe4` core, `dfe994e` ui, `4224b7d` spec);
+its contract is `.trellis/spec/backend/memory-local-onboarding.md`, its deferred items are D85/D86, and the 2026-09-22
+formal check (`research/check-2026-09-22.md` in the archive) proves AC1-AC9 and AC11 — AC10 owner manual acceptance is
+still pending and must be performed by the owner. Next deliveries are Stage 2b `09-19-hindsight-first-activation`
+(PR03 source custody now targets the real `primary-memory-custody-repo.ts`; re-run seam research against it first) and
+Stage 2c `09-19-active-bank-lifecycle`; both exist as PRD skeletons only.
+The owner's latest direction makes grill conditional across the whole task: proceed when no major unresolved
+requirement needs an owner decision; reopen grill for a concrete material issue during development. No currently known
+owner question blocks continuation.
+See `research/overall-grill-2026-09-19.md` under the completeness-audit task. U1 is answered: one normal-switch
+confirmation, then completion after all checks pass; emergency takeover remains separately confirmed. G1's assisted
+administration choice is withdrawn; PR01/PR02 remain engineering work. Earlier mandatory-grill and U1-unanswered notes
+are superseded. Under the owner's
 2026-09-19 autonomy grant the Leader may run the Trellis flow, commit and archive cleanly completed stages without
-per-step consent; manual acceptance is never marked passed and nothing is pushed.
+per-step consent; manual acceptance is never marked passed and nothing is pushed. Implementer dispatch follows the
+plan's wave boundaries (one agent per wave, never finer) with an explicit context-budget brief.
 
 The Hindsight production patch lives under `H:/hindsight` and has no T4 production-file overlap. Later Memory children
 can overlap T4 integration seams. The main merge hotspots are expected to be:

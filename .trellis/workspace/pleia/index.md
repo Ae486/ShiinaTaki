@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 31
-- **Last Active**: 2026-09-19
+- **Total Sessions**: 32
+- **Last Active**: 2026-09-22
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1466 | Active |
+| `journal-1.md` | ~1510 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 32 | 2026-09-22 | Hindsight closure Stage 2a: durable Local onboarding | `b095477`, `93febe4`, `dfe994e`, `4224b7d`, `6d60004`, `4b225b8` | `main` |
 | 31 | 2026-09-19 | Hindsight closure Stage 1: durable memory operations | `406d7cd`, `eb20c58`, `4b2694f`, `7d80d87`, `18fe4d4` | `main` |
 | 30 | 2026-09-06 | Memory replica Waves 0-2 checkpoint | `69ca779`, `e5d1bb5` | `main` |
 | 29 | 2026-09-05 | Compaction Harness final check and archive | `6761090`, `94407cf`, `34fd3bc` | `task/t4-skills-mcp-productization` |
