@@ -76,4 +76,6 @@
 - hindsight-native-runtime-schema.ts — validated native fields, preserving omitted values, nulls, and typed JSON
 - memory-policy-assessment-schema.ts — strict D77 memory-body and assessment contracts, plus the shared importance default
 - memory-operation-schema.ts — MEMORY_OPERATION_METHODS + Core-minted durable operation identity/state/request/result contracts and the operator submit/status/list/cancel/subscribe/changed schemas (operator-only, NO Rust mirror)
+- memory-local-operation-schema.ts — Local onboarding command, exact producer, checkpoint, outcome and closed failure contracts
+- memory-local-onboarding-schema.ts — operator preview/discovery, actionable runtime/custody status, exclusion and invalidation contracts
 - memory-authority-status-schema.ts — MEMORY_AUTHORITY_METHODS + the strict composite memory.authority.status read (authority, runtime availability, setup, per-Bank replica/Pending, operations, derivedFreshness literal unknown)

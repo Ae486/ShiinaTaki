@@ -7,6 +7,7 @@ import { z } from "zod";
 import { HindsightSetupErrorSchema } from "./hindsight-connection-schema.ts";
 import { HindsightManagedDeploymentReceiptSchema, HindsightSetupPhaseSchema } from "./hindsight-setup-schema.ts";
 import { MemoryReplicaErrorCodeSchema, MemoryReplicaRunKindSchema } from "./memory-replica-schedule-schema.ts";
+import { MemoryLocalActivateRequestSchema, MemoryLocalPrepareRequestSchema, MemoryLocalProducerRefSchema, MemoryLocalResultSchema, MemoryLocalErrorCodeSchema } from "./memory-local-operation-schema.ts";
 
 export const MEMORY_OPERATION_METHODS = {
   submit: "memory.operations.submit",
@@ -21,18 +22,18 @@ const Id = z.string().min(1).max(256);
 const Timestamp = z.iso.datetime({ offset: true });
 const revision = z.number().int().nonnegative();
 
-export const MemoryOperationKindSchema = z.enum(["setup.validate", "setup.apply", "replica.sync"]);
+export const MemoryOperationKindSchema = z.enum(["setup.validate", "setup.apply", "replica.sync", "local.onboard.prepare", "local.onboard.activate"]);
 export type MemoryOperationKind = z.infer<typeof MemoryOperationKindSchema>;
 export const MemoryOperationStateSchema = z.enum(["admitted", "running", "completed", "failed", "cancelled", "outcome_unknown"]);
 export type MemoryOperationState = z.infer<typeof MemoryOperationStateSchema>;
 export const MEMORY_OPERATION_TERMINAL_STATES: readonly MemoryOperationState[] = ["completed", "failed", "cancelled", "outcome_unknown"];
 export const MemoryOperationReasonSchema = z.enum([
-  "core_restart", "producer_refused", "producer_failed", "cancelled_before_claim", "runtime_unavailable",
+  "core_restart", "producer_refused", "producer_failed", "cancelled_before_claim", "runtime_unavailable", "producer_incomplete", "commitment_unknown",
 ]);
 export type MemoryOperationReason = z.infer<typeof MemoryOperationReasonSchema>;
 export const MemoryOperationRefusalReasonSchema = z.enum([
   "MEMORY_OPERATION_NOT_FOUND", "MEMORY_OPERATION_BUSY", "MEMORY_OPERATION_RUNNING", "MEMORY_OPERATION_SETTLED",
-  "MEMORY_OPERATION_UNSUPPORTED", "MEMORY_OPERATION_BANK_UNKNOWN",
+  "MEMORY_OPERATION_UNSUPPORTED", "MEMORY_OPERATION_BANK_UNKNOWN", "MEMORY_OPERATION_REQUIRED",
 ]);
 export type MemoryOperationRefusalReason = z.infer<typeof MemoryOperationRefusalReasonSchema>;
 
@@ -43,12 +44,15 @@ export const MemoryOperationRequestSchema = z.discriminatedUnion("kind", [
     managedReceipt: HindsightManagedDeploymentReceiptSchema.optional(),
   }),
   z.strictObject({ kind: z.literal("replica.sync"), bankId: Id, syncKind: MemoryReplicaRunKindSchema }),
+  MemoryLocalPrepareRequestSchema,
+  MemoryLocalActivateRequestSchema,
 ]);
 export type MemoryOperationRequest = z.infer<typeof MemoryOperationRequestSchema>;
 
 export const MemoryOperationProducerRefSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("setup"), attemptId: Id.nullable(), revisionBefore: revision, revisionAfter: revision.nullable() }),
   z.strictObject({ kind: z.literal("replica"), bankId: Id, admittedAt: Timestamp }),
+  MemoryLocalProducerRefSchema,
 ]);
 export type MemoryOperationProducerRef = z.infer<typeof MemoryOperationProducerRefSchema>;
 
@@ -59,8 +63,11 @@ export const MemoryOperationResultSchema = z.discriminatedUnion("kind", [
     kind: z.literal("replica"), errorCode: MemoryReplicaErrorCodeSchema.nullable(),
     nextAction: MemoryReplicaNextActionSchema.nullable(), lastSuccessAt: Timestamp.nullable(),
   }),
+  MemoryLocalResultSchema,
 ]);
 export type MemoryOperationResult = z.infer<typeof MemoryOperationResultSchema>;
+export const MemoryOperationErrorCodeSchema = z.union([MemoryReplicaErrorCodeSchema, MemoryLocalErrorCodeSchema]);
+export type MemoryOperationErrorCode = z.infer<typeof MemoryOperationErrorCodeSchema>;
 
 const MemoryOperationBase = z.strictObject({
   operationId: z.uuid(),
@@ -72,7 +79,7 @@ const MemoryOperationBase = z.strictObject({
   producer: MemoryOperationProducerRefSchema.nullable(),
   result: MemoryOperationResultSchema.nullable(),
   // Only closed producer codes cross this boundary; free-form exception text never does.
-  errorCode: MemoryReplicaErrorCodeSchema.nullable(),
+  errorCode: MemoryOperationErrorCodeSchema.nullable(),
   createdAt: Timestamp,
   updatedAt: Timestamp,
   terminalAt: Timestamp.nullable(),
@@ -85,6 +92,12 @@ export const MemoryOperationSchema = MemoryOperationBase.superRefine((operation,
   if ((operation.state === "outcome_unknown" || operation.state === "cancelled") && operation.reason === null) fail("unknown/cancelled outcomes require a reason");
   if (operation.state === "completed" && (operation.reason !== null || operation.errorCode !== null)) fail("a completed operation carries no failure diagnostics");
   if (operation.kind !== operation.request.kind) fail("operation kind and request disagree");
+  const producerKind = operation.kind.startsWith("local.") ? "local" : operation.kind.startsWith("setup.") ? "setup" : "replica";
+  if (operation.producer !== null && operation.producer.kind !== producerKind) fail("producer and command disagree");
+  if (operation.result !== null && operation.result.kind !== producerKind) fail("result and command disagree");
+  if (operation.producer?.kind === "local" && operation.result?.kind === "local" && operation.producer.runId !== operation.result.runId) {
+    fail("local producer and result run disagree");
+  }
 });
 export type MemoryOperation = z.infer<typeof MemoryOperationSchema>;
 

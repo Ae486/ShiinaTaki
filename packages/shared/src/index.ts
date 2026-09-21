@@ -479,15 +479,28 @@ export {
   MemoryOperationSubmitResultSchema, MemoryOperationStatusParamsSchema, MemoryOperationStatusResultSchema,
   MemoryOperationListParamsSchema, MemoryOperationListResultSchema, MemoryOperationCancelParamsSchema,
   MemoryOperationCancelResultSchema, MemoryOperationSubscribeParamsSchema, MemoryOperationSubscribeResultSchema,
-  MemoryOperationChangedSchema,
+  MemoryOperationChangedSchema, MemoryOperationErrorCodeSchema,
 } from "./memory-operation-schema.ts";
 export type {
   MemoryOperationKind, MemoryOperationState, MemoryOperationReason, MemoryOperationRefusalReason, MemoryOperationRequest,
   MemoryOperationProducerRef, MemoryOperationResult, MemoryOperation, MemoryOperationSubmitParams, MemoryOperationSubmitResult,
   MemoryOperationStatusParams, MemoryOperationStatusResult, MemoryOperationListParams, MemoryOperationListResult,
-  MemoryOperationCancelParams, MemoryOperationCancelResult, MemoryOperationSubscribeResult, MemoryOperationChanged,
+  MemoryOperationCancelParams, MemoryOperationCancelResult, MemoryOperationSubscribeResult, MemoryOperationChanged, MemoryOperationErrorCode,
 } from "./memory-operation-schema.ts";
 export {
   MEMORY_AUTHORITY_METHODS, MemoryRuntimeUnavailableReasonSchema, MemoryAuthorityStatusParamsSchema, MemoryAuthorityStatusSchema,
 } from "./memory-authority-status-schema.ts";
 export type { MemoryRuntimeUnavailableReason, MemoryAuthorityStatus, MemoryAuthorityStatusParams } from "./memory-authority-status-schema.ts";
+export { MemoryLocalErrorCodeSchema, MemoryLocalPrepareSourceSchema, MemoryLocalPrepareRequestSchema, MemoryLocalActivateRequestSchema,
+  MemoryLocalProgressSchema, MemoryLocalProducerRefSchema, MemoryLocalResultSchema } from "./memory-local-operation-schema.ts";
+export type { MemoryLocalErrorCode, MemoryLocalPrepareSource, MemoryLocalPrepareRequest, MemoryLocalActivateRequest,
+  MemoryLocalProgress, MemoryLocalProducerRef, MemoryLocalResult } from "./memory-local-operation-schema.ts";
+export { MEMORY_ONBOARDING_METHODS, MemoryOnboardingPreviewParamsSchema, MemoryOnboardingPreviewResultSchema,
+  MemoryOnboardingStatusParamsSchema, MemoryOnboardingReceiptSchema, MemoryOnboardingRunSchema, MemoryOnboardingActionsSchema,
+  MemoryOnboardingStatusSchema, MemoryOnboardingExceptionsParamsSchema, MemoryOnboardingExceptionsResultSchema,
+  MemoryOnboardingExcludeParamsSchema, MemoryOnboardingExcludeResultSchema, MemoryOnboardingSubscribeParamsSchema,
+  MemoryOnboardingSubscribeResultSchema, MemoryOnboardingChangedSchema } from "./memory-local-onboarding-schema.ts";
+export type { MemoryOnboardingPreviewParams, MemoryOnboardingPreviewResult, MemoryOnboardingStatusParams, MemoryOnboardingStatus,
+  MemoryOnboardingRun, MemoryOnboardingActions, MemoryOnboardingReceipt, MemoryOnboardingExceptionsParams,
+  MemoryOnboardingExceptionsResult, MemoryOnboardingExcludeParams, MemoryOnboardingExcludeResult,
+  MemoryOnboardingChanged, MemoryOnboardingSubscribeResult } from "./memory-local-onboarding-schema.ts";
