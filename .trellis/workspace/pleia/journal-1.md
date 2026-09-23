@@ -1508,3 +1508,47 @@ Took over the Codex-led S2a tree, completed Core waves A-C with one implementer 
 - AC10 owner manual acceptance of the Local onboarding journey
 - Stage 2b 09-19-hindsight-first-activation: re-run PR03 seam research against primary-memory-custody-repo.ts, then plan
 - Stage 2c 09-19-active-bank-lifecycle
+
+
+## Session 33: Hindsight closure Stage 2b: first Hindsight activation
+
+**Date**: 2026-09-24
+**Task**: Hindsight closure Stage 2b: first Hindsight activation
+**Branch**: `main`
+
+### Summary
+
+Took over S2b after waves A-C were implemented; formal opus check fixed three MEDIUM defects; leader gates, spec update, layered commits and archive.
+
+### Main Changes
+
+- Shared: hindsight.activate operation arms and memory.activation.status contract
+- Core: Canonical Local write fence and drain, activation service over D78 primitives, PR03 custody carry in the promotion transaction, Hindsight rebind with binding-only recover and boot-unavailable runtime
+- Desktop: Hindsight activation card, generic memory operations controller
+- Check fixes: F1 drain vs interval witnesses, F2 start-failure binding/boot, F3 apply remedy for unverified Banks
+- Specs: memory-hindsight-activation.md plus memory-operations, canonical-local-memory-runtime, home-window; D87/D88 deferred
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `31b8f05` | (see git log) |
+| `f34fe08` | (see git log) |
+| `137b7fb` | (see git log) |
+| `b9debf1` | (see git log) |
+| `c6738c5` | (see git log) |
+| `37b0ae3` | (see git log) |
+
+### Testing
+
+- [OK] [OK] pnpm typecheck 5/5; pnpm lint; Shared 523; Desktop 635; Desktop build; git diff --check
+- [OK] [OK] Core 3201/3203, the 2 load timeouts pass alone (23/23); isolated boot smoke port 14286, migrations 1..49, 0 fetches
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Stage 2c 09-19-active-bank-lifecycle: seam research, prd/design/implement, waves
+- Owner batched manual acceptance for Stage 2a+2b+2c after 2c closes
