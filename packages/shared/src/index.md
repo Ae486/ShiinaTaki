@@ -78,4 +78,6 @@
 - memory-operation-schema.ts — MEMORY_OPERATION_METHODS + Core-minted durable operation identity/state/request/result contracts and the operator submit/status/list/cancel/subscribe/changed schemas (operator-only, NO Rust mirror)
 - memory-local-operation-schema.ts — Local onboarding command, exact producer, checkpoint, outcome and closed failure contracts
 - memory-local-onboarding-schema.ts — operator preview/discovery, actionable runtime/custody status, exclusion and invalidation contracts
+- memory-hindsight-operation-schema.ts — hindsight.activate command (new/resume/recover), Core-minted producer identity + per-Bank progress, outcome and the closed activation error-code set
+- memory-activation-schema.ts — MEMORY_ACTIVATION_METHODS + the strict memory.activation.status read (authority, runtime, setup, Bank prerequisites, cutover run/receipt, custody counters, Core-derived actions)
 - memory-authority-status-schema.ts — MEMORY_AUTHORITY_METHODS + the strict composite memory.authority.status read (authority, runtime availability, setup, per-Bank replica/Pending, operations, derivedFreshness literal unknown)

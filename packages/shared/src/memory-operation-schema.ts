@@ -8,6 +8,7 @@ import { HindsightSetupErrorSchema } from "./hindsight-connection-schema.ts";
 import { HindsightManagedDeploymentReceiptSchema, HindsightSetupPhaseSchema } from "./hindsight-setup-schema.ts";
 import { MemoryReplicaErrorCodeSchema, MemoryReplicaRunKindSchema } from "./memory-replica-schedule-schema.ts";
 import { MemoryLocalActivateRequestSchema, MemoryLocalPrepareRequestSchema, MemoryLocalProducerRefSchema, MemoryLocalResultSchema, MemoryLocalErrorCodeSchema } from "./memory-local-operation-schema.ts";
+import { MemoryHindsightActivateRequestSchema, MemoryHindsightActivationErrorCodeSchema, MemoryHindsightProducerRefSchema, MemoryHindsightResultSchema } from "./memory-hindsight-operation-schema.ts";
 
 export const MEMORY_OPERATION_METHODS = {
   submit: "memory.operations.submit",
@@ -22,7 +23,7 @@ const Id = z.string().min(1).max(256);
 const Timestamp = z.iso.datetime({ offset: true });
 const revision = z.number().int().nonnegative();
 
-export const MemoryOperationKindSchema = z.enum(["setup.validate", "setup.apply", "replica.sync", "local.onboard.prepare", "local.onboard.activate"]);
+export const MemoryOperationKindSchema = z.enum(["setup.validate", "setup.apply", "replica.sync", "local.onboard.prepare", "local.onboard.activate", "hindsight.activate"]);
 export type MemoryOperationKind = z.infer<typeof MemoryOperationKindSchema>;
 export const MemoryOperationStateSchema = z.enum(["admitted", "running", "completed", "failed", "cancelled", "outcome_unknown"]);
 export type MemoryOperationState = z.infer<typeof MemoryOperationStateSchema>;
@@ -46,6 +47,7 @@ export const MemoryOperationRequestSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("replica.sync"), bankId: Id, syncKind: MemoryReplicaRunKindSchema }),
   MemoryLocalPrepareRequestSchema,
   MemoryLocalActivateRequestSchema,
+  MemoryHindsightActivateRequestSchema,
 ]);
 export type MemoryOperationRequest = z.infer<typeof MemoryOperationRequestSchema>;
 
@@ -53,6 +55,7 @@ export const MemoryOperationProducerRefSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("setup"), attemptId: Id.nullable(), revisionBefore: revision, revisionAfter: revision.nullable() }),
   z.strictObject({ kind: z.literal("replica"), bankId: Id, admittedAt: Timestamp }),
   MemoryLocalProducerRefSchema,
+  MemoryHindsightProducerRefSchema,
 ]);
 export type MemoryOperationProducerRef = z.infer<typeof MemoryOperationProducerRefSchema>;
 
@@ -64,9 +67,10 @@ export const MemoryOperationResultSchema = z.discriminatedUnion("kind", [
     nextAction: MemoryReplicaNextActionSchema.nullable(), lastSuccessAt: Timestamp.nullable(),
   }),
   MemoryLocalResultSchema,
+  MemoryHindsightResultSchema,
 ]);
 export type MemoryOperationResult = z.infer<typeof MemoryOperationResultSchema>;
-export const MemoryOperationErrorCodeSchema = z.union([MemoryReplicaErrorCodeSchema, MemoryLocalErrorCodeSchema]);
+export const MemoryOperationErrorCodeSchema = z.union([MemoryReplicaErrorCodeSchema, MemoryLocalErrorCodeSchema, MemoryHindsightActivationErrorCodeSchema]);
 export type MemoryOperationErrorCode = z.infer<typeof MemoryOperationErrorCodeSchema>;
 
 const MemoryOperationBase = z.strictObject({
@@ -92,11 +96,13 @@ export const MemoryOperationSchema = MemoryOperationBase.superRefine((operation,
   if ((operation.state === "outcome_unknown" || operation.state === "cancelled") && operation.reason === null) fail("unknown/cancelled outcomes require a reason");
   if (operation.state === "completed" && (operation.reason !== null || operation.errorCode !== null)) fail("a completed operation carries no failure diagnostics");
   if (operation.kind !== operation.request.kind) fail("operation kind and request disagree");
-  const producerKind = operation.kind.startsWith("local.") ? "local" : operation.kind.startsWith("setup.") ? "setup" : "replica";
+  const producerKind = operation.kind.startsWith("local.") ? "local" : operation.kind.startsWith("setup.") ? "setup"
+    : operation.kind.startsWith("hindsight.") ? "hindsight" : "replica";
   if (operation.producer !== null && operation.producer.kind !== producerKind) fail("producer and command disagree");
   if (operation.result !== null && operation.result.kind !== producerKind) fail("result and command disagree");
-  if (operation.producer?.kind === "local" && operation.result?.kind === "local" && operation.producer.runId !== operation.result.runId) {
-    fail("local producer and result run disagree");
+  if ((operation.producer?.kind === "local" || operation.producer?.kind === "hindsight") && operation.producer.kind === operation.result?.kind
+    && operation.producer.runId !== operation.result.runId) {
+    fail("producer and result run disagree");
   }
 });
 export type MemoryOperation = z.infer<typeof MemoryOperationSchema>;

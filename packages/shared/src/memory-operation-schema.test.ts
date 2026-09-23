@@ -40,4 +40,19 @@ describe("memory operation contracts", () => {
     expect(MemoryOperationListParamsSchema.parse({})).toEqual({ includeTerminal: false, limit: 20 });
     expect(MemoryOperationListParamsSchema.safeParse({ limit: 51 }).success).toBe(false);
   });
+
+  it("binds the hindsight.activate kind to Hindsight producer/result arms and its closed error codes", () => {
+    const progress = { phase: "importing", bankCount: 2, preparedBankCount: 2, importedBankCount: 1, verifiedBankCount: 0, carriedWitnessCount: 0 };
+    const producer = { kind: "hindsight", runId: "run", hindsightEpochId: "epoch-h", transactionId: "tx", configFingerprint: "a".repeat(64),
+      manifestId: "manifest", progress, banks: [] };
+    const request = { kind: "hindsight.activate", source: { mode: "new", setupRevision: 2, expectedEpochId: "epoch-l" } };
+    const running = { ...base, kind: "hindsight.activate", state: "running", request, producer } as const;
+    expect(MemoryOperationSchema.safeParse(running).success).toBe(true);
+    expect(MemoryOperationSchema.safeParse({ ...running, producer: { kind: "local", runId: "run", previewId: null, snapshotId: null, activationTransactionId: null, progress: { phase: "reserved", sourceCount: null, resolvedCount: null, blockingCount: null } } }).success).toBe(false);
+    const result = { kind: "hindsight", runId: "run", outcome: "activated", epochId: "epoch-h", runtimeAvailable: true, blocking: [] };
+    expect(MemoryOperationSchema.safeParse({ ...running, state: "completed", terminalAt: at, result }).success).toBe(true);
+    expect(MemoryOperationSchema.safeParse({ ...running, state: "completed", terminalAt: at, result: { ...result, runId: "other" } }).success).toBe(false);
+    expect(MemoryOperationSchema.safeParse({ ...running, state: "failed", terminalAt: at, reason: "producer_failed", errorCode: "HINDSIGHT_CUTOVER_LEASE_LOST" }).success).toBe(true);
+    expect(MemoryOperationSchema.safeParse({ ...running, state: "failed", terminalAt: at, reason: "producer_failed", errorCode: "LEASE_LOST" }).success).toBe(false);
+  });
 });

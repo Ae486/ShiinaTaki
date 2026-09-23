@@ -504,3 +504,10 @@ export type { MemoryOnboardingPreviewParams, MemoryOnboardingPreviewResult, Memo
   MemoryOnboardingRun, MemoryOnboardingActions, MemoryOnboardingReceipt, MemoryOnboardingExceptionsParams,
   MemoryOnboardingExceptionsResult, MemoryOnboardingExcludeParams, MemoryOnboardingExcludeResult,
   MemoryOnboardingChanged, MemoryOnboardingSubscribeResult } from "./memory-local-onboarding-schema.ts";
+export { MemoryHindsightActivationErrorCodeSchema, MemoryHindsightActivateSourceSchema, MemoryHindsightActivateRequestSchema, MemoryHindsightPhaseSchema,
+  MemoryHindsightProgressSchema, MemoryHindsightProducerBankSchema, MemoryHindsightProducerRefSchema, MemoryHindsightBlockingSchema, MemoryHindsightResultSchema } from "./memory-hindsight-operation-schema.ts";
+export type { MemoryHindsightActivationErrorCode, MemoryHindsightActivateSource, MemoryHindsightActivateRequest, MemoryHindsightPhase, MemoryHindsightProgress,
+  MemoryHindsightProducerBank, MemoryHindsightProducerRef, MemoryHindsightBlocking, MemoryHindsightResult } from "./memory-hindsight-operation-schema.ts";
+export { MEMORY_ACTIVATION_METHODS, MemoryActivationStatusParamsSchema, MemoryActivationReceiptSchema, MemoryActivationRunSchema, MemoryActivationBankSchema,
+  MemoryActivationActionsSchema, MemoryActivationStatusSchema } from "./memory-activation-schema.ts";
+export type { MemoryActivationStatusParams, MemoryActivationReceipt, MemoryActivationRun, MemoryActivationBank, MemoryActivationActions, MemoryActivationStatus } from "./memory-activation-schema.ts";
