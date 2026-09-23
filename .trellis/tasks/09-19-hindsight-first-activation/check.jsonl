@@ -1,1 +1,20 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/index.md","reason":"Backend conventions and final gates"}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Size, headers, indexes, lint, real boot"}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"Single writer, no await in transactions"}
+{"file":".trellis/spec/backend/sqlite-transaction-isolation.md","reason":"Promotion atomicity and custody carry"}
+{"file":".trellis/spec/backend/sqlite-migration-lineage.md","reason":"Migration immutability if 050 was added"}
+{"file":".trellis/spec/backend/canonical-local-memory-runtime.md","reason":"Fence coverage of every Local writer"}
+{"file":".trellis/spec/backend/memory-current-state-cutover.md","reason":"D78 primitives must be reused unchanged"}
+{"file":".trellis/spec/backend/memory-local-cutover-coverage.md","reason":"Coverage staleness and writer reservation"}
+{"file":".trellis/spec/backend/hindsight-application-runtime.md","reason":"Hindsight binding readiness"}
+{"file":".trellis/spec/backend/memory-operations.md","reason":"Settlement, unknown outcomes, immutability, families"}
+{"file":".trellis/spec/backend/memory-local-onboarding.md","reason":"Pattern parity with S2a"}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Closed codes, no swallowed failures"}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Operator-only methods, push"}
+{"file":".trellis/spec/frontend/index.md","reason":"Frontend gates"}
+{"file":".trellis/spec/frontend/reactive-read-models.md","reason":"No polling, no replay, generation guards"}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Card contract"}
+{"file":".trellis/tasks/09-19-hindsight-first-activation/prd.md","reason":"AC1-AC10 traceability"}
+{"file":".trellis/tasks/09-19-hindsight-first-activation/design.md","reason":"Intended structure per wave"}
+{"file":".trellis/tasks/09-19-hindsight-first-activation/grill.md","reason":"Q1 and engineering rulings to verify"}
+{"file":".trellis/tasks/09-19-hindsight-first-activation/research/stage2b-seams.md","reason":"Failure matrix and gap list to close"}

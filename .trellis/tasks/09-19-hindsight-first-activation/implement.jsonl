@@ -1,1 +1,20 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file":".trellis/spec/backend/index.md","reason":"Backend conventions and final gates"}
+{"file":".trellis/spec/backend/database-guidelines.md","reason":"SQLite single writer and transactions"}
+{"file":".trellis/spec/backend/sqlite-migration-lineage.md","reason":"Immutable additive migration and reopen tests"}
+{"file":".trellis/spec/backend/sqlite-transaction-isolation.md","reason":"Atomic promotion, custody carry and witnesses"}
+{"file":".trellis/spec/backend/canonical-local-memory-runtime.md","reason":"Local writers, ingestion, flush and retirement"}
+{"file":".trellis/spec/backend/memory-current-state-cutover.md","reason":"D78 capture/import/certificate/verify/promotion primitives"}
+{"file":".trellis/spec/backend/memory-local-cutover-coverage.md","reason":"Coverage manifests, writer reservation, staleness"}
+{"file":".trellis/spec/backend/hindsight-application-runtime.md","reason":"Hindsight subsystem construction and readiness"}
+{"file":".trellis/spec/backend/memory-replica-sync.md","reason":"B5 scheduler start and replica checkpoints"}
+{"file":".trellis/spec/backend/memory-operations.md","reason":"Operation owner, tryClaim, observeBoot, families"}
+{"file":".trellis/spec/backend/memory-local-onboarding.md","reason":"S2a custody, binding and service patterns to mirror"}
+{"file":".trellis/spec/backend/error-handling.md","reason":"Closed error codes and retry truth"}
+{"file":".trellis/spec/backend/server-push-and-connection-auth.md","reason":"Operator methods and the operations push"}
+{"file":".trellis/spec/backend/quality-guidelines.md","reason":"Headers, indexes, lint and real boot"}
+{"file":".trellis/spec/frontend/index.md","reason":"Frontend conventions and gates"}
+{"file":".trellis/spec/frontend/reactive-read-models.md","reason":"Push, visibility/generation, no polling/replay"}
+{"file":".trellis/spec/frontend/home-window.md","reason":"Operations page cards"}
+{"file":".trellis/tasks/09-19-hindsight-first-activation/research/stage2b-seams.md","reason":"Primitives, custody, fence, surface, matrix with file:line"}
+{"file":".trellis/tasks/09-19-hindsight-first-activation/design.md","reason":"Wave design and contracts"}
+{"file":".trellis/tasks/09-19-hindsight-first-activation/grill.md","reason":"Q1 decision and engineering rulings"}
