@@ -19,6 +19,12 @@ maybeRun(input: { characterId: string }): Promise<CanonicalIngestionRunResult | 
 run(input: { characterId: string; throughSeq?: number }): Promise<CanonicalIngestionRunResult>;
 prepareRetirement(input: MemoryFlushRequest): Promise<MemoryFlushOutcome>;
 captureRun(characterId: string): Promise<CapturedMemoryRun>;
+settle(): Promise<void>;   // CanonicalLocalIngestion: resolves once every queued per-Character chain has settled
+// canonical-local-write-fence.ts
+CanonicalLocalWriteFence = { writable(); admit(op); admitSync(op); quiesce({ timeoutMs }); release(); retire() };
+// canonical-local-writers.ts
+fenceCanonicalLocalWriters({ engine, ingestion, tidy, fence, onIngestionFailed }) -> { engine, maintenance, memoryFlush, tidy, captureRun };
+BlockReplaceInput.expectedEpochId?: string;   // structured-memory-block-repo.ts
 ```
 
 - `PrimaryConversationCommit` contains the exact committed `TimelineEntry[]`, Character and optional Run ID supplied
@@ -97,6 +103,29 @@ captureRun(characterId: string): Promise<CapturedMemoryRun>;
   references. Before-commit rollback may reopen them. Failed replacement binding leaves an unavailable facade and failing
   Compaction flush; it must not keep using the retired writer.
 
+### Local -> Hindsight write fence and retirement
+
+- The Local subsystem owns one `CanonicalLocalWriteFence` and publishes only the fenced surfaces from
+  `fenceCanonicalLocalWriters`; the fence gates writes only and never touches storage. Admitted writes are counted so
+  `quiesce` can refuse new ones and wait for in-flight ones; a drain past `timeoutMs` throws `MEMORY_QUIESCENCE_TIMEOUT`
+  and reopens the fence (unless retired).
+- While fenced every Local writer refuses `MEMORY_AUTHORITY_FENCED`: foreground and background write tools return the
+  structured `{ ok: false, code: "MEMORY_AUTHORITY_FENCED", message }` (the Effect metadata is reattached to the wrapper);
+  `writeEntry`/`writeMemory`, retention archive/hardDelete, maintenance and tidy reject; `prepareRetirement` returns
+  `retryable_failure` + `MEMORY_AUTHORITY_FENCED`, which Compaction already retries. `recall`/`reflect`, `assemble` and
+  reports stay open, so chat keeps working during an activation.
+- `captureRun` skips the Bank/baseline write while fenced instead of refusing: the custody group Chat opens initializes
+  eligibility itself. The retention sweeper runs only while `fence.writable()` and the epoch is still this subsystem's.
+- `CanonicalLocalIngestion.settle()` loops until no per-Character chain is queued; the activation drain calls it after
+  quiesce and before forcing ingestion (see [`memory-hindsight-activation.md`](./memory-hindsight-activation.md)).
+- Tidy Block writes pass `expectedEpochId: review.input.epochId`; the repo compares it with
+  `canonical_memory_authority_state.active_epoch_id` inside the write transaction and throws `MEMORY_AUTHORITY_MISMATCH`,
+  because Blocks are coverage-manifest content and a retired epoch must not change them.
+- `release()` is called only after a positive marker read of `canonical-local` + the predecessor epoch (pre-COMMIT
+  failure). After a Hindsight COMMIT, `fence.retire()` is irreversible, then the selector withdraws the Local publication
+  (`local.retire()` disposes it, binding state `none`) before constructing Hindsight; held Local references keep failing
+  closed and nothing reopens Local, even when the Hindsight construction fails.
+
 ## 4. Validation & Error Matrix
 
 | Condition | Required result |
@@ -112,6 +141,10 @@ captureRun(characterId: string): Promise<CapturedMemoryRun>;
 | Imported record receives an unchanged lifecycle operation | Persist the referenced snapshot with its receipt; return the same result on retry |
 | Post-marker constructor/callback/read failure | Legacy stays retired; replacement is unavailable or correctly bound, never fallback |
 | No real provider flush installed | Failure that prevents Compaction retirement |
+| Local write while fenced | Structured `MEMORY_AUTHORITY_FENCED` (tool result, rejection, or `retryable_failure` flush); reads succeed |
+| In-flight writes outlive the quiesce timeout | `MEMORY_QUIESCENCE_TIMEOUT`; fence reopened (unless retired) |
+| Block replace after the authority epoch moved | `MEMORY_AUTHORITY_MISMATCH`; Block unchanged |
+| Local write after a Hindsight COMMIT | Fails closed; Local is never republished or reopened |
 
 ## 5. Good / Base / Bad Cases
 
@@ -132,6 +165,8 @@ captureRun(characterId: string): Promise<CapturedMemoryRun>;
 - Activation failure: held Legacy tool/write/retention/tidy/maintenance/flush references reject after a committed marker even
   when construction/callback/marker reread fails; pre-commit transaction failure retains usable Legacy authority.
 - Prompt/Block: complete relationships, promoted profile, observed fences, mood/hidden visibility, captured content and CAS.
+- Write fence: every writer refuses structurally while reads stay open, quiesce waits and times out, release/retire
+  (`canonical-local-write-fence.test.ts`); Block `expectedEpochId` guard (`structured-memory-block-repo.test.ts`).
 - Run the workspace TypeScript checks and real Node strip-only boot with fresh isolated Legacy and Canonical Local fixtures.
   Do not load `.env.local`, real credentials, another worktree or private D78 acceptance data for this verification.
 

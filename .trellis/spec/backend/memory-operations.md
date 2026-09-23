@@ -17,13 +17,14 @@ MEMORY_OPERATION_METHODS = { submit: "memory.operations.submit", status: "memory
   list: "memory.operations.list", cancel: "memory.operations.cancel", subscribe: "memory.operations.subscribe",
   changed: "memory.operations.changed" };
 MEMORY_AUTHORITY_METHODS = { status: "memory.authority.status" };
-MemoryOperationKind = "setup.validate" | "setup.apply" | "replica.sync" | "local.onboard.prepare" | "local.onboard.activate";
+MemoryOperationKind = "setup.validate" | "setup.apply" | "replica.sync" | "local.onboard.prepare" | "local.onboard.activate"
+  | "hindsight.activate";
 MemoryOperationState = "admitted" | "running" | "completed" | "failed" | "cancelled" | "outcome_unknown";
 MemoryOperationReason = "core_restart" | "producer_refused" | "producer_failed" | "cancelled_before_claim" | "runtime_unavailable"
   | "producer_incomplete" | "commitment_unknown";
 MemoryOperationRefusalReason = "MEMORY_OPERATION_NOT_FOUND" | "…_BUSY" | "…_RUNNING" | "…_SETTLED" | "…_UNSUPPORTED" | "…_BANK_UNKNOWN"
   | "MEMORY_OPERATION_REQUIRED";
-MemoryOperationErrorCode = MemoryReplicaErrorCode | MemoryLocalErrorCode;   // producer/result arms must agree on kind
+MemoryOperationErrorCode = MemoryReplicaErrorCode | MemoryLocalErrorCode | MemoryHindsightActivationErrorCode;   // arms agree on kind
 ```
 
 Core: `createMemoryOperationService({ db, live, setup, bootId, onChanged, logger })` ->
@@ -79,6 +80,13 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
   `outcome_unknown` with `commitment_unknown` (COMMIT not provable) or `producer_incomplete` (run never published) and
   an explicit recovery action. Setup/replica kinds have no `observeBoot` and keep the `core_restart` fallback. The
   full producer, custody and binding contract is [`memory-local-onboarding.md`](./memory-local-onboarding.md).
+- Family `hindsight-activation` (`hindsight.activate`, source modes `new` / `resume` / `recover`) follows the same
+  deferred-claim and `observeBoot` rules; its producer, custody and rebind contract is
+  [`memory-hindsight-activation.md`](./memory-hindsight-activation.md).
+- `setup`, `local-onboarding` and `hindsight-activation` are mutually single-flight: every setup, Local and activation
+  kind calls `refuseWhileExclusiveFamilyBusy` (`EXCLUSIVE_MEMORY_FAMILIES` in `memory-operation-contract.ts`) at
+  admission, so an open row in any of the three refuses the others `MEMORY_OPERATION_BUSY` naming that row. The
+  per-family unique index alone cannot express this, because the three are different families.
 
 ### Known precision limits (recorded 2026-09-19, see deferred-decisions D84)
 
@@ -108,6 +116,7 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 | scheduler drain threw during a manual run | `failed` with `scheduler.lastError()` |
 | production `memory.migration.stage/resume/verify/exclude/activate` | `MEMORY_OPERATION_REFUSED` / `MEMORY_OPERATION_REQUIRED`; only dryRun/status/exceptions reads remain |
 | Core restart with a non-terminal `local.onboard.*` row | `observeBoot` classifies from the receipt; otherwise `outcome_unknown` / `commitment_unknown` or `producer_incomplete` |
+| submit any setup / Local / activation kind while another of the three families is open | `MEMORY_OPERATION_BUSY` + that row's `activeOperationId` |
 
 ## 5. Good / Base / Bad Cases
 
@@ -134,6 +143,7 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 - Local kinds: claim race / pre-claim cancel, `retry` resolving the reserved run from the prior row, boot observation
   (unknown stays unknown, no run created), terminal rows immutable after a later binding repair
   (`memory-operation-kind-local.test.ts`).
+- Activation kind: three-family single-flight and the direct setup RPC refusals (`memory-operation-kind-hindsight.test.ts`).
 
 ## 7. Wrong vs Correct
 

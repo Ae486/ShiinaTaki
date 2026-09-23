@@ -96,8 +96,8 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
   the Bank reports `explicit_retry_required` and Cancel only for an `admitted` `replica.sync`. Availability follows the
   current Core status, never a stale snapshot.
 - Unknown values render as 未知; the card never shows `0` pending, a health badge or freshness that the producer did
-  not report. Setup validate/apply and every later workflow (transitions, backup, upgrade) are not on this card until
-  their Core operations exist.
+  not report. Setup validate/apply live on the Hindsight activation card; every later workflow (transitions, backup,
+  upgrade) is not on this card until its Core operation exists.
 - Full operation ownership and verification requirements live in
   [`memory-operations.md`](../backend/memory-operations.md).
 
@@ -113,6 +113,25 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
 - The card renders producer counts and source-relative diagnostics; it never carries filesystem paths or memory bodies,
   and technical receipt hashes stay in diagnostics. Accepted (admitted) and completed states are shown distinctly.
 - Contract: [`memory-local-onboarding.md`](../backend/memory-local-onboarding.md).
+
+### Hindsight activation card (Operations page)
+
+- A separate card (`hindsight-activation-card.tsx`, `use-hindsight-activation.ts`, state/actions modules) projects
+  `memory.activation.status` (`INTERACTIVE_READ` deadline class), invalidated by `memory.operations.changed`. A hidden
+  page retires the client generation; there is no polling and no replay of a write.
+- It and the Stage 1 card share `createMemoryOperationsController<TStatus>(sink, read)`: one push subscription per
+  generation awaited before the first read, coalesced refetch on every push and after every mutation outcome, and
+  serialized submit/cancel. A mutation whose deadline expired with `outcomeUnknown` shows
+  "请求超时，操作结果未知。正在重新读取 Core 状态，请根据结果选择下一步。" and re-reads Core instead of resubmitting.
+- 启用 Hindsight / 继续 / 恢复运行时 / 取消 come only from Core `actions` (`activate`, `resume`, `recoverBinding`,
+  `cancelOperationId`). The two client-derived rules are 校验连接 / 应用配置 (`setup.validate` / `setup.apply`): allowed
+  only under `canonical-local` authority with no open activation row, by setup phase (validate: `ready-to-validate`,
+  `compatible`, `failed`; apply: `compatible`, `failed`); when setup is already `configured`, only 应用配置, and only
+  while `prerequisites.blocking` contains `HINDSIGHT_TEMPLATE_NOT_VERIFIED` (a Character Bank created after setup,
+  D86), targeting the first unverified Character Bank. A loading, errored or busy frame dispatches nothing.
+- Run, transaction, epoch ids and hashes appear only in the collapsed diagnostics; admitted and completed are shown
+  distinctly, and outcomes are never derived locally.
+- Contract: [`memory-hindsight-activation.md`](../backend/memory-hindsight-activation.md).
 
 ## Cross-window commands (the pet owns the scene, the pages own the surface)
 
