@@ -18,7 +18,7 @@
 - hindsight-compatibility-service.ts — ordered exact-build health/version/manifest gate, independent cutover support and stable settings fingerprint
 - hindsight-bank-identity.ts — versioned deterministic opaque Global/Character external Bank ids
 - taki-bank-template-v1.ts — fixed secret-free additive template, canonical digest, and Taki-owned read-back verification
-- hindsight-setup-service.ts — resumable validate/setup/disable/explicit LLM-health state machine (a failed validate withdraws compatibility, keeps the fingerprint); never owns Memory Authority
+- hindsight-setup-service.ts — resumable validate/setup/disable/explicit LLM-health state machine (a failed validate withdraws compatibility, keeps the fingerprint); refuses HINDSIGHT_STATE_CONFLICT while an activation row is open, and disable also under a selected Hindsight authority; never owns Memory Authority
 - hindsight-setup-recovery.ts — boot reconciliation: a busy phase left by a dead process becomes failed/HINDSIGHT_SETUP_INTERRUPTED and intermediate Bank rows return to pending
 - hindsight-bank-setup.ts — idempotent Bank/template application, operation polling, and verified projection
 - hindsight-setup-stages.ts — deterministic setup targets and dry-run preflight orchestration

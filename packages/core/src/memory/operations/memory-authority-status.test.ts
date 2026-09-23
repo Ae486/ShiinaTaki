@@ -3,6 +3,7 @@ import { MemoryAuthorityStatusSchema } from "@taki/shared";
 import { MIGRATIONS } from "../../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../../db/sqlite.ts";
 import { createLogger } from "../../logging/logger.ts";
+import type { HindsightBindingSnapshot } from "../hindsight-runtime-binding.ts";
 import { AT, CHARACTER, GLOBAL, fakeRuntime, fakeSetup, seedHindsightAuthority, type FakeRuntime } from "./memory-operation-fixtures.ts";
 import { readMemoryAuthorityStatus } from "./memory-authority-status.ts";
 import { createMemoryOperationService } from "./memory-operation-service.ts";
@@ -56,5 +57,21 @@ describe("memory.authority.status read", () => {
     runtime.breakConnection("HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE");
     expect(f.read().runtime.unavailableReason).toBe("connection_unavailable");
     expect(fixture("hindsight", null).read()).toMatchObject({ runtime: { providerId: "hindsight", available: false, unavailableReason: "not_installed" }, replica: null });
+  });
+
+  it("reports the Hindsight binding snapshot truthfully before the rebind, after it and once stopped", () => {
+    const runtime = fakeRuntime([GLOBAL], () => AT);
+    const f = fixture("hindsight", runtime);
+    const snapshot = (binding: HindsightBindingSnapshot["binding"], lifetime: HindsightBindingSnapshot["lifetime"] = "running"): HindsightBindingSnapshot =>
+      ({ selection: "hindsight", selectedEpochId: "epoch", binding, lifetime, flush: binding.kind === "published" && lifetime === "running" ? "available" : "failing" });
+    const read = (binding: HindsightBindingSnapshot) => readMemoryAuthorityStatus({ db: f.db, live: () => runtime, hindsightBinding: () => binding, setup: f.setup, operations: f.operations, now: () => AT });
+    expect(read(snapshot({ kind: "unavailable", epochId: "epoch", code: "HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE" }))).toMatchObject({
+      runtime: { providerId: "hindsight", available: false, unavailableReason: "not_installed" }, replica: null, pending: null });
+    expect(read(snapshot({ kind: "published", epochId: "other" })).runtime.unavailableReason).toBe("authority_mismatch");
+    expect(read(snapshot({ kind: "published", epochId: "epoch" }, "stopped")).runtime.unavailableReason).toBe("stopped");
+    const bound = read(snapshot({ kind: "published", epochId: "epoch" }));
+    expect(MemoryAuthorityStatusSchema.parse(bound)).toEqual(bound);
+    expect(bound).toMatchObject({ runtime: { available: true, unavailableReason: null } });
+    expect(bound.replica?.map((bank) => bank.bankId)).toEqual(["global"]);
   });
 });

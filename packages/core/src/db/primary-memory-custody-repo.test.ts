@@ -6,10 +6,11 @@ import { createPrimaryMemoryCustody, type PrimaryMemoryCustody } from "./primary
 import { openDatabase, type Database } from "./sqlite.ts";
 import { createTimelineRepo, type TimelineRepo } from "./timeline-repo.ts";
 import { cleanupLegacyMigrationFixtures, createLegacyMigrationFixture } from "../memory/legacy-migration/legacy-migration-fixture.ts";
+import { createHindsightActivationHarness, type HindsightActivationHarness } from "../memory/hindsight-activation/hindsight-activation-fixture.ts";
 
 const NOW = "2026-09-22T00:00:00.000Z";
-const opened: Database[] = [];
-afterEach(() => { for (const db of opened.splice(0)) db.close(); cleanupLegacyMigrationFixtures(); });
+const opened: Database[] = []; const harnesses: HindsightActivationHarness[] = [];
+afterEach(async () => { for (const db of opened.splice(0)) db.close(); for (const h of harnesses.splice(0)) await h.close(); cleanupLegacyMigrationFixtures(); });
 
 function memory(): { db: Database; timeline: TimelineRepo } {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); opened.push(db);
@@ -169,5 +170,23 @@ describe("trusted primary group custody", () => {
     const gap = custody.begin({ characterId: "taki", repo: timeline });
     const only = gap.repo.append(assistant("assistant-only member"));
     expect(() => sources.advanceCoverage({ ...scope, throughSeq: only.seq, now: NOW })).toThrow("MEMORY_INGESTION_INCOMPLETE");
+  });
+
+  it("assigns new groups to the Hindsight epoch after COMMIT and routes their witnesses by the assigned epoch's provider", async () => {
+    const h = createHindsightActivationHarness(); harnesses.push(h);
+    const carried = h.custody.begin({ characterId: "taki", runId: "run-carried", repo: h.timeline });
+    const first = carried.repo.append(user("opened under Local"));
+    await h.service.start(h.identity(), h.control());
+    const late = h.custody.begin({ characterId: "taki", runId: "run-late", repo: h.timeline });
+    const second = late.repo.append(user("opened under Hindsight")); const reply = late.repo.append(assistant("reply"));
+    expect(group(h.db, late.groupId)).toMatchObject({ assigned_epoch_id: "hindsight-epoch", original_epoch_id: "hindsight-epoch" });
+    expect(group(h.db, carried.groupId)).toMatchObject({ assigned_epoch_id: "hindsight-epoch", original_epoch_id: h.local.epochId });
+    carried.finalize(); late.finalize();
+    expect(h.db.prepare("SELECT timeline_seq FROM hindsight_ingestion_primary_commits WHERE authority_epoch_id='hindsight-epoch' ORDER BY timeline_seq").all()
+      .map((row) => Number(row.timeline_seq))).toEqual([first.seq, second.seq, reply.seq]);
+    expect(witnesses(h.db)).toEqual([]);
+    expect(h.db.prepare("SELECT eligibility_start_seq FROM hindsight_ingestion_cursors WHERE authority_epoch_id='hindsight-epoch' AND character_id='taki'").get()?.eligibility_start_seq)
+      .toBe(first.seq + 1);
+    expect(h.custody.status()).toEqual({ openGroups: 0, recoverableGroups: 0 });
   });
 });

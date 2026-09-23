@@ -8,6 +8,7 @@ import { resolveHindsightConfig } from "../config/hindsight-config.ts";
 import { createHindsightBankSetupRepo } from "../db/hindsight-bank-setup-repo.ts";
 import { createHindsightConnectionRepo } from "../db/hindsight-connection-repo.ts";
 import { createHindsightCutoverRunRepo } from "../db/hindsight-cutover-run-repo.ts";
+import { createMemoryOperationRepo } from "../db/memory-operation-repo.ts";
 import type { Database } from "../db/sqlite.ts";
 import type { Logger } from "../logging/logger.ts";
 import { createHindsightClient } from "../memory/hindsight/hindsight-client.ts";
@@ -15,6 +16,7 @@ import { createHindsightCompatibilityService } from "../memory/hindsight/hindsig
 import { createHindsightConnectionSecret } from "../memory/hindsight/hindsight-secret-refs.ts";
 import { reconcileInterruptedSetup } from "../memory/hindsight/hindsight-setup-recovery.ts";
 import { createHindsightSetupService, type HindsightSetupService } from "../memory/hindsight/hindsight-setup-service.ts";
+import { HINDSIGHT_ACTIVATION_FAMILY } from "../memory/hindsight-activation/hindsight-activation-status.ts";
 import { readMemoryAuthoritySelection } from "../memory/legacy-migration/legacy-activation-repo.ts";
 import type { SecretCatalogService } from "../secrets/secret-catalog-service.ts";
 import type { MethodRegistry } from "../server/method-registry.ts";
@@ -31,6 +33,7 @@ export function composeHindsightSetup(input: {
   const secret = createHindsightConnectionSecret(input.secrets);
   const connectionRepo = createHindsightConnectionRepo(input.db);
   const bankRepo = createHindsightBankSetupRepo(input.db);
+  const operations = createMemoryOperationRepo(input.db);
   // A busy phase left by a dead process can never complete; reconcile before any operator request can observe it.
   const interrupted = reconcileInterruptedSetup({ connectionRepo, bankRepo }, () => new Date().toISOString());
   if (interrupted) input.logger.child({ mod: "hindsight-setup" }).info(interrupted, "interrupted Hindsight setup attempt reconciled to failed");
@@ -42,6 +45,7 @@ export function composeHindsightSetup(input: {
     connectionRepo,
     bankRepo,
     authorityMode: () => readMemoryAuthoritySelection(input.db).mode,
+    activationOpen: () => operations.activeInFamily(HINDSIGHT_ACTIVATION_FAMILY) !== undefined,
   });
   registerHindsightSetupMethods(input.registry, { service, logger: input.logger });
   registerHindsightCutoverMethods(input.registry, { repo: createHindsightCutoverRunRepo(input.db), logger: input.logger });

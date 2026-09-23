@@ -56,9 +56,10 @@
 - pending-memory-repo.ts — idempotent Pending Memory admission, Bank/authority/lease/CAS guards, truthful summaries, and separate overlay reads
 - pending-memory-store.ts — immutable intent/dispatch storage, versioned factual proof integrity, old-row reads and CAS writes
 - pending-memory-transition.ts — versioned native factual and legacy derived transitions, stage-preserving retry and supersession
-- hindsight-authority-repo.ts — writer-reserved current Local/precondition checks, activation receipts and atomic Local-to-Hindsight promotion
+- hindsight-authority-repo.ts — writer-reserved current Local/precondition checks, activation receipts and atomic Local-to-Hindsight promotion with an in-transaction beforeCommit hook
+- hindsight-activation-custody.ts — PR03 custody carry inside the promotion transaction: refuses incomplete Local spans, copies unconsumed Local witnesses into the Hindsight witness table, seeds per-Character Hindsight cursors and reassigns open/finalized groups
 - canonical-memory-authority-repo.ts — explicit Local authority epoch and scoped Bank persistence
-- structured-memory-block-repo.ts — revisioned Core-owned Memory Blocks, writer enforcement, atomic absent/existing CAS and budgeted rendering
+- structured-memory-block-repo.ts — revisioned Core-owned Memory Blocks, writer enforcement, atomic absent/existing CAS, optional active-epoch binding and budgeted rendering
 - canonical-memory-repo.ts — canonical source/unit/policy/receipt aggregate with atomic retain and revisioned lifecycle
 - canonical-memory-maintenance-contract.ts — internal scoped Local maintenance, retention, ingestion and copy contracts
 - canonical-memory-maintenance-repo.ts — Local maintenance composition with one shared tokenizer and synchronous transactions
@@ -71,7 +72,7 @@
 - canonical-memory-maintenance-ingestion.ts — atomic original-source/new-fact/duplicate-proof batches and receipt reads
 - canonical-ingestion-repo.ts — durable fixed-span Write Gate/extraction state, per-Bank receipts and atomic completion
 - canonical-ingestion-source-repo.ts — exact primary commit evidence, epoch/span assignment, persistent eligibility baseline and guarded retirement coverage
-- primary-memory-custody-repo.ts — trusted primary group/member custody: candidate-attached group open, atomic append+member enrolment, whole-group witness finalization (closed-empty / header-only Legacy), silent retraction, dead/settled reconciliation and candidate adoption/relocation with consumption refusal
+- primary-memory-custody-repo.ts — trusted primary group/member custody: candidate-attached group open (Local or Hindsight epoch by marker), atomic append+member enrolment, whole-group witness finalization routed by the assigned epoch's provider (closed-empty / header-only Legacy), silent retraction, dead/settled reconciliation and candidate adoption/relocation with consumption refusal
 - canonical-memory-maintenance-copy.ts — same-Bank copies and complete cross-Bank support/source remapping with retirement
 - canonical-memory-maintenance-retention.ts — activity-only rolling deletion with source cleanup and historical identity retention
 - canonical-memory-maintenance-fixtures.ts — owned SQLite-only canonical test fixtures; no runtime wiring
@@ -96,7 +97,7 @@
 - hindsight-ingestion-durability.ts — verified source coverage or a refusal; queue promises alone never establish durability
 - hindsight-ingestion-guard.ts — synchronous authority/namespace fences for ingestion plans and durable coverage
 - hindsight-ingestion-repo.ts — restart-safe Hindsight source ingestion journal and receipt-verified retirement coverage
-- hindsight-ingestion-source-repo.ts — durable source witnesses, immutable eligibility baseline and claim/coverage checks
+- hindsight-ingestion-source-repo.ts — durable source witnesses (same-epoch replay checked before the Local prior), immutable eligibility baseline and claim/coverage checks
 - hindsight-memory-write-contract.ts — lossless internal parent-intent state and an immutable operation identity
 - hindsight-memory-write-repo.ts — original target capture, independent child evidence, stable full-operation receipts and the count-only pending parent-write read
 - memory-operation-repo.ts — durable memory_operations ledger: admitted insert (partial-unique-index single flight), state-CAS transition, active/recent/latest-in-family reads, foreign-row listing for per-kind boot observation, restart reconciliation by owner boot id

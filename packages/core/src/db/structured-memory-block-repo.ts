@@ -10,10 +10,12 @@ import type { Database, SqlRow } from "./sqlite.ts";
 export type BlockScope = { kind: "global"; characterId: null } | { kind: "character"; characterId: string };
 export type BlockActor = "user" | "background";
 export interface StructuredMemoryBlock { blockId: string; scope: BlockScope; content: string; revision: number; updatedAt: string; }
-export interface StructuredMemoryBlockRepo { read(blockId: string, scope: BlockScope): StructuredMemoryBlock | undefined; replace(input: { blockId: string; scope: BlockScope; content: string; expectedRevision?: number; actor: BlockActor; now?: string }): StructuredMemoryBlock; render(scopes: BlockScope[]): string; }
+export interface StructuredMemoryBlockRepo { read(blockId: string, scope: BlockScope): StructuredMemoryBlock | undefined; replace(input: BlockReplaceInput): StructuredMemoryBlock; render(scopes: BlockScope[]): string; }
+/** `expectedEpochId` binds a canonical writer's Block write to the active authority epoch inside the same transaction (Blocks are coverage-manifest content). */
+export interface BlockReplaceInput { blockId: string; scope: BlockScope; content: string; expectedRevision?: number; actor: BlockActor; now?: string; expectedEpochId?: string }
 export function createStructuredMemoryBlockRepo(db: Database): StructuredMemoryBlockRepo { return { read: (id, scope) => read(db, id, scope), replace: (input) => replace(db, input), render: (scopes) => render(db, scopes) }; }
 function read(db: Database, blockId: string, scope: BlockScope): StructuredMemoryBlock | undefined { const row = db.prepare("SELECT * FROM taki_memory_blocks WHERE block_id=:id AND scope_kind=:kind AND ifnull(character_id,'')=ifnull(:character,'')").get({ id: blockId, kind: scope.kind, character: scope.characterId }); return row ? parse(row) : undefined; }
-function replace(db: Database, input: { blockId: string; scope: BlockScope; content: string; expectedRevision?: number; actor: BlockActor; now?: string }): StructuredMemoryBlock {
+function replace(db: Database, input: BlockReplaceInput): StructuredMemoryBlock {
   const def = getBlock(input.blockId); if (!def) throw new Error("MEMORY_INVALID_REQUEST: unknown block");
   if ((def.ownership === "global" ? "global" : "character") !== input.scope.kind) throw new Error("MEMORY_INVALID_REQUEST: block scope mismatch");
   if (def.writer !== input.actor) throw new Error("MEMORY_CAPABILITY_UNSUPPORTED: block writer");
@@ -23,6 +25,9 @@ function replace(db: Database, input: { blockId: string; scope: BlockScope; cont
   const now = input.now ?? new Date().toISOString();
   let result: StructuredMemoryBlock | undefined;
   db.transaction(() => {
+    if (input.expectedEpochId !== undefined && db.prepare("SELECT active_epoch_id FROM canonical_memory_authority_state WHERE singleton=1").get()?.active_epoch_id !== input.expectedEpochId) {
+      throw new Error("MEMORY_AUTHORITY_MISMATCH");
+    }
     const old = read(db, input.blockId, input.scope);
     // Zero means the reviewer saw an absent block. A concurrent creation must not be overwritten.
     if (input.expectedRevision !== undefined && (old?.revision ?? 0) !== input.expectedRevision) throw new Error("MEMORY_REVISION_MISMATCH");

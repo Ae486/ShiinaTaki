@@ -1,7 +1,7 @@
 /**
  * INPUT:  open Database and explicit Legacy, canonical Local and Hindsight subsystem factories
  * OUTPUT: marker-first runtime selection, irreversible post-commit retirement (failed rebinding included), observable
- *         unavailable Local boot and same-epoch recovery that never re-activates
+ *         unavailable Local/Hindsight boot and same-epoch recovery that never re-activates or re-promotes
  * POS:    core/memory — authority marker routing seam; canonical mode never invokes the legacy factory
  */
 import type { Database } from "../db/sqlite.ts";
@@ -9,13 +9,18 @@ import type { MemoryEngine } from "./memory-engine.ts";
 import type { MemorySubsystem } from "./bootstrap.ts";
 import { readMemoryAuthoritySelection, type MemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
 
+export type BindingRecoveryOutcome = "healthy" | "published";
 export interface SelectedMemoryRuntime {
   memory: MemoryEngine;
   legacy: MemorySubsystem | null;
   readonly canonical: boolean;
   bindCanonical(epochId: string): void;
   /** Same-epoch repair of an unavailable committed Local runtime; never re-activates and never revives Legacy. */
-  recoverCanonical(epochId: string): "healthy" | "published";
+  recoverCanonical(epochId: string): BindingRecoveryOutcome;
+  /** After a Hindsight COMMIT: retire Local (never restored) and construct the Hindsight runtime for the committed epoch. */
+  bindHindsight(epochId: string): void;
+  /** Same-epoch repair of an unavailable committed Hindsight runtime; never re-promotes and never revives Local. */
+  recoverHindsight(epochId: string): BindingRecoveryOutcome;
   stop(): void;
 }
 export interface SelectMemoryRuntimeInput {
@@ -25,27 +30,29 @@ export interface SelectMemoryRuntimeInput {
   createHindsight?: (epochId: string) => MemoryEngine;
   onLegacyRetired?: () => void;
   onCanonicalBound?: () => void;
-  /** Present = a committed Local runtime that fails to construct at boot stays observable and unavailable instead of aborting boot. */
+  /** Runs once the Hindsight marker is proven and before construction: the Local runtime is withdrawn whatever follows. */
+  onLocalRetired?: () => void;
+  /** Present = a committed Local or Hindsight runtime that fails to construct at boot stays observable and unavailable instead of aborting boot. */
   onBootUnavailable?: (error: unknown) => void;
+  /** False when the constructed Hindsight runtime was withdrawn afterwards (failed start); recovery then constructs it again. */
+  hindsightLive?: () => boolean;
 }
 interface SelectorState { canonical: boolean; legacy: MemorySubsystem | null; current: MemoryEngine | undefined }
 
 export function selectMemoryRuntime(input: SelectMemoryRuntimeInput): SelectedMemoryRuntime {
   const selection = readMemoryAuthoritySelection(input.db);
-  if (selection.mode === "hindsight" && !input.createHindsight) {
-    throw new Error("MEMORY_INTEGRITY_ERROR: Hindsight authority runtime is not installed");
-  }
   const state: SelectorState = { canonical: selection.mode !== "legacy-markdown", legacy: null, current: undefined };
   if (selection.mode === "hindsight") {
-    state.current = input.createHindsight!(selection.epochId as string);
+    const construct = requireHindsight(input);
+    state.current = bootConstruct(input, () => construct(selection.epochId as string));
   } else if (state.canonical) {
-    state.current = bootCanonical(input, selection.epochId as string);
+    state.current = bootConstruct(input, () => input.createCanonical(selection.epochId as string));
   } else {
     state.legacy = input.createLegacy();
     state.current = state.legacy.engine;
   }
   const readCurrent = (): MemoryEngine => {
-    if (!state.current) throw new Error("MEMORY_INTEGRITY_ERROR: canonical Local runtime is unavailable");
+    if (!state.current) throw new Error("MEMORY_INTEGRITY_ERROR: selected memory runtime is unavailable");
     return state.current;
   };
   return {
@@ -61,11 +68,27 @@ export function selectMemoryRuntime(input: SelectMemoryRuntimeInput): SelectedMe
       state.current = input.createCanonical(epochId);
       return "published";
     },
+    bindHindsight: (epochId) => bindHindsight(input, state, epochId),
+    recoverHindsight: (epochId) => {
+      committedHindsightEpoch(readMemoryAuthoritySelection(input.db), epochId);
+      if (state.current && (input.hindsightLive?.() ?? true)) return "healthy";
+      state.current = requireHindsight(input)(epochId);
+      return "published";
+    },
   };
 }
 
 function committedEpoch(committed: MemoryAuthoritySelection, epochId: string): void {
   if (committed.mode !== "canonical-local" || committed.epochId !== epochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
+}
+
+function committedHindsightEpoch(committed: MemoryAuthoritySelection, epochId: string): void {
+  if (committed.mode !== "hindsight" || committed.epochId !== epochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
+}
+
+function requireHindsight(input: SelectMemoryRuntimeInput): (epochId: string) => MemoryEngine {
+  if (!input.createHindsight) throw new Error("MEMORY_INTEGRITY_ERROR: Hindsight authority runtime is not installed");
+  return input.createHindsight;
 }
 
 function bindCanonical(input: SelectMemoryRuntimeInput, state: SelectorState, epochId: string): void {
@@ -87,8 +110,17 @@ function bindCanonical(input: SelectMemoryRuntimeInput, state: SelectorState, ep
   state.current = next;
 }
 
-function bootCanonical(input: SelectMemoryRuntimeInput, epochId: string): MemoryEngine | undefined {
-  try { return input.createCanonical(epochId); }
+/** Local is withdrawn only on positive Hindsight marker proof; a failed construction leaves Hindsight selected and unavailable. */
+function bindHindsight(input: SelectMemoryRuntimeInput, state: SelectorState, epochId: string): void {
+  committedHindsightEpoch(readMemoryAuthoritySelection(input.db), epochId);
+  const construct = requireHindsight(input);
+  state.canonical = true; state.legacy = null; state.current = undefined;
+  input.onLocalRetired?.();
+  state.current = construct(epochId);
+}
+
+function bootConstruct(input: SelectMemoryRuntimeInput, construct: () => MemoryEngine): MemoryEngine | undefined {
+  try { return construct(); }
   catch (error) {
     if (!input.onBootUnavailable) throw error;
     input.onBootUnavailable(error);

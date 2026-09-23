@@ -16,4 +16,6 @@
 - hindsight-application-fixtures.ts — complete hash-consistent D77 bundles/events and V1 baseline manifest fixtures
 - hindsight-application-runtime-fixtures.ts — bound native/artifact fixtures, an admitted capability manifest and an isolated SQLite authority
 
-- hindsight-runtime-composition-fixtures.ts — isolated SQLite/B3 runtime construction with exact native selectors and complete application history
+- hindsight-runtime-composition-fixtures.ts — isolated SQLite/B3 runtime construction with exact native selectors and complete application history; exports the D77 application client overlay and fixture secrets for the activation journey
+- hindsight-fixture-routes.ts — the health/version/compatibility bodies shared by every in-memory Hindsight transport double
+- hindsight-activation-transport.ts — in-memory D78 transport double for activation tests: Bank setup, snapshots, current-state transfers, cutover verifications computed from the POSTed request, per-route counts, one-shot/persistent faults and a pre-answer hook

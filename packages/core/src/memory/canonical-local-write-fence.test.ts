@@ -1,0 +1,50 @@
+import { afterEach, describe, expect, it } from "vitest";
+import { createHindsightActivationHarness, type HindsightActivationHarness } from "./hindsight-activation/hindsight-activation-fixture.ts";
+import { createCanonicalLocalWriteFence } from "./canonical-local-write-fence.ts";
+
+const harnesses: HindsightActivationHarness[] = [];
+afterEach(async () => { for (const harness of harnesses.splice(0)) await harness.close(); });
+function harness() { const value = createHindsightActivationHarness(); harnesses.push(value); return value; }
+const options = { toolCallId: "call-1", messages: [], context: undefined };
+
+describe("canonical Local write fence", () => {
+  it("drains admitted writers before fencing, refuses later writes, and reopens only through release until retired", async () => {
+    const fence = createCanonicalLocalWriteFence();
+    let finish!: () => void; const slow = fence.admit(() => new Promise<void>((resolve) => { finish = resolve; }));
+    let quiesced = false; const quiesce = fence.quiesce({ timeoutMs: 1_000 }).then(() => { quiesced = true; });
+    await Promise.resolve(); expect(quiesced).toBe(false); expect(fence.writable()).toBe(false);
+    await expect(fence.admit(async () => "late")).rejects.toThrow("MEMORY_AUTHORITY_FENCED");
+    finish(); await slow; await quiesce; expect(quiesced).toBe(true);
+    await expect(fence.quiesce({ timeoutMs: 10 })).rejects.toThrow("MEMORY_AUTHORITY_FENCED");
+    fence.release(); expect(fence.writable()).toBe(true); expect(fence.admitSync(() => "again")).toBe("again");
+    const stuck = fence.admit(() => new Promise<void>(() => undefined));
+    await expect(fence.quiesce({ timeoutMs: 5 })).rejects.toThrow("MEMORY_QUIESCENCE_TIMEOUT");
+    expect(fence.writable()).toBe(true); void stuck;
+    fence.retire(); fence.release(); expect(fence.writable()).toBe(false);
+    expect(() => fence.admitSync(() => "never")).toThrow("MEMORY_AUTHORITY_FENCED");
+  });
+
+  it("returns structured MEMORY_AUTHORITY_FENCED from every Local writer while reads and witnesses stay open", async () => {
+    const h = harness(); const { subsystem } = h;
+    const run = await subsystem.captureRun("taki");
+    await subsystem.fence.quiesce({ timeoutMs: 1_000 });
+    expect(() => subsystem.engine.writeEntry({ characterId: "taki", type: "episodes", content: "fenced", importance: 3 })).toThrow("MEMORY_AUTHORITY_FENCED");
+    expect(() => subsystem.writeMemory({ characterId: "taki", layer: "episodes", content: "fenced", importance: 3 })).toThrow("MEMORY_AUTHORITY_FENCED");
+    await expect(subsystem.tidy.runNow("taki")).rejects.toThrow("MEMORY_AUTHORITY_FENCED");
+    await expect(subsystem.maintenance.run("taki", "primary")).rejects.toThrow("MEMORY_AUTHORITY_FENCED");
+    expect(await subsystem.memoryFlush.prepareRetirement({ characterId: "taki", fromSeq: 0, throughSeq: 2, operationId: "flush-1" }))
+      .toEqual({ status: "retryable_failure", code: "MEMORY_AUTHORITY_FENCED" });
+    const retained = await run.tools.retain!.execute!({ content: "我记得这件事。", layer: "episodes", context: null }, options);
+    expect(retained).toMatchObject({ ok: false, code: "MEMORY_AUTHORITY_FENCED" });
+    const recalled = await run.tools.recall!.execute!({ query: "这件事", scope: "both", limit: 4, maxTokens: 400 }, options);
+    expect(recalled).toMatchObject({ ok: true });
+    expect(subsystem.engine.assemble({ characterId: "taki", currentMessage: "hello" })).toEqual(expect.any(String));
+    const late = await subsystem.captureRun("taki");
+    expect(await late.tools.update_memory!.execute!({ scope: "global", memoryId: "missing", expectedRevision: 1, patch: { text: "x" } }, options))
+      .toMatchObject({ ok: false, code: "MEMORY_AUTHORITY_FENCED" });
+    const entries = h.primary();
+    expect(h.db.prepare("SELECT count(*) AS n FROM canonical_memory_primary_commits").get()?.n).toBe(entries.length);
+    subsystem.fence.release();
+    expect(await run.tools.retain!.execute!({ content: "我记得这件事。", layer: "episodes", context: null }, options)).toMatchObject({ ok: true });
+  });
+});

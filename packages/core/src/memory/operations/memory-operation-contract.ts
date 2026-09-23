@@ -1,13 +1,15 @@
 /**
  * INPUT:  sealed operation requests plus the live producers (B3 setup service, B5 scheduler, Hindsight runtime accessor,
- *         Local onboarding service) and the owner's own row lookup
- * OUTPUT: the handler contract every operation kind implements, the settlement/observation shapes and the closed refusal error
+ *         Local onboarding service, Hindsight activation service) and the owner's own row lookups
+ * OUTPUT: the handler contract every operation kind implements, the settlement/observation shapes, the closed refusal error
+ *         and the mutual single-flight guard for the setup / local-onboarding / hindsight-activation families
  * POS:    core/memory/operations — internal contract shared by the kind handlers and the service; no persistence here
  */
 import type {
   MemoryOperation, MemoryOperationErrorCode, MemoryOperationProducerRef, MemoryOperationReason, MemoryOperationRefusalReason,
   MemoryOperationRequest, MemoryOperationResult, MemoryReplicaBank, PendingMemorySummary,
 } from "@taki/shared";
+import type { HindsightActivationService } from "../hindsight-activation/hindsight-activation-service.ts";
 import type { HindsightReplicaScheduler } from "../hindsight/hindsight-replica-scheduler.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
 import type { LocalOnboardingService } from "../local-onboarding/local-onboarding-service.ts";
@@ -26,9 +28,22 @@ export interface MemoryOperationContext {
   setup: HindsightSetupService;
   /** Absent when Core composes without a Local onboarding producer; the local kinds then refuse at admission. */
   local?: LocalOnboardingService;
+  /** Absent when Core composes without a Hindsight activation producer; the activation kind then refuses at admission. */
+  hindsight?: HindsightActivationService;
   /** The owner's own durable rows, so a kind can resolve a prior command (retry) without trusting the client. */
   lookup(operationId: string): MemoryOperation | undefined;
+  activeInFamily(family: string): MemoryOperation | undefined;
+  latestInFamily(family: string): MemoryOperation | undefined;
   now(): string;
+}
+
+/** Setup, Local onboarding and Hindsight activation are mutually single-flight (grill G6); the open row wins and is named. */
+export const EXCLUSIVE_MEMORY_FAMILIES = ["setup", "local-onboarding", "hindsight-activation"] as const;
+export function refuseWhileExclusiveFamilyBusy(ctx: Pick<MemoryOperationContext, "activeInFamily">): void {
+  for (const family of EXCLUSIVE_MEMORY_FAMILIES) {
+    const active = ctx.activeInFamily(family);
+    if (active) throw new MemoryOperationRefusal("MEMORY_OPERATION_BUSY", active.operationId);
+  }
 }
 
 export interface MemoryOperationSettlement {
@@ -42,6 +57,7 @@ export interface MemoryOperationSettlement {
 export type MemoryOperationObservation = { kind: "running" } | { kind: "settled"; settlement: MemoryOperationSettlement } | null;
 
 export interface MemoryOperationExecution<R extends MemoryOperationRequest> {
+  operationId: string;
   request: R;
   producer: MemoryOperationProducerRef;
   ctx: MemoryOperationContext;

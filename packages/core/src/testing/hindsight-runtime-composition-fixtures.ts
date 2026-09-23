@@ -24,7 +24,7 @@ import { failingGenerateModel } from "./mock-language-model.ts";
 import { rmTempDir } from "./rm-temp.ts";
 import { APPLICATION_TEST_AT, APPLICATION_TEST_SCOPE, applicationTestSnapshot, applicationTestNativeBaseline,
   type ApplicationArtifactFixture } from "./hindsight-application-fixtures.ts";
-import { applicationTestCompatibility } from "./hindsight-application-runtime-fixtures.ts";
+import { hindsightFixtureCommonRoute } from "./hindsight-fixture-routes.ts";
 import { createIntlSegmenterTokenizer } from "../memory/search-tokenizer.ts";
 import { createUtilitySlot } from "../memory/utility-slot.ts";
 import { composeMemoryRuntime } from "../memory/runtime-composition.ts";
@@ -36,8 +36,8 @@ import { hindsightApplicationHash, sameApplicationValue, withoutApplicationHash 
 import { hindsightError } from "../memory/hindsight/hindsight-errors.ts";
 import { curatorTestBank, type CuratorTestBank } from "../memory/hindsight/hindsight-policy-curator-fixtures.ts";
 
-interface TransportControl { offline: boolean; beforeChanges?: (bankId: string) => Promise<void>; beforeRecall?: (bankId: string) => Promise<void> }
-interface RuntimeCall { operation: string; bankId?: string }
+export interface TransportControl { offline: boolean; beforeChanges?: (bankId: string) => Promise<void>; beforeRecall?: (bankId: string) => Promise<void> }
+export interface RuntimeCall { operation: string; bankId?: string }
 export function hindsightRuntimeFixture(input: { mode?: "hindsight" | "local" | "legacy"; seed?: boolean;
   banks?: CuratorTestBank[]; model?: LanguageModel } = {}) {
   const dataDir = mkdtempSync(join(tmpdir(), "taki-hindsight-runtime-"));
@@ -47,7 +47,7 @@ export function hindsightRuntimeFixture(input: { mode?: "hindsight" | "local" | 
   const model = input.model ?? failingGenerateModel(new Error("fixture forbids unexpected Utility model calls"));
   const config = createConfigRepo(db); const source = createConfigSource({ env: {}, repo: config });
   config.upsert("TAKI_HINDSIGHT_ENABLED", true); config.upsert("TAKI_HINDSIGHT_ENDPOINT", "http://127.0.0.1:18481");
-  const secrets = fixtureSecrets(); const remote = runtimeClient(banks, secrets.catalog);
+  const secrets = hindsightFixtureSecrets(); const remote = runtimeClient(banks, secrets.catalog);
   const authority = createCanonicalMemoryAuthorityRepo(db);
   if (mode === "hindsight") seedHindsightAuthority(db, banks);
   else {
@@ -106,7 +106,7 @@ function seedHindsightAuthority(db: Database, banks: CuratorTestBank[]) {
   db.prepare(`UPDATE memory_authority_selection SET mode='hindsight',active_epoch_id='epoch',verified_snapshot_id=NULL,
     activation_transaction_id='fixture-hindsight',provider_lineage_id=:lineage,replica_checkpoint_digest=:digest WHERE singleton=1`).run({ lineage, digest });
 }
-function fixtureSecrets() {
+export function hindsightFixtureSecrets() {
   const state = { value: "fixture-connection-key" as string | null, version: 1 };
   const provenance = () => ({ source: "catalog" as const, keyVersion: state.version, updatedAt: APPLICATION_TEST_AT });
   const unsupported = (): never => { throw new Error("unused fixture secret method"); };
@@ -119,6 +119,16 @@ function fixtureSecrets() {
 }
 
 function runtimeClient(banks: CuratorTestBank[], secrets: SecretCatalogService) {
+  const { overlay, control, calls, requireBank } = hindsightApplicationClientOverlay(banks);
+  const base = createNativeFixtureClient({ control, calls, secrets, requireBank });
+  const client: HindsightClient & HindsightApplicationClient = { ...base, ...overlay };
+  return { client, control, calls };
+}
+/**
+ * The in-memory D77 application methods (plus the native baseline) for a set of curator Banks, layered over any native
+ * transport client; the activation journey overlays them on the activation transport double for the post-COMMIT runtime.
+ */
+export function hindsightApplicationClientOverlay(banks: CuratorTestBank[]) {
   const control: TransportControl = { offline: false }; const calls: RuntimeCall[] = [];
   const bundles = new Map<string, HindsightApplicationBundle>();
   const histories = new Map(banks.map((bank) => [bank.scope.bankId, new Map(bank.artifacts.map((entry) => [historyKey(entry), entry]))]));
@@ -138,7 +148,6 @@ function runtimeClient(banks: CuratorTestBank[], secrets: SecretCatalogService) 
     bundle.manifest.manifest_hash = hindsightApplicationHash({ ...bank.scope, domain: "snapshot", value: withoutApplicationHash(bundle.manifest, "manifest_hash") });
     bundles.set(bundle.manifest.snapshot_id, bundle); storeBodies(bank, bundle); return bundle.manifest;
   };
-  const base = createNativeFixtureClient({ control, calls, secrets, requireBank });
   const app: HindsightApplicationClient = { ...bodyClient(requireBank),
     initializeApplication: async ({ bankId }) => { const bank = requireBank(bankId, "initialize"); return {
       namespace: bank.scope.namespace, bank_id: bankId, checkpoint: checkpoint(bank), minimum_state_cursor: 0, initialized_at: APPLICATION_TEST_AT }; },
@@ -156,9 +165,9 @@ function runtimeClient(banks: CuratorTestBank[], secrets: SecretCatalogService) 
       .find((event) => event.manifest.state_cursor === stateCursor)!.pages[pageNumber]!,
     pruneApplicationChanges: async () => { throw new Error("unused fixture prune"); },
     reflectApplication: async () => { throw new Error("unused fixture reflection"); } };
-  const client: HindsightClient & HindsightApplicationClient = { ...base, ...app, createLogicalSnapshot: async ({ bankId }) => {
+  const overlay: HindsightApplicationClient & Pick<HindsightClient, "createLogicalSnapshot"> = { ...app, createLogicalSnapshot: async ({ bankId }) => {
     const bank = requireBank(bankId, "native-baseline"); return applicationTestNativeBaseline(bankBundle(bank)); } };
-  return { client, control, calls };
+  return { overlay, control, calls, requireBank };
 }
 function createNativeFixtureClient(input: { control: TransportControl; calls: RuntimeCall[]; secrets: SecretCatalogService;
   requireBank(bankId: string, operation: string): CuratorTestBank }): HindsightClient {
@@ -168,9 +177,7 @@ function createNativeFixtureClient(input: { control: TransportControl; calls: Ru
       const path = new URL(String(url)).pathname; calls.push({ operation: path });
       if (control.offline) throw new Error("fixture is offline");
       if (new Headers(init?.headers).get("authorization") !== `Bearer ${secrets.resolve("memory.hindsight.connection.api-key")}`) throw new Error("fixture expected authentication");
-      if (path === "/health") return { status: 200, body: JSON.stringify({ status: "healthy", database: "connected" }) };
-      if (path === "/version") return { status: 200, body: JSON.stringify({ api_version: "0.9.0" }) };
-      if (path === "/ext/taki-memory/version") return { status: 200, body: JSON.stringify(applicationTestCompatibility()) };
+      const common = hindsightFixtureCommonRoute(path); if (common) return common;
       const match = /^\/v1\/default\/banks\/([^/]+)\/memories\/recall$/.exec(path);
       if (match) {
         const bank = requireBank(decodeURIComponent(match[1]!), "recall-native"); await control.beforeRecall?.(bank.scope.bankId);

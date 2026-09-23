@@ -1,6 +1,6 @@
 /**
  * INPUT:  a Local subsystem draft constructor, the authority marker reader and the composition logger
- * OUTPUT: createLocalRuntimeBinding -> publish/current/snapshot/stop: the ONE published truth for the Local engine,
+ * OUTPUT: createLocalRuntimeBinding -> publish/current/snapshot/retire/stop: the ONE published truth for the Local engine,
  *         captureRun, maintenance, writeMemory and flush, plus a pure snapshot for onboarding and authority status
  * POS:    core/memory — draft -> install -> publish -> start; a failed draft is disposed and leaves an observable
  *         unavailable state, never a half-published engine; no side channel exposes a draft
@@ -28,6 +28,8 @@ export interface LocalRuntimeBinding {
   publish(epochId: string): LocalSubsystem;
   current(): LocalSubsystem | undefined;
   snapshot(): LocalBindingSnapshot;
+  /** Irreversible: after a Hindsight COMMIT the publication is withdrawn so no caller can route to the retired Local runtime. */
+  retire(): void;
   stop(): void;
 }
 
@@ -60,6 +62,7 @@ export function createLocalRuntimeBinding(input: { db: Database; construct: (epo
       return { selection: selection.mode, selectedEpochId: selection.epochId, binding: state,
         lifetime: stopped ? "stopped" : "running", flush: published && !stopped ? "available" : "failing" };
     },
+    retire: () => { dispose(published); published = undefined; state = { kind: "none" }; },
     stop: () => { stopped = true; dispose(published); },
   };
 }

@@ -5,9 +5,10 @@
  */
 import { randomUUID } from "node:crypto";
 import { TimelineEntrySchema, type TimelineEntry } from "@taki/shared";
-import { primaryEntryDigest } from "../memory/canonical-ingestion-source.ts";
+import { primaryEntryDigest, type PrimaryConversationCommit } from "../memory/canonical-ingestion-source.ts";
 import { createCanonicalIngestionSourceRepo } from "./canonical-ingestion-source-repo.ts";
 import { canonicalMemoryAtomic } from "./canonical-memory-maintenance-storage.ts";
+import { createHindsightIngestionSourceRepo } from "./hindsight-ingestion-source-repo.ts";
 import type { Database, SqlRow } from "./sqlite.ts";
 import type { TimelineRepo } from "./timeline-repo.ts";
 
@@ -59,12 +60,12 @@ function begin(custody: Custody, input: { characterId: string; runId?: string; r
   const { db } = custody;
   const groupId = randomUUID();
   canonicalMemoryAtomic(db, () => {
-    const epoch = currentLocalCandidate(db);
-    if (epoch) initializeEligibility(db, { epoch, characterId: input.characterId, now: custody.now() });
+    const candidate = currentCandidate(db);
+    if (candidate) initializeEligibility(db, { ...candidate, characterId: input.characterId, now: custody.now() });
     db.prepare(`INSERT INTO primary_memory_groups
       (group_id,character_id,run_id,creator_boot_id,original_epoch_id,assigned_epoch_id,state,created_at)
       VALUES (:id,:character,:run,:boot,:epoch,:epoch,'open',:now)`)
-      .run({ id: groupId, character: input.characterId, run: input.runId ?? null, boot: custody.bootId, epoch, now: custody.now() });
+      .run({ id: groupId, character: input.characterId, run: input.runId ?? null, boot: custody.bootId, epoch: candidate?.epoch ?? null, now: custody.now() });
   });
   const repo: PrimaryTimelineWriter = {
     append: (entry) => canonicalMemoryAtomic(db, () => {
@@ -94,15 +95,31 @@ function failureCode(error: unknown): string {
   return message.match(/^MEMORY_[A-Z_]+(?=:|$)/)?.[0] ?? "MEMORY_INGESTION_WITNESS_FAILED";
 }
 
-/** The committed Local epoch, or the selected candidate's epoch while it is the active canonical authority; Hindsight enrolls none. */
-function currentLocalCandidate(db: Database): string | null {
+type EpochProvider = "local" | "hindsight";
+interface EpochCandidate { epoch: string; provider: EpochProvider }
+
+/** The committed Local or Hindsight epoch, or the selected candidate's epoch while it is the active canonical authority under Legacy. */
+function currentCandidate(db: Database): EpochCandidate | null {
   const marker = db.prepare("SELECT mode,active_epoch_id FROM memory_authority_selection WHERE singleton=1").get();
-  if (marker?.mode === "canonical-local") return String(marker.active_epoch_id);
+  if (marker?.mode === "canonical-local") return { epoch: String(marker.active_epoch_id), provider: "local" };
+  if (marker?.mode === "hindsight") return { epoch: String(marker.active_epoch_id), provider: "hindsight" };
   if (marker?.mode !== "legacy-markdown") return null;
   const row = db.prepare(`SELECT r.epoch_id FROM memory_migration_runs r JOIN memory_migration_candidates c ON c.run_id=r.run_id
     JOIN canonical_memory_authority_state s ON s.singleton=1 AND s.active_epoch_id=r.epoch_id
     WHERE c.superseded_by_run_id IS NULL AND r.status<>'completed' LIMIT 1`).get();
-  return row ? String(row.epoch_id) : null;
+  return row ? { epoch: String(row.epoch_id), provider: "local" } : null;
+}
+
+/** Witness routing follows the assigned epoch's provider, so a group carried across COMMIT finalizes into the Hindsight table. */
+function epochProvider(db: Database, epochId: string): EpochProvider {
+  const row = db.prepare("SELECT provider_id FROM canonical_memory_authority_epochs WHERE epoch_id=:epoch").get({ epoch: epochId });
+  if (row?.provider_id !== "local" && row?.provider_id !== "hindsight") throw new Error("MEMORY_AUTHORITY_MISMATCH");
+  return row.provider_id;
+}
+
+function witness(db: Database, input: { candidate: EpochCandidate; commit: PrimaryConversationCommit; now: string }): void {
+  if (input.candidate.provider === "local") createCanonicalIngestionSourceRepo(db).recordPrimaryCommitted({ ...input.commit, epochId: input.candidate.epoch });
+  else createHindsightIngestionSourceRepo(db).recordPrimaryCommitted({ ...input.commit, epochId: input.candidate.epoch, now: input.now });
 }
 
 function requireOpen(db: Database, groupId: string): SqlRow {
@@ -133,8 +150,9 @@ function finalize(db: Database, groupId: string, now: string): void {
     const entries = exactMembers(db, group);
     // An unassigned Legacy group closes its header only; a zero-member group leaves no witness and no boundary.
     if (entries.length > 0 && group.assigned_epoch_id !== null) {
-      createCanonicalIngestionSourceRepo(db).recordPrimaryCommitted({ characterId: String(group.character_id), entries,
-        epochId: String(group.assigned_epoch_id), ...(group.run_id ? { runId: String(group.run_id) } : {}) });
+      const epoch = String(group.assigned_epoch_id);
+      witness(db, { candidate: { epoch, provider: epochProvider(db, epoch) }, now,
+        commit: { characterId: String(group.character_id), entries, ...(group.run_id ? { runId: String(group.run_id) } : {}) } });
     }
     db.prepare(`UPDATE primary_memory_groups SET state=:state,producer_settled=1,finalized_through_seq=:seq,finalized_at=:now
       WHERE group_id=:id AND state='open'`)
@@ -167,10 +185,12 @@ function recoverable(db: Database, row: SqlRow, bootId: string): boolean {
   return db.prepare("SELECT 1 FROM runs WHERE run_id=:run AND terminal_at IS NOT NULL").get({ run: String(row.run_id) }) !== undefined;
 }
 
-function initializeEligibility(db: Database, input: { epoch: string; characterId: string; now: string }): void {
+function initializeEligibility(db: Database, input: EpochCandidate & { characterId: string; now: string }): void {
   const throughSeq = Number(db.prepare("SELECT coalesce(max(seq),0) AS seq FROM timeline_messages WHERE character_id=:character")
     .get({ character: input.characterId })?.seq ?? 0);
-  createCanonicalIngestionSourceRepo(db).initializeBaseline({ epochId: input.epoch, characterId: input.characterId, throughSeq, now: input.now });
+  const scope = { epochId: input.epoch, characterId: input.characterId, throughSeq, now: input.now };
+  if (input.provider === "local") createCanonicalIngestionSourceRepo(db).initializeBaseline(scope);
+  else createHindsightIngestionSourceRepo(db).initializeBaseline(scope);
 }
 
 /** Runs inside candidate publication after the active pointer moved; adopts open groups and relocates unconsumed custody. */
@@ -178,7 +198,7 @@ export function assignPrimaryCandidate(db: Database, input: { epoch: string; pre
   if (input.previousEpoch) relocateUnconsumed(db, { previous: input.previousEpoch, epoch: input.epoch });
   const characters = db.prepare(`SELECT DISTINCT character_id FROM timeline_messages UNION SELECT character_id FROM primary_memory_groups
     UNION SELECT character_id FROM canonical_memory_banks WHERE authority_epoch_id=:epoch AND scope_kind='character'`).all({ epoch: input.epoch });
-  for (const row of characters) initializeEligibility(db, { epoch: input.epoch, characterId: String(row.character_id), now: input.now });
+  for (const row of characters) initializeEligibility(db, { epoch: input.epoch, provider: "local", characterId: String(row.character_id), now: input.now });
   // Finalized groups that were never assigned are pre-boundary Legacy history; they are not adopted later.
   db.prepare(`UPDATE primary_memory_groups SET original_epoch_id=coalesce(original_epoch_id,:epoch),assigned_epoch_id=:epoch
     WHERE (state='open' AND assigned_epoch_id IS NULL) OR (assigned_epoch_id=:previous AND state IN ('open','finalized'))`)

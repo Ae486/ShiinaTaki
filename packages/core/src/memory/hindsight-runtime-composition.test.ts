@@ -122,10 +122,34 @@ describe("production Hindsight runtime composition", () => {
     expect(runtime.selected.legacy).toBeNull();
   });
 
-  it("fails selected-Hindsight construction with disabled B3 configuration without creating a Legacy directory", () => {
+  it("keeps Core serving with an observable unavailable Hindsight runtime when B3 configuration is disabled at boot", async () => {
     const f = fixture(); f.config.upsert("TAKI_HINDSIGHT_ENABLED", false);
-    expect(() => f.compose()).toThrow("HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE");
+    const runtime = f.compose();
+    expect(runtime.operations()).toBeNull(); expect(runtime.selected.legacy).toBeNull(); expect(runtime.selected.canonical).toBe(true);
+    expect(runtime.hindsightBindingSnapshot()).toMatchObject({ selection: "hindsight", selectedEpochId: "epoch",
+      binding: { kind: "unavailable", epochId: "epoch", code: "HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE" } });
+    await expect(runtime.captureRun("taki")).rejects.toThrow("MEMORY_RUNTIME_UNAVAILABLE");
+    expect(() => runtime.memory.createTools("taki")).toThrow("MEMORY_INTEGRITY_ERROR");
     expect(f.remote.calls).toEqual([]); expect(existsSync(join(f.dataDir, "workspace", "memory"))).toBe(false);
+    // Repair once the configuration is back: same epoch, never a second promotion.
+    f.config.upsert("TAKI_HINDSIGHT_ENABLED", true);
+    expect(runtime.recoverHindsightBinding("epoch")).toEqual({ binding: "published", reconciledGroups: 0 });
+    expect(runtime.hindsightBindingSnapshot().binding).toEqual({ kind: "published", epochId: "epoch" });
+    expect(runtime.operations()?.epochId).toBe("epoch");
+  });
+
+  it("keeps Core serving when the selected Hindsight runtime fails to start at boot and republishes it through recover", async () => {
+    const f = fixture(); const runtime = f.compose();
+    f.config.upsert("TAKI_HINDSIGHT_ENABLED", false);
+    expect(() => runtime.start()).not.toThrow();
+    expect(runtime.operations()).toBeNull();
+    expect(runtime.hindsightBindingSnapshot().binding).toMatchObject({ kind: "unavailable", epochId: "epoch" });
+    await expect(runtime.captureRun("taki")).rejects.toThrow("MEMORY_RUNTIME_UNAVAILABLE");
+    f.config.upsert("TAKI_HINDSIGHT_ENABLED", true);
+    expect(runtime.recoverHindsightBinding("epoch")).toEqual({ binding: "published", reconciledGroups: 0 });
+    expect(runtime.hindsightBindingSnapshot().binding).toEqual({ kind: "published", epochId: "epoch" });
+    expect(runtime.operations()?.scheduler.started()).toBe(true);
+    expect(runtime.recoverHindsightBinding("epoch")).toEqual({ binding: "healthy", reconciledGroups: 0 });
   });
 
   it("uses verified replica data during an outage while retaining Hindsight identity and explicit partial status", async () => {

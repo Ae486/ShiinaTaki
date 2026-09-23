@@ -1,6 +1,6 @@
 /**
- * INPUT:  the authority selection marker, the live Hindsight runtime accessor, the pure Local binding snapshot, the B3 setup
- *         service and the operation owner
+ * INPUT:  the authority selection marker, the live Hindsight runtime accessor, the pure Local and Hindsight binding snapshots,
+ *         the B3 setup service and the operation owner
  * OUTPUT: readMemoryAuthorityStatus() — one strict composite MemoryAuthorityStatus; an unavailable runtime never fails the read
  * POS:    core/memory/operations — read-only projection; unknown stays unknown (derivedFreshness is always "unknown")
  */
@@ -9,6 +9,7 @@ import { countPendingHindsightMemoryWrites } from "../../db/hindsight-memory-wri
 import type { Database } from "../../db/sqlite.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
+import { hindsightRuntimeAvailability, type HindsightBindingSnapshot } from "../hindsight-runtime-binding.ts";
 import { localRuntimeAvailability } from "../local-onboarding/local-onboarding-reads.ts";
 import type { LocalBindingSnapshot } from "../local-runtime-binding.ts";
 import type { MemoryOperationsRuntime } from "./memory-operation-contract.ts";
@@ -19,6 +20,8 @@ export interface MemoryAuthorityStatusInput {
   live(): MemoryOperationsRuntime | null;
   /** The same pure Local binding snapshot the onboarding status reads; absent means a selected Local runtime is judged available. */
   binding?(): LocalBindingSnapshot;
+  /** The pure Hindsight binding snapshot; absent means a selected Hindsight runtime is judged by the live accessor alone. */
+  hindsightBinding?(): HindsightBindingSnapshot;
   setup: HindsightSetupService;
   operations: MemoryOperationService;
   now?: () => string;
@@ -32,8 +35,9 @@ export function readMemoryAuthorityStatus(input: MemoryAuthorityStatusInput): Me
   const runtime = hindsight ? input.live() : null;
   let unavailableReason: MemoryRuntimeUnavailableReason | null = hindsight && !runtime ? "not_installed" : null;
   if (selection.mode === "canonical-local" && input.binding) unavailableReason = localRuntimeAvailability(input.binding()).unavailableReason;
+  if (hindsight && input.hindsightBinding) unavailableReason = hindsightRuntimeAvailability(input.hindsightBinding()).unavailableReason;
   let evidence: Evidence = { replica: null, pending: null };
-  if (runtime) {
+  if (runtime && unavailableReason === null) {
     try { evidence = hindsightEvidence(input.db, runtime); }
     catch (error) { unavailableReason = unavailableReasonOf(error); }
   }

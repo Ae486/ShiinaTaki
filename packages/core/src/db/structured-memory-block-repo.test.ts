@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createCanonicalMemoryAuthorityRepo } from "./canonical-memory-authority-repo.ts";
 import { MIGRATIONS } from "./migrations/index-list.ts";
 import { openDatabase } from "./sqlite.ts";
 import { createStructuredMemoryBlockRepo } from "./structured-memory-block-repo.ts";
@@ -34,5 +35,13 @@ describe("structured Memory Blocks", () => {
     expect(headers.map((header) => rendered.indexOf(header))).toEqual([...headers.map((header) => rendered.indexOf(header))].sort((a, b) => a - b));
     expect(rendered).toContain("[truncated to block budget]"); expect(rendered).toContain("[budget:");
     expect(db.prepare("SELECT count(*) AS n FROM canonical_memory_units").get()?.n).toBe(0); expect(db.prepare("SELECT count(*) AS n FROM canonical_memory_fts").get()?.n).toBe(0); db.close();
+  });
+  it("binds a canonical writer's Block write to the active authority epoch inside the transaction", () => {
+    const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); const repo = createStructuredMemoryBlockRepo(db);
+    const scope = { kind: "global" as const, characterId: null };
+    const epoch = createCanonicalMemoryAuthorityRepo(db).initializeLocalAuthority("2026-09-23T00:00:00.000Z").epochId;
+    expect(repo.replace({ blockId: "user-model", scope, content: "same epoch", actor: "background", expectedEpochId: epoch }).revision).toBe(1);
+    expect(() => repo.replace({ blockId: "user-model", scope, content: "retired epoch", actor: "background", expectedEpochId: "closed-epoch" })).toThrow("MEMORY_AUTHORITY_MISMATCH");
+    expect(repo.read("user-model", scope)).toMatchObject({ content: "same epoch", revision: 1 }); db.close();
   });
 });

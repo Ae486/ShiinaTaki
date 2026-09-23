@@ -14,7 +14,8 @@ export interface HindsightCutoverLease { runId: string; owner: string; fence: nu
 
 export interface HindsightCutoverRunRepo {
   create(input: { runId: string; expectedPredecessorEpochId: string; now: string }): void;
-  acquireLease(input: { runId: string; owner: string; now: string; expiresAt: string }): HindsightCutoverLease;
+  /** `takeOverFrom` names the exact holder a resumed activation may displace (its operation is terminal or foreign-boot). */
+  acquireLease(input: { runId: string; owner: string; now: string; expiresAt: string; takeOverFrom?: string }): HindsightCutoverLease;
   renewLease(input: { lease: HindsightCutoverLease; now: string; expiresAt: string }): void;
   releaseLease(input: { lease: HindsightCutoverLease; now: string }): void;
   captureCoverage(input: { lease: HindsightCutoverLease; now: string }): HindsightLocalCoverageManifest;
@@ -125,13 +126,13 @@ function create(db: Database, input: { runId: string; expectedPredecessorEpochId
   });
 }
 
-function acquireLease(db: Database, input: { runId: string; owner: string; now: string; expiresAt: string }): HindsightCutoverLease {
+function acquireLease(db: Database, input: { runId: string; owner: string; now: string; expiresAt: string; takeOverFrom?: string }): HindsightCutoverLease {
   let fence = 0;
   db.transaction(() => {
     const result = db.prepare(`UPDATE hindsight_cutover_runs SET lease_owner=:owner,lease_fence=lease_fence+1,
       lease_expires_at=:expires,updated_at=:now WHERE run_id=:run AND status IN ('running','ready')
-      AND (lease_owner IS NULL OR lease_expires_at<=:now OR lease_owner=:owner)`)
-      .run({ run: input.runId, owner: input.owner, now: input.now, expires: input.expiresAt });
+      AND (lease_owner IS NULL OR lease_expires_at<=:now OR lease_owner=:owner OR lease_owner=:displaced)`)
+      .run({ run: input.runId, owner: input.owner, now: input.now, expires: input.expiresAt, displaced: input.takeOverFrom ?? null });
     if (result.changes !== 1) throw new Error("LEASE_LOST");
     fence = Number(db.prepare("SELECT lease_fence FROM hindsight_cutover_runs WHERE run_id=:run").get({ run: input.runId })?.lease_fence ?? 0);
     db.prepare("UPDATE hindsight_cutover_local_coverage SET selection_lease_fence=:fence WHERE run_id=:run")

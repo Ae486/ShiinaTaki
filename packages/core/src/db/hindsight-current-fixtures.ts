@@ -75,7 +75,8 @@ export function currentSnapshotFixture(records: HindsightSnapshotRecordWire[], b
   return { metadata, pages };
 }
 
-export function currentImportFixture(prepared: HindsightPreparedCurrentBank, baseline: HindsightSnapshotRecordWire[]) {
+/** `prepared` may be the persisted preparation or the transport double's view of a POSTed request plus its Bank identities. */
+export function currentImportFixture(prepared: Pick<HindsightPreparedCurrentBank, "request" | "bankId" | "sourceBankId">, baseline: HindsightSnapshotRecordWire[]) {
   const request = prepared.request; if (!request) throw new Error("TEST_REQUEST_MISSING");
   const records = structuredClone(baseline); const mappings: HindsightCurrentMapping[] = [{ ordinal: 0, source: request.source_bank,
     target_kind: "bank", target_id: prepared.bankId, target_revision: request.target_bank.object_revision,
@@ -123,8 +124,9 @@ function mapping(source: HindsightCurrentMapping["source"], record: HindsightSna
     target_payload_hash: hindsightCurrentStateHash(record.payload), journal_cursor: input.cursor };
 }
 
-export function currentMaintenanceFixture(imported: HindsightCurrentImportEvidence, native: ReturnType<typeof currentImportFixture>) {
-  const request = currentVerificationRequest({ imported, verificationId: CURRENT_VERIFICATION });
+export function currentMaintenanceFixture(imported: Pick<HindsightCurrentImportEvidence, "result">, native: ReturnType<typeof currentImportFixture>,
+  verificationId = CURRENT_VERIFICATION) {
+  const request = currentVerificationRequest({ imported, verificationId });
   const policy = hindsightCurrentStateHash({ observations_enabled: false }); const records: HindsightCutoverEvidenceRecord[] = [];
   const requirements: HindsightCutoverRequirement[] = [];
   for (const record of native.records.filter((row) => row.object_kind === "mental_model" || row.object_kind === "memory_unit"

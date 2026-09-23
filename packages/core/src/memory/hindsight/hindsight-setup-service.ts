@@ -51,6 +51,8 @@ export interface HindsightSetupDeps {
   connectionRepo: HindsightConnectionRepo;
   bankRepo: HindsightBankSetupRepo;
   authorityMode(): string;
+  /** True while a hindsight-activation operation row is open; validate/setup/disable then refuse HINDSIGHT_STATE_CONFLICT (G6). */
+  activationOpen?(): boolean;
   now?: () => string;
   attemptId?: () => string;
   wait?: (ms: number) => Promise<void>;
@@ -160,6 +162,9 @@ function disable(
   params: HindsightDisableParams,
   now: () => string,
 ): HindsightSetupSnapshot {
+  // A selected Hindsight authority cannot be disabled underneath its runtime; that is a Stage 4 transition, not a setup edit.
+  if (deps.authorityMode() === "hindsight") throw hindsightError("HINDSIGHT_STATE_CONFLICT");
+  requireNoActivation(deps);
   const current = requireRevision(read(deps), params.expectedRevision);
   requireIdle(current);
   return persist({ deps, current, patch: { phase: "disabled", latestError: null, attemptId: null }, updatedAt: now() });
@@ -258,6 +263,11 @@ function persistFailure(input: {
 
 function requireCanonicalLocal(deps: HindsightSetupDeps): void {
   if (deps.authorityMode() !== "canonical-local") throw hindsightError("HINDSIGHT_STATE_CONFLICT");
+  requireNoActivation(deps);
+}
+
+function requireNoActivation(deps: HindsightSetupDeps): void {
+  if (deps.activationOpen?.()) throw hindsightError("HINDSIGHT_STATE_CONFLICT");
 }
 
 function wait(ms: number): Promise<void> {

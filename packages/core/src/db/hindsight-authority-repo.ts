@@ -28,6 +28,8 @@ export interface HindsightPromotionInput {
   checkpointSetDigest: string;
   banks: HindsightPromotionBank[];
   now: string;
+  /** Runs inside the promotion transaction after the epoch rows exist (PR03 custody carry); a throw rolls the promotion back. */
+  beforeCommit?: () => void;
 }
 
 export interface HindsightPromotionResult {
@@ -43,6 +45,7 @@ export function promoteHindsightAuthority(db: Database, input: HindsightPromotio
     reserveHindsightLocalWriter(db, input.predecessorEpochId);
     const lineage = requirePreconditions(db, input);
     commitPromotion(db, input, lineage);
+    input.beforeCommit?.();
   });
   return { selection: readMemoryAuthoritySelection(db), hindsightEpochId: input.hindsightEpochId, predecessorEpochId: input.predecessorEpochId };
 }

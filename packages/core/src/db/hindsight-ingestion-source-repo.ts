@@ -67,10 +67,12 @@ function previousCommit(db: Database, value: {
   input: PrimaryConversationCommit & HindsightIngestionScope; entry: TimelineEntry; digest: string; throughSeq: number;
 }): boolean {
   const { input, entry, digest, throughSeq } = value;
-  // A completed Local occurrence is historical evidence, not a new occurrence after binding Hindsight.
-  // Reading its status does not invoke or relax any Local writer/authority guard.
-  const local = db.prepare("SELECT *, 'local' AS source FROM canonical_memory_primary_commits WHERE timeline_seq=:seq").get({ seq: entry.seq });
-  const prior = local ?? db.prepare("SELECT *, 'hindsight' AS source FROM hindsight_ingestion_primary_commits WHERE timeline_seq=:seq").get({ seq: entry.seq });
+  // A same-epoch Hindsight witness (including one carried from Local at activation) is this commit's own idempotent
+  // replay and is checked first. A completed Local occurrence is historical evidence, not a new occurrence after
+  // binding Hindsight. Reading its status does not invoke or relax any Local writer/authority guard.
+  const hindsight = db.prepare("SELECT *, 'hindsight' AS source FROM hindsight_ingestion_primary_commits WHERE timeline_seq=:seq").get({ seq: entry.seq });
+  const prior = hindsight?.authority_epoch_id === input.epochId ? hindsight
+    : db.prepare("SELECT *, 'local' AS source FROM canonical_memory_primary_commits WHERE timeline_seq=:seq").get({ seq: entry.seq }) ?? hindsight;
   if (!prior) return false;
   if (prior.entry_id !== entry.id || prior.entry_digest !== digest || prior.character_id !== input.characterId
     || prior.run_id !== (input.runId ?? null) || prior.committed_through_seq !== throughSeq) throw new Error("MEMORY_INGESTION_SOURCE_UNPROVEN");

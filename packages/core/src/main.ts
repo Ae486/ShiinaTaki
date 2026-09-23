@@ -29,6 +29,7 @@ import { createCapabilityTools } from "./capabilities/capability-tools.ts";
 import { routeCapability } from "./capabilities/route-capability.ts";
 import { createScreenshotDescriber } from "./capabilities/screenshot-describe.ts";
 import { bootstrapCore } from "./boot/core-bootstrap.ts";
+import { composeHindsightActivation } from "./boot/hindsight-activation-boot.ts";
 import { composeHindsightSetup } from "./boot/hindsight-setup-boot.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
 import { composeApprovalRuntime } from "./approval/approval-runtime.ts";
@@ -62,6 +63,7 @@ import { composeMemoryRuntime } from "./memory/runtime-composition.ts";
 import { createImageDescriptionWriter } from "./memory/image-description-writer.ts";
 import { createLocalOnboardingService } from "./memory/local-onboarding/local-onboarding-service.ts";
 import { readLocalOnboardingStatus } from "./memory/local-onboarding/local-onboarding-status.ts";
+import { readHindsightActivationStatus } from "./memory/hindsight-activation/hindsight-activation-status.ts";
 import { readMemoryAuthorityStatus } from "./memory/operations/memory-authority-status.ts";
 import { createMemoryOperationService } from "./memory/operations/memory-operation-service.ts";
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
@@ -89,6 +91,7 @@ import { mediaClearMethod } from "./server/methods/media-clear.ts";
 import { mediaGetMethod } from "./server/methods/media-get.ts";
 import { mediaUsageMethod } from "./server/methods/media-usage.ts";
 import { memoryAuthorityStatusMethod } from "./server/methods/memory-authority-status.ts";
+import { registerMemoryActivationMethods } from "./server/methods/memory-activation-methods.ts";
 import { registerMemoryOnboardingMethods } from "./server/methods/memory-onboarding-methods.ts";
 import { registerMemoryOperationMethods } from "./server/methods/memory-operation-methods.ts";
 import { memoryTidyMethod } from "./server/methods/memory-tidy.ts";
@@ -246,15 +249,19 @@ const localOnboarding = createLocalOnboardingService({
   db, workspaceRoot: join(serverConfig.dataDir, "workspace"), runner: memoryRuntime.migrationRunner, runtime: memoryRuntime, owner: bootId,
   onChanged: (reason) => memoryOnboardingSubscriptions.publish({ reason }),
 });
+// Hindsight activation (Stage 2b) is the only caller of the B4/D78 mutation primitives; it rebinds the runtime after COMMIT.
+const hindsightActivation = composeHindsightActivation({ db, config: boot.config.source, secrets: secretCatalog, setup: hindsightSetup, runtime: memoryRuntime, logger });
 const memoryOperations = createMemoryOperationService({
-  db, live: memoryRuntime.operations, setup: hindsightSetup, local: localOnboarding, bootId, logger,
+  db, live: memoryRuntime.operations, setup: hindsightSetup, local: localOnboarding, hindsight: hindsightActivation, bootId, logger,
   onChanged: memoryOperationSubscriptions.publish,
 });
 registerMemoryOperationMethods(registry, { service: memoryOperations, subscriptions: memoryOperationSubscriptions, logger });
 registerMemoryOnboardingMethods(registry, { local: localOnboarding, subscriptions: memoryOnboardingSubscriptions, logger,
   status: () => readLocalOnboardingStatus({ local: localOnboarding, operations: memoryOperations }) });
+registerMemoryActivationMethods(registry, { logger, status: () => readHindsightActivationStatus({ service: hindsightActivation, operations: memoryOperations }) });
 registry.register(memoryAuthorityStatusMethod({ logger,
-  read: () => readMemoryAuthorityStatus({ db, live: memoryRuntime.operations, binding: memoryRuntime.bindingSnapshot, setup: hindsightSetup, operations: memoryOperations }) }));
+  read: () => readMemoryAuthorityStatus({ db, live: memoryRuntime.operations, binding: memoryRuntime.bindingSnapshot,
+    hindsightBinding: memoryRuntime.hindsightBindingSnapshot, setup: hindsightSetup, operations: memoryOperations }) }));
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
@@ -539,11 +546,11 @@ function shutdown(signal: string): void {
   runService.seal();
   recovery.close();
   cancelDurableWorkForShutdown();
-  // Local onboarding first refuses new claims and lets the active producer checkpoint (conversion stops between sources,
-  // activation finishes its commit); only then does the memory runtime stop. That stop settles the B5 scheduler (and any
-  // manual tick a replica operation awaits), so the operation owner has nothing left in flight afterwards except setup
-  // calls bounded by their own deadlines.
-  const memoryStopped = localOnboarding.stop().then(() => memoryRuntime.stop());
+  // Local onboarding and Hindsight activation first refuse new claims and let the active producer checkpoint (conversion stops
+  // between sources, activation at a Bank boundary, never inside COMMIT); only then does the memory runtime stop. That stop
+  // settles the B5 scheduler (and any manual tick a replica operation awaits), so the operation owner has nothing left in
+  // flight afterwards except setup calls bounded by their own deadlines.
+  const memoryStopped = Promise.all([localOnboarding.stop(), hindsightActivation.stop()]).then(() => memoryRuntime.stop());
   void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => memoryStopped).then(() => memoryOperations.stop()).then(() => server.close()).then(async () => {
     skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients

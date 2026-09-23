@@ -7,7 +7,7 @@ import { HindsightCutoverVerificationRequestSchema, type HindsightCurrentImportE
   type HindsightCutoverVerificationRequest, type HindsightCutoverVerificationStatus } from "@taki/shared";
 import { currentStateFieldsWithout, hindsightCurrentStateHash } from "./hindsight-current-state-hash.ts";
 
-export function currentVerificationRequest(input: { imported: HindsightCurrentImportEvidence; verificationId: string }): HindsightCutoverVerificationRequest {
+export function currentVerificationRequest(input: { imported: Pick<HindsightCurrentImportEvidence, "result">; verificationId: string }): HindsightCutoverVerificationRequest {
   const result = input.imported.result;
   const request = HindsightCutoverVerificationRequestSchema.parse({ contract_version: result.contract_version,
     encoding: result.encoding, verification_id: input.verificationId, request_hash: "0".repeat(64),

@@ -1,6 +1,6 @@
 /**
  * INPUT:  operator operation requests, the kind registry, the live Hindsight runtime accessor, the B3 setup service and the
- *         optional Local onboarding service
+ *         optional Local onboarding / Hindsight activation services
  * OUTPUT: createMemoryOperationService() — durable admit/execute/observe/settle/cancel with transition fan-out
  * POS:    core/memory/operations — the single operation owner (D-S1-1); every state change is a repo CAS, then onChanged
  */
@@ -10,6 +10,7 @@ import { createMemoryOperationRepo, type MemoryOperationRepo } from "../../db/me
 import type { Database } from "../../db/sqlite.ts";
 import type { Logger } from "../../logging/logger.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import type { HindsightActivationService } from "../hindsight-activation/hindsight-activation-service.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
 import type { LocalOnboardingService } from "../local-onboarding/local-onboarding-service.ts";
 import {
@@ -36,6 +37,7 @@ export interface MemoryOperationServiceInput {
   live(): MemoryOperationsRuntime | null;
   setup: HindsightSetupService;
   local?: LocalOnboardingService;
+  hindsight?: HindsightActivationService;
   bootId: string;
   onChanged(operation: MemoryOperation): void;
   logger: Logger;
@@ -54,7 +56,8 @@ export function createMemoryOperationService(input: MemoryOperationServiceInput)
   const repo = input.repo ?? createMemoryOperationRepo(input.db, now);
   const owner: Owner = {
     repo, kinds: input.kinds ?? MEMORY_OPERATION_KINDS,
-    ctx: { live: input.live, setup: input.setup, local: input.local, lookup: (operationId) => repo.get(operationId), now }, input, inflight: new Set(),
+    ctx: { live: input.live, setup: input.setup, local: input.local, hindsight: input.hindsight, lookup: (operationId) => repo.get(operationId),
+      activeInFamily: (family) => repo.activeInFamily(family), latestInFamily: (family) => repo.latestInFamily(family), now }, input, inflight: new Set(),
   };
   observeBoot(owner);
   // A previous process cannot report what happened to its open rows; unknown stays unknown (D-S1-3).
@@ -108,7 +111,7 @@ async function execute(owner: Owner, handler: MemoryOperationKindHandler, input:
   const claim = () => transition(owner, operationId, (current) => current.state === "admitted" ? { state: "running" } : null);
   try {
     const settlement = await handler.execute({
-      request: input.request, producer: input.producer, ctx: owner.ctx, running: () => { claim(); },
+      operationId, request: input.request, producer: input.producer, ctx: owner.ctx, running: () => { claim(); },
       tryClaim: () => claim()?.state === "running",
       checkpoint: (producer) => { transition(owner, operationId, (current) => current.state === "running" ? { producer } : null); },
     });

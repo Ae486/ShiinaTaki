@@ -177,7 +177,8 @@ function supersede(review: Review, input: { id: string; replacement?: Replacemen
 
 function rethinkBlock(review: Review, input: { id: string; content: string }): ToolOutput {
   const block = review.input.blocks.replace({ blockId: input.id, scope: blockScope(input.id, review.characterId),
-    expectedRevision: review.blocks.get(input.id)?.revision ?? 0, actor: "background", content: input.content, now: review.at });
+    expectedRevision: review.blocks.get(input.id)?.revision ?? 0, actor: "background", content: input.content, now: review.at,
+    expectedEpochId: review.input.epochId });
   review.blocks.set(input.id, block);
   return { ok: true, id: input.id, revision: block.revision };
 }

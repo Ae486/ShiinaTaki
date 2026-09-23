@@ -10,7 +10,7 @@ import type { MigrationReceipt } from "../legacy-migration/legacy-migration-read
 import type { LocalOnboardingService } from "../local-onboarding/local-onboarding-service.ts";
 import { LOCAL_ONBOARDING_FAMILY } from "../local-onboarding/local-onboarding-status.ts";
 import {
-  MemoryOperationRefusal, type MemoryOperationContext, type MemoryOperationExecution, type MemoryOperationKindHandler,
+  MemoryOperationRefusal, refuseWhileExclusiveFamilyBusy, type MemoryOperationContext, type MemoryOperationExecution, type MemoryOperationKindHandler,
   type MemoryOperationSettlement,
 } from "./memory-operation-contract.ts";
 import {
@@ -25,7 +25,7 @@ type Claim = "claimed" | "lost" | "interrupted";
 export const localPrepareKind: MemoryOperationKindHandler<PrepareRequest> = {
   family: () => LOCAL_ONBOARDING_FAMILY,
   admit: (request, ctx) => {
-    const local = requireLocal(ctx);
+    const local = admissible(ctx);
     if (local.authority().mode !== "legacy-markdown") throw new MemoryOperationRefusal("MEMORY_OPERATION_UNSUPPORTED");
     return admitPrepare(request, ctx, local);
   },
@@ -48,7 +48,7 @@ export const localPrepareKind: MemoryOperationKindHandler<PrepareRequest> = {
 
 export const localActivateKind: MemoryOperationKindHandler<ActivateRequest> = {
   family: () => LOCAL_ONBOARDING_FAMILY,
-  admit: (request, ctx) => admitActivate(request, requireLocal(ctx)),
+  admit: (request, ctx) => admitActivate(request, admissible(ctx)),
   execute: async (execution) => {
     const local = requireLocal(execution.ctx);
     const ref = localRef(execution.producer);
@@ -71,6 +71,13 @@ export const localActivateKind: MemoryOperationKindHandler<ActivateRequest> = {
 function requireLocal(ctx: MemoryOperationContext): LocalOnboardingService {
   if (!ctx.local) throw new MemoryOperationRefusal("MEMORY_OPERATION_UNSUPPORTED");
   return ctx.local;
+}
+
+/** Admission only: the executing row itself is the open family row once claimed. */
+function admissible(ctx: MemoryOperationContext): LocalOnboardingService {
+  const local = requireLocal(ctx);
+  refuseWhileExclusiveFamilyBusy(ctx);
+  return local;
 }
 
 function refuseAfterClaim(operation: MemoryOperation): void {

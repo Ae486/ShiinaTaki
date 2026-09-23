@@ -5,7 +5,7 @@
  */
 import { HindsightErrorCodeSchema, type MemoryOperationProducerRef, type MemoryOperationRequest, type MemoryReplicaErrorCode } from "@taki/shared";
 import { HindsightError } from "../hindsight/hindsight-errors.ts";
-import type { MemoryOperationContext, MemoryOperationKindHandler, MemoryOperationSettlement } from "./memory-operation-contract.ts";
+import { refuseWhileExclusiveFamilyBusy, type MemoryOperationContext, type MemoryOperationKindHandler, type MemoryOperationSettlement } from "./memory-operation-contract.ts";
 
 type ValidateRequest = Extract<MemoryOperationRequest, { kind: "setup.validate" }>;
 type ApplyRequest = Extract<MemoryOperationRequest, { kind: "setup.apply" }>;
@@ -33,6 +33,7 @@ export const setupApplyKind: MemoryOperationKindHandler<ApplyRequest> = {
 };
 
 function producerRef(ctx: MemoryOperationContext): SetupRef {
+  refuseWhileExclusiveFamilyBusy(ctx);
   return { kind: "setup", attemptId: null, revisionBefore: ctx.setup.status().revision, revisionAfter: null };
 }
 

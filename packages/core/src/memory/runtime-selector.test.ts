@@ -56,6 +56,39 @@ describe("memory runtime selector", () => {
     expect(() => selectMemoryRuntime({ db, createLegacy, createCanonical })).toThrow("Hindsight authority runtime is not installed");
     expect(createLegacy).not.toHaveBeenCalled(); expect(createCanonical).not.toHaveBeenCalled();
   });
+  it("binds Hindsight only on positive marker proof, retires Local before construction and keeps a failed construction unavailable", () => {
+    const db = openDatabase({ path: ":memory:", migrations: [canonicalMemoryMigration017, memoryLegacyMigration021, hindsightInitialCutoverMigration023] }); dbs.push(db);
+    db.exec("UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id='local-epoch',verified_snapshot_id='snapshot',activation_transaction_id='tx' WHERE singleton=1");
+    const local = engine(); const hindsight = engine(); local.assemble = () => "local"; hindsight.assemble = () => "hindsight";
+    const failure = new Error("HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE"); let fail = true;
+    const createHindsight = vi.fn(() => { if (fail) throw failure; return hindsight; }); const onLocalRetired = vi.fn();
+    const selected = selectMemoryRuntime({ db, createLegacy: () => ({ engine: engine() } as never), createCanonical: () => local, createHindsight, onLocalRetired });
+    expect(() => selected.bindHindsight("hindsight-epoch")).toThrow("MEMORY_AUTHORITY_MISMATCH");
+    expect(selected.memory.assemble({ characterId: "taki", currentMessage: "" })).toBe("local");
+    expect(onLocalRetired).not.toHaveBeenCalled(); expect(createHindsight).not.toHaveBeenCalled();
+    seedHindsightSelection(db);
+    expect(() => selected.bindHindsight("hindsight-epoch")).toThrow(failure);
+    expect(onLocalRetired).toHaveBeenCalledOnce(); expect(selected.canonical).toBe(true); expect(selected.legacy).toBeNull();
+    expect(() => selected.memory.assemble({ characterId: "taki", currentMessage: "" })).toThrow("MEMORY_INTEGRITY_ERROR");
+    expect(() => selected.recoverHindsight("other")).toThrow("MEMORY_AUTHORITY_MISMATCH");
+    fail = false;
+    expect(selected.recoverHindsight("hindsight-epoch")).toBe("published");
+    expect(selected.memory.assemble({ characterId: "taki", currentMessage: "" })).toBe("hindsight");
+    expect(selected.recoverHindsight("hindsight-epoch")).toBe("healthy");
+    expect(createHindsight).toHaveBeenCalledTimes(2);
+  });
+  it("keeps a selected Hindsight runtime that fails to construct at boot observable instead of aborting boot", () => {
+    const db = openDatabase({ path: ":memory:", migrations: [canonicalMemoryMigration017, memoryLegacyMigration021, hindsightInitialCutoverMigration023] }); dbs.push(db);
+    seedHindsightSelection(db);
+    const onBootUnavailable = vi.fn(); const hindsight = engine(); let fail = true;
+    const createHindsight = vi.fn(() => { if (fail) throw new Error("HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE"); return hindsight; });
+    const selected = selectMemoryRuntime({ db, createLegacy: () => ({ engine: engine() } as never), createCanonical: engine, createHindsight, onBootUnavailable });
+    expect(onBootUnavailable).toHaveBeenCalledOnce(); expect(selected.canonical).toBe(true);
+    expect(() => selected.memory.createTools("taki")).toThrow("MEMORY_INTEGRITY_ERROR");
+    fail = false;
+    expect(selected.recoverHindsight("hindsight-epoch")).toBe("published");
+    expect(selected.memory.createTools("taki")).toEqual({});
+  });
 });
 
 function seedHindsightSelection(db: Database): void {

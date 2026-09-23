@@ -31,6 +31,8 @@ export interface CanonicalLocalIngestion {
   recordPrimaryCommitted(input: PrimaryConversationCommit): void;
   run(input: { characterId: string; throughSeq?: number }): Promise<CanonicalIngestionRunResult>;
   maybeRun(input: { characterId: string }): Promise<CanonicalIngestionRunResult | null>;
+  /** Resolves once every queued per-Character chain has settled; the activation drain waits here before capture. */
+  settle(): Promise<void>;
   readonly flushPort: MemoryFlushPort;
 }
 export interface CanonicalLocalIngestionDeps {
@@ -54,6 +56,7 @@ export function createCanonicalLocalIngestion(deps: CanonicalLocalIngestionDeps)
   };
   const run: CanonicalLocalIngestion["run"] = (input) => enqueue(input.characterId, () => runRange(ctx, input));
   return { run, flushPort: canonicalLocalMemoryFlushPort({ run }),
+    settle: async () => { while (chains.size) await Promise.allSettled([...chains.values()]); },
     maybeRun: (input) => enqueue(input.characterId, async () => {
       const scope = { epochId: ctx.epochId, characterId: input.characterId };
       return deps.journal.pending(scope) || deps.journal.unprocessedCount(scope) >= EPISODIC_EVERY_N
