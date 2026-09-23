@@ -30,19 +30,20 @@ export interface MemoryOperationsView extends MemoryOperationsState {
 }
 
 const INITIAL: MemoryOperationsState = { status: null, loading: true, error: null, busyKey: null, feedback: null };
+const readAuthority = (client: MemoryOperationsClient) => client.memoryAuthorityStatus();
 
 export function useMemoryOperations(): MemoryOperationsView {
   const { client, status: connection } = useHomeClient();
   const ready: MemoryOperationsClient | null = client && connection.kind === "connected" ? client : null;
   const [state, setState] = useState<MemoryOperationsState>(INITIAL);
-  const controller = useMemo(() => createMemoryOperationsController({
+  const controller = useMemo(() => createMemoryOperationsController<MemoryAuthorityStatus>({
     loading: () => setState((current) => ({ ...current, loading: true })),
     loaded: (status) => setState((current) => ({ ...current, status, loading: false, error: null })),
     // A failed re-read keeps the last frame on screen; the error line carries the retry.
     loadFailed: (cause) => setState((current) => ({ ...current, loading: false, error: cause instanceof Error ? cause.message : String(cause) })),
     mutationStarted: (busyKey) => setState((current) => ({ ...current, busyKey, feedback: null })),
     mutationSettled: (feedback) => setState((current) => ({ ...current, busyKey: null, feedback })),
-  }), []);
+  }, readAuthority), []);
 
   useEffect(() => {
     setState((current) => ({ ...current, busyKey: null, feedback: null }));

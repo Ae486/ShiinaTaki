@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { MemoryAuthorityStatusSchema, MemoryOperationSchema } from "@taki/shared";
 import { bankStatus, hindsightStatus, localStatus, operation } from "./memory-authority-fixtures.ts";
-import { memoryAuthorityView, memoryOperationAppError } from "./memory-authority-state.ts";
+import { MEMORY_OPERATION_KIND_LABEL, memoryAuthorityView, memoryOperationAppError } from "./memory-authority-state.ts";
 
 describe("memory authority view model", () => {
   it("builds every fixture from the shared strict schemas", () => {
@@ -60,6 +60,14 @@ describe("memory authority view model", () => {
     const [admitted, running] = memoryAuthorityView(status).active;
     expect(admitted).toMatchObject({ cancellable: true, label: "同步副本 · global (incremental) · 已受理（未认领）" });
     expect(running).toMatchObject({ cancellable: false, state: "running" });
+  });
+
+  it("labels a running hindsight.activate without offering Cancel", () => {
+    const activate = operation({ kind: "hindsight.activate", state: "running", authorityEpochId: "epoch-1", producer: null,
+      request: { kind: "hindsight.activate", source: { mode: "new", setupRevision: 3, expectedEpochId: "epoch-1" } } });
+    expect(MEMORY_OPERATION_KIND_LABEL["hindsight.activate"]).toBe("启用 Hindsight");
+    expect(memoryAuthorityView(hindsightStatus({ operations: { active: [activate], recent: [] } })).active)
+      .toEqual([{ operationId: activate.operationId, label: "启用 Hindsight · 执行中", state: "running", cancellable: false }]);
   });
 
   it("reads the closed refusal reason and active operation id from error.data", () => {

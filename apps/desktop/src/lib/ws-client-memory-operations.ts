@@ -1,20 +1,23 @@
 /**
  * INPUT:  the operator socket's JSON-RPC request function + call params from the Home operations page.
- * OUTPUT: memoryOperationMethods(request) — typed memory.authority.status / memory.operations.* wrappers, each result
- *         parsed through its @taki/shared schema; subscribe is memoized per client generation (like config.subscribe).
+ * OUTPUT: memoryOperationMethods(request) — typed memory.authority.status / memory.activation.status / memory.operations.*
+ *         wrappers, each result parsed through its @taki/shared schema; subscribe is memoized per client generation.
  * POS:    ui/lib — a sibling of ws-client-methods (kept separate so that file stays under the size baseline).
  */
 
 import type { JSONRPCParams } from "json-rpc-2.0";
 import {
+  MEMORY_ACTIVATION_METHODS,
   MEMORY_AUTHORITY_METHODS,
   MEMORY_OPERATION_METHODS,
+  MemoryActivationStatusSchema,
   MemoryAuthorityStatusSchema,
   MemoryOperationCancelResultSchema,
   MemoryOperationListResultSchema,
   MemoryOperationStatusResultSchema,
   MemoryOperationSubmitResultSchema,
   MemoryOperationSubscribeResultSchema,
+  type MemoryActivationStatus,
   type MemoryAuthorityStatus,
   type MemoryOperation,
   type MemoryOperationListParams,
@@ -24,6 +27,8 @@ import {
 export interface MemoryOperationMethods {
   /** Reads the composite memory-authority status (authority, runtime, setup, per-Bank replica/Pending, operations). */
   memoryAuthorityStatus(): Promise<MemoryAuthorityStatus>;
+  /** Reads the Hindsight activation status (setup, Bank prerequisites, run, custody, Core-derived actions); invalidated by memory.operations.changed. */
+  memoryActivationStatus(): Promise<MemoryActivationStatus>;
   /** Submits one durable operation; a busy family rejects with MEMORY_OPERATION_REFUSED + activeOperationId. */
   memoryOperationSubmit(request: MemoryOperationRequest): Promise<MemoryOperation>;
   memoryOperationStatus(operationId: string): Promise<MemoryOperation>;
@@ -38,6 +43,7 @@ export function memoryOperationMethods(request: <T>(method: string, params: JSON
   let subscription: Promise<void> | null = null;
   return {
     memoryAuthorityStatus: async () => MemoryAuthorityStatusSchema.parse(await request(MEMORY_AUTHORITY_METHODS.status, {})),
+    memoryActivationStatus: async () => MemoryActivationStatusSchema.parse(await request(MEMORY_ACTIVATION_METHODS.status, {})),
     memoryOperationSubmit: async (submitted) =>
       MemoryOperationSubmitResultSchema.parse(await request(MEMORY_OPERATION_METHODS.submit, { request: submitted })).operation,
     memoryOperationStatus: async (operationId) =>

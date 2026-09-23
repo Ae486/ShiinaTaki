@@ -1,7 +1,7 @@
 /**
  * INPUT:  a schema-validated MemoryAuthorityStatus (and the operations it embeds) from memory.authority.status.
  * OUTPUT: pure view models for the Memory authority card — headline, setup line, per-Bank rows, Pending rows and the
- *         active-operation rows — plus the app-error reader for MEMORY_OPERATION_REFUSED rejections.
+ *         active-operation rows — plus the operation-kind labels and the app-error reader for MEMORY_OPERATION_REFUSED rejections.
  * POS:    ui/windows/home/pages/operations — node-testable; no DOM, no socket. Unknown stays "unknown", never "0".
  */
 
@@ -42,15 +42,15 @@ export interface MemoryAuthorityView {
 const MODE_LABEL: Record<MemoryAuthorityStatus["authority"]["mode"], string> = {
   "legacy-markdown": "Legacy Markdown", "canonical-local": "Local（canonical）", hindsight: "Hindsight",
 };
-const UNAVAILABLE_LABEL: Record<NonNullable<MemoryAuthorityStatus["runtime"]["unavailableReason"]>, string> = {
+export const MEMORY_RUNTIME_UNAVAILABLE_LABEL: Record<NonNullable<MemoryAuthorityStatus["runtime"]["unavailableReason"]>, string> = {
   authority_mismatch: "运行时与权威标记不一致", connection_unavailable: "连接不可用", stopped: "运行时已停止", not_installed: "运行时未安装",
 };
-const STATE_LABEL: Record<MemoryOperation["state"], string> = {
+export const MEMORY_OPERATION_STATE_LABEL: Record<MemoryOperation["state"], string> = {
   admitted: "已受理（未认领）", running: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消", outcome_unknown: "结果未知（Core 重启）",
 };
-const KIND_LABEL: Record<MemoryOperation["kind"], string> = {
+export const MEMORY_OPERATION_KIND_LABEL: Record<MemoryOperation["kind"], string> = {
   "setup.validate": "校验连接", "setup.apply": "应用配置", "replica.sync": "同步副本",
-  "local.onboard.prepare": "准备本地记忆", "local.onboard.activate": "启用 / 恢复本地记忆",
+  "local.onboard.prepare": "准备本地记忆", "local.onboard.activate": "启用 / 恢复本地记忆", "hindsight.activate": "启用 Hindsight",
 };
 const UNKNOWN = "未知";
 
@@ -58,7 +58,7 @@ export function memoryAuthorityView(status: MemoryAuthorityStatus): MemoryAuthor
   const hindsight = status.authority.mode === "hindsight" && status.runtime.available;
   return {
     headline: `${MODE_LABEL[status.authority.mode]}${status.authority.epochId ? ` · epoch ${status.authority.epochId}` : ""}`,
-    runtimeLine: status.runtime.available ? "运行时可用" : `运行时不可用：${UNAVAILABLE_LABEL[status.runtime.unavailableReason ?? "connection_unavailable"]}`,
+    runtimeLine: status.runtime.available ? "运行时可用" : `运行时不可用：${MEMORY_RUNTIME_UNAVAILABLE_LABEL[status.runtime.unavailableReason ?? "connection_unavailable"]}`,
     setupLine: `${status.setup.phase}${status.setup.latestError ? ` · ${status.setup.latestError.code}` : ""}`,
     hindsight,
     banks: (status.replica ?? []).map(bankRow),
@@ -86,7 +86,7 @@ function activeRow(operation: MemoryOperation): ActiveOperationRow {
   const target = operation.request.kind === "replica.sync" ? ` · ${operation.request.bankId} (${operation.request.syncKind})` : "";
   return {
     operationId: operation.operationId,
-    label: `${KIND_LABEL[operation.kind]}${target} · ${STATE_LABEL[operation.state]}`,
+    label: `${MEMORY_OPERATION_KIND_LABEL[operation.kind]}${target} · ${MEMORY_OPERATION_STATE_LABEL[operation.state]}`,
     state: operation.state,
     cancellable: operation.kind === "replica.sync" && operation.state === "admitted",
   };

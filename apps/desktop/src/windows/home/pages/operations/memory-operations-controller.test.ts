@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { MemoryOperation } from "@taki/shared";
+import type { MemoryAuthorityStatus, MemoryOperation } from "@taki/shared";
+import { activationStatus } from "./hindsight-activation-fixtures.ts";
 import { hindsightStatus, operation } from "./memory-authority-fixtures.ts";
 import { createMemoryOperationsController, type MemoryOperationsClient, type MemoryOperationsSink } from "./memory-operations-controller.ts";
 
@@ -16,6 +17,7 @@ function client(behavior: Partial<MemoryOperationsClient> = {}): FakeClient {
   const handlers = new Set<Handler>();
   const base: MemoryOperationsClient = {
     memoryAuthorityStatus: async () => { calls.push("status"); return hindsightStatus(); },
+    memoryActivationStatus: async () => { calls.push("activation"); return activationStatus(); },
     memoryOperationSubmit: async () => { calls.push("submit"); return operation(); },
     memoryOperationCancel: async () => { calls.push("cancel"); return operation({ state: "cancelled", reason: "cancelled_before_claim", terminalAt: "2026-09-19T00:00:01.000Z" }); },
     subscribeMemoryOperations: async () => { calls.push("subscribe"); },
@@ -26,15 +28,16 @@ function client(behavior: Partial<MemoryOperationsClient> = {}): FakeClient {
 }
 
 function sink() {
-  return { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationSettled: vi.fn() } satisfies MemoryOperationsSink;
+  return { loading: vi.fn(), loaded: vi.fn(), loadFailed: vi.fn(), mutationStarted: vi.fn(), mutationSettled: vi.fn() } satisfies MemoryOperationsSink<MemoryAuthorityStatus>;
 }
 
+const readAuthority = (target: MemoryOperationsClient) => target.memoryAuthorityStatus();
 const settle = () => new Promise((resolve) => setImmediate(resolve));
 
 describe("memory operations controller", () => {
   it("reads status and subscribes on replace, then drops results from a retired generation", async () => {
     const s = sink();
-    const controller = createMemoryOperationsController(s);
+    const controller = createMemoryOperationsController(s, readAuthority);
     const first = client();
     controller.replace(first);
     await settle();
@@ -52,7 +55,7 @@ describe("memory operations controller", () => {
 
   it("refetches Core truth on every changed push and coalesces pushes that land mid-read", async () => {
     const s = sink();
-    const controller = createMemoryOperationsController(s);
+    const controller = createMemoryOperationsController(s, readAuthority);
     const gate: { release: (() => void) | null } = { release: null };
     const stub = client({
       memoryAuthorityStatus: async () => {
@@ -75,7 +78,7 @@ describe("memory operations controller", () => {
 
   it("serializes submit, reports the accepted operation and re-reads status", async () => {
     const s = sink();
-    const controller = createMemoryOperationsController(s);
+    const controller = createMemoryOperationsController(s, readAuthority);
     const stub = client();
     controller.replace(stub);
     await settle();
@@ -88,7 +91,7 @@ describe("memory operations controller", () => {
 
   it("surfaces a MEMORY_OPERATION_REFUSED rejection with its closed reason and still refetches", async () => {
     const s = sink();
-    const controller = createMemoryOperationsController(s);
+    const controller = createMemoryOperationsController(s, readAuthority);
     const stub = client({
       memoryOperationCancel: async () => {
         throw Object.assign(new Error("refused"), { data: { code: "MEMORY_OPERATION_REFUSED", reason: "MEMORY_OPERATION_RUNNING" } });
@@ -104,7 +107,7 @@ describe("memory operations controller", () => {
 
   it("keeps a failed read as loadFailed without fabricating a frame", async () => {
     const s = sink();
-    const controller = createMemoryOperationsController(s);
+    const controller = createMemoryOperationsController(s, readAuthority);
     controller.replace(client({ memoryAuthorityStatus: async () => { throw new Error("deadline"); } }));
     await settle();
     expect(s.loaded).not.toHaveBeenCalled();

@@ -12,6 +12,7 @@ import {
   CONNECT_METHOD,
   EXTENSION_METHODS,
   MEDIA_METHODS,
+  MEMORY_ACTIVATION_METHODS,
   MEMORY_AUTHORITY_METHODS,
   MEMORY_METHODS,
   MEMORY_OPERATION_METHODS,
@@ -61,6 +62,7 @@ export const RPC_METHOD_POLICIES: ReadonlyMap<string, RpcMethodPolicy> = new Map
   // Memory operations: admission is synchronous in Core (the durable row is the outcome), so submit/cancel stay interactive
   // mutations; the status/list reads may be reread after a timeout without replaying anything.
   [MEMORY_AUTHORITY_METHODS.status, INTERACTIVE_READ],
+  [MEMORY_ACTIVATION_METHODS.status, INTERACTIVE_READ],
   [MEMORY_OPERATION_METHODS.status, INTERACTIVE_READ],
   [MEMORY_OPERATION_METHODS.list, INTERACTIVE_READ],
   [MEMORY_ONBOARDING_METHODS.preview, INTERACTIVE_READ],
