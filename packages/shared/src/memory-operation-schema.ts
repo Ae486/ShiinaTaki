@@ -9,6 +9,8 @@ import { HindsightManagedDeploymentReceiptSchema, HindsightSetupPhaseSchema } fr
 import { MemoryReplicaErrorCodeSchema, MemoryReplicaRunKindSchema } from "./memory-replica-schedule-schema.ts";
 import { MemoryLocalActivateRequestSchema, MemoryLocalPrepareRequestSchema, MemoryLocalProducerRefSchema, MemoryLocalResultSchema, MemoryLocalErrorCodeSchema } from "./memory-local-operation-schema.ts";
 import { MemoryHindsightActivateRequestSchema, MemoryHindsightActivationErrorCodeSchema, MemoryHindsightProducerRefSchema, MemoryHindsightResultSchema } from "./memory-hindsight-operation-schema.ts";
+import { MemoryBankProducerRefSchema, MemoryBankProvisionRequestSchema, MemoryBankResultSchema, MemoryConnectionProducerRefSchema, MemoryConnectionResultSchema,
+  MemoryConnectionRevalidateRequestSchema, MemoryHindsightLifecycleErrorCodeSchema } from "./memory-hindsight-lifecycle-schema.ts";
 
 export const MEMORY_OPERATION_METHODS = {
   submit: "memory.operations.submit",
@@ -23,7 +25,10 @@ const Id = z.string().min(1).max(256);
 const Timestamp = z.iso.datetime({ offset: true });
 const revision = z.number().int().nonnegative();
 
-export const MemoryOperationKindSchema = z.enum(["setup.validate", "setup.apply", "replica.sync", "local.onboard.prepare", "local.onboard.activate", "hindsight.activate"]);
+export const MemoryOperationKindSchema = z.enum([
+  "setup.validate", "setup.apply", "replica.sync", "local.onboard.prepare", "local.onboard.activate", "hindsight.activate",
+  "bank.provision", "connection.revalidate",
+]);
 export type MemoryOperationKind = z.infer<typeof MemoryOperationKindSchema>;
 export const MemoryOperationStateSchema = z.enum(["admitted", "running", "completed", "failed", "cancelled", "outcome_unknown"]);
 export type MemoryOperationState = z.infer<typeof MemoryOperationStateSchema>;
@@ -48,6 +53,8 @@ export const MemoryOperationRequestSchema = z.discriminatedUnion("kind", [
   MemoryLocalPrepareRequestSchema,
   MemoryLocalActivateRequestSchema,
   MemoryHindsightActivateRequestSchema,
+  MemoryBankProvisionRequestSchema,
+  MemoryConnectionRevalidateRequestSchema,
 ]);
 export type MemoryOperationRequest = z.infer<typeof MemoryOperationRequestSchema>;
 
@@ -56,6 +63,8 @@ export const MemoryOperationProducerRefSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("replica"), bankId: Id, admittedAt: Timestamp }),
   MemoryLocalProducerRefSchema,
   MemoryHindsightProducerRefSchema,
+  MemoryBankProducerRefSchema,
+  MemoryConnectionProducerRefSchema,
 ]);
 export type MemoryOperationProducerRef = z.infer<typeof MemoryOperationProducerRefSchema>;
 
@@ -68,10 +77,20 @@ export const MemoryOperationResultSchema = z.discriminatedUnion("kind", [
   }),
   MemoryLocalResultSchema,
   MemoryHindsightResultSchema,
+  MemoryBankResultSchema,
+  MemoryConnectionResultSchema,
 ]);
 export type MemoryOperationResult = z.infer<typeof MemoryOperationResultSchema>;
-export const MemoryOperationErrorCodeSchema = z.union([MemoryReplicaErrorCodeSchema, MemoryLocalErrorCodeSchema, MemoryHindsightActivationErrorCodeSchema]);
+export const MemoryOperationErrorCodeSchema = z.union([
+  MemoryReplicaErrorCodeSchema, MemoryLocalErrorCodeSchema, MemoryHindsightActivationErrorCodeSchema, MemoryHindsightLifecycleErrorCodeSchema,
+]);
 export type MemoryOperationErrorCode = z.infer<typeof MemoryOperationErrorCodeSchema>;
+
+/** Explicit per-kind producer ownership; a new kind that forgets its row fails typecheck instead of inheriting a prefix guess. */
+const PRODUCER_KIND: Record<MemoryOperationKind, MemoryOperationProducerRef["kind"]> = {
+  "setup.validate": "setup", "setup.apply": "setup", "replica.sync": "replica", "local.onboard.prepare": "local",
+  "local.onboard.activate": "local", "hindsight.activate": "hindsight", "bank.provision": "bank", "connection.revalidate": "connection",
+};
 
 const MemoryOperationBase = z.strictObject({
   operationId: z.uuid(),
@@ -96,8 +115,7 @@ export const MemoryOperationSchema = MemoryOperationBase.superRefine((operation,
   if ((operation.state === "outcome_unknown" || operation.state === "cancelled") && operation.reason === null) fail("unknown/cancelled outcomes require a reason");
   if (operation.state === "completed" && (operation.reason !== null || operation.errorCode !== null)) fail("a completed operation carries no failure diagnostics");
   if (operation.kind !== operation.request.kind) fail("operation kind and request disagree");
-  const producerKind = operation.kind.startsWith("local.") ? "local" : operation.kind.startsWith("setup.") ? "setup"
-    : operation.kind.startsWith("hindsight.") ? "hindsight" : "replica";
+  const producerKind = PRODUCER_KIND[operation.kind];
   if (operation.producer !== null && operation.producer.kind !== producerKind) fail("producer and command disagree");
   if (operation.result !== null && operation.result.kind !== producerKind) fail("result and command disagree");
   if ((operation.producer?.kind === "local" || operation.producer?.kind === "hindsight") && operation.producer.kind === operation.result?.kind

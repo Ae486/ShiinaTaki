@@ -55,4 +55,26 @@ describe("memory operation contracts", () => {
     expect(MemoryOperationSchema.safeParse({ ...running, state: "failed", terminalAt: at, reason: "producer_failed", errorCode: "HINDSIGHT_CUTOVER_LEASE_LOST" }).success).toBe(true);
     expect(MemoryOperationSchema.safeParse({ ...running, state: "failed", terminalAt: at, reason: "producer_failed", errorCode: "LEASE_LOST" }).success).toBe(false);
   });
+
+  it("binds both lifecycle kinds to their own producer/result arms through the explicit producer table", () => {
+    const bank = { ...base, kind: "bank.provision", state: "running", request: { kind: "bank.provision", characterId: "mika" },
+      producer: { kind: "bank", origin: "automatic", characterId: "mika", nativeBankId: "taki-hs-v1-c-1", templateRevision: "taki-bank-v1",
+        admittedEpochId: "epoch-h", configFingerprint: "a".repeat(64), phase: "applying" } } as const;
+    expect(MemoryOperationSchema.safeParse(bank).success).toBe(true);
+    expect(MemoryOperationSchema.safeParse({ ...bank, producer: { ...bank.producer, origin: "client" } }).success).toBe(false);
+    const bankResult = { kind: "bank", characterId: "mika", nativeBankId: "taki-hs-v1-c-1", readiness: "ready" };
+    expect(MemoryOperationSchema.safeParse({ ...bank, state: "completed", terminalAt: at, result: bankResult }).success).toBe(true);
+    expect(MemoryOperationSchema.safeParse({ ...bank, state: "failed", terminalAt: at, reason: "producer_failed", errorCode: "HINDSIGHT_BANK_OCCUPIED" }).success).toBe(true);
+    expect(MemoryOperationSchema.safeParse({ ...bank, state: "failed", terminalAt: at, reason: "producer_failed", errorCode: "HINDSIGHT_LIFECYCLE_INTERRUPTED" }).success).toBe(true);
+    const connection = { ...base, kind: "connection.revalidate", state: "running", request: { kind: "connection.revalidate", expectedEpochId: "epoch-h" },
+      producer: { kind: "connection", origin: "operator", epochId: "epoch-h", fingerprintBefore: null, fingerprintAfter: "b".repeat(64), phase: "rebinding" } } as const;
+    expect(MemoryOperationSchema.safeParse(connection).success).toBe(true);
+    expect(MemoryOperationSchema.safeParse({ ...connection, producer: bank.producer }).success).toBe(false);
+    expect(MemoryOperationSchema.safeParse({ ...bank, producer: connection.producer }).success).toBe(false);
+    const rebound = { kind: "connection", outcome: "rebound", fingerprint: "b".repeat(64) };
+    expect(MemoryOperationSchema.safeParse({ ...connection, state: "completed", terminalAt: at, result: rebound }).success).toBe(true);
+    expect(MemoryOperationSchema.safeParse({ ...connection, state: "completed", terminalAt: at, result: bankResult }).success).toBe(false);
+    expect(MemoryOperationRequestSchema.safeParse({ kind: "bank.provision", characterId: "x".repeat(161) }).success).toBe(false);
+    expect(MemoryOperationRequestSchema.safeParse({ kind: "connection.revalidate", expectedEpochId: "epoch", origin: "automatic" }).success).toBe(false);
+  });
 });
