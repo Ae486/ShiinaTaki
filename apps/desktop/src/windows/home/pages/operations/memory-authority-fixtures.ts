@@ -1,9 +1,11 @@
 /**
  * INPUT:  none — hand-built MemoryAuthorityStatus / MemoryOperation values.
- * OUTPUT: localStatus() / hindsightStatus() / bankStatus() / operation() fixtures shared by the memory authority tests.
+ * OUTPUT: localStatus() / hindsightStatus() / bankStatus() / operation() fixtures shared by the memory authority tests, plus
+ *         lifecycleBank() / lifecycleSection() / degradedStatus() for the Hindsight connection + Bank readiness block.
  * POS:    ui/windows/home/pages/operations — test support only; not in the production path.
  */
-import type { MemoryAuthorityStatus, MemoryOperation, MemoryReplicaSyncStatus } from "@taki/shared";
+import type { HindsightBankReadiness, HindsightErrorCode, MemoryAuthorityStatus, MemoryHindsightStatusSection, MemoryOperation,
+  MemoryReplicaSyncStatus, MemoryRuntimeUnavailableReason } from "@taki/shared";
 
 export const AT = "2026-09-19T00:00:00.000Z";
 export const OPERATION_ID = "22222222-2222-4222-8222-222222222222";
@@ -55,4 +57,28 @@ export function operation(patch: Partial<MemoryOperation> = {}): MemoryOperation
     producer: { kind: "replica", bankId: "global", admittedAt: AT }, result: null, errorCode: null,
     createdAt: AT, updatedAt: AT, terminalAt: null, ...patch,
   };
+}
+
+type LifecycleBank = MemoryHindsightStatusSection["banks"][number];
+
+export function lifecycleBank(characterId: string | null, readiness: HindsightBankReadiness, errorCode: HindsightErrorCode | null = null): LifecycleBank {
+  const scope = characterId === null ? "global" : "character";
+  const nativeBankId = readiness === "not_provisioned" ? null : characterId === null ? "global" : `character-${characterId}`;
+  return { scope, characterId, nativeBankId, readiness, errorCode };
+}
+
+/** One Bank per readiness state, a changed configuration, revalidate offered and the two unserved Characters listed. */
+export function lifecycleSection(patch: Partial<MemoryHindsightStatusSection> = {}): MemoryHindsightStatusSection {
+  return {
+    connection: { config: "ready", drift: "config_changed", admittedAt: AT },
+    banks: [lifecycleBank(null, "ready"), lifecycleBank("taki", "syncing"), lifecycleBank("mika", "provisioning"),
+      lifecycleBank("nana", "failed", "HINDSIGHT_BANK_OCCUPIED"), lifecycleBank("yui", "not_provisioned")],
+    actions: { revalidate: true, provision: ["nana", "yui"] },
+    ...patch,
+  };
+}
+
+/** A Hindsight marker whose runtime is down for `reason`; replica and Pending evidence are absent as the schema requires. */
+export function degradedStatus(hindsight: MemoryHindsightStatusSection = lifecycleSection(), reason: MemoryRuntimeUnavailableReason = "config_changed"): MemoryAuthorityStatus {
+  return hindsightStatus({ runtime: { providerId: "hindsight", available: false, unavailableReason: reason }, replica: null, pending: null, hindsight });
 }

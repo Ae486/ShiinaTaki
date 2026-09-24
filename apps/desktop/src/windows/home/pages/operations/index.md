@@ -6,11 +6,13 @@ the memory/context status card, and storage usage with the D46 attachment purge.
 - use-operations.ts — the page's ws touchpoint: memory.tidy plus the cached memory.status / media.usage reads (a failed re-read keeps the last counters on screen; refresh() backs the retry)
 - use-media-clear.ts — destructive purge owner: immediate exact-once guard, media.clear call, terminal release, and refresh
 - operations-state.ts — pure view models + media.clear state machine; Cancel is valid only before destructive execution
-- memory-authority-card.tsx — memory.authority.status card: authority/runtime/setup lines, per-Bank replica + Pending rows with Sync now / Full reconcile / Retry, active operations with Cancel (admitted replica.sync only)
-- memory-authority-state.ts — pure view models for that card (unknown stays 未知) + the shared operation kind/state/runtime-reason labels + the MEMORY_OPERATION_REFUSED app-error reader
+- memory-authority-card.tsx — memory.authority.status card: authority/runtime/setup lines, the Hindsight lifecycle block, per-Bank replica + Pending rows with Sync now / Full reconcile / Retry, active operations with Cancel (admitted replica.sync only)
+- memory-authority-state.ts — pure view models for that card (unknown stays 未知) + the shared Bank scope / operation kind/state/runtime-reason labels + the MEMORY_OPERATION_REFUSED app-error reader
+- memory-hindsight-lifecycle-block.tsx — the card's Hindsight connection + Bank readiness block: 重新校验连接 / 创建 Bank buttons through the generic submit, collapsed diagnostics
+- memory-hindsight-lifecycle-state.ts — pure projection of the status `hindsight` section: connection rows, per-scope readiness rows, diagnostics (native ids, error codes) and action descriptors from Core `actions` only
 - memory-operations-controller.ts — framework-free guard shared by the Stage 1 and Hindsight cards: one injected status read per instance behind the changed-push subscription, generic serialized submit(request, key)/cancel, coalesced refetch on push and after every mutation outcome, no replay
-- use-memory-operations.ts — the React seam for memory.authority.status + memory.operations.*: state + the controller lifecycle bound to the authenticated client
-- memory-authority-fixtures.ts — test support (not in the production path): MemoryAuthorityStatus / Bank / MemoryOperation fixtures shared by the card, view-model and controller tests
+- use-memory-operations.ts — the React seam for memory.authority.status + memory.operations.*: state + the controller lifecycle bound to the authenticated client, generic submit / submitSync / cancel
+- memory-authority-fixtures.ts — test support (not in the production path): MemoryAuthorityStatus / Bank / MemoryOperation fixtures plus the Hindsight lifecycle section (every readiness state) shared by the card, view-model and controller tests
 - local-onboarding-card.tsx — memory.onboarding.status card: authority vs runtime facts, progress, Core-derived action buttons, exceptions list and technical diagnostics
 - local-onboarding-exceptions.tsx — bounded source diagnostics with the per-source exclusion reason form and cursor paging
 - local-onboarding-actions.ts — action labels, Core-derived allow checks and the exact memory.operations.submit request per action

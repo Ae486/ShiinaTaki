@@ -1,20 +1,51 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { bankStatus, hindsightStatus, localStatus, operation } from "./memory-authority-fixtures.ts";
+import { bankStatus, degradedStatus, hindsightStatus, lifecycleSection, localStatus, operation } from "./memory-authority-fixtures.ts";
 import { MemoryAuthorityCard } from "./memory-authority-card.tsx";
 import type { MemoryOperationsView } from "./use-memory-operations.ts";
 
 const noop = async () => undefined;
 
 function view(overrides: Partial<MemoryOperationsView> = {}): MemoryOperationsView {
-  return { status: null, loading: false, error: null, busyKey: null, feedback: null, connectionReady: true, refresh: noop, submitSync: noop, cancel: noop, ...overrides };
+  return { status: null, loading: false, error: null, busyKey: null, feedback: null, connectionReady: true, refresh: noop, submit: noop, submitSync: noop, cancel: noop, ...overrides };
 }
 
 function card(overrides: Partial<MemoryOperationsView> = {}): string {
   return renderToStaticMarkup(<MemoryAuthorityCard ops={view(overrides)} />);
 }
 
+const buttons = (markup: string) => [...markup.matchAll(/<button[^>]*>([^<]*)<\/button>/g)].map((match) => match[1]);
+const LIFECYCLE_BUTTONS = ["重新校验连接", "创建 Bank（nana）", "创建 Bank（yui）"];
+
 describe("memory authority card", () => {
+  it("renders no Hindsight lifecycle block outside Hindsight authority", () => {
+    expect(card({ status: localStatus() })).not.toContain("Hindsight 连接与 Bank");
+  });
+
+  it("renders connection, readiness rows and the Core-listed lifecycle actions while the runtime is degraded", () => {
+    const markup = card({ status: degradedStatus() });
+    expect(markup).toContain("运行时不可用：连接配置已变更，需要重新校验");
+    expect(markup).toContain("Hindsight 连接与 Bank");
+    for (const label of ["可用", "同步中", "创建中", "失败", "未创建"]) expect(markup).toContain(`>${label}<`);
+    expect(buttons(markup)).toEqual(LIFECYCLE_BUTTONS);
+    const [primary, diagnostics] = markup.split("技术诊断");
+    expect(primary).not.toContain("HINDSIGHT_BANK_OCCUPIED");
+    expect(diagnostics).toContain("character-nana · HINDSIGHT_BANK_OCCUPIED");
+    const quiet = card({ status: degradedStatus(lifecycleSection({ actions: { revalidate: false, provision: [] } })) });
+    expect(buttons(quiet)).toEqual([]);
+    expect(card({ status: degradedStatus(lifecycleSection({ connection: { config: "disabled", drift: "none", admittedAt: null },
+      actions: { revalidate: false, provision: [] } }), "connection_disabled") })).toContain("Hindsight 连接已关闭");
+  });
+
+  it("locks the lifecycle actions while a submission is pending or the connection is down", () => {
+    const busy = card({ status: degradedStatus(), busyKey: "provision:nana" });
+    expect(busy.match(/disabled=""/g)).toHaveLength(LIFECYCLE_BUTTONS.length);
+    expect([...busy.matchAll(/<button[^>]*aria-busy="true"[^>]*>([^<]*)</g)].map((match) => match[1])).toEqual(["创建 Bank（nana）"]);
+    const offline = card({ status: degradedStatus(), connectionReady: false });
+    expect(offline.match(/disabled=""/g)).toHaveLength(LIFECYCLE_BUTTONS.length);
+    expect(card({ status: degradedStatus() })).not.toContain("disabled=");
+  });
+
   it("renders the skeleton before the first read and the retry line after a failed one", () => {
     expect(card()).toContain("animate-pulse");
     const failed = card({ error: "deadline" });

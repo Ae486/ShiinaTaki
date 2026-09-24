@@ -1,12 +1,12 @@
 /**
  * INPUT:  the authenticated Home WsClient generation and the framework-free memory-operations controller.
  * OUTPUT: useMemoryOperations() — the composite memory.authority.status view, one changed-push subscription per
- *         connection, and the serialized submitSync / cancel actions; nothing is persisted or replayed.
+ *         connection, and the serialized generic submit / submitSync / cancel actions; nothing is persisted or replayed.
  * POS:    ui/windows/home/pages/operations — the only React seam for memory.operations.*; glue only, the view model
  *         lives in memory-authority-state.ts and the authority guard in memory-operations-controller.ts.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { MemoryAuthorityStatus, MemoryReplicaRunKind } from "@taki/shared";
+import type { MemoryAuthorityStatus, MemoryOperationRequest, MemoryReplicaRunKind } from "@taki/shared";
 import { useHomeClient } from "../../home-client-context.ts";
 import {
   createMemoryOperationsController,
@@ -25,6 +25,7 @@ export interface MemoryOperationsState {
 export interface MemoryOperationsView extends MemoryOperationsState {
   connectionReady: boolean;
   refresh(): Promise<void>;
+  submit(request: MemoryOperationRequest, key: string): Promise<void>;
   submitSync(bankId: string, syncKind: MemoryReplicaRunKind): Promise<void>;
   cancel(operationId: string): Promise<void>;
 }
@@ -53,8 +54,9 @@ export function useMemoryOperations(): MemoryOperationsView {
   useEffect(() => () => controller.dispose(), [controller]);
 
   const refresh = useCallback(() => controller.refresh(), [controller]);
+  const submit = useCallback((request: MemoryOperationRequest, key: string) => controller.submit(request, key), [controller]);
   const submitSync = useCallback((bankId: string, syncKind: MemoryReplicaRunKind) => controller.submitSync(bankId, syncKind), [controller]);
   const cancel = useCallback((operationId: string) => controller.cancel(operationId), [controller]);
 
-  return { ...state, connectionReady: ready !== null, refresh, submitSync, cancel };
+  return { ...state, connectionReady: ready !== null, refresh, submit, submitSync, cancel };
 }

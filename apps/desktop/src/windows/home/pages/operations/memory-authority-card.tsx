@@ -1,9 +1,10 @@
 /**
  * INPUT:  the useMemoryOperations() view (composite memory.authority.status + serialized actions).
- * OUTPUT: <MemoryAuthorityCard> — authority/runtime/setup lines, one block per Bank (replica status, Pending counts,
- *         Sync now / Full reconcile / Retry), and the active operations with Cancel for admitted replica.sync only.
+ * OUTPUT: <MemoryAuthorityCard> — authority/runtime/setup lines, the Hindsight connection + Bank readiness block (创建 Bank /
+ *         重新校验连接 from Core actions), one block per Bank (replica status, Pending counts, Sync now / Full reconcile /
+ *         Retry), and the active operations with Cancel for admitted replica.sync only.
  * POS:    ui/windows/home/pages/operations — presentational; every number is a Core read and unknown renders as
- *         "未知". Stage 1 offers no setup.validate / setup.apply controls from this card.
+ *         "未知". Setup validate/apply stay on the Hindsight activation card.
  */
 
 import { FeedbackLine } from "@/components/ui/feedback-line.js";
@@ -11,6 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton.js";
 import { ActionButton } from "../../action-button.tsx";
 import { LabeledRows, PageCard } from "../../page-card.tsx";
 import { memoryAuthorityView, type ActiveOperationRow, type BankRow, type MemoryAuthorityView, type PendingRow } from "./memory-authority-state.ts";
+import { HindsightLifecycleBlock } from "./memory-hindsight-lifecycle-block.tsx";
+import { hindsightLifecycleView } from "./memory-hindsight-lifecycle-state.ts";
 import type { MemoryOperationsView } from "./use-memory-operations.ts";
 
 export function MemoryAuthorityCard({ ops }: { ops: MemoryOperationsView }) {
@@ -28,9 +31,11 @@ export function MemoryAuthorityCard({ ops }: { ops: MemoryOperationsView }) {
 
 function CardBody({ view, ops }: { view: MemoryAuthorityView; ops: MemoryOperationsView }) {
   const locked = !ops.connectionReady || ops.busyKey !== null;
+  const lifecycle = ops.status ? hindsightLifecycleView(ops.status) : null;
   return (
     <div className="flex flex-col gap-4">
       <LabeledRows rows={[{ label: "权威", value: view.headline }, { label: "运行时", value: view.runtimeLine }, { label: "Setup", value: view.setupLine }]} />
+      {lifecycle && <HindsightLifecycleBlock lifecycle={lifecycle} ops={ops} locked={locked} />}
       {view.hindsight && view.banks.length === 0 && <p className="text-xs text-text-secondary">尚无 Bank。</p>}
       {view.banks.map((bank) => (
         <BankBlock key={bank.bankId} bank={bank} pending={view.pending.find((row) => row.bankId === bank.bankId) ?? null} ops={ops} locked={locked} />

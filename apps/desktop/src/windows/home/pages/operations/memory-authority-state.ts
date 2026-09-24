@@ -1,7 +1,7 @@
 /**
  * INPUT:  a schema-validated MemoryAuthorityStatus (and the operations it embeds) from memory.authority.status.
  * OUTPUT: pure view models for the Memory authority card — headline, setup line, per-Bank rows, Pending rows and the
- *         active-operation rows — plus the operation-kind labels and the app-error reader for MEMORY_OPERATION_REFUSED rejections.
+ *         active-operation rows — plus the Bank scope / operation-kind labels and the app-error reader for MEMORY_OPERATION_REFUSED rejections.
  * POS:    ui/windows/home/pages/operations — node-testable; no DOM, no socket. Unknown stays "unknown", never "0".
  */
 
@@ -70,11 +70,15 @@ export function memoryAuthorityView(status: MemoryAuthorityStatus): MemoryAuthor
   };
 }
 
-function bankRow(bank: NonNullable<MemoryAuthorityStatus["replica"]>[number]): BankRow {
+export function bankScopeLabel(scope: "global" | "character", characterId: string | null): string {
+  return scope === "global" ? "Global" : `Character · ${characterId}`;
+}
+
+function bankRow(bank:NonNullable<MemoryAuthorityStatus["replica"]>[number]): BankRow {
   const explicit = bank.nextAction === "explicit_retry_required";
   return {
     bankId: bank.bankId,
-    label: bank.scope === "global" ? "Global" : `Character · ${bank.characterId}`,
+    label: bankScopeLabel(bank.scope, bank.characterId),
     lastSuccess: bank.lastSuccessAt ?? UNKNOWN,
     lastAttempt: bank.lastAttemptAt ?? UNKNOWN,
     nextDue: bank.run ? "执行中" : bank.pendingManualKind ? `手动 ${bank.pendingManualKind} 待认领` : bank.retryDueAt ?? bank.nextDueAt ?? (bank.automatic ? UNKNOWN : "手动模式"),
