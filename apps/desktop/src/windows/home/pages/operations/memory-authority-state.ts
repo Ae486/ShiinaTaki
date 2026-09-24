@@ -44,6 +44,7 @@ const MODE_LABEL: Record<MemoryAuthorityStatus["authority"]["mode"], string> = {
 };
 export const MEMORY_RUNTIME_UNAVAILABLE_LABEL: Record<NonNullable<MemoryAuthorityStatus["runtime"]["unavailableReason"]>, string> = {
   authority_mismatch: "运行时与权威标记不一致", connection_unavailable: "连接不可用", stopped: "运行时已停止", not_installed: "运行时未安装",
+  connection_disabled: "Hindsight 连接已关闭", config_changed: "连接配置已变更，需要重新校验",
 };
 export const MEMORY_OPERATION_STATE_LABEL: Record<MemoryOperation["state"], string> = {
   admitted: "已受理（未认领）", running: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消", outcome_unknown: "结果未知（Core 重启）",

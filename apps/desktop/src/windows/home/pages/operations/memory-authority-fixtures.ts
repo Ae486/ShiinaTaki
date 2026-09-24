@@ -30,7 +30,7 @@ export function localStatus(): MemoryAuthorityStatus {
   return {
     authority: { mode: "canonical-local", epochId: "epoch-1", providerLineageId: null },
     runtime: { providerId: "local", available: true, unavailableReason: null },
-    setup, replica: null, pending: null, operations: { active: [], recent: [] }, derivedFreshness: "unknown", observedAt: AT,
+    setup, replica: null, pending: null, operations: { active: [], recent: [] }, hindsight: null, derivedFreshness: "unknown", observedAt: AT,
   };
 }
 
@@ -42,6 +42,8 @@ export function hindsightStatus(patch: Partial<MemoryAuthorityStatus> = {}): Mem
     replica: [bankStatus("global")],
     pending: [{ bankId: "global", parentWritesPending: 2,
       summary: { pendingCount: 1, nativeConfirmedCount: 0, completedCount: 4, supersededCount: 0, failedCount: 0, unknownCount: 1, cancelledCount: 0 } }],
+    hindsight: { connection: { config: "ready", drift: "none", admittedAt: AT },
+      banks: [{ scope: "global", characterId: null, nativeBankId: "global", readiness: "ready", errorCode: null }], actions: { revalidate: false, provision: [] } },
     ...patch,
   };
 }
