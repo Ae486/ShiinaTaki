@@ -120,8 +120,9 @@ function readCustodyCounters(db: Database, scope: HindsightActivationRunScope) {
 
 /**
  * The committed identity for a binding repair when no operation row carries it: receipts name the run, epoch, transaction,
- * fingerprint and per-Bank replica epochs; the latest verification candidate names each Bank's verification id. Null when the
- * receipt or any Bank's verification evidence is missing — recovery then has nothing proven to repair against.
+ * fingerprint and per-Bank replica epochs; the latest verification candidate names each Bank's verification id — the native
+ * per-preparation id, not the minted base, which is safe because a committed run is never replayed through the chain. Null when
+ * the receipt or any Bank's verification evidence is missing — recovery then has nothing proven to repair against.
  */
 export function readCommittedHindsightProducer(db: Database, input: { epochId: string; transactionId: string }): MemoryHindsightProducerRef | null {
   const receipt = db.prepare("SELECT run_id,config_fingerprint FROM hindsight_authority_activation_receipts WHERE transaction_id=:tx AND hindsight_epoch_id=:epoch")

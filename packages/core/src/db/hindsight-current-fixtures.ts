@@ -111,7 +111,9 @@ export function currentImportFixture(prepared: Pick<HindsightPreparedCurrentBank
   const result = HindsightCurrentTransferResultSchema.parse({ contract_version: request.contract_version, encoding: request.encoding,
     state: "completed", operation_id: request.operation_id, request_hash: request.request_hash, local_manifest_digest: request.local_manifest_digest,
     provider_lineage: request.provider_lineage, bank_generation: request.bank_generation, bank_id: prepared.bankId, source_bank_id: prepared.sourceBankId,
-    native_before_cursor: 10, native_through_cursor: cursor, native_batch_id: cursor === 10 ? null : CURRENT_VERIFICATION, superseded_count: 0,
+    native_before_cursor: 10, native_through_cursor: cursor,
+    // Native writes one batch for any change, supersede tombstones included, and counts every superseded receipt it was sent.
+    native_batch_id: cursor === 10 && request.supersede.length === 0 ? null : CURRENT_VERIFICATION, superseded_count: request.supersede.length,
     manifest: { total_records: mappings.length, page_size: 128, total_pages: 1, mappings_hash: hindsightCurrentStateHash(mappings), page_hashes: [pageHash] }, result_hash: "0".repeat(64) });
   result.result_hash = hindsightCurrentStateHash(currentStateFieldsWithout(result, ["result_hash"]));
   const pages = [{ operation_id: result.operation_id, bank_id: prepared.bankId, provider_lineage: request.provider_lineage,

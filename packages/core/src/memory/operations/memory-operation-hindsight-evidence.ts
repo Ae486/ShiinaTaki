@@ -22,7 +22,10 @@ export function hindsightRef(producer: MemoryOperationProducerRef | null): Hinds
   return producer;
 }
 
-/** Fresh identities unless a prior attempt of the same run already minted them: resume must replay, never re-mint, per-Bank ids. */
+/**
+ * Fresh identities unless a prior attempt of the same run already minted them: resume must replay, never re-mint, per-Bank ids.
+ * A Bank's verificationId is the base; the chain derives each preparation's native id from it (preparationVerificationId).
+ */
 export function mintRef(plan: HindsightActivationPlan & { runId: string; configFingerprint: string }, prior: HindsightRef | null): HindsightRef {
   const known = new Map<string, BankIds>(prior?.banks.map((bank) => [bank.nativeBankId, { replicaEpochId: bank.replicaEpochId, verificationId: bank.verificationId }]) ?? []);
   // A Bank without a verified B3 row has no proven native identity yet; execution reports it as blocking instead of guessing one.

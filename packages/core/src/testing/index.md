@@ -19,4 +19,4 @@
 - hindsight-runtime-composition-fixtures.ts — isolated SQLite/B3 runtime construction with exact native selectors and complete application history; exports the D77 application client overlay and fixture secrets for the activation journey
 - memory-chat-turn-fixture.ts — one chat.send-level primary turn through Harness admission and the chat agent with a streaming mock model; test-only
 - hindsight-fixture-routes.ts — the health/version/compatibility bodies shared by every in-memory Hindsight transport double
-- hindsight-activation-transport.ts — in-memory D78 transport double for activation tests: Bank setup, snapshots, current-state transfers, cutover verifications computed from the POSTed request, per-route counts, one-shot/persistent faults and a pre-answer hook
+- hindsight-activation-transport.ts — in-memory D78 transport double for activation tests: Bank setup, snapshots, current-state transfers, cutover verifications computed from the POSTed request (a changed request under a used verification id is a request_conflict, as native), per-route counts, one-shot/persistent faults and a pre-answer hook

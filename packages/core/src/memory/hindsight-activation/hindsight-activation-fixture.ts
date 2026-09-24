@@ -1,14 +1,16 @@
 /**
  * INPUT:  an owned SQLite database seeded with a real B2-activated Local epoch, verified B3 rows and a scripted Utility model
  * OUTPUT: createHindsightActivationHarness() -> the real Local subsystem (fence/ingestion), the activation transport double, the
- *         activation service over a programmable fake binding seam, Core-minted identities and captured checkpoints; never imported by production code
+ *         activation service over a programmable fake binding seam, Core-minted identities and captured checkpoints, and
+ *         recordedVerifications() (every native verification Core recorded); never imported by production code
  * POS:    core/memory/hindsight-activation — test-only harness shared by the service, kind, custody-carry and custody-routing tests
  */
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { LanguageModel } from "ai";
-import { HindsightSetupSnapshotSchema, HindsightSnapshotRecordWireSchema, type HindsightCompatibilityProjection, type HindsightSetupSnapshot, type MemoryHindsightProducerRef,
+import { HindsightSetupSnapshotSchema, HindsightSnapshotRecordWireSchema, type HindsightCompatibilityProjection, type HindsightCurrentVerificationCandidate,
+  type HindsightSetupSnapshot, type MemoryHindsightProducerRef,
   type HindsightSnapshotRecordWire, type MemoryOperation, type MemoryOperationRequest, type TimelineEntry } from "@taki/shared";
 import { loadMemoryConfig } from "../../config/memory-config.ts";
 import { createCanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
@@ -90,6 +92,14 @@ export function createHindsightActivationHarness(options: { model?: LanguageMode
 }
 export type HindsightActivationHarness = ReturnType<typeof createHindsightActivationHarness>;
 export type HindsightActivationOwner = ReturnType<HindsightActivationHarness["owner"]>;
+
+/** Every native verification Core recorded, oldest first, with the Bank and preparation it verifies. */
+export function recordedVerifications(db: Database) {
+  return db.prepare(`SELECT c.verification_id,c.preparation_id,p.bank_id,c.candidate_json FROM hindsight_current_verification_candidates c
+    JOIN hindsight_current_preparations p ON p.preparation_id=c.preparation_id ORDER BY c.rowid`).all().map((row) => ({
+    verificationId: String(row.verification_id), preparationId: String(row.preparation_id), bankId: String(row.bank_id),
+    request: (JSON.parse(String(row.candidate_json)) as HindsightCurrentVerificationCandidate).request }));
+}
 
 export interface FakeHindsightBinding {
   state: HindsightBindingState; stopped: boolean; publishFails: boolean; recoverable: number; binds: string[]; recovers: string[];

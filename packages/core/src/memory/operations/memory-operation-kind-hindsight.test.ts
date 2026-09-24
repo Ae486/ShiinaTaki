@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { MemoryOperation, MemoryOperationRequest } from "@taki/shared";
+import { retainNewLocalSource } from "../../db/hindsight-local-coverage-fixtures.ts";
 import { createMemoryOperationRepo } from "../../db/memory-operation-repo.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
-import { createHindsightActivationHarness, type HindsightActivationHarness, type HindsightActivationOwner } from "../hindsight-activation/hindsight-activation-fixture.ts";
+import { preparationVerificationId } from "../hindsight-activation/hindsight-activation-chain.ts";
+import { createHindsightActivationHarness, recordedVerifications, type HindsightActivationHarness, type HindsightActivationOwner } from "../hindsight-activation/hindsight-activation-fixture.ts";
 import { MemoryOperationRefusal, type MemoryOperationContext, type MemoryOperationExecution } from "./memory-operation-contract.ts";
 import { hindsightActivateKind } from "./memory-operation-kind-hindsight.ts";
 import { fakeSetup } from "./memory-operation-fixtures.ts";
@@ -172,6 +174,29 @@ describe("hindsight.activate — claim, cancel and boot observation", () => {
   });
 });
 
+describe("hindsight.activate — recaptured verification ids", () => {
+  it("resumes a recaptured run after a restart mid-verify with the per-preparation ids the interrupted attempt posted", async () => {
+    const h = harness(); const owner = h.owner(); let written = false;
+    h.transport.before(({ route }) => { if (route === "verification-verify" && !written) { written = true; retainNewLocalSource(h.db, h.local); } });
+    const stale = await owner.settled(activate(h));
+    expect(stale).toMatchObject({ state: "failed", errorCode: "HINDSIGHT_LOCAL_COVERAGE_STALE" });
+    h.transport.fail("verification-verify", { response: new Error("lost reply"), afterEffect: true });
+    const interrupted = await owner.settled(resume());
+    expect(interrupted).toMatchObject({ state: "failed", errorCode: "HINDSIGHT_UNREACHABLE" });
+    const posted = recordedVerifications(h.db);
+
+    const resumed = await h.owner("boot-b").settled(resume());
+    expect(resumed).toMatchObject({ state: "completed", result: { outcome: "activated" } });
+    const ids = (operation: MemoryOperation) => (operation.producer as HindsightRef).banks.map((bank) => bank.verificationId);
+    expect(ids(interrupted)).toEqual(ids(stale)); expect(ids(resumed)).toEqual(ids(stale));
+    const all = recordedVerifications(h.db);
+    expect(all.slice(0, posted.length)).toEqual(posted);
+    const base = new Map((stale.producer as HindsightRef).banks.map((bank) => [bank.nativeBankId, bank.verificationId]));
+    expect(all.map((row) => row.verificationId)).toEqual(all.map((row) => preparationVerificationId(base.get(row.bankId)!, row.preparationId)));
+    expect(new Set(all.map((row) => row.verificationId)).size).toBe(all.length);
+  });
+});
+
 describe("hindsight.activate — binding repair", () => {
   it("settles a post-COMMIT bind failure as runtime_unavailable, repairs through recover without re-promoting and keeps history immutable", async () => {
     const h = harness(); const owner = h.owner();
@@ -215,6 +240,9 @@ describe("hindsight.activate — binding repair", () => {
     const repaired = await owner.settled(recover(receipt.hindsightEpochId));
     expect(repaired).toMatchObject({ state: "completed", result: { outcome: "activated", epochId: "hindsight-epoch" },
       producer: { runId: "run", transactionId: "hindsight-tx", progress: { phase: "completed", bankCount: 2 } } });
-    expect((repaired.producer as HindsightRef).banks.map((bank) => bank.verificationId).sort()).toEqual(h.identity().banks.map((bank) => bank.verificationId).sort());
+    // Receipts only hold the native per-preparation id; the minted base lives in operation rows, which this path lacks.
+    const rebuilt = (repaired.producer as HindsightRef).banks;
+    expect(rebuilt.map((bank) => bank.verificationId)).toEqual(rebuilt.map((bank) =>
+      preparationVerificationId(h.identity().banks.find((minted) => minted.nativeBankId === bank.nativeBankId)!.verificationId, bank.preparationId!)));
   });
 });

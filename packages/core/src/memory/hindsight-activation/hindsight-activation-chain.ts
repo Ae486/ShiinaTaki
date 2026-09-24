@@ -1,7 +1,8 @@
 /**
  * INPUT:  one leased cutover run, the selected Local capture, per-Bank Core-minted identities and the authenticated D78 client
- * OUTPUT: activateBank() (baseline -> prepare -> import -> verify, replaying persisted evidence and never re-POSTing) and
- *         promoteActivation() (markReady -> promotion with the PR03 custody carry) over the unchanged B4/D78 primitives
+ * OUTPUT: activateBank() (baseline -> prepare -> import -> verify, replaying persisted evidence and never re-POSTing),
+ *         promoteActivation() (markReady -> promotion with the PR03 custody carry) over the unchanged B4/D78 primitives and
+ *         preparationVerificationId() (the native verification id each preparation presents)
  * POS:    core/memory/hindsight-activation — the only production caller of the D78 mutation primitives; each step is its own transaction
  */
 import type { HindsightCurrentCapture, HindsightCurrentTransferRequest, MemoryHindsightPhase, MemoryHindsightProducerRef,
@@ -15,6 +16,7 @@ import { createHindsightCutoverRunRepo, type HindsightCutoverLease } from "../..
 import { createHindsightReplicaRepo } from "../../db/hindsight-replica-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
 import type { HindsightCurrentStateClient } from "../hindsight/hindsight-current-client.ts";
+import { hindsightOperationUuid } from "../hindsight/hindsight-import-identity.ts";
 import { fetchHindsightCurrentBaseline, importHindsightCurrentBank, verifyHindsightCurrentBank } from "../hindsight/hindsight-current-orchestrator.ts";
 
 export interface HindsightActivationBankIdentity {
@@ -83,11 +85,20 @@ export async function activateBank(ctx: ActivationChainContext, input: {
     }
     progress.phase("verifying", { importedBankCount: counts.importedBankCount + 1 });
     ctx.renew();
-    const verified = await verifyHindsightCurrentBank({ db, preparationId, lease: ctx.lease, verificationId: bank.verificationId,
+    const verified = await verifyHindsightCurrentBank({ db, preparationId, lease: ctx.lease,
+      verificationId: preparationVerificationId(bank.verificationId, preparationId),
       replicaEpochId: bank.replicaEpochId, client: ctx.client, context, now: ctx.now });
     if (!verified.evidence) throw new Error("HINDSIGHT_CURRENT_VERIFICATION_INCOMPLETE");
   }
   progress.phase("verifying", { importedBankCount: counts.importedBankCount + 1, verifiedBankCount: counts.verifiedBankCount + 1 });
+}
+
+/**
+ * Native keys a verification by id and refuses a different request under a used one, and a recapture's preparation asks to
+ * verify a different transfer; so each preparation presents its own id, and replaying the same preparation derives the same one.
+ */
+export function preparationVerificationId(verificationId: string, preparationId: string): string {
+  return hindsightOperationUuid(`cutover-verification/v1/${verificationId}/${preparationId}`);
 }
 
 export function promoteActivation(ctx: ActivationChainContext): HindsightActivationReceipt {

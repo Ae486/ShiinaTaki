@@ -1,9 +1,13 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { readHindsightCurrentImport } from "../../db/hindsight-current-import-repo.ts";
 import { retainNewLocalSource } from "../../db/hindsight-local-coverage-fixtures.ts";
 import { createHindsightIngestionSourceRepo } from "../../db/hindsight-ingestion-source-repo.ts";
 import { scriptedGenerateModel } from "../../testing/mock-language-model.ts";
+import type { HindsightCurrentStateClient } from "../hindsight/hindsight-current-client.ts";
+import { currentVerificationRequest } from "../hindsight/hindsight-current-verification-identity.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
-import { createHindsightActivationHarness, type HindsightActivationHarness } from "./hindsight-activation-fixture.ts";
+import { preparationVerificationId } from "./hindsight-activation-chain.ts";
+import { createHindsightActivationHarness, recordedVerifications, type HindsightActivationHarness } from "./hindsight-activation-fixture.ts";
 
 const harnesses: HindsightActivationHarness[] = [];
 afterEach(async () => { for (const harness of harnesses.splice(0)) await harness.close(); });
@@ -122,6 +126,32 @@ describe("Hindsight activation service", () => {
     expect(h.db.prepare("SELECT count(*) AS n FROM hindsight_local_coverage_manifests").get()?.n).toBe(2);
     expect(h.transport.calls("transfer-post")).toBe(2);
     expect(readMemoryAuthoritySelection(h.db).mode).toBe("hindsight");
+  });
+
+  it("verifies a recapture after a posted verification under a new per-preparation id and replays that id after an interrupted verify", async () => {
+    const h = harness(); let written = false;
+    h.transport.before(({ route }) => { if (route === "verification-verify" && !written) { written = true; retainNewLocalSource(h.db, h.local); } });
+    await expectFailure(h, h.service.start(h.identity(), h.control()), "HINDSIGHT_LOCAL_COVERAGE_STALE");
+    const posted = recordedVerifications(h.db);
+    expect(posted.length).toBeGreaterThan(0);
+    h.transport.fail("verification-verify", { response: new Error("lost reply"), afterEffect: true });
+    await expectFailure(h, h.service.resumeActivation(h.identity("op-2"), h.control()), "HINDSIGHT_UNREACHABLE");
+    const interrupted = recordedVerifications(h.db).filter((row) => !posted.some((prior) => prior.preparationId === row.preparationId));
+    expect(interrupted).toHaveLength(1);
+    await h.service.resumeActivation(h.identity("op-3"), h.control());
+    expect(readMemoryAuthoritySelection(h.db).mode).toBe("hindsight");
+
+    const all = recordedVerifications(h.db);
+    const base = new Map(h.identity().banks.map((bank) => [bank.nativeBankId, bank.verificationId]));
+    expect(all.map((row) => row.verificationId)).toEqual(all.map((row) => preparationVerificationId(base.get(row.bankId)!, row.preparationId)));
+    expect(new Set(all.map((row) => row.verificationId)).size).toBe(all.length);
+    expect(all.find((row) => row.preparationId === interrupted[0]!.preparationId)?.verificationId).toBe(interrupted[0]!.verificationId);
+    // The double answers a used id like native: the same request replays, a different transfer under it is a conflict.
+    const [first] = posted; const recaptured = all.find((row) => row.bankId === first!.bankId && row.preparationId !== first!.preparationId)!;
+    const client = h.transport.client as HindsightCurrentStateClient; const context = { timeoutMs: 1_000 };
+    expect(await client.prepareCurrentVerification({ bankId: first!.bankId, request: first!.request, context })).not.toHaveProperty("error");
+    const reused = currentVerificationRequest({ imported: readHindsightCurrentImport(h.db, recaptured.preparationId)!, verificationId: first!.verificationId });
+    expect(await client.prepareCurrentVerification({ bankId: first!.bankId, request: reused, context })).toMatchObject({ reason: "request_conflict" });
   });
 
   it("refuses an unowned target object and representation gaps before any transfer is submitted", async () => {

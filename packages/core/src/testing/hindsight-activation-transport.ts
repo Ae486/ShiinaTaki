@@ -1,7 +1,8 @@
 /**
  * INPUT:  the exact D78 requests the activation chain sends (Bank template setup, snapshots, current-state transfers, cutover verifications)
  * OUTPUT: createHindsightActivationTransport() — an in-memory HindsightTransport whose bodies are computed from the POSTed request
- *         with the D78 fixture builders, with per-route call counts and one-shot or persistent fault injection
+ *         with the D78 fixture builders (a changed verification request under a used id is refused, as native does), with
+ *         per-route call counts and one-shot or persistent fault injection
  * POS:    core/testing — deterministic native substitute for activation tests; never contacts a real Hindsight or PostgreSQL
  */
 import { HindsightCurrentTransferRequestSchema, HindsightCutoverVerificationRequestSchema, type HindsightCutoverVerificationStatus,
@@ -33,7 +34,7 @@ export interface HindsightActivationTransportInput {
 }
 
 interface Transfer { native: ReturnType<typeof currentImportFixture> }
-interface Verification { proof: ReturnType<typeof currentMaintenanceFixture>; status: HindsightCutoverVerificationStatus }
+interface Verification { request: string; proof: ReturnType<typeof currentMaintenanceFixture>; status: HindsightCutoverVerificationStatus }
 interface State {
   banks: Record<string, HindsightSnapshotRecordWire[]>; templates: Map<string, unknown>;
   snapshots: Map<string, { metadata: HindsightSnapshotMetadataWire; pages: HindsightSnapshotPageWire[] }>;
@@ -124,7 +125,7 @@ function answer(state: State, call: Call): HindsightTransportResponse {
     case "transfer-result": return state.transfers.has(call.rest[1] ?? "") ? ok(state.transfers.get(call.rest[1]!)!.native.result)
       : refusal(404, "current_state_transfer_refused", "result_not_found");
     case "transfer-page": return page(state.transfers.get(call.rest[1] ?? "")?.native.pages, Number(call.rest[3]));
-    case "verification-post": return ok(verification(state, call).status);
+    case "verification-post": return verification(state, call);
     case "verification-verify": return ok(advance(state, call));
     case "verification-get": return state.verifications.has(call.rest[1] ?? "") ? ok(state.verifications.get(call.rest[1]!)!.status)
       : refusal(404, "cutover_verification_refused", "operation_refused");
@@ -150,13 +151,15 @@ function transfer(state: State, call: Call, baseline: HindsightSnapshotRecordWir
   return entry;
 }
 
-function verification(state: State, call: Call): Verification {
-  const request = HindsightCutoverVerificationRequestSchema.parse(call.body);
-  const existing = state.verifications.get(request.verification_id); if (existing) return existing;
+/** Like native, a replayed request answers its stored run and a different request under a used id is a request_conflict. */
+function verification(state: State, call: Call): HindsightTransportResponse {
+  const request = HindsightCutoverVerificationRequestSchema.parse(call.body); const body = JSON.stringify(request);
+  const existing = state.verifications.get(request.verification_id);
+  if (existing) return existing.request === body ? ok(existing.status) : refusal(409, "cutover_verification_refused", "request_conflict");
   const imported = state.transfers.get(request.transfer_operation_id); if (!imported) throw new Error("activation fixture: verification before transfer");
   const proof = currentMaintenanceFixture({ result: imported.native.result }, imported.native, request.verification_id);
-  const entry = { proof, status: proof.candidate }; state.verifications.set(request.verification_id, entry);
-  return entry;
+  const entry = { request: body, proof, status: proof.candidate }; state.verifications.set(request.verification_id, entry);
+  return ok(entry.status);
 }
 
 function advance(state: State, call: Call): HindsightCutoverVerificationStatus {
