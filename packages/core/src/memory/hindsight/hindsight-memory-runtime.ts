@@ -1,7 +1,8 @@
 /**
  * INPUT:  the real Hindsight provider/recovery state and Core-owned persona/Block projection
  * OUTPUT: canonical tools, immutable Run memory capture and actual native policy-bearing recall; a memory-unavailable Run
- *         (unavailableRun) when the Character has no ready Bank or an unreachable provider left no admission evidence
+ *         (unavailableRun) when the Character has no ready Bank or an unreachable provider left no admission evidence;
+ *         onSynced after a capture that admitted and synced every routed Bank (the G13 reconnect signal)
  * POS:    core/memory/hindsight — foreground engine adapter; legacy generic background/file mutation surfaces refuse explicitly;
  *         integrity failures keep refusing the capture
  */
@@ -22,7 +23,7 @@ import type { MemoryReplicaBank } from "@taki/shared";
 export interface HindsightUnavailableRunEvent { characterId: string; reason: HindsightUnavailableRunReason }
 
 export function createHindsightMemoryRuntime(input: {
-  state: HindsightRuntimeState; promptDir?: string; onUnavailable?: (event: HindsightUnavailableRunEvent) => void;
+  state: HindsightRuntimeState; promptDir?: string; onUnavailable?: (event: HindsightUnavailableRunEvent) => void; onSynced?: () => void;
 }) {
   const { state } = input;
   const consumers = createHindsightRuntimeConsumers();
@@ -60,8 +61,9 @@ export function createHindsightMemoryRuntime(input: {
     captureRun: (characterId: string, signal?: AbortSignal) => consumers.capture(async () => {
       const banks = state.runtime.routedBanks(characterId);
       if (!banks) return unavailableRun(characterId, "bank_not_ready");
-      const degraded = await synchronizeForCapture(state, { banks, signal });
-      if (degraded) return unavailableRun(characterId, degraded);
+      const synced = await synchronizeForCapture(state, { banks, signal });
+      if (synced === "admission_unavailable") return unavailableRun(characterId, synced);
+      if (synced === "synced") input.onSynced?.();
       // Both routes and the prompt projection are captured before the coordinator
       // seals capabilities. Later background changes cannot rewrite a queued Run.
       const captured = await createCanonicalMemoryRun({ coordinator: state.coordinator, router: bankRouter(state, characterId),
@@ -76,8 +78,9 @@ function bankRouter(state: HindsightRuntimeState, characterId: string) {
   return { globalBankId: () => global.bankId, characterBankId: () => character.bankId, characterId: () => characterId };
 }
 
+/** "partial": admitted, but some routed Bank was unreachable (the Run keeps its in-Run fallback). */
 async function synchronizeForCapture(state: HindsightRuntimeState, input: { banks: readonly MemoryReplicaBank[]; signal?: AbortSignal }):
-Promise<"admission_unavailable" | undefined> {
+Promise<"synced" | "partial" | "admission_unavailable"> {
   if (input.signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
   let unavailable = false;
   for (const bank of input.banks) {
@@ -89,7 +92,7 @@ Promise<"admission_unavailable" | undefined> {
   // A readable replica does not prove negotiated capabilities. Missing evidence
   // must not start an implicit coordinator admission without this caller's signal;
   // an unreachable provider degrades this Run instead of refusing the chat turn.
-  if (state.provider.capabilitiesSnapshot()) return undefined;
+  if (state.provider.capabilitiesSnapshot()) return unavailable ? "partial" : "synced";
   if (unavailable) return "admission_unavailable";
   throw new Error("HINDSIGHT_APPLICATION_ADMISSION_UNAVAILABLE");
 }

@@ -2,7 +2,9 @@
  * INPUT:  active Hindsight configuration/Bank bindings, SQLite, Timeline and the shared Utility Slot
  * OUTPUT: complete provider/run/ingestion/curator/flush composition with the existing B5 scheduler and settled shutdown;
  *         captureRun degrades to a memory-unavailable Run on connection drift, and a refused primary witness is still retained;
- *         background ingestion/curation and flush skip a Character without a routed Bank before any Utility model call
+ *         background ingestion/curation and flush skip a Character without a routed Bank before any Utility model call; every
+ *         memory-unavailable Run reaches onUnavailable, and a fully synced foreground capture calls verifiedReconnect() once
+ *         while an automatic Bank waits in availability backoff (G13)
  * POS:    core/memory/hindsight — selected provider subsystem; Core retains Compaction and no generic native maintenance is duplicated
  */
 import type { ConfigSource } from "../../config/config-source.ts";
@@ -25,24 +27,31 @@ import { buildTidyReport } from "../tidy-report.ts";
 import type { UtilitySlot } from "../utility-slot.ts";
 import { witnessHindsightPrimaryCommit } from "../hindsight-runtime-binding.ts";
 import type { HindsightClient } from "./hindsight-client.ts";
+import { hindsightAvailabilityCode } from "./hindsight-memory-provider-context.ts";
 import { createHindsightRuntimeConnection } from "./hindsight-runtime-connection.ts";
 import { createHindsightRuntimeState, type HindsightRuntimeState } from "./hindsight-runtime-state.ts";
-import { createHindsightMemoryRuntime } from "./hindsight-memory-runtime.ts";
+import { createHindsightMemoryRuntime, type HindsightUnavailableRunEvent } from "./hindsight-memory-runtime.ts";
 import { createHindsightObservedWriter } from "./hindsight-observed-write.ts";
 import { createHindsightIngestion } from "./hindsight-ingestion.ts";
 import { createHindsightPolicyCurator, type HindsightPolicyCurator } from "./hindsight-policy-curator.ts";
-import { createHindsightReplicaScheduler } from "./hindsight-replica-scheduler.ts";
+import { createHindsightReplicaScheduler, type HindsightReplicaScheduler } from "./hindsight-replica-scheduler.ts";
 
 interface Input {
   db: Database; epochId: string; config: MemoryConfig; source: ConfigSource; secrets: SecretCatalogService;
   timeline: TimelineRepo; utility: UtilitySlot; logger: Logger; promptDir?: string; now?: () => string; client?: HindsightClient;
+  /** Core's automatic lifecycle trigger; it must never fail the capture. */
+  onUnavailable?: (event: HindsightUnavailableRunEvent) => void;
 }
 
 export function createHindsightMemorySubsystem(input: Input) {
   const runtime = createHindsightRuntimeConnection({ ...input, config: input.source });
   const state = createHindsightRuntimeState({ db: input.db, runtime, config: input.config, now: input.now });
-  const foreground = createHindsightMemoryRuntime({ state, promptDir: input.promptDir, onUnavailable: ({ characterId, reason }) =>
-    input.logger.warn({ characterId, code: reason }, "Hindsight Run admitted without memory") });
+  const foreground = createHindsightMemoryRuntime({ state, promptDir: input.promptDir,
+    onUnavailable: (event) => {
+      input.logger.warn({ characterId: event.characterId, code: event.reason }, "Hindsight Run admitted without memory");
+      input.onUnavailable?.(event);
+    },
+    onSynced: () => reconnectAfterForegroundSync(scheduler, input.logger) });
   const journal = createHindsightIngestionRepo({ db: input.db, pending: state.pending,
     readVerifiedBank: (bankId) => state.replica.bankBinding(bankId)?.bank });
   const ingestion = createHindsightIngestion({ authority: runtime.authority, journal, timeline: input.timeline,
@@ -83,6 +92,14 @@ export function createHindsightMemorySubsystem(input: Input) {
       return drift === "none" ? foreground.captureRun(characterId, signal) : foreground.unavailableRun(characterId, drift);
     },
     recordPrimaryCommitted: (commit: PrimaryConversationCommit) => recordWitness(input, { runtime, ingestion }, commit) };
+}
+
+/** A foreground success proves the provider is back; a Bank parked in availability backoff catches up now, not at retryDueAt. */
+function reconnectAfterForegroundSync(scheduler: HindsightReplicaScheduler, logger: Logger): void {
+  try {
+    const parked = scheduler.status().some((bank) => bank.automatic && bank.retryDueAt !== null && hindsightAvailabilityCode(bank.errorCode));
+    if (parked) scheduler.verifiedReconnect();
+  } catch { logger.warn({ code: "HINDSIGHT_REPLICA_SCHEDULE_STALE" }, "verified reconnect after a foreground sync was not requested"); }
 }
 
 function recordWitness(input: Input, bound: { runtime: ReturnType<typeof createHindsightRuntimeConnection>;

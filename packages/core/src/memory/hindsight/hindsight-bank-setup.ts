@@ -1,6 +1,7 @@
 /**
  * INPUT:  one Hindsight Bank target, setup dependencies, and a bounded cancellation signal
- * OUTPUT: idempotent Bank/template application with operation polling and verified durable projection
+ * OUTPUT: idempotent Bank/template application with operation polling and verified durable projection; bankProjection()
+ *         (the B3 row a target maps to, also used for a lifecycle dry-run failure)
  * POS:    core/memory/hindsight — extracted setup stage; never changes Memory Authority
  */
 import type { HindsightBankSetupProjection, HindsightConnectionProjection } from "@taki/shared";
@@ -82,14 +83,14 @@ async function waitForOperations(input: HindsightBankApplyInput): Promise<void> 
   }
 }
 
-interface BankProjectionState {
+export interface BankProjectionState {
   status: HindsightBankSetupProjection["status"];
   operationIds: string[];
   lastVerifiedAt: string | null;
   lastError: HindsightBankSetupProjection["lastError"];
 }
 
-function bankProjection(target: HindsightBankSetupTarget, state: BankProjectionState): HindsightBankSetupProjection {
+export function bankProjection(target: HindsightBankSetupTarget, state: BankProjectionState): HindsightBankSetupProjection {
   return {
     ...target.binding,
     templateRevision: target.template.takiTemplateRevision,

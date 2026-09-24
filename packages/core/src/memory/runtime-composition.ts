@@ -3,7 +3,8 @@
  * OUTPUT: authority-selected engine, immutable Run capture (a memory-unavailable Run while a setting keeps the selected
  *         Hindsight runtime unbound), background maintenance, durability, the operations() live
  *         accessor, trusted primary custody, the pure Local/Hindsight binding snapshots, same-epoch binding recovery and
- *         the Local -> Hindsight rebind the activation service drives after COMMIT
+ *         the Local -> Hindsight rebind the activation service drives after COMMIT, and replaceHindsightBinding() (the
+ *         revalidation swap); every memory-unavailable Hindsight Run is reported to onHindsightUnavailable
  * POS:    core/memory — process composition seam; one Utility Slot, one selected provider chain and ONE published binding per provider
  */
 import type { LanguageModel } from "ai";
@@ -29,6 +30,7 @@ import { createCanonicalLocalSubsystem } from "./canonical-local-subsystem.ts";
 import { createHindsightMemorySubsystem } from "./hindsight/hindsight-memory-subsystem.ts";
 import type { HindsightClient } from "./hindsight/hindsight-client.ts";
 import type { HindsightActivationLocalRuntime } from "./hindsight-activation/hindsight-activation-service.ts";
+import type { HindsightUnavailableRunEvent } from "./hindsight/hindsight-memory-runtime.ts";
 import { createHindsightRuntimeBinding, witnessHindsightPrimaryCommit, type HindsightBindingSnapshot, type HindsightSubsystem } from "./hindsight-runtime-binding.ts";
 import { readHindsightLiveConnection } from "./hindsight/hindsight-runtime-connection.ts";
 import { createUnboundHindsightCapture } from "./hindsight-unbound-run.ts";
@@ -52,6 +54,8 @@ interface MemoryRuntimeInput {
   measureRequest?: (characterId: string) => RequestMeasurement | undefined;
   effectiveWindowTokens?: () => number;
   hindsight?: { source: ConfigSource; secrets: SecretCatalogService; client?: HindsightClient };
+  /** Core's automatic lifecycle trigger (late-bound); called for every memory-unavailable Hindsight Run. */
+  onHindsightUnavailable?: (event: HindsightUnavailableRunEvent) => void;
 }
 type SelectedSubsystem = MemorySubsystem | LocalSubsystem | HindsightSubsystem;
 interface ProviderMaintenance { maintenance: AutoMemoryMaintenance; memoryFlush: MemoryFlushPort }
@@ -64,7 +68,7 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
     onFailure: (failure) => input.logger.warn({ code: failure.code, groupId: failure.groupId }, "primary memory group finalize deferred; recovery will retry") });
   const scope = createSelectedSubsystem(input, utility); const { selected, current, fence, local, hindsightBinding } = scope;
   const unbound = createUnboundHindsightCapture({ db: input.db, logger: input.logger, promptDir: input.promptDir,
-    binding: hindsightBinding.snapshot, live: () => input.hindsight
+    binding: hindsightBinding.snapshot, onUnavailable: input.onHindsightUnavailable, live: () => input.hindsight
       ? readHindsightLiveConnection({ config: input.hindsight.source, secrets: input.hindsight.secrets }) : null });
   const compaction = createCompactionMaintenance(input, utility, current);
   const lifecycle = createRuntimeLifetime({ scope, utility, autoMemory: compaction.autoMemory });
@@ -146,6 +150,14 @@ function createBindingSeams(deps: {
       lifecycle.startHindsight();
       return { binding, reconciledGroups };
     },
+    /** Revalidation: same-epoch swap onto the current connection, then start; a construct/start failure stays observable. */
+    replaceHindsightBinding: async (epochId: string): Promise<void> => {
+      alive();
+      committed("hindsight", epochId);
+      await selected.replaceHindsight(epochId);
+      alive();
+      lifecycle.startHindsight();
+    },
   };
 }
 
@@ -154,11 +166,16 @@ function createSelectedSubsystem(input: MemoryRuntimeInput, utility: UtilitySlot
   const local = createLocalRuntimeBinding({ db: input.db, logger: input.logger,
     construct: (epochId) => createCanonicalLocalSubsystem({ ...input, epochId, utility, config: loadMemoryConfig(input.env) }) });
   const hindsight = createHindsightRuntimeBinding({ db: input.db, logger: input.logger,
-    construct: (epochId) => createHindsightMemorySubsystem({ ...input, ...input.hindsight!, epochId, utility, config: loadMemoryConfig(input.env) }) });
+    construct: (epochId) => createHindsightMemorySubsystem({ ...input, ...input.hindsight!, epochId, utility, config: loadMemoryConfig(input.env),
+      onUnavailable: input.onHindsightUnavailable }) });
   const selected = selectMemoryRuntime({ db: input.db,
     createLegacy: () => createMemorySubsystem({ ...input, utility, authorityFence: fence, isCanonical: () => activated }),
     createCanonical: (epochId) => local.publish(epochId).engine,
     createHindsight: input.hindsight ? (epochId) => hindsight.publish(epochId).engine : undefined,
+    replaceHindsight: input.hindsight ? (epochId) => {
+      const next = hindsight.replace(epochId);
+      return { engine: next.subsystem.engine, retired: next.retired };
+    } : undefined,
     onLegacyRetired: () => { activated = true; fence.retire(); },
     onLocalRetired: () => local.retire(),
     // The binding already recorded the unavailable state; boot continues with an observable, fail-closed facade.
@@ -236,8 +253,8 @@ function captureLegacyRun(db: Database, subsystem: SelectedSubsystem, characterI
 
 function operationsRuntime(hindsight: HindsightSubsystem): MemoryOperationsRuntime {
   const { runtime, pending } = hindsight.state;
-  return { epochId: runtime.epoch.epochId, scheduler: hindsight.scheduler, banks: runtime.banks, assertConnection: runtime.assertConnection,
-    driftReason: runtime.driftReason, pendingSummary: (bankId) => pending.summary({ authorityEpochId: runtime.epoch.epochId, bankId }) };
+  return { epochId: runtime.epoch.epochId, configFingerprint: runtime.configFingerprint, deploymentMode: runtime.connection.deploymentMode,
+    scheduler: hindsight.scheduler, banks: runtime.banks, assertConnection: runtime.assertConnection, driftReason: runtime.driftReason, pendingSummary: (bankId) => pending.summary({ authorityEpochId: runtime.epoch.epochId, bankId }) };
 }
 
 function diagnosticSnapshot(db: Database) {

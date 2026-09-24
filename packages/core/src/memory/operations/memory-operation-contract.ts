@@ -1,15 +1,17 @@
 /**
  * INPUT:  sealed operation requests plus the live producers (B3 setup service, B5 scheduler, Hindsight runtime accessor,
- *         Local onboarding service, Hindsight activation service) and the owner's own row lookups
- * OUTPUT: the handler contract every operation kind implements, the settlement/observation shapes, the closed refusal error
- *         and the mutual single-flight guard for the setup / local-onboarding / hindsight-activation families
+ *         Local onboarding service, Hindsight activation service, Hindsight lifecycle service) and the owner's own row lookups
+ * OUTPUT: the handler contract every operation kind implements (admission carries the Core-stamped origin), the
+ *         settlement/observation shapes, the closed refusal error and the mutual single-flight guard for the setup /
+ *         local-onboarding / hindsight-activation / hindsight-lifecycle families
  * POS:    core/memory/operations — internal contract shared by the kind handlers and the service; no persistence here
  */
 import type {
-  MemoryOperation, MemoryOperationErrorCode, MemoryOperationProducerRef, MemoryOperationReason, MemoryOperationRefusalReason,
-  MemoryOperationRequest, MemoryOperationResult, MemoryReplicaBank, PendingMemorySummary,
+  HindsightConnectionProjection, MemoryHindsightLifecycleOrigin, MemoryOperation, MemoryOperationErrorCode, MemoryOperationProducerRef,
+  MemoryOperationReason, MemoryOperationRefusalReason, MemoryOperationRequest, MemoryOperationResult, MemoryReplicaBank, PendingMemorySummary,
 } from "@taki/shared";
 import type { HindsightActivationService } from "../hindsight-activation/hindsight-activation-service.ts";
+import type { HindsightLifecycleService } from "../hindsight-lifecycle/hindsight-lifecycle-service.ts";
 import type { HindsightReplicaScheduler } from "../hindsight/hindsight-replica-scheduler.ts";
 import type { HindsightConnectionDrift } from "../hindsight/hindsight-runtime-connection.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
@@ -18,7 +20,10 @@ import type { LocalOnboardingService } from "../local-onboarding/local-onboardin
 /** The narrow live view of the selected Hindsight subsystem; null when the authority runtime is not Hindsight. */
 export interface MemoryOperationsRuntime {
   epochId: string;
-  scheduler: Pick<HindsightReplicaScheduler, "started" | "requestManual" | "cancelManual" | "tick" | "status" | "lastError">;
+  /** The fingerprint and deployment mode the published runtime was constructed with (drift is measured against them). */
+  configFingerprint: string;
+  deploymentMode: HindsightConnectionProjection["deploymentMode"];
+  scheduler: Pick<HindsightReplicaScheduler, "started" | "requestManual" | "cancelManual" | "tick" | "status" | "lastError" | "verifiedReconnect">;
   banks(): MemoryReplicaBank[];
   assertConnection(): void;
   /** Throws on a stopped runtime or an epoch/lineage mismatch; otherwise names a changed or disabled connection. */
@@ -33,6 +38,8 @@ export interface MemoryOperationContext {
   local?: LocalOnboardingService;
   /** Absent when Core composes without a Hindsight activation producer; the activation kind then refuses at admission. */
   hindsight?: HindsightActivationService;
+  /** Absent when Core composes without a Hindsight lifecycle producer; the lifecycle kinds then refuse at admission. */
+  lifecycle?: HindsightLifecycleService;
   /** The owner's own durable rows, so a kind can resolve a prior command (retry) without trusting the client. */
   lookup(operationId: string): MemoryOperation | undefined;
   activeInFamily(family: string): MemoryOperation | undefined;
@@ -40,8 +47,8 @@ export interface MemoryOperationContext {
   now(): string;
 }
 
-/** Setup, Local onboarding and Hindsight activation are mutually single-flight (grill G6); the open row wins and is named. */
-export const EXCLUSIVE_MEMORY_FAMILIES = ["setup", "local-onboarding", "hindsight-activation"] as const;
+/** Setup, Local onboarding, Hindsight activation and lifecycle are mutually single-flight (grill G6); the open row wins and is named. */
+export const EXCLUSIVE_MEMORY_FAMILIES = ["setup", "local-onboarding", "hindsight-activation", "hindsight-lifecycle"] as const;
 export function refuseWhileExclusiveFamilyBusy(ctx: Pick<MemoryOperationContext, "activeInFamily">): void {
   for (const family of EXCLUSIVE_MEMORY_FAMILIES) {
     const active = ctx.activeInFamily(family);
@@ -72,10 +79,13 @@ export interface MemoryOperationExecution<R extends MemoryOperationRequest> {
   checkpoint(producer: MemoryOperationProducerRef): void;
 }
 
+/** Who asked: WS submissions are always the operator; only Core's automatic lifecycle triggers pass "automatic". */
+export interface MemoryOperationAdmission { origin: MemoryHindsightLifecycleOrigin }
+
 export interface MemoryOperationKindHandler<R extends MemoryOperationRequest = MemoryOperationRequest> {
   family(request: R): string;
   /** Synchronous refusal point; throws MemoryOperationRefusal before any row exists. */
-  admit(request: R, ctx: MemoryOperationContext): MemoryOperationProducerRef;
+  admit(request: R, ctx: MemoryOperationContext, admission: MemoryOperationAdmission): MemoryOperationProducerRef;
   /** Resolves null when the producer has not settled yet; observe() then classifies later reads. */
   execute(input: MemoryOperationExecution<R>): Promise<MemoryOperationSettlement | null>;
   observe?(operation: MemoryOperation, ctx: MemoryOperationContext): MemoryOperationObservation;

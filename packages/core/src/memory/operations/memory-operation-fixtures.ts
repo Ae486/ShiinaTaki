@@ -93,6 +93,7 @@ function fakeScheduler(banks: MemoryReplicaBank[], clock: () => string) {
     },
     status: (bankId?: string) => banks.filter((bank) => bankId === undefined || bank.bankId === bankId).map((bank) => required(bank.bankId)),
     lastError: () => control.error,
+    verifiedReconnect: vi.fn(),
   };
   return { scheduler, states };
 }
@@ -109,7 +110,8 @@ export function fakeRuntime(banks: MemoryReplicaBank[], clock: () => string): Fa
   const driftReason = () => { if (connectionError) throw new Error(connectionError); return drift; };
   const guard = () => { if (driftReason() !== "none") throw new Error("MEMORY_AUTHORITY_MISMATCH"); };
   return {
-    epochId: "epoch", scheduler, banks: () => { guard(); return banks; }, assertConnection: guard, driftReason,
+    epochId: "epoch", configFingerprint: "a".repeat(64), deploymentMode: "existing-instance", scheduler, banks: () => { guard(); return banks; },
+    assertConnection: guard, driftReason,
     pendingSummary: () => ({ pendingCount: 0, nativeConfirmedCount: 0, completedCount: 0, supersededCount: 0, failedCount: 1, unknownCount: 2, cancelledCount: 0 }),
     breakConnection: (message) => { connectionError = message; },
     drift: (reason) => { drift = reason; },

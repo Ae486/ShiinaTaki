@@ -1,7 +1,8 @@
 /**
  * INPUT:  open Database and explicit Legacy, canonical Local and Hindsight subsystem factories
  * OUTPUT: marker-first runtime selection, irreversible post-commit retirement (failed rebinding included), observable
- *         unavailable Local/Hindsight boot and same-epoch recovery that never re-activates or re-promotes
+ *         unavailable Local/Hindsight boot, same-epoch recovery that never re-activates or re-promotes, and the same-epoch
+ *         Hindsight replace a connection revalidation drives
  * POS:    core/memory — authority marker routing seam; canonical mode never invokes the legacy factory
  */
 import type { Database } from "../db/sqlite.ts";
@@ -21,6 +22,8 @@ export interface SelectedMemoryRuntime {
   bindHindsight(epochId: string): void;
   /** Same-epoch repair of an unavailable committed Hindsight runtime; never re-promotes and never revives Local. */
   recoverHindsight(epochId: string): BindingRecoveryOutcome;
+  /** Same-epoch swap onto a runtime built from the current connection; resolves once the replaced runtime stopped. */
+  replaceHindsight(epochId: string): Promise<void>;
   stop(): void;
 }
 export interface SelectMemoryRuntimeInput {
@@ -28,6 +31,7 @@ export interface SelectMemoryRuntimeInput {
   createLegacy: () => MemorySubsystem;
   createCanonical: (epochId: string) => MemoryEngine;
   createHindsight?: (epochId: string) => MemoryEngine;
+  replaceHindsight?: (epochId: string) => { engine: MemoryEngine; retired: Promise<void> };
   onLegacyRetired?: () => void;
   onCanonicalBound?: () => void;
   /** Runs once the Hindsight marker is proven and before construction: the Local runtime is withdrawn whatever follows. */
@@ -74,6 +78,15 @@ export function selectMemoryRuntime(input: SelectMemoryRuntimeInput): SelectedMe
       if (state.current && (input.hindsightLive?.() ?? true)) return "healthy";
       state.current = requireHindsight(input)(epochId);
       return "published";
+    },
+    replaceHindsight: async (epochId) => {
+      committedHindsightEpoch(readMemoryAuthoritySelection(input.db), epochId);
+      if (!input.replaceHindsight) throw new Error("MEMORY_INTEGRITY_ERROR: Hindsight authority runtime is not installed");
+      let next: { engine: MemoryEngine; retired: Promise<void> };
+      try { next = input.replaceHindsight(epochId); }
+      catch (error) { state.current = undefined; throw error; }
+      state.current = next.engine;
+      await next.retired;
     },
   };
 }

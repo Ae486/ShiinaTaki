@@ -1,6 +1,6 @@
 /**
- * INPUT:  operator operation requests, the kind registry, the live Hindsight runtime accessor, the B3 setup service and the
- *         optional Local onboarding / Hindsight activation services
+ * INPUT:  operator operation requests (plus Core's automatic lifecycle submissions), the kind registry, the live Hindsight
+ *         runtime accessor, the B3 setup service and the optional Local onboarding / Hindsight activation / lifecycle services
  * OUTPUT: createMemoryOperationService() — durable admit/execute/observe/settle/cancel with transition fan-out
  * POS:    core/memory/operations — the single operation owner (D-S1-1); every state change is a repo CAS, then onChanged
  */
@@ -11,16 +11,18 @@ import type { Database } from "../../db/sqlite.ts";
 import type { Logger } from "../../logging/logger.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import type { HindsightActivationService } from "../hindsight-activation/hindsight-activation-service.ts";
+import type { HindsightLifecycleService } from "../hindsight-lifecycle/hindsight-lifecycle-service.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
 import type { LocalOnboardingService } from "../local-onboarding/local-onboarding-service.ts";
 import {
-  MemoryOperationRefusal, type MemoryOperationContext, type MemoryOperationKindHandler, type MemoryOperationSettlement,
+  MemoryOperationRefusal, type MemoryOperationAdmission, type MemoryOperationContext, type MemoryOperationKindHandler, type MemoryOperationSettlement,
   type MemoryOperationsRuntime,
 } from "./memory-operation-contract.ts";
 import { MEMORY_OPERATION_KINDS, memoryOperationHandler, type MemoryOperationKindRegistry } from "./memory-operation-kinds.ts";
 
 export interface MemoryOperationService {
-  submit(request: MemoryOperationRequest): MemoryOperation;
+  /** The origin defaults to the operator; only Core's automatic lifecycle trigger passes "automatic". */
+  submit(request: MemoryOperationRequest, admission?: MemoryOperationAdmission): MemoryOperation;
   status(operationId: string): MemoryOperation;
   list(params: MemoryOperationListParams): MemoryOperation[];
   /** Terminal rows, newest settlement first, for the composite status read. */
@@ -38,6 +40,7 @@ export interface MemoryOperationServiceInput {
   setup: HindsightSetupService;
   local?: LocalOnboardingService;
   hindsight?: HindsightActivationService;
+  lifecycle?: HindsightLifecycleService;
   bootId: string;
   onChanged(operation: MemoryOperation): void;
   logger: Logger;
@@ -56,14 +59,14 @@ export function createMemoryOperationService(input: MemoryOperationServiceInput)
   const repo = input.repo ?? createMemoryOperationRepo(input.db, now);
   const owner: Owner = {
     repo, kinds: input.kinds ?? MEMORY_OPERATION_KINDS,
-    ctx: { live: input.live, setup: input.setup, local: input.local, hindsight: input.hindsight, lookup: (operationId) => repo.get(operationId),
+    ctx: { live: input.live, setup: input.setup, local: input.local, hindsight: input.hindsight, lifecycle: input.lifecycle, lookup: (operationId) => repo.get(operationId),
       activeInFamily: (family) => repo.activeInFamily(family), latestInFamily: (family) => repo.latestInFamily(family), now }, input, inflight: new Set(),
   };
   observeBoot(owner);
   // A previous process cannot report what happened to its open rows; unknown stays unknown (D-S1-3).
   for (const operation of owner.repo.reconcileForeign(input.bootId)) input.onChanged(operation);
   return {
-    submit: (request) => submit(owner, request),
+    submit: (request, admission) => submit(owner, request, admission ?? { origin: "operator" }),
     status: (operationId) => refresh(owner, requireOperation(owner, operationId)),
     list: (params) => list(owner, params),
     recent: (limit) => owner.repo.listRecent(limit),
@@ -86,9 +89,9 @@ function observeBoot(owner: Owner): void {
   }
 }
 
-function submit(owner: Owner, request: MemoryOperationRequest): MemoryOperation {
+function submit(owner: Owner, request: MemoryOperationRequest, admission: MemoryOperationAdmission): MemoryOperation {
   const handler = memoryOperationHandler(owner.kinds, request.kind);
-  const producer = handler.admit(request, owner.ctx);
+  const producer = handler.admit(request, owner.ctx, admission);
   const family = handler.family(request);
   const operationId = randomUUID();
   let admitted: MemoryOperation;

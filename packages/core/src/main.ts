@@ -30,6 +30,7 @@ import { routeCapability } from "./capabilities/route-capability.ts";
 import { createScreenshotDescriber } from "./capabilities/screenshot-describe.ts";
 import { bootstrapCore } from "./boot/core-bootstrap.ts";
 import { composeHindsightActivation } from "./boot/hindsight-activation-boot.ts";
+import { composeHindsightLifecycle } from "./boot/hindsight-lifecycle-boot.ts";
 import { composeHindsightSetup } from "./boot/hindsight-setup-boot.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
 import { composeApprovalRuntime } from "./approval/approval-runtime.ts";
@@ -66,6 +67,7 @@ import { readLocalOnboardingStatus } from "./memory/local-onboarding/local-onboa
 import { readHindsightActivationStatus } from "./memory/hindsight-activation/hindsight-activation-status.ts";
 import { readMemoryAuthorityStatus } from "./memory/operations/memory-authority-status.ts";
 import { readHindsightLiveConnection } from "./memory/hindsight/hindsight-runtime-connection.ts";
+import { createHindsightLifecycleTrigger } from "./memory/hindsight-lifecycle/hindsight-lifecycle-trigger.ts";
 import { createMemoryOperationService } from "./memory/operations/memory-operation-service.ts";
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
 import { migrateMcpPlaintextSecrets } from "./secrets/mcp-secret-migration.ts";
@@ -179,6 +181,8 @@ const avatarVocabulary = createAvatarVocabulary();
 
 // One per-process boot id tells rows this boot owns apart from rows an earlier boot left open (operations, custody).
 const bootId = randomUUID();
+// Automatic lifecycle submits (R8) are late-bound: degraded Runs may report before the operation owner exists.
+const hindsightLifecycleTrigger = createHindsightLifecycleTrigger({ db, logger: logger.child({ mod: "hindsight-lifecycle" }) });
 // Marker-first composition owns every legacy/canonical reader, writer, prompt, scheduler, and migration cutover seam.
 const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, promptDir: serverConfig.promptDir, model, bootId,
   timeline: timelineRepo, windowStart: conversationStore.windowStart, summaries: summaryRepo,
@@ -186,7 +190,7 @@ const memoryRuntime = composeMemoryRuntime({ db, dataDir: serverConfig.dataDir, 
   measureRequest: (characterId) => latestRequestMeasurements.get(characterId),
   effectiveWindowTokens: () => windowCalibrator.effectiveWindow(),
   compact: contextConfig.compact, env: boot.env, logger,
-  hindsight: { source: boot.config.source, secrets: secretCatalog } });
+  hindsight: { source: boot.config.source, secrets: secretCatalog }, onHindsightUnavailable: hindsightLifecycleTrigger.onUnavailable });
 const { selected: selectedMemory, memory, autoMemory, tidy, memoryRoot, writeMemory } = memoryRuntime;
 
 // Attachment store (#17): the sanctioned content-addressed Workspace R/W site for chat image attachments — the DB never
@@ -252,10 +256,13 @@ const localOnboarding = createLocalOnboardingService({
 });
 // Hindsight activation (Stage 2b) is the only caller of the B4/D78 mutation primitives; it rebinds the runtime after COMMIT.
 const hindsightActivation = composeHindsightActivation({ db, config: boot.config.source, secrets: secretCatalog, setup: hindsightSetup, runtime: memoryRuntime, logger });
+// Hindsight lifecycle (Stage 2c): Bank provisioning and connection revalidation under a committed Hindsight authority.
+const hindsightLifecycle = composeHindsightLifecycle({ db, config: boot.config.source, secrets: secretCatalog, runtime: memoryRuntime, logger });
 const memoryOperations = createMemoryOperationService({
-  db, live: memoryRuntime.operations, setup: hindsightSetup, local: localOnboarding, hindsight: hindsightActivation, bootId, logger,
-  onChanged: memoryOperationSubscriptions.publish,
+  db, live: memoryRuntime.operations, setup: hindsightSetup, local: localOnboarding, hindsight: hindsightActivation, lifecycle: hindsightLifecycle,
+  bootId, logger, onChanged: memoryOperationSubscriptions.publish,
 });
+hindsightLifecycleTrigger.bind({ lifecycle: hindsightLifecycle, operations: memoryOperations });
 registerMemoryOperationMethods(registry, { service: memoryOperations, subscriptions: memoryOperationSubscriptions, logger });
 registerMemoryOnboardingMethods(registry, { local: localOnboarding, subscriptions: memoryOnboardingSubscriptions, logger,
   status: () => readLocalOnboardingStatus({ local: localOnboarding, operations: memoryOperations }) });
@@ -263,7 +270,7 @@ registerMemoryActivationMethods(registry, { logger, status: () => readHindsightA
 registry.register(memoryAuthorityStatusMethod({ logger,
   read: () => readMemoryAuthorityStatus({ db, live: memoryRuntime.operations, binding: memoryRuntime.bindingSnapshot,
     hindsightBinding: memoryRuntime.hindsightBindingSnapshot, setup: hindsightSetup, operations: memoryOperations,
-    liveConnection: () => readHindsightLiveConnection({ config: boot.config.source, secrets: secretCatalog }) }) }));
+    liveConnection: () => readHindsightLiveConnection({ config: boot.config.source, secrets: secretCatalog }), lifecycle: hindsightLifecycle }) }));
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending
@@ -552,7 +559,7 @@ function shutdown(signal: string): void {
   // between sources, activation at a Bank boundary, never inside COMMIT); only then does the memory runtime stop. That stop
   // settles the B5 scheduler (and any manual tick a replica operation awaits), so the operation owner has nothing left in
   // flight afterwards except setup calls bounded by their own deadlines.
-  const memoryStopped = Promise.all([localOnboarding.stop(), hindsightActivation.stop()]).then(() => memoryRuntime.stop());
+  const memoryStopped = Promise.all([localOnboarding.stop(), hindsightActivation.stop(), hindsightLifecycle.stop()]).then(() => memoryRuntime.stop());
   void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => memoryStopped).then(() => memoryOperations.stop()).then(() => server.close()).then(async () => {
     skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients

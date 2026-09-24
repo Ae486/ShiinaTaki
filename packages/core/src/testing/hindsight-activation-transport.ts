@@ -1,8 +1,9 @@
 /**
- * INPUT:  the exact D78 requests the activation chain sends (Bank template setup, snapshots, current-state transfers, cutover verifications)
+ * INPUT:  the exact D78 requests the activation chain sends (Bank template setup, snapshots, current-state transfers, cutover
+ *         verifications) plus the lifecycle occupancy probe (Bank stats)
  * OUTPUT: createHindsightActivationTransport() — an in-memory HindsightTransport whose bodies are computed from the POSTed request
  *         with the D78 fixture builders (a changed verification request under a used id is refused, as native does), with
- *         per-route call counts and one-shot or persistent fault injection
+ *         per-route call counts, one-shot or persistent fault injection and occupy()
  * POS:    core/testing — deterministic native substitute for activation tests; never contacts a real Hindsight or PostgreSQL
  */
 import { HindsightCurrentTransferRequestSchema, HindsightCutoverVerificationRequestSchema, type HindsightCutoverVerificationStatus,
@@ -11,7 +12,7 @@ import { currentImportFixture, currentMaintenanceFixture, currentSnapshotFixture
 import { createHindsightClient, type HindsightClient, type HindsightTransport, type HindsightTransportResponse } from "../memory/hindsight/hindsight-client.ts";
 import { hindsightFixtureCommonRoute } from "./hindsight-fixture-routes.ts";
 
-export type ActivationRoute = "common" | "bank-put" | "template-import" | "template-export" | "operation-status" | "snapshot-create"
+export type ActivationRoute = "common" | "bank-put" | "bank-stats" | "template-import" | "template-export" | "operation-status" | "snapshot-create"
   | "snapshot-page" | "transfer-post" | "transfer-result" | "transfer-page" | "verification-post" | "verification-verify"
   | "verification-get" | "verification-page";
 /** A fault answers the next matching call; `afterEffect` keeps the route's state change (a lost acknowledgement). */
@@ -25,6 +26,8 @@ export interface HindsightActivationTransport {
   before(hook: ((call: { route: ActivationRoute; bankId: string }) => void | Promise<void>) | null): void;
   /** Replaces the next verify answer with a non-complete candidate so the operator sees HINDSIGHT_CURRENT_VERIFICATION_INCOMPLETE. */
   incompleteVerification(): void;
+  /** Makes the Bank's stats report existing content, as a Bank some other tenant already wrote into. */
+  occupy(bankId: string): void;
 }
 export interface HindsightActivationTransportInput {
   /** Native baseline records per Bank id (Bank row plus template models/directives); unknown Banks answer bank_not_found. */
@@ -38,14 +41,15 @@ interface Verification { request: string; proof: ReturnType<typeof currentMainte
 interface State {
   banks: Record<string, HindsightSnapshotRecordWire[]>; templates: Map<string, unknown>;
   snapshots: Map<string, { metadata: HindsightSnapshotMetadataWire; pages: HindsightSnapshotPageWire[] }>;
-  transfers: Map<string, Transfer>; verifications: Map<string, Verification>; incomplete: boolean;
+  transfers: Map<string, Transfer>; verifications: Map<string, Verification>; incomplete: boolean; occupied: Set<string>;
 }
 interface Call { route: ActivationRoute; bankId: string; rest: string[]; method: string; body: unknown; query: URLSearchParams }
 
 const BASELINE_CURSOR = 10;
 
 export function createHindsightActivationTransport(input: HindsightActivationTransportInput): HindsightActivationTransport {
-  const state: State = { banks: input.banks, templates: new Map(), snapshots: new Map(), transfers: new Map(), verifications: new Map(), incomplete: false };
+  const state: State = { banks: input.banks, templates: new Map(), snapshots: new Map(), transfers: new Map(), verifications: new Map(),
+    incomplete: false, occupied: new Set() };
   const counts = new Map<ActivationRoute, number>(); const faults = new Map<ActivationRoute, ActivationFault>();
   let before: ((call: { route: ActivationRoute; bankId: string }) => void | Promise<void>) | null = null;
   const apiKey = input.apiKey ?? "fixture-key";
@@ -69,6 +73,7 @@ export function createHindsightActivationTransport(input: HindsightActivationTra
     fail: (route, fault) => { faults.set(route, fault); },
     before: (hook) => { before = hook; },
     incompleteVerification: () => { state.incomplete = true; },
+    occupy: (bankId) => { state.occupied.add(bankId); },
   };
 }
 
@@ -89,6 +94,7 @@ function parseCall(path: string, init: RequestInit | undefined, query: URLSearch
 
 function setupRoute(rest: string[], method: string): ActivationRoute | undefined {
   if (rest.length === 0 && method === "PUT") return "bank-put";
+  if (rest[0] === "stats" && method === "GET") return "bank-stats";
   if (rest[0] === "import" && method === "POST") return "template-import";
   if (rest[0] === "export") return "template-export";
   if (rest[0] === "operations" && rest.length === 2) return "operation-status";
@@ -109,6 +115,8 @@ function nativeRoute(rest: string[], method: string): ActivationRoute | undefine
 }
 
 function answer(state: State, call: Call): HindsightTransportResponse {
+  // Native stats aggregate by bank_id: an unknown Bank reports zeros, never 404.
+  if (call.route === "bank-stats") return ok(stats(call.bankId, state.occupied.has(call.bankId)));
   const baseline = state.banks[call.bankId];
   if (!baseline) return refusal(404, "current_state_transfer_refused", "bank_not_found");
   switch (call.route) {
@@ -178,6 +186,10 @@ function advance(state: State, call: Call): HindsightCutoverVerificationStatus {
 function page(pages: unknown[] | undefined, pageNumber: number): HindsightTransportResponse {
   const value = pages?.[pageNumber];
   return value === undefined ? refusal(404, "current_state_transfer_refused", "page_not_found") : ok(value);
+}
+function stats(bankId: string, occupied: boolean) {
+  const count = occupied ? 3 : 0;
+  return { bank_id: bankId, total_nodes: count, total_documents: count, total_observations: 0, pending_operations: 0 };
 }
 function ok(body: unknown): HindsightTransportResponse { return { status: 200, body: JSON.stringify(body) }; }
 function refusal(status: number, error: string, reason: string): HindsightTransportResponse { return { status, body: JSON.stringify({ error, reason }) }; }

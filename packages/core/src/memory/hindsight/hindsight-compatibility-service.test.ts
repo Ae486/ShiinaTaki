@@ -26,7 +26,7 @@ function fake(overrides: Partial<HindsightClient> = {}): HindsightClient {
     health: vi.fn(async () => ({ status: "healthy" as const, database: "connected" as const })),
     version: vi.fn(async () => ({ apiVersion: "0.9.0" })),
     compatibility: vi.fn(async () => manifest),
-    createOrUpdateBank: vi.fn(), importTemplate: vi.fn(), exportTemplate: vi.fn(), bankLlmHealth: vi.fn(), operationStatus: vi.fn(),
+    createOrUpdateBank: vi.fn(), importTemplate: vi.fn(), exportTemplate: vi.fn(), bankLlmHealth: vi.fn(), bankStats: vi.fn(), operationStatus: vi.fn(),
     ...overrides,
   };
 }

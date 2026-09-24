@@ -1,8 +1,8 @@
 # core/memory/hindsight/
-- hindsight-contracts.ts — bounded Hindsight 0.9.0 raw-wire schemas and independently negotiated G1/D78 capabilities
+- hindsight-contracts.ts — bounded Hindsight 0.9.0 raw-wire schemas and independently negotiated G1/D78 capabilities plus the Bank-stats counters of the occupancy probe
 - hindsight-endpoint-policy.ts — endpoint normalization and SSRF/redirect policy for explicit operator endpoints
 - hindsight-errors.ts — sanitized Hindsight setup failure code and retry projection
-- hindsight-client.ts — authenticated REST client with finite HTTP deadlines, prompt cancellation even for an abort-ignoring delegate, response bounds and typed setup/import/replica/recovery/native-read/D77 application-state methods
+- hindsight-client.ts — authenticated REST client with finite HTTP deadlines, prompt cancellation even for an abort-ignoring delegate, response bounds and typed setup/Bank-stats/import/replica/recovery/native-read/D77 application-state methods
 - hindsight-runtime-client.ts — bounded native recall/reflect POST methods through the existing authenticated requester; no Canonical hydration or runtime activation
 - hindsight-http-transport.ts — single HTTP/HTTPS request under the captured total deadline, bounded decompression, and no redirect/retry or hidden fetch phase timeout
 - hindsight-pending-client.ts — canonical retain-to-native wire mapping and B0 expected-revision/mutation-ID replay with bounded native receipts
@@ -18,9 +18,9 @@
 - hindsight-compatibility-service.ts — ordered exact-build health/version/manifest gate, independent cutover support and stable settings fingerprint
 - hindsight-bank-identity.ts — versioned deterministic opaque Global/Character external Bank ids
 - taki-bank-template-v1.ts — fixed secret-free additive template, canonical digest, and Taki-owned read-back verification
-- hindsight-setup-service.ts — resumable validate/setup/disable/explicit LLM-health state machine (a failed validate withdraws compatibility, keeps the fingerprint); refuses HINDSIGHT_STATE_CONFLICT while an activation row is open, and disable also under a selected Hindsight authority; never owns Memory Authority
+- hindsight-setup-service.ts — resumable validate/setup/disable/explicit LLM-health state machine (a failed validate withdraws compatibility, keeps the fingerprint; every reviewed fingerprint is stored with its deployment mode); refuses HINDSIGHT_STATE_CONFLICT while an activation row is open, and disable also under a selected Hindsight authority; never owns Memory Authority
 - hindsight-setup-recovery.ts — boot reconciliation: a busy phase left by a dead process becomes failed/HINDSIGHT_SETUP_INTERRUPTED and intermediate Bank rows return to pending
-- hindsight-bank-setup.ts — idempotent Bank/template application, operation polling, and verified projection
+- hindsight-bank-setup.ts — idempotent Bank/template application, operation polling, verified projection and bankProjection() (the B3 row for a target)
 - hindsight-setup-stages.ts — deterministic setup targets and dry-run preflight orchestration
 - hindsight-import-contracts.ts — bounded retain/operation/document/fact data-plane wire schemas
 - hindsight-import-identity.ts — frozen deterministic UUID adapter for domain-separated B2 and Pending Memory operation identities
@@ -76,14 +76,14 @@
 - hindsight-ingestion-lifetime.ts — owner cancellation, serial ingestion chains and a drain that waits for every underlying operation
 - hindsight-ingestion.ts — source-only ingestion with restart-safe gate/Bank coverage, pre-retirement flush and owned stop/drain
 - hindsight-memory-pending-read.ts — separate unconfirmed overlays, gated by exact scope and current known target policy
-- hindsight-memory-provider-context.ts — guarded foreground request allowances, bounded capability admission or explicit shrinking operation deadlines, and closed provider failures
+- hindsight-memory-provider-context.ts — guarded foreground request allowances, bounded capability admission or explicit shrinking operation deadlines, closed provider failures and the availability-code class (hindsightAvailabilityCode)
 - hindsight-memory-provider.ts — native reads/reflection with foreground cold-admission cancellation, truthful Pending outcomes and stable authority
 - hindsight-memory-read-projection.ts — exact current Canonical hits admitted by persisted Taki policy before result limits
 - hindsight-memory-recall.ts — foreground native recall and complete hydration under per-HTTP limits, or verified sparse replica plus truthful Pending overlays
 - hindsight-memory-reflect.ts — policy-guarded native reflection with one fixed five-minute allowance across synchronization, admission, policy upload and generation
-- hindsight-memory-runtime.ts — canonical tools, caller-cancellable Run capture requiring verified capability evidence, foreground synchronization without a default business deadline and native policy-bearing recall; degrades to a memory-unavailable Run for a Character without a verified Bank or an unreachable provider with no admission evidence
+- hindsight-memory-runtime.ts — canonical tools, caller-cancellable Run capture requiring verified capability evidence, foreground synchronization without a default business deadline and native policy-bearing recall; degrades to a memory-unavailable Run for a Character without a verified Bank or an unreachable provider with no admission evidence; onSynced after a capture that admitted and synced every routed Bank
 - hindsight-unavailable-run.ts — the immutable memory-unavailable CapturedMemoryRun (no tools/recall, persona-only assembly, base prompt without the memory floor, all-false capabilities under the admitted identity)
-- hindsight-memory-subsystem.ts — provider/run/ingestion/curator/flush composition with caller-cancellable admission, the existing B5 scheduler and settled shutdown; background ingestion/curation and flush skip a Character without a routed Bank before any model call; a changed/disabled connection degrades the Run and a refused primary witness is kept through the marker-routed witness
+- hindsight-memory-subsystem.ts — provider/run/ingestion/curator/flush composition with caller-cancellable admission, the existing B5 scheduler and settled shutdown; background ingestion/curation and flush skip a Character without a routed Bank before any model call; a changed/disabled connection degrades the Run and a refused primary witness is kept through the marker-routed witness; every memory-unavailable Run reaches onUnavailable, and a fully synced foreground capture calls verifiedReconnect() once while an automatic Bank waits in availability backoff (G13)
 - hindsight-memory-write-admission.ts — atomic parent intent plus required native/source children, or a stable no-dispatch result
 - hindsight-memory-write-context.ts — guarded write contexts and verified mutation targets shared by admission and recovery
 - hindsight-memory-write-fixtures.ts — real parent journal, Pending repository/writer, application outbox and G1 replay composition
@@ -109,7 +109,7 @@
 - hindsight-policy-curator-tools.ts — a small proposal-only toolset with immutable local result persistence
 - hindsight-policy-curator.ts — scoped production policy reviews, restart-safe publication and actual applied-effect outcomes
 - hindsight-runtime-bank-service.ts — cancellable Bank queues and renewable foreground read leases alongside bounded synchronization, Pending/parent-write recovery and shutdown drain
-- hindsight-runtime-connection.ts — one captured authenticated client and guards for connection, epoch and Bank route changes; driftReason() (changed/disabled connection vs integrity failure), routedBanks(), characterRouted(), readHindsightLiveConnection() and the template-revision refusal at construction
+- hindsight-runtime-connection.ts — one captured authenticated client and guards for connection, epoch and Bank route changes; driftReason() (changed/disabled connection vs integrity failure), routedBanks(), characterRouted(), readHindsightLiveConnection() / readHindsightLiveProjection() and the template-revision refusal at construction
 - hindsight-runtime-state.ts — application replica, source/binding producer, Pending recovery, durable writes and real provider
 - hindsight-runtime-view.ts — admitted frozen prompt/T5 rows and explicit capture refusal when a required pin needs native-policy rebinding
 - hindsight-runtime-consumers.ts — complete captured foreground lifetime, held-reference refusal and preserved non-enumerable Effect metadata

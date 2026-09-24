@@ -10,6 +10,7 @@ import { HindsightError, hindsightError } from "./hindsight-errors.ts";
 import { HINDSIGHT_DEFAULT_RESPONSE_BYTES, hindsightHttpTransport } from "./hindsight-http-transport.ts";
 import {
   HindsightBankLlmHealthWireSchema,
+  HindsightBankStatsWireSchema,
   HindsightBankTemplateManifestSchema,
   HindsightBankWireSchema,
   HindsightCompatibilityWireSchema,
@@ -17,6 +18,7 @@ import {
   HindsightOperationStatusWireSchema,
   HindsightTemplateImportWireSchema,
   HindsightVersionWireSchema,
+  type HindsightBankStatsWire,
   type HindsightBankTemplateManifest,
   type HindsightCompatibilityWire,
 } from "./hindsight-contracts.ts";
@@ -56,6 +58,8 @@ export interface HindsightClient extends Partial<HindsightPendingClient>, Partia
   }): Promise<ReturnType<typeof HindsightTemplateImportWireSchema.parse>>;
   exportTemplate(bankId: string, context: HindsightCallContext): Promise<HindsightBankTemplateManifest>;
   bankLlmHealth(bankId: string, context: HindsightCallContext): Promise<HindsightBankLlmHealthProjection>;
+  /** Fresh (cache-bypassing) native Bank counters for the pre-PUT occupancy probe. */
+  bankStats(bankId: string, context: HindsightCallContext): Promise<HindsightBankStatsWire>;
   operationStatus(bankId: string, operationId: string, context: HindsightCallContext): Promise<{ operationId: string; status: "pending" | "processing" | "completed" | "failed" | "cancelled" | "not_found" }>;
   retainImport?: (input: { bankId: string; content: string; documentId: string; operationId: string; context: string | null; call: HindsightCallContext }) => Promise<{ operationId: string; itemsCount: number }>;
   operationImportStatus?: (bankId: string, operationId: string, context: HindsightCallContext) => Promise<{ operationId: string; status: "pending" | "processing" | "completed" | "failed" | "cancelled" | "not_found"; operationType?: string | null; resultMetadataHash: string | null; derivedUnitCount: number | null; extractionErrorCount: number | null }>;
@@ -84,7 +88,7 @@ export function createHindsightClient(deps: {
 }
 
 function createClientMethods(request: <T>(input: HindsightRequestInput<T>) => Promise<T>): HindsightClient {
-  const methods: HindsightClient = {
+  const methods: Omit<HindsightClient, "bankLlmHealth" | "bankStats"> = {
     health: (context) => request({ path: "/health", context, schema: HindsightHealthWireSchema }),
     version: async (context) => {
       const result = await request({ path: "/version", context, schema: HindsightVersionWireSchema });
@@ -103,10 +107,6 @@ function createClientMethods(request: <T>(input: HindsightRequestInput<T>) => Pr
       context: input.context, schema: HindsightTemplateImportWireSchema,
     }),
     exportTemplate: (bankId, context) => request({ path: `/v1/default/banks/${encodeURIComponent(bankId)}/export`, context, schema: HindsightBankTemplateManifestSchema }),
-    bankLlmHealth: async (bankId, context) => {
-      const result = await request({ path: `/v1/default/banks/${encodeURIComponent(bankId)}/health/llm`, init: { method: "POST" }, context, schema: HindsightBankLlmHealthWireSchema });
-      return { bankId: result.bank_id, operations: result.operations.map((operation) => ({ operation: operation.operation, ok: operation.ok, status: operation.status, latencyMs: operation.latency_ms ?? null })) };
-    },
     operationStatus: async (bankId, operationId, context) => {
       const result = await request({ path: `/v1/default/banks/${encodeURIComponent(bankId)}/operations/${encodeURIComponent(operationId)}?include_payload=false`, context, schema: HindsightOperationStatusWireSchema });
       return { operationId: result.operation_id, status: result.status };
@@ -129,9 +129,19 @@ function createClientMethods(request: <T>(input: HindsightRequestInput<T>) => Pr
       return { items: result.items, total: result.total, limit: result.limit, offset: result.offset };
     },
   };
-  return Object.assign(methods, createSnapshotMethods(request), createJournalMethods(request),
+  return Object.assign(methods, createBankProbeMethods(request), createSnapshotMethods(request), createJournalMethods(request),
     createHindsightPendingMethods(request), createHindsightNativeResultMethods(request), createHindsightCurrentMethods(request),
     createHindsightRuntimeMethods(request), createHindsightApplicationMethods(request));
+}
+
+function createBankProbeMethods(request: <T>(input: HindsightRequestInput<T>) => Promise<T>): Pick<HindsightClient, "bankLlmHealth" | "bankStats"> {
+  return {
+    bankLlmHealth: async (bankId, context) => {
+      const result = await request({ path: `/v1/default/banks/${encodeURIComponent(bankId)}/health/llm`, init: { method: "POST" }, context, schema: HindsightBankLlmHealthWireSchema });
+      return { bankId: result.bank_id, operations: result.operations.map((operation) => ({ operation: operation.operation, ok: operation.ok, status: operation.status, latencyMs: operation.latency_ms ?? null })) };
+    },
+    bankStats: (bankId, context) => request({ path: `/v1/default/banks/${encodeURIComponent(bankId)}/stats?refresh=true`, context, schema: HindsightBankStatsWireSchema }),
+  };
 }
 
 function createJournalMethods(request: <T>(input: HindsightRequestInput<T>) => Promise<T>): Pick<HindsightClient, "changesAfter"> {

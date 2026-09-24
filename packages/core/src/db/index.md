@@ -23,7 +23,7 @@
 - ../governance/governance-policy-repo.ts — governance policy SQL aggregate: durable level/generation + sparse validated overrides
 - ../approval/approval-state-repo.ts — Approval SQL aggregate: durable generation/revisions + canonical always-allow decisions
 - migrations/ — numbered TS-constant migrations + their ordered registry
-- hindsight-connection-repo.ts — singleton sanitized Hindsight setup state with optimistic revision writes
+- hindsight-connection-repo.ts — singleton sanitized Hindsight setup state with optimistic revision writes, plus the Core-internal reviewed fingerprint + deployment mode (a mode never outlives its fingerprint)
 - hindsight-bank-setup-repo.ts — deterministic per-Bank template/setup evidence repository
 - hindsight-cutover-run-repo.ts — B4 lifecycle/leases, explicit Local coverage selection, and bounded truthful status/verification
 - hindsight-local-coverage-reader.ts — complete active Local payload witnesses and typed source/record reads
@@ -106,4 +106,5 @@
 - hindsight-policy-work-repo.ts — durable claims, original prompt/results, explicit retry and terminal queue progress
 - hindsight-policy-work-storage.ts — complete hash-checked journal reads and version-CAS state updates
 - hindsight-runtime-admission-repo.ts — integrity-checked last-verified D77 and guarded-reflect support across restart
+- hindsight-lifecycle-attempt-reads.ts — read-only automatic once-guard: whether an automatic bank.provision (Character + fingerprint) or connection.revalidate (epoch + fingerprint) row already exists
 - hindsight-runtime-memory-view.ts — complete current Canonical memory rows for internal prompt/report staging

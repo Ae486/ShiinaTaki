@@ -1,7 +1,8 @@
 /**
  * INPUT:  the pure Hindsight binding snapshot, the live Hindsight connection config and the committed authority marker
  * OUTPUT: hindsightUnboundReason() (the known configuration cause of an unbound selected runtime, or null) and
- *         createUnboundHindsightCapture() -> the memory-unavailable Run for that cause, or MEMORY_RUNTIME_UNAVAILABLE
+ *         createUnboundHindsightCapture() -> the memory-unavailable Run for that cause (reported to onUnavailable), or
+ *         MEMORY_RUNTIME_UNAVAILABLE
  * POS:    core/memory — composition-side degrade for a Hindsight runtime a setting kept unbound; every other unbound state
  *         (unknown construct/start failure, epoch mismatch, stopped) keeps refusing; never a Local or Legacy fallback
  */
@@ -9,6 +10,7 @@ import type { Logger } from "../logging/logger.ts";
 import type { Database } from "../db/sqlite.ts";
 import type { CapturedMemoryRun } from "./canonical-memory-run.ts";
 import type { HindsightBindingSnapshot } from "./hindsight-runtime-binding.ts";
+import type { HindsightUnavailableRunEvent } from "./hindsight/hindsight-memory-runtime.ts";
 import type { HindsightLiveConnection } from "./hindsight/hindsight-runtime-connection.ts";
 import { createHindsightUnavailableRun } from "./hindsight/hindsight-unavailable-run.ts";
 import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
@@ -16,17 +18,22 @@ import { createFallbackPersonaProvider, createPersonaProvider } from "./persona-
 
 export type HindsightUnboundReason = "connection_disabled" | "config_changed";
 
-/** Pure: only a disabled/unconfigured connection or a template-revision conflict is a known configuration cause. */
+/**
+ * Pure: only a disabled/unconfigured connection, a template-revision conflict, or a connection that was unavailable at
+ * construction but is ready now (re-enabled; a revalidation rebinds it) is a known configuration cause.
+ */
 export function hindsightUnboundReason(snapshot: HindsightBindingSnapshot, live: HindsightLiveConnection | null): HindsightUnboundReason | null {
   const { binding } = snapshot;
   if (snapshot.selection !== "hindsight" || snapshot.lifetime !== "running" || binding.kind !== "unavailable"
     || binding.epochId !== snapshot.selectedEpochId) return null;
   if (live && live.state !== "ready") return "connection_disabled";
-  return binding.code === "HINDSIGHT_TEMPLATE_CONFLICT" ? "config_changed" : null;
+  if (binding.code === "HINDSIGHT_TEMPLATE_CONFLICT") return "config_changed";
+  return binding.code === "HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE" && live?.state === "ready" ? "config_changed" : null;
 }
 
 export function createUnboundHindsightCapture(input: {
   db: Database; logger: Logger; promptDir?: string; binding(): HindsightBindingSnapshot; live(): HindsightLiveConnection | null;
+  onUnavailable?: (event: HindsightUnavailableRunEvent) => void;
 }): (characterId: string) => CapturedMemoryRun {
   const persona = input.promptDir ? createPersonaProvider({ promptDir: input.promptDir }) : createFallbackPersonaProvider();
   return (characterId) => {
@@ -36,6 +43,7 @@ export function createUnboundHindsightCapture(input: {
     const selection = readMemoryAuthoritySelection(input.db);
     if (selection.mode !== "hindsight" || !selection.epochId || !selection.providerLineageId) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
     input.logger.warn({ characterId, code: reason }, "Hindsight Run admitted without memory");
+    input.onUnavailable?.({ characterId, reason });
     return createHindsightUnavailableRun({ epoch: { epochId: selection.epochId, providerLineageId: selection.providerLineageId },
       characterId, persona });
   };

@@ -22,7 +22,8 @@ function fixture() {
   const live = readHindsightLiveConnection({ config: f.source, secrets: f.secrets.catalog });
   if (live.state !== "ready") throw new Error("fixture connection must be ready");
   const input = (patch: Partial<HindsightLifecycleStatusInput> = {}): HindsightLifecycleStatusInput => ({ db: f.db, epochId: "epoch", live,
-    runtimeDrift: "none", setup: setupSnapshot({ banks: f.setup.list(), configFingerprint: live.fingerprint }), provisioning: ["sayo"], ...patch });
+    runtimeDrift: "none", setup: setupSnapshot({ banks: f.setup.list(), configFingerprint: live.fingerprint }), provisioning: ["sayo"],
+    busy: false, unavailableReason: null, revalidateBlocked: false, ...patch });
   return { f, live, input };
 }
 
@@ -37,7 +38,7 @@ describe("Hindsight lifecycle status section", () => {
     expect(section.banks.find((bank) => bank.characterId === "mika")?.nativeBankId).toBe(hindsightBankBindings("mika")[1].externalBankId);
     expect(section.banks.find((bank) => bank.characterId === "x".repeat(200))?.nativeBankId).toBeNull();
     expect(section.banks.filter((bank) => bank.characterId === "taki")).toHaveLength(1);
-    expect(section.actions).toEqual({ revalidate: false, provision: [] });
+    expect(section.actions).toEqual({ revalidate: false, provision: ["rana", "mika"] });
     // Without an open operation a pending row is not provisioning; a replica bound under another epoch is not ready.
     const idle = readHindsightLifecycleStatus(input({ provisioning: [], epochId: "other-epoch" }));
     expect(idle.banks.find((bank) => bank.characterId === "sayo")?.readiness).toBe("not_provisioned");
@@ -56,6 +57,22 @@ describe("Hindsight lifecycle status section", () => {
     expect(drift({ live: { state: "disabled", fingerprint: null }, runtimeDrift: "connection_disabled" }))
       .toEqual({ config: "disabled", drift: "none", admittedAt: null });
     expect(f.remote.calls).toEqual([]);
+  });
+
+  it("derives actions from drift, runtime availability and an open exclusive family only", () => {
+    const { f, input } = fixture();
+    const actions = (patch: Partial<HindsightLifecycleStatusInput>) => readHindsightLifecycleStatus(input(patch)).actions;
+    expect(actions({ runtimeDrift: "config_changed", unavailableReason: "config_changed" })).toEqual({ revalidate: true, provision: [] });
+    expect(actions({ runtimeDrift: null, unavailableReason: "not_installed" })).toEqual({ revalidate: true, provision: [] });
+    expect(actions({ setup: setupSnapshot({ banks: f.setup.list(), configFingerprint: "c".repeat(64) }) }).revalidate).toBe(true);
+    for (const reason of ["stopped", "authority_mismatch"] as const) expect(actions({ runtimeDrift: null, unavailableReason: reason }).revalidate).toBe(false);
+    expect(actions({ live: { state: "disabled", fingerprint: null }, runtimeDrift: "connection_disabled", unavailableReason: "connection_disabled" }))
+      .toEqual({ revalidate: false, provision: [] });
+    expect(actions({ busy: true, runtimeDrift: "config_changed", unavailableReason: "config_changed" })).toEqual({ revalidate: false, provision: [] });
+    expect(actions({ busy: true })).toEqual({ revalidate: false, provision: [] });
+    // A Stage 5 change keeps its drift visible but is never offered as a revalidation.
+    expect(readHindsightLifecycleStatus(input({ runtimeDrift: "config_changed", unavailableReason: "config_changed", revalidateBlocked: true })))
+      .toMatchObject({ connection: { drift: "config_changed" }, actions: { revalidate: false } });
   });
 
   it("reports the stored admission evidence time for the current epoch and fingerprint only", async () => {

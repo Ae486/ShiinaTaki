@@ -1,6 +1,7 @@
 /**
  * INPUT:  live non-secret config, Secret Catalog connection seam, focused client, compatibility gate, and SQLite repos
- * OUTPUT: explicit validate/setup/disable/status/LLM-health operator operations over resumable sanitized state
+ * OUTPUT: explicit validate/setup/disable/status/LLM-health operator operations over resumable sanitized state; every reviewed
+ *         fingerprint is stored with the deployment mode it was reviewed under
  * POS:    core/memory/hindsight — B3 orchestration only; never selects Memory Authority or performs Host actions
  */
 import { randomUUID } from "node:crypto";
@@ -9,6 +10,7 @@ import {
   HindsightManagedDeploymentReceiptSchema,
   HindsightSetupSnapshotSchema,
   type HindsightConnectionProjection,
+  type HindsightDeploymentMode,
   type HindsightDisableParams,
   type HindsightLlmHealthParams,
   type HindsightLlmHealthResult,
@@ -104,7 +106,7 @@ async function validate(input: {
     working = persist({ deps, current: working, patch: {
       phase: "compatible", lastSuccessfulPhase: "compatible", configFingerprint: result.fingerprint,
       compatibility: result.compatibility, latestError: null, lastSuccessAt: runtime.now(),
-    }, updatedAt: runtime.now() });
+    }, updatedAt: runtime.now(), reviewedDeploymentMode: connection.deploymentMode });
     return read(deps);
   } catch (error) {
     // Failed validation withdraws the compatibility evidence (setup/llmHealth refuse until a fresh success) while
@@ -147,7 +149,7 @@ async function setup(input: {
     working = persist({ deps, current: working, patch: {
       phase: "configured", lastSuccessfulPhase: "configured", configFingerprint: fingerprint,
       banks, latestError: null, lastSuccessAt: runtime.now(),
-    }, updatedAt: runtime.now() });
+    }, updatedAt: runtime.now(), reviewedDeploymentMode: connection.deploymentMode });
     return read(deps);
   } catch (error) {
     const normalized = controller.signal.aborted ? hindsightError("HINDSIGHT_TIMEOUT") : normalizeError(error);
@@ -247,9 +249,11 @@ function persist(input: {
   current: HindsightSetupSnapshot;
   patch: Partial<HindsightSetupSnapshot>;
   updatedAt: string;
+  /** Given exactly when the patch records a reviewed fingerprint. */
+  reviewedDeploymentMode?: HindsightDeploymentMode;
 }): HindsightSetupSnapshot {
   const next = HindsightSetupSnapshotSchema.parse({ ...input.current, ...input.patch, banks: input.patch.banks ?? input.deps.bankRepo.list(), revision: input.current.revision + 1, updatedAt: input.updatedAt });
-  return input.deps.connectionRepo.save(next, input.current.revision);
+  return input.deps.connectionRepo.save(next, input.current.revision, input.reviewedDeploymentMode);
 }
 
 function persistFailure(input: {

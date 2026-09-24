@@ -73,8 +73,11 @@ describe("memory.authority.status read", () => {
       ({ selection: "hindsight", selectedEpochId: "epoch", binding, lifetime, flush: binding.kind === "published" && lifetime === "running" ? "available" : "failing" });
     const read = (binding: HindsightBindingSnapshot) => readMemoryAuthorityStatus({ db: f.db, live: () => runtime, hindsightBinding: () => binding,
       setup: f.setup, operations: f.operations, now: () => AT, liveConnection: () => READY });
+    // Unavailable at construction but ready now: a revalidation rebinds it, so it is reported as a changed configuration.
     expect(read(snapshot({ kind: "unavailable", epochId: "epoch", code: "HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE" }))).toMatchObject({
-      runtime: { providerId: "hindsight", available: false, unavailableReason: "not_installed" }, replica: null, pending: null });
+      runtime: { providerId: "hindsight", available: false, unavailableReason: "config_changed" }, replica: null, pending: null });
+    expect(read(snapshot({ kind: "unavailable", epochId: "epoch", code: "HINDSIGHT_REPLICA_BANK_BINDING_MISMATCH" })).runtime.unavailableReason)
+      .toBe("not_installed");
     expect(read(snapshot({ kind: "published", epochId: "other" })).runtime.unavailableReason).toBe("authority_mismatch");
     expect(read(snapshot({ kind: "published", epochId: "epoch" }, "stopped")).runtime.unavailableReason).toBe("stopped");
     const bound = read(snapshot({ kind: "published", epochId: "epoch" }));
@@ -116,5 +119,14 @@ describe("memory.authority.status read", () => {
       .runtime.unavailableReason).toBe("not_installed");
     f.connection.live = { state: "disabled", fingerprint: null };
     expect(read({ ...unavailable("HINDSIGHT_TEMPLATE_CONFLICT"), lifetime: "stopped" }).runtime.unavailableReason).toBe("stopped");
+  });
+
+  it("answers with an unconfigured connection when the live config or Secret Catalog cannot be read", () => {
+    const f = fixture("hindsight", null);
+    const status = readMemoryAuthorityStatus({ db: f.db, live: () => null, setup: f.setup, operations: f.operations, now: () => AT,
+      liveConnection: () => { throw new Error("CONFIG_UNREADABLE"); } });
+    expect(MemoryAuthorityStatusSchema.parse(status)).toEqual(status);
+    expect(status).toMatchObject({ runtime: { available: false, unavailableReason: "not_installed" },
+      hindsight: { connection: { config: "unconfigured", drift: "none", admittedAt: null }, actions: { revalidate: false, provision: [] } } });
   });
 });

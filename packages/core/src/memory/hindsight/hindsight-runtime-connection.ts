@@ -2,11 +2,12 @@
  * INPUT:  active Hindsight epoch, effective B3 configuration, verified Bank setup and the Secret Catalog
  * OUTPUT: one captured authenticated client, guards for connection, epoch and Bank route changes, driftReason() separating a
  *         changed/disabled connection from an Authority integrity failure, routedBanks()/characterRouted() for a Character without a ready Bank,
- *         and readHindsightLiveConnection() (the live config state + fingerprint, no network)
+ *         readHindsightLiveConnection() (the live config state + fingerprint, no network) and readHindsightLiveProjection()
+ *         (the same read plus the ready projection the lifecycle producers act on)
  * POS:    core/memory/hindsight — runtime consumes existing operator setup; construction performs no network or Authority write
  *         and refuses HINDSIGHT_TEMPLATE_CONFLICT when the desired template revision differs from the verified Banks'
  */
-import { HindsightConnectionProjectionSchema, MemoryReplicaBankSchema, type MemoryReplicaBank } from "@taki/shared";
+import { HindsightConnectionProjectionSchema, MemoryReplicaBankSchema, type HindsightConnectionProjection, type MemoryReplicaBank } from "@taki/shared";
 import type { ConfigSource } from "../../config/config-source.ts";
 import { resolveHindsightConfig, type HindsightResolvedConfig } from "../../config/hindsight-config.ts";
 import { createCanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
@@ -29,10 +30,20 @@ export type HindsightLiveConnection =
   | { state: "ready"; fingerprint: string }
   | { state: Exclude<HindsightResolvedConfig["state"], "ready">; fingerprint: null };
 
-export function readHindsightLiveConnection(input: { config: ConfigSource; secrets: SecretCatalogService }): HindsightLiveConnection {
+export type HindsightLiveProjection =
+  | { state: "ready"; fingerprint: string; projection: HindsightConnectionProjection }
+  | { state: Exclude<HindsightResolvedConfig["state"], "ready">; fingerprint: null; projection: null };
+
+export function readHindsightLiveProjection(input: { config: ConfigSource; secrets: SecretCatalogService }): HindsightLiveProjection {
   const configured = resolveHindsightConfig(input.config);
-  if (configured.state !== "ready") return { state: configured.state, fingerprint: null };
-  return { state: "ready", fingerprint: hindsightConnectionFingerprint(configured.projection, createHindsightConnectionSecret(input.secrets).marker()) };
+  if (configured.state !== "ready") return { state: configured.state, fingerprint: null, projection: null };
+  const fingerprint = hindsightConnectionFingerprint(configured.projection, createHindsightConnectionSecret(input.secrets).marker());
+  return { state: "ready", fingerprint, projection: configured.projection };
+}
+
+export function readHindsightLiveConnection(input: { config: ConfigSource; secrets: SecretCatalogService }): HindsightLiveConnection {
+  const live = readHindsightLiveProjection(input);
+  return live.state === "ready" ? { state: "ready", fingerprint: live.fingerprint } : { state: live.state, fingerprint: null };
 }
 
 export function createHindsightRuntimeConnection(input: HindsightRuntimeConnectionInput) {

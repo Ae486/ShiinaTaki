@@ -51,3 +51,4 @@
 - 047-hindsight-memory-writes.ts — durable original requests, exact mutation targets and stable whole-operation results
 - 048-memory-operations.ts — Core-minted durable memory operation ledger; partial unique index = single-flight per family; owner boot id drives restart reconciliation
 - 049-local-onboarding.ts — additive Local onboarding storage: migration candidates/supersession, run-scoped Block plans, source effect proofs, primary group/member custody
+- 050-hindsight-reviewed-deployment-mode.ts — nullable reviewed deployment mode beside the reviewed B3 fingerprint (NULL = pre-050 row, readers fail closed)

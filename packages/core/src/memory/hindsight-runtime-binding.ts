@@ -1,6 +1,6 @@
 /**
  * INPUT:  a Hindsight subsystem draft constructor, the authority marker reader and the composition logger
- * OUTPUT: createHindsightRuntimeBinding -> publish/start/current/snapshot/stop: the ONE published truth for the Hindsight
+ * OUTPUT: createHindsightRuntimeBinding -> publish/replace/start/current/snapshot/stop: the ONE published truth for the Hindsight
  *         engine, scheduler, ingestion and flush after COMMIT, plus a pure snapshot for activation and authority status;
  *         hindsightRuntimeAvailability() and witnessHindsightPrimaryCommit() (marker-routed witness while unbound)
  * POS:    core/memory — draft -> install -> publish -> start; a failed draft is disposed and leaves an observable unavailable
@@ -31,6 +31,11 @@ export interface HindsightRuntimeAvailability { available: boolean; unavailableR
 export interface HindsightRuntimeBinding {
   /** Builds, installs and publishes one draft; on any failure disposes it, records unavailable and rethrows. */
   publish(epochId: string): HindsightSubsystem;
+  /**
+   * Revalidation rebind: builds the next draft while the current one stays published, swaps publication, and resolves
+   * `retired` once the old subsystem stopped. With nothing published it publishes. A failed draft withdraws both.
+   */
+  replace(epochId: string): { subsystem: HindsightSubsystem; retired: Promise<void> };
   /** Starts the published subsystem once the composition runs; a failing start withdraws the publication as unavailable. */
   start(): void;
   current(): HindsightSubsystem | undefined;
@@ -51,16 +56,29 @@ export function createHindsightRuntimeBinding(input: { db: Database; construct: 
     input.logger.error({ code: "MEMORY_HINDSIGHT_BINDING_UNAVAILABLE", epochId, cause: state.code }, "Hindsight runtime binding failed; runtime stays unavailable");
     throw error;
   };
+  const publish = (epochId: string, previous: HindsightSubsystem | undefined): HindsightSubsystem => {
+    let draft: HindsightSubsystem | undefined;
+    try {
+      draft = input.construct(epochId);
+      install(draft);
+      published = draft; state = { kind: "published", epochId }; started = false;
+      return draft;
+    } catch (error) {
+      // The draft was built for a changed connection the old runtime already refuses; keeping it published would hide that.
+      dispose(previous);
+      return fail(epochId, error, draft);
+    }
+  };
   return {
     publish: (epochId) => {
       if (published) throw new Error("MEMORY_INTEGRITY_ERROR: Hindsight runtime binding is already published");
-      let draft: HindsightSubsystem | undefined;
-      try {
-        draft = input.construct(epochId);
-        install(draft);
-        published = draft; state = { kind: "published", epochId };
-        return draft;
-      } catch (error) { return fail(epochId, error, draft); }
+      return publish(epochId, undefined);
+    },
+    replace: (epochId) => {
+      if (stopped) throw new Error("MEMORY_OPERATION_CANCELLED");
+      const previous = published;
+      const subsystem = publish(epochId, previous);
+      return { subsystem, retired: retire(previous, input.logger) };
     },
     start: () => {
       if (!published || started || state.kind !== "published") return;
@@ -68,11 +86,7 @@ export function createHindsightRuntimeBinding(input: { db: Database; construct: 
       catch (error) { fail(state.epochId, error, published); }
     },
     current: () => published,
-    snapshot: () => {
-      const selection = readMemoryAuthoritySelection(input.db);
-      return { selection: selection.mode, selectedEpochId: selection.epochId, binding: state,
-        lifetime: stopped ? "stopped" : "running", flush: published && !stopped ? "available" : "failing" };
-    },
+    snapshot: () => snapshotOf(input.db, { binding: state, stopped, flushing: published !== undefined && !stopped }),
     stop: async () => {
       if (stopped) return;
       stopped = true;
@@ -113,6 +127,18 @@ function install(draft: HindsightSubsystem): void {
     if (draft[member] === undefined || draft[member] === null) throw new Error(`MEMORY_INTEGRITY_ERROR: Hindsight runtime draft lacks ${member}`);
   }
   if (typeof draft.memoryFlush.prepareRetirement !== "function") throw new Error("MEMORY_INTEGRITY_ERROR: Hindsight runtime draft lacks a flush port");
+}
+
+function snapshotOf(db: Database, input: { binding: HindsightBindingState; stopped: boolean; flushing: boolean }): HindsightBindingSnapshot {
+  const selection = readMemoryAuthoritySelection(db);
+  return { selection: selection.mode, selectedEpochId: selection.epochId, binding: input.binding,
+    lifetime: input.stopped ? "stopped" : "running", flush: input.flushing ? "available" : "failing" };
+}
+
+/** The replaced subsystem is already unpublished; a failing stop is logged, never allowed to undo the swap. */
+async function retire(previous: HindsightSubsystem | undefined, logger: Logger): Promise<void> {
+  try { await previous?.stop(); }
+  catch { logger.warn({ code: "MEMORY_SHUTDOWN_FAILED" }, "replaced Hindsight runtime did not stop cleanly"); }
 }
 
 function dispose(subsystem: HindsightSubsystem | undefined): void {

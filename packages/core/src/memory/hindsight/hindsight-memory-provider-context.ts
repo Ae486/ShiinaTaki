@@ -113,8 +113,12 @@ export function hindsightAvailabilityFailure(error: unknown): boolean {
   // B5 recovery intentionally rethrows its closed diagnostic as a plain Error.
   // Preserve that availability meaning across the adapter: losing the native
   // ACK must leave the already durable intent pending, not report an internal bug.
-  const code = error instanceof HindsightError ? error.code : error instanceof Error ? error.message : "";
-  return ["HINDSIGHT_UNREACHABLE", "HINDSIGHT_TIMEOUT", "HINDSIGHT_DEADLINE_EXCEEDED", "HINDSIGHT_HEALTH_FAILED",
+  return hindsightAvailabilityCode(error instanceof HindsightError ? error.code : error instanceof Error ? error.message : null);
+}
+
+/** The same availability class for an already closed code (a replica status errorCode). */
+export function hindsightAvailabilityCode(code: string | null): boolean {
+  return code !== null && ["HINDSIGHT_UNREACHABLE", "HINDSIGHT_TIMEOUT", "HINDSIGHT_DEADLINE_EXCEEDED", "HINDSIGHT_HEALTH_FAILED",
     "HINDSIGHT_SECRET_UNAVAILABLE", "HINDSIGHT_AUTHENTICATION_FAILED"].includes(code);
 }
 

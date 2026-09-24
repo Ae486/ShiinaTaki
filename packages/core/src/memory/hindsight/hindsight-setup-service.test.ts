@@ -51,6 +51,7 @@ function build(options: { failDryRunBank?: string; failApplyBank?: string; opera
     health: async () => ({ status: "healthy", database: "connected" }),
     version: async () => ({ apiVersion: "0.9.0" }),
     compatibility: async () => { throw new Error("unused"); },
+    bankStats: async () => { throw new Error("unused"); },
     createOrUpdateBank: vi.fn(async (bankId) => { calls.push(`put:${bankId}`); return { bankId, name: null }; }),
     importTemplate: vi.fn(async ({ bankId, dryRun }) => {
       calls.push(`${dryRun ? "dry" : "apply"}:${bankId}`);

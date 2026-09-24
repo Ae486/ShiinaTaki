@@ -1,5 +1,5 @@
 /**
- * INPUT:  untrusted JSON returned by the exact Hindsight 0.9.0 endpoints used by B3
+ * INPUT:  untrusted JSON returned by the exact Hindsight 0.9.0 endpoints used by B3 and the lifecycle occupancy probe
  * OUTPUT: bounded raw-wire schemas and safe projected Core types
  * POS:    core/memory/hindsight — the only Hindsight response-validation vocabulary
  */
@@ -111,3 +111,12 @@ export const HindsightOperationStatusWireSchema = z.object({
   operation_id: text,
   status: z.enum(["pending", "processing", "completed", "failed", "cancelled", "not_found"]),
 });
+/** Only the counters the occupancy rule reads; native stats aggregate by bank_id, so an absent Bank answers zeros. */
+export const HindsightBankStatsWireSchema = z.object({
+  bank_id: text,
+  total_nodes: z.int().nonnegative(),
+  total_documents: z.int().nonnegative(),
+  total_observations: z.int().nonnegative(),
+  pending_operations: z.int().nonnegative(),
+});
+export type HindsightBankStatsWire = z.infer<typeof HindsightBankStatsWireSchema>;

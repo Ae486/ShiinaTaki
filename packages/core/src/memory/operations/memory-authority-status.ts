@@ -2,22 +2,25 @@
  * INPUT:  the authority selection marker, the live Hindsight runtime accessor and connection config, the pure Local and
  *         Hindsight binding snapshots, the B3 setup service and the operation owner
  * OUTPUT: readMemoryAuthorityStatus() — one strict composite MemoryAuthorityStatus with the `hindsight` lifecycle section under
- *         Hindsight authority; an unavailable runtime never fails the read
+ *         Hindsight authority (open bank.provision Characters, exclusive-family business and the lifecycle revalidate blocker
+ *         feed its actions); an unavailable runtime or an unreadable live connection never fails the read
  * POS:    core/memory/operations — read-only projection, never probes the network; a changed/disabled connection is its own
  *         reason, authority_mismatch only for a real epoch/lineage mismatch; unknown stays unknown (derivedFreshness "unknown")
  */
-import { MemoryAuthorityStatusSchema, type MemoryAuthorityStatus, type MemoryRuntimeUnavailableReason } from "@taki/shared";
+import { MemoryAuthorityStatusSchema, type MemoryAuthorityStatus, type MemoryOperation, type MemoryRuntimeUnavailableReason } from "@taki/shared";
 import { countPendingHindsightMemoryWrites } from "../../db/hindsight-memory-write-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
+import type { HindsightLifecycleService } from "../hindsight-lifecycle/hindsight-lifecycle-service.ts";
 import type { HindsightConnectionDrift, HindsightLiveConnection } from "../hindsight/hindsight-runtime-connection.ts";
 import { hindsightRuntimeAvailability, type HindsightBindingSnapshot } from "../hindsight-runtime-binding.ts";
 import { hindsightUnboundReason } from "../hindsight-unbound-run.ts";
 import { localRuntimeAvailability } from "../local-onboarding/local-onboarding-reads.ts";
 import type { LocalBindingSnapshot } from "../local-runtime-binding.ts";
 import { readHindsightLifecycleStatus } from "./memory-hindsight-lifecycle-status.ts";
-import type { MemoryOperationsRuntime } from "./memory-operation-contract.ts";
+import { EXCLUSIVE_MEMORY_FAMILIES, type MemoryOperationsRuntime } from "./memory-operation-contract.ts";
+import { MEMORY_OPERATION_KINDS, memoryOperationHandler } from "./memory-operation-kinds.ts";
 import type { MemoryOperationService } from "./memory-operation-service.ts";
 
 export interface MemoryAuthorityStatusInput {
@@ -29,6 +32,8 @@ export interface MemoryAuthorityStatusInput {
   hindsightBinding?(): HindsightBindingSnapshot;
   /** The live Hindsight connection config (state + fingerprint); a local read, never a probe. */
   liveConnection(): HindsightLiveConnection;
+  /** The lifecycle owner's revalidate blocker, the one the producer and the automatic trigger apply; absent blocks nothing. */
+  lifecycle?: Pick<HindsightLifecycleService, "live" | "revalidateBlocker">;
   setup: HindsightSetupService;
   operations: MemoryOperationService;
   now?: () => string;
@@ -53,22 +58,49 @@ export function readMemoryAuthorityStatus(input: MemoryAuthorityStatusInput): Me
     } catch (error) { unavailableReason = unavailableReasonOf(error); }
   }
   const setup = input.setup.status();
-  const live = hindsight ? input.liveConnection() : null;
+  const live = hindsight ? liveConnection(input) : null;
   // A runtime a setting keeps unbound reports that setting (the same rule that admits its memory-unavailable Runs).
   const unbound = binding ? hindsightUnboundReason(binding, live) : null;
   if (unbound) unavailableReason = unbound;
+  const active = input.operations.list({ includeTerminal: false, limit: 50 });
   return MemoryAuthorityStatusSchema.parse({
     authority: { mode: selection.mode, epochId: selection.epochId, providerLineageId: selection.providerLineageId },
     runtime: { providerId: selection.mode === "canonical-local" ? "local" : selection.mode, available: unavailableReason === null, unavailableReason },
     setup,
     ...(unavailableReason === null ? evidence : { replica: null, pending: null }),
-    operations: { active: input.operations.list({ includeTerminal: false, limit: 50 }), recent: input.operations.recent(20) },
-    hindsight: live && selection.epochId
-      ? readHindsightLifecycleStatus({ db: input.db, epochId: selection.epochId, live, runtimeDrift: drift, setup, provisioning: [] })
+    operations: { active, recent: input.operations.recent(20) },
+    hindsight: hindsight && selection.epochId
+      ? readHindsightLifecycleStatus({ db: input.db, epochId: selection.epochId, live: live ?? { state: "unconfigured", fingerprint: null },
+        runtimeDrift: drift, setup, provisioning: provisioning(active), busy: active.some(exclusive), unavailableReason,
+        revalidateBlocked: revalidateBlocked(input, selection.epochId) })
       : null,
     derivedFreshness: "unknown",
     observedAt: (input.now ?? (() => new Date().toISOString()))(),
   });
+}
+
+/** An unreadable config or Secret Catalog reads as unconfigured; the read itself never fails on it. */
+function liveConnection(input: MemoryAuthorityStatusInput): HindsightLiveConnection | null {
+  try { return input.liveConnection(); }
+  catch { return null; }
+}
+
+/** An unreadable blocker input proves nothing is safe to revalidate. */
+function revalidateBlocked(input: MemoryAuthorityStatusInput, epochId: string): boolean {
+  if (!input.lifecycle) return false;
+  try {
+    const live = input.lifecycle.live();
+    return live.state === "ready" && input.lifecycle.revalidateBlocker(live, epochId) !== null;
+  } catch { return true; }
+}
+
+function provisioning(active: readonly MemoryOperation[]): string[] {
+  return active.flatMap((operation) => operation.request.kind === "bank.provision" ? [operation.request.characterId] : []);
+}
+
+function exclusive(operation: MemoryOperation): boolean {
+  const family = memoryOperationHandler(MEMORY_OPERATION_KINDS, operation.kind).family(operation.request);
+  return (EXCLUSIVE_MEMORY_FAMILIES as readonly string[]).includes(family);
 }
 
 function hindsightEvidence(db: Database, runtime: MemoryOperationsRuntime): Evidence {

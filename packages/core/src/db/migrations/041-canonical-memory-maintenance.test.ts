@@ -54,7 +54,7 @@ describe("041 canonical maintenance history and ingestion schema", () => {
   it("applies a fresh ordered registry, enforces one pending span, and retains the exact eligibility baseline", () => {
     const applied: number[][] = []; const db = open(":memory:", MIGRATIONS, (versions) => applied.push(versions));
     expect(applied).toEqual([MIGRATIONS.map(({ version }) => version)]);
-    expect(MIGRATIONS.at(-1)?.version).toBe(49);
+    expect(MIGRATIONS.at(-1)?.version).toBe(50);
     const tables = db.prepare("SELECT name FROM sqlite_schema WHERE type='table'").all().map((row) => row.name);
     expect(addedTables.every((table) => tables.includes(table))).toBe(true);
     const value = createCanonicalMaintenanceFixture(db); value.seed();
@@ -91,7 +91,7 @@ describe("041 canonical maintenance history and ingestion schema", () => {
     const historical = createCanonicalMemoryRepo(old).edit(editInput);
     const before = { history: historyBytes(old), current: currentRows(old), receipts: migrationReceipts(old) }; old.close();
     const applied: number[][] = []; const upgraded = open(file, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49]]);
+    expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50]]);
     expect(historyBytes(upgraded)).toEqual(before.history);
     expect(currentRows(upgraded)).toEqual(before.current);
     expect(migrationReceipts(upgraded).filter((row) => Number(row.version) <= 40)).toEqual(before.receipts);
@@ -104,7 +104,7 @@ describe("041 canonical maintenance history and ingestion schema", () => {
     expect(records.edit(editInput)).toEqual(historical);
     const after = historyBytes(upgraded); upgraded.close();
     const reopened = open(file, MIGRATIONS, (versions) => applied.push(versions));
-    expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49], []]);
+    expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50], []]);
     expect(historyBytes(reopened)).toEqual(after);
     expect(createCanonicalMemoryRepo(reopened).edit(editInput)).toEqual(historical);
     expect(reopened.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
