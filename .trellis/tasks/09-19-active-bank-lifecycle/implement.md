@@ -32,7 +32,8 @@ finer) with an explicit context-budget brief. The leader owns task/spec/handoff 
 
 ## C. Home
 
-- [ ] Authority card readiness rows, labels, two actions; fixtures; tests; Desktop build. Gates + commit if clean.
+- [x] Authority card readiness rows, labels, two actions; fixtures; tests; Desktop build. Gates.
+- [ ] Commit if clean.
 
 ## Validation and final review
 
@@ -205,3 +206,31 @@ Leader ruling: persist the reviewed deployment mode instead of deferring the cro
 - Commits: e5f172d (fix core, S2b verification id), f831880 (shared), 2bf5cb7 (core), 2c07d6a (ui).
 - For the formal check: `main.ts` is 585 lines (578 at HEAD before the wave, pre-existing overage); `readCommittedHindsightProducer`
   now returns the native per-preparation id (safe only while committed runs are never replayed through the chain).
+
+### Wave C — 2026-09-25 (trellis-implement)
+
+- `memory-hindsight-lifecycle-state.ts` (new, 64 lines): `hindsightLifecycleView(status)` -> null unless `status.hindsight`;
+  connection rows (config 已配置 / reused `connection_disabled` label / 未填写连接参数; drift and 上次校验通过 only for a ready
+  config — reused `config_changed` label, 与已校验的配置一致, 当前配置尚未校验; null admittedAt -> 无记录), per-scope readiness
+  rows (可用 / 同步中 / 创建中 / 失败 / 未创建), diagnostics (`nativeBankId` + `errorCode` only there), action descriptors from
+  `hindsight.actions` only: 重新校验连接 `{ kind: "connection.revalidate", expectedEpochId: authority.epochId }` key `revalidate`
+  (omitted when the epoch id is null), 创建 Bank（id）`{ kind: "bank.provision", characterId }` key `provision:<id>`.
+- `memory-hindsight-lifecycle-block.tsx` (new, 34 lines): child block of the authority card; buttons call `ops.submit(request,
+  key)`, disabled by the card's existing lock (`!connectionReady || busyKey !== null`), busy on the matching key; collapsed
+  技术诊断.
+- `memory-authority-card.tsx`: renders the block when the section is non-null (also while the runtime is unavailable);
+  `memory-authority-state.ts`: `bankScopeLabel()` shared by replica and readiness rows; `use-memory-operations.ts`: exposes the
+  controller's generic `submit`; `memory-authority-fixtures.ts`: `lifecycleBank` / `lifecycleSection` (every readiness state,
+  `config_changed`, revalidate on, provision `[nana, yui]`) / `degradedStatus`; `index.md` updated.
+- Tests: `memory-hindsight-lifecycle-state.test.ts` 6 (fixtures schema-valid incl. disabled / unconfigured / unreviewed / settled;
+  null under Local and Legacy; every readiness label with codes/native ids only in diagnostics; both reasons reuse the runtime
+  labels; actions exactly from Core incl. an unlisted `not_provisioned` Bank with no button and null epoch; exact payloads and
+  keys through a real controller); `memory-hindsight-lifecycle-block.test.tsx` 2 (onClick props drive `submit` with exact
+  request + key; lock and busy per button); `memory-authority-card.test.tsx` +3 (no block under Local; degraded block with
+  labels, buttons exactly from actions, code only after 技术诊断; disabled while pending / disconnected). Mutation checks:
+  offering revalidate without `actions.revalidate` fails 3 tests; putting `errorCode` in a readiness row fails 2.
+- Gates (2026-09-25): `pnpm typecheck` 5/5; `pnpm lint` clean; `pnpm --filter @taki/desktop test` 113 / 646; `pnpm --filter
+  @taki/desktop build` ok (existing chunk-size warning only); `git diff --check` clean. No Core/Shared change; Tauri and Core
+  not launched.
+- Deviations: the block lives in its own child component file instead of inline in the card (distinct concern); the
+  active-operation row for the two new kinds keeps the kind label without a target suffix (unchanged from wave B).
