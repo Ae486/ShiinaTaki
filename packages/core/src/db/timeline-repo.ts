@@ -1,6 +1,7 @@
 /**
  * INPUT:  the Database wrapper + append/paging calls (characterId-scoped)
- * OUTPUT: timeline repository with names-only tool-call rows and sanitized legacy reads over timeline_messages
+ * OUTPUT: timeline repository with names-only tool-call rows and sanitized legacy reads over timeline_messages;
+ *         listTimelineCharacterIds() (bounded distinct Character ids for status projections)
  * POS:    core/db — timeline SQL and defense-in-depth privacy boundary; raw tool-call input never crosses the repo
  */
 import { randomUUID } from "node:crypto";
@@ -142,4 +143,10 @@ function sanitizeParts(parts: TimelinePart[] | undefined): TimelinePart[] | unde
   return parts?.map((part) => part.type === "tool-call"
     ? { type: "tool-call", toolCallId: part.toolCallId, toolName: part.toolName }
     : part);
+}
+
+/** Distinct Characters with Timeline history, bounded; ids longer than the protocol id limit are never projected. */
+export function listTimelineCharacterIds(db: Database, limit: number): string[] {
+  return db.prepare(`SELECT DISTINCT character_id FROM timeline_messages WHERE length(character_id) <= 256
+    ORDER BY character_id LIMIT :limit`).all({ limit }).map((row) => String(row.character_id));
 }

@@ -11,6 +11,7 @@ import type {
 } from "@taki/shared";
 import type { HindsightActivationService } from "../hindsight-activation/hindsight-activation-service.ts";
 import type { HindsightReplicaScheduler } from "../hindsight/hindsight-replica-scheduler.ts";
+import type { HindsightConnectionDrift } from "../hindsight/hindsight-runtime-connection.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
 import type { LocalOnboardingService } from "../local-onboarding/local-onboarding-service.ts";
 
@@ -20,6 +21,8 @@ export interface MemoryOperationsRuntime {
   scheduler: Pick<HindsightReplicaScheduler, "started" | "requestManual" | "cancelManual" | "tick" | "status" | "lastError">;
   banks(): MemoryReplicaBank[];
   assertConnection(): void;
+  /** Throws on a stopped runtime or an epoch/lineage mismatch; otherwise names a changed or disabled connection. */
+  driftReason(): HindsightConnectionDrift;
   pendingSummary(bankId: string): PendingMemorySummary;
 }
 

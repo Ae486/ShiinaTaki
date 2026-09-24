@@ -4,6 +4,7 @@ import { MIGRATIONS } from "../../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../../db/sqlite.ts";
 import { createLogger } from "../../logging/logger.ts";
 import type { HindsightBindingSnapshot } from "../hindsight-runtime-binding.ts";
+import type { HindsightLiveConnection } from "../hindsight/hindsight-runtime-connection.ts";
 import { AT, CHARACTER, GLOBAL, fakeRuntime, fakeSetup, seedHindsightAuthority, type FakeRuntime } from "./memory-operation-fixtures.ts";
 import { readMemoryAuthorityStatus } from "./memory-authority-status.ts";
 import { createMemoryOperationService } from "./memory-operation-service.ts";
@@ -11,13 +12,17 @@ import { createMemoryOperationService } from "./memory-operation-service.ts";
 const dbs: Database[] = [];
 afterEach(() => { for (const db of dbs.splice(0)) db.close(); });
 
+const READY: HindsightLiveConnection = { state: "ready", fingerprint: "a".repeat(64) };
+
 function fixture(mode: "canonical-local" | "hindsight", runtime: FakeRuntime | null) {
   const db = openDatabase({ path: ":memory:", migrations: MIGRATIONS }); dbs.push(db);
   db.prepare("UPDATE memory_authority_selection SET mode='canonical-local',active_epoch_id='epoch',verified_snapshot_id='snapshot',activation_transaction_id='tx' WHERE singleton=1").run();
   if (mode === "hindsight") seedHindsightAuthority(db);
   const setup = fakeSetup();
   const operations = createMemoryOperationService({ db, live: () => runtime, setup, bootId: "boot", now: () => AT, onChanged: () => undefined, logger: createLogger("fatal") });
-  return { db, setup, operations, read: () => readMemoryAuthorityStatus({ db, live: () => runtime, setup, operations, now: () => AT }) };
+  const connection = { live: READY };
+  return { db, setup, operations, connection,
+    read: () => readMemoryAuthorityStatus({ db, live: () => runtime, setup, operations, now: () => AT, liveConnection: () => connection.live }) };
 }
 
 describe("memory.authority.status read", () => {
@@ -27,7 +32,7 @@ describe("memory.authority.status read", () => {
     expect(MemoryAuthorityStatusSchema.parse(status)).toEqual(status);
     expect(status).toMatchObject({ authority: { mode: "canonical-local", epochId: "epoch", providerLineageId: null },
       runtime: { providerId: "local", available: true, unavailableReason: null }, replica: null, pending: null,
-      operations: { active: [], recent: [] }, derivedFreshness: "unknown", observedAt: AT, setup: { revision: 3 } });
+      operations: { active: [], recent: [] }, hindsight: null, derivedFreshness: "unknown", observedAt: AT, setup: { revision: 3 } });
   });
 
   it("reports per-Bank replica status and separate Pending/parent-write counts when the Hindsight runtime is live", async () => {
@@ -43,6 +48,8 @@ describe("memory.authority.status read", () => {
       { bankId: "global", summary: expect.objectContaining({ pendingCount: 0, failedCount: 1, unknownCount: 2 }), parentWritesPending: 0 },
       { bankId: "character", summary: expect.objectContaining({ failedCount: 1 }), parentWritesPending: 0 },
     ]);
+    expect(status.hindsight).toEqual({ connection: { config: "ready", drift: "none", admittedAt: null }, banks: [],
+      actions: { revalidate: false, provision: [] } });
     expect(status.operations.active).toEqual([]);
     expect(status.operations.recent.map((operation) => [operation.operationId, operation.state])).toEqual([[submitted.operationId, "completed"]]);
   });
@@ -64,7 +71,8 @@ describe("memory.authority.status read", () => {
     const f = fixture("hindsight", runtime);
     const snapshot = (binding: HindsightBindingSnapshot["binding"], lifetime: HindsightBindingSnapshot["lifetime"] = "running"): HindsightBindingSnapshot =>
       ({ selection: "hindsight", selectedEpochId: "epoch", binding, lifetime, flush: binding.kind === "published" && lifetime === "running" ? "available" : "failing" });
-    const read = (binding: HindsightBindingSnapshot) => readMemoryAuthorityStatus({ db: f.db, live: () => runtime, hindsightBinding: () => binding, setup: f.setup, operations: f.operations, now: () => AT });
+    const read = (binding: HindsightBindingSnapshot) => readMemoryAuthorityStatus({ db: f.db, live: () => runtime, hindsightBinding: () => binding,
+      setup: f.setup, operations: f.operations, now: () => AT, liveConnection: () => READY });
     expect(read(snapshot({ kind: "unavailable", epochId: "epoch", code: "HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE" }))).toMatchObject({
       runtime: { providerId: "hindsight", available: false, unavailableReason: "not_installed" }, replica: null, pending: null });
     expect(read(snapshot({ kind: "published", epochId: "other" })).runtime.unavailableReason).toBe("authority_mismatch");
@@ -73,5 +81,40 @@ describe("memory.authority.status read", () => {
     expect(MemoryAuthorityStatusSchema.parse(bound)).toEqual(bound);
     expect(bound).toMatchObject({ runtime: { available: true, unavailableReason: null } });
     expect(bound.replica?.map((bank) => bank.bankId)).toEqual(["global"]);
+  });
+
+  it("reports a changed or disabled connection as its own reason and keeps authority_mismatch for a real epoch mismatch", () => {
+    const runtime = fakeRuntime([GLOBAL, CHARACTER], () => AT);
+    const f = fixture("hindsight", runtime);
+    runtime.drift("config_changed"); f.connection.live = { state: "ready", fingerprint: "c".repeat(64) };
+    const changed = f.read();
+    expect(MemoryAuthorityStatusSchema.parse(changed)).toEqual(changed);
+    expect(changed).toMatchObject({ runtime: { available: false, unavailableReason: "config_changed" }, replica: null, pending: null,
+      hindsight: { connection: { config: "ready", drift: "config_changed", admittedAt: null } } });
+    runtime.drift("connection_disabled"); f.connection.live = { state: "disabled", fingerprint: null };
+    expect(f.read()).toMatchObject({ runtime: { unavailableReason: "connection_disabled" },
+      hindsight: { connection: { config: "disabled", drift: "none", admittedAt: null } } });
+    runtime.drift("none"); runtime.breakConnection("MEMORY_AUTHORITY_MISMATCH");
+    expect(f.read().runtime.unavailableReason).toBe("authority_mismatch");
+  });
+
+  it("reports a setting-caused unbound runtime as that setting and every other unbound state as not_installed", () => {
+    const f = fixture("hindsight", null);
+    const unavailable = (code: string): HindsightBindingSnapshot => ({ selection: "hindsight", selectedEpochId: "epoch",
+      binding: { kind: "unavailable", epochId: "epoch", code }, lifetime: "running", flush: "failing" });
+    const read = (binding: HindsightBindingSnapshot) => readMemoryAuthorityStatus({ db: f.db, live: () => null, hindsightBinding: () => binding,
+      setup: f.setup, operations: f.operations, now: () => AT, liveConnection: () => f.connection.live });
+    for (const state of ["disabled", "unconfigured"] as const) {
+      f.connection.live = { state, fingerprint: null };
+      expect(read(unavailable("HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE"))).toMatchObject({
+        runtime: { available: false, unavailableReason: "connection_disabled" }, hindsight: { connection: { config: state } } });
+    }
+    f.connection.live = READY;
+    expect(read(unavailable("HINDSIGHT_TEMPLATE_CONFLICT")).runtime).toMatchObject({ available: false, unavailableReason: "config_changed" });
+    expect(read(unavailable("MEMORY_INTEGRITY_ERROR")).runtime.unavailableReason).toBe("not_installed");
+    expect(read({ ...unavailable("HINDSIGHT_TEMPLATE_CONFLICT"), binding: { kind: "unavailable", epochId: "other", code: "HINDSIGHT_TEMPLATE_CONFLICT" } })
+      .runtime.unavailableReason).toBe("not_installed");
+    f.connection.live = { state: "disabled", fingerprint: null };
+    expect(read({ ...unavailable("HINDSIGHT_TEMPLATE_CONFLICT"), lifetime: "stopped" }).runtime.unavailableReason).toBe("stopped");
   });
 });

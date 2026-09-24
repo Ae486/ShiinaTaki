@@ -11,7 +11,7 @@ const status: MemoryAuthorityStatus = {
   runtime: { providerId: "local", available: true, unavailableReason: null },
   setup: { revision: 0, phase: "unconfigured", lastSuccessfulPhase: null, configFingerprint: null, attemptId: null, compatibility: null,
     banks: [], modelHealth: "not-run", latestError: null, lastAttemptAt: null, lastSuccessAt: null, updatedAt: AT },
-  replica: null, pending: null, operations: { active: [], recent: [] }, derivedFreshness: "unknown", observedAt: AT,
+  replica: null, pending: null, operations: { active: [], recent: [] }, hindsight: null, derivedFreshness: "unknown", observedAt: AT,
 };
 
 function call(read: () => MemoryAuthorityStatus, role: "operator" | "node" = "operator") {

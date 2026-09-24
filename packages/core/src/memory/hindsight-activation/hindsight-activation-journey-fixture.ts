@@ -31,6 +31,7 @@ import { hindsightBankBindings } from "../hindsight/hindsight-bank-identity.ts";
 import type { HindsightClient } from "../hindsight/hindsight-client.ts";
 import { createHindsightCompatibilityService } from "../hindsight/hindsight-compatibility-service.ts";
 import { curatorTestBank } from "../hindsight/hindsight-policy-curator-fixtures.ts";
+import { readHindsightLiveConnection } from "../hindsight/hindsight-runtime-connection.ts";
 import { createHindsightConnectionSecret } from "../hindsight/hindsight-secret-refs.ts";
 import { createHindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
 import { loadTakiBankTemplate } from "../hindsight/taki-bank-template-v1.ts";
@@ -116,7 +117,8 @@ function openSession(boot: Boot, bootId: string) {
     activationStatus: () => readHindsightActivationStatus({ service: activation, operations }),
     onboardingStatus: () => readLocalOnboardingStatus({ local, operations }),
     authorityStatus: () => readMemoryAuthorityStatus({ db, live: runtime.operations, binding: runtime.bindingSnapshot,
-      hindsightBinding: runtime.hindsightBindingSnapshot, setup, operations }),
+      hindsightBinding: runtime.hindsightBindingSnapshot, setup, operations,
+      liveConnection: () => readHindsightLiveConnection({ config: source, secrets: boot.secrets.catalog }) }),
     stop: async () => {
       await Promise.all([local.stop(), activation.stop()]);
       await runtime.stop().catch(() => undefined);

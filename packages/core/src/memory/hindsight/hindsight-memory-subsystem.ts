@@ -1,6 +1,8 @@
 /**
  * INPUT:  active Hindsight configuration/Bank bindings, SQLite, Timeline and the shared Utility Slot
- * OUTPUT: complete provider/run/ingestion/curator/flush composition with the existing B5 scheduler and settled shutdown
+ * OUTPUT: complete provider/run/ingestion/curator/flush composition with the existing B5 scheduler and settled shutdown;
+ *         captureRun degrades to a memory-unavailable Run on connection drift, and a refused primary witness is still retained;
+ *         background ingestion/curation and flush skip a Character without a routed Bank before any Utility model call
  * POS:    core/memory/hindsight — selected provider subsystem; Core retains Compaction and no generic native maintenance is duplicated
  */
 import type { ConfigSource } from "../../config/config-source.ts";
@@ -17,9 +19,11 @@ import type { Logger } from "../../logging/logger.ts";
 import type { SecretCatalogService } from "../../secrets/secret-catalog-service.ts";
 import type { AutoMemoryMaintenance } from "../auto-memory.ts";
 import type { PrimaryConversationCommit } from "../canonical-ingestion-source.ts";
+import type { MemoryFlushPort } from "../memory-flush-port.ts";
 import type { TidyPass } from "../tidy-pass.ts";
 import { buildTidyReport } from "../tidy-report.ts";
 import type { UtilitySlot } from "../utility-slot.ts";
+import { witnessHindsightPrimaryCommit } from "../hindsight-runtime-binding.ts";
 import type { HindsightClient } from "./hindsight-client.ts";
 import { createHindsightRuntimeConnection } from "./hindsight-runtime-connection.ts";
 import { createHindsightRuntimeState, type HindsightRuntimeState } from "./hindsight-runtime-state.ts";
@@ -37,7 +41,8 @@ interface Input {
 export function createHindsightMemorySubsystem(input: Input) {
   const runtime = createHindsightRuntimeConnection({ ...input, config: input.source });
   const state = createHindsightRuntimeState({ db: input.db, runtime, config: input.config, now: input.now });
-  const foreground = createHindsightMemoryRuntime({ state, promptDir: input.promptDir });
+  const foreground = createHindsightMemoryRuntime({ state, promptDir: input.promptDir, onUnavailable: ({ characterId, reason }) =>
+    input.logger.warn({ characterId, code: reason }, "Hindsight Run admitted without memory") });
   const journal = createHindsightIngestionRepo({ db: input.db, pending: state.pending,
     readVerifiedBank: (bankId) => state.replica.bankBinding(bankId)?.bank });
   const ingestion = createHindsightIngestion({ authority: runtime.authority, journal, timeline: input.timeline,
@@ -54,25 +59,44 @@ export function createHindsightMemorySubsystem(input: Input) {
   const tidy = createTidyAdapter({ state, curator, view: foreground.tidy, logger: input.logger });
   const maintenance: AutoMemoryMaintenance = { run: async (characterId, origin) => {
     runtime.assertConnection();
+    // A Character without a routed Bank has nothing to ingest into or curate: no Utility model call, no failure log. Its
+    // witnesses stay in the source ledger until the Bank is ready.
+    if (!runtime.characterRouted(characterId)) return;
     if (origin === "primary") {
       try { await ingestion.maybeRun({ characterId }); }
       catch { input.logger.warn({ characterId, code: "MEMORY_INGESTION_FAILED" }, "Hindsight source ingestion will retry"); }
     }
     runtime.assertConnection(); await tidy.maybeRun(characterId);
   } };
-  return { engine: foreground.engine, maintenance, memoryFlush: ingestion.flushPort, tidy,
+  // Retirement of an unrouted Character's source stays refused (never "not required"), so uncovered Timeline rows are kept.
+  const memoryFlush: MemoryFlushPort = { prepareRetirement: (request) => runtime.characterRouted(request.characterId)
+    ? ingestion.flushPort.prepareRetirement(request) : Promise.resolve({ status: "retryable_failure", code: "MEMORY_FLUSH_INCOMPLETE" }) };
+  return { engine: foreground.engine, maintenance, memoryFlush, tidy,
     writeMemory: createHindsightObservedWriter(state), snapshot: foreground.snapshot,
     state, ingestion, curator, scheduler,
     start: () => { runtime.assertConnection(); scheduler.start(); },
     stop: () => stopSubsystem({ state, ingestion, curator, scheduler, foreground }),
-    captureRun: (characterId: string, signal?: AbortSignal) => {
+    captureRun: async (characterId: string, signal?: AbortSignal) => {
       if (signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
-      runtime.assertConnection(); ingestion.initializeBaseline(characterId); return foreground.captureRun(characterId, signal);
+      // Epoch/lineage mismatch throws here; only a changed or disabled connection degrades the Run.
+      const drift = runtime.driftReason(); ingestion.initializeBaseline(characterId);
+      return drift === "none" ? foreground.captureRun(characterId, signal) : foreground.unavailableRun(characterId, drift);
     },
-    recordPrimaryCommitted: (commit: PrimaryConversationCommit) => {
-      try { runtime.assertConnection(); ingestion.recordPrimaryCommitted(commit); }
-      catch { input.logger.warn({ code: "MEMORY_INGESTION_WITNESS_FAILED" }, "Hindsight primary source witness was not committed"); }
-    } };
+    recordPrimaryCommitted: (commit: PrimaryConversationCommit) => recordWitness(input, { runtime, ingestion }, commit) };
+}
+
+function recordWitness(input: Input, bound: { runtime: ReturnType<typeof createHindsightRuntimeConnection>;
+  ingestion: ReturnType<typeof createHindsightIngestion>; }, commit: PrimaryConversationCommit): void {
+  try { bound.runtime.assertConnection(); }
+  catch {
+    // A drifted connection must not lose the source: the marker-routed witness keeps it for ingestion after revalidation.
+    if (!witnessHindsightPrimaryCommit({ db: input.db, commit, logger: input.logger, now: input.now })) {
+      input.logger.warn({ code: "MEMORY_INGESTION_WITNESS_FAILED" }, "Hindsight primary source witness found no Hindsight marker");
+    }
+    return;
+  }
+  try { bound.ingestion.recordPrimaryCommitted(commit); }
+  catch { input.logger.warn({ code: "MEMORY_INGESTION_WITNESS_FAILED" }, "Hindsight primary source witness was not committed"); }
 }
 
 function createTidyAdapter(input: {

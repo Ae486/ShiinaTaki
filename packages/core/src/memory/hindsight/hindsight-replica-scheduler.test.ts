@@ -204,4 +204,17 @@ describe("B5 asynchronous single-flight scheduler", () => {
     const before = f.repo.get("global"); release(); await active;
     expect(f.repo.get("global")).toEqual(before);
   });
+
+  it("records a refused Bank read while re-arming as lastError instead of rejecting the settled tick", async () => {
+    const f = fixture(); let refuse = false;
+    const run = vi.fn(async (input: HindsightReplicaRunInput) => { refuse = true; return f.result(input); });
+    const scheduler = createHindsightReplicaScheduler({ repo: f.repo, replica: { leases: f.leases, checkpoint: (id) => readReplicaCheckpoint(f.db, id) },
+      ownerId: "process", runner: { run, rebuild: run },
+      banks: () => { if (refuse) throw new Error("MEMORY_AUTHORITY_MISMATCH"); return [globalBank]; } });
+    schedulers.push(scheduler); scheduler.start();
+    await expect(scheduler.tick()).resolves.toBeUndefined();
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(scheduler.lastError()).toBe("HINDSIGHT_REPLICA_SYNC_FAILED");
+    expect(vi.getTimerCount()).toBe(0);
+  });
 });

@@ -65,6 +65,7 @@ import { createLocalOnboardingService } from "./memory/local-onboarding/local-on
 import { readLocalOnboardingStatus } from "./memory/local-onboarding/local-onboarding-status.ts";
 import { readHindsightActivationStatus } from "./memory/hindsight-activation/hindsight-activation-status.ts";
 import { readMemoryAuthorityStatus } from "./memory/operations/memory-authority-status.ts";
+import { readHindsightLiveConnection } from "./memory/hindsight/hindsight-runtime-connection.ts";
 import { createMemoryOperationService } from "./memory/operations/memory-operation-service.ts";
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
 import { migrateMcpPlaintextSecrets } from "./secrets/mcp-secret-migration.ts";
@@ -261,7 +262,8 @@ registerMemoryOnboardingMethods(registry, { local: localOnboarding, subscription
 registerMemoryActivationMethods(registry, { logger, status: () => readHindsightActivationStatus({ service: hindsightActivation, operations: memoryOperations }) });
 registry.register(memoryAuthorityStatusMethod({ logger,
   read: () => readMemoryAuthorityStatus({ db, live: memoryRuntime.operations, binding: memoryRuntime.bindingSnapshot,
-    hindsightBinding: memoryRuntime.hindsightBindingSnapshot, setup: hindsightSetup, operations: memoryOperations }) }));
+    hindsightBinding: memoryRuntime.hindsightBindingSnapshot, setup: hindsightSetup, operations: memoryOperations,
+    liveConnection: () => readHindsightLiveConnection({ config: boot.config.source, secrets: secretCatalog }) }) }));
 
 // Capability channel (#10): the screenshot tool routes to a connected node via the broker, which pushes a
 // capability.request notification and awaits the node's capability.respond. A node disconnect denies its pending

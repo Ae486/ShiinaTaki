@@ -107,7 +107,9 @@ describe("production Hindsight runtime composition", () => {
     if (change === "endpoint") f.config.upsert("TAKI_HINDSIGHT_ENDPOINT", "http://127.0.0.1:18482");
     if (change === "secret") f.secrets.catalog.set("memory.hindsight.connection.api-key", "rotated-fixture-key");
     if (change === "epoch") f.db.exec("UPDATE canonical_memory_authority_epochs SET provider_lineage_id='33333333-3333-4333-8333-333333333333' WHERE epoch_id='epoch'");
-    await expect(runtime.captureRun("taki")).rejects.toThrow("MEMORY_AUTHORITY_MISMATCH");
+    // A changed connection degrades the next Run; only an Authority change refuses it outright.
+    if (change === "epoch") await expect(runtime.captureRun("taki")).rejects.toThrow("MEMORY_AUTHORITY_MISMATCH");
+    else expect((await runtime.captureRun("taki")).tools).toEqual({});
     const result = await recall(run); expect(result).toMatchObject({ ok: false, providerId: "hindsight", error: { code: "MEMORY_AUTHORITY_MISMATCH" } });
     expect(await run.automaticRecall!({ query: "fact", visibleContext: "", now: Date.now() })).toBe("");
     expect(f.remote.calls).toHaveLength(before); expect(runtime.selected.legacy).toBeNull();
@@ -128,7 +130,7 @@ describe("production Hindsight runtime composition", () => {
     expect(runtime.operations()).toBeNull(); expect(runtime.selected.legacy).toBeNull(); expect(runtime.selected.canonical).toBe(true);
     expect(runtime.hindsightBindingSnapshot()).toMatchObject({ selection: "hindsight", selectedEpochId: "epoch",
       binding: { kind: "unavailable", epochId: "epoch", code: "HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE" } });
-    await expect(runtime.captureRun("taki")).rejects.toThrow("MEMORY_RUNTIME_UNAVAILABLE");
+    expect((await runtime.captureRun("taki")).tools).toEqual({});
     expect(() => runtime.memory.createTools("taki")).toThrow("MEMORY_INTEGRITY_ERROR");
     expect(f.remote.calls).toEqual([]); expect(existsSync(join(f.dataDir, "workspace", "memory"))).toBe(false);
     // Repair once the configuration is back: same epoch, never a second promotion.
@@ -144,7 +146,7 @@ describe("production Hindsight runtime composition", () => {
     expect(() => runtime.start()).not.toThrow();
     expect(runtime.operations()).toBeNull();
     expect(runtime.hindsightBindingSnapshot().binding).toMatchObject({ kind: "unavailable", epochId: "epoch" });
-    await expect(runtime.captureRun("taki")).rejects.toThrow("MEMORY_RUNTIME_UNAVAILABLE");
+    expect((await runtime.captureRun("taki")).tools).toEqual({});
     f.config.upsert("TAKI_HINDSIGHT_ENABLED", true);
     expect(runtime.recoverHindsightBinding("epoch")).toEqual({ binding: "published", reconciledGroups: 0 });
     expect(runtime.hindsightBindingSnapshot().binding).toEqual({ kind: "published", epochId: "epoch" });

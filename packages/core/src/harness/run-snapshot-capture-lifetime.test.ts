@@ -48,15 +48,17 @@ function noAdmission(f: ReturnType<typeof fixture>) {
 }
 
 describe("Run snapshot capture lifetime", () => {
-  it("refuses unverified capability fallback after both pre-sync failures without starting an uncancellable retry", async () => {
+  it("degrades instead of using unverified capabilities after both pre-sync failures without starting an uncancellable retry", async () => {
     const f = fixture(true); const controller = new AbortController();
     vi.mocked(f.remote.client.health).mockRejectedValueOnce(hindsightError("HINDSIGHT_UNREACHABLE"))
       .mockRejectedValueOnce(hindsightError("HINDSIGHT_UNREACHABLE"));
-    let result: { code: string } | undefined;
-    const running = outcome(f.runtime.captureRun("taki", controller.signal)).then((value) => { result = value; });
+    let result: { code: string } | undefined; let tools: object | undefined;
+    const running = outcome(f.runtime.captureRun("taki", controller.signal).then((run) => { tools = run.tools; }))
+      .then((value) => { result = value; });
     try {
       await vi.advanceTimersByTimeAsync(0);
-      expect(result).toEqual({ code: "HINDSIGHT_UNREACHABLE" });
+      // No admission evidence and an unreachable provider admit a memory-unavailable Run, never unverified capabilities.
+      expect(result).toEqual({ code: "admitted" }); expect(tools).toEqual({});
       expect(f.remote.client.health).toHaveBeenCalledTimes(2); expect(f.transport).not.toHaveBeenCalled();
     } finally { controller.abort(); f.response.resolve(); await vi.runAllTimersAsync(); await running; }
     expect(f.db.prepare("SELECT count(*) AS n FROM hindsight_application_runtime_admission").get()?.n).toBe(0);

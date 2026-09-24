@@ -50,7 +50,7 @@ function fixture(banks: MemoryReplicaBank[] = [GLOBAL]) {
     const changes: MemoryOperation[] = [];
     const service = createMemoryOperationService({
       db, setup: fakeSetup(), bootId: "boot", now: clock, logger: createLogger("fatal"), onChanged: (operation) => changes.push(operation),
-      live: () => ({ epochId: "epoch", scheduler, banks: () => banks, assertConnection: () => undefined,
+      live: () => ({ epochId: "epoch", scheduler, banks: () => banks, assertConnection: () => undefined, driftReason: () => "none",
         pendingSummary: () => ({ pendingCount: 0, nativeConfirmedCount: 0, completedCount: 0, supersededCount: 0, failedCount: 0, unknownCount: 0, cancelledCount: 0 }) }),
     });
     services.push(service);

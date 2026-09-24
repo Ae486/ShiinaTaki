@@ -1,6 +1,7 @@
 /**
  * INPUT:  Core boot dependencies for Legacy, Local and explicitly selected Hindsight memory runtimes, plus the boot identity
- * OUTPUT: authority-selected engine, immutable Run capture, background maintenance, durability, the operations() live
+ * OUTPUT: authority-selected engine, immutable Run capture (a memory-unavailable Run while a setting keeps the selected
+ *         Hindsight runtime unbound), background maintenance, durability, the operations() live
  *         accessor, trusted primary custody, the pure Local/Hindsight binding snapshots, same-epoch binding recovery and
  *         the Local -> Hindsight rebind the activation service drives after COMMIT
  * POS:    core/memory — process composition seam; one Utility Slot, one selected provider chain and ONE published binding per provider
@@ -29,6 +30,8 @@ import { createHindsightMemorySubsystem } from "./hindsight/hindsight-memory-sub
 import type { HindsightClient } from "./hindsight/hindsight-client.ts";
 import type { HindsightActivationLocalRuntime } from "./hindsight-activation/hindsight-activation-service.ts";
 import { createHindsightRuntimeBinding, witnessHindsightPrimaryCommit, type HindsightBindingSnapshot, type HindsightSubsystem } from "./hindsight-runtime-binding.ts";
+import { readHindsightLiveConnection } from "./hindsight/hindsight-runtime-connection.ts";
+import { createUnboundHindsightCapture } from "./hindsight-unbound-run.ts";
 import type { CapturedMemoryRun } from "./canonical-memory-run.ts";
 import type { MemoryWriteOp } from "./episodic-writer.ts";
 import { LOCAL_MEMORY_CAPABILITIES } from "./local-memory-provider.ts";
@@ -60,6 +63,9 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
   const custody: PrimaryMemoryCustody = createPrimaryMemoryCustody({ db: input.db, bootId: input.bootId,
     onFailure: (failure) => input.logger.warn({ code: failure.code, groupId: failure.groupId }, "primary memory group finalize deferred; recovery will retry") });
   const scope = createSelectedSubsystem(input, utility); const { selected, current, fence, local, hindsightBinding } = scope;
+  const unbound = createUnboundHindsightCapture({ db: input.db, logger: input.logger, promptDir: input.promptDir,
+    binding: hindsightBinding.snapshot, live: () => input.hindsight
+      ? readHindsightLiveConnection({ config: input.hindsight.source, secrets: input.hindsight.secrets }) : null });
   const compaction = createCompactionMaintenance(input, utility, current);
   const lifecycle = createRuntimeLifetime({ scope, utility, autoMemory: compaction.autoMemory });
   const alive = lifecycle.alive;
@@ -77,8 +83,9 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
       if (scope.hindsight) return scope.hindsight.captureRun(characterId, signal);
       const published = local.current();
       if (published) return published.captureRun(characterId);
-      // Committed but unbound (failed rebind, boot-unavailable): a structured refusal, never a Local or Legacy fallback.
-      if (readMemoryAuthoritySelection(input.db).mode === "hindsight") throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
+      // Committed but unbound: a setting-caused state admits a memory-unavailable Run, any other a structured refusal;
+      // never a Local or Legacy fallback.
+      if (readMemoryAuthoritySelection(input.db).mode === "hindsight") return unbound(characterId);
       return captureLegacyRun(input.db, current(), characterId);
     },
     recordPrimaryCommitted: (commit: PrimaryConversationCommit) => {
@@ -230,7 +237,7 @@ function captureLegacyRun(db: Database, subsystem: SelectedSubsystem, characterI
 function operationsRuntime(hindsight: HindsightSubsystem): MemoryOperationsRuntime {
   const { runtime, pending } = hindsight.state;
   return { epochId: runtime.epoch.epochId, scheduler: hindsight.scheduler, banks: runtime.banks, assertConnection: runtime.assertConnection,
-    pendingSummary: (bankId) => pending.summary({ authorityEpochId: runtime.epoch.epochId, bankId }) };
+    driftReason: runtime.driftReason, pendingSummary: (bankId) => pending.summary({ authorityEpochId: runtime.epoch.epochId, bankId }) };
 }
 
 function diagnosticSnapshot(db: Database) {

@@ -185,8 +185,12 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
   private armTimer(): void {
     this.clearWake();
     if (!this.running || this.active) return;
-    const now = this.input.repo.now();
-    const due = this.status().map((state) => this.nextWake(state, now)).filter((value): value is string => value !== null);
+    let now: string; let due: string[];
+    // Callers arm from settle paths; a drifted connection refusing banks() must surface as lastError, not an escaped rejection.
+    try {
+      now = this.input.repo.now();
+      due = this.status().map((state) => this.nextWake(state, now)).filter((value): value is string => value !== null);
+    } catch (error) { this.error = replicaErrorCode(error); return; }
     if (due.length === 0) return;
     const delay = Math.max(0, Math.min(60 * 60_000, Math.min(...due.map(Date.parse)) - Date.parse(now)));
     const setTimer = this.input.setTimer ?? ((callback, ms) => setTimeout(callback, ms));

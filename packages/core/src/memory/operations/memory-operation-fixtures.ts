@@ -7,6 +7,7 @@ import { vi } from "vitest";
 import type { HindsightSetupSnapshot, MemoryReplicaBank, MemoryReplicaRunKind, MemoryReplicaSyncStatus } from "@taki/shared";
 import type { Database } from "../../db/sqlite.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
+import type { HindsightConnectionDrift } from "../hindsight/hindsight-runtime-connection.ts";
 import type { MemoryOperationsRuntime } from "./memory-operation-contract.ts";
 
 export const AT = "2026-09-19T00:00:00.000Z";
@@ -99,16 +100,19 @@ function fakeScheduler(banks: MemoryReplicaBank[], clock: () => string) {
 export interface FakeRuntime extends MemoryOperationsRuntime {
   scheduler: FakeScheduler;
   breakConnection(message: string | null): void;
+  drift(reason: HindsightConnectionDrift): void;
 }
 
 export function fakeRuntime(banks: MemoryReplicaBank[], clock: () => string): FakeRuntime {
   const { scheduler } = fakeScheduler(banks, clock);
-  let connectionError: string | null = null;
-  const guard = () => { if (connectionError) throw new Error(connectionError); };
+  let connectionError: string | null = null; let drift: HindsightConnectionDrift = "none";
+  const driftReason = () => { if (connectionError) throw new Error(connectionError); return drift; };
+  const guard = () => { if (driftReason() !== "none") throw new Error("MEMORY_AUTHORITY_MISMATCH"); };
   return {
-    epochId: "epoch", scheduler, banks: () => { guard(); return banks; }, assertConnection: guard,
+    epochId: "epoch", scheduler, banks: () => { guard(); return banks; }, assertConnection: guard, driftReason,
     pendingSummary: () => ({ pendingCount: 0, nativeConfirmedCount: 0, completedCount: 0, supersededCount: 0, failedCount: 1, unknownCount: 2, cancelledCount: 0 }),
     breakConnection: (message) => { connectionError = message; },
+    drift: (reason) => { drift = reason; },
   };
 }
 

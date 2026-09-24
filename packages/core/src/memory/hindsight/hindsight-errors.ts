@@ -26,7 +26,7 @@ export class HindsightError extends Error {
 export function hindsightError(code: HindsightErrorCode): HindsightError {
   const retryable = !["HINDSIGHT_ENDPOINT_REJECTED", "HINDSIGHT_AUTHENTICATION_FAILED", "HINDSIGHT_VERSION_UNSUPPORTED",
     "HINDSIGHT_EXTENSION_UNSUPPORTED", "HINDSIGHT_DATABASE_UNSUPPORTED", "HINDSIGHT_TEMPLATE_INVALID",
-    "HINDSIGHT_STATE_CONFLICT", "HINDSIGHT_OPERATION_IDENTITY_CONFLICT"].includes(code);
+    "HINDSIGHT_STATE_CONFLICT", "HINDSIGHT_OPERATION_IDENTITY_CONFLICT", "HINDSIGHT_BANK_OCCUPIED", "HINDSIGHT_CONNECTION_DISABLED"].includes(code);
   return new HindsightError({ code, retryable, nextAction: NEXT_ACTION[code] });
 }
 
@@ -53,4 +53,6 @@ const NEXT_ACTION: Record<HindsightErrorCode, string> = {
   HINDSIGHT_STATE_CONFLICT: "Refresh status and retry with its current revision.",
   HINDSIGHT_RESPONSE_INVALID: "Use the exact admitted Hindsight compatibility build.",
   HINDSIGHT_SETUP_INTERRUPTED: "The previous setup attempt was interrupted by a Core restart; retry the idempotent stage.",
+  HINDSIGHT_BANK_OCCUPIED: "The native Bank already holds content Taki did not create; inspect it before provisioning.",
+  HINDSIGHT_CONNECTION_DISABLED: "Enable the Hindsight connection, then revalidate it.",
 };

@@ -11,7 +11,7 @@
 - scheduled-task-repo.ts — revision-safe Scheduled Task definitions and occurrence outbox persistence
 - sqlite.ts — DatabaseSync wrapper with commit-failure rollback and aborted-transaction SQL isolation; the only node:sqlite importer
 - migration-runner.ts — max-version migrations with conservative bare-TEXT guards, exact schema branches and atomic SQL/receipt tracking
-- timeline-repo.ts — timeline_messages SQL: append / deleteEntry / pageBefore / latestAscending / latestSeq / rangeAscending (zod-parse at the row boundary)
+- timeline-repo.ts — timeline_messages SQL: append / deleteEntry / pageBefore / latestAscending / latestSeq / rangeAscending (zod-parse at the row boundary) + listTimelineCharacterIds (bounded distinct Characters)
 - memory-repo.ts — memory_entries + memory_fts SQL: upsert / deleteByPath / listHashes / listActiveByLayers / listActiveInLayer / countActiveSince / search / resolvePath; the 4-column bm25 weights are baked in at construction from config; the retention + tidy-trigger reads anchor on COALESCE(updated_at, created_at)
 - memory-auto-repo.ts — memory_auto_state SQL: get / setEpisodic / setFlush / setTidy (per-character auto-write + tidy watermarks)
 - memory-events-repo.ts — memory_events SQL: record / listByCharacter (the memory system's decision log — skips, reinforcements, searches, tidy passes; ids/counts only, never memory content or a query)
