@@ -3,7 +3,7 @@
   "name": "active-bank-lifecycle",
   "title": "Active Bank and configuration lifecycle under Hindsight authority",
   "description": "Hindsight closure Stage 2c: new-Character Bank provisioning/verification before Run admission, active provider health/revalidation/rebind, and the verified provider-reconnect catch-up trigger, all as durable memory operations with truthful readiness state.",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

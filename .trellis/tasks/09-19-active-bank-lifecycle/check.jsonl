@@ -1,1 +1,18 @@
-{"_example": "Fill with {\"file\": \"<path>\", \"reason\": \"<why>\"}. Put spec/research files only — no code paths. Run `python .trellis/scripts/get_context.py --mode packages` to list available specs. Delete this line once real entries are added."}
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend conventions and final gates"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Headers, indexes, size limits, lint, real boot"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Single writer, no await in transactions"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Closed codes, no swallowed failures"}
+{"file": ".trellis/spec/backend/memory-operations.md", "reason": "Operation owner, kinds, families, observeBoot, settlement"}
+{"file": ".trellis/spec/backend/memory-hindsight-activation.md", "reason": "S2b binding, recover, boot-unavailable, custody routing to extend"}
+{"file": ".trellis/spec/backend/hindsight-application-runtime.md", "reason": "Hindsight subsystem construction, admission, readiness"}
+{"file": ".trellis/spec/backend/hindsight-runtime-reads.md", "reason": "Runtime reads and capability snapshots"}
+{"file": ".trellis/spec/backend/memory-replica-sync.md", "reason": "B5 scheduler, requestManual, verifiedReconnect"}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "Operator methods and the operations push"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "Frontend conventions and gates"}
+{"file": ".trellis/spec/frontend/reactive-read-models.md", "reason": "Push, generation guards, no polling/replay"}
+{"file": ".trellis/spec/frontend/home-window.md", "reason": "Operations page memory authority card"}
+{"file": ".trellis/tasks/09-19-active-bank-lifecycle/research/stage2c-seams.md", "reason": "Primitives, gaps G1-G14, failure matrix with file:line"}
+{"file": ".trellis/tasks/09-19-active-bank-lifecycle/design.md", "reason": "Wave design and seams"}
+{"file": ".trellis/tasks/09-19-active-bank-lifecycle/grill.md", "reason": "Owner questions and engineering rulings"}
+{"file": ".trellis/tasks/09-19-active-bank-lifecycle/prd.md", "reason": "AC1-AC9 traceability"}
+{"file": ".trellis/spec/backend/sqlite-transaction-isolation.md", "reason": "Atomicity of row/evidence writes"}
