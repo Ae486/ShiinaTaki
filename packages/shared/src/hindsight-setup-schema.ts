@@ -43,7 +43,10 @@ export const HindsightSetupSnapshotSchema = z.strictObject({
   lastSuccessAt: timestamp.nullable(),
   updatedAt: timestamp,
 }).superRefine((snapshot, ctx) => {
-  if (snapshot.phase === "configured" && (snapshot.banks.length < 2 || snapshot.banks.some((bank) => bank.status !== "verified"))) {
+  // Post-activation provisioning adds per-Character rows that may be pending or failed; they are readiness evidence and
+  // must not make the configured snapshot unreadable.
+  const verified = (scope: "global" | "character") => snapshot.banks.some((bank) => bank.scope === scope && bank.status === "verified");
+  if (snapshot.phase === "configured" && (!verified("global") || !verified("character"))) {
     ctx.addIssue({ code: "custom", message: "configured setup requires verified Global and Character Banks", path: ["banks"] });
   }
   if (snapshot.phase === "configured" && snapshot.compatibility === null) {

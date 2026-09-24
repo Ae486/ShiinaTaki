@@ -511,3 +511,5 @@ export type { MemoryHindsightActivationErrorCode, MemoryHindsightActivateSource,
 export { MEMORY_ACTIVATION_METHODS, MemoryActivationStatusParamsSchema, MemoryActivationReceiptSchema, MemoryActivationRunSchema, MemoryActivationBankSchema,
   MemoryActivationActionsSchema, MemoryActivationStatusSchema } from "./memory-activation-schema.ts";
 export type { MemoryActivationStatusParams, MemoryActivationReceipt, MemoryActivationRun, MemoryActivationBank, MemoryActivationActions, MemoryActivationStatus } from "./memory-activation-schema.ts";
+export { HindsightBankReadinessSchema, MemoryHindsightStatusSectionSchema } from "./memory-hindsight-lifecycle-schema.ts";
+export type { HindsightBankReadiness, MemoryHindsightStatusSection } from "./memory-hindsight-lifecycle-schema.ts";
