@@ -52,6 +52,7 @@ export const MEMORY_OPERATION_STATE_LABEL: Record<MemoryOperation["state"], stri
 export const MEMORY_OPERATION_KIND_LABEL: Record<MemoryOperation["kind"], string> = {
   "setup.validate": "校验连接", "setup.apply": "应用配置", "replica.sync": "同步副本",
   "local.onboard.prepare": "准备本地记忆", "local.onboard.activate": "启用 / 恢复本地记忆", "hindsight.activate": "启用 Hindsight",
+  "bank.provision": "创建 Bank", "connection.revalidate": "重新校验连接",
 };
 const UNKNOWN = "未知";
 
