@@ -23,12 +23,12 @@ finer) with an explicit context-budget brief. The leader owns task/spec/handoff 
 
 ## B. Producers, rebind, reconnect, automatic triggers
 
-- [ ] Shared kinds/unions/producer table; Core lifecycle service, occupancy, two kinds, registry/family/context, binding
+- [x] Shared kinds/unions/producer table; Core lifecycle service, occupancy, two kinds, registry/family/context, binding
       `replace`, G13 callback, boot composition, main wiring, Core-derived actions; automatic triggers per Q1/Q2.
-- [ ] Tests: kind admission matrix, four-family busy, pre-claim cancel, `observeBoot`; lifecycle journey (provision +
+- [x] Tests: kind admission matrix, four-family busy, pre-claim cancel, `observeBoot`; lifecycle journey (provision +
       fresh-Bank bind + recall; drift + revalidate + rebind; lineage refusal; outage -> reconnect); D87 journey (AC6);
       isolated boot.
-- [ ] Gates + commit if clean.
+- [x] Gates + commit if clean.
 
 ## C. Home
 
@@ -108,3 +108,100 @@ Leader review items (a) and (b).
   live `ready`) — must degrade as `config_changed` and trigger automatic revalidate; guard the status read's
   `liveConnection()` so a config/secret read failure cannot throw the whole status.
 
+### Wave B — 2026-09-25 (trellis-implement)
+
+- Shared: `bank.provision` / `connection.revalidate` requests, producer refs, `bank` / `connection` results and the closed
+  lifecycle error codes in `memory-hindsight-lifecycle-schema.ts`; unions + producer table in `memory-operation-schema.ts`
+  (+ test); `index.ts` 488/500 effective lines (unchanged count, names folded into existing statements).
+- Core producers (`memory/hindsight-lifecycle/`): context, reads, `hindsight-bank-occupancy.ts` (client `bankStats`),
+  provision (template/fingerprint/runtime guards, occupancy, dry-run, unchanged `applyHindsightBank`, one full replica run),
+  revalidate (Stage 4/5 blocker, lineage admission, export-verify without row writes, evidence record, `verifiedReconnect`
+  or binding `replace`), service (setup deadline, stop interruption), trigger (R8, once per key from persisted rows).
+- Core kinds: `operations/memory-operation-kind-bank.ts`, `-kind-connection.ts`, `-lifecycle-settlement.ts`; family
+  `hindsight-lifecycle` in `EXCLUSIVE_MEMORY_FAMILIES`; `db/hindsight-lifecycle-attempt-reads.ts`.
+- Binding `replace` + selector/composition seam; G13 `verifiedReconnect` on the subsystem; `boot/hindsight-lifecycle-boot.ts`;
+  `main.ts` wiring (trigger late-bound; lifecycle stops with local/activation before the runtime — order kept); status
+  actions derived from open `bank.provision` rows and exclusive-family business.
+- Carried: re-enabled flag before recover degrades as `config_changed` (`hindsight-unbound-run.ts`) and reports to
+  `onUnavailable`; status read guards `liveConnection()` (unreadable -> `unconfigured`).
+- Desktop minimal: two `MEMORY_OPERATION_KIND_LABEL` entries in `memory-authority-state.ts`.
+- Tests: `memory-operation-kind-lifecycle.test.ts` 5 (admission matrix, four-family busy, pre-claim cancel, two
+  `observeBoot`); `hindsight-lifecycle-journey.test.ts` 13 (AC1 provision + bind + recall + degraded turn ingested once;
+  occupied refusal; template conflict zero native calls; drift -> rebound, old scheduler stopped once; `replace` under an
+  in-flight Run; disabled / deploymentMode / template / lineage refusals keep the binding; outage -> exactly one
+  `verifiedReconnect`; automatic provision once across restart; automatic revalidate; automatic busy refusal; D87).
+- D87 (AC6): first report stopped after half 2; closed in full by the S2b verification-id fix below.
+- Gates (2026-09-25): `pnpm typecheck` 5/5; `pnpm lint` clean; `pnpm --filter @taki/shared test` 59 / 532;
+  `pnpm --filter @taki/core test` 405 / 3242 (no flake this run); `pnpm --filter @taki/desktop test` 111 / 635;
+  `pnpm --filter @taki/desktop build` ok; `git diff --check` clean.
+- Isolated boot: `node .trellis/tasks/09-19-active-bank-lifecycle/research/isolated-process-check.mjs` passed — port 8718,
+  migrations 1..49, `memory.authority.status` schema-valid (`hindsight: null`) on Legacy and after RPC Local onboarding,
+  both kinds refused `MEMORY_OPERATION_REFUSED` / `MEMORY_OPERATION_UNSUPPORTED` on the Local marker with no row,
+  0 fetches, exit 0; `netstat -ano` afterwards: only a PID 0 `TIME_WAIT`, no listener, child pid gone.
+
+### Wave B follow-up — 2026-09-25 (trellis-implement)
+
+Leader ruling on D87 plus two review items.
+
+- S2b verification-id fix (separate `fix(core)` commit): `hindsight-activation-chain.ts` presents
+  `preparationVerificationId(base, preparationId)` (the existing `hindsightOperationUuid` over both) instead of the per-Bank
+  base, so a recapture's preparation gets its own native id and a replay of the same preparation the same one; derivation
+  over re-minting in `mintRef` because admission cannot know whether execution will recapture, and derivation needs no
+  new persisted state. Readers audited: orchestrator/candidate/invalidation repos key by the presented id (unchanged);
+  `hindsight.activate` `observeBoot` never reads it; `readCommittedHindsightProducer` now returns the native
+  per-preparation id (documented; a committed run is never replayed through the chain). Test double: `currentImportFixture`
+  answers `superseded_count: request.supersede.length` (batch id when superseding); the transport refuses a changed
+  verification request under a used id with 409 `request_conflict`, like native. Tests: service (recapture after a posted
+  verification -> interrupted verify -> resume, ids derived per preparation and unique, conflict refusal by the double),
+  kind (same across a `boot-b` restart, base ids replayed by `mintRef`), kind rebuild assertion re-aimed. Mutation checks:
+  presenting the base id fails both with `HINDSIGHT_CURRENT_NATIVE_REFUSED` (request_conflict); `superseded_count: 0`
+  fails the service test at the import proof.
+- D87 journey now completes: resume after 应用配置 -> `activated`, marker Hindsight, a mika Run served with recall.
+- deploymentMode: a restart with a changed mode binds the runtime on the live settings (status drift `unreviewed`), so the
+  blocker's runtime reference carried the new mode and revalidate passed `unchanged`, recording the new fingerprint.
+  Fixed in `hindsight-lifecycle-reads.ts`: the runtime is the mode reference only when built on the reviewed fingerprint,
+  otherwise only an unchanged reviewed fingerprint proves it; test: refused `HINDSIGHT_STATE_CONFLICT` at `reserved`, no
+  export, reviewed fingerprint kept. Remaining (proposed deferral): boot itself still binds unreviewed settings, and a legit
+  Stage 4 change made across a restart cannot be revalidated until the reviewed deployment mode is persisted.
+- Automatic revalidate with a changed lineage: one failed automatic attempt (`HINDSIGHT_REPLICA_LINEAGE_MISMATCH`,
+  phase `validating`), binding kept, no retry on the next degraded Run (new journey test).
+- Gates (2026-09-25): `pnpm typecheck` 5/5; `pnpm lint` clean; Shared 59 / 532; Core 405 / 3246 (no flake);
+  Desktop 111 / 635; Desktop build ok; `git diff --check` clean; isolated boot passed again (port 7751, 1..49, 0 fetches,
+  exit 0; only a PID 0 `TIME_WAIT` left, no listener).
+
+### Wave B follow-up 2 — 2026-09-25 (trellis-implement)
+
+Leader ruling: persist the reviewed deployment mode instead of deferring the cross-restart gap.
+
+- Migration 050 `db/migrations/050-hindsight-reviewed-deployment-mode.ts`: nullable `reviewed_deployment_mode` on
+  `hindsight_connection_state` (CHECK against the Shared mode values; NULL = pre-050 row). Registered in `index-list.ts`;
+  head pins in the migration/lineage/pending-memory/scheduled-task tests moved to 50.
+- `db/hindsight-connection-repo.ts`: `save(snapshot, expectedRevision, reviewedDeploymentMode?)` writes the mode in the same
+  UPDATE (given -> set; omitted -> kept only while the fingerprint is unchanged, else NULL); `reviewed()` reads fingerprint +
+  mode. Core-internal, not in the Shared snapshot. Writers: setup validate (`compatible`) and apply (`configured`) pass the
+  connection's mode; revalidate `record()` passes the live mode.
+- `hindsightRevalidateBlocker` (no `reviewedFingerprint` parameter any more): the persisted mode is the reference (mismatch
+  -> `HINDSIGHT_STATE_CONFLICT`); NULL keeps the earlier fail-closed rule. Status `actions.revalidate` is false whenever the
+  same lifecycle `revalidateBlocker` refuses (`memory-authority-status.ts` optional `lifecycle` input, wired in `main.ts`
+  and the journey fixture; an unreadable blocker read counts as blocked); drift still shows.
+- Tests: migration 050 (applies on a 049 DB, legacy row unchanged with NULL mode; CHECK); repo (mode kept/cleared with
+  its fingerprint, stale revision refused); status unit (blocked hides revalidate, drift kept); journey: in-process and
+  cross-restart mode change offer no revalidate, cross-restart refusal keeps fingerprint + mode; cross-restart timeout
+  change -> revalidate `unchanged`, reviewed fingerprint + mode advance, then an in-process key rotation -> `rebound`,
+  recall served; a pre-050 NULL row stays fail-closed across a restart (status offers none, refused at `reserved`).
+  Mutation checks: ignoring the persisted mode fails the benign cross-restart test; dropping the status gate fails three
+  journey tests.
+- PRD R9 migration line: already reads "One migration (050)" (leader edit). Isolated boot script expects head 50.
+- Gates (2026-09-25): `pnpm typecheck` 5/5; `pnpm lint` clean; Shared 59 / 532; Core 406 / 3251 (no flake); Desktop
+  111 / 635; Desktop build ok; `git diff --check` clean; isolated boot passed (port 4854, 1..50, 0 fetches, exit 0);
+  `netstat -ano` afterwards: only a PID 0 `TIME_WAIT`, child pid gone.
+
+### Leader verification, wave B — 2026-09-25
+
+- Rulings: fold the S2b verification-id defect and the D87 double gap into wave B (committed separately as `fix(core)`);
+  persist the reviewed deployment mode (migration 050, PRD R9 amended) instead of deferring the cross-restart revalidate gap.
+- `pnpm typecheck` 5/5; `pnpm lint` 0; Shared 59/532; Core 406/3251 (no flake); Desktop 111/635; Desktop build ok;
+  `git diff --check` clean; isolated boot passed (port 5281, migrations 1..50, 0 fetches, exit 0, no listener left).
+- Commits: e5f172d (fix core, S2b verification id), f831880 (shared), 2bf5cb7 (core), 2c07d6a (ui).
+- For the formal check: `main.ts` is 585 lines (578 at HEAD before the wave, pre-existing overage); `readCommittedHindsightProducer`
+  now returns the native per-preparation id (safe only while committed runs are never replayed through the chain).

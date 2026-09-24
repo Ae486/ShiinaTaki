@@ -50,7 +50,8 @@ missing Character Bank and revalidate/rebind the connection. Isolated data only;
 - R9 Family `hindsight-lifecycle` joins `EXCLUSIVE_MEMORY_FAMILIES` (four families mutually single-flight). Both kinds
   follow the S2a/S2b handler rules: synchronous side-effect-free admission, Core-minted ids, deferred claim, cancel only
   while admitted, read-only `observeBoot` (settle from B3 row, replica state and binding snapshot, else
-  `outcome_unknown`). No migration (head stays 049).
+  `outcome_unknown`). One migration (050): the reviewed `deploymentMode` is persisted beside the reviewed fingerprint so a
+  revalidation after a restart can prove the mode unchanged (leader ruling, wave B).
 - R10 Home (G14): the authority card shows readiness rows, the new reason labels and 创建 Bank / 重新校验连接 from
   `hindsight.actions` only; no client-derived allow rules, no polling, no replay.
 - R11 Shared additions are additive and strict; producer-kind inference becomes an explicit per-kind table;
@@ -80,7 +81,7 @@ missing Character Bank and revalidate/rebind the connection. Isolated data only;
 - [ ] AC8 Home card renders every readiness state and reason from fixtures, submits both kinds through the generic
   controller, disables actions while pending/disconnected.
 - [ ] AC9 Gates: `pnpm typecheck` 5/5, `pnpm lint`, Shared/Core/Desktop tests, Desktop build, `git diff --check`,
-  isolated boot (head 049, status reads answered, both kinds registered, zero fetches at boot). Owner manual acceptance
+  isolated boot (head 050, status reads answered, both kinds registered, zero fetches at boot). Owner manual acceptance
   is batched with Stage 2a/2b after this stage and never marked here.
 
 ## Out of scope
