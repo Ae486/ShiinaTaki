@@ -74,7 +74,7 @@ export function bankScopeLabel(scope: "global" | "character", characterId: strin
   return scope === "global" ? "Global" : `Character · ${characterId}`;
 }
 
-function bankRow(bank:NonNullable<MemoryAuthorityStatus["replica"]>[number]): BankRow {
+function bankRow(bank: NonNullable<MemoryAuthorityStatus["replica"]>[number]): BankRow {
   const explicit = bank.nextAction === "explicit_retry_required";
   return {
     bankId: bank.bankId,

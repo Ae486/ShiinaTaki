@@ -1,7 +1,8 @@
 /**
  * INPUT:  none — hand-built MemoryAuthorityStatus / MemoryOperation values.
  * OUTPUT: localStatus() / hindsightStatus() / bankStatus() / operation() fixtures shared by the memory authority tests, plus
- *         lifecycleBank() / lifecycleSection() / degradedStatus() for the Hindsight connection + Bank readiness block.
+ *         lifecycleBank() / lifecycleSection() and the provisioning / changed / unreviewed / disabled sections (each shaped as
+ *         Core derives it) plus degradedStatus() for the Hindsight connection + Bank readiness block.
  * POS:    ui/windows/home/pages/operations — test support only; not in the production path.
  */
 import type { HindsightBankReadiness, HindsightErrorCode, MemoryAuthorityStatus, MemoryHindsightStatusSection, MemoryOperation,
@@ -60,25 +61,44 @@ export function operation(patch: Partial<MemoryOperation> = {}): MemoryOperation
 }
 
 type LifecycleBank = MemoryHindsightStatusSection["banks"][number];
+type Section = MemoryHindsightStatusSection;
 
 export function lifecycleBank(characterId: string | null, readiness: HindsightBankReadiness, errorCode: HindsightErrorCode | null = null): LifecycleBank {
-  const scope = characterId === null ? "global" : "character";
-  const nativeBankId = readiness === "not_provisioned" ? null : characterId === null ? "global" : `character-${characterId}`;
-  return { scope, characterId, nativeBankId, readiness, errorCode };
+  return { scope: characterId === null ? "global" : "character", characterId, nativeBankId: characterId === null ? "global" : `character-${characterId}`,
+    readiness, errorCode };
 }
 
-/** One Bank per readiness state, a changed configuration, revalidate offered and the two unserved Characters listed. */
-export function lifecycleSection(patch: Partial<MemoryHindsightStatusSection> = {}): MemoryHindsightStatusSection {
-  return {
-    connection: { config: "ready", drift: "config_changed", admittedAt: AT },
-    banks: [lifecycleBank(null, "ready"), lifecycleBank("taki", "syncing"), lifecycleBank("mika", "provisioning"),
-      lifecycleBank("nana", "failed", "HINDSIGHT_BANK_OCCUPIED"), lifecycleBank("yui", "not_provisioned")],
-    actions: { revalidate: true, provision: ["nana", "yui"] },
-    ...patch,
-  };
+/** A Timeline Character past the 160-char Bank identity bound: Core shows it without a native id and never offers provision. */
+export const UNMAPPABLE_CHARACTER = "u".repeat(161);
+const BANKS: LifecycleBank[] = [lifecycleBank(null, "ready"), lifecycleBank("taki", "syncing"), lifecycleBank("nana", "failed", "HINDSIGHT_TEMPLATE_INVALID"),
+  lifecycleBank("yui", "not_provisioned"), { scope: "character", characterId: UNMAPPABLE_CHARACTER, nativeBankId: null, readiness: "not_provisioned", errorCode: null }];
+const NO_ACTIONS: Section["actions"] = { revalidate: false, provision: [] };
+
+/** Serving runtime, nothing open: provision for the failed and the unprovisioned mappable Characters only. */
+export function lifecycleSection(patch: Partial<Section> = {}): Section {
+  return { connection: { config: "ready", drift: "none", admittedAt: AT }, banks: BANKS, actions: { revalidate: false, provision: ["nana", "yui"] }, ...patch };
+}
+
+/** An open bank.provision for mika: every action is withheld while an exclusive family runs. */
+export function provisioningSection(): Section {
+  return lifecycleSection({ banks: [...BANKS.slice(0, 2), lifecycleBank("mika", "provisioning"), ...BANKS.slice(2)], actions: NO_ACTIONS });
+}
+
+/** The connection changed under the bound runtime: revalidate only; provision waits for a serving runtime. */
+function changedSection(): Section {
+  return lifecycleSection({ connection: { config: "ready", drift: "config_changed", admittedAt: null }, actions: { revalidate: true, provision: [] } });
+}
+
+/** Booted on an edited but unreviewed config: the runtime serves, so revalidate and provision are both offered. */
+export function unreviewedSection(): Section {
+  return lifecycleSection({ connection: { config: "ready", drift: "unreviewed", admittedAt: null }, actions: { revalidate: true, provision: ["nana", "yui"] } });
+}
+
+export function disabledSection(config: "disabled" | "unconfigured" = "disabled"): Section {
+  return lifecycleSection({ connection: { config, drift: "none", admittedAt: null }, actions: NO_ACTIONS });
 }
 
 /** A Hindsight marker whose runtime is down for `reason`; replica and Pending evidence are absent as the schema requires. */
-export function degradedStatus(hindsight: MemoryHindsightStatusSection = lifecycleSection(), reason: MemoryRuntimeUnavailableReason = "config_changed"): MemoryAuthorityStatus {
+export function degradedStatus(hindsight: Section = changedSection(), reason: MemoryRuntimeUnavailableReason = "config_changed"): MemoryAuthorityStatus {
   return hindsightStatus({ runtime: { providerId: "hindsight", available: false, unavailableReason: reason }, replica: null, pending: null, hindsight });
 }

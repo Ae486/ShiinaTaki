@@ -1,12 +1,14 @@
 import { isValidElement, type ReactElement, type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { ActionButton, type ActionButtonProps } from "../../action-button.tsx";
-import { degradedStatus } from "./memory-authority-fixtures.ts";
+import { hindsightStatus, unreviewedSection } from "./memory-authority-fixtures.ts";
 import { HindsightLifecycleBlock } from "./memory-hindsight-lifecycle-block.tsx";
 import { hindsightLifecycleView } from "./memory-hindsight-lifecycle-state.ts";
 import type { MemoryOperationsView } from "./use-memory-operations.ts";
 
 const noop = async () => undefined;
+// The unreviewed-config status is the one Core state that offers revalidate and provision together.
+const status = hindsightStatus({ hindsight: unreviewedSection() });
 
 /** Walks the returned element tree (no DOM in this suite) so a click is driven through the real onClick props. */
 function actionButtons(node: ReactNode): ReactElement<ActionButtonProps>[] {
@@ -17,9 +19,9 @@ function actionButtons(node: ReactNode): ReactElement<ActionButtonProps>[] {
 
 function block(locked: boolean, busyKey: string | null = null) {
   const submit = vi.fn<MemoryOperationsView["submit"]>(noop);
-  const ops: MemoryOperationsView = { status: degradedStatus(), loading: false, error: null, busyKey, feedback: null, connectionReady: true,
+  const ops: MemoryOperationsView = { status, loading: false, error: null, busyKey, feedback: null, connectionReady: true,
     refresh: noop, submit, submitSync: noop, cancel: noop };
-  const lifecycle = hindsightLifecycleView(degradedStatus());
+  const lifecycle = hindsightLifecycleView(status);
   if (!lifecycle) throw new Error("fixture must carry a Hindsight section");
   return { submit, buttons: actionButtons(HindsightLifecycleBlock({ lifecycle, ops, locked })) };
 }
