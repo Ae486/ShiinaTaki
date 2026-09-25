@@ -17,16 +17,19 @@ import { readMemoryAuthoritySelection } from "./legacy-migration/legacy-activati
 import { createFallbackPersonaProvider, createPersonaProvider } from "./persona-provider.ts";
 
 export type HindsightUnboundReason = "connection_disabled" | "config_changed";
+// The connection guard's own refusals: construction on a non-ready config, start() on a config disabled since, a template drift.
+const DISABLED_CODES: ReadonlySet<string> = new Set(["HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE", "MEMORY_AUTHORITY_MISMATCH", "HINDSIGHT_TEMPLATE_CONFLICT"]);
 
 /**
  * Pure: only a disabled/unconfigured connection, a template-revision conflict, or a connection that was unavailable at
- * construction but is ready now (re-enabled; a revalidation rebinds it) is a known configuration cause.
+ * construction but is ready now (re-enabled; a revalidation rebinds it) is a known configuration cause. Disabling the
+ * connection later never masks an integrity or unknown failure: the binding code must be one the guard itself raises.
  */
 export function hindsightUnboundReason(snapshot: HindsightBindingSnapshot, live: HindsightLiveConnection | null): HindsightUnboundReason | null {
   const { binding } = snapshot;
   if (snapshot.selection !== "hindsight" || snapshot.lifetime !== "running" || binding.kind !== "unavailable"
     || binding.epochId !== snapshot.selectedEpochId) return null;
-  if (live && live.state !== "ready") return "connection_disabled";
+  if (live && live.state !== "ready") return DISABLED_CODES.has(binding.code) ? "connection_disabled" : null;
   if (binding.code === "HINDSIGHT_TEMPLATE_CONFLICT") return "config_changed";
   return binding.code === "HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE" && live?.state === "ready" ? "config_changed" : null;
 }

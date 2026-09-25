@@ -118,6 +118,7 @@ describe("memory.authority.status read", () => {
     expect(read({ ...unavailable("HINDSIGHT_TEMPLATE_CONFLICT"), binding: { kind: "unavailable", epochId: "other", code: "HINDSIGHT_TEMPLATE_CONFLICT" } })
       .runtime.unavailableReason).toBe("not_installed");
     f.connection.live = { state: "disabled", fingerprint: null };
+    expect(read(unavailable("MEMORY_INTEGRITY_ERROR")).runtime.unavailableReason).toBe("not_installed");
     expect(read({ ...unavailable("HINDSIGHT_TEMPLATE_CONFLICT"), lifetime: "stopped" }).runtime.unavailableReason).toBe("stopped");
   });
 

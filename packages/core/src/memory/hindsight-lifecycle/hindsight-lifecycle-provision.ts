@@ -52,8 +52,8 @@ function prepare(deps: HindsightLifecycleDeps, ref: MemoryBankProducerRef): Prep
   const runtime = deps.runtime();
   if (!runtime || runtime.epochId !== ref.admittedEpochId || !runtime.scheduler.started()) throw new Error("MEMORY_RUNTIME_UNAVAILABLE");
   if (runtime.driftReason() !== "none") throw hindsightError("HINDSIGHT_STATE_CONFLICT");
-  const target = setupTargets(revision, ref.characterId)[1]!;
-  if (target.binding.externalBankId !== ref.nativeBankId) throw hindsightError("HINDSIGHT_STATE_CONFLICT");
+  const target = setupTargets(revision, ref.characterId).find((candidate) => candidate.binding.scope === "character");
+  if (!target || target.binding.externalBankId !== ref.nativeBankId) throw hindsightError("HINDSIGHT_STATE_CONFLICT");
   return { live, runtime, facts, target };
 }
 

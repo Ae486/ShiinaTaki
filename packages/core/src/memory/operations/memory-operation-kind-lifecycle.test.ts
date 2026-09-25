@@ -61,6 +61,9 @@ describe("bank.provision / connection.revalidate — admission", () => {
     const epochId = readMemoryAuthoritySelection(session.db).epochId!;
     expect(() => bare.submit(provision)).toThrow("MEMORY_OPERATION_UNSUPPORTED");
     expect(() => bare.submit(revalidate(epochId))).toThrow("MEMORY_OPERATION_UNSUPPORTED");
+    const unbound = createMemoryOperationService({ db: session.db, live: () => null, setup: session.setup, local: session.local,
+      hindsight: session.activation, lifecycle: session.lifecycle, bootId: "boot-unbound", logger: createLogger("fatal"), onChanged: () => undefined });
+    expect(() => unbound.submit(provision)).toThrow("MEMORY_OPERATION_UNSUPPORTED");
     expect(lifecycleRows(session)).toEqual([]);
   });
 
@@ -79,6 +82,12 @@ describe("bank.provision / connection.revalidate — admission", () => {
       expect(refusal(session, revalidate(epochId))).toEqual({ reason: "MEMORY_OPERATION_BUSY", activeOperationId: open });
       session.db.prepare("DELETE FROM memory_operations WHERE operation_id=:id").run({ id: open });
     }
+    // The other direction: an open lifecycle row holds every other exclusive kind at admission.
+    const open = openRow(session, { family: "hindsight-lifecycle", operation: settled });
+    const others: MemoryOperationRequest[] = [sample("setup.validate").request, sample("local.onboard.prepare").request,
+      { kind: "hindsight.activate", source: { mode: "recover", epochId } }];
+    for (const request of others) expect(refusal(session, request)).toEqual({ reason: "MEMORY_OPERATION_BUSY", activeOperationId: open });
+    session.db.prepare("DELETE FROM memory_operations WHERE operation_id=:id").run({ id: open });
     expect(lifecycleRows(session)).toHaveLength(1);
   });
 

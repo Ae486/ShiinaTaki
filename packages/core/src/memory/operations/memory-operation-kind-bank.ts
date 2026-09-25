@@ -28,7 +28,7 @@ export const bankProvisionKind: MemoryOperationKindHandler<ProvisionRequest> = {
     const runtime = cleanRuntime(ctx);
     const facts = admissibleFacts(lifecycle, { epochId: runtime.epochId, characterId: request.characterId });
     return { kind: "bank", origin: admission.origin, characterId: request.characterId, nativeBankId: facts.nativeBankId,
-      templateRevision: facts.globalRevision!, admittedEpochId: runtime.epochId, configFingerprint: runtime.configFingerprint, phase: "reserved" };
+      templateRevision: facts.globalRevision, admittedEpochId: runtime.epochId, configFingerprint: runtime.configFingerprint, phase: "reserved" };
   },
   execute: async (execution) => {
     const lifecycle = requireLifecycle(execution.ctx);
@@ -58,12 +58,13 @@ function cleanRuntime(ctx: MemoryOperationContext): MemoryOperationsRuntime {
   return runtime;
 }
 
-function admissibleFacts(lifecycle: HindsightLifecycleService, input: { epochId: string; characterId: string }): HindsightBankFacts {
+function admissibleFacts(lifecycle: HindsightLifecycleService, input: { epochId: string; characterId: string }): HindsightBankFacts & { globalRevision: string } {
   let facts: HindsightBankFacts;
   try { facts = lifecycle.bankFacts(input); }
   catch { throw new MemoryOperationRefusal("MEMORY_OPERATION_UNSUPPORTED"); }
-  if (facts.globalRevision === null || (facts.row?.status === "verified" && facts.bound)) throw new MemoryOperationRefusal("MEMORY_OPERATION_UNSUPPORTED");
-  return facts;
+  const { globalRevision } = facts;
+  if (globalRevision === null || (facts.row?.status === "verified" && facts.bound)) throw new MemoryOperationRefusal("MEMORY_OPERATION_UNSUPPORTED");
+  return { ...facts, globalRevision };
 }
 
 async function provision(lifecycle: HindsightLifecycleService, execution: MemoryOperationExecution<ProvisionRequest>, ref: MemoryBankProducerRef):

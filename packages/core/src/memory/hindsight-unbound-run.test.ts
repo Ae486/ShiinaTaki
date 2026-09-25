@@ -41,6 +41,9 @@ describe("unbound selected Hindsight runtime at boot", () => {
     const entries = [f.timeline.append({ characterId: "taki", role: "user", content: "Refused source" })];
     runtime.recordPrimaryCommitted({ characterId: "taki", entries });
     expect(witnesses(f)).toBe(1); expect(f.remote.calls).toEqual([]);
+    // Disabling the connection afterwards is a setting, not the cause: it must not turn the failure into a degraded Run.
+    f.config.upsert("TAKI_HINDSIGHT_ENABLED", false);
+    await expect(runtime.captureRun("taki")).rejects.toThrow("MEMORY_RUNTIME_UNAVAILABLE");
   });
 
   it("returns to the full memory Run through the unchanged same-epoch recovery once the setting is repaired", async () => {

@@ -45,6 +45,8 @@ const bank = (session: JourneySession, characterId: string) => session.authority
 const nativeCalls = (j: HindsightActivationJourney) => (["common", "bank-put", "bank-stats", "template-import", "template-export"] as const)
   .reduce((total, route) => total + j.transport.calls(route), 0) + j.application.calls.length;
 const bankRows = (session: JourneySession) => JSON.stringify(createHindsightBankSetupRepo(session.db).list());
+/** The provider answers /health as down (first common route of every admission). */
+const UNHEALTHY = { status: 503, body: JSON.stringify({ status: "unhealthy", database: "disconnected" }) };
 const revalidate = (session: JourneySession, epochId: string) => session.settled({ kind: "connection.revalidate", expectedEpochId: epochId });
 
 function expectStatusValid(session: JourneySession) {
@@ -221,6 +223,24 @@ describe("Stage 2c — connection revalidation and rebind", () => {
     expect(await next.tools.recall!.execute!(query, TOOL_OPTIONS)).toMatchObject({ ok: true });
   });
 
+  it("settles a replacement that fails to build as failed runtime_unavailable, leaves the binding unavailable and offers recoverBinding", async () => {
+    const j = journey();
+    const { session, epochId } = await activatedInstance(j);
+    const construct = vi.spyOn(hindsightSubsystem, "createHindsightMemorySubsystem").mockImplementationOnce(() => { throw new Error("MEMORY_INTEGRITY_ERROR: draft"); });
+    session.config.upsert("TAKI_HINDSIGHT_REQUEST_TIMEOUT_MS", 12_000);
+    const operation = await revalidate(session, epochId);
+    expect(operation).toMatchObject({ state: "failed", reason: "runtime_unavailable", result: { kind: "connection", outcome: "binding_unavailable" },
+      producer: { phase: "rebinding" } });
+    expect(session.runtime.operations()).toBeNull();
+    expect(session.runtime.hindsightBindingSnapshot().binding).toEqual({ kind: "unavailable", epochId, code: "MEMORY_INTEGRITY_ERROR" });
+    await expect(session.runtime.captureRun(JOURNEY_CHARACTER)).rejects.toThrow("MEMORY_RUNTIME_UNAVAILABLE");
+    expect(readMemoryAuthoritySelection(session.db)).toMatchObject({ mode: "hindsight", epochId });
+    expect(session.activationStatus().actions.recoverBinding).toBe(true);
+    construct.mockRestore();
+    expect(await session.settled({ kind: "hindsight.activate", source: { mode: "recover", epochId } })).toMatchObject({ state: "completed" });
+    expect((await session.runtime.captureRun(JOURNEY_CHARACTER)).snapshot.capabilities.recall).toBe(true);
+  });
+
   it("refuses a disabled connection, a deployment-mode change and a template change with the authority and binding kept", async () => {
     const j = journey();
     const subsystems = observeHindsightSubsystems();
@@ -318,6 +338,26 @@ describe("Stage 2c — connection revalidation and rebind", () => {
     expect(expectStatusValid(session).runtime).toMatchObject({ unavailableReason: "config_changed" });
   });
 
+  it("settles a health check the provider fails (503) or an unsupported version as failed with its closed code, writing no reviewed state and no Bank row", async () => {
+    const j = journey();
+    const subsystems = observeHindsightSubsystems();
+    const { session, epochId } = await activatedInstance(j);
+    session.config.upsert("TAKI_HINDSIGHT_REQUEST_TIMEOUT_MS", 12_000);
+    const connection = createHindsightConnectionRepo(session.db);
+    const before = { reviewed: connection.reviewed(), fingerprint: session.setup.status().configFingerprint, rows: bankRows(session) };
+    const version = j.client.version.bind(j.client);
+    j.transport.fail("common", { response: UNHEALTHY });
+    expect(await revalidate(session, epochId)).toMatchObject({ state: "failed", reason: "producer_failed", errorCode: "HINDSIGHT_UNREACHABLE",
+      result: null, producer: { phase: "validating" } });
+    vi.spyOn(j.client, "version").mockImplementation(async (context) => ({ ...await version(context), apiVersion: "0.0.0" }));
+    expect(await revalidate(session, epochId)).toMatchObject({ state: "failed", reason: "producer_failed", errorCode: "HINDSIGHT_VERSION_UNSUPPORTED",
+      result: null, producer: { phase: "validating" } });
+    expect({ reviewed: connection.reviewed(), fingerprint: session.setup.status().configFingerprint, rows: bankRows(session) }).toEqual(before);
+    expect(subsystems).toHaveLength(1);
+    expect(session.runtime.hindsightBindingSnapshot().binding).toEqual({ kind: "published", epochId });
+    expect(expectStatusValid(session)).toMatchObject({ runtime: { unavailableReason: "config_changed" }, hindsight: { actions: { revalidate: true } } });
+  });
+
   it("calls verifiedReconnect once after a foreground success following an outage, never from scheduled runs, and on an unchanged revalidate", async () => {
     const j = journey();
     const subsystems = observeHindsightSubsystems();
@@ -399,6 +439,23 @@ describe("Stage 2c — automatic lifecycle triggers", () => {
         producer: expect.objectContaining({ origin: "automatic", phase: "validating" }) })]);
     }
     expect(subsystems).toHaveLength(1);
+    expect(session.runtime.hindsightBindingSnapshot().binding).toEqual({ kind: "published", epochId });
+  });
+
+  it("settles an automatic revalidation whose health check the provider fails once and never retries it for the same fingerprint", async () => {
+    const j = journey({ automatic: true });
+    const { session, epochId } = await activatedInstance(j);
+    session.config.upsert("TAKI_HINDSIGHT_REQUEST_TIMEOUT_MS", 12_000);
+    j.transport.fail("common", { response: UNHEALTHY, persistent: true });
+    const probed = vi.spyOn(j.client, "health");
+    const revalidations = () => session.operations.list({ includeTerminal: true, limit: 20 }).filter((operation) => operation.kind === "connection.revalidate");
+    for (let turn = 0; turn < 2; turn++) {
+      expect((await session.runtime.captureRun(JOURNEY_CHARACTER)).snapshot.capabilities.recall).toBe(false);
+      await session.operations.stop();
+      expect(revalidations()).toEqual([expect.objectContaining({ state: "failed", errorCode: "HINDSIGHT_UNREACHABLE",
+        producer: expect.objectContaining({ origin: "automatic", phase: "validating" }) })]);
+    }
+    expect(probed).toHaveBeenCalledTimes(1);
     expect(session.runtime.hindsightBindingSnapshot().binding).toEqual({ kind: "published", epochId });
   });
 
