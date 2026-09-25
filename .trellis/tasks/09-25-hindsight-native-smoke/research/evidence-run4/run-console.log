@@ -1,0 +1,19 @@
+[smoke] temp root G:\Temp\taki-native-smoke-gZRBDQ
+[smoke] step 1: Boot native + Core; Legacy/empty
+[smoke] step 2: Local onboarding + retaining Run
+[smoke] step 3: Hindsight connection + setup.validate + setup.apply
+[smoke] step 4: hindsight.activate
+[smoke] step 5: Hindsight capture + replica.sync incremental/full + second connection
+[smoke] step 6: New Character mika: degraded Run, provision, recall, ingestion
+[smoke] step 6 FAILED: RPC deadline: chat.send
+[smoke] step 7: Timeout change -> config_changed -> connection.revalidate
+[smoke] step 8: Core restart: status stable, no redispatch
+[smoke] result failed; evidence H:\TakiAgent\.trellis\tasks\09-25-hindsight-native-smoke\research\evidence\
+[smoke]   1 passed 
+[smoke]   2 passed 
+[smoke]   3 passed 
+[smoke]   4 passed 
+[smoke]   5 passed 
+[smoke]   6 failed RPC deadline: chat.send
+[smoke]   7 passed 
+[smoke]   8 passed 

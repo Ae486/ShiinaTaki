@@ -1,0 +1,36 @@
+{"level":30,"time":1790371543073,"pid":50472,"hostname":"tianxuanji","mod":"db","applied":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50],"msg":"migrations applied"}
+{"level":30,"time":1790371543080,"pid":50472,"hostname":"tianxuanji","msg":"Core Host identity loaded"}
+{"level":30,"time":1790371543089,"pid":50472,"hostname":"tianxuanji","mod":"secrets","mod":"secrets","health":"ok","keySource":"credentials-directory","msg":"secret catalog opened"}
+{"level":30,"time":1790371543099,"pid":50472,"hostname":"tianxuanji","mod":"memory","upserted":0,"deleted":0,"total":0,"invalid":[],"msg":"memory index reconciled from workspace"}
+{"level":30,"time":1790371543108,"pid":50472,"hostname":"tianxuanji","mod":"skills","active":0,"invalidated":0,"seeded":0,"seedRejected":0,"msg":"skill lifecycle ready"}
+{"level":30,"time":1790371543110,"pid":50472,"hostname":"tianxuanji","mod":"mcp","msg":"no legacy mcp-servers.json to seed"}
+{"level":30,"time":1790371543123,"pid":50472,"hostname":"tianxuanji","mod":"mcp","servers":0,"published":0,"failed":0,"msg":"mcp reconcile from desired state complete"}
+{"level":30,"time":1790371543166,"pid":50472,"hostname":"tianxuanji","mod":"server","host":"127.0.0.1","port":5611,"msg":"ws server listening"}
+{"level":30,"time":1790371543184,"pid":50472,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1790371543197,"pid":50472,"hostname":"tianxuanji","mod":"pairing","deviceId":"35e76615-6987-4d8b-bc0c-4ef0abda18bf","deviceName":"native smoke","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1790371543517,"pid":50472,"hostname":"tianxuanji","mod":"secrets","mod":"secrets","secretRef":"memory.hindsight.connection.api-key","msg":"secret stored"}
+{"level":30,"time":1790371543519,"pid":50472,"hostname":"tianxuanji","mod":"config","key":"TAKI_HINDSIGHT_ENDPOINT","reset":false,"apply":"live","msg":"config stored"}
+{"level":30,"time":1790371543520,"pid":50472,"hostname":"tianxuanji","mod":"config","key":"TAKI_HINDSIGHT_ENABLED","reset":false,"apply":"live","msg":"config stored"}
+{"level":30,"time":1790371552577,"pid":50472,"hostname":"tianxuanji","mod":"hindsight-activation","runId":"78e90578-eeaf-4671-bdba-3be6c6cfdcb2","transactionId":"88d81395-93d4-43e4-9f96-0b765c32744a","carried":0,"msg":"Hindsight authority activated"}
+{"level":30,"time":1790371564789,"pid":50472,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1790371564792,"pid":50472,"hostname":"tianxuanji","mod":"pairing","deviceId":"964be9fe-b643-4a7e-ac1d-f59bfa6dcc09","deviceName":"native smoke second connection","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":40,"time":1790371564808,"pid":50472,"hostname":"tianxuanji","characterId":"mika","code":"bank_not_ready","msg":"Hindsight Run admitted without memory"}
+{"level":30,"time":1790371564812,"pid":50472,"hostname":"tianxuanji","mod":"hindsight-lifecycle","kind":"bank.provision","operationId":"5e6b9f0a-7301-4713-a996-c75e308ae6d0","msg":"automatic Hindsight lifecycle operation submitted"}
+{"level":30,"time":1790371564843,"pid":50472,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":30,"time":1790371567456,"pid":50472,"hostname":"tianxuanji","characterId":"taki","status":"failed","assessed":0,"blocks":0,"pending":1,"edits":0,"steps":1,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1790371572275,"pid":50472,"hostname":"tianxuanji","characterId":"mika","status":"clean","assessed":0,"blocks":0,"pending":0,"edits":0,"steps":0,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1790371573119,"pid":50472,"hostname":"tianxuanji","mod":"activity","code":"NO_NODE","msg":"no device provides foreground-window; sampler idle until one connects"}
+{"level":30,"time":1790371574228,"pid":50472,"hostname":"tianxuanji","characterId":"mika","status":"clean","assessed":0,"blocks":0,"pending":0,"edits":0,"steps":0,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1790371576066,"pid":50472,"hostname":"tianxuanji","characterId":"mika","status":"clean","assessed":0,"blocks":0,"pending":0,"edits":0,"steps":0,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1790371577889,"pid":50472,"hostname":"tianxuanji","characterId":"mika","status":"clean","assessed":0,"blocks":0,"pending":0,"edits":0,"steps":0,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1790371579795,"pid":50472,"hostname":"tianxuanji","characterId":"mika","status":"clean","assessed":0,"blocks":0,"pending":0,"edits":0,"steps":0,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1790371581744,"pid":50472,"hostname":"tianxuanji","characterId":"mika","status":"clean","assessed":0,"blocks":0,"pending":0,"edits":0,"steps":0,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1790371583843,"pid":50472,"hostname":"tianxuanji","characterId":"mika","status":"clean","assessed":0,"blocks":0,"pending":0,"edits":0,"steps":0,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1790371590037,"pid":50472,"hostname":"tianxuanji","characterId":"mika","status":"clean","assessed":0,"blocks":0,"pending":0,"edits":0,"steps":0,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1790371593112,"pid":50472,"hostname":"tianxuanji","characterId":"mika","status":"clean","assessed":0,"blocks":0,"pending":0,"edits":0,"steps":0,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1790371660178,"pid":50472,"hostname":"tianxuanji","mod":"config","key":"TAKI_HINDSIGHT_REQUEST_TIMEOUT_MS","reset":false,"apply":"live","msg":"config stored"}
+{"level":40,"time":1790371660326,"pid":50472,"hostname":"tianxuanji","mod":"memory-auto","kind":"provider","characterId":"mika","code":"MEMORY_PROVIDER_MAINTENANCE_FAILED","msg":"memory provider maintenance failed; will retry"}
+{"level":30,"time":1790371662633,"pid":50472,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":30,"time":1790371662634,"pid":50472,"hostname":"tianxuanji","signal":"SIGINT","msg":"shutting down"}
+{"level":40,"time":1790371662636,"pid":50472,"hostname":"tianxuanji","mod":"memory-auto","kind":"provider","characterId":"mika","code":"MEMORY_PROVIDER_MAINTENANCE_FAILED","msg":"memory provider maintenance failed; will retry"}
+{"level":30,"time":1790371662639,"pid":50472,"hostname":"tianxuanji","mod":"mcp","clients":0,"msg":"mcp manager closed"}
