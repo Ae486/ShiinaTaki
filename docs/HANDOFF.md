@@ -206,8 +206,9 @@ the Home readiness block) is archived as `09-19-active-bank-lifecycle` (commits 
 `3929490`/`1b4ccdb`/`fc6964f` check fixes, `356c3cb` spec); its contract is
 `.trellis/spec/backend/memory-hindsight-lifecycle.md`, D87 is closed, D86/D88 are retargeted to Stage 3/4/5, and the
 2026-09-25 formal check (`research/check-2026-09-25.md`, PASS-WITH-FIXES) covers AC1-AC9 and the failure matrix.
-Stage 2 is closed on automated criteria; the batched owner manual acceptance of 2a+2b+2c is now due and must be
-performed by the owner. Next delivery is Stage 3. From 2026-09-23 all sub-agents run on opus (fable unavailable).
+Stage 2 is closed on automated criteria; the owner manual acceptance of Stages 1-2 is deferred to the Stage 6
+acceptance session (D89, owner 2026-09-25) and covered meanwhile by an isolated throwaway native Hindsight smoke.
+Next delivery is Stage 3. From 2026-09-23 all sub-agents run on opus (fable unavailable).
 The owner's latest direction makes grill conditional across the whole task: proceed when no major unresolved
 requirement needs an owner decision; reopen grill for a concrete material issue during development. No currently known
 owner question blocks continuation.
