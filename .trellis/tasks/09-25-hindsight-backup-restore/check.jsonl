@@ -1,0 +1,14 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend conventions and final gates"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Headers, indexes, size limits, lint, real boot"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Single writer, no await in transactions"}
+{"file": ".trellis/spec/backend/sqlite-transaction-isolation.md", "reason": "Row writes and evidence atomicity"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Closed codes, no swallowed failures"}
+{"file": ".trellis/spec/backend/memory-operations.md", "reason": "Operation owner, kinds, families, observeBoot, settlement"}
+{"file": ".trellis/spec/backend/memory-hindsight-lifecycle.md", "reason": "Latest kind/family/status patterns to mirror"}
+{"file": ".trellis/spec/backend/memory-hindsight-activation.md", "reason": "Write fence, binding, authority marker and receipts"}
+{"file": ".trellis/spec/backend/hindsight-application-runtime.md", "reason": "Hindsight subsystem writers and readiness"}
+{"file": ".trellis/spec/backend/memory-replica-sync.md", "reason": "Scheduler stop/start, cursor reset and rebuild"}
+{"file": ".trellis/spec/backend/secret-catalog.md", "reason": "Presence/list only; never copy secrets"}
+{"file": ".trellis/spec/backend/server-push-and-connection-auth.md", "reason": "Operator-only methods and push"}
+{"file": ".trellis/tasks/09-25-hindsight-backup-restore/research/stage3-seams.md", "reason": "Gaps, failure matrix, contracts with file:line"}
+{"file": ".trellis/tasks/09-25-hindsight-backup-restore/design.md", "reason": "Leader rulings and wave boundaries"}

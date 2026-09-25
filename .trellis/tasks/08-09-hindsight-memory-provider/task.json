@@ -31,7 +31,9 @@
     "09-19-hindsight-durable-operations",
     "09-19-local-onboarding-operation",
     "09-19-hindsight-first-activation",
-    "09-19-active-bank-lifecycle"
+    "09-19-active-bank-lifecycle",
+    "09-25-hindsight-backup-restore",
+    "09-25-hindsight-native-smoke"
   ],
   "parent": null,
   "relatedFiles": [],
