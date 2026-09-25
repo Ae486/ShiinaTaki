@@ -1,10 +1,12 @@
 /**
  * INPUT:  the live Hindsight connection state, B3 Bank rows, replica binding evidence and open lifecycle operations
- * OUTPUT: HindsightBankReadinessSchema, MemoryHindsightStatusSectionSchema (the memory.authority.status `hindsight` section)
+ * OUTPUT: HindsightBankReadinessSchema, MemoryHindsightStatusSectionSchema (the memory.authority.status `hindsight` section,
+ *         including the nullable Stage 3 `backup` block)
  *         and the bank.provision / connection.revalidate request, producer, result and closed error-code schemas
  * POS:    shared/protocol — lifecycle contracts under Hindsight authority; actions and origins are Core-derived, never client rules
  */
 import { z } from "zod";
+import { HindsightBackupStatusSectionSchema } from "./hindsight-backup-schema.ts";
 import { HindsightErrorCodeSchema } from "./hindsight-connection-schema.ts";
 import { MemoryReplicaErrorCodeSchema } from "./memory-replica-schedule-schema.ts";
 
@@ -33,6 +35,8 @@ export const MemoryHindsightStatusSectionSchema = z.strictObject({
   }),
   banks: z.array(BankSchema).max(256),
   actions: z.strictObject({ revalidate: z.boolean(), provision: z.array(CharacterId).max(256) }),
+  /** Null until Core reads backup evidence for this section. */
+  backup: HindsightBackupStatusSectionSchema.nullable(),
 }).superRefine((section, context) => {
   const fail = (message: string) => context.addIssue({ code: "custom", message });
   if (section.connection.config !== "ready" && (section.connection.drift !== "none" || section.connection.admittedAt !== null)) {

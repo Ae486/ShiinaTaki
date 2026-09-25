@@ -11,6 +11,8 @@ import { MemoryLocalActivateRequestSchema, MemoryLocalPrepareRequestSchema, Memo
 import { MemoryHindsightActivateRequestSchema, MemoryHindsightActivationErrorCodeSchema, MemoryHindsightProducerRefSchema, MemoryHindsightResultSchema } from "./memory-hindsight-operation-schema.ts";
 import { MemoryBankProducerRefSchema, MemoryBankProvisionRequestSchema, MemoryBankResultSchema, MemoryConnectionProducerRefSchema, MemoryConnectionResultSchema,
   MemoryConnectionRevalidateRequestSchema, MemoryHindsightLifecycleErrorCodeSchema } from "./memory-hindsight-lifecycle-schema.ts";
+import { MemoryBackupAdmitRequestSchema, MemoryBackupCaptureRequestSchema, MemoryBackupErrorCodeSchema, MemoryBackupProducerRefSchema,
+  MemoryBackupResultSchema, MemoryBackupVerifyRequestSchema } from "./hindsight-backup-schema.ts";
 
 export const MEMORY_OPERATION_METHODS = {
   submit: "memory.operations.submit",
@@ -27,7 +29,7 @@ const revision = z.number().int().nonnegative();
 
 export const MemoryOperationKindSchema = z.enum([
   "setup.validate", "setup.apply", "replica.sync", "local.onboard.prepare", "local.onboard.activate", "hindsight.activate",
-  "bank.provision", "connection.revalidate",
+  "bank.provision", "connection.revalidate", "backup.capture", "backup.admit", "backup.verify",
 ]);
 export type MemoryOperationKind = z.infer<typeof MemoryOperationKindSchema>;
 export const MemoryOperationStateSchema = z.enum(["admitted", "running", "completed", "failed", "cancelled", "outcome_unknown"]);
@@ -55,6 +57,9 @@ export const MemoryOperationRequestSchema = z.discriminatedUnion("kind", [
   MemoryHindsightActivateRequestSchema,
   MemoryBankProvisionRequestSchema,
   MemoryConnectionRevalidateRequestSchema,
+  MemoryBackupCaptureRequestSchema,
+  MemoryBackupAdmitRequestSchema,
+  MemoryBackupVerifyRequestSchema,
 ]);
 export type MemoryOperationRequest = z.infer<typeof MemoryOperationRequestSchema>;
 
@@ -65,6 +70,7 @@ export const MemoryOperationProducerRefSchema = z.discriminatedUnion("kind", [
   MemoryHindsightProducerRefSchema,
   MemoryBankProducerRefSchema,
   MemoryConnectionProducerRefSchema,
+  MemoryBackupProducerRefSchema,
 ]);
 export type MemoryOperationProducerRef = z.infer<typeof MemoryOperationProducerRefSchema>;
 
@@ -79,10 +85,12 @@ export const MemoryOperationResultSchema = z.discriminatedUnion("kind", [
   MemoryHindsightResultSchema,
   MemoryBankResultSchema,
   MemoryConnectionResultSchema,
+  MemoryBackupResultSchema,
 ]);
 export type MemoryOperationResult = z.infer<typeof MemoryOperationResultSchema>;
 export const MemoryOperationErrorCodeSchema = z.union([
   MemoryReplicaErrorCodeSchema, MemoryLocalErrorCodeSchema, MemoryHindsightActivationErrorCodeSchema, MemoryHindsightLifecycleErrorCodeSchema,
+  MemoryBackupErrorCodeSchema,
 ]);
 export type MemoryOperationErrorCode = z.infer<typeof MemoryOperationErrorCodeSchema>;
 
@@ -90,6 +98,7 @@ export type MemoryOperationErrorCode = z.infer<typeof MemoryOperationErrorCodeSc
 const PRODUCER_KIND: Record<MemoryOperationKind, MemoryOperationProducerRef["kind"]> = {
   "setup.validate": "setup", "setup.apply": "setup", "replica.sync": "replica", "local.onboard.prepare": "local",
   "local.onboard.activate": "local", "hindsight.activate": "hindsight", "bank.provision": "bank", "connection.revalidate": "connection",
+  "backup.capture": "backup", "backup.admit": "backup", "backup.verify": "backup",
 };
 
 const MemoryOperationBase = z.strictObject({
@@ -121,6 +130,9 @@ export const MemoryOperationSchema = MemoryOperationBase.superRefine((operation,
   if ((operation.producer?.kind === "local" || operation.producer?.kind === "hindsight") && operation.producer.kind === operation.result?.kind
     && operation.producer.runId !== operation.result.runId) {
     fail("producer and result run disagree");
+  }
+  if (operation.producer?.kind === "backup" && operation.result?.kind === "backup" && operation.producer.backupId !== operation.result.backupId) {
+    fail("producer and result backup disagree");
   }
 });
 export type MemoryOperation = z.infer<typeof MemoryOperationSchema>;

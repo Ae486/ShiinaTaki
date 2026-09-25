@@ -11,7 +11,7 @@ const local = {
   runtime: { providerId: "local", available: true, unavailableReason: null },
   setup, replica: null, pending: null, operations: { active: [], recent: [] }, hindsight: null, derivedFreshness: "unknown", observedAt: at,
 } as const;
-const section = { connection: { config: "ready", drift: "none", admittedAt: null }, banks: [], actions: { revalidate: false, provision: [] } } as const;
+const section = { connection: { config: "ready", drift: "none", admittedAt: null }, banks: [], actions: { revalidate: false, provision: [] }, backup: null } as const;
 const summary = { pendingCount: 0, nativeConfirmedCount: 0, completedCount: 2, supersededCount: 0, failedCount: 1, unknownCount: 1, cancelledCount: 0 };
 
 describe("memory authority status contract", () => {
