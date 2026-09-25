@@ -7,7 +7,8 @@ Use this contract when a Canonical Local instance moves to Hindsight authority t
 the promotion transaction, custody routing across COMMIT, the Hindsight runtime binding or `memory.activation.status`
 (`core/memory/hindsight-activation/`, `operations/memory-operation-kind-hindsight.ts` + `-hindsight-evidence.ts`,
 `db/hindsight-activation-custody.ts`, `hindsight-runtime-binding.ts`, `runtime-selector.ts`, `runtime-composition.ts`).
-Reverse transitions (Stage 4), backup (Stage 3), Bank lifecycle (Stage 2c) and the native patch are out of scope. D78
+Reverse transitions (Stage 4), backup (Stage 3) and the native patch are out of scope; the Bank and connection lifecycle
+after COMMIT is [`memory-hindsight-lifecycle.md`](./memory-hindsight-lifecycle.md). D78
 primitives: [`memory-current-state-cutover.md`](./memory-current-state-cutover.md); lifecycle:
 [`memory-operations.md`](./memory-operations.md); fence: [`canonical-local-memory-runtime.md`](./canonical-local-memory-runtime.md).
 
@@ -43,11 +44,14 @@ resumeActivation, recover, stopRequested, stop }` (composed in `core/boot/hindsi
 ### Admission and single-flight (R1, R2)
 
 - `admit` is synchronous and side-effect free: `refuseWhileExclusiveFamilyBusy` (families `setup`, `local-onboarding`,
-  `hindsight-activation` are mutually single-flight), then `service.plan()`. `new`/`resume` require marker
+  `hindsight-activation`, `hindsight-lifecycle` are mutually single-flight), then `service.plan()`. `new`/`resume` require marker
   `canonical-local`, the B2 run id joined by the Local activation receipt, setup `configured` with compatibility, and
   no fingerprint drift; `new` also requires `expectedEpochId`/`setupRevision` equal to Core's view and no existing run.
 - Identities are minted at admission (`mintRef`). `resume` reuses the newest family row's ids for the same run so
-  per-Bank replica/verification ids are replayed, never re-minted. Banks lacking a verified B3 row get no identity;
+  per-Bank replica/verification ids are replayed, never re-minted. The ref's `verificationId` is a base: the chain
+  presents `preparationVerificationId(base, preparationId)` (`hindsight-activation-chain.ts`), so replaying one
+  preparation derives the same native id and a recapture's new preparation gets a new one (native refuses a different
+  verification request under a used id with `request_conflict`). No persisted state is added. Banks lacking a verified B3 row get no identity;
   execution settles `completed` / `prerequisite_blocked` listing missing and extra scopes before anything native happens.
 - Claim is one macrotask after admission via `tryClaim`; a stopping service never claims; cancel only while `admitted`.
   While a family row is open, direct `memory.hindsight.validate/setup/disable` refuse `HINDSIGHT_STATE_CONFLICT`
@@ -70,7 +74,7 @@ resumeActivation, recover, stopRequested, stop }` (composed in `core/boot/hindsi
   terminal after reconciliation); a live holder refuses `HINDSIGHT_CUTOVER_LEASE_LOST`.
 - The selected manifest is reused while `compareCurrent` matches; staleness at promotion is a refusal, and the next
   attempt records an explicit new version whose import supersedes the prior transfer by its exact receipts.
-- Per Bank: baseline -> prepare -> import -> verify, a checkpoint after each. A persisted preparation, import result or
+- Per Bank: baseline -> prepare -> import -> verify, a checkpoint after each (verify under the derived per-preparation id). A persisted preparation, import result or
   verification evidence is replayed, so each import/verification is POSTed exactly once across retries and restarts.
 - `markReady` is idempotent only for the exact fingerprint + checkpoint-set digest (`HINDSIGHT_CHECKPOINT_SET_STALE`
   otherwise). `stopRequested` is honoured at Bank boundaries (`HINDSIGHT_ACTIVATION_INTERRUPTED`), never inside COMMIT.
@@ -156,7 +160,8 @@ The receipt, never the exception, decides whether the authority switched.
   refused repair, committed identity from receipts.
 - `hindsight-activation-journey.test.ts` (C03, temp SQLite + transport double): lost reply, duplicate, restart on both
   sides of COMMIT, commit between COMMIT and bind, corrupt marker. Plus custody-carry, write-fence, Block-repo,
-  `hindsight-runtime-composition.test.ts` (F2), status and Shared schema tests, and the isolated Core boot
+  `hindsight-runtime-composition.test.ts` (F2), status and Shared schema tests, the recapture-after-posted-verification
+  service test (ids derived per preparation, unique, identical on replay), and the isolated Core boot
   (`research/isolated-process-check.mjs`: migrations through 049, both status reads, kind registered, zero fetches).
 
 ## 7. Wrong vs Correct
@@ -175,6 +180,10 @@ if (incompleteSpan(db, epochId)) throw new Error("MEMORY_INGESTION_INCOMPLETE");
 
 ## Known limits
 
-- D87: a Character first seen during the interval gets its Local Bank outside the fence (surfaces on `resume` as
-  staleness or a missing-Bank prerequisite). D88: `target_conflict` has no distinct remedy; clearing the Bank is manual.
+- D87 (closed 2026-09-25): a Character first seen during the interval blocks `resume` until 应用配置 verifies its Bank,
+  then `resume` completes (`hindsight-lifecycle-journey.test.ts` "blocks resume on a Character first seen during the
+  interval ..."); a Character first seen after COMMIT is provisioned by `bank.provision`.
+- D88: `target_conflict` has no distinct remedy; clearing the Bank is manual (retargeted to Stage 3/5).
+- `readCommittedHindsightProducer` rebuilds `verificationId` from the latest verification candidate, i.e. the native
+  per-preparation id, not the base; safe only while a committed run is never replayed through the chain.
 - Owner acceptance on a real Hindsight/PostgreSQL instance is batched with the Stage 2 session, not automated here.

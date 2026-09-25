@@ -141,6 +141,14 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
 - A claim/database supervisor failure must not rearm a zero-delay loop. Use the existing one-minute first delay for
   automatic mode; manual mode requires another explicit action in that process. This supervisor pause is process-local
   because a failed database may not persist it. Retain a closed `lastError()` and never fabricate a durable attempt.
+  `armTimer` is called from settle paths, so a failing status/`banks()` read there (for example a drifted connection)
+  is recorded as `lastError()` and arms nothing; it never escapes as a rejection.
+- `verifiedReconnect()` has exactly two callers (Stage 2c R7): a `connection.revalidate` whose runtime is already on
+  the new fingerprint, and the Hindsight subsystem once per foreground capture that admitted and synced every routed
+  Bank while some `automatic` Bank has `retryDueAt` set with an availability `errorCode`. The scheduler's own drain,
+  scheduled runs and WS/browser events never call it. The subsystem caller catches (the Run continues); a throw in the
+  revalidate caller fails that operation. Contract:
+  [`memory-hindsight-lifecycle.md`](./memory-hindsight-lifecycle.md).
 - Full reconciliation uses the provider's supported `page_size=1`. Verify complete metadata, manifest digest, page
   hashes, counts, unique logical identities, and the Bank record. Reuse a cached record only after validating both
   its schema and `canonicalPayloadHash({ contract: "taki-replica-snapshot-cache.v1", bankId, providerLineageId,
@@ -170,6 +178,8 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
 | Default Bank enumeration repeats or scope/Character binding changes | Preserve configuration; reject contradictory binding. |
 | Expired/replaced lease, stale run, schedule CAS, or predecessor | Refuse stale publication/settlement; preserve current ownership. |
 | Claim/database supervisor failure | Bound automatic wake; pause manual execution until explicit action; do not invent an attempt. |
+| `armTimer` status read throws | Record `lastError()`, arm no wake, no escaped rejection. |
+| Foreground success while no automatic Bank is in availability backoff, or a scheduled run succeeds | No `verifiedReconnect()` call. |
 | HTTP response arrives after the absolute deadline | Reject inside publication; leave that page's records, FTS, cache, and checkpoint unchanged. |
 | Authority or trusted Bank binding changes during HTTP work | Reject inside publication against captured identity/scope, including pages without a Bank object. |
 | Cached payload or page-hash/lineage/generation association is corrupt | Cache miss and authenticated refetch; never trust a copied hash alone. |

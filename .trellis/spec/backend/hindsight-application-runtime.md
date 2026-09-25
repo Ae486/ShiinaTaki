@@ -168,8 +168,10 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
   authority/checkpoint and lease fence rather than creating a fresh lifetime.
 - Run capture carries caller cancellation and any explicit trigger deadline through runtime composition and both Bank
   synchronizations. Recheck cancellation before exposing the captured result. Without verified capability evidence,
-  failed pre-synchronization must refuse admission using the actual failure; it must not start an unowned cold retry.
-  Existing verified capability evidence remains usable for the documented outage/replica behavior.
+  an availability failure in pre-synchronization admits a memory-unavailable Run (`admission_unavailable`, Stage 2c);
+  any other failure refuses with the actual failure; neither starts an unowned cold retry. Existing verified
+  capability evidence remains usable for the documented outage/replica behavior. Degrade-vs-refuse table:
+  [`memory-hindsight-lifecycle.md`](./memory-hindsight-lifecycle.md).
 - The client settles caller/runtime cancellation even when an injected transport ignores its signal, preserves the
   first cancellation/timeout classification and contains late success/rejection. Local settlement never proves a
   dispatched remote write was cancelled; unknown outcomes retain the existing durable Pending/recovery semantics.

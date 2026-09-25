@@ -98,6 +98,14 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
 - Unknown values render as 未知; the card never shows `0` pending, a health badge or freshness that the producer did
   not report. Setup validate/apply live on the Hindsight activation card; every later workflow (transitions, backup,
   upgrade) is not on this card until its Core operation exists.
+- Under Hindsight authority the card renders the `hindsight` section as a child block
+  (`memory-hindsight-lifecycle-state.ts` `hindsightLifecycleView`, `memory-hindsight-lifecycle-block.tsx`), also while
+  the runtime is unavailable: connection rows (drift and 上次校验通过 only for a ready config), one readiness row per
+  scope (可用 / 同步中 / 创建中 / 失败 / 未创建), and the reason labels for `connection_disabled` / `config_changed`.
+- 重新校验连接 (`connection.revalidate` with the status epoch id; omitted when it is null) and 创建 Bank（id）
+  (`bank.provision` per listed Character) come only from `hindsight.actions`; there is no client allow rule. They submit
+  through the generic controller `submit(request, key)` and are disabled while the client is disconnected or any
+  mutation is pending. Native Bank ids and error codes appear only in the collapsed 技术诊断.
 - Full operation ownership and verification requirements live in
   [`memory-operations.md`](../backend/memory-operations.md).
 

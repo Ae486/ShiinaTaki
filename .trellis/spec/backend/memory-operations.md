@@ -4,7 +4,7 @@
 
 Use this contract when an operator-initiated memory operation must outlive its Home reply: Hindsight setup
 validation/application, manual replica synchronization, and every later long-running memory operation (first
-activation, transitions, backup, upgrade). One Core-owned owner in `core/memory/operations/` admits, executes,
+activation, Bank provisioning and connection revalidation, transitions, backup, upgrade). One Core-owned owner in `core/memory/operations/` admits, executes,
 observes and settles operations over the existing producers (B3 setup service, B5 scheduler, D77 writes). It never
 becomes a second scheduler, recovery loop, or authority writer.
 
@@ -18,24 +18,39 @@ MEMORY_OPERATION_METHODS = { submit: "memory.operations.submit", status: "memory
   changed: "memory.operations.changed" };
 MEMORY_AUTHORITY_METHODS = { status: "memory.authority.status" };
 MemoryOperationKind = "setup.validate" | "setup.apply" | "replica.sync" | "local.onboard.prepare" | "local.onboard.activate"
-  | "hindsight.activate";
+  | "hindsight.activate" | "bank.provision" | "connection.revalidate";
 MemoryOperationState = "admitted" | "running" | "completed" | "failed" | "cancelled" | "outcome_unknown";
 MemoryOperationReason = "core_restart" | "producer_refused" | "producer_failed" | "cancelled_before_claim" | "runtime_unavailable"
   | "producer_incomplete" | "commitment_unknown";
 MemoryOperationRefusalReason = "MEMORY_OPERATION_NOT_FOUND" | "…_BUSY" | "…_RUNNING" | "…_SETTLED" | "…_UNSUPPORTED" | "…_BANK_UNKNOWN"
   | "MEMORY_OPERATION_REQUIRED";
-MemoryOperationErrorCode = MemoryReplicaErrorCode | MemoryLocalErrorCode | MemoryHindsightActivationErrorCode;   // arms agree on kind
+MemoryOperationErrorCode = MemoryReplicaErrorCode | MemoryLocalErrorCode | MemoryHindsightActivationErrorCode
+  | MemoryHindsightLifecycleErrorCode;   // arms agree on kind
 ```
 
-Core: `createMemoryOperationService({ db, live, setup, bootId, onChanged, logger })` ->
-`{ submit, status, list, recent, latest(family), cancel, stop }`; kind handlers implement
-`{ family(request), admit(request, ctx) -> producerRef, execute({ request, producer, ctx, running, tryClaim, checkpoint })
+Producer and result arms are tied to the kind by the explicit, non-exported `PRODUCER_KIND` table in
+`memory-operation-schema.ts` (never a name-prefix guess; a kind without a row fails typecheck):
+
+| Kind | Producer / result `kind` | Family |
+| --- | --- | --- |
+| `setup.validate`, `setup.apply` | `setup` | `setup` |
+| `replica.sync` | `replica` | `replica:<bankId>` |
+| `local.onboard.prepare`, `local.onboard.activate` | `local` | `local-onboarding` |
+| `hindsight.activate` | `hindsight` | `hindsight-activation` |
+| `bank.provision` | `bank` | `hindsight-lifecycle` |
+| `connection.revalidate` | `connection` | `hindsight-lifecycle` |
+
+Core: `createMemoryOperationService({ db, live, setup, local?, hindsight?, lifecycle?, bootId, onChanged, logger })` ->
+`{ submit(request, admission?), status, list, recent, latest(family), cancel, stop }`; kind handlers implement
+`{ family(request), admit(request, ctx, { origin }) -> producerRef, execute({ request, producer, ctx, running, tryClaim, checkpoint })
 -> settlement | null, observe?(operation, ctx), observeBoot?(operation, ctx), cancel?(operation, ctx) }` and are
 registered once in `memory-operation-kinds.ts`. `running()` is a notification; `tryClaim(): boolean` is the repo CAS
 admitted -> running and the only claim proof. `checkpoint(progress)` persists producer progress independently of `result`.
 `composeMemoryRuntime(...).operations()` is the live accessor to the selected Hindsight subsystem
-(`scheduler`, `state`, `banks()`, `assertConnection()`), or `null` under Local authority.
-`readMemoryAuthorityStatus({ db, live, setup, operations })` produces `MemoryAuthorityStatus`.
+(`MemoryOperationsRuntime`: `epochId`, `configFingerprint`, `deploymentMode`, `scheduler`, `banks()`,
+`assertConnection()`, `driftReason()`, `pendingSummary()`), or `null` under Local authority or while unbound.
+`readMemoryAuthorityStatus({ db, live, binding?, hindsightBinding?, liveConnection, lifecycle?, setup, operations })`
+produces `MemoryAuthorityStatus`.
 Storage: migration 048 `memory_operations` (STRICT) with the partial unique index
 `memory_operations_active_family(family) WHERE terminal_at IS NULL`.
 
@@ -66,7 +81,9 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
   every `memory.operations.changed` push, on reconnect and on remount — never by polling.
 - `MemoryAuthorityStatus` separates authority (marker), runtime availability (closed reason), setup snapshot,
   per-Bank replica sync status, per-Bank Pending summary plus the count of unfinished D77 parent writes, and
-  operations. `replica`/`pending` are `null` unless Hindsight is the authority and the runtime is available.
+  operations. `replica`/`pending` are `null` unless Hindsight is the authority and the runtime is available; the
+  `hindsight` lifecycle section is non-null exactly under marker `hindsight`, also while the runtime is unavailable
+  ([`memory-hindsight-lifecycle.md`](./memory-hindsight-lifecycle.md) §3 "Status section and actions").
   `derivedFreshness` is the literal `"unknown"` while D79-D82 are open. `memory.status` stays the Local maintenance read.
 - A still-queued manual request (`pendingManualKind !== null`) proves the Bank state is not this operation's outcome
   (the claim consumes the request and this owner is its only producer); only then may `lastAttemptAt >= admittedAt`
@@ -83,10 +100,17 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 - Family `hindsight-activation` (`hindsight.activate`, source modes `new` / `resume` / `recover`) follows the same
   deferred-claim and `observeBoot` rules; its producer, custody and rebind contract is
   [`memory-hindsight-activation.md`](./memory-hindsight-activation.md).
-- `setup`, `local-onboarding` and `hindsight-activation` are mutually single-flight: every setup, Local and activation
-  kind calls `refuseWhileExclusiveFamilyBusy` (`EXCLUSIVE_MEMORY_FAMILIES` in `memory-operation-contract.ts`) at
-  admission, so an open row in any of the three refuses the others `MEMORY_OPERATION_BUSY` naming that row. The
-  per-family unique index alone cannot express this, because the three are different families.
+- Family `hindsight-lifecycle` (`bank.provision`, `connection.revalidate`) follows the same deferred-claim and
+  read-only `observeBoot` rules; its producers, automatic triggers and status actions are
+  [`memory-hindsight-lifecycle.md`](./memory-hindsight-lifecycle.md).
+- `setup`, `local-onboarding`, `hindsight-activation` and `hindsight-lifecycle` are mutually single-flight: every setup,
+  Local, activation and lifecycle kind calls `refuseWhileExclusiveFamilyBusy` (`EXCLUSIVE_MEMORY_FAMILIES` in
+  `memory-operation-contract.ts`) at admission, so an open row in any of the four refuses the others
+  `MEMORY_OPERATION_BUSY` naming that row. The per-family unique index alone cannot express this, because the four are
+  different families.
+- Admission carries a Core-stamped origin: `submit` defaults to `{ origin: "operator" }` (every WS submission); only the
+  automatic lifecycle trigger passes `automatic`, and lifecycle producer refs persist it for the once-guard. Clients
+  never supply an origin.
 
 ### Known precision limits (recorded 2026-09-19, see deferred-decisions D84)
 
@@ -116,7 +140,7 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 | scheduler drain threw during a manual run | `failed` with `scheduler.lastError()` |
 | production `memory.migration.stage/resume/verify/exclude/activate` | `MEMORY_OPERATION_REFUSED` / `MEMORY_OPERATION_REQUIRED`; only dryRun/status/exceptions reads remain |
 | Core restart with a non-terminal `local.onboard.*` row | `observeBoot` classifies from the receipt; otherwise `outcome_unknown` / `commitment_unknown` or `producer_incomplete` |
-| submit any setup / Local / activation kind while another of the three families is open | `MEMORY_OPERATION_BUSY` + that row's `activeOperationId` |
+| submit any setup / Local / activation / lifecycle kind while another of the four families is open | `MEMORY_OPERATION_BUSY` + that row's `activeOperationId` |
 
 ## 5. Good / Base / Bad Cases
 
@@ -143,7 +167,9 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 - Local kinds: claim race / pre-claim cancel, `retry` resolving the reserved run from the prior row, boot observation
   (unknown stays unknown, no run created), terminal rows immutable after a later binding repair
   (`memory-operation-kind-local.test.ts`).
-- Activation kind: three-family single-flight and the direct setup RPC refusals (`memory-operation-kind-hindsight.test.ts`).
+- Activation kind: exclusive-family single-flight and the direct setup RPC refusals (`memory-operation-kind-hindsight.test.ts`).
+- Lifecycle kinds: admission matrix, four-family busy in both directions, pre-claim cancel, both `observeBoot`s
+  (`memory-operation-kind-lifecycle.test.ts`); Shared producer-table cases (`memory-operation-schema.test.ts`).
 
 ## 7. Wrong vs Correct
 
