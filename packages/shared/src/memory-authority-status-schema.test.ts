@@ -37,6 +37,9 @@ describe("memory authority status contract", () => {
       expect(MemoryAuthorityStatusSchema.safeParse({ ...status, hindsight: section }).success).toBe(true);
       expect(MemoryAuthorityStatusSchema.safeParse(status).success).toBe(false);
     }
+    const unavailable = { ...hindsight, runtime: { providerId: "hindsight", available: false, unavailableReason: "stopped" }, hindsight: section } as const;
+    expect(MemoryAuthorityStatusSchema.safeParse({ ...unavailable, authority: { ...hindsight.authority, epochId: null } }).success).toBe(false);
+    expect(MemoryAuthorityStatusSchema.safeParse({ ...unavailable, authority: { ...hindsight.authority, providerLineageId: null } }).success).toBe(false);
   });
 
   it("refuses fabricated freshness and mismatched availability reasons", () => {

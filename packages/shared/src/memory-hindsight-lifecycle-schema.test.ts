@@ -43,6 +43,8 @@ describe("Hindsight lifecycle status section", () => {
     ];
     for (const banks of invalid) expect(MemoryHindsightStatusSectionSchema.safeParse({ ...section, banks }).success).toBe(false);
     expect(MemoryHindsightStatusSectionSchema.safeParse({ ...section, actions: { revalidate: true, provision: ["mika", "mika"] } }).success).toBe(false);
+    // An offered action must be submittable: the bank.provision request bounds the Character id at 160.
+    expect(MemoryHindsightStatusSectionSchema.safeParse({ ...section, actions: { revalidate: false, provision: ["m".repeat(161)] } }).success).toBe(false);
     expect(MemoryHindsightStatusSectionSchema.safeParse({ ...section, extra: true }).success).toBe(false);
   });
 });

@@ -32,7 +32,7 @@ export const MemoryHindsightStatusSectionSchema = z.strictObject({
     admittedAt: Timestamp.nullable(),
   }),
   banks: z.array(BankSchema).max(256),
-  actions: z.strictObject({ revalidate: z.boolean(), provision: z.array(Id).max(256) }),
+  actions: z.strictObject({ revalidate: z.boolean(), provision: z.array(CharacterId).max(256) }),
 }).superRefine((section, context) => {
   const fail = (message: string) => context.addIssue({ code: "custom", message });
   if (section.connection.config !== "ready" && (section.connection.drift !== "none" || section.connection.admittedAt !== null)) {

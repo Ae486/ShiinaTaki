@@ -56,6 +56,9 @@ export const MemoryAuthorityStatusSchema = z.strictObject({
   }
   if (status.runtime.available !== (status.runtime.unavailableReason === null)) fail("runtime availability and reason disagree");
   if ((status.authority.mode === "hindsight") !== (status.hindsight !== null)) fail("the Hindsight section exists exactly under Hindsight authority");
+  if (status.authority.mode === "hindsight" && (status.authority.epochId === null || status.authority.providerLineageId === null)) {
+    fail("Hindsight authority always names its epoch and provider lineage");
+  }
 });
 export type MemoryAuthorityStatus = z.infer<typeof MemoryAuthorityStatusSchema>;
 export type MemoryAuthorityStatusParams = z.infer<typeof MemoryAuthorityStatusParamsSchema>;
