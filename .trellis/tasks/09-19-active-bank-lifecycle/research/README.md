@@ -7,3 +7,5 @@
   Baseline `main` `f1acf9e`, 2026-09-24.
 - [`isolated-process-check.mjs`](./isolated-process-check.mjs) — wave B isolated Core boot (temp dir, free non-default
   port, fetch blocked): head 050, authority status on Legacy and Local, both lifecycle kinds refused on Local, clean exit.
+- [`check-2026-09-25.md`](./check-2026-09-25.md) — formal trellis-check of all Stage 2c changes: findings F1..F7 with
+  fixes, observations, AC / failure-matrix coverage table and gates.

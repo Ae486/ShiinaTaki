@@ -33,13 +33,13 @@ finer) with an explicit context-budget brief. The leader owns task/spec/handoff 
 ## C. Home
 
 - [x] Authority card readiness rows, labels, two actions; fixtures; tests; Desktop build. Gates.
-- [ ] Commit if clean.
+- [x] Commit if clean.
 
 ## Validation and final review
 
-- [ ] One independent `trellis-check` over all S2c changes, AC1-AC9 and the failure matrix.
-- [ ] Leader re-runs all gates + isolated boot.
-- [ ] Specs: new `memory-hindsight-lifecycle.md`; `memory-operations.md`, `memory-hindsight-activation.md` (D87),
+- [x] One independent `trellis-check` over all S2c changes, AC1-AC9 and the failure matrix.
+- [x] Leader re-runs all gates + isolated boot.
+- [x] Specs: new `memory-hindsight-lifecycle.md`; `memory-operations.md`, `memory-hindsight-activation.md` (D87),
       `memory-replica-sync.md` (reconnect callers), `home-window.md`; D86/D88 retarget, D87 close.
 - [ ] Finish/archive, journal, HANDOFF §3.2; then queue the batched Stage 2 owner manual acceptance.
 
@@ -234,3 +234,50 @@ Leader ruling: persist the reviewed deployment mode instead of deferring the cro
   not launched.
 - Deviations: the block lives in its own child component file instead of inline in the card (distinct concern); the
   active-operation row for the two new kinds keeps the kind label without a target suffix (unchanged from wave B).
+
+### Formal check — 2026-09-25
+
+- Verdict PASS-WITH-FIXES; full report `research/check-2026-09-25.md`.
+- Fixed: F1 (MEDIUM, R1) `hindsightUnboundReason` degraded any unbound code once the connection was disabled — now only the
+  connection guard's own codes; F2 Shared refine: Hindsight authority names epoch + lineage; F3 `actions.provision` bounded
+  like the request (160); F4 production non-null assertions in `memory-operation-kind-bank.ts` / `hindsight-lifecycle-provision.ts`;
+  F5 formatting; F6 tests for revalidate replace failure (+ recoverBinding), reverse four-family busy, provision with no runtime.
+- Not fixed: F7 Desktop fixture offers provision under an unavailable runtime (test-only realism). Uncovered: dedicated
+  revalidate health/version failure test.
+- Gates: typecheck 5/5; lint clean; Shared 59/532; Core 406/3252 (no flake); Desktop 113/646; Desktop build ok;
+  `git diff --check` clean; isolated boot passed (port 8341, 1..50, 0 fetches, exit 0), no listener left.
+- Leader follow-up (same day): F1 accepted (`MEMORY_AUTHORITY_MISMATCH` degrades only under a non-ready config; reasoning
+  in the report O6). F7 fixed: lifecycle fixtures reshaped to Core's derivation (serving / provisioning / changed /
+  unreviewed / disabled sections, `HINDSIGHT_TEMPLATE_INVALID` failed row, native ids on mappable Banks, the Core-produced
+  unmappable Timeline Character kept, null-epoch case dropped). Revalidate health (503 -> `HINDSIGHT_UNREACHABLE`) and version
+  (`HINDSIGHT_VERSION_UNSUPPORTED`) failures tested: failed / producer_failed at `validating`, reviewed fingerprint + mode,
+  B3 fingerprint and Bank rows unchanged, old binding kept; automatic variant settles once with one probe and never retries.
+  Gates: typecheck 5/5; lint clean; Core 406/3254; Desktop 113/646; Desktop build ok; `git diff --check` clean.
+
+### Spec update — 2026-09-25
+
+- New `.trellis/spec/backend/memory-hindsight-lifecycle.md`: degrade-vs-refuse table (incl. `DISABLED_CODES`), witnesses and
+  exactly-once ingestion, `bank.provision` / `connection.revalidate` (admission, occupancy, blocker, reviewed fingerprint +
+  mode and NULL fail-closed, `replace` ordering), settlement/boot table, four exclusive families, automatic triggers,
+  `verifiedReconnect` callers, status section + actions, common mistakes, known limits.
+- Updated: `backend/memory-operations.md` (kinds, explicit producer table, four families, origin, `MemoryOperationsRuntime`
+  fields, status inputs), `backend/memory-hindsight-activation.md` (per-preparation verification id, D87 closed, D88
+  retargeted, `readCommittedHindsightProducer` note), `backend/memory-replica-sync.md` (reconnect callers, `armTimer`
+  `lastError`), `backend/hindsight-application-runtime.md` (capture without evidence degrades on availability failure),
+  `backend/index.md` (new row), `frontend/home-window.md` (readiness block, actions only from `hindsight.actions`,
+  collapsed diagnostics). `database-guidelines.md` lists no migration heads; unchanged.
+- `docs/deferred-decisions.md`: D87 DONE (AC6 journey tests, e5f172d / 2bf5cb7); D86 retargeted (Stage 4 reverse transition /
+  Stage 3 backup identity); D88 retargeted (Stage 3/5; transient `target_conflict` keeps re-POST, reset = whole-Bank DELETE).
+  No new entry: the check lists no deferred item without a home (boot binding on unreviewed settings is the AC5 contract).
+
+### Leader verification, final — 2026-09-25
+
+- Check verdict PASS-WITH-FIXES (`research/check-2026-09-25.md`); leader accepted F1 (MEMORY_AUTHORITY_MISMATCH degrades
+  only under a non-ready config) and had F7 plus the revalidate health/version tests closed instead of deferred.
+- Spec-agent ambiguities accepted as stated in `memory-hindsight-lifecycle.md`: a busy/changed-state automatic refusal
+  leaves no row (the once-guard counts admitted automatic rows only); a Bank left `syncing` offers no provision action and
+  recovers through ordinary B5 scheduling (re-submit stays admitted and idempotent).
+- Gates after all fixes: `pnpm typecheck` 5/5; `pnpm lint` 0; Shared 59/532; Core 406/3254 (no flake); Desktop 113/646;
+  Desktop build ok; `git diff --check` clean; isolated boot passed (port 1249, migrations 1..50, 0 fetches, exit 0).
+- Commits: wave C 37b0703; check fixes 3929490 (shared), 1b4ccdb (core), fc6964f (ui).
+- Owner manual acceptance: batched with Stage 2a/2b; not marked here.
