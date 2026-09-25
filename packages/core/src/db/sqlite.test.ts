@@ -1,6 +1,6 @@
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { MIGRATIONS } from "./migrations/index-list.ts";
 import { openDatabase, toSafeInteger, type Database } from "./sqlite.ts";
@@ -171,4 +171,55 @@ describe("transaction", () => {
       expect(db.prepare("SELECT * FROM entry ORDER BY id").all()).toEqual([{ id: 1 }, { id: 4 }]);
     },
   );
+});
+
+describe("backupTo", () => {
+  function sourceWithRows(): Database {
+    const db = openDatabase({ path: tempFile(), migrations: [] });
+    dbs.push(db);
+    // No INTEGER PRIMARY KEY: implicit rowids with gaps, the shape VACUUM INTO may renumber and Core orders by.
+    db.exec("CREATE TABLE bulk (payload TEXT NOT NULL)");
+    const insert = db.prepare("INSERT INTO bulk (payload) VALUES (:payload)");
+    db.transaction(() => { for (let index = 0; index < 4000; index++) insert.run({ payload: `${index}:${"x".repeat(1000)}` }); });
+    db.exec("DELETE FROM bulk WHERE rowid % 7 = 0");
+    return db;
+  }
+  function openCopy(path: string): Database {
+    const copy = openDatabase({ path, migrations: [] });
+    dbs.push(copy);
+    return copy;
+  }
+  const rows = (db: Database) => db.prepare("SELECT rowid AS id, payload FROM bulk ORDER BY rowid").all();
+
+  it("copies an openable, intact database whose implicit rowids are unchanged", async () => {
+    const db = sourceWithRows();
+    const target = join(dirname(tempFile()), "copy.sqlite");
+    expect(await db.backupTo(target)).toBeGreaterThan(100);
+    const copy = openCopy(target);
+    expect(copy.prepare("PRAGMA integrity_check").get()?.integrity_check).toBe("ok");
+    expect(rows(copy)).toEqual(rows(db));
+  });
+
+  it("reflects a same-connection write made while the copy is still running", async () => {
+    const db = sourceWithRows();
+    const target = join(dirname(tempFile()), "copy.sqlite");
+    let settled = false;
+    const copying = db.backupTo(target).finally(() => { settled = true; });
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(settled).toBe(false);
+    db.prepare("INSERT INTO bulk (payload) VALUES ('during')").run();
+    await copying;
+    const copy = openCopy(target);
+    expect(copy.prepare("SELECT count(*) AS n FROM bulk WHERE payload='during'").get()?.n).toBe(1);
+    expect(rows(copy)).toEqual(rows(db));
+  });
+
+  it("refuses to start inside a transaction and rejects when the target cannot be created", async () => {
+    const db = sourceWithRows();
+    const dir = dirname(tempFile());
+    let inside: Promise<number> | undefined;
+    db.transaction(() => { inside = db.backupTo(join(dir, "inside.sqlite")); });
+    await expect(inside).rejects.toThrow(/inside a transaction/);
+    await expect(db.backupTo(join(dir, "missing", "copy.sqlite"))).rejects.toThrow();
+  });
 });

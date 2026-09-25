@@ -42,7 +42,7 @@ export function readHindsightLifecycleStatus(input: HindsightLifecycleStatusInpu
     if (!listed.has(characterId)) banks.push(timelineBank(input, characterId));
   }
   const section = connection(input);
-  return { connection: section, banks, actions: actions(input, { connection: section, banks }) };
+  return { connection: section, banks, actions: actions(input, { connection: section, banks }), backup: null };
 }
 
 // Stopped and authority_mismatch are not connection problems: a revalidation cannot repair either.

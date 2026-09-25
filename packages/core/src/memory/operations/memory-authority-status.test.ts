@@ -49,7 +49,7 @@ describe("memory.authority.status read", () => {
       { bankId: "character", summary: expect.objectContaining({ failedCount: 1 }), parentWritesPending: 0 },
     ]);
     expect(status.hindsight).toEqual({ connection: { config: "ready", drift: "none", admittedAt: null }, banks: [],
-      actions: { revalidate: false, provision: [] } });
+      actions: { revalidate: false, provision: [] }, backup: null });
     expect(status.operations.active).toEqual([]);
     expect(status.operations.recent.map((operation) => [operation.operationId, operation.state])).toEqual([[submitted.operationId, "completed"]]);
   });

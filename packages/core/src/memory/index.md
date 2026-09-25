@@ -67,6 +67,7 @@
 - hindsight/ — Hindsight setup/cutover clients and offline-testable replica sync/reconciliation/recovery; runtime authority composition remains separate
 - operations/ — the durable memory operation owner (Stage 1 + 2a): kind registry over the B3 setup service, B5 scheduler and the Local onboarding service; per-kind boot observation before restart reconciliation; the composite memory.authority.status read
 - hindsight-lifecycle/ — the Stage 2c lifecycle producers under a committed Hindsight authority: new-Character Bank provisioning, connection revalidation + rebind, and the automatic triggers
+- hindsight-backup/ — the Stage 3 backup primitives: artifact store below `<dataDir>/backups/` and the pure Core/native pair verifier
 - hindsight-activation/ — the Stage 2b first-activation coordinator: plan/status reads, Local drain over the write fence, cutover lease, per-Bank D78 chain with checkpoints and evidence replay, promotion with the PR03 custody carry, closed error mapping
 - local-onboarding/ — the Local onboarding service (Stage 2a): the only caller of the B2 runner mutations, read projections (discovered run, exceptions, runtime availability), the memory.onboarding.status composite with server-derived actions, and shutdown checkpointing
 - canonical-tools/ — admission-bound capability-filtered canonical tool adapters and non-advertised compatibility aliases

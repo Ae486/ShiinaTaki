@@ -1,9 +1,10 @@
 /**
  * INPUT:  a db file path (or ':memory:') + an ordered migration list
- * OUTPUT: openDatabase({path, migrations}) -> Database (exec/prepare/transaction/close); toSafeInteger helper
+ * OUTPUT: openDatabase({path, migrations}) -> Database (exec/prepare/transaction/backupTo/close); toSafeInteger helper
  * POS:    core/db — the ONLY module importing node:sqlite; repos receive this wrapper, never DatabaseSync; no fs here
+ *         (backupTo writes only the path its caller owns)
  */
-import { DatabaseSync, type StatementSync } from "node:sqlite";
+import { backup, DatabaseSync, type StatementSync } from "node:sqlite";
 import { runMigrations, type Migration } from "./migration-runner.ts";
 
 /** Values SQLite binds or returns (subset of node:sqlite SQLInputValue / SQLOutputValue we use). */
@@ -26,6 +27,12 @@ export interface Database {
   prepare(sql: string): SqlStatement;
   /** BEGIN/COMMIT around fn, ROLLBACK on throw. Synchronous only — never await inside fn. */
   transaction(fn: () => void): void;
+  /**
+   * Online page copy through this connection; resolves with the page count. Same-connection writes during the copy are
+   * reflected and rowids are kept (VACUUM INTO may renumber implicit rowids that Core orders by). An existing file at
+   * `path` is overwritten, so the caller owns a fresh path and removes it on failure.
+   */
+  backupTo(path: string): Promise<number>;
   close(): void;
 }
 
@@ -61,6 +68,11 @@ function wrap(raw: DatabaseSync): Database {
       return wrapStatement(raw.prepare(sql), assertActive);
     },
     transaction: (fn) => runTransaction(raw, transactionState, fn),
+    backupTo: async (path) => {
+      // A copy started inside a synchronous transaction outlives its callback, so no single committed state would bound it.
+      if (transactionState.depth > 0) throw new Error("sqlite backup cannot start inside a transaction");
+      return backup(raw, path);
+    },
     // Idempotent: shutdown and test teardown may both close; node:sqlite throws on a double raw close.
     close() {
       if (closed) return;

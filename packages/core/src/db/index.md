@@ -9,7 +9,7 @@
 - run-readers.ts — strict Run/Attempt/Receipt aggregate reads shared by the lifecycle writer
 - run-row-mappers.ts — strict Run/Attempt/Receipt row parsing and deterministic snapshot digests
 - scheduled-task-repo.ts — revision-safe Scheduled Task definitions and occurrence outbox persistence
-- sqlite.ts — DatabaseSync wrapper with commit-failure rollback and aborted-transaction SQL isolation; the only node:sqlite importer
+- sqlite.ts — DatabaseSync wrapper with commit-failure rollback, aborted-transaction SQL isolation and the online `backupTo` page copy; the only node:sqlite importer
 - migration-runner.ts — max-version migrations with conservative bare-TEXT guards, exact schema branches and atomic SQL/receipt tracking
 - timeline-repo.ts — timeline_messages SQL: append / deleteEntry / pageBefore / latestAscending / latestSeq / rangeAscending (zod-parse at the row boundary) + listTimelineCharacterIds (bounded distinct Characters)
 - memory-repo.ts — memory_entries + memory_fts SQL: upsert / deleteByPath / listHashes / listActiveByLayers / listActiveInLayer / countActiveSince / search / resolvePath; the 4-column bm25 weights are baked in at construction from config; the retention + tidy-trigger reads anchor on COALESCE(updated_at, created_at)

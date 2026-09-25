@@ -1,11 +1,12 @@
 /**
  * INPUT:  the per-kind handler modules (setup validate/apply, replica sync, local prepare/activate, hindsight activate,
- *         bank provision, connection revalidate)
+ *         bank provision, connection revalidate, the backup kinds)
  * OUTPUT: MEMORY_OPERATION_KINDS — the closed kind registry the service dispatches through
  * POS:    core/memory/operations — one handler module per kind; later stages add a row here, never a branch in the service
  */
 import type { MemoryOperationKind, MemoryOperationRequest } from "@taki/shared";
 import type { MemoryOperationKindHandler } from "./memory-operation-contract.ts";
+import { backupUnsupportedKind } from "./memory-operation-kind-backup.ts";
 import { bankProvisionKind } from "./memory-operation-kind-bank.ts";
 import { connectionRevalidateKind } from "./memory-operation-kind-connection.ts";
 import { hindsightActivateKind } from "./memory-operation-kind-hindsight.ts";
@@ -26,6 +27,9 @@ export const MEMORY_OPERATION_KINDS: MemoryOperationKindRegistry = {
   "hindsight.activate": hindsightActivateKind,
   "bank.provision": bankProvisionKind,
   "connection.revalidate": connectionRevalidateKind,
+  "backup.capture": backupUnsupportedKind,
+  "backup.admit": backupUnsupportedKind,
+  "backup.verify": backupUnsupportedKind,
 };
 
 /** Erases the per-kind request narrowing at the dispatch boundary; the service only ever passes a request of the matching kind. */
