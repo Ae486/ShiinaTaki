@@ -191,15 +191,23 @@ path, one published Local runtime binding, `local.onboard.*` operations and the 
 archived as `09-19-local-onboarding-operation` (commits `b095477` shared, `93febe4` core, `dfe994e` ui, `4224b7d` spec);
 its contract is `.trellis/spec/backend/memory-local-onboarding.md`, its deferred items are D85/D86, and the 2026-09-22
 formal check (`research/check-2026-09-22.md` in the archive) proves AC1-AC9 and AC11 — AC10 owner manual acceptance is
-still pending and must be performed by the owner. Stage 2b (existing-instance first activation `hindsight.activate`:
+batched into the Stage 2 owner acceptance. Stage 2b (existing-instance first activation `hindsight.activate`:
 Canonical Local write fence and drain, D78 chain with per-Bank checkpoints, PR03 custody carry inside the promotion
 transaction, in-process Hindsight rebind with binding-only `recover`, `memory.activation.status` and the Home activation
 card) is archived as `09-19-hindsight-first-activation` (commits `31b8f05` shared, `f34fe08` core, `137b7fb` ui,
 `b9debf1` spec, `37b0ae3` archive); its contract is `.trellis/spec/backend/memory-hindsight-activation.md`, deferred
 items are D87/D88, and the 2026-09-23 formal check (`research/check-2026-09-23.md`, PASS-WITH-FIXES F1-F3) proves the
-automated criteria. Owner manual acceptance of 2a and 2b is batched into one session after Stage 2c. Next delivery is
-Stage 2c `09-19-active-bank-lifecycle` (PRD skeleton only; it also owns D87/D88 triggers). From 2026-09-23 all
-sub-agents run on opus (fable unavailable).
+automated criteria. Stage 2c (active Bank and connection lifecycle: memory-unavailable Runs for a Character without a
+Bank or a drifted/disabled connection with witnessed turns ingested once, `bank.provision` with the native occupancy
+probe, `connection.revalidate` with binding `replace`, automatic once-per-fingerprint triggers per owner Q1-A/Q2-A,
+family `hindsight-lifecycle`, migration 050 persisting the reviewed deployment mode, the `hindsight` status section and
+the Home readiness block) is archived as `09-19-active-bank-lifecycle` (commits `211d37c`/`3a1428c`/`3605604` wave A,
+`e5f172d` S2b per-preparation verification-id fix, `f831880`/`2bf5cb7`/`2c07d6a` wave B, `37b0703` wave C,
+`3929490`/`1b4ccdb`/`fc6964f` check fixes, `356c3cb` spec); its contract is
+`.trellis/spec/backend/memory-hindsight-lifecycle.md`, D87 is closed, D86/D88 are retargeted to Stage 3/4/5, and the
+2026-09-25 formal check (`research/check-2026-09-25.md`, PASS-WITH-FIXES) covers AC1-AC9 and the failure matrix.
+Stage 2 is closed on automated criteria; the batched owner manual acceptance of 2a+2b+2c is now due and must be
+performed by the owner. Next delivery is Stage 3. From 2026-09-23 all sub-agents run on opus (fable unavailable).
 The owner's latest direction makes grill conditional across the whole task: proceed when no major unresolved
 requirement needs an owner decision; reopen grill for a concrete material issue during development. No currently known
 owner question blocks continuation.
