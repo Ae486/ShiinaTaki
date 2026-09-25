@@ -1552,3 +1552,54 @@ Took over S2b after waves A-C were implemented; formal opus check fixed three ME
 
 - Stage 2c 09-19-active-bank-lifecycle: seam research, prd/design/implement, waves
 - Owner batched manual acceptance for Stage 2a+2b+2c after 2c closes
+
+
+## Session 34: Hindsight Stage 2c: active Bank and connection lifecycle
+
+**Date**: 2026-09-25
+**Task**: Hindsight Stage 2c: active Bank and connection lifecycle
+**Branch**: `main`
+
+### Summary
+
+Stage 2c closed on automated criteria: degraded memory-unavailable Runs with witnessed turns, bank.provision and connection.revalidate durable operations with automatic once-per-fingerprint triggers (owner Q1-A/Q2-A), binding replace, migration 050 reviewed deployment mode, hindsight status section and Home readiness block; S2b verification-id defect fixed.
+
+### Main Changes
+
+- Wave A: degrade path, G11 witnesses, lifecycle status section, connection drift reasons
+- Wave B: two lifecycle kinds, occupancy probe, binding replace, verifiedReconnect callers, automatic triggers, migration 050
+- S2b fix: native verification id derived per preparation so a recaptured activation resumes (D87 closed)
+- Wave C: Home readiness rows and 创建 Bank / 重新校验连接 from Core-derived actions
+- Formal check PASS-WITH-FIXES (F1 disable no longer masks integrity failures); spec memory-hindsight-lifecycle.md; D86/D88 retargeted
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `211d37c` | (see git log) |
+| `3a1428c` | (see git log) |
+| `3605604` | (see git log) |
+| `e5f172d` | (see git log) |
+| `f831880` | (see git log) |
+| `2bf5cb7` | (see git log) |
+| `2c07d6a` | (see git log) |
+| `37b0703` | (see git log) |
+| `3929490` | (see git log) |
+| `1b4ccdb` | (see git log) |
+| `fc6964f` | (see git log) |
+| `356c3cb` | (see git log) |
+| `32909f5` | (see git log) |
+| `a46aebf` | (see git log) |
+
+### Testing
+
+- [OK] typecheck 5/5, lint 0, Shared 59/532, Core 406/3254, Desktop 113/646, Desktop build, diff --check, isolated boot head 050 zero fetches
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Owner performs the batched Stage 2 (2a+2b+2c) manual acceptance
+- Plan Stage 3 per plan-review-2026-09-18.md
