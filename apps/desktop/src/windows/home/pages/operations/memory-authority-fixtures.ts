@@ -46,7 +46,7 @@ export function hindsightStatus(patch: Partial<MemoryAuthorityStatus> = {}): Mem
     pending: [{ bankId: "global", parentWritesPending: 2,
       summary: { pendingCount: 1, nativeConfirmedCount: 0, completedCount: 4, supersededCount: 0, failedCount: 0, unknownCount: 1, cancelledCount: 0 } }],
     hindsight: { connection: { config: "ready", drift: "none", admittedAt: AT },
-      banks: [{ scope: "global", characterId: null, nativeBankId: "global", readiness: "ready", errorCode: null }], actions: { revalidate: false, provision: [] } },
+      banks: [{ scope: "global", characterId: null, nativeBankId: "global", readiness: "ready", errorCode: null }], actions: { revalidate: false, provision: [] }, backup: null },
     ...patch,
   };
 }
@@ -76,7 +76,7 @@ const NO_ACTIONS: Section["actions"] = { revalidate: false, provision: [] };
 
 /** Serving runtime, nothing open: provision for the failed and the unprovisioned mappable Characters only. */
 export function lifecycleSection(patch: Partial<Section> = {}): Section {
-  return { connection: { config: "ready", drift: "none", admittedAt: AT }, banks: BANKS, actions: { revalidate: false, provision: ["nana", "yui"] }, ...patch };
+  return { connection: { config: "ready", drift: "none", admittedAt: AT }, banks: BANKS, actions: { revalidate: false, provision: ["nana", "yui"] }, backup: null, ...patch };
 }
 
 /** An open bank.provision for mika: every action is withheld while an exclusive family runs. */
