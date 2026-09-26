@@ -95,6 +95,15 @@ describe("Run-admission Hindsight sync resilience", () => {
     expect(JSON.stringify(f.logs)).not.toContain("private");
   });
 
+  it("degrades to a memory-unavailable Run when the connection changes during the admission sync", async () => {
+    const { f, subsystem, bank } = await primed(); remoteUnits(bank, 1); const commit = bank.server.client.commitApplication;
+    bank.server.client.commitApplication = async (request) => { f.config.upsert("TAKI_HINDSIGHT_REQUEST_TIMEOUT_MS", 12_345); return commit(request); };
+    const run = await subsystem.captureRun("taki");
+    expect(run.tools).toEqual({}); expect(run.snapshot.capabilities.recall).toBe(false); expect(syncLogs(f)).toEqual([]);
+    expect(f.logs.filter((log) => log.msg === "Hindsight Run admitted without memory").map((log) => (log.obj as { code: string }).code))
+      .toEqual(["config_changed"]);
+  });
+
   it("keeps refusing an integrity failure, as a logged structured refusal", async () => {
     const { f, subsystem, bank } = await primed(); remoteUnits(bank, 1); const before = f.replica.checkpoint(bank.scope.bankId);
     const changes = f.remote.client.applicationChanges;

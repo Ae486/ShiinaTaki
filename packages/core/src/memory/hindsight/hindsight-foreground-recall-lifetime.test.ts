@@ -116,9 +116,11 @@ describe("foreground Hindsight Recall lifetime", () => {
     for (const bank of f.banks) expect(f.replica.checkpoint(bank.scope.bankId)?.checkpoint).toEqual({ native_cursor: 2, state_cursor: 0 });
     const result = await settled(subsystem.captureRun("taki"));
     expect(result).toHaveProperty("value"); if (!("value" in result)) return;
+    const recallStarted = Date.now();
     const recalled = await settled(result.value.automaticRecall!({ query: "fact", visibleContext: "", now: Date.now() }));
     expect(recalled).toHaveProperty("value"); if (!("value" in recalled)) return;
     expect(recalled.value).toContain("bank-a fact memory-a"); expect(recalled.value).toContain("bank-taki fact memory-a");
+    expect(Date.now() - recallStarted).toBeGreaterThan(HTTP_MS);
     expect(budgets.every((value) => value === HTTP_MS)).toBe(true);
   });
 

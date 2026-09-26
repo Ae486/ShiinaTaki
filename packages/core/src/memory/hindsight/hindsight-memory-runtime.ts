@@ -1,7 +1,8 @@
 /**
  * INPUT:  the real Hindsight provider/recovery state and Core-owned persona/Block projection
  * OUTPUT: canonical tools, immutable Run memory capture and actual native policy-bearing recall; a memory-unavailable Run
- *         (unavailableRun) when the Character has no ready Bank or a degraded admission sync left no admission evidence;
+ *         (unavailableRun) when the Character has no ready Bank, the connection drifted during an incomplete admission sync or
+ *         a degraded admission sync left no admission evidence;
  *         onSynced after a capture that admitted and synced every routed Bank (the G13 reconnect signal); onSync per Bank
  *         whose admission sync (bounded by admissionBudgetMs(), read per capture) was refused, degraded, deferred or later
  *         failed in the background
@@ -65,7 +66,7 @@ export function createHindsightMemoryRuntime(input: {
       if (!banks) return unavailableRun(characterId, "bank_not_ready");
       const synced = await synchronizeHindsightCapture(state, { characterId, banks, signal,
         budgetMs: input.admissionBudgetMs(), onEvent: input.onSync });
-      if (synced === "admission_unavailable") return unavailableRun(characterId, synced);
+      if (synced !== "synced" && synced !== "partial") return unavailableRun(characterId, synced);
       if (synced === "synced") input.onSynced?.();
       // Both routes and the prompt projection are captured before the coordinator
       // seals capabilities. Later background changes cannot rewrite a queued Run.

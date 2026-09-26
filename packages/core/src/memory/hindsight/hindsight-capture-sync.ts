@@ -1,16 +1,18 @@
 /**
  * INPUT:  a Run's routed Banks, the caller's cancellation, the connection's per-request timeout and the admission budget
- * OUTPUT: synchronizeHindsightCapture() -> "synced" | "partial" | "admission_unavailable", plus one closed-code event per Bank
- *         that was refused, degraded, deferred past the budget or failed later in the background
+ * OUTPUT: synchronizeHindsightCapture() -> "synced" | "partial" | "admission_unavailable" | the connection drift seen after an
+ *         incomplete sync, plus one closed-code event per Bank that was refused, degraded, deferred past the budget or failed
+ *         later in the background
  * POS:    core/memory/hindsight — Run-admission foreground sync bounded by the composed admission budget; unfinished Bank work stays
  *         owned by the Bank service; only integrity, authority and cancellation failures refuse the Run
  */
 import type { MemoryReplicaBank } from "@taki/shared";
 import type { HindsightCallContext } from "./hindsight-client.ts";
 import { hindsightMemoryErrorCode } from "./hindsight-memory-provider-context.ts";
+import type { HindsightConnectionDrift } from "./hindsight-runtime-connection.ts";
 import type { HindsightRuntimeState } from "./hindsight-runtime-state.ts";
 
-export type HindsightCaptureSync = "synced" | "partial" | "admission_unavailable";
+export type HindsightCaptureSync = "synced" | "partial" | "admission_unavailable" | Exclude<HindsightConnectionDrift, "none">;
 export interface HindsightCaptureSyncEvent {
   characterId: string; bankId: string; code: string; outcome: "refused" | "degraded" | "deferred" | "background_failed";
 }
@@ -35,6 +37,10 @@ export async function synchronizeHindsightCapture(state: HindsightRuntimeState, 
   try { await within(syncBanks(state, input, run), input.budgetMs); }
   finally { run.detached = true; input.signal?.removeEventListener("abort", forward); }
   if (input.signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
+  // A connection changed or disabled mid-sync fails the sync guards as an authority mismatch; like a drift seen before
+  // the sync, it degrades this Run to memory-unavailable instead of refusing the chat turn.
+  const drift = run.outcomes.every((outcome) => outcome === "synced") ? "none" : connectionDrift(state);
+  if (drift !== "none") return drift;
   const partial = settle(input, run.outcomes);
   // A readable replica does not prove negotiated capabilities. Missing evidence
   // must not start an implicit coordinator admission without this caller's signal;
@@ -77,6 +83,11 @@ function within(work: Promise<void>, timeoutMs: number): Promise<void> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   const expired = new Promise<void>((resolve) => { timer = setTimeout(resolve, timeoutMs); });
   return Promise.race([work, expired]).finally(() => clearTimeout(timer));
+}
+
+/** An epoch/lineage change (or a stopped runtime) throws here; it stays the original failure's refusal. */
+function connectionDrift(state: HindsightRuntimeState): HindsightConnectionDrift {
+  try { return state.runtime.driftReason(); } catch { return "none"; }
 }
 
 function cancelled(error: unknown): boolean { return hindsightMemoryErrorCode(error) === "MEMORY_OPERATION_CANCELLED"; }
