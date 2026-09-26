@@ -78,3 +78,53 @@ barrels; tests colocated; no real Hindsight/model/user data; boots use a temp da
   each passed alone and the full Core rerun was green, no timeout raised. `git diff --check` clean, no trailing
   whitespace in new files. Isolated boot (archived Stage 2c harness, temp copy removed): port 7363, migrations 1..50,
   0 fetches, exit 0.
+
+### W2 (2026-09-26, implementer; uncommitted)
+
+- Pause: `memory/fenced-memory-tools.ts` (tool fencing extracted from the Local writers, shared by both fences);
+  `memory/hindsight/hindsight-writer-fence.ts` fences engine write tools, observed `writeMemory`, `maintenance.run`,
+  `memoryFlush` (retryable `MEMORY_AUTHORITY_FENCED` outcome) and `tidy`; recall/reflect, Run capture and
+  `recordPrimaryCommitted` stay open. The Hindsight subsystem owns one `writeFence`; the operations runtime view exposes it
+  plus `scheduler.stop/start`.
+- Capture: `backup.capture` kind (`memory-operation-kind-backup-capture.ts`) with admission refusals (no producer, marker
+  not Hindsight, runtime unpublished or drifting, epoch mismatch, busy exclusive family), deferred claim, pre-claim cancel,
+  `observeBoot` -> `outcome_unknown`/`producer_incomplete` with the partial dir quarantined (no redispatch). Family
+  `hindsight-backup` joins `EXCLUSIVE_MEMORY_FAMILIES`. Producer `hindsight-backup-service.ts` runs §5.2: quiesce ->
+  scheduler `stop()` (cancels and awaits the active run) -> one-transaction identity read (`hindsight-backup-identity.ts`)
+  -> `db.backupTo` into the partial dir -> native snapshot (route promise raced against its deadline) -> pair check ->
+  seal; `finally` releases the fence and restarts a scheduler that was started. Composed in `boot/hindsight-backup-boot.ts`,
+  wired in `main.ts` (shutdown aborts an in-flight native snapshot) and the activation journey (optional route double).
+- Route: `HindsightNativeBackupRoute` (`hindsight-backup-route.ts`) + `createUnavailableHindsightBackupRoute()` (production,
+  `HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE` until W5) + in-memory double `hindsight-backup-route-fixtures.ts`.
+- Receipt mapping (ruling 3), pinned in `HINDSIGHT_BACKUP_RECEIPT_MAP`:
+
+  | Core terminal write | Native proof | Id |
+  | --- | --- | --- |
+  | Pending tracked_native_v1 retain, native-confirmed | `memory_native_operation_receipts` | `native-operation:<bank>:<gen>:retain:<remoteOperationId>` |
+  | Pending tracked_native_v1 edit/invalidate/restore, native-confirmed | `memory_native_operation_receipts` | `native-operation:<bank>:<gen>:mutation:<remoteOperationId>` |
+  | Pending legacy edit/invalidate/restore, native-confirmed | `memory_mutation_receipts` | `mutation-receipt:<bank>:<remoteOperationId>` |
+  | Pending legacy retain | cursor-only | — |
+  | D77 application command job completed | `memory_application_operations` | `application-operation:<lineage>:<bank>:<gen>:<operationId>` |
+  | D77 write intent (047), ingestion outbox/provider evidence, policy work (045), observed write, primary witness | cursor-only | — |
+
+  Only rows of the Bank's current Core generation are listed.
+- Rollback (§5.7): `hindsight-cursor-reset.ts`; `mapHttpFailure` reads the 409 body on `/changes` and `/snapshots`
+  (512 KiB cap, never logged): well-formed `cursor_ahead` -> `HindsightRollbackError` (`HINDSIGHT_PROVIDER_ROLLBACK_DETECTED`,
+  non-retryable, not a replica reset); `syncHindsightBankPage` keeps it only for the checkpoint's own lineage/generation,
+  otherwise `HINDSIGHT_CURSOR_RESET_REQUIRED`; `cursor_expired` and unparseable bodies keep the rebuild.
+- Deviations: route interface named `HindsightNativeBackupRoute` (Shared already exports the `HindsightBackupRoute`
+  enum type); the Pending recovery runner is not wrapped separately - it runs only through the scheduler (stopped by
+  capture) and `service.recover` inside already-fenced write paths; `store.quarantine` became synchronous (boot
+  observation cannot await); custody is a minimal presence reader (W3 owns the full record); a native ZIP left on the
+  native host after a later-step failure is not removed (W5/D90).
+- Tests added: `hindsight-writer-fence.test.ts`, `hindsight-backup-service.test.ts` (success, scheduler not started,
+  restart failure logged, 11-row §4 capture failure matrix each asserting no listed artifact/no partial/fence released/
+  scheduler resumed, pair-mismatch detail, stop() aborts native, quarantine, inter-capture write accepted, missing
+  receipt -> `PAIR_MISMATCH`), `hindsight-backup-receipts.test.ts`, `memory-operation-kind-backup-capture.test.ts`
+  (journey: admission matrix, exclusive both ways vs setup/onboarding/activation/lifecycle, pre-claim cancel, capture with
+  chat committing and Run writes refused during the native step, production route `ROUTE_UNAVAILABLE`, mismatch result,
+  restart mid-capture), `hindsight-cursor-reset.test.ts` (409 matrix), runner rollback/no-rebuild + rebuild cases.
+- Gates: `pnpm typecheck` green; `pnpm lint` green; Shared 60 / 540; Desktop 113 / 646; CLI 8 / 47; Core 414 / 3315
+  (+1 skipped POSIX-mode test), no flake this run; `git diff --check` clean. Isolated boot
+  (`research/isolated-process-check.mjs`, kept): port 6744, migrations 1..50 (head), `backup.capture` refused
+  `MEMORY_OPERATION_UNSUPPORTED` on the Local marker with no row and no `backups/` dir, 0 fetches, exit 0.
