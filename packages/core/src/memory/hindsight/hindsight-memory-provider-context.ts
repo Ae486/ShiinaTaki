@@ -1,6 +1,7 @@
 /**
  * INPUT:  captured Hindsight authority, B3 connection/Bank routes and verified application replica
- * OUTPUT: guarded foreground HTTP allowances or explicit operation deadlines, verified capabilities and closed public error envelopes
+ * OUTPUT: guarded foreground HTTP allowances or explicit operation deadlines, verified capabilities, closed public error envelopes and
+ *         the failure-to-MemoryErrorCode classification (hindsightMemoryErrorCode)
  * POS:    core/memory/hindsight — runtime identity boundary; degraded availability never changes Memory Authority
  */
 import {
@@ -125,13 +126,14 @@ export function hindsightAvailabilityCode(code: string | null): boolean {
 export function hindsightProviderError<T>(input: {
   context: MemoryProviderCallContext; capabilities: MemoryProviderCapabilities | null; error: unknown;
 }): MemoryResult<T> {
-  const code = publicCode(input.error);
+  const code = hindsightMemoryErrorCode(input.error);
   const [category, retryable, nextAction] = MEMORY_ERROR_POLICY[code];
   return { ok: false, requestId: input.context.requestId, providerId: "hindsight", authorityEpochId: input.context.authorityEpochId,
     capabilities: input.capabilities, error: MemoryErrorSchema.parse({ code, category, retryable, nextAction, message: MESSAGES[code] }) };
 }
 
-function publicCode(error: unknown): MemoryErrorCode {
+/** The closed public category of a Hindsight failure (availability, revision, authority, integrity, ...). */
+export function hindsightMemoryErrorCode(error: unknown): MemoryErrorCode {
   if (hindsightAvailabilityFailure(error)) return "MEMORY_PROVIDER_UNAVAILABLE";
   if (error instanceof HindsightApplicationRefusal || error instanceof HindsightPolicyRefusal) {
     const code = error instanceof HindsightApplicationRefusal ? error.refusal.code : error.code;

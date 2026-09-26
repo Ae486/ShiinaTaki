@@ -4,9 +4,12 @@
  *         captureRun degrades to a memory-unavailable Run on connection drift, and a refused primary witness is still retained;
  *         background ingestion/curation and flush skip a Character without a routed Bank before any Utility model call; every
  *         memory-unavailable Run reaches onUnavailable, and a fully synced foreground capture calls verifiedReconnect() once
- *         while an automatic Bank waits in availability backoff (G13); writeFence pauses every native writer for backup capture
+ *         while an automatic Bank waits in availability backoff (G13); an incomplete bounded admission sync is logged per Bank
+ *         (warn; error when an integrity failure refuses the Run) and bounded by min(request timeout, half the live chat ack
+ *         deadline); writeFence pauses every native writer for backup capture
  * POS:    core/memory/hindsight — selected provider subsystem; Core retains Compaction and no generic native maintenance is duplicated
  */
+import { TIMING_CONFIG_KEYS, TIMING_POLICY_DEVELOPMENT_DEFAULTS, TimingDurationMsSchema } from "@taki/shared";
 import type { ConfigSource } from "../../config/config-source.ts";
 import type { MemoryConfig } from "../../config/memory-config.ts";
 import { loadHindsightPolicyConfig } from "../../config/hindsight-policy-config.ts";
@@ -32,6 +35,7 @@ import { hindsightAvailabilityCode } from "./hindsight-memory-provider-context.t
 import { createHindsightRuntimeConnection } from "./hindsight-runtime-connection.ts";
 import { createHindsightRuntimeState, type HindsightRuntimeState } from "./hindsight-runtime-state.ts";
 import { createHindsightMemoryRuntime, type HindsightUnavailableRunEvent } from "./hindsight-memory-runtime.ts";
+import type { HindsightCaptureSyncEvent } from "./hindsight-capture-sync.ts";
 import { createHindsightObservedWriter } from "./hindsight-observed-write.ts";
 import { createHindsightIngestion } from "./hindsight-ingestion.ts";
 import { createHindsightPolicyCurator, type HindsightPolicyCurator } from "./hindsight-policy-curator.ts";
@@ -49,11 +53,12 @@ export function createHindsightMemorySubsystem(input: Input) {
   const runtime = createHindsightRuntimeConnection({ ...input, config: input.source });
   const state = createHindsightRuntimeState({ db: input.db, runtime, config: input.config, now: input.now });
   const foreground = createHindsightMemoryRuntime({ state, promptDir: input.promptDir,
+    admissionBudgetMs: () => admissionBudgetMs(input.source, runtime.connection.requestTimeoutMs),
     onUnavailable: (event) => {
       input.logger.warn({ characterId: event.characterId, code: event.reason }, "Hindsight Run admitted without memory");
       input.onUnavailable?.(event);
     },
-    onSynced: () => reconnectAfterForegroundSync(scheduler, input.logger) });
+    onSynced: () => reconnectAfterForegroundSync(scheduler, input.logger), onSync: (event) => logCaptureSync(input.logger, event) });
   const journal = createHindsightIngestionRepo({ db: input.db, pending: state.pending,
     readVerifiedBank: (bankId) => state.replica.bankBinding(bankId)?.bank });
   const ingestion = createHindsightIngestion({ authority: runtime.authority, journal, timeline: input.timeline,
@@ -103,6 +108,17 @@ function reconnectAfterForegroundSync(scheduler: HindsightReplicaScheduler, logg
     const parked = scheduler.status().some((bank) => bank.automatic && bank.retryDueAt !== null && hindsightAvailabilityCode(bank.errorCode));
     if (parked) scheduler.verifiedReconnect();
   } catch { logger.warn({ code: "HINDSIGHT_REPLICA_SCHEDULE_STALE" }, "verified reconnect after a foreground sync was not requested"); }
+}
+
+// The client abandons chat.send at its ack deadline (a live knob); half of it leaves room for the rest of admission.
+function admissionBudgetMs(source: ConfigSource, requestTimeoutMs: number): number {
+  const ack = TimingDurationMsSchema.safeParse(source.resolve(TIMING_CONFIG_KEYS.chatAckMs)?.value);
+  return Math.min(requestTimeoutMs, Math.floor((ack.success ? ack.data : TIMING_POLICY_DEVELOPMENT_DEFAULTS.chatAckMs) / 2));
+}
+
+function logCaptureSync(logger: Logger, event: HindsightCaptureSyncEvent): void {
+  if (event.outcome === "refused") logger.error(event, "Hindsight Run refused by a memory sync integrity failure");
+  else logger.warn(event, "Hindsight Run admission sync incomplete; the Bank catches up in the background");
 }
 
 function recordWitness(input: Input, bound: { runtime: ReturnType<typeof createHindsightRuntimeConnection>;

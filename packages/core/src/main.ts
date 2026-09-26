@@ -220,7 +220,7 @@ const deviceRegistry = createDeviceRegistry({
 });
 const connectionRegistry = createConnectionRegistry();
 const hostCatalogs = createHostCatalogStore();
-const registry = createMethodRegistry();
+const registry = createMethodRegistry({ logger });
 const { approval, coreToolGovernance } = composeApprovalRuntime({
   db, governance, coreHostId, registry, connections: connectionRegistry, logger,
   recordRunEvent: effectLifecycle.record,

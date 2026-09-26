@@ -1,10 +1,11 @@
 /**
  * INPUT:  synthetic scoped native/application records and an owned SQLite path
- * OUTPUT: real curator/work/outbox/replica composition with deterministic byte-client and model substitutes
+ * OUTPUT: real curator/work/outbox/replica composition with deterministic byte-client and model substitutes; a stale artifact/native
+ *         CAS returns a durable refused receipt like native
  * POS:    core/memory/hindsight tests only — no production authority, original data or external model calls
  */
 import type { LanguageModel } from "ai";
-import type { MemoryBankScope, TakiApplicationCommitRequest,
+import type { MemoryBankScope, TakiApplicationCommitReceipt, TakiApplicationCommitRequest, TakiApplicationFailureCode,
   TakiApplicationMemoryBody, TakiMemoryPolicyProjection } from "@taki/shared";
 import { loadMemoryConfig } from "../../config/memory-config.ts";
 import { loadHindsightPolicyConfig } from "../../config/hindsight-policy-config.ts";
@@ -56,6 +57,7 @@ export function curatorTestBank(input: { bankId?: string; characterId?: string;
   server.client.commitApplication = async (request) => {
     if (server.receipts.has(request.request.operation_id)) return commit(request);
     const plan = remotePlan(state, request.request);
+    if (typeof plan === "string") return refusedReceipt(state, request.request, plan);
     const original = await commit(request); const from = { native_cursor: server.cursor.native, state_cursor: server.cursor.state - 1 };
     const event = remoteEvent(state, plan, from); state.events.push(event);
     const affected = applicationTestBody("application-affected-versions.v1", { artifacts: plan.map(({ artifact }) => ({
@@ -66,20 +68,30 @@ export function curatorTestBank(input: { bankId?: string; characterId?: string;
   };
   return state;
 }
-function remotePlan(bank: CuratorTestBank, request: TakiApplicationCommitRequest): ApplicationArtifactFixture[] {
-  return applicationCommandList(uploaded(bank, request.commands_ref.body_id)).map((command) => {
+/** Like native, a stale artifact/native CAS is a durable refused receipt for that exact operation, not a transport error. */
+function remotePlan(bank: CuratorTestBank, request: TakiApplicationCommitRequest): ApplicationArtifactFixture[] | TakiApplicationFailureCode {
+  const commands = applicationCommandList(uploaded(bank, request.commands_ref.body_id)); const plan: ApplicationArtifactFixture[] = [];
+  for (const command of commands) {
     if (command.command !== "put_artifact") throw new Error("fixture only accepts curator put commands");
     const prior = bank.artifacts.find((entry) => sameApplicationValue(entry.artifact.key, command.key));
     const version = prior ? { key: prior.artifact.key, revision: prior.artifact.revision, record_hash: prior.artifact.record_hash } : null;
-    if (!sameApplicationValue(command.expected_artifact, version)) throw new Error("fixture artifact CAS refused");
+    if (!sameApplicationValue(command.expected_artifact, version)) return "artifact_conflict";
     if (command.expected_native) {
       const native = bank.native.find((entry) => entry.head.object_kind === command.expected_native?.object_kind
         && entry.head.object_id === command.expected_native.object_id);
-      if (!sameApplicationValue(native?.head.version, command.expected_native)) throw new Error("fixture native CAS refused");
+      if (!sameApplicationValue(native?.head.version, command.expected_native)) return "native_version_conflict";
     }
-    return applicationTestArtifact({ scope: bank.scope, key: command.key, binding: command.binding,
-      revision: (prior?.artifact.revision ?? 0) + 1, body: uploaded(bank, command.body_ref.body_id) });
-  });
+    plan.push(applicationTestArtifact({ scope: bank.scope, key: command.key, binding: command.binding,
+      revision: (prior?.artifact.revision ?? 0) + 1, body: uploaded(bank, command.body_ref.body_id) }));
+  }
+  return plan;
+}
+function refusedReceipt(bank: CuratorTestBank, request: TakiApplicationCommitRequest, code: TakiApplicationFailureCode): TakiApplicationCommitReceipt {
+  const receipt: TakiApplicationCommitReceipt = { namespace: request.namespace, bank_id: bank.scope.bankId, operation_id: request.operation_id,
+    request_hash: request.request_hash, state: "refused", result_hash: "", checkpoint: null, affected_versions_ref: null,
+    refusal: { error: "application_state_error", code, detail: code }, completed_at: APPLICATION_TEST_AT };
+  receipt.result_hash = hindsightApplicationHash({ ...bank.scope, domain: "receipt", value: withoutApplicationHash(receipt, "result_hash") });
+  bank.server.receipts.set(receipt.operation_id, receipt); return receipt;
 }
 function remoteEvent(bank: CuratorTestBank, artifacts: ApplicationArtifactFixture[], from: { native_cursor: number; state_cursor: number }) {
   const changed: ApplicationNativeFixture[] = [];

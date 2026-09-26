@@ -6,6 +6,8 @@ import { hindsightError } from "./hindsight-errors.ts";
 
 const fixtures: HindsightRuntimeFixture[] = [];
 const HTTP_MS = 10_000;
+/** min(HTTP_MS, half the default 15000 chat ack deadline). */
+const ADMISSION_MS = 7500;
 const STEP_MS = 4000;
 const call = { requestId: "foreground-lifetime", authorityEpochId: "epoch", actor: "foreground-agent" as const };
 const request = { bankId: "bank-a", query: "fact", queryTimestamp: null, limit: 8, maxTokens: 1024,
@@ -94,21 +96,30 @@ describe("foreground Hindsight Recall lifetime", () => {
     expect(f.remote.client.hydrateApplication).toHaveBeenCalledOnce();
   });
 
-  it("captures an unseeded Run and then automatically recalls both Banks without an enlarged budget or pre-sync", async () => {
-    const f = fixture(false); const budgets = slowClient(f); const subsystem = f.subsystem(); const started = Date.now();
+  it("bounds an unseeded Run capture by the admission budget and finishes the cold sync in the background for the next Run", async () => {
+    const f = fixture(false); const budgets = slowClient(f); const subsystem = f.subsystem();
     expect(subsystem.state.runtime.connection.requestTimeoutMs).toBe(HTTP_MS);
     expect(subsystem.state.provider.capabilitiesSnapshot()).toBeUndefined();
     for (const bank of f.banks) expect(f.replica.checkpoint(bank.scope.bankId)).toBeUndefined();
+    let first: { tools: object; automaticRecall?: unknown } | undefined;
+    void subsystem.captureRun("taki").then((run) => { first = run; });
+    await vi.advanceTimersByTimeAsync(ADMISSION_MS - 1); expect(first).toBeUndefined();
+    await vi.advanceTimersByTimeAsync(1);
+    // No admission evidence yet: the Run replies without memory instead of waiting for the cold pull.
+    expect(first?.tools).toEqual({}); expect(first?.automaticRecall).toBeUndefined();
+    expect(f.logs.filter((log) => log.level === "warn").map((log) => log.obj)).toEqual([
+      { characterId: "taki", bankId: "bank-a", code: "HINDSIGHT_DEADLINE_EXCEEDED", outcome: "deferred" },
+      { characterId: "taki", bankId: "bank-taki", code: "HINDSIGHT_DEADLINE_EXCEEDED", outcome: "deferred" },
+      { characterId: "taki", code: "admission_unavailable" }]);
+    await vi.runAllTimersAsync();
+    expect(subsystem.state.provider.capabilitiesSnapshot()).toBeDefined();
+    for (const bank of f.banks) expect(f.replica.checkpoint(bank.scope.bankId)?.checkpoint).toEqual({ native_cursor: 2, state_cursor: 0 });
     const result = await settled(subsystem.captureRun("taki"));
     expect(result).toHaveProperty("value"); if (!("value" in result)) return;
-    expect(Date.now() - started).toBeGreaterThan(HTTP_MS);
-    const recallStarted = Date.now();
     const recalled = await settled(result.value.automaticRecall!({ query: "fact", visibleContext: "", now: Date.now() }));
     expect(recalled).toHaveProperty("value"); if (!("value" in recalled)) return;
     expect(recalled.value).toContain("bank-a fact memory-a"); expect(recalled.value).toContain("bank-taki fact memory-a");
-    expect(Date.now() - recallStarted).toBeGreaterThan(HTTP_MS);
     expect(budgets.every((value) => value === HTTP_MS)).toBe(true);
-    for (const bank of f.banks) expect(f.replica.checkpoint(bank.scope.bankId)?.checkpoint).toEqual({ native_cursor: 2, state_cursor: 0 });
   });
 
   it("renews one owned lease across a complete cold synchronization while keeping its publication identity frozen", async () => {

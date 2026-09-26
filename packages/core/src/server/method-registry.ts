@@ -1,6 +1,7 @@
 /**
  * INPUT:  method registrations ({ method, paramsSchema, handler }) + inbound JSON-RPC requests
- * OUTPUT: createMethodRegistry() -> { register, dispatch }; dispatch returns a JSON-RPC response object
+ * OUTPUT: createMethodRegistry({ logger? }) -> { register, dispatch }; dispatch returns a JSON-RPC response object and logs
+ *         each unexpected failure once (method + closed code or error class; never params, bodies or messages)
  * POS:    core/server — the WS method table + pluggable seam (invariant 7); zod-validates params before the handler
  */
 import {
@@ -12,6 +13,7 @@ import {
 } from "json-rpc-2.0";
 import { ErrorCodeSchema, JSON_RPC_ERROR_CODES, type JsonRpcRequest, type Role } from "@taki/shared";
 import type { ZodType } from "zod";
+import type { Logger } from "../logging/logger.ts";
 import { appErrorResponse } from "./app-error.ts";
 import type { Connection } from "./connection-registry.ts";
 
@@ -57,8 +59,9 @@ interface RegisteredMethod {
  * method is one `register` call, never a switch statement edit. Params are
  * zod-validated before the handler runs; the lib builds the response envelopes.
  */
-export function createMethodRegistry(): MethodRegistry {
+export function createMethodRegistry(options: { logger?: Logger } = {}): MethodRegistry {
   const methods = new Map<string, RegisteredMethod>();
+  const log = options.logger?.child({ mod: "method-registry" });
 
   return {
     register<P>(def: MethodDefinition<P>): void {
@@ -73,21 +76,22 @@ export function createMethodRegistry(): MethodRegistry {
       });
     },
 
-    dispatch: (request, ctx) => dispatch(methods, request, ctx),
+    dispatch: (request, ctx) => dispatch({ methods, log }, request, ctx),
   };
 }
 
-async function dispatch(
-  methods: Map<string, RegisteredMethod>,
-  request: JsonRpcRequest,
-  ctx: MethodContext,
-): Promise<JsonRpcResponse> {
+interface DispatchScope {
+  methods: Map<string, RegisteredMethod>;
+  log?: Logger;
+}
+
+async function dispatch({ methods, log }: DispatchScope, request: JsonRpcRequest, ctx: MethodContext): Promise<JsonRpcResponse> {
   const method = methods.get(request.method);
   if (!method) {
     return createJSONRPCErrorResponse(request.id, JSON_RPC_ERROR_CODES.METHOD_NOT_FOUND, `Method not found: ${request.method}`);
   }
   const parsed = method.paramsSchema.safeParse(request.params);
-  if (!parsed.success) return invalidParams({ method, request, ctx, issues: parsed.error.issues });
+  if (!parsed.success) return invalidParams({ method, request, ctx, log, issues: parsed.error.issues });
   const connection = ctx.connection.state;
   if (connection.status === "authenticated" && !method.roles.includes(connection.role)) {
     return appErrorResponse(request.id, ErrorCodeSchema.enum.FORBIDDEN, `role ${connection.role} may not call ${request.method}`);
@@ -98,24 +102,31 @@ async function dispatch(
     if (error instanceof JSONRPCErrorException) {
       return createJSONRPCErrorResponse(request.id, error.code, error.message, error.data);
     }
-    const message = error instanceof Error ? error.message : String(error);
-    return createJSONRPCErrorResponse(request.id, JSON_RPC_ERROR_CODES.INTERNAL_ERROR, message);
+    return internalError(request, error, log);
   }
+}
+
+// The response keeps its existing message; the log carries only a closed code, since messages may embed content.
+function internalError(request: JsonRpcRequest, error: unknown, log: Logger | undefined): JsonRpcResponse {
+  const message = error instanceof Error ? error.message : String(error);
+  const code = /^[A-Z][A-Z0-9_]+$/.test(message) ? message : error instanceof Error ? error.name : typeof error;
+  log?.error({ method: request.method, code }, "method failed unexpectedly");
+  return createJSONRPCErrorResponse(request.id, JSON_RPC_ERROR_CODES.INTERNAL_ERROR, message);
 }
 
 interface InvalidParamsInput {
   method: RegisteredMethod;
   request: JsonRpcRequest;
   ctx: MethodContext;
+  log?: Logger;
   issues: unknown;
 }
 
-function invalidParams({ method, request, ctx, issues }: InvalidParamsInput): JsonRpcResponse {
+function invalidParams({ method, request, ctx, log, issues }: InvalidParamsInput): JsonRpcResponse {
   try {
     method.onInvalidParams?.(request.params, ctx);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    return createJSONRPCErrorResponse(request.id, JSON_RPC_ERROR_CODES.INTERNAL_ERROR, message);
+    return internalError(request, error, log);
   }
   return createJSONRPCErrorResponse(request.id, JSON_RPC_ERROR_CODES.INVALID_PARAMS, "Invalid params", { issues });
 }

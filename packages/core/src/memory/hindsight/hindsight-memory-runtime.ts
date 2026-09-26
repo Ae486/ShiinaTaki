@@ -1,10 +1,12 @@
 /**
  * INPUT:  the real Hindsight provider/recovery state and Core-owned persona/Block projection
  * OUTPUT: canonical tools, immutable Run memory capture and actual native policy-bearing recall; a memory-unavailable Run
- *         (unavailableRun) when the Character has no ready Bank or an unreachable provider left no admission evidence;
- *         onSynced after a capture that admitted and synced every routed Bank (the G13 reconnect signal)
+ *         (unavailableRun) when the Character has no ready Bank or a degraded admission sync left no admission evidence;
+ *         onSynced after a capture that admitted and synced every routed Bank (the G13 reconnect signal); onSync per Bank
+ *         whose admission sync (bounded by admissionBudgetMs(), read per capture) was refused, degraded, deferred or later
+ *         failed in the background
  * POS:    core/memory/hindsight — foreground engine adapter; legacy generic background/file mutation surfaces refuse explicitly;
- *         integrity failures keep refusing the capture
+ *         integrity/authority failures keep refusing the capture
  */
 import type { MemoryEngine } from "../memory-engine.ts";
 import { CANONICAL_MEMORY_SYSTEM_PROMPT } from "../../agents/chat-agent.ts";
@@ -14,16 +16,16 @@ import { createCanonicalMemoryRun, type CapturedMemoryRun } from "../canonical-m
 import { createMemoryRunReference } from "../memory-capability-snapshot.ts";
 import { createFallbackPersonaProvider, createPersonaProvider } from "../persona-provider.ts";
 import { captureHindsightRuntimeRows, createHindsightRuntimeTidyView } from "./hindsight-runtime-view.ts";
-import { hindsightAvailabilityFailure } from "./hindsight-memory-provider-context.ts";
+import { synchronizeHindsightCapture, type HindsightCaptureSyncEvent } from "./hindsight-capture-sync.ts";
 import type { HindsightRuntimeState } from "./hindsight-runtime-state.ts";
 import { createHindsightRuntimeConsumers } from "./hindsight-runtime-consumers.ts";
 import { createHindsightUnavailableRun, type HindsightUnavailableRunReason } from "./hindsight-unavailable-run.ts";
-import type { MemoryReplicaBank } from "@taki/shared";
 
 export interface HindsightUnavailableRunEvent { characterId: string; reason: HindsightUnavailableRunReason }
 
 export function createHindsightMemoryRuntime(input: {
   state: HindsightRuntimeState; promptDir?: string; onUnavailable?: (event: HindsightUnavailableRunEvent) => void; onSynced?: () => void;
+  onSync?: (event: HindsightCaptureSyncEvent) => void; admissionBudgetMs: () => number;
 }) {
   const { state } = input;
   const consumers = createHindsightRuntimeConsumers();
@@ -61,7 +63,8 @@ export function createHindsightMemoryRuntime(input: {
     captureRun: (characterId: string, signal?: AbortSignal) => consumers.capture(async () => {
       const banks = state.runtime.routedBanks(characterId);
       if (!banks) return unavailableRun(characterId, "bank_not_ready");
-      const synced = await synchronizeForCapture(state, { banks, signal });
+      const synced = await synchronizeHindsightCapture(state, { characterId, banks, signal,
+        budgetMs: input.admissionBudgetMs(), onEvent: input.onSync });
       if (synced === "admission_unavailable") return unavailableRun(characterId, synced);
       if (synced === "synced") input.onSynced?.();
       // Both routes and the prompt projection are captured before the coordinator
@@ -76,23 +79,4 @@ export function createHindsightMemoryRuntime(input: {
 function bankRouter(state: HindsightRuntimeState, characterId: string) {
   const [global, character] = state.runtime.resolveBanks(characterId);
   return { globalBankId: () => global.bankId, characterBankId: () => character.bankId, characterId: () => characterId };
-}
-
-/** "partial": admitted, but some routed Bank was unreachable (the Run keeps its in-Run fallback). */
-async function synchronizeForCapture(state: HindsightRuntimeState, input: { banks: readonly MemoryReplicaBank[]; signal?: AbortSignal }):
-Promise<"synced" | "partial" | "admission_unavailable"> {
-  if (input.signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
-  let unavailable = false;
-  for (const bank of input.banks) {
-    try { await state.service.synchronize({ bankId: bank.bankId, mode: "foreground",
-      context: { timeoutMs: state.runtime.connection.requestTimeoutMs, signal: input.signal } }); }
-    catch (error) { if (!hindsightAvailabilityFailure(error)) throw error; unavailable = true; }
-  }
-  if (input.signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
-  // A readable replica does not prove negotiated capabilities. Missing evidence
-  // must not start an implicit coordinator admission without this caller's signal;
-  // an unreachable provider degrades this Run instead of refusing the chat turn.
-  if (state.provider.capabilitiesSnapshot()) return unavailable ? "partial" : "synced";
-  if (unavailable) return "admission_unavailable";
-  throw new Error("HINDSIGHT_APPLICATION_ADMISSION_UNAVAILABLE");
 }

@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
+import { JSONRPCErrorException } from "json-rpc-2.0";
 import { JSON_RPC_APP_ERROR, JSON_RPC_ERROR_CODES, type JsonRpcRequest, type Role } from "@taki/shared";
+import { createCaptureLogger } from "../testing/capture-logger.ts";
 import type { Connection } from "./connection-registry.ts";
 import { createMethodRegistry, type MethodContext } from "./method-registry.ts";
 
@@ -142,5 +144,35 @@ describe("createMethodRegistry dispatch", () => {
     const res = await registry.dispatch(request("connect", {}), ctxFor(awaiting()));
 
     expect(res).toEqual({ jsonrpc: "2.0", id: "1", result: { status: "ok" } });
+  });
+});
+
+describe("createMethodRegistry failure logging", () => {
+  function failing(thrown: unknown) {
+    const { logger, records } = createCaptureLogger(); const registry = createMethodRegistry({ logger });
+    registry.register({ method: "chat.send", roles: ["operator"], paramsSchema: z.object({ text: z.string() }),
+      handler: () => { throw thrown; } });
+    return { registry, records };
+  }
+
+  it("logs an unexpected failure once with the method and its closed code, keeping the response message", async () => {
+    const { registry, records } = failing(new Error("HINDSIGHT_APPLICATION_NATIVE_VERSION_CONFLICT"));
+    const res = await registry.dispatch(request("chat.send", { text: "secret prompt" }), NOOP_CTX);
+    expect(res).toMatchObject({ error: { code: JSON_RPC_ERROR_CODES.INTERNAL_ERROR, message: "HINDSIGHT_APPLICATION_NATIVE_VERSION_CONFLICT" } });
+    expect(records).toEqual([{ level: "error", obj: { method: "chat.send", code: "HINDSIGHT_APPLICATION_NATIVE_VERSION_CONFLICT" },
+      msg: "method failed unexpectedly" }]);
+  });
+
+  it("logs only the error class for a free-text failure, never its message or params", async () => {
+    const { registry, records } = failing(new TypeError("cannot read key sk-live-123 of prompt"));
+    await registry.dispatch(request("chat.send", { text: "secret prompt" }), NOOP_CTX);
+    expect(records.map((record) => record.obj)).toEqual([{ method: "chat.send", code: "TypeError" }]);
+    expect(JSON.stringify(records)).not.toMatch(/sk-live|secret prompt/);
+  });
+
+  it("does not log a deliberate JSON-RPC error", async () => {
+    const { registry, records } = failing(new JSONRPCErrorException("busy", JSON_RPC_APP_ERROR));
+    await registry.dispatch(request("chat.send", { text: "x" }), NOOP_CTX);
+    expect(records).toEqual([]);
   });
 });

@@ -1,6 +1,7 @@
 /**
  * INPUT:  authenticated D77 state, captured authority/Bank leases and complete native/application checkpoints
- * OUTPUT: atomic joint snapshot/event publication through the existing B5 scheduler interface
+ * OUTPUT: atomic joint snapshot/event publication through the existing B5 scheduler interface; a binding CAS conflict
+ *         re-pulls and retries a bounded number of consecutive times before failing the run
  * POS:    core/memory/hindsight — application-aware pull; policy binding runs between complete pulls, never in SQL transactions
  */
 import { z } from "zod";
@@ -24,6 +25,9 @@ export interface HindsightApplicationBindingPass extends HindsightApplicationSco
   checkpoint: HindsightApplicationReplicaCheckpoint;
   request(): HindsightCallContext;
 }
+/** Consecutive binding CAS conflicts re-pulled within one run before the conflict fails it. */
+const BIND_CONFLICT_RETRIES = 3;
+
 interface Dependencies {
   client: HindsightClient;
   repo: HindsightApplicationReplicaRepo;
@@ -122,15 +126,34 @@ async function synchronize(context: Context, reset: boolean): Promise<MemoryRepl
       checkpoint = await full(context, true);
     }
   }
+  checkpoint = await bindPasses(context, checkpoint);
+  context.request();
+  return { checkpoint: checkpoint.native, observedCursor: checkpoint.checkpoint.native_cursor };
+}
+
+async function bindPasses(context: Context, initial: HindsightApplicationReplicaCheckpoint): Promise<HindsightApplicationReplicaCheckpoint> {
+  const { deps, input } = context; let checkpoint = initial; let conflicts = 0;
   // Neutral/rebinding commands have their own immutable receipts. A receipt is
   // followed by a complete pull before any new policy becomes locally readable.
-  while (!checkpoint.bankDeleted && deps.bind && await deps.bind({ bankId: input.bank.bankId, namespace: checkpoint.namespace,
-    authorityEpochId: context.authority.epochId, bank: input.bank, checkpoint, request: context.request })) {
+  while (!checkpoint.bankDeleted && deps.bind) {
+    try {
+      if (!await deps.bind({ bankId: input.bank.bankId, namespace: checkpoint.namespace, authorityEpochId: context.authority.epochId,
+        bank: input.bank, checkpoint, request: context.request })) return checkpoint;
+      conflicts = 0;
+    } catch (error) {
+      // Native consolidation can advance a unit between the pull and its binding CAS. The refused receipt is durable
+      // for that exact intent only, so a fresh pull yields a new intent against the newer version.
+      if (!bindingConflict(error) || ++conflicts > BIND_CONFLICT_RETRIES) throw error;
+    }
     context.request();
     checkpoint = await incremental(context, checkpoint);
   }
-  context.request();
-  return { checkpoint: checkpoint.native, observedCursor: checkpoint.checkpoint.native_cursor };
+  return checkpoint;
+}
+
+function bindingConflict(error: unknown): boolean {
+  return error instanceof HindsightApplicationRefusal
+    && (error.refusal.code === "native_version_conflict" || error.refusal.code === "artifact_conflict");
 }
 
 async function full(context: Context, reset: boolean): Promise<HindsightApplicationReplicaCheckpoint> {

@@ -71,20 +71,21 @@
 - hindsight-application-recovery-replica.ts — the existing Pending recovery reader interface backed by current D77 projections
 - hindsight-application-source-binding.ts — truthful current-source projection and operation-proven awaiting-source resolution
 - hindsight-application-source-write.ts — an immutable application Source artifact prepared before any native source dispatch
-- hindsight-application-sync-runner.ts — atomic joint publication with fixed operation deadlines or a renewable foreground lease, independent HTTP caps and frozen authority/namespace/checkpoint guards
+- hindsight-application-sync-runner.ts — atomic joint publication with fixed operation deadlines or a renewable foreground lease, independent HTTP caps and frozen authority/namespace/checkpoint guards; a binding CAS conflict re-pulls and retries a bounded number of times
 - hindsight-application-writer.ts — durable original command identity plus independently verified remote receipt/application status
 - hindsight-ingestion-contract.ts — durable source-only plans, original retain payloads, stable operation identities and coverage codecs
 - hindsight-ingestion-lifetime.ts — owner cancellation, serial ingestion chains and a drain that waits for every underlying operation
 - hindsight-ingestion.ts — source-only ingestion with restart-safe gate/Bank coverage, pre-retirement flush and owned stop/drain
 - hindsight-memory-pending-read.ts — separate unconfirmed overlays, gated by exact scope and current known target policy
-- hindsight-memory-provider-context.ts — guarded foreground request allowances, bounded capability admission or explicit shrinking operation deadlines, closed provider failures and the availability-code class (hindsightAvailabilityCode)
+- hindsight-memory-provider-context.ts — guarded foreground request allowances, bounded capability admission or explicit shrinking operation deadlines, closed provider failures (hindsightMemoryErrorCode) and the availability-code class (hindsightAvailabilityCode)
 - hindsight-memory-provider.ts — native reads/reflection with foreground cold-admission cancellation, truthful Pending outcomes and stable authority
 - hindsight-memory-read-projection.ts — exact current Canonical hits admitted by persisted Taki policy before result limits
 - hindsight-memory-recall.ts — foreground native recall and complete hydration under per-HTTP limits, or verified sparse replica plus truthful Pending overlays
 - hindsight-memory-reflect.ts — policy-guarded native reflection with one fixed five-minute allowance across synchronization, admission, policy upload and generation
-- hindsight-memory-runtime.ts — canonical tools, caller-cancellable Run capture requiring verified capability evidence, foreground synchronization without a default business deadline and native policy-bearing recall; degrades to a memory-unavailable Run for a Character without a verified Bank or an unreachable provider with no admission evidence; onSynced after a capture that admitted and synced every routed Bank
+- hindsight-capture-sync.ts — Run-admission Bank sync bounded by the admission budget (min of request timeout and half the live chat ack deadline, composed in the subsystem): unfinished work continues in the Bank service, non-integrity failures degrade the Run, integrity/authority/cancellation refuse it; one closed-code event per unsynced Bank
+- hindsight-memory-runtime.ts — canonical tools, caller-cancellable Run capture requiring verified capability evidence, bounded admission sync and native policy-bearing recall; degrades to a memory-unavailable Run for a Character without a verified Bank or when a degraded admission sync left no admission evidence; onSynced after a capture that admitted and synced every routed Bank
 - hindsight-unavailable-run.ts — the immutable memory-unavailable CapturedMemoryRun (no tools/recall, persona-only assembly, base prompt without the memory floor, all-false capabilities under the admitted identity)
-- hindsight-memory-subsystem.ts — provider/run/ingestion/curator/flush composition with caller-cancellable admission, the existing B5 scheduler and settled shutdown; background ingestion/curation and flush skip a Character without a routed Bank before any model call; a changed/disabled connection degrades the Run and a refused primary witness is kept through the marker-routed witness; every memory-unavailable Run reaches onUnavailable, and a fully synced foreground capture calls verifiedReconnect() once while an automatic Bank waits in availability backoff (G13); every native writer passes the backup write fence it exposes
+- hindsight-memory-subsystem.ts — provider/run/ingestion/curator/flush composition with caller-cancellable admission, the existing B5 scheduler and settled shutdown; background ingestion/curation and flush skip a Character without a routed Bank before any model call; a changed/disabled connection degrades the Run and a refused primary witness is kept through the marker-routed witness; every memory-unavailable Run reaches onUnavailable, and a fully synced foreground capture calls verifiedReconnect() once while an automatic Bank waits in availability backoff (G13); every native writer passes the backup write fence it exposes; logs each incomplete admission sync per Bank (warn, or error for a refusal)
 - hindsight-writer-fence.ts — backup capture pause (§5.3): engine write tools, observed writeMemory, maintenance, flush and tidy admitted through one write fence; recall/reflect, Run capture and the primary witness stay open; fenced tools and flush return retryable MEMORY_AUTHORITY_FENCED
 - hindsight-memory-write-admission.ts — atomic parent intent plus required native/source children, or a stable no-dispatch result
 - hindsight-memory-write-context.ts — guarded write contexts and verified mutation targets shared by admission and recovery
@@ -102,7 +103,7 @@
 - hindsight-policy-context.ts — exact scope/version checks and validated policy bodies for pure policy consumers
 - hindsight-policy-curator-context.ts — narrow curator dependency, review and run-state contracts
 - hindsight-policy-curator-execution.ts — durable model proposals/failures with single-attempt evidence and no remote writes during generation
-- hindsight-policy-curator-fixtures.ts — real curator/work/outbox/replica composition with deterministic byte-client and model substitutes
+- hindsight-policy-curator-fixtures.ts — real curator/work/outbox/replica composition with deterministic byte-client and model substitutes; a stale CAS is a durable refused receipt
 - hindsight-policy-curator-lifetime.ts — a shared deadline/abort lifetime and bounded awaits which cannot resume into late DB callbacks
 - hindsight-policy-curator-model.ts — a bounded production AI SDK tool loop with actual completed-step/token usage
 - hindsight-policy-curator-prompt.ts — dedicated policy-only instructions, fenced report and actual effective prompt hash
