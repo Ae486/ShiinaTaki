@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  HindsightBackupInboxFileSchema, HindsightBackupManifestSchema, HindsightBackupNativeProofSchema, HindsightBackupStatusSectionSchema,
-  HindsightCredentialCustodySchema, MemoryBackupResultSchema,
+  HindsightBackupArchiveProofSchema, HindsightBackupInboxFileSchema, HindsightBackupManifestSchema, HindsightBackupNativeProofSchema,
+  HindsightBackupNativeRequestSchema, HindsightBackupStatusSectionSchema, HindsightCredentialCustodySchema, HindsightIncidentManifestSchema,
+  HindsightNativeArchiveManifestSchema, MemoryBackupResultSchema,
 } from "./hindsight-backup-schema.ts";
 import { HindsightErrorCodeSchema } from "./hindsight-connection-schema.ts";
 import { MemoryOperationErrorCodeSchema, MemoryOperationRequestSchema, MemoryOperationSchema } from "./memory-operation-schema.ts";
@@ -122,8 +123,11 @@ describe("backup operation arms", () => {
     expect(MemoryOperationSchema.safeParse({ ...base, state: "failed", terminalAt: at, reason: "producer_failed",
       errorCode: "HINDSIGHT_BACKUP_PAIR_MISMATCH", result: mismatch }).success).toBe(true);
     expect(MemoryBackupResultSchema.safeParse({ ...mismatch, verifiedAt: at }).success).toBe(false);
-    expect(MemoryOperationRequestSchema.safeParse({ kind: "backup.admit", expectedEpochId: "epoch-h", fileName: "b.zip" }).success).toBe(true);
-    expect(MemoryOperationRequestSchema.safeParse({ kind: "backup.admit", expectedEpochId: "epoch-h", fileName: "../b.zip" }).success).toBe(false);
+    expect(MemoryOperationRequestSchema.safeParse({ kind: "backup.admit", expectedEpochId: "epoch-h", backupId: BACKUP_ID, fileName: "b.zip" }).success).toBe(true);
+    expect(MemoryOperationRequestSchema.safeParse({ kind: "backup.admit", expectedEpochId: "epoch-h", backupId: BACKUP_ID, fileName: "../b.zip" }).success).toBe(false);
+    expect(MemoryOperationRequestSchema.safeParse({ kind: "backup.admit", expectedEpochId: "epoch-h", fileName: "b.zip" }).success).toBe(false);
+    expect(MemoryOperationRequestSchema.safeParse({ kind: "backup.capture", expectedEpochId: "epoch-h", route: "operator-artifact" }).success).toBe(true);
+    expect(MemoryOperationRequestSchema.safeParse({ kind: "backup.capture", expectedEpochId: "epoch-h", route: "cli" }).success).toBe(false);
     expect(MemoryOperationRequestSchema.safeParse({ kind: "backup.verify", backupId: BACKUP_ID }).success).toBe(true);
     expect(MemoryOperationRequestSchema.safeParse({ kind: "backup.verify", backupId: "latest" }).success).toBe(false);
     expect(MemoryOperationErrorCodeSchema.safeParse("HINDSIGHT_BACKUP_QUIESCENCE_TIMEOUT").success).toBe(true);
@@ -132,6 +136,41 @@ describe("backup operation arms", () => {
   it("adds the rollback refusal to the Hindsight code set every replica and operation arm inherits", () => {
     for (const schema of [HindsightErrorCodeSchema, MemoryReplicaErrorCodeSchema, MemoryOperationErrorCodeSchema]) {
       expect(schema.safeParse("HINDSIGHT_PROVIDER_ROLLBACK_DETECTED").success).toBe(true);
+    }
+  });
+});
+
+describe("route-b native request and ZIP proof", () => {
+  const request = { version: 1, backupId: BACKUP_ID, createdAt: at, providerLineageId: LINEAGE, nativeBankIds: ["taki-hs-g"], operationIds: ["write:a", "pending:b"] } as const;
+  const body = Object.fromEntries(Object.entries(proof).filter(([key]) => key !== "zipSha256" && key !== "zipBytes"));
+  const taki = { version: 1, backupId: BACKUP_ID, proof: body, entries: [{ name: "memory_units.bin", bytes: 3, sha256: hex("9") }] } as const;
+  const archive = { version: "2", created_at: at, schema: "public", tables: { memory_units: { rows: 1, size_bytes: 3, columns: [] } }, taki };
+
+  it("keeps the request to unique printable ids and the native Banks Core asked about", () => {
+    expect(HindsightBackupNativeRequestSchema.parse(request)).toEqual(request);
+    for (const invalid of [{ ...request, operationIds: ["a b"] }, { ...request, operationIds: ["a", "a"] }, { ...request, nativeBankIds: ["g", "g"] },
+      { ...request, backupId: "latest" }, { ...request, version: 2 }]) {
+      expect(HindsightBackupNativeRequestSchema.safeParse(invalid).success).toBe(false);
+    }
+  });
+
+  it("reads the native v2 manifest with an optional strict taki proof that cannot carry its own ZIP digest", () => {
+    expect(HindsightNativeArchiveManifestSchema.parse(archive).taki).toEqual(taki);
+    expect(HindsightNativeArchiveManifestSchema.parse({ ...archive, taki: undefined }).taki).toBeUndefined();
+    for (const invalid of [{ ...archive, version: 2 }, { ...archive, taki: { ...taki, proof } }, { ...archive, taki: { ...taki, entries: [...taki.entries, ...taki.entries] } },
+      { ...archive, taki: { ...taki, entries: [{ ...taki.entries[0], name: "../x.bin" }] } }, { ...archive, tables: { "a.b": { rows: 1, size_bytes: 1 } } }]) {
+      expect(HindsightNativeArchiveManifestSchema.safeParse(invalid).success).toBe(false);
+    }
+    expect(HindsightBackupArchiveProofSchema.safeParse({ ...taki, proof: { ...body, receipts: { ...proof.receipts, missingCount: 1 } } }).success).toBe(false);
+  });
+
+  it("records an incident as local evidence, never a full backup", () => {
+    const incident = { version: 1, kind: "incident-local", fullBackup: false, incidentId: BACKUP_ID, createdAt: at, authorityEpochId: "epoch-h",
+      core: { file: "core.sqlite", sha256: hex("1"), bytes: 8192, pages: 2, migrationHead: 50 }, lastVerifiedBackupId: null, backupAgeSeconds: null,
+      missingInterval: [{ bankId: "taki-hs-g", fromNativeCursor: null, toReplicaCursor: 20, pendingCount: 2 }] } as const;
+    expect(HindsightIncidentManifestSchema.parse(incident)).toEqual(incident);
+    for (const invalid of [{ ...incident, fullBackup: true }, { ...incident, backupAgeSeconds: 5 }, { ...incident, lastVerifiedBackupId: BACKUP_ID }]) {
+      expect(HindsightIncidentManifestSchema.safeParse(invalid).success).toBe(false);
     }
   });
 });

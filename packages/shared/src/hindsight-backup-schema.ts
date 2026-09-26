@@ -1,7 +1,8 @@
 /**
  * INPUT:  the Core identity read at capture, the native route's snapshot proof and Secret Catalog presence (never values)
- * OUTPUT: HindsightBackupManifestSchema, native proof, credential custody, pair-mismatch reasons, the memory.authority.status
- *         `hindsight.backup` section and the backup.capture/admit/verify request, producer, result and closed error-code schemas
+ * OUTPUT: HindsightBackupManifestSchema, native proof, native request, the route-b ZIP manifest with its `taki` proof,
+ *         credential custody, pair-mismatch reasons, the memory.authority.status `hindsight.backup` section, the emergency
+ *         incident manifest and the backup.capture/admit/verify request, producer, result and closed error-code schemas
  * POS:    shared/protocol — Stage 3 backup contracts; Core mints every backup id and path, a client names only a listed
  *         backup id or a plain inbox file name
  */
@@ -50,23 +51,58 @@ const NativeBankSchema = z.strictObject({
   bankId: Id, bankGeneration: z.uuid(), currentCursor: Cursor, minimumAvailableCursor: Cursor,
   application: z.strictObject({ nativeCursor: Cursor, stateCursor: Cursor }).nullable(),
 });
-/** Read by the native route inside the same REPEATABLE READ transaction as the snapshot it describes. */
-export const HindsightBackupNativeProofSchema = z.strictObject({
+const NativeProofBodySchema = z.strictObject({
   providerLineage: z.uuid(), alembicRevision: Label, upstreamCommit: Label, compatibilityBuild: Label,
   /** Exactly the Banks Core asked about, keyed by native Bank id. */
   banks: z.array(NativeBankSchema).max(256),
   /** Set membership of the Core-supplied terminal operation ids; count and digest name the list that was checked. */
   receipts: z.strictObject({ count: Count, digest: Digest, missingCount: Count, missingSample: z.array(Id).max(16) }),
-  zipSha256: Digest, zipBytes: z.int().positive(),
-}).superRefine((proof, context) => {
+});
+function refineNativeProof(proof: z.infer<typeof NativeProofBodySchema>, context: z.RefinementCtx): void {
   const fail = failWith(context);
   if (!unique(proof.banks.map((bank) => bank.bankId))) fail("each native Bank appears once");
   const { count, missingCount, missingSample } = proof.receipts;
   if (missingCount > count || missingSample.length > missingCount || (missingCount > 0 && missingSample.length === 0)) {
     fail("missing receipts are a sampled subset of the checked list");
   }
-});
+}
+/** Read by the native route inside the same REPEATABLE READ transaction as the snapshot it describes. */
+export const HindsightBackupNativeProofSchema = NativeProofBodySchema
+  .extend({ zipSha256: Digest, zipBytes: z.int().positive() }).superRefine(refineNativeProof);
 export type HindsightBackupNativeProof = z.infer<typeof HindsightBackupNativeProofSchema>;
+
+/**
+ * What Core asks the native side to snapshot and prove, minted at the Core copy: the route-c request body and the route-b
+ * `native-request.json` the operator hands to the native CLI. Ids are printable ASCII (the receipt digest's byte order).
+ */
+export const HindsightBackupNativeRequestSchema = z.strictObject({
+  version: z.literal(1), backupId: HindsightBackupIdSchema, createdAt: Timestamp, providerLineageId: z.uuid(),
+  nativeBankIds: z.array(Id).max(256),
+  operationIds: z.array(z.string().regex(/^[\x21-\x7e]{1,256}$/)).max(1_000_000),
+}).refine((request) => unique(request.nativeBankIds) && unique(request.operationIds), "each Bank and operation id appears once");
+export type HindsightBackupNativeRequest = z.infer<typeof HindsightBackupNativeRequestSchema>;
+
+const ArchiveEntrySchema = z.strictObject({ name: z.string().regex(/^[A-Za-z0-9_]{1,63}\.bin$/), bytes: Count, sha256: Digest });
+/**
+ * The `taki` object of an operator-produced native ZIP's `manifest.json` (route b). The proof omits the ZIP digest (a ZIP
+ * cannot hash itself; Core hashes the file) and instead pins every table entry, so the proof describes these exact bytes.
+ */
+export const HindsightBackupArchiveProofSchema = z.strictObject({
+  version: z.literal(1),
+  /** Echoes the request: the native snapshot began after the Core copy that minted this id. */
+  backupId: HindsightBackupIdSchema,
+  proof: NativeProofBodySchema.superRefine(refineNativeProof),
+  entries: z.array(ArchiveEntrySchema).max(512),
+}).refine((archive) => unique(archive.entries.map((entry) => entry.name)), "each archive entry appears once");
+export type HindsightBackupArchiveProof = z.infer<typeof HindsightBackupArchiveProofSchema>;
+
+/** The native CLI manifest v2 (`manifest.json` in the ZIP); native-owned fields beyond these are ignored, `taki` is strict. */
+export const HindsightNativeArchiveManifestSchema = z.object({
+  version: z.literal("2"), created_at: z.string().min(1).max(64), schema: Label,
+  tables: z.record(z.string().regex(/^[A-Za-z0-9_]{1,63}$/), z.object({ rows: Count, size_bytes: Count })),
+  taki: HindsightBackupArchiveProofSchema.optional(),
+});
+export type HindsightNativeArchiveManifest = z.infer<typeof HindsightNativeArchiveManifestSchema>;
 
 const CoreBankSchema = z.strictObject({
   bankId: Id, nativeBankId: Id, scope: z.enum(["global", "character"]), characterId: Id.nullable(),
@@ -132,6 +168,11 @@ export type HindsightBackupPairMismatchReason = z.infer<typeof HindsightBackupPa
 export const HindsightBackupPairMismatchSchema = z.strictObject({ reason: HindsightBackupPairMismatchReasonSchema, bankId: Id.nullable() });
 export type HindsightBackupPairMismatch = z.infer<typeof HindsightBackupPairMismatchSchema>;
 
+/** Per Bank: native changes after the last verified backup (to the current Core checkpoint) and unsettled Core writes. */
+const MissingIntervalSchema = z.array(z.strictObject({
+  bankId: Id, fromNativeCursor: Cursor.nullable(), toReplicaCursor: Cursor.nullable(), pendingCount: Count.nullable(),
+})).max(256).refine((banks) => unique(banks.map((bank) => bank.bankId)), "each Bank interval appears once");
+
 /** The memory.authority.status `hindsight.backup` section; unknown stays null, never a fabricated zero. */
 export const HindsightBackupStatusSectionSchema = z.strictObject({
   lastVerified: z.strictObject({
@@ -139,19 +180,28 @@ export const HindsightBackupStatusSectionSchema = z.strictObject({
     nativeCursors: z.array(z.strictObject({ bankId: Id, currentCursor: Cursor })).max(256),
   }).nullable(),
   ageSeconds: Count.nullable(),
-  missingInterval: z.array(z.strictObject({
-    bankId: Id, fromNativeCursor: Cursor.nullable(), toReplicaCursor: Cursor.nullable(), pendingCount: Count.nullable(),
-  })).max(256),
+  missingInterval: MissingIntervalSchema,
 }).superRefine((section, context) => {
   const fail = failWith(context);
   if ((section.lastVerified === null) !== (section.ageSeconds === null)) fail("backup age exists exactly with a verified backup");
-  if (!unique(section.missingInterval.map((bank) => bank.bankId))) fail("each Bank interval appears once");
   if (section.lastVerified === null && section.missingInterval.some((bank) => bank.fromNativeCursor !== null)) {
     fail("an interval starts from a verified backup only");
   }
   if (section.lastVerified !== null && !unique(section.lastVerified.nativeCursors.map((bank) => bank.bankId))) fail("each Bank cursor appears once");
 });
 export type HindsightBackupStatusSection = z.infer<typeof HindsightBackupStatusSectionSchema>;
+
+/** Emergency evidence (never a full backup): a Core copy sealed without contacting native, pointing at the last verified pair. */
+export const HindsightIncidentManifestSchema = z.strictObject({
+  version: z.literal(1), kind: z.literal("incident-local"), fullBackup: z.literal(false),
+  incidentId: z.uuid(), createdAt: Timestamp, authorityEpochId: Id.nullable(),
+  core: z.strictObject({
+    file: z.literal("core.sqlite"), sha256: Digest, bytes: z.int().positive(), pages: z.int().positive(), migrationHead: z.int().positive(),
+  }),
+  lastVerifiedBackupId: HindsightBackupIdSchema.nullable(), backupAgeSeconds: Count.nullable(),
+  missingInterval: MissingIntervalSchema,
+}).refine((incident) => (incident.lastVerifiedBackupId === null) === (incident.backupAgeSeconds === null), "backup age exists exactly with a verified backup");
+export type HindsightIncidentManifest = z.infer<typeof HindsightIncidentManifestSchema>;
 
 export const MemoryBackupErrorCodeSchema = z.enum([
   "HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE", "HINDSIGHT_BACKUP_QUIESCENCE_TIMEOUT", "HINDSIGHT_BACKUP_CORE_CAPTURE_FAILED",
@@ -162,9 +212,16 @@ export const MemoryBackupErrorCodeSchema = z.enum([
 ]);
 export type MemoryBackupErrorCode = z.infer<typeof MemoryBackupErrorCodeSchema>;
 
-export const MemoryBackupCaptureRequestSchema = z.strictObject({ kind: z.literal("backup.capture"), expectedEpochId: Id });
+/**
+ * `native-endpoint` (default) snapshots native in the same paused operation; `operator-artifact` stages the Core copy plus
+ * its native request and releases, and a later backup.admit pairs it with the operator's ZIP.
+ */
+export const MemoryBackupCaptureRequestSchema = z.strictObject({
+  kind: z.literal("backup.capture"), expectedEpochId: Id, route: HindsightBackupRouteSchema.optional(),
+});
+/** Pairs the inbox ZIP with the staged route-b capture `backupId`; the ZIP's `taki.backupId` must echo it. */
 export const MemoryBackupAdmitRequestSchema = z.strictObject({
-  kind: z.literal("backup.admit"), expectedEpochId: Id, fileName: HindsightBackupInboxFileSchema,
+  kind: z.literal("backup.admit"), expectedEpochId: Id, backupId: HindsightBackupIdSchema, fileName: HindsightBackupInboxFileSchema,
 });
 export const MemoryBackupVerifyRequestSchema = z.strictObject({ kind: z.literal("backup.verify"), backupId: HindsightBackupIdSchema });
 export const MemoryBackupProducerRefSchema = z.strictObject({
