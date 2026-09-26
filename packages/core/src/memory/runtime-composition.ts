@@ -254,7 +254,8 @@ function captureLegacyRun(db: Database, subsystem: SelectedSubsystem, characterI
 function operationsRuntime(hindsight: HindsightSubsystem): MemoryOperationsRuntime {
   const { runtime, pending } = hindsight.state;
   return { epochId: runtime.epoch.epochId, configFingerprint: runtime.configFingerprint, deploymentMode: runtime.connection.deploymentMode,
-    scheduler: hindsight.scheduler, banks: runtime.banks, assertConnection: runtime.assertConnection, driftReason: runtime.driftReason, pendingSummary: (bankId) => pending.summary({ authorityEpochId: runtime.epoch.epochId, bankId }) };
+    scheduler: hindsight.scheduler, writeFence: hindsight.writeFence, banks: runtime.banks, assertConnection: runtime.assertConnection,
+    driftReason: runtime.driftReason, pendingSummary: (bankId) => pending.summary({ authorityEpochId: runtime.epoch.epochId, bankId }) };
 }
 
 function diagnosticSnapshot(db: Database) {

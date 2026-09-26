@@ -4,7 +4,8 @@
  * OUTPUT: createHindsightActivationJourney() -> the real composition (Legacy at boot), the real B3 setup service, the Local
  *         onboarding, Hindsight activation and Hindsight lifecycle services, the automatic lifecycle trigger (bound only
  *         when `automatic`) and one operation owner, with restart(bootId) reopening the same database as a new boot;
- *         `characters` adds native-side Banks for Characters no setup has provisioned; never imported by production code
+ *         `characters` adds native-side Banks for Characters no setup has provisioned; `backupRoute` gives the Stage 3
+ *         backup producer a native route double (unavailable otherwise); never imported by production code
  * POS:    core/memory/hindsight-activation — test-only harness for the C03 and Stage 2c journeys through registered operations
  */
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
@@ -13,6 +14,7 @@ import { dirname, join } from "node:path";
 import type { MockLanguageModelV4 } from "ai/test";
 import type { MemoryOperation, MemoryOperationRequest, TimelineEntry } from "@taki/shared";
 import { composeHindsightActivation } from "../../boot/hindsight-activation-boot.ts";
+import { composeHindsightBackup } from "../../boot/hindsight-backup-boot.ts";
 import { composeHindsightLifecycle } from "../../boot/hindsight-lifecycle-boot.ts";
 import { createConfigSource } from "../../config/config-source.ts";
 import { resolveHindsightConfig } from "../../config/hindsight-config.ts";
@@ -21,7 +23,7 @@ import { createHindsightBankSetupRepo } from "../../db/hindsight-bank-setup-repo
 import { createHindsightConnectionRepo } from "../../db/hindsight-connection-repo.ts";
 import { createMemoryOperationRepo } from "../../db/memory-operation-repo.ts";
 import { MIGRATIONS } from "../../db/migrations/index-list.ts";
-import { openDatabase } from "../../db/sqlite.ts";
+import { openDatabase, type Database } from "../../db/sqlite.ts";
 import { createSummaryRepo } from "../../db/summary-repo.ts";
 import { createTimelineRepo } from "../../db/timeline-repo.ts";
 import { createCaptureLogger } from "../../testing/capture-logger.ts";
@@ -29,6 +31,7 @@ import { createHindsightActivationTransport, type HindsightActivationTransport }
 import { hindsightApplicationClientOverlay, hindsightFixtureSecrets } from "../../testing/hindsight-runtime-composition-fixtures.ts";
 import { failingGenerateModel } from "../../testing/mock-language-model.ts";
 import { rmTempDir } from "../../testing/rm-temp.ts";
+import type { HindsightNativeBackupRoute } from "../hindsight-backup/hindsight-backup-route.ts";
 import { hindsightBankBindings } from "../hindsight/hindsight-bank-identity.ts";
 import type { HindsightClient } from "../hindsight/hindsight-client.ts";
 import { createHindsightCompatibilityService } from "../hindsight/hindsight-compatibility-service.ts";
@@ -51,7 +54,9 @@ import { readHindsightActivationStatus } from "./hindsight-activation-status.ts"
 export const JOURNEY_CHARACTER = "taki";
 const ENDPOINT = "http://127.0.0.1:18481";
 
-export function createHindsightActivationJourney(options: { model?: MockLanguageModelV4; characters?: string[]; automatic?: boolean } = {}) {
+export function createHindsightActivationJourney(options: {
+  model?: MockLanguageModelV4; characters?: string[]; automatic?: boolean; backupRoute?: HindsightNativeBackupRoute;
+} = {}) {
   const dataDir = mkdtempSync(join(tmpdir(), "taki-hindsight-journey-"));
   const workspaceRoot = join(dataDir, "workspace");
   const entry = join(workspaceRoot, PROFILE_ENTRY);
@@ -70,7 +75,8 @@ export function createHindsightActivationJourney(options: { model?: MockLanguage
   ...extra.map((entry) => curatorTestBank({ bankId: entry.binding.externalBankId, characterId: entry.characterId, memories: [] }))]);
   // One client answers both the D78 activation routes (transport double) and the D77 application methods (in-memory overlay).
   const client: HindsightClient = { ...transport.client, ...application.overlay };
-  const boot = { dataDir, workspaceRoot, model, logger, logs, secrets, transport, application, client, bindings, automatic: options.automatic ?? false };
+  const boot = { dataDir, workspaceRoot, model, logger, logs, secrets, transport, application, client, bindings, automatic: options.automatic ?? false,
+    backupRoute: options.backupRoute };
   let session = openSession(boot, "boot-a");
   return {
     ...boot,
@@ -86,6 +92,7 @@ export type JourneySession = ReturnType<typeof openSession>;
 interface Boot {
   dataDir: string; workspaceRoot: string; model: MockLanguageModelV4; logger: ReturnType<typeof createCaptureLogger>["logger"];
   secrets: ReturnType<typeof hindsightFixtureSecrets>; transport: HindsightActivationTransport; client: HindsightClient; automatic: boolean;
+  backupRoute?: HindsightNativeBackupRoute;
 }
 
 function openSession(boot: Boot, bootId: string) {
@@ -108,9 +115,10 @@ function openSession(boot: Boot, bootId: string) {
   const local = createLocalOnboardingService({ db, workspaceRoot: boot.workspaceRoot, runner: runtime.migrationRunner, runtime, owner: bootId, onChanged: () => undefined });
   const activation = composeHindsightActivation({ db, config: source, secrets: boot.secrets.catalog, setup, runtime, logger: boot.logger, client: boot.client });
   const lifecycle = composeHindsightLifecycle({ db, config: source, secrets: boot.secrets.catalog, runtime, logger: boot.logger, client: boot.client });
+  const backup = openBackup(boot, db);
   const changes: MemoryOperation[] = [];
-  const operations = createMemoryOperationService({ db, live: runtime.operations, setup, local, hindsight: activation, lifecycle, bootId, logger: boot.logger,
-    onChanged: (operation) => changes.push(operation) });
+  const operations = createMemoryOperationService({ db, live: runtime.operations, setup, local, hindsight: activation, lifecycle, backup, bootId,
+    logger: boot.logger, onChanged: (operation) => changes.push(operation) });
   if (boot.automatic) trigger.bind({ lifecycle, operations });
   const settled = async (request: MemoryOperationRequest): Promise<MemoryOperation> => {
     const admitted = operations.submit(request);
@@ -123,19 +131,24 @@ function openSession(boot: Boot, bootId: string) {
     return entries;
   };
   return {
-    bootId, db, config, source, timeline, runtime, setup, local, activation, lifecycle, trigger, operations, changes, settled, chat,
+    bootId, db, config, source, timeline, runtime, setup, local, activation, lifecycle, backup, trigger, operations, changes, settled, chat,
     activationStatus: () => readHindsightActivationStatus({ service: activation, operations }),
     onboardingStatus: () => readLocalOnboardingStatus({ local, operations }),
     authorityStatus: () => readMemoryAuthorityStatus({ db, live: runtime.operations, binding: runtime.bindingSnapshot,
       hindsightBinding: runtime.hindsightBindingSnapshot, setup, operations,
       liveConnection: () => readHindsightLiveConnection({ config: source, secrets: boot.secrets.catalog }), lifecycle }),
     stop: async () => {
-      await Promise.all([local.stop(), activation.stop(), lifecycle.stop()]);
+      await Promise.all([local.stop(), activation.stop(), lifecycle.stop(), backup.stop()]);
       await runtime.stop().catch(() => undefined);
       await operations.stop();
       db.close();
     },
   };
+}
+
+function openBackup(boot: Boot, db: Database) {
+  return composeHindsightBackup({ db, dataDir: boot.dataDir, secrets: { catalog: boot.secrets.catalog, storeId: "journey-host" },
+    logger: boot.logger, route: boot.backupRoute });
 }
 
 /** Legacy -> Local through the registered S2a kinds; returns the committed Local epoch. */

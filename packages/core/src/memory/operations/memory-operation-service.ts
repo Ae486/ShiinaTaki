@@ -1,6 +1,7 @@
 /**
  * INPUT:  operator operation requests (plus Core's automatic lifecycle submissions), the kind registry, the live Hindsight
- *         runtime accessor, the B3 setup service and the optional Local onboarding / Hindsight activation / lifecycle services
+ *         runtime accessor, the B3 setup service and the optional Local onboarding / Hindsight activation / lifecycle / backup
+ *         services
  * OUTPUT: createMemoryOperationService() — durable admit/execute/observe/settle/cancel with transition fan-out
  * POS:    core/memory/operations — the single operation owner (D-S1-1); every state change is a repo CAS, then onChanged
  */
@@ -11,6 +12,7 @@ import type { Database } from "../../db/sqlite.ts";
 import type { Logger } from "../../logging/logger.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
 import type { HindsightActivationService } from "../hindsight-activation/hindsight-activation-service.ts";
+import type { HindsightBackupService } from "../hindsight-backup/hindsight-backup-service.ts";
 import type { HindsightLifecycleService } from "../hindsight-lifecycle/hindsight-lifecycle-service.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
 import type { LocalOnboardingService } from "../local-onboarding/local-onboarding-service.ts";
@@ -41,6 +43,7 @@ export interface MemoryOperationServiceInput {
   local?: LocalOnboardingService;
   hindsight?: HindsightActivationService;
   lifecycle?: HindsightLifecycleService;
+  backup?: HindsightBackupService;
   bootId: string;
   onChanged(operation: MemoryOperation): void;
   logger: Logger;
@@ -59,7 +62,8 @@ export function createMemoryOperationService(input: MemoryOperationServiceInput)
   const repo = input.repo ?? createMemoryOperationRepo(input.db, now);
   const owner: Owner = {
     repo, kinds: input.kinds ?? MEMORY_OPERATION_KINDS,
-    ctx: { live: input.live, setup: input.setup, local: input.local, hindsight: input.hindsight, lifecycle: input.lifecycle, lookup: (operationId) => repo.get(operationId),
+    ctx: { live: input.live, setup: input.setup, local: input.local, hindsight: input.hindsight, lifecycle: input.lifecycle, backup: input.backup,
+      lookup: (operationId) => repo.get(operationId),
       activeInFamily: (family) => repo.activeInFamily(family), latestInFamily: (family) => repo.latestInFamily(family), now }, input, inflight: new Set(),
   };
   observeBoot(owner);

@@ -1,13 +1,14 @@
 /**
- * INPUT:  backup.capture / backup.admit / backup.verify requests
- * OUTPUT: backupUnsupportedKind — refuses every backup kind MEMORY_OPERATION_UNSUPPORTED at admission (no row, no effect)
+ * INPUT:  backup.admit / backup.verify requests
+ * OUTPUT: HINDSIGHT_BACKUP_FAMILY and backupUnsupportedKind — refuses admit/verify MEMORY_OPERATION_UNSUPPORTED at admission
+ *         (no row, no effect); backup.capture has its own handler in memory-operation-kind-backup-capture.ts
  * POS:    core/memory/operations — family hindsight-backup; holds the registry rows the Shared contract requires until the
- *         Stage 3 backup producers replace this handler (task 09-25-hindsight-backup-restore W2/W3)
+ *         Stage 3 admit/verify producers replace this handler (task 09-25-hindsight-backup-restore W3)
  */
 import type { MemoryOperationRequest } from "@taki/shared";
 import { MemoryOperationRefusal, type MemoryOperationKindHandler } from "./memory-operation-contract.ts";
 
-type BackupRequest = Extract<MemoryOperationRequest, { kind: "backup.capture" | "backup.admit" | "backup.verify" }>;
+type BackupRequest = Extract<MemoryOperationRequest, { kind: "backup.admit" | "backup.verify" }>;
 
 export const HINDSIGHT_BACKUP_FAMILY = "hindsight-backup";
 

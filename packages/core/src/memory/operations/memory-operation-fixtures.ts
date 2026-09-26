@@ -6,6 +6,7 @@
 import { vi } from "vitest";
 import type { HindsightSetupSnapshot, MemoryReplicaBank, MemoryReplicaRunKind, MemoryReplicaSyncStatus } from "@taki/shared";
 import type { Database } from "../../db/sqlite.ts";
+import { createCanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
 import type { HindsightConnectionDrift } from "../hindsight/hindsight-runtime-connection.ts";
 import type { MemoryOperationsRuntime } from "./memory-operation-contract.ts";
@@ -66,6 +67,8 @@ function fakeScheduler(banks: MemoryReplicaBank[], clock: () => string) {
   const required = (bankId: string) => { const state = states.get(bankId); if (!state) throw new Error("HINDSIGHT_REPLICA_BANK_NOT_SCHEDULED"); return state; };
   const scheduler: FakeScheduler = {
     started: () => control.started,
+    start: vi.fn(() => { control.started = true; }),
+    stop: vi.fn(async () => { control.started = false; }),
     setStarted: (value) => { control.started = value; },
     program: (next) => { control.outcome = next; },
     hold: () => { let release = (): void => undefined; control.gate = new Promise<void>((done) => { release = done; }); return () => { control.gate = null; release(); }; },
@@ -110,7 +113,8 @@ export function fakeRuntime(banks: MemoryReplicaBank[], clock: () => string): Fa
   const driftReason = () => { if (connectionError) throw new Error(connectionError); return drift; };
   const guard = () => { if (driftReason() !== "none") throw new Error("MEMORY_AUTHORITY_MISMATCH"); };
   return {
-    epochId: "epoch", configFingerprint: "a".repeat(64), deploymentMode: "existing-instance", scheduler, banks: () => { guard(); return banks; },
+    epochId: "epoch", configFingerprint: "a".repeat(64), deploymentMode: "existing-instance", scheduler, writeFence: createCanonicalLocalWriteFence(),
+    banks: () => { guard(); return banks; },
     assertConnection: guard, driftReason,
     pendingSummary: () => ({ pendingCount: 0, nativeConfirmedCount: 0, completedCount: 0, supersededCount: 0, failedCount: 1, unknownCount: 2, cancelledCount: 0 }),
     breakConnection: (message) => { connectionError = message; },

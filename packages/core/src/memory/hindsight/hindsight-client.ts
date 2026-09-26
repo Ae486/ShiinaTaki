@@ -6,6 +6,7 @@
 import { type HindsightBankLlmHealthProjection, type HindsightErrorCode } from "@taki/shared";
 import { addAbortListener } from "node:events";
 import { normalizeHindsightEndpoint } from "./hindsight-endpoint-policy.ts";
+import { hindsightCursorResetFailure } from "./hindsight-cursor-reset.ts";
 import { HindsightError, hindsightError } from "./hindsight-errors.ts";
 import { HINDSIGHT_DEFAULT_RESPONSE_BYTES, hindsightHttpTransport } from "./hindsight-http-transport.ts";
 import {
@@ -230,7 +231,7 @@ async function requestJson<T>(input: RequestJsonInput<T>): Promise<T> {
     if (response.status === 401 || response.status === 403) throw hindsightError("HINDSIGHT_AUTHENTICATION_FAILED");
     if (response.status === 500 && input.path.includes("/snapshots")) throw hindsightError("HINDSIGHT_SNAPSHOT_INTEGRITY");
     if (response.status >= 500) throw hindsightError("HINDSIGHT_UNREACHABLE");
-    if (response.status < 200 || response.status >= 300) throw mapHttpFailure(response.status, input.path);
+    if (response.status < 200 || response.status >= 300) throw mapHttpFailure(response.status, input.path, response.body);
     return parseResponse(response, input.schema, input.maxResponseBytes);
   } catch (error) {
     requireActiveRequest(signal, controller.signal, firstAbort.reason);
@@ -276,17 +277,17 @@ function requireActiveRequest(signal: AbortSignal, deadline: AbortSignal, firstR
   throw hindsightError(deadline.aborted && firstReason === deadline.reason ? "HINDSIGHT_TIMEOUT" : "HINDSIGHT_CANCELLED");
 }
 
-function mapHttpFailure(status: number, path: string): HindsightError {
+function mapHttpFailure(status: number, path: string, body: string): HindsightError {
   const snapshot = path.includes("/snapshots");
+  if ((snapshot || path.includes("/changes?")) && status === 409) return hindsightCursorResetFailure(body);
   const nativeRead = /^\/v1\/default\/banks\/[^/]+\/(?:memories\/recall|reflect)$/.test(path);
   const code: HindsightErrorCode = status === 408 ? "HINDSIGHT_TIMEOUT"
-    : (snapshot || path.includes("/changes?")) && status === 409 ? "HINDSIGHT_CURSOR_RESET_REQUIRED"
-      : snapshot && status === 410 ? "HINDSIGHT_SNAPSHOT_EXPIRED"
-        : snapshot && status === 404 && path.includes("/pages/") ? "HINDSIGHT_SNAPSHOT_PAGE_MISSING"
-          : snapshot && status === 404 ? "HINDSIGHT_SNAPSHOT_NOT_FOUND"
-            : status === 409 && path.endsWith("/memories") ? "HINDSIGHT_OPERATION_IDENTITY_CONFLICT"
-              : status === 409 ? "HINDSIGHT_TEMPLATE_CONFLICT"
-              : (status === 422 || status === 400) && nativeRead ? "HINDSIGHT_RESPONSE_INVALID"
-              : status === 422 || status === 400 ? "HINDSIGHT_TEMPLATE_INVALID" : "HINDSIGHT_RESPONSE_INVALID";
+    : snapshot && status === 410 ? "HINDSIGHT_SNAPSHOT_EXPIRED"
+      : snapshot && status === 404 && path.includes("/pages/") ? "HINDSIGHT_SNAPSHOT_PAGE_MISSING"
+        : snapshot && status === 404 ? "HINDSIGHT_SNAPSHOT_NOT_FOUND"
+          : status === 409 && path.endsWith("/memories") ? "HINDSIGHT_OPERATION_IDENTITY_CONFLICT"
+            : status === 409 ? "HINDSIGHT_TEMPLATE_CONFLICT"
+            : (status === 422 || status === 400) && nativeRead ? "HINDSIGHT_RESPONSE_INVALID"
+            : status === 422 || status === 400 ? "HINDSIGHT_TEMPLATE_INVALID" : "HINDSIGHT_RESPONSE_INVALID";
   return hindsightError(code);
 }

@@ -6,6 +6,7 @@ import { createHindsightReplicaSchedulerRepo, type HindsightReplicaSchedulerRepo
 import { MIGRATIONS } from "../../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../../db/sqlite.ts";
 import { createLogger } from "../../logging/logger.ts";
+import { createCanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 import { createHindsightReplicaScheduler, type HindsightReplicaScheduler } from "../hindsight/hindsight-replica-scheduler.ts";
 import type { HindsightReplicaRunInput } from "../hindsight/hindsight-replica-sync-runner.ts";
 import { MemoryOperationRefusal } from "./memory-operation-contract.ts";
@@ -50,7 +51,7 @@ function fixture(banks: MemoryReplicaBank[] = [GLOBAL]) {
     const changes: MemoryOperation[] = [];
     const service = createMemoryOperationService({
       db, setup: fakeSetup(), bootId: "boot", now: clock, logger: createLogger("fatal"), onChanged: (operation) => changes.push(operation),
-      live: () => ({ epochId: "epoch", configFingerprint: "a".repeat(64), deploymentMode: "existing-instance", scheduler, banks: () => banks, assertConnection: () => undefined, driftReason: () => "none",
+      live: () => ({ epochId: "epoch", configFingerprint: "a".repeat(64), deploymentMode: "existing-instance", scheduler, writeFence: createCanonicalLocalWriteFence(), banks: () => banks, assertConnection: () => undefined, driftReason: () => "none",
         pendingSummary: () => ({ pendingCount: 0, nativeConfirmedCount: 0, completedCount: 0, supersededCount: 0, failedCount: 0, unknownCount: 0, cancelledCount: 0 }) }),
     });
     services.push(service);

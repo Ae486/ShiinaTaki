@@ -235,6 +235,33 @@ describe("B5 admitted client/repository runner", () => {
     expect(authorityState(f.db)).toEqual(beforeAuthority);
   });
 
+  const cursorReset = (reason: string, identity: { lineage?: string; generation?: string } = {}) => ({ status: 409, body: JSON.stringify({
+    error: "replication_cursor_reset_required", reason, bank_id: "global", requested_cursor: 8, minimum_available_cursor: 0, current_cursor: 3,
+    provider_lineage: identity.lineage ?? lineage, bank_generation: identity.generation ?? generation }) });
+
+  it("refuses a same-lineage same-generation cursor_ahead as a provider rollback without rebuilding the replica (§5.7)", async () => {
+    const f = fixture(); await f.execute("full");
+    const before = durableState(f.db); const snapshotsBefore = f.calls.filter((path) => path.endsWith("/snapshots")).length;
+    f.hook = (url, response) => url.pathname.endsWith("/changes") ? cursorReset("cursor_ahead") : response;
+    const scheduler = f.scheduler(); scheduler.start(); scheduler.requestManual("global"); await scheduler.tick();
+    expect(scheduler.status()[0]).toMatchObject({ mode: "failed", errorCode: "HINDSIGHT_PROVIDER_ROLLBACK_DETECTED", checkpoint: { endCursor: 8 } });
+    expect(f.calls.filter((path) => path.endsWith("/snapshots"))).toHaveLength(snapshotsBefore);
+    expect(durableState(f.db)).toEqual(before);
+  });
+
+  it.each([
+    ["cursor_expired on the same identity", cursorReset("cursor_expired")],
+    ["cursor_ahead on another generation", cursorReset("cursor_ahead", { generation: other })],
+    ["cursor_ahead on another lineage", cursorReset("cursor_ahead", { lineage: other })],
+  ])("keeps the verified-snapshot rebuild for %s", async (_name, reset) => {
+    const f = fixture(); await f.execute("full");
+    const remote = f.remote.get("global")!; remote.cursor = 1;
+    remote.records = [bankRecord("global"), sourceRecord("global"), memory("global", "new", { revision: 1, text: "新的快照" })];
+    f.hook = (url, response) => url.pathname.endsWith("/changes") ? reset : response;
+    const scheduler = f.scheduler(); scheduler.start(); scheduler.requestManual("global"); await scheduler.tick();
+    expect(scheduler.status()[0]).toMatchObject({ mode: "idle", fullReconciliationState: "succeeded", checkpoint: { endCursor: 1 } });
+  });
+
   it("handles a generation reset discovered by a periodic full reconciliation", async () => {
     const f = fixture(); const remote = f.remote.get("global")!; remote.generation = other; remote.cursor = 0;
     await f.execute("full");

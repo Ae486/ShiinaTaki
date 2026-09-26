@@ -1,11 +1,13 @@
 /**
  * INPUT:  one admitted Hindsight client, verified checkpoint, trusted projection, and captured publication constraints
- * OUTPUT: one complete journal page atomically committed under lease, deadline, and optional Authority/Bank guards
+ * OUTPUT: one complete journal page atomically committed under lease, deadline, and optional Authority/Bank guards; a native
+ *         `cursor_ahead` on the checkpoint's own lineage and generation surfaces as a rollback, never a reset
  * POS:    core/memory/hindsight — B5 one-Bank synchronization primitive, detached from runtime recall and authority
  */
 import type { MemoryAuthorityEpoch, MemoryReplicaBank, MemoryReplicaCheckpoint, MemoryReplicaLease } from "@taki/shared";
 import type { HindsightClient, HindsightCallContext } from "./hindsight-client.ts";
 import type { HindsightReplicaSyncRepo } from "../../db/hindsight-replica-sync-repo.ts";
+import { confirmHindsightRollback } from "./hindsight-cursor-reset.ts";
 import { projectHindsightJournal, type HindsightReplicaProjection } from "./hindsight-replica-projection.ts";
 
 export async function syncHindsightBankPage(input: {
@@ -18,7 +20,8 @@ export async function syncHindsightBankPage(input: {
   const expectedCheckpoint = input.repo.checkpoint(input.lease.bankId);
   if (!expectedCheckpoint) throw new Error("HINDSIGHT_CHECKPOINT_MISSING");
   const journal = await input.client.changesAfter({ bankId: input.lease.bankId,
-    afterCursor: expectedCheckpoint.endCursor, limit: 500, context: input.context });
+    afterCursor: expectedCheckpoint.endCursor, limit: 500, context: input.context })
+    .catch((error: unknown) => { throw confirmHindsightRollback(error, expectedCheckpoint); });
   if (input.context.signal?.aborted) throw new Error("HINDSIGHT_CANCELLED");
   const page = projectHindsightJournal(journal, { bankId: input.lease.bankId,
     authorityEpochId: expectedCheckpoint.authorityEpochId, projection: input.projection });

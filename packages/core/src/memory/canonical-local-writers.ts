@@ -6,20 +6,20 @@
  * POS:    core/memory — installed by the Local subsystem draft; a fenced tool write returns a structured MEMORY_AUTHORITY_FENCED
  *         to the model and a fenced flush returns the retryable outcome Compaction already understands
  */
-import type { Tool, ToolSet } from "ai";
 import type { AutoMemoryMaintenance } from "./auto-memory.ts";
 import type { CanonicalLocalIngestion } from "./canonical-local-ingestion.ts";
 import type { CanonicalLocalRuntime } from "./canonical-local-runtime.ts";
 import { isCanonicalLocalFenced, type CanonicalLocalWriteFence } from "./canonical-local-write-fence.ts";
-import { attachMemoryEffectMetadata, memoryEffectMetadata } from "./canonical-tools/memory-effect-tool.ts";
 import type { CapturedMemoryRun } from "./canonical-memory-run.ts";
+import { fenceMemoryToolWrites, type FencedToolPolicy } from "./fenced-memory-tools.ts";
 import type { MemoryEngine } from "./memory-engine.ts";
 import type { MemoryFlushPort } from "./memory-flush-port.ts";
 import type { TidyPass } from "./tidy-pass.ts";
 
-const READ_TOOLS: ReadonlySet<string> = new Set(["recall", "reflect"]);
-const FENCED_TOOL_RESULT = Object.freeze({ ok: false as const, code: "MEMORY_AUTHORITY_FENCED" as const,
+const REFUSAL = Object.freeze({ ok: false as const, code: "MEMORY_AUTHORITY_FENCED" as const,
   message: "Canonical Local memory writes are paused while Hindsight activation runs; reads still work, retry the write after it completes." });
+const FOREGROUND: FencedToolPolicy = { open: new Set(["recall", "reflect"]), refusal: REFUSAL };
+const BACKGROUND: FencedToolPolicy = { open: new Set(), refusal: REFUSAL };
 
 export interface FencedCanonicalLocalWriters {
   engine: MemoryEngine; maintenance: AutoMemoryMaintenance; memoryFlush: MemoryFlushPort; tidy: TidyPass;
@@ -34,8 +34,8 @@ export function fenceCanonicalLocalWriters(input: {
   return {
     engine: {
       reconcile: engine.reconcile, assemble: engine.assemble, tidy: engine.tidy,
-      createTools: (characterId, seq) => fenceToolWrites(engine.createTools(characterId, seq), fence, READ_TOOLS),
-      createBackgroundTools: (characterId, seq) => fenceToolWrites(engine.createBackgroundTools(characterId, seq), fence, new Set()),
+      createTools: (characterId, seq) => fenceMemoryToolWrites(engine.createTools(characterId, seq), fence, FOREGROUND),
+      createBackgroundTools: (characterId, seq) => fenceMemoryToolWrites(engine.createBackgroundTools(characterId, seq), fence, BACKGROUND),
       writeEntry: (request) => fence.admitSync(() => engine.writeEntry(request)),
       retention: { listActive: engine.retention.listActive,
         archive: (path) => fence.admitSync(() => engine.retention.archive(path)),
@@ -62,22 +62,7 @@ export function fenceCanonicalLocalWriters(input: {
       // opens initializes eligibility itself, so the baseline write is skipped here rather than refused.
       if (fence.writable()) fence.admitSync(() => { engine.banks(characterId); ingestion.initializeBaseline(characterId); });
       const run = await engine.captureRun(characterId);
-      return Object.freeze({ ...run, tools: fenceToolWrites(run.tools, fence, READ_TOOLS) });
+      return Object.freeze({ ...run, tools: fenceMemoryToolWrites(run.tools, fence, FOREGROUND) });
     },
   };
-}
-
-/** Write tools admit their execution through the fence; a refusal is a bounded structured result, never a thrown error. */
-function fenceToolWrites(tools: ToolSet, fence: CanonicalLocalWriteFence, open: ReadonlySet<string>): ToolSet {
-  return Object.freeze(Object.fromEntries(Object.entries(tools).map(([name, definition]) => {
-    const execute = definition.execute;
-    if (!execute || open.has(name)) return [name, definition];
-    const fenced: Tool = { ...definition, execute: async (toolInput: unknown, options: Parameters<typeof execute>[1]) => {
-      try { return await fence.admit(async () => await execute(toolInput, options)); }
-      catch (error) { if (isCanonicalLocalFenced(error)) return FENCED_TOOL_RESULT; throw error; }
-    } };
-    // The spread drops the non-enumerable Effect metadata governance keys on; reattach the same frozen identity.
-    const metadata = memoryEffectMetadata(definition);
-    return [name, Object.freeze(metadata ? attachMemoryEffectMetadata(fenced, metadata) : fenced)];
-  })));
 }

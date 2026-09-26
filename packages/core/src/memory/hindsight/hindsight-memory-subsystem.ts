@@ -4,7 +4,7 @@
  *         captureRun degrades to a memory-unavailable Run on connection drift, and a refused primary witness is still retained;
  *         background ingestion/curation and flush skip a Character without a routed Bank before any Utility model call; every
  *         memory-unavailable Run reaches onUnavailable, and a fully synced foreground capture calls verifiedReconnect() once
- *         while an automatic Bank waits in availability backoff (G13)
+ *         while an automatic Bank waits in availability backoff (G13); writeFence pauses every native writer for backup capture
  * POS:    core/memory/hindsight — selected provider subsystem; Core retains Compaction and no generic native maintenance is duplicated
  */
 import type { ConfigSource } from "../../config/config-source.ts";
@@ -20,6 +20,7 @@ import type { TimelineRepo } from "../../db/timeline-repo.ts";
 import type { Logger } from "../../logging/logger.ts";
 import type { SecretCatalogService } from "../../secrets/secret-catalog-service.ts";
 import type { AutoMemoryMaintenance } from "../auto-memory.ts";
+import { createCanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 import type { PrimaryConversationCommit } from "../canonical-ingestion-source.ts";
 import type { MemoryFlushPort } from "../memory-flush-port.ts";
 import type { TidyPass } from "../tidy-pass.ts";
@@ -35,6 +36,7 @@ import { createHindsightObservedWriter } from "./hindsight-observed-write.ts";
 import { createHindsightIngestion } from "./hindsight-ingestion.ts";
 import { createHindsightPolicyCurator, type HindsightPolicyCurator } from "./hindsight-policy-curator.ts";
 import { createHindsightReplicaScheduler, type HindsightReplicaScheduler } from "./hindsight-replica-scheduler.ts";
+import { fenceHindsightWriters } from "./hindsight-writer-fence.ts";
 
 interface Input {
   db: Database; epochId: string; config: MemoryConfig; source: ConfigSource; secrets: SecretCatalogService;
@@ -80,17 +82,18 @@ export function createHindsightMemorySubsystem(input: Input) {
   // Retirement of an unrouted Character's source stays refused (never "not required"), so uncovered Timeline rows are kept.
   const memoryFlush: MemoryFlushPort = { prepareRetirement: (request) => runtime.characterRouted(request.characterId)
     ? ingestion.flushPort.prepareRetirement(request) : Promise.resolve({ status: "retryable_failure", code: "MEMORY_FLUSH_INCOMPLETE" }) };
-  return { engine: foreground.engine, maintenance, memoryFlush, tidy,
-    writeMemory: createHindsightObservedWriter(state), snapshot: foreground.snapshot,
-    state, ingestion, curator, scheduler,
-    start: () => { runtime.assertConnection(); scheduler.start(); },
-    stop: () => stopSubsystem({ state, ingestion, curator, scheduler, foreground }),
-    captureRun: async (characterId: string, signal?: AbortSignal) => {
+  const writeFence = createCanonicalLocalWriteFence();
+  const writers = fenceHindsightWriters({ engine: foreground.engine, maintenance, memoryFlush, tidy,
+    writeMemory: createHindsightObservedWriter(state),
+    captureRun: async (characterId, signal) => {
       if (signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
       // Epoch/lineage mismatch throws here; only a changed or disabled connection degrades the Run.
       const drift = runtime.driftReason(); ingestion.initializeBaseline(characterId);
       return drift === "none" ? foreground.captureRun(characterId, signal) : foreground.unavailableRun(characterId, drift);
-    },
+    } }, writeFence);
+  return { ...writers, snapshot: foreground.snapshot, state, ingestion, curator, scheduler, writeFence,
+    start: () => { runtime.assertConnection(); scheduler.start(); },
+    stop: () => stopSubsystem({ state, ingestion, curator, scheduler, foreground }),
     recordPrimaryCommitted: (commit: PrimaryConversationCommit) => recordWitness(input, { runtime, ingestion }, commit) };
 }
 

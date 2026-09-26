@@ -1,16 +1,19 @@
 /**
  * INPUT:  sealed operation requests plus the live producers (B3 setup service, B5 scheduler, Hindsight runtime accessor,
- *         Local onboarding service, Hindsight activation service, Hindsight lifecycle service) and the owner's own row lookups
+ *         Local onboarding service, Hindsight activation service, Hindsight lifecycle service, Hindsight backup service) and the
+ *         owner's own row lookups
  * OUTPUT: the handler contract every operation kind implements (admission carries the Core-stamped origin), the
  *         settlement/observation shapes, the closed refusal error and the mutual single-flight guard for the setup /
- *         local-onboarding / hindsight-activation / hindsight-lifecycle families
+ *         local-onboarding / hindsight-activation / hindsight-lifecycle / hindsight-backup families
  * POS:    core/memory/operations — internal contract shared by the kind handlers and the service; no persistence here
  */
 import type {
   HindsightConnectionProjection, MemoryHindsightLifecycleOrigin, MemoryOperation, MemoryOperationErrorCode, MemoryOperationProducerRef,
   MemoryOperationReason, MemoryOperationRefusalReason, MemoryOperationRequest, MemoryOperationResult, MemoryReplicaBank, PendingMemorySummary,
 } from "@taki/shared";
+import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 import type { HindsightActivationService } from "../hindsight-activation/hindsight-activation-service.ts";
+import type { HindsightBackupService } from "../hindsight-backup/hindsight-backup-service.ts";
 import type { HindsightLifecycleService } from "../hindsight-lifecycle/hindsight-lifecycle-service.ts";
 import type { HindsightReplicaScheduler } from "../hindsight/hindsight-replica-scheduler.ts";
 import type { HindsightConnectionDrift } from "../hindsight/hindsight-runtime-connection.ts";
@@ -23,7 +26,10 @@ export interface MemoryOperationsRuntime {
   /** The fingerprint and deployment mode the published runtime was constructed with (drift is measured against them). */
   configFingerprint: string;
   deploymentMode: HindsightConnectionProjection["deploymentMode"];
-  scheduler: Pick<HindsightReplicaScheduler, "started" | "requestManual" | "cancelManual" | "tick" | "status" | "lastError" | "verifiedReconnect">;
+  scheduler: Pick<HindsightReplicaScheduler, "started" | "start" | "stop" | "requestManual" | "cancelManual" | "tick" | "status" | "lastError"
+    | "verifiedReconnect">;
+  /** The subsystem's native-writer fence; only backup capture quiesces it, and always releases it. */
+  writeFence: Pick<CanonicalLocalWriteFence, "quiesce" | "release">;
   banks(): MemoryReplicaBank[];
   assertConnection(): void;
   /** Throws on a stopped runtime or an epoch/lineage mismatch; otherwise names a changed or disabled connection. */
@@ -40,6 +46,8 @@ export interface MemoryOperationContext {
   hindsight?: HindsightActivationService;
   /** Absent when Core composes without a Hindsight lifecycle producer; the lifecycle kinds then refuse at admission. */
   lifecycle?: HindsightLifecycleService;
+  /** Absent when Core composes without a Hindsight backup producer; backup.capture then refuses at admission. */
+  backup?: HindsightBackupService;
   /** The owner's own durable rows, so a kind can resolve a prior command (retry) without trusting the client. */
   lookup(operationId: string): MemoryOperation | undefined;
   activeInFamily(family: string): MemoryOperation | undefined;
@@ -47,8 +55,8 @@ export interface MemoryOperationContext {
   now(): string;
 }
 
-/** Setup, Local onboarding, Hindsight activation and lifecycle are mutually single-flight (grill G6); the open row wins and is named. */
-export const EXCLUSIVE_MEMORY_FAMILIES = ["setup", "local-onboarding", "hindsight-activation", "hindsight-lifecycle"] as const;
+/** Setup, Local onboarding, Hindsight activation, lifecycle and backup are mutually single-flight (grill G6); the open row wins and is named. */
+export const EXCLUSIVE_MEMORY_FAMILIES = ["setup", "local-onboarding", "hindsight-activation", "hindsight-lifecycle", "hindsight-backup"] as const;
 export function refuseWhileExclusiveFamilyBusy(ctx: Pick<MemoryOperationContext, "activeInFamily">): void {
   for (const family of EXCLUSIVE_MEMORY_FAMILIES) {
     const active = ctx.activeInFamily(family);

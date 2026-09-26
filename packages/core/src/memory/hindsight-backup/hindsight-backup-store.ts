@@ -6,7 +6,7 @@
  *         id, never a caller path; a partial or quarantined dir is never listed
  */
 import { createHash } from "node:crypto";
-import { createReadStream } from "node:fs";
+import { createReadStream, existsSync, mkdirSync, renameSync } from "node:fs";
 import { chmod, mkdir, open, readFile, readdir, rename, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { HindsightBackupIdSchema, HindsightBackupManifestSchema, type HindsightBackupManifest } from "@taki/shared";
@@ -31,8 +31,8 @@ export interface HindsightBackupStore {
   /** Re-hashes the staged files against the manifest, writes manifest.json and renames the partial dir into place. */
   seal(manifest: HindsightBackupManifest): Promise<void>;
   discard(backupId: string): Promise<void>;
-  /** Moves a leftover partial dir under `quarantine/`; true when one existed. */
-  quarantine(backupId: string): Promise<boolean>;
+  /** Moves a leftover partial dir under `quarantine/`; true when one existed. Synchronous: boot observation cannot await. */
+  quarantine(backupId: string): boolean;
   /** Sealed backups with a schema-valid manifest naming their own dir, oldest first. */
   list(): Promise<HindsightBackupManifest[]>;
   read(backupId: string): Promise<HindsightBackupManifest | null>;
@@ -63,11 +63,11 @@ export function createHindsightBackupStore(dataDir: string): HindsightBackupStor
       await rename(staged, target);
     },
     discard: (backupId) => removeDir(partialDir(backupId)),
-    quarantine: async (backupId) => {
+    quarantine: (backupId) => {
       const staged = partialDir(backupId);
-      if (!(await exists(staged))) return false;
-      await mkdir(join(root, QUARANTINE_DIR), { recursive: true, mode: OWNER_DIR });
-      await rename(staged, join(root, QUARANTINE_DIR, requireBackupId(backupId)));
+      if (!existsSync(staged)) return false;
+      mkdirSync(join(root, QUARANTINE_DIR), { recursive: true, mode: OWNER_DIR });
+      renameSync(staged, join(root, QUARANTINE_DIR, requireBackupId(backupId)));
       return true;
     },
     list: () => listManifests(root, read),

@@ -40,7 +40,8 @@
 - canonical-local-banks.ts — preserves existing Local Bank identities and initializes scopes for a new Character
 - canonical-local-subsystem.ts — Local ingestion, precise source witnesses, tidy, retention and pre-retirement flush on the shared Utility Slot behind one write fence; built as a draft, retention starts only via start() after binding publication; exposes fence/ingestion for the activation drain
 - canonical-local-write-fence.ts — write-only Local admission fence: bounded quiesce, structured MEMORY_AUTHORITY_FENCED, explicit release after a pre-COMMIT failure, irrevocable retire after COMMIT
-- canonical-local-writers.ts — the fenced Local surfaces (engine write tools/writeEntry/retention, maintenance, flush, tidy, captured Run tools); reads stay open, fenced tool writes return a structured refusal
+- canonical-local-writers.ts — the fenced Local surfaces (engine write tools/writeEntry/retention, maintenance, flush, tidy, captured Run tools) over fenced-memory-tools; reads stay open, fenced tool writes return a structured refusal
+- fenced-memory-tools.ts — shared tool-write fencing for the Local (activation) and Hindsight (backup) writer fences: open read tools pass, a fenced write returns the policy refusal, Effect metadata identity kept
 - canonical-ingestion-source.ts — exact primary commit witnesses, sanitized original conversational spans and reversible source metadata
 - canonical-ingestion-model.ts — one Write Gate and source-grounded Local extraction through the process Utility Slot
 - canonical-ingestion-plan.ts — durable gate/extraction plan and stable routed write identities

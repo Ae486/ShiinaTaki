@@ -3,6 +3,7 @@
 - hindsight-endpoint-policy.ts — endpoint normalization and SSRF/redirect policy for explicit operator endpoints
 - hindsight-errors.ts — sanitized Hindsight setup failure code and retry projection
 - hindsight-client.ts — authenticated REST client with finite HTTP deadlines, prompt cancellation even for an abort-ignoring delegate, response bounds and typed setup/Bank-stats/import/replica/recovery/native-read/D77 application-state methods
+- hindsight-cursor-reset.ts — §5.7 native 409 classification: a well-formed `cursor_ahead` is HINDSIGHT_PROVIDER_ROLLBACK_DETECTED carrying the native lineage/generation (kept only when they match the Core checkpoint), anything else stays HINDSIGHT_CURSOR_RESET_REQUIRED; bodies are never logged
 - hindsight-runtime-client.ts — bounded native recall/reflect POST methods through the existing authenticated requester; no Canonical hydration or runtime activation
 - hindsight-http-transport.ts — single HTTP/HTTPS request under the captured total deadline, bounded decompression, and no redirect/retry or hidden fetch phase timeout
 - hindsight-pending-client.ts — canonical retain-to-native wire mapping and B0 expected-revision/mutation-ID replay with bounded native receipts
@@ -46,7 +47,7 @@
 - hindsight-current-maintenance-proof.ts — complete native maintenance certificate and exact immutable retained snapshot proof
 - hindsight-current-orchestrator.ts — current-state import, ACK-loss recovery, finite verification, known-native-drift persistence and raw replica publication
 - hindsight-journal-contracts.ts — authenticated changes endpoint wire normalization with complete transaction bounds
-- hindsight-incremental-sync.ts — one admitted Bank journal page pulled, projected, and transactionally applied under captured Authority/Bank binding, lease, and deadline
+- hindsight-incremental-sync.ts — one admitted Bank journal page pulled, projected, and transactionally applied under captured Authority/Bank binding, lease, and deadline; a same-identity `cursor_ahead` surfaces as a rollback, never a reset
 - hindsight-replica-scheduler.ts — asynchronous all-Bank single-flight execution, persisted wakes, bounded supervisor retries, manual request/cancel-before-claim, reconnection requests, started() and truthful status; a refused Bank read while re-arming is recorded as lastError
 - hindsight-replica-run-execution.ts — captured absolute run/reset deadline, bounded cancellation, reset escalation, and lease-fenced completion
 - hindsight-replica-sync-runner.ts — admitted B5 catch-up and reconciliation/reset with fixed deadlines; shared internal run contract also carries process-local foreground lease ownership
@@ -83,7 +84,8 @@
 - hindsight-memory-reflect.ts — policy-guarded native reflection with one fixed five-minute allowance across synchronization, admission, policy upload and generation
 - hindsight-memory-runtime.ts — canonical tools, caller-cancellable Run capture requiring verified capability evidence, foreground synchronization without a default business deadline and native policy-bearing recall; degrades to a memory-unavailable Run for a Character without a verified Bank or an unreachable provider with no admission evidence; onSynced after a capture that admitted and synced every routed Bank
 - hindsight-unavailable-run.ts — the immutable memory-unavailable CapturedMemoryRun (no tools/recall, persona-only assembly, base prompt without the memory floor, all-false capabilities under the admitted identity)
-- hindsight-memory-subsystem.ts — provider/run/ingestion/curator/flush composition with caller-cancellable admission, the existing B5 scheduler and settled shutdown; background ingestion/curation and flush skip a Character without a routed Bank before any model call; a changed/disabled connection degrades the Run and a refused primary witness is kept through the marker-routed witness; every memory-unavailable Run reaches onUnavailable, and a fully synced foreground capture calls verifiedReconnect() once while an automatic Bank waits in availability backoff (G13)
+- hindsight-memory-subsystem.ts — provider/run/ingestion/curator/flush composition with caller-cancellable admission, the existing B5 scheduler and settled shutdown; background ingestion/curation and flush skip a Character without a routed Bank before any model call; a changed/disabled connection degrades the Run and a refused primary witness is kept through the marker-routed witness; every memory-unavailable Run reaches onUnavailable, and a fully synced foreground capture calls verifiedReconnect() once while an automatic Bank waits in availability backoff (G13); every native writer passes the backup write fence it exposes
+- hindsight-writer-fence.ts — backup capture pause (§5.3): engine write tools, observed writeMemory, maintenance, flush and tidy admitted through one write fence; recall/reflect, Run capture and the primary witness stay open; fenced tools and flush return retryable MEMORY_AUTHORITY_FENCED
 - hindsight-memory-write-admission.ts — atomic parent intent plus required native/source children, or a stable no-dispatch result
 - hindsight-memory-write-context.ts — guarded write contexts and verified mutation targets shared by admission and recovery
 - hindsight-memory-write-fixtures.ts — real parent journal, Pending repository/writer, application outbox and G1 replay composition

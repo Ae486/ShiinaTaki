@@ -30,6 +30,7 @@ import { routeCapability } from "./capabilities/route-capability.ts";
 import { createScreenshotDescriber } from "./capabilities/screenshot-describe.ts";
 import { bootstrapCore } from "./boot/core-bootstrap.ts";
 import { composeHindsightActivation } from "./boot/hindsight-activation-boot.ts";
+import { composeHindsightBackup } from "./boot/hindsight-backup-boot.ts";
 import { composeHindsightLifecycle } from "./boot/hindsight-lifecycle-boot.ts";
 import { composeHindsightSetup } from "./boot/hindsight-setup-boot.ts";
 import { createPrivacyPauseRepo } from "./db/privacy-pause-repo.ts";
@@ -258,9 +259,11 @@ const localOnboarding = createLocalOnboardingService({
 const hindsightActivation = composeHindsightActivation({ db, config: boot.config.source, secrets: secretCatalog, setup: hindsightSetup, runtime: memoryRuntime, logger });
 // Hindsight lifecycle (Stage 2c): Bank provisioning and connection revalidation under a committed Hindsight authority.
 const hindsightLifecycle = composeHindsightLifecycle({ db, config: boot.config.source, secrets: secretCatalog, runtime: memoryRuntime, logger });
+// Hindsight backup (Stage 3): backup.capture pauses Hindsight writers, copies Core, then asks the native route (W5) for its half.
+const hindsightBackup = composeHindsightBackup({ db, dataDir: serverConfig.dataDir, secrets: { catalog: secretCatalog, storeId: coreHostId }, logger });
 const memoryOperations = createMemoryOperationService({
   db, live: memoryRuntime.operations, setup: hindsightSetup, local: localOnboarding, hindsight: hindsightActivation, lifecycle: hindsightLifecycle,
-  bootId, logger, onChanged: memoryOperationSubscriptions.publish,
+  backup: hindsightBackup, bootId, logger, onChanged: memoryOperationSubscriptions.publish,
 });
 hindsightLifecycleTrigger.bind({ lifecycle: hindsightLifecycle, operations: memoryOperations });
 registerMemoryOperationMethods(registry, { service: memoryOperations, subscriptions: memoryOperationSubscriptions, logger });
@@ -559,6 +562,7 @@ function shutdown(signal: string): void {
   // between sources, activation at a Bank boundary, never inside COMMIT); only then does the memory runtime stop. That stop
   // settles the B5 scheduler (and any manual tick a replica operation awaits), so the operation owner has nothing left in
   // flight afterwards except setup calls bounded by their own deadlines.
+  hindsightBackup.stop();
   const memoryStopped = Promise.all([localOnboarding.stop(), hindsightActivation.stop(), hindsightLifecycle.stop()]).then(() => memoryRuntime.stop());
   void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => memoryStopped).then(() => memoryOperations.stop()).then(() => server.close()).then(async () => {
     skillBoot.catalog.close();

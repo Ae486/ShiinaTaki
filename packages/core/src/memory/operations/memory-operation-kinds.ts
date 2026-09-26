@@ -7,6 +7,7 @@
 import type { MemoryOperationKind, MemoryOperationRequest } from "@taki/shared";
 import type { MemoryOperationKindHandler } from "./memory-operation-contract.ts";
 import { backupUnsupportedKind } from "./memory-operation-kind-backup.ts";
+import { backupCaptureKind } from "./memory-operation-kind-backup-capture.ts";
 import { bankProvisionKind } from "./memory-operation-kind-bank.ts";
 import { connectionRevalidateKind } from "./memory-operation-kind-connection.ts";
 import { hindsightActivateKind } from "./memory-operation-kind-hindsight.ts";
@@ -27,7 +28,7 @@ export const MEMORY_OPERATION_KINDS: MemoryOperationKindRegistry = {
   "hindsight.activate": hindsightActivateKind,
   "bank.provision": bankProvisionKind,
   "connection.revalidate": connectionRevalidateKind,
-  "backup.capture": backupUnsupportedKind,
+  "backup.capture": backupCaptureKind,
   "backup.admit": backupUnsupportedKind,
   "backup.verify": backupUnsupportedKind,
 };
