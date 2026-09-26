@@ -1,10 +1,10 @@
 /**
  * INPUT:  the current checkout and a fresh temporary directory; no private configuration, provider fetches blocked
  * OUTPUT: real Core boot on a free non-default port: migrations through the head, operator authentication,
- *         memory.authority.status answered and schema-valid, Legacy -> Local onboarding over RPC, backup.capture
- *         registered (refused on the Local marker, not unknown, no row, no backups dir), SIGINT clean exit; retained
- *         isolated evidence (logs + result.json)
- * POS:    Stage 3 wave W2 acceptance harness — never opens user storage, never contacts a model or Hindsight
+ *         memory.authority.status answered and schema-valid (`hindsight` null under Legacy and Local), Legacy -> Local
+ *         onboarding over RPC, backup.capture / backup.admit / backup.verify registered (refused on the Local marker, not
+ *         unknown, no row, no backups dir), SIGINT clean exit; retained isolated evidence (logs + result.json)
+ * POS:    Stage 3 waves W2/W3 acceptance harness — never opens user storage, never contacts a model or Hindsight
  */
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
@@ -155,7 +155,7 @@ async function openOperator(port) {
     pending.set(id, { resolve, reject, timer });
     socket.send(JSON.stringify({ jsonrpc: "2.0", id, method, params }));
   });
-  shared.ConnectResultSchema.parse(await call("connect", { deviceId: randomUUID(), deviceName: "Stage 3 W2 isolated acceptance", role: "operator" }));
+  shared.ConnectResultSchema.parse(await call("connect", { deviceId: randomUUID(), deviceName: "Stage 3 isolated acceptance", role: "operator" }));
   return { call, socket };
 }
 
@@ -199,16 +199,23 @@ async function journey(operator, dataDir) {
   const local = await authorityStatus(operator);
   assert.equal(local.authority.mode, "canonical-local");
   assert.equal(local.hindsight, null);
-  const refusals = [await refused(operator, { kind: "backup.capture", expectedEpochId: local.authority.epochId })];
+  const epochId = local.authority.epochId;
+  const backupId = randomUUID();
+  const refusals = [];
+  for (const request of [{ kind: "backup.capture", expectedEpochId: epochId }, { kind: "backup.capture", expectedEpochId: epochId, route: "operator-artifact" },
+    { kind: "backup.admit", expectedEpochId: epochId, backupId, fileName: "hindsight-backup.zip" }, { kind: "backup.verify", backupId }]) {
+    refusals.push({ kind: request.kind, refusal: await refused(operator, request) });
+  }
   const rows = shared.MemoryOperationListResultSchema.parse(await operator.call(shared.MEMORY_OPERATION_METHODS.list, { includeTerminal: true, limit: 50 }));
   const backups = rows.operations.filter((operation) => operation.kind.startsWith("backup."));
   assert.deepEqual(backups, [], "a refused submit leaves no row");
-  assert.equal(existsSync(join(dataDir, "backups")), false, "a refused capture creates no backup storage");
+  assert.equal(existsSync(join(dataDir, "backups")), false, "a refused backup kind creates no backup storage");
+  assert.equal((await authorityStatus(operator)).hindsight, null, "no Hindsight section, hence no backup block, under Local");
   return { legacy: legacy.authority, local: local.authority, refusals };
 }
 
 async function runAcceptance() {
-  const dataDir = await mkdtemp(join(tmpdir(), "taki-s3w2-process-"));
+  const dataDir = await mkdtemp(join(tmpdir(), "taki-s3w3-process-"));
   console.log(`Isolated evidence: ${dataDir}`);
   const instance = await boot(dataDir, "boot");
   let operator; let evidence; let exit;

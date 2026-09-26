@@ -128,3 +128,78 @@ barrels; tests colocated; no real Hindsight/model/user data; boots use a temp da
   (+1 skipped POSIX-mode test), no flake this run; `git diff --check` clean. Isolated boot
   (`research/isolated-process-check.mjs`, kept): port 6744, migrations 1..50 (head), `backup.capture` refused
   `MEMORY_OPERATION_UNSUPPORTED` on the Local marker with no row and no `backups/` dir, 0 fetches, exit 0.
+
+### W3 (2026-09-26, implementer; uncommitted)
+
+- Route-b admission protocol (PR02 fallback; route c stays primary):
+  1. `backup.capture {expectedEpochId, route: "operator-artifact"}` runs the W2 pause (fence, scheduler stop, identity
+     read, Core `backupTo`) and, instead of calling native, stages `<dataDir>/backups/<id>.staged/` = `core.sqlite` +
+     `core-identity.json` (every manifest field except native/route/verifiedAt) + `native-request.json`
+     (`HindsightBackupNativeRequest` v1: `backupId`, `createdAt`, `providerLineageId`, `nativeBankIds`, `operationIds`).
+     It completes `verifiedAt: null` with the backup id in the producer ref and releases the fence; a staged dir is never
+     listed. `route` defaults to `native-endpoint` (W2 behaviour).
+  2. The operator runs the native CLI with `native-request.json` and drops the ZIP at
+     `<dataDir>/backups/inbox/<fileName>` (`HindsightBackupInboxFileSchema`: plain `[A-Za-z0-9][A-Za-z0-9._-]*\.zip`,
+     max 128, no device names; never a path).
+  3. `backup.admit {expectedEpochId, backupId, fileName}` (backupId added to the request): refuses an unknown staged id
+     (`ARTIFACT_INVALID`) or an epoch other than the staged one (`MEMORY_AUTHORITY_MISMATCH`), then moves (renames) the
+     inbox ZIP into the staged dir as `native.zip` before reading a byte (regular file only; a directory or symlink is
+     moved back and refused), reads it, requires the echoed backup id, runs the pair verifier against the staged Core
+     identity and seals `route: operator-artifact`, `native.location: core-dir`, `verifiedAt` set. Any refusal moves the
+     ZIP back to the inbox and keeps the staged capture admissible for a corrected ZIP; sealing consumes it. Boot
+     observation: sealed -> `completed`; otherwise the claimed ZIP goes back and the row is `outcome_unknown`.
+  - Ordering proof (a ZIP older than the Core copy is refused): the ZIP must echo the Core-minted `backupId` that only
+    exists once the Core copy is staged; its proof's receipts `count`/`digest` must equal the staged Core terminal-id
+    list (another list -> `PAIR_MISMATCH receipt_scope`, a Core success the ZIP lacks -> `receipt_missing`); every
+    native Bank cursor must be >= the Core checkpoint (`replica_cursor` / `application_native_cursor` /
+    `application_state_cursor`); every `.bin` entry is re-hashed against its pinned digest.
+- Proof-in-ZIP format W5 must produce (native CLI `backup`, `MANIFEST_VERSION` "2"): the ZIP holds only
+  `manifest.json` and `<table>.bin` entries (`[A-Za-z0-9_]{1,63}.bin`, no directories, no encryption, <= 513 entries,
+  manifest <= 4 MiB). `manifest.json` is the native v2 manifest (`version: "2"`, `created_at`, `schema`,
+  `tables.<table>.size_bytes` = the `.bin` entry byte length) plus a top-level `taki` object
+  (`HindsightBackupArchiveProofSchema`): `{ version: 1, backupId: <echoed from native-request.json>, proof: <native proof
+  body read in the same REPEATABLE READ snapshot as the COPY: providerLineage, alembicRevision, upstreamCommit,
+  compatibilityBuild, banks[{bankId, bankGeneration, currentCursor, minimumAvailableCursor, application|null}] exactly for
+  the requested nativeBankIds, receipts{count, digest (Core operation-list digest), missingCount, missingSample}; no
+  zipSha256/zipBytes>, entries: [{ name: "<table>.bin", bytes, sha256 }] one per table }`. Core computes the ZIP's own
+  sha256/bytes. A ZIP without `taki` -> `PROOF_MISSING`; bad version/schema/entry/hash/size/echoed id ->
+  `ARTIFACT_INVALID`. Reference builder: `hindsight-backup-harness.ts` `operatorZip()`.
+- `backup.verify {backupId}`: re-hashes `core.sqlite`; a Core-held route-c `native.zip` is re-hashed against the proof, a
+  route-b ZIP is re-read and must be deep-equal to the recorded proof; a native-host ZIP is judged by its recorded proof
+  (D92). Pair re-check follows. Artifact codes (`ARTIFACT_INVALID`/`PROOF_MISSING`/`PAIR_MISMATCH`) record
+  `verifiedAt: null`; success rewrites only `verifiedAt` via `.next` + rename. A missing credential fails
+  `HINDSIGHT_BACKUP_CREDENTIAL_MISSING` (refs logged) without touching the manifest (host state, not artifact state).
+- Custody (§5.9): `readHindsightBackupCustody` records presence/health/keyVersion/updatedAt of the fixed Hindsight refs plus
+  any other listed `memory.hindsight.` ref (sorted, max 32) and the connection marker; never `resolve`/`backup`.
+  `missingHindsightCredentials(custody, catalog)` names every `present: true` ref the target catalog lacks; boot wires it
+  into verify.
+- Status: `hindsight-backup-status.ts` fills `hindsight.backup` synchronously (last verified pair, `ageSeconds` from its
+  `createdAt`, per verified B3 native Bank `{fromNativeCursor, toReplicaCursor, pendingCount}` = Pending pending + open D77
+  parent writes); the service caches the last verified manifest and invalidates it after every capture/admit/verify.
+  `memory-hindsight-lifecycle-status.ts` returns the block as read; `memory-authority-status.ts` builds it (unreadable ->
+  null).
+- Emergency: `sealEmergencyEvidence({db, store, lastVerified, now?})` writes `backups/incident-<uuid>/` (Core copy +
+  `incident-local`, `fullBackup: false`, last verified id, age, missing interval); takes no route, never listed; no caller
+  (Stage 4).
+- Refactor: producer failure helpers (`hindsight-backup-failure.ts`) and file helpers (`hindsight-backup-files.ts`) split
+  out; the three backup kinds share `memory-operation-kind-backup.ts` helpers; the store factory is split into
+  capture/staged/sealed method groups; `HindsightNativeBackupRequest` derives from the Shared request.
+- Deviations: `backup.admit` request carries `backupId` (pairs a ZIP with exactly one staged capture);
+  `backup.capture` gained optional `route`; the native proof schema is split into a body (in-ZIP) and the full proof;
+  admit claims the ZIP before reading it (no check/seal race); a sealed route-b dir keeps `native-request.json` and
+  `core-identity.json` beside the pair; custody lists extra `memory.hindsight.` refs; status intervals are keyed by
+  native Bank id; the activation journey's fixture catalog now answers `list()` with no entries. D90 widened to staged,
+  inbox and incident entries; D92 added.
+- Tests added: `hindsight-backup-admit.test.ts` (route-b staging, admit success, refusal matrix incl. missing proof,
+  version, foreign echoed id, tampered/unpinned/nested entries, native behind, pre-request receipts, unknown id, epoch,
+  path-like/absent/directory/non-ZIP inbox entries; ZIP returned each time), `hindsight-backup-verify.test.ts`,
+  `hindsight-backup-custody.test.ts` (real SecretCatalogService; no secret value or envelope bytes in any artifact incl.
+  incident evidence; read-back), `hindsight-backup-status.test.ts`, `hindsight-backup-emergency.test.ts` (hanging native
+  never called), `memory-operation-kind-backup-admit.test.ts` (journey: Local refusal, family both ways, route b through
+  the owner incl. status, proof-missing failure, boot observation both ways); `memory-operation-kind-backup.test.ts`
+  rewritten; capture journey helpers moved to `memory-operation-backup-fixtures.ts`.
+- Gates: `pnpm typecheck` green; `pnpm lint` green; Shared 60 / 543; Core 421 / 3362 (+1 skipped POSIX-mode test), no
+  flake this run; Desktop 113 / 646; `git diff --check` clean, no trailing whitespace in new files. Isolated boot
+  (`research/isolated-process-check.mjs`, extended): port 6341, migrations 1..50, `backup.capture` (both routes),
+  `backup.admit` and `backup.verify` refused `MEMORY_OPERATION_UNSUPPORTED` on the Local marker, no row, no `backups/`,
+  status `hindsight` null under Legacy and Local, 0 fetches, exit 0.
