@@ -64,8 +64,9 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
   to its historical artifact during retirement; current native CAS does not invent a reassessment.
 - Snapshots and hydration contain complete artifact history/source closure. Native hydration returns only explicitly
   selected native heads: candidate recall requests a Bank selector and at most 255 Memory selectors per batch.
-- A bounded multi-page Bank synchronization owns one absolute run deadline. Foreground Recall and the Bank sync needed
-  for Run admission instead wait for completion or caller/runtime cancellation, with no implicit business timer.
+- A bounded multi-page Bank synchronization owns one absolute run deadline. Foreground Recall and the foreground Bank
+  sync started for Run admission instead run to completion or caller/runtime cancellation, with no implicit business
+  timer; Run admission itself waits for that sync only up to the admission budget (see Run capture below).
   Their request callback rechecks the current lease, authority and cancellation before every snapshot/event page,
   body descriptor and body part, and caps each HTTP call separately. Nested readers and candidate hydration must
   retain that callback rather than spending one HTTP timeout across the whole operation. Standalone reads without
@@ -166,12 +167,22 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
   predecessor's serialization barrier or acquire a later lease. Foreground queue wait observes cancellation; explicitly
   bounded queue wait also observes its original deadline. Generation-reset retries retain the owning mode, captured
   authority/checkpoint and lease fence rather than creating a fresh lifetime.
-- Run capture carries caller cancellation and any explicit trigger deadline through runtime composition and both Bank
-  synchronizations. Recheck cancellation before exposing the captured result. Without verified capability evidence,
-  an availability failure in pre-synchronization admits a memory-unavailable Run (`admission_unavailable`, Stage 2c);
-  any other failure refuses with the actual failure; neither starts an unowned cold retry. Existing verified
-  capability evidence remains usable for the documented outage/replica behavior. Degrade-vs-refuse table:
-  [`memory-hindsight-lifecycle.md`](./memory-hindsight-lifecycle.md).
+- Run capture (`hindsight-capture-sync.ts`) syncs the routed Banks serially in foreground mode (each HTTP call keeps the
+  `requestTimeoutMs` allowance) and waits for them at most the admission budget
+  `min(requestTimeoutMs, floor(chatAckMs / 2))`. `chatAckMs` is the effective `TAKI_CHAT_ACK_TIMEOUT_MS` from Core's
+  ConfigSource (invalid or unset -> the 15000 default), read per capture so a live change applies without a restart;
+  the half leaves the client's `chat.send` ack room for the rest of admission. Caller cancellation reaches the sync only within that budget; afterwards the Bank service
+  owns the unfinished sync until it completes or Core stops (tracked by `settle()`/`stop()`), so binding progress is
+  never abandoned and later syncs reuse durable intent-digest receipts instead of duplicating a commit. A Bank still
+  running at the budget is `deferred` (`HINDSIGHT_DEADLINE_EXCEEDED`); any failure other than cancellation or
+  `MEMORY_INTEGRITY_ERROR` / `MEMORY_AUTHORITY_MISMATCH` / `MEMORY_REQUEST_ID_CONFLICT` is `degraded`: the Run proceeds
+  on the readable replica (partial) with verified capability evidence, or as a memory-unavailable Run
+  (`admission_unavailable`) without it. Those three refuse the Run as a logged structured refusal. Recheck cancellation
+  before exposing the captured result. Each unsynced Bank emits one closed-code event (never a raw message).
+  Degrade-vs-refuse table: [`memory-hindsight-lifecycle.md`](./memory-hindsight-lifecycle.md).
+- A binding commit refused with `native_version_conflict` / `artifact_conflict` (native consolidated between the pull
+  and the commit) re-pulls and rebinds within the same sync run, at most `BIND_CONFLICT_RETRIES` (3) consecutive times;
+  the next conflict fails that run with its closed code, which capture then degrades.
 - The client settles caller/runtime cancellation even when an injected transport ignores its signal, preserves the
   first cancellation/timeout classification and contains late success/rejection. Local settlement never proves a
   dispatched remote write was cancelled; unknown outcomes retain the existing durable Pending/recovery semantics.

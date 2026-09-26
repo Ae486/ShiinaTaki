@@ -61,10 +61,10 @@ no network call and is never a Local or Legacy fallback. Every such Run reaches 
 | State | Where decided | Result |
 | --- | --- | --- |
 | Character has no verified B3 row (`routedBanks()` undefined) | `hindsight-memory-runtime.ts` `captureRun` | degrade `bank_not_ready` |
-| availability failure during foreground sync and no capability evidence for the fingerprint | `synchronizeForCapture` | degrade `admission_unavailable` |
-| capability evidence exists, some routed Bank unreachable | same | normal Run with the in-Run recall fallback (unchanged) |
-| no availability failure and no evidence | same | refuse `HINDSIGHT_APPLICATION_ADMISSION_UNAVAILABLE` |
-| non-availability sync error | same | rethrow (refuse) |
+| admission sync failed (not integrity/authority/request-id/cancellation) or still running at the admission budget `min(requestTimeoutMs, floor(chatAckMs / 2))`, and no capability evidence | `synchronizeHindsightCapture` (`hindsight-capture-sync.ts`) | degrade `admission_unavailable` |
+| same, with capability evidence | same | partial Run on the readable replica with the in-Run recall fallback; the Bank catches up in the background |
+| every Bank synced and no evidence | same | refuse `HINDSIGHT_APPLICATION_ADMISSION_UNAVAILABLE` |
+| `MEMORY_INTEGRITY_ERROR` / `MEMORY_AUTHORITY_MISMATCH` / `MEMORY_REQUEST_ID_CONFLICT` or cancellation during the sync | same | refuse (rethrow; integrity refusals logged at error) |
 | bound runtime, live config changed / not ready | subsystem `captureRun` via `driftReason()` | degrade `config_changed` / `connection_disabled` |
 | bound runtime, epoch or lineage changed; missing Global Bank | `driftReason()` / `routedBanks()` | refuse (`MEMORY_AUTHORITY_MISMATCH` / `HINDSIGHT_REPLICA_BANK_BINDING_MISMATCH`) |
 | unbound, live config not ready, binding code in `DISABLED_CODES` | `hindsightUnboundReason` | degrade `connection_disabled` |
