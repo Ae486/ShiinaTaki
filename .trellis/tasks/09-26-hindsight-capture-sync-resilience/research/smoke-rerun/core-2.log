@@ -1,0 +1,12 @@
+{"level":30,"time":1790394640012,"pid":44912,"hostname":"tianxuanji","mod":"db","applied":[],"msg":"schema already up to date"}
+{"level":30,"time":1790394640016,"pid":44912,"hostname":"tianxuanji","msg":"Core Host identity loaded"}
+{"level":30,"time":1790394640028,"pid":44912,"hostname":"tianxuanji","mod":"secrets","mod":"secrets","health":"ok","keySource":"credentials-directory","msg":"secret catalog opened"}
+{"level":30,"time":1790394640056,"pid":44912,"hostname":"tianxuanji","mod":"skills","active":0,"invalidated":0,"seeded":0,"seedRejected":0,"msg":"skill lifecycle ready"}
+{"level":30,"time":1790394640058,"pid":44912,"hostname":"tianxuanji","mod":"mcp","msg":"no legacy mcp-servers.json to seed"}
+{"level":30,"time":1790394640074,"pid":44912,"hostname":"tianxuanji","mod":"mcp","servers":0,"published":0,"failed":0,"msg":"mcp reconcile from desired state complete"}
+{"level":30,"time":1790394640117,"pid":44912,"hostname":"tianxuanji","mod":"server","host":"127.0.0.1","port":3338,"msg":"ws server listening"}
+{"level":30,"time":1790394640141,"pid":44912,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1790394640146,"pid":44912,"hostname":"tianxuanji","mod":"pairing","deviceId":"31edcfcc-535f-4c31-99fc-081fe59293f8","deviceName":"native smoke after restart","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1790394640207,"pid":44912,"hostname":"tianxuanji","mod":"server","msg":"client disconnected"}
+{"level":30,"time":1790394640207,"pid":44912,"hostname":"tianxuanji","signal":"SIGINT","msg":"shutting down"}
+{"level":30,"time":1790394640211,"pid":44912,"hostname":"tianxuanji","mod":"mcp","clients":0,"msg":"mcp manager closed"}

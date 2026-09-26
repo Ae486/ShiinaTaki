@@ -1,0 +1,9 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "Backend conventions and final gates"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "Headers, indexes, size limits, lint, real boot"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "Structured errors, no swallowed failures"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "What may be logged (R4)"}
+{"file": ".trellis/spec/backend/hindsight-application-runtime.md", "reason": "Run capture, foreground sync, degradation"}
+{"file": ".trellis/spec/backend/hindsight-runtime-reads.md", "reason": "Runtime reads and capability snapshots"}
+{"file": ".trellis/spec/backend/memory-replica-sync.md", "reason": "Bank service, scheduler, foreground/background modes"}
+{"file": ".trellis/spec/backend/memory-hindsight-lifecycle.md", "reason": "Memory-unavailable Runs and degraded reasons"}
+{"file": ".trellis/tasks/09-25-hindsight-native-smoke/research/native-smoke-2026-09-25.md", "reason": "D1-D3 evidence and reproduction"}

@@ -72,6 +72,8 @@ Core selection (D23).
 
 ## Open questions
 
-- PR02 (asked 2026-09-26, blocks only the native-route wave): may the native fork gain an opt-in, default-off
-  whole-database backup endpoint callable with the existing API key (route c), or does every backup stay an operator
-  CLI run admitted by Taki (route b)? Research recommends (c), default off. Waves not touching the native route proceed.
+- PR02 ANSWERED 2026-09-26 by the owner: option 1 = route (c). The native fork gains an opt-in, default-off endpoint
+  callable with the existing API key; the native ZIP stays on the native host and the endpoint returns only the proof
+  and artifact reference (no download through the API); one backup at a time. Route (b) (operator CLI run with the same
+  proof, admitted from `backups/inbox`) ships as the fallback with the same verifier. Streaming the ZIP to Core (c-stream)
+  would widen the key's power and needs a new owner decision.

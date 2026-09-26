@@ -38,5 +38,5 @@ The contracts are `research/stage3-seams.md` §5 unless a leader ruling below ch
 | W2 | `fenceHindsightWriters` + scheduler pause; family + `backup.capture` + `observeBoot`; route interface + double; rollback detection | W1 |
 | W3 | `backup.admit` / `backup.verify`; custody + missing-credential read-back; status age/missing interval; emergency seal | W2 |
 | W4 | Desktop Home backup block (fixtures, generic controller) | W3 |
-| W5 | Native route in `H:/hindsight` per the owner's PR02 answer + Core route client | owner answer, W2 |
+| W5 | Native route in `H:/hindsight` (owner PR02 = route c, default-off, native-host ZIP, single-flight) + CLI proof for the route-b fallback + Core route client | W2 |
 | W6 | Restore drill on the native-smoke harness (environment evidence, AC11) | W5, native-smoke harness |

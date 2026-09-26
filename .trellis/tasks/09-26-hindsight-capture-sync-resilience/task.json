@@ -1,0 +1,28 @@
+{
+  "id": "hindsight-capture-sync-resilience",
+  "name": "hindsight-capture-sync-resilience",
+  "title": "Hindsight capture sync resilience (smoke defects D1-D3)",
+  "description": "",
+  "status": "in_progress",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "pleia",
+  "assignee": "pleia",
+  "createdAt": "2026-09-26",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "08-09-hindsight-memory-provider",
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "source": "09-25-hindsight-native-smoke"
+  }
+}
