@@ -245,3 +245,81 @@ barrels; tests colocated; no real Hindsight/model/user data; boots use a temp da
   captures and the newest sealed backup regardless of verification, so Home does not depend on the 20-row
   `operations.recent` window (W4 point 1) and a sealed backup whose verify failed can be re-verified (W4 point 2).
 - `home-window.md` backup line is updated in the spec step.
+
+### W5 (2026-09-27, implementer; uncommitted; owner PR02 = route c, route b fallback)
+
+- Native (`H:/hindsight`, uncommitted, no git write): patch `TAKI-HS-013` in `TAKI_PATCHES.md`. Files:
+  - new `hindsight-api-slim/hindsight_api/admin/taki_backup.py`: request model, proof read, manifest entries;
+  - `admin/cli.py`: `_backup` split into `_backup_on_connection`;
+  - new `api/taki_backup.py`: router;
+  - `api/http.py`: mounts the router under `/ext/taki-memory`;
+  - new `tests/test_taki_admin_backup.py`.
+  Compatibility build stays `taki-memory-hindsight-0.9.0-d77-v1`: Core admits exactly that build, and the patch is
+  additive and default-off. No migration.
+- Proof and ZIP share one snapshot. The proof is the first read of the REPEATABLE READ transaction that runs every COPY.
+  `manifest.json` gains `taki {version 1, backupId, proof, entries[{name, bytes, sha256}]}`. The native manifest stays v2
+  and native restore ignores `taki`.
+- CLI (route b): `hindsight-admin backup <out.zip> --schema <s> --taki-request native-request.json`. An invalid request
+  exits 1. Without the option, output is unchanged.
+- Endpoint (route c):
+  - `HINDSIGHT_API_TAKI_BACKUP_ENABLED` (default false): when off nothing is mounted, so 404 `{"detail":"Not Found"}`.
+  - `HINDSIGHT_API_TAKI_BACKUP_DIR` is required when enabled, otherwise startup fails.
+  - `POST /ext/taki-memory/admin/backups` uses API-key auth and the supported-build check (401/503). It reads a byte-capped
+    body (413) and validates it (422).
+  - Single flight: a database-wide `pg_try_advisory_lock` answers 409 `backup_in_progress`.
+  - It writes `taki-backup-<backupId>.zip` through an exclusive 0600 partial file and rename; an existing target gets 409
+    `backup_exists`. It returns `{version, backupId, schema, proof, artifact{location:"native-host", fileName, sha256,
+    bytes}}` and never the ZIP.
+  - `GET .../admin/backups/{fileName}` returns `{fileName, sha256, bytes}`; a bad name gets 422, a missing file 404
+    `artifact_not_found`. Refusals use `{error:"taki_backup_refused", reason}`.
+  - Both routes are hidden from OpenAPI.
+- Core:
+  - `memory/hindsight/hindsight-backup-client.ts`: strict wire schemas, `createNativeBackup` / `nativeBackupDigest`, mixed
+    into `createHindsightClient`.
+  - `memory/hindsight-backup/hindsight-backup-native-route.ts`: the production route over the live connection.
+    - A non-ready connection, or the absent route's 404, → `ROUTE_UNAVAILABLE`.
+    - A 409 refusal → `NATIVE_FAILED`, with the reason logged.
+    - Other client errors propagate to the capture's `NATIVE_FAILED` mapping, with the sanitized cause logged.
+    - The proof is `HindsightBackupNativeProofSchema` of the native body plus the ZIP digest, and the echoed backupId must
+      match.
+  - `boot/hindsight-backup-boot.ts` wires the route. `composeHindsightBackup` takes `config` plus an optional injected
+    `client`, and `main.ts` and the journey fixture were updated. The activation transport answers the backup routes as
+    absent, which is the native default.
+- No new closed code for `backup_in_progress`: Desktop `BACKUP_ERROR_LABEL` is an exhaustive record in `apps/desktop`,
+  which this wave must not touch. A dedicated busy code is a Shared + Desktop follow-up.
+- D92 closed: `backup.verify` reads back the native-host ZIP digest via `route.readBack`.
+  - A changed or missing ZIP → `ARTIFACT_INVALID` with `verifiedAt` null.
+  - Route unavailable or native failure → that code, with the manifest untouched.
+  - `docs/deferred-decisions.md` D92 is marked DONE.
+- Tests:
+  - native: `test_taki_admin_backup.py` 13 cases, together with `test_admin_backup_restore.py` and
+    `test_taki_extension_contract.py` 35 passed, offline, on an owned pg0 instance that was then removed (other
+    `~/.pg0/instances` untouched).
+  - Core: `hindsight-backup-native-route.test.ts` (12 cases); verify native-host read-back cases; the production-route
+    capture test now asserts nothing is listed while the endpoint is off.
+- Gates:
+  - native: scoped Ruff check/format and scoped `ty` clean on changed files; full API `ruff check .` clean; whole-package
+    `ty` = the unchanged 27 Windows/MLX baseline diagnostics. OpenAPI regenerated to temp, byte-identical with the flag
+    off and on (sha256 `582b83b3…`).
+  - TakiAgent: `pnpm typecheck` and `pnpm lint` green; Shared 60 / 543; Core 422 / 3378 (+1 skipped); `git diff --check`
+    clean.
+  - Isolated boot (port 3990): migrations 1..50, 0 fetches, backup kinds refused (not unknown), exit 0.
+- Not run:
+  - native: the auto-fixing `scripts/hooks/lint.sh` (would rewrite unrelated files), the full native pytest suite, Oracle,
+    a live flag-on deployment;
+  - the Desktop test/build (Desktop is not touched);
+  - the W6 restore drill.
+- Spec follow-up: wording that says the native route is "unavailable until W5" needs the update-spec step.
+
+### Leader notes after W5 (2026-09-27)
+
+- Leader gate rerun found one `tsc` error the report missed (`RefusalSchema` widened the refusal reason to `string`); fixed by
+  making the helper generic, then typecheck, lint, Shared 543, Core 422 / 3378 (+1 skipped), `git diff --check` and the
+  isolated boot (port 4992, migrations 1..50, 0 fetches, exit 0) passed.
+- Ruling: the native compatibility build stays `taki-memory-hindsight-0.9.0-d77-v1`. TAKI-HS-013 is additive and off by
+  default; Core discovers a build without it by the absent-route 404 (`ROUTE_UNAVAILABLE`), while a bump would make Core
+  refuse the owner's running instance until a redeploy. Bump together with Shared when a patch changes existing behavior.
+- Ruling: no dedicated busy code. Core's exclusive `hindsight-backup` family already serializes captures, so a native
+  `backup_in_progress` only means a concurrent operator CLI or second Core; `NATIVE_FAILED` with the logged reason is truthful.
+- For the formal check: the native backup compresses on the API event loop (sync `zipfile`), so native reads stall for the
+  compression time during a capture; acceptable at owner scale, the check judges whether it needs `to_thread`.
