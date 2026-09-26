@@ -114,7 +114,7 @@ export function hindsightFixtureSecrets() {
     presence: (secretRef) => ({ secretRef, present: state.value !== null, provenance: state.value ? provenance() : null, health: "ok" }),
     set: (_secretRef, value) => { state.value = value; state.version++; return { present: true, provenance: provenance() }; },
     clear: () => { state.value = null; state.version++; return { present: false }; },
-    list: unsupported, verifyEntries: unsupported, rotateToKey: unsupported, backup: unsupported, restore: unsupported };
+    list: () => ({ health: "ok", entries: [] }), verifyEntries: unsupported, rotateToKey: unsupported, backup: unsupported, restore: unsupported };
   return { catalog, state };
 }
 

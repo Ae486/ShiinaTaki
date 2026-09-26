@@ -136,7 +136,7 @@ function openSession(boot: Boot, bootId: string) {
     onboardingStatus: () => readLocalOnboardingStatus({ local, operations }),
     authorityStatus: () => readMemoryAuthorityStatus({ db, live: runtime.operations, binding: runtime.bindingSnapshot,
       hindsightBinding: runtime.hindsightBindingSnapshot, setup, operations,
-      liveConnection: () => readHindsightLiveConnection({ config: source, secrets: boot.secrets.catalog }), lifecycle }),
+      liveConnection: () => readHindsightLiveConnection({ config: source, secrets: boot.secrets.catalog }), lifecycle, backup }),
     stop: async () => {
       await Promise.all([local.stop(), activation.stop(), lifecycle.stop(), backup.stop()]);
       await runtime.stop().catch(() => undefined);

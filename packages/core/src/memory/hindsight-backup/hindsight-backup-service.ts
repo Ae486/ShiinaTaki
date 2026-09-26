@@ -1,25 +1,31 @@
 /**
  * INPUT:  the published Hindsight runtime (write fence, replica scheduler, identity), Core SQLite, the artifact store, the
- *         native backup route and the custody reader
- * OUTPUT: createHindsightBackupService() -> markerEpochId/capture/quarantine/stop; capture runs §5.2 exactly: quiesce ->
- *         scheduler stop -> one Core identity read -> Database.backupTo into the partial dir -> native snapshot -> pair check
- *         -> seal, always releasing the fence and restarting a previously started scheduler; every failure is a closed
+ *         native backup route, the custody reader and the current catalog's credential read-back
+ * OUTPUT: createHindsightBackupService() -> markerEpochId/capture/admit/verify/lastVerified/sealed/quarantine/returnInbox/stop;
+ *         capture runs §5.2 exactly: quiesce -> scheduler stop -> one Core identity read -> Database.backupTo into the partial
+ *         dir -> native snapshot, pair check and seal (route c) or the staged native request awaiting backup.admit (route b),
+ *         always releasing the fence and restarting a previously started scheduler; every failure is a closed
  *         MemoryBackupErrorCode with no listed artifact
- * POS:    core/memory/hindsight-backup — the backup.capture producer; the operation owner is its only caller
+ * POS:    core/memory/hindsight-backup — the backup producer; the operation owner is its only caller
  */
 import {
-  HindsightBackupNativeProofSchema, type HindsightBackupManifest, type HindsightBackupPairMismatch, type HindsightCredentialCustody,
-  type MemoryBackupErrorCode, type MemoryBackupProducerRef,
+  HindsightBackupNativeProofSchema, type HindsightBackupManifest, type HindsightBackupNativeRequest, type HindsightBackupRoute,
+  type HindsightCredentialCustody, type MemoryBackupErrorCode, type MemoryBackupProducerRef,
 } from "@taki/shared";
 import type { Database } from "../../db/sqlite.ts";
 import type { Logger } from "../../logging/logger.ts";
 import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 import type { HindsightReplicaScheduler } from "../hindsight/hindsight-replica-scheduler.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
+import { admitHindsightBackup, type HindsightBackupAdmitInput } from "./hindsight-backup-admit.ts";
+import {
+  errorMessage, failedOutcome, HindsightBackupFailure, outcomeOf, step, stepAsync, type HindsightBackupOutcome,
+} from "./hindsight-backup-failure.ts";
 import { readHindsightBackupIdentity, type HindsightBackupIdentity, type HindsightBackupRuntimeIdentity } from "./hindsight-backup-identity.ts";
 import { verifyHindsightBackupPair } from "./hindsight-backup-pair.ts";
 import type { HindsightNativeBackupRoute, HindsightNativeBackupSnapshot } from "./hindsight-backup-route.ts";
-import type { HindsightBackupStore } from "./hindsight-backup-store.ts";
+import type { HindsightBackupStagedRecord, HindsightBackupStore } from "./hindsight-backup-store.ts";
+import { verifyHindsightBackup, type HindsightBackupVerifyInput } from "./hindsight-backup-verify.ts";
 
 const QUIESCE_TIMEOUT_MS = 30_000;
 const NATIVE_TIMEOUT_MS = 600_000;
@@ -30,19 +36,25 @@ export interface HindsightBackupRuntime extends HindsightBackupRuntimeIdentity {
   writeFence: Pick<CanonicalLocalWriteFence, "quiesce" | "release">;
 }
 export interface HindsightBackupCaptureInput {
-  operationId: string; backupId: string; runtime: HindsightBackupRuntime;
+  operationId: string; backupId: string; route: HindsightBackupRoute; runtime: HindsightBackupRuntime;
   checkpoint(phase: HindsightBackupPhase): void;
 }
-export type HindsightBackupCaptureOutcome =
-  | { ok: true; manifest: HindsightBackupManifest }
-  | { ok: false; code: MemoryBackupErrorCode; mismatch: HindsightBackupPairMismatch | null };
 
 export interface HindsightBackupService {
   /** The committed Hindsight epoch from the marker, or null under any other authority. */
   markerEpochId(): string | null;
-  capture(input: HindsightBackupCaptureInput): Promise<HindsightBackupCaptureOutcome>;
+  /** Route c resolves a sealed verified pair; route b resolves `verifiedAt: null` with the Core half staged for backup.admit. */
+  capture(input: HindsightBackupCaptureInput): Promise<HindsightBackupOutcome>;
+  admit(input: HindsightBackupAdmitInput): Promise<HindsightBackupOutcome>;
+  verify(input: HindsightBackupVerifyInput): Promise<HindsightBackupOutcome>;
+  /** The newest sealed backup whose pair is verified; a synchronous local read, re-listed after this service changes one. */
+  lastVerified(): HindsightBackupManifest | null;
+  /** The sealed manifest of a backup id, or null; synchronous for boot observation. */
+  sealed(backupId: string): HindsightBackupManifest | null;
   /** Boot observation: a leftover partial dir from a dead capture is moved aside, never listed. */
   quarantine(backupId: string): boolean;
+  /** Boot observation of a dead admit: a ZIP claimed into the staged dir goes back under its inbox name. */
+  returnInbox(backupId: string, fileName: string): boolean;
   /** Aborts an in-flight native snapshot so shutdown is not held by the route. */
   stop(): void;
 }
@@ -50,81 +62,82 @@ export interface HindsightBackupService {
 export interface HindsightBackupServiceInput {
   db: Database; store: HindsightBackupStore; route: HindsightNativeBackupRoute;
   custody(): HindsightCredentialCustody;
+  /** The refs a custody record saw present that the current catalog does not hold. */
+  missingCredentials(custody: HindsightCredentialCustody): string[];
   logger: Logger; now?: () => string; quiesceTimeoutMs?: number; nativeTimeoutMs?: number;
 }
-
-/** A failure already named by its capture step; anything else escaping a step is an internal error. */
-class CaptureFailure extends Error {
-  readonly code: MemoryBackupErrorCode;
-  readonly mismatch: HindsightBackupPairMismatch | null;
-  constructor(code: MemoryBackupErrorCode, mismatch: HindsightBackupPairMismatch | null = null) {
-    super(code); this.name = "CaptureFailure"; this.code = code; this.mismatch = mismatch;
-  }
-}
+type Deps = HindsightBackupServiceInput & { now: () => string };
 
 export function createHindsightBackupService(input: HindsightBackupServiceInput): HindsightBackupService {
   const active = new Set<AbortController>();
+  const deps: Deps = { ...input, now: input.now ?? (() => new Date().toISOString()) };
+  let verified: { manifest: HindsightBackupManifest | null } | null = null;
+  const changing = async (work: () => Promise<HindsightBackupOutcome>) => {
+    try { return await work(); }
+    finally { verified = null; }
+  };
   return {
     markerEpochId: () => {
       const selection = readMemoryAuthoritySelection(input.db);
       return selection.mode === "hindsight" ? selection.epochId : null;
     },
-    capture: async (capture) => {
+    capture: (capture) => changing(async () => {
       const controller = new AbortController(); active.add(controller);
-      try { return await paused(input, capture, controller.signal); }
+      try { return await paused(deps, capture, controller.signal); }
       finally { active.delete(controller); }
-    },
+    }),
+    admit: (admit) => changing(() => admitHindsightBackup(deps, admit)),
+    verify: (target) => changing(() => verifyHindsightBackup(deps, target)),
+    lastVerified: () => (verified ??= { manifest: input.store.listSync().filter((backup) => backup.verifiedAt !== null).at(-1) ?? null }).manifest,
+    sealed: (backupId) => input.store.readSync(backupId),
     quarantine: (backupId) => input.store.quarantine(backupId),
+    returnInbox: (backupId, fileName) => input.store.returnInbox(backupId, fileName),
     stop: () => { for (const controller of active) controller.abort(); },
   };
 }
 
-async function paused(deps: HindsightBackupServiceInput, capture: HindsightBackupCaptureInput, signal: AbortSignal): Promise<HindsightBackupCaptureOutcome> {
-  if (!deps.route.available()) return failed("HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE");
+async function paused(deps: Deps, capture: HindsightBackupCaptureInput, signal: AbortSignal): Promise<HindsightBackupOutcome> {
+  if (capture.route === "native-endpoint" && !deps.route.available()) return failedOutcome("HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE");
   const { runtime } = capture;
   capture.checkpoint("quiescing");
   try { await runtime.writeFence.quiesce({ timeoutMs: deps.quiesceTimeoutMs ?? QUIESCE_TIMEOUT_MS }); }
   catch (error) {
     // A timed-out quiesce reopens the fence itself; nothing else was paused yet.
-    return failed(errorMessage(error) === "MEMORY_QUIESCENCE_TIMEOUT" ? "HINDSIGHT_BACKUP_QUIESCENCE_TIMEOUT" : "HINDSIGHT_BACKUP_INTERNAL_ERROR");
+    return failedOutcome(errorMessage(error) === "MEMORY_QUIESCENCE_TIMEOUT" ? "HINDSIGHT_BACKUP_QUIESCENCE_TIMEOUT" : "HINDSIGHT_BACKUP_INTERNAL_ERROR");
   }
   const schedulerWasStarted = runtime.scheduler.started();
   try {
     await runtime.scheduler.stop();
-    return { ok: true, manifest: await captureQuiesced(deps, { capture, signal }) };
+    return { ok: true, verifiedAt: await captureQuiesced(deps, { capture, signal }) };
   } catch (error) {
-    if (error instanceof CaptureFailure) return failed(error.code, error.mismatch);
-    deps.logger.error({ code: "HINDSIGHT_BACKUP_INTERNAL_ERROR", err: error instanceof Error ? error.name : "unknown" }, "backup capture failed");
-    return failed("HINDSIGHT_BACKUP_INTERNAL_ERROR");
+    return outcomeOf(error, (unexpected) => deps.logger.error({ code: "HINDSIGHT_BACKUP_INTERNAL_ERROR",
+      err: unexpected instanceof Error ? unexpected.name : "unknown" }, "backup capture failed"));
   } finally {
     runtime.writeFence.release();
     if (schedulerWasStarted) restartScheduler(runtime, deps.logger);
   }
 }
 
-async function captureQuiesced(deps: HindsightBackupServiceInput, work: { capture: HindsightBackupCaptureInput; signal: AbortSignal }): Promise<HindsightBackupManifest> {
-  const { capture } = work; const now = deps.now ?? (() => new Date().toISOString());
+/** Resolves the sealed pair's verifiedAt, or null once a route-b capture is staged for its native ZIP. */
+async function captureQuiesced(deps: Deps, work: { capture: HindsightBackupCaptureInput; signal: AbortSignal }): Promise<string | null> {
+  const { capture } = work;
   const identity = step(() => readHindsightBackupIdentity(deps.db, capture.runtime), coreReadCode);
   const custody = step(() => deps.custody(), () => "HINDSIGHT_BACKUP_INTERNAL_ERROR");
-  const createdAt = now();
+  const createdAt = deps.now();
   capture.checkpoint("capturing-core");
   await stepAsync(() => deps.store.begin(capture.backupId), () => "HINDSIGHT_BACKUP_STORAGE_FAILED");
   try {
     const core = await stepAsync(() => deps.store.captureCore(capture.backupId, (path) => deps.db.backupTo(path)),
       () => "HINDSIGHT_BACKUP_CORE_CAPTURE_FAILED");
-    capture.checkpoint("capturing-native");
-    const native = await nativeSnapshot(deps, { capture, identity, signal: work.signal });
-    capture.checkpoint("verifying");
-    const pair = verifyHindsightBackupPair(identity.core, native.proof);
-    if (!pair.ok) throw new CaptureFailure("HINDSIGHT_BACKUP_PAIR_MISMATCH", { reason: pair.reason, bankId: pair.bankId });
+    const staged: HindsightBackupStagedRecord = {
+      request: nativeRequest(identity, { backupId: capture.backupId, createdAt }),
+      core: { version: 1, backupId: capture.backupId, createdAt, operationId: capture.operationId,
+        core: { file: "core.sqlite", ...core, migrationHead: identity.migrationHead }, ...identity.core, custody },
+    };
+    if (capture.route === "native-endpoint") return await pairAndSeal(deps, { capture, staged, signal: work.signal });
     capture.checkpoint("sealing");
-    const manifest: HindsightBackupManifest = { version: 1, backupId: capture.backupId, createdAt, operationId: capture.operationId,
-      route: "native-endpoint", core: { file: "core.sqlite", ...core, migrationHead: identity.migrationHead },
-      native: { ...native.artifact, nativeManifestVersion: "2", schema: native.schema, proof: native.proof },
-      ...identity.core, custody, sensitive: true, verifiedAt: now() };
-    await stepAsync(() => deps.store.seal(manifest), (error) => errorMessage(error) === "HINDSIGHT_BACKUP_ARTIFACT_INVALID"
-      ? "HINDSIGHT_BACKUP_INTERNAL_ERROR" : "HINDSIGHT_BACKUP_STORAGE_FAILED");
-    return manifest;
+    await stepAsync(() => deps.store.stage(staged), () => "HINDSIGHT_BACKUP_STORAGE_FAILED");
+    return null;
   } catch (error) {
     // An unpaired Core copy is never offered as a backup; the partial dir goes with the failure.
     await deps.store.discard(capture.backupId).catch(() => deps.logger.warn({ code: "HINDSIGHT_BACKUP_STORAGE_FAILED" }, "partial backup dir was not removed"));
@@ -132,16 +145,35 @@ async function captureQuiesced(deps: HindsightBackupServiceInput, work: { captur
   }
 }
 
-async function nativeSnapshot(deps: HindsightBackupServiceInput, input: {
-  capture: HindsightBackupCaptureInput; identity: HindsightBackupIdentity; signal: AbortSignal;
-}): Promise<HindsightNativeBackupSnapshot> {
+async function pairAndSeal(deps: Deps, input: { capture: HindsightBackupCaptureInput; staged: HindsightBackupStagedRecord; signal: AbortSignal }): Promise<string> {
+  const { capture, staged } = input;
+  capture.checkpoint("capturing-native");
+  const native = await nativeSnapshot(deps, { request: staged.request, signal: input.signal });
+  capture.checkpoint("verifying");
+  const pair = verifyHindsightBackupPair(staged.core, native.proof);
+  if (!pair.ok) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_PAIR_MISMATCH", { reason: pair.reason, bankId: pair.bankId });
+  capture.checkpoint("sealing");
+  const verifiedAt = deps.now();
+  const manifest: HindsightBackupManifest = { ...staged.core, route: "native-endpoint",
+    native: { ...native.artifact, nativeManifestVersion: "2", schema: native.schema, proof: native.proof }, sensitive: true, verifiedAt };
+  await stepAsync(() => deps.store.seal(manifest), (error) => errorMessage(error) === "HINDSIGHT_BACKUP_ARTIFACT_INVALID"
+    ? "HINDSIGHT_BACKUP_INTERNAL_ERROR" : "HINDSIGHT_BACKUP_STORAGE_FAILED");
+  return verifiedAt;
+}
+
+/** What the native side must snapshot and prove: route c sends it, route b writes it for the operator's native CLI. */
+function nativeRequest(identity: HindsightBackupIdentity, input: { backupId: string; createdAt: string }): HindsightBackupNativeRequest {
+  return { version: 1, backupId: input.backupId, createdAt: input.createdAt, providerLineageId: identity.core.authority.providerLineageId,
+    nativeBankIds: identity.core.banks.map((bank) => bank.nativeBankId), operationIds: identity.operationIds };
+}
+
+async function nativeSnapshot(deps: Deps, input: { request: HindsightBackupNativeRequest; signal: AbortSignal }): Promise<HindsightNativeBackupSnapshot> {
   const signal = AbortSignal.any([input.signal, AbortSignal.timeout(deps.nativeTimeoutMs ?? NATIVE_TIMEOUT_MS)]);
   // The fence stays closed until this settles, so a route that ignores its signal must not hold writes past the deadline.
-  const snapshot = await stepAsync(() => Promise.race([deps.route.snapshot({ backupId: input.capture.backupId,
-    providerLineageId: input.identity.core.authority.providerLineageId, nativeBankIds: input.identity.core.banks.map((bank) => bank.nativeBankId),
-    operationIds: input.identity.operationIds, signal }), aborted(signal)]), () => "HINDSIGHT_BACKUP_NATIVE_FAILED");
+  const snapshot = await stepAsync(() => Promise.race([deps.route.snapshot({ ...input.request, signal }), aborted(signal)]),
+    () => "HINDSIGHT_BACKUP_NATIVE_FAILED");
   const proof = HindsightBackupNativeProofSchema.safeParse(snapshot.proof);
-  if (!proof.success) throw new CaptureFailure("HINDSIGHT_BACKUP_NATIVE_FAILED");
+  if (!proof.success) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_NATIVE_FAILED");
   return { ...snapshot, proof: proof.data };
 }
 
@@ -159,22 +191,4 @@ function restartScheduler(runtime: HindsightBackupRuntime, logger: Logger): void
 
 function coreReadCode(error: unknown): MemoryBackupErrorCode {
   return errorMessage(error) === "MEMORY_AUTHORITY_MISMATCH" ? "MEMORY_AUTHORITY_MISMATCH" : "HINDSIGHT_BACKUP_CORE_CAPTURE_FAILED";
-}
-
-function step<T>(action: () => T, code: (error: unknown) => MemoryBackupErrorCode): T {
-  try { return action(); }
-  catch (error) { throw error instanceof CaptureFailure ? error : new CaptureFailure(code(error)); }
-}
-
-async function stepAsync<T>(action: () => Promise<T>, code: (error: unknown) => MemoryBackupErrorCode): Promise<T> {
-  try { return await action(); }
-  catch (error) { throw error instanceof CaptureFailure ? error : new CaptureFailure(code(error)); }
-}
-
-function failed(code: MemoryBackupErrorCode, mismatch: HindsightBackupPairMismatch | null = null): HindsightBackupCaptureOutcome {
-  return { ok: false, code, mismatch };
-}
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "";
 }

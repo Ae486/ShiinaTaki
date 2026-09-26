@@ -6,8 +6,9 @@
  */
 import type { MemoryOperationKind, MemoryOperationRequest } from "@taki/shared";
 import type { MemoryOperationKindHandler } from "./memory-operation-contract.ts";
-import { backupUnsupportedKind } from "./memory-operation-kind-backup.ts";
+import { backupAdmitKind } from "./memory-operation-kind-backup-admit.ts";
 import { backupCaptureKind } from "./memory-operation-kind-backup-capture.ts";
+import { backupVerifyKind } from "./memory-operation-kind-backup-verify.ts";
 import { bankProvisionKind } from "./memory-operation-kind-bank.ts";
 import { connectionRevalidateKind } from "./memory-operation-kind-connection.ts";
 import { hindsightActivateKind } from "./memory-operation-kind-hindsight.ts";
@@ -29,8 +30,8 @@ export const MEMORY_OPERATION_KINDS: MemoryOperationKindRegistry = {
   "bank.provision": bankProvisionKind,
   "connection.revalidate": connectionRevalidateKind,
   "backup.capture": backupCaptureKind,
-  "backup.admit": backupUnsupportedKind,
-  "backup.verify": backupUnsupportedKind,
+  "backup.admit": backupAdmitKind,
+  "backup.verify": backupVerifyKind,
 };
 
 /** Erases the per-kind request narrowing at the dispatch boundary; the service only ever passes a request of the matching kind. */

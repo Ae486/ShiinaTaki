@@ -23,7 +23,7 @@ function fixture() {
   if (live.state !== "ready") throw new Error("fixture connection must be ready");
   const input = (patch: Partial<HindsightLifecycleStatusInput> = {}): HindsightLifecycleStatusInput => ({ db: f.db, epochId: "epoch", live,
     runtimeDrift: "none", setup: setupSnapshot({ banks: f.setup.list(), configFingerprint: live.fingerprint }), provisioning: ["sayo"],
-    busy: false, unavailableReason: null, revalidateBlocked: false, ...patch });
+    busy: false, unavailableReason: null, revalidateBlocked: false, backup: null, ...patch });
   return { f, live, input };
 }
 

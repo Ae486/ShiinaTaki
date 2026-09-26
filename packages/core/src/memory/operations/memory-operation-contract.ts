@@ -46,7 +46,7 @@ export interface MemoryOperationContext {
   hindsight?: HindsightActivationService;
   /** Absent when Core composes without a Hindsight lifecycle producer; the lifecycle kinds then refuse at admission. */
   lifecycle?: HindsightLifecycleService;
-  /** Absent when Core composes without a Hindsight backup producer; backup.capture then refuses at admission. */
+  /** Absent when Core composes without a Hindsight backup producer; the backup kinds then refuse at admission. */
   backup?: HindsightBackupService;
   /** The owner's own durable rows, so a kind can resolve a prior command (retry) without trusting the client. */
   lookup(operationId: string): MemoryOperation | undefined;

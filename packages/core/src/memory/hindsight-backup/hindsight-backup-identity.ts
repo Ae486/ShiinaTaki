@@ -1,7 +1,7 @@
 /**
  * INPUT:  a committed Hindsight marker, the published runtime's identity/Bank set and Core SQLite
  * OUTPUT: readHindsightBackupIdentity() — authority, per-Bank checkpoints, terminal-operation ids and migration head read in
- *         one SQLite transaction immediately before the Core copy
+ *         one SQLite transaction immediately before the Core copy; migrationHead() for any Core copy
  * POS:    core/memory/hindsight-backup — capture step 3 (§5.2); read-only; a later foreground pull may only raise the copy's
  *         checkpoints above these values, so they are lower bounds the native side must still meet
  */
@@ -55,7 +55,8 @@ function readBank(db: Database, bank: MemoryReplicaBank): HindsightBackupBank {
   };
 }
 
-function migrationHead(db: Database): number {
+/** The Core schema version a copy of this database carries. */
+export function migrationHead(db: Database): number {
   const version = db.prepare("SELECT max(version) AS version FROM migrations").get()?.version;
   if (typeof version !== "number") throw new Error("HINDSIGHT_BACKUP_CORE_CAPTURE_FAILED");
   return version;

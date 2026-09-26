@@ -1,12 +1,20 @@
 # core/memory/hindsight-backup/
 Stage 3 backup primitives under a committed Hindsight authority. Operator-only: no agent tool reaches them; Core writes
 only below `<dataDir>/backups/`.
-- hindsight-backup-store.ts — the artifact store: `<backupId>.partial/` staging, Core copy with removal on failure, sha256/bytes, re-hash then manifest then rename on seal, quarantine of leftover partials, listing of sealed schema-valid manifests only, owner-only modes where the OS has them
+- hindsight-backup-store.ts — the artifact store: `<backupId>.partial/` staging, Core copy with removal on failure, sha256/bytes, re-hash then manifest then rename on seal, quarantine of leftover partials, route-b `<backupId>.staged/` records with inbox claim/return by plain file name, atomic verifiedAt rewrite, `incident-<id>/` emergency dirs, listing of sealed schema-valid manifests only, owner-only modes where the OS has them
 - hindsight-backup-pair.ts — the pure pair verifier (lineage, Bank set and native Bank ids, generations, replica/application cursors, terminal-operation receipt scope and membership; native superset accepted) and the shared operation-list digest
 - hindsight-backup-fixtures.ts — test support (not in the production path): manifest, native proof and Core Bank builders
 - hindsight-backup-identity.ts — capture step 3: authority, per-Bank replica/application checkpoints, terminal-operation ids and migration head in one SQLite transaction (lower bounds the native side must meet)
 - hindsight-backup-receipts.ts — the test-pinned Core terminal write kind -> native receipt table map (ruling 3) and the reader that lists native-confirmed Pending and completed D77 job ids of the current lineage/generation
-- hindsight-backup-route.ts — the native snapshot seam (request -> native proof + native-host artifact reference) and the unavailable production route until W5
-- hindsight-backup-custody.ts — presence-only custody record of every Hindsight secret ref plus the connection marker; no value or envelope leaves the catalog
-- hindsight-backup-service.ts — the backup.capture producer: quiesce -> scheduler stop -> identity read -> Core backupTo -> native snapshot (deadline-raced) -> pair check -> seal, always releasing and restarting; closed failure codes, no listed artifact on failure
+- hindsight-backup-route.ts — the route-c native snapshot seam (the Shared native request -> native proof + artifact reference) and the unavailable production route until W5
+- hindsight-backup-custody.ts — presence-only custody record of every Hindsight secret ref (fixed slots plus listed `memory.hindsight.` refs) and the connection marker, plus the read-back naming refs a target catalog lacks; no value or envelope leaves the catalog
+- hindsight-backup-service.ts — the backup producer: capture (quiesce -> scheduler stop -> identity read -> Core backupTo -> route c: native snapshot (deadline-raced) -> pair check -> seal; route b: stage the Core half and the native request), always releasing and restarting; admit/verify delegation and the cached last verified pair
+- hindsight-backup-failure.ts — the producer outcome type, the closed-code failure carrier and step/outcome mapping helpers
+- hindsight-backup-files.ts — owner-only file writes, atomic replace, streaming sha256 and error-code helpers
+- hindsight-backup-archive.ts — the route-b ZIP reader: native manifest v2 + `taki` proof, every `<table>.bin` re-hashed against its pinned digest and size, no extraction
+- hindsight-backup-admit.ts — the backup.admit producer: claim the inbox ZIP into the staged dir, check the echoed backup id and the pair against the staged Core copy, seal verified or hand the ZIP back
+- hindsight-backup-verify.ts — the backup.verify producer: re-hash, re-read the route-b proof, re-pair, credential read-back; atomic verifiedAt or a recorded null
+- hindsight-backup-status.ts — the synchronous `hindsight.backup` status section: last verified pair, age, per-Bank missing interval and unsettled Core writes
+- hindsight-backup-emergency.ts — sealEmergencyEvidence(): an incident-local Core copy + manifest that never contacts native (Stage 4 hook, no caller yet)
+- hindsight-backup-harness.ts — test support (not in the production path): the service harness, the route-b operator ZIP builder (the W5 CLI contract) and inbox helpers
 - hindsight-backup-route-fixtures.ts — test support (not in the production path): programmable in-memory native route double with an inter-capture hook and failure injection

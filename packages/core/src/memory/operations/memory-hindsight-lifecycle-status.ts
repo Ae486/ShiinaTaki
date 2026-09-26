@@ -1,13 +1,15 @@
 /**
  * INPUT:  the selected Hindsight epoch, the live connection (state + fingerprint), the bound runtime's drift (null while
  *         unbound) and unavailable reason, the B3 setup snapshot, Characters with an open bank.provision, whether an
- *         exclusive family is open, whether the revalidate blocker refuses, replica checkpoints and the Timeline
+ *         exclusive family is open, whether the revalidate blocker refuses, replica checkpoints, the Timeline and the backup block
  * OUTPUT: readHindsightLifecycleStatus() — the memory.authority.status `hindsight` section (connection drift/admission
- *         evidence, per-scope Bank readiness, Core-derived actions: revalidate on drift or a repairable unavailable runtime
+ *         evidence, per-scope Bank readiness, the backup block as read, Core-derived actions: revalidate on drift or a repairable unavailable runtime
  *         unless the revalidate blocker refuses, provision for every unprovisioned/failed Character while the runtime serves; none while an exclusive family is open)
  * POS:    core/memory/operations — pure local read; never probes the network, never writes, never fails on missing evidence
  */
-import type { HindsightBankSetupProjection, HindsightSetupSnapshot, MemoryHindsightStatusSection, MemoryRuntimeUnavailableReason } from "@taki/shared";
+import type {
+  HindsightBackupStatusSection, HindsightBankSetupProjection, HindsightSetupSnapshot, MemoryHindsightStatusSection, MemoryRuntimeUnavailableReason,
+} from "@taki/shared";
 import { createHindsightRuntimeAdmissionRepo } from "../../db/hindsight-runtime-admission-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
 import { listTimelineCharacterIds } from "../../db/timeline-repo.ts";
@@ -28,6 +30,8 @@ export interface HindsightLifecycleStatusInput {
   unavailableReason: MemoryRuntimeUnavailableReason | null;
   /** hindsightRevalidateBlocker refuses this live connection (a Stage 5 change): the drift still shows, no revalidate is offered. */
   revalidateBlocked: boolean;
+  /** The backup block read by the caller (null when Core composes without a backup producer). */
+  backup: HindsightBackupStatusSection | null;
 }
 
 type Section = MemoryHindsightStatusSection;
@@ -42,7 +46,7 @@ export function readHindsightLifecycleStatus(input: HindsightLifecycleStatusInpu
     if (!listed.has(characterId)) banks.push(timelineBank(input, characterId));
   }
   const section = connection(input);
-  return { connection: section, banks, actions: actions(input, { connection: section, banks }), backup: null };
+  return { connection: section, banks, actions: actions(input, { connection: section, banks }), backup: input.backup };
 }
 
 // Stopped and authority_mismatch are not connection problems: a revalidation cannot repair either.

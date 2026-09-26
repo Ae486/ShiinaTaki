@@ -1,67 +1,19 @@
-import { existsSync, mkdtempSync, readdirSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { MemoryReplicaBank } from "@taki/shared";
-import { publishReplicaCheckpoint } from "../../db/hindsight-replica-checkpoint-store.ts";
 import { MIGRATIONS } from "../../db/migrations/index-list.ts";
 import { openDatabase, type Database } from "../../db/sqlite.ts";
-import { createCaptureLogger } from "../../testing/capture-logger.ts";
 import { rmTempDir } from "../../testing/rm-temp.ts";
-import { createCanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
-import { seedHindsightAuthority } from "../operations/memory-operation-fixtures.ts";
-import { AT, BACKUP_ID, backupManifest } from "./hindsight-backup-fixtures.ts";
-import { createNativeBackupRouteDouble } from "./hindsight-backup-route-fixtures.ts";
-import { createHindsightBackupService, type HindsightBackupRuntime, type HindsightBackupServiceInput } from "./hindsight-backup-service.ts";
-import { createHindsightBackupStore, type HindsightBackupStore } from "./hindsight-backup-store.ts";
-
-const LINEAGE = "11111111-1111-4111-8111-111111111111";
-const GENERATION = "33333333-3333-4333-8333-333333333333";
-const OPERATION_ID = "44444444-4444-4444-8444-444444444444";
-const BANK: MemoryReplicaBank = { bankId: "taki-hs-g", scope: "global", characterId: null };
-const hex = (character: string) => character.repeat(64);
+import { AT, BACKUP_ID } from "./hindsight-backup-fixtures.ts";
+import {
+  backupHarness, HARNESS_BANK as BANK, HARNESS_GENERATION as GENERATION, HARNESS_LINEAGE as LINEAGE, HARNESS_OPERATION_ID as OPERATION_ID, seedConfirmedRetain,
+  type BackupHarness as Harness, type BackupHarnessOptions as HarnessOptions,
+} from "./hindsight-backup-harness.ts";
 
 const dirs: string[] = []; const dbs: Database[] = [];
 afterEach(() => { vi.restoreAllMocks(); for (const db of dbs.splice(0)) db.close(); for (const dir of dirs.splice(0)) rmTempDir(dir); });
 
-interface HarnessOptions {
-  wrapStore?: (store: HindsightBackupStore) => HindsightBackupStore;
-  custody?: HindsightBackupServiceInput["custody"];
-  quiesceTimeoutMs?: number; nativeTimeoutMs?: number;
-}
-
-function harness(options: HarnessOptions = {}) {
-  const dataDir = mkdtempSync(join(tmpdir(), "taki-backup-service-")); dirs.push(dataDir);
-  const db = openDatabase({ path: join(dataDir, "state.db"), migrations: MIGRATIONS }); dbs.push(db);
-  seedHindsightAuthority(db);
-  publishReplicaCheckpoint(db, { previous: null, next: { providerLineageId: LINEAGE, bankId: BANK.bankId, bankGeneration: GENERATION,
-    authorityEpochId: "epoch", replicaEpochId: "55555555-5555-4555-8555-555555555555", endCursor: 5,
-    snapshotId: "66666666-6666-4666-8666-666666666666", snapshotCursor: 0, snapshotManifestDigest: hex("a"), manifestDigest: hex("b"), verifiedAt: AT } });
-  const store = createHindsightBackupStore(dataDir);
-  const route = createNativeBackupRouteDouble({ providerLineage: LINEAGE, receipts: new Set(),
-    banks: new Map([[BANK.bankId, { bankGeneration: GENERATION, currentCursor: 5, application: null }]]) });
-  let started = true;
-  const scheduler = { started: vi.fn(() => started), stop: vi.fn(async () => { started = false; }), start: vi.fn(() => { started = true; }) };
-  const runtime: HindsightBackupRuntime = { epochId: "epoch", configFingerprint: hex("f"), deploymentMode: "existing-instance",
-    banks: () => [BANK], scheduler, writeFence: createCanonicalLocalWriteFence() };
-  const fence = runtime.writeFence as ReturnType<typeof createCanonicalLocalWriteFence>;
-  const { logger, records: logs } = createCaptureLogger();
-  const service = createHindsightBackupService({ db, store: options.wrapStore?.(store) ?? store, route, logger, now: () => AT,
-    custody: options.custody ?? (() => backupManifest({ sha256: hex("0"), bytes: 1, pages: 1 }).custody),
-    quiesceTimeoutMs: options.quiesceTimeoutMs ?? 1_000, nativeTimeoutMs: options.nativeTimeoutMs ?? 5_000 });
-  const phases: string[] = [];
-  const capture = () => service.capture({ operationId: OPERATION_ID, backupId: BACKUP_ID, runtime, checkpoint: (phase) => { phases.push(phase); } });
-  return { dataDir, db, store, route, scheduler, runtime, fence, logs, service, phases, capture };
-}
-type Harness = ReturnType<typeof harness>;
-
-/** A native-confirmed tracked Pending row: its Core terminal id is `native-operation:<bank>:<gen>:retain:<remote>`. */
-function seedConfirmedRetain(db: Database, remote: string): string {
-  db.prepare(`INSERT INTO pending_memory (authority_epoch_id,bank_id,operation_id,operation_kind,intent_hash,phase,version,state_json)
-    VALUES ('epoch',:bank,:operation,'retain',:hash,'completed',1,:state)`).run({ bank: BANK.bankId, operation: `op-${remote}`, hash: hex("c"),
-    state: JSON.stringify({ remoteOperationId: remote, intent: { bankGeneration: GENERATION }, dispatch: { protocol: "tracked_native_v1" }, nativeReceipt: {} }) });
-  return `native-operation:${BANK.bankId}:${GENERATION}:retain:${remote}`;
-}
+const harness = (options?: HarnessOptions) => backupHarness({ dirs, dbs }, options);
 
 function leftovers(h: Harness): string[] {
   return existsSync(h.store.root) ? readdirSync(h.store.root).filter((name) => name !== "quarantine") : [];
@@ -180,7 +132,8 @@ describe("inter-capture writes (§5.4)", () => {
       h.route.state.receipts.add(after); h.route.state.banks.get(BANK.bankId)!.currentCursor = 6;
     };
     const outcome = await h.capture();
-    expect(outcome).toMatchObject({ ok: true, manifest: { terminalOperations: { count: 1 }, banks: [{ core: { replicaCursor: 5 } }] } });
+    expect(outcome).toEqual({ ok: true, verifiedAt: AT });
+    expect(await h.store.list()).toMatchObject([{ terminalOperations: { count: 1 }, banks: [{ core: { replicaCursor: 5 } }] }]);
     const copy = openDatabase({ path: join(h.store.root, BACKUP_ID, "core.sqlite"), migrations: MIGRATIONS }); dbs.push(copy);
     expect(copy.prepare("SELECT count(*) AS n FROM pending_memory").get()?.n).toBe(1);
   });

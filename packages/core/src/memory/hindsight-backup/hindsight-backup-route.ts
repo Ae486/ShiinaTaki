@@ -5,16 +5,10 @@
  * POS:    core/memory/hindsight-backup — capture step 5 seam (§6); the route never receives Core cursors, it reports native
  *         truth read in the same REPEATABLE READ transaction as its snapshot and the pair check judges it
  */
-import type { HindsightBackupNativeProof } from "@taki/shared";
+import type { HindsightBackupNativeProof, HindsightBackupNativeRequest } from "@taki/shared";
 
-export interface HindsightNativeBackupRequest {
-  backupId: string;
-  providerLineageId: string;
-  nativeBankIds: readonly string[];
-  /** The Core terminal-operation list; the proof answers membership for exactly this list. */
-  operationIds: readonly string[];
-  signal: AbortSignal;
-}
+/** The same request body route b writes as `native-request.json`; the proof answers membership for exactly its operation ids. */
+export type HindsightNativeBackupRequest = HindsightBackupNativeRequest & { signal: AbortSignal };
 
 export interface HindsightNativeBackupSnapshot {
   proof: HindsightBackupNativeProof;
@@ -24,12 +18,12 @@ export interface HindsightNativeBackupSnapshot {
 }
 
 export interface HindsightNativeBackupRoute {
-  /** False when no native backup endpoint is configured; capture then fails before pausing anything. */
+  /** False when no native backup endpoint is configured; a route-c capture then fails before pausing anything. */
   available(): boolean;
   snapshot(request: HindsightNativeBackupRequest): Promise<HindsightNativeBackupSnapshot>;
 }
 
-/** Deferred to W5 (owner PR02 answer pending): no native backup endpoint exists, so every capture fails ROUTE_UNAVAILABLE. */
+/** Deferred to W5: no native backup endpoint exists yet, so every route-c capture fails ROUTE_UNAVAILABLE (route b still works). */
 export function createUnavailableHindsightBackupRoute(): HindsightNativeBackupRoute {
   return {
     available: () => false,
