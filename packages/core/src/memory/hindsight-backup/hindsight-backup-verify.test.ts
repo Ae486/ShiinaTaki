@@ -63,3 +63,29 @@ describe("backup.verify", () => {
     expect(await verify(h)).toEqual({ ok: false, code: "HINDSIGHT_BACKUP_ARTIFACT_INVALID", mismatch: null });
   });
 });
+
+describe("backup.verify — native-host ZIP read-back", () => {
+  const file = `taki-backup-${BACKUP_ID}.zip`;
+
+  it.each([
+    ["changed", (h: BackupHarness) => { h.route.artifacts.set(file, { sha256: "f".repeat(64), bytes: 4096 }); }],
+    ["gone", (h: BackupHarness) => { h.route.artifacts.delete(file); }],
+  ])("records verifiedAt null when the native host's ZIP is %s", async (_name, arrange) => {
+    const h = await routeC();
+    arrange(h);
+    expect(await verify(h)).toEqual({ ok: false, code: "HINDSIGHT_BACKUP_ARTIFACT_INVALID", mismatch: null });
+    expect(JSON.parse(manifestText(h)).verifiedAt).toBeNull();
+  });
+
+  it.each([
+    ["the route is unavailable", "HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE", (h: BackupHarness) => { h.route.unavailable = true; }],
+    ["the native host cannot answer", "HINDSIGHT_BACKUP_NATIVE_FAILED",
+      (h: BackupHarness) => { vi.spyOn(h.route, "readBack").mockRejectedValue(new Error("HINDSIGHT_UNREACHABLE")); }],
+  ])("fails without touching the manifest when %s", async (_name, code, arrange) => {
+    const h = await routeC();
+    const before = manifestText(h);
+    arrange(h);
+    expect(await verify(h)).toEqual({ ok: false, code, mismatch: null });
+    expect(manifestText(h)).toBe(before);
+  });
+});

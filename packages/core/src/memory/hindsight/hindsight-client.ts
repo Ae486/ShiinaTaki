@@ -34,6 +34,7 @@ import { createHindsightNativeResultMethods, type HindsightNativeResultClient } 
 import { createHindsightCurrentMethods, type HindsightCurrentStateClient } from "./hindsight-current-client.ts";
 import { createHindsightRuntimeMethods, type HindsightRuntimeClient } from "./hindsight-runtime-client.ts";
 import { createHindsightApplicationMethods, type HindsightApplicationClient } from "./hindsight-application-client.ts";
+import { createHindsightBackupMethods, type HindsightBackupClient } from "./hindsight-backup-client.ts";
 
 export interface HindsightTransportResponse {
   status: number;
@@ -46,7 +47,7 @@ export interface HindsightCallContext {
   timeoutMs: number;
   attemptId?: string;
 }
-export interface HindsightClient extends Partial<HindsightPendingClient>, Partial<HindsightNativeResultClient>, Partial<HindsightCurrentStateClient>, Partial<HindsightRuntimeClient>, Partial<HindsightApplicationClient> {
+export interface HindsightClient extends Partial<HindsightPendingClient>, Partial<HindsightNativeResultClient>, Partial<HindsightCurrentStateClient>, Partial<HindsightRuntimeClient>, Partial<HindsightApplicationClient>, Partial<HindsightBackupClient> {
   health(context: HindsightCallContext): Promise<{ status: "healthy"; database: "connected" }>;
   version(context: HindsightCallContext): Promise<{ apiVersion: string }>;
   compatibility(context: HindsightCallContext): Promise<HindsightCompatibilityWire>;
@@ -132,7 +133,7 @@ function createClientMethods(request: <T>(input: HindsightRequestInput<T>) => Pr
   };
   return Object.assign(methods, createBankProbeMethods(request), createSnapshotMethods(request), createJournalMethods(request),
     createHindsightPendingMethods(request), createHindsightNativeResultMethods(request), createHindsightCurrentMethods(request),
-    createHindsightRuntimeMethods(request), createHindsightApplicationMethods(request));
+    createHindsightRuntimeMethods(request), createHindsightApplicationMethods(request), createHindsightBackupMethods(request));
 }
 
 function createBankProbeMethods(request: <T>(input: HindsightRequestInput<T>) => Promise<T>): Pick<HindsightClient, "bankLlmHealth" | "bankStats"> {

@@ -6,15 +6,16 @@ only below `<dataDir>/backups/`.
 - hindsight-backup-fixtures.ts — test support (not in the production path): manifest, native proof and Core Bank builders
 - hindsight-backup-identity.ts — capture step 3: authority, per-Bank replica/application checkpoints, terminal-operation ids and migration head in one SQLite transaction (lower bounds the native side must meet)
 - hindsight-backup-receipts.ts — the test-pinned Core terminal write kind -> native receipt table map (ruling 3) and the reader that lists native-confirmed Pending and completed D77 job ids of the current lineage/generation
-- hindsight-backup-route.ts — the route-c native snapshot seam (the Shared native request -> native proof + artifact reference) and the unavailable production route until W5
+- hindsight-backup-route.ts — the route-c native snapshot seam (the Shared native request -> native proof + artifact reference, plus the native-host ZIP digest read-back) and the unavailable route
+- hindsight-backup-native-route.ts — the production route c over the Hindsight client: live-connection availability, proof composed from the native body and ZIP digest, disabled endpoint -> ROUTE_UNAVAILABLE, single-flight refusal and other failures -> NATIVE_FAILED
 - hindsight-backup-custody.ts — presence-only custody record of every Hindsight secret ref (fixed slots plus listed `memory.hindsight.` refs) and the connection marker, plus the read-back naming refs a target catalog lacks; no value or envelope leaves the catalog
 - hindsight-backup-service.ts — the backup producer: capture (quiesce -> scheduler stop -> identity read -> Core backupTo -> route c: native snapshot (deadline-raced) -> pair check -> seal; route b: stage the Core half and the native request), always releasing and restarting; admit/verify delegation and the cached last verified pair
 - hindsight-backup-failure.ts — the producer outcome type, the closed-code failure carrier and step/outcome mapping helpers
 - hindsight-backup-files.ts — owner-only file writes, atomic replace, streaming sha256 and error-code helpers
 - hindsight-backup-archive.ts — the route-b ZIP reader: native manifest v2 + `taki` proof, every `<table>.bin` re-hashed against its pinned digest and size, no extraction
 - hindsight-backup-admit.ts — the backup.admit producer: claim the inbox ZIP into the staged dir, check the echoed backup id and the pair against the staged Core copy, seal verified or hand the ZIP back
-- hindsight-backup-verify.ts — the backup.verify producer: re-hash, re-read the route-b proof, re-pair, credential read-back; atomic verifiedAt or a recorded null
+- hindsight-backup-verify.ts — the backup.verify producer: re-hash (a native-host ZIP through the route's digest read-back), re-read the route-b proof, re-pair, credential read-back; atomic verifiedAt or a recorded null
 - hindsight-backup-status.ts — the synchronous `hindsight.backup` status section: last verified pair, age, per-Bank missing interval and unsettled Core writes
 - hindsight-backup-emergency.ts — sealEmergencyEvidence(): an incident-local Core copy + manifest that never contacts native (Stage 4 hook, no caller yet)
 - hindsight-backup-harness.ts — test support (not in the production path): the service harness, the route-b operator ZIP builder (the W5 CLI contract) and inbox helpers
-- hindsight-backup-route-fixtures.ts — test support (not in the production path): programmable in-memory native route double with an inter-capture hook and failure injection
+- hindsight-backup-route-fixtures.ts — test support (not in the production path): programmable in-memory native route double with an inter-capture hook, failure injection and the produced native-host ZIP digests

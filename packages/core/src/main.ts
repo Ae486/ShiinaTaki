@@ -260,8 +260,8 @@ const hindsightActivation = composeHindsightActivation({ db, config: boot.config
 // Hindsight lifecycle (Stage 2c): Bank provisioning and connection revalidation under a committed Hindsight authority.
 const hindsightLifecycle = composeHindsightLifecycle({ db, config: boot.config.source, secrets: secretCatalog, runtime: memoryRuntime, logger });
 // Hindsight backup (Stage 3): capture pauses Hindsight writers and copies Core, then pairs it with the native half from the
-// route (W5) or, via backup.admit, from the operator's native CLI ZIP; verify re-checks a sealed pair.
-const hindsightBackup = composeHindsightBackup({ db, dataDir: serverConfig.dataDir, secrets: { catalog: secretCatalog, storeId: coreHostId }, logger });
+// opt-in native endpoint (W5) or, via backup.admit, from the operator's native CLI ZIP; verify re-checks a sealed pair.
+const hindsightBackup = composeHindsightBackup({ db, dataDir: serverConfig.dataDir, config: boot.config.source, secrets: { catalog: secretCatalog, storeId: coreHostId }, logger });
 const memoryOperations = createMemoryOperationService({
   db, live: memoryRuntime.operations, setup: hindsightSetup, local: localOnboarding, hindsight: hindsightActivation, lifecycle: hindsightLifecycle,
   backup: hindsightBackup, bootId, logger, onChanged: memoryOperationSubscriptions.publish,

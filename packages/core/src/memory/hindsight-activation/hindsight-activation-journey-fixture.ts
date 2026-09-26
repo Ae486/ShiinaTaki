@@ -5,7 +5,8 @@
  *         onboarding, Hindsight activation and Hindsight lifecycle services, the automatic lifecycle trigger (bound only
  *         when `automatic`) and one operation owner, with restart(bootId) reopening the same database as a new boot;
  *         `characters` adds native-side Banks for Characters no setup has provisioned; `backupRoute` gives the Stage 3
- *         backup producer a native route double (unavailable otherwise); never imported by production code
+ *         backup producer a native route double (otherwise the production route over the transport double, whose native
+ *         backup endpoint is off); never imported by production code
  * POS:    core/memory/hindsight-activation — test-only harness for the C03 and Stage 2c journeys through registered operations
  */
 import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
@@ -16,7 +17,7 @@ import type { MemoryOperation, MemoryOperationRequest, TimelineEntry } from "@ta
 import { composeHindsightActivation } from "../../boot/hindsight-activation-boot.ts";
 import { composeHindsightBackup } from "../../boot/hindsight-backup-boot.ts";
 import { composeHindsightLifecycle } from "../../boot/hindsight-lifecycle-boot.ts";
-import { createConfigSource } from "../../config/config-source.ts";
+import { createConfigSource, type ConfigSource } from "../../config/config-source.ts";
 import { resolveHindsightConfig } from "../../config/hindsight-config.ts";
 import { createConfigRepo } from "../../db/config-repo.ts";
 import { createHindsightBankSetupRepo } from "../../db/hindsight-bank-setup-repo.ts";
@@ -115,7 +116,7 @@ function openSession(boot: Boot, bootId: string) {
   const local = createLocalOnboardingService({ db, workspaceRoot: boot.workspaceRoot, runner: runtime.migrationRunner, runtime, owner: bootId, onChanged: () => undefined });
   const activation = composeHindsightActivation({ db, config: source, secrets: boot.secrets.catalog, setup, runtime, logger: boot.logger, client: boot.client });
   const lifecycle = composeHindsightLifecycle({ db, config: source, secrets: boot.secrets.catalog, runtime, logger: boot.logger, client: boot.client });
-  const backup = openBackup(boot, db);
+  const backup = openBackup(boot, db, source);
   const changes: MemoryOperation[] = [];
   const operations = createMemoryOperationService({ db, live: runtime.operations, setup, local, hindsight: activation, lifecycle, backup, bootId,
     logger: boot.logger, onChanged: (operation) => changes.push(operation) });
@@ -146,9 +147,9 @@ function openSession(boot: Boot, bootId: string) {
   };
 }
 
-function openBackup(boot: Boot, db: Database) {
-  return composeHindsightBackup({ db, dataDir: boot.dataDir, secrets: { catalog: boot.secrets.catalog, storeId: "journey-host" },
-    logger: boot.logger, route: boot.backupRoute });
+function openBackup(boot: Boot, db: Database, config: ConfigSource) {
+  return composeHindsightBackup({ db, dataDir: boot.dataDir, config, secrets: { catalog: boot.secrets.catalog, storeId: "journey-host" },
+    logger: boot.logger, route: boot.backupRoute, client: boot.client });
 }
 
 /** Legacy -> Local through the registered S2a kinds; returns the committed Local epoch. */

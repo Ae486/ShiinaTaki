@@ -3,7 +3,8 @@
  *         verifications) plus the lifecycle occupancy probe (Bank stats)
  * OUTPUT: createHindsightActivationTransport() — an in-memory HindsightTransport whose bodies are computed from the POSTed request
  *         with the D78 fixture builders (a changed verification request under a used id is refused, as native does), with
- *         per-route call counts, one-shot or persistent fault injection and occupy()
+ *         per-route call counts, one-shot or persistent fault injection and occupy(); the opt-in native backup routes answer
+ *         as absent (their native default)
  * POS:    core/testing — deterministic native substitute for activation tests; never contacts a real Hindsight or PostgreSQL
  */
 import { HindsightCurrentTransferRequestSchema, HindsightCutoverVerificationRequestSchema, type HindsightCutoverVerificationStatus,
@@ -56,6 +57,8 @@ export function createHindsightActivationTransport(input: HindsightActivationTra
   const transport: HindsightTransport = async (url, init) => {
     const target = new URL(String(url)); const path = target.pathname;
     if (new Headers(init?.headers).get("authorization") !== `Bearer ${apiKey}`) return { status: 401, body: JSON.stringify({ detail: "unauthorized" }) };
+    // Native default: the opt-in TAKI-HS-013 backup routes are off, so they answer like any absent route.
+    if (path.startsWith("/ext/taki-memory/admin/backups")) return { status: 404, body: JSON.stringify({ detail: "Not Found" }) };
     const common = hindsightFixtureCommonRoute(path);
     const call = common ? { route: "common" as const, bankId: "", rest: [], method: "GET", body: undefined, query: target.searchParams }
       : parseCall(path, init, target.searchParams);

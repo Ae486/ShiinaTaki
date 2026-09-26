@@ -100,12 +100,13 @@ describe("backup.capture — execution", () => {
     expect(await run.tools.retain!.execute!({ content: "备份之后的写入。", layer: "episodes", context: null }, TOOL_OPTIONS)).toMatchObject({ ok: true });
   });
 
-  it("fails ROUTE_UNAVAILABLE on the production route without pausing anything", async () => {
+  it("fails ROUTE_UNAVAILABLE on the production route while the native endpoint is off, leaving nothing listed and writers resumed", async () => {
     const j = journey();
     const { session, epochId } = await activated(j);
     const settled = await session.settled(capture(epochId));
     expect(settled).toMatchObject({ state: "failed", reason: "producer_refused", errorCode: "HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE", result: null });
     expect(session.runtime.operations()!.scheduler.started()).toBe(true);
+    expect(await createHindsightBackupStore(j.dataDir).list()).toEqual([]);
   });
 
   it("records the pair mismatch in the result when native lacks a Core Bank", async () => {

@@ -1,10 +1,11 @@
 /**
- * INPUT:  a sealed backup id, the artifact store, the current catalog's credential read-back and a phase checkpoint
- * OUTPUT: verifyHindsightBackup() -> re-hashes core.sqlite and a Core-held native.zip against the manifest, re-reads a route-b
- *         ZIP's in-ZIP proof, re-runs the pair check, then names any credential the record saw present and this host lacks;
- *         a verified pair rewrites only `verifiedAt` (atomic replace), a broken artifact or pair records `verifiedAt: null`
- * POS:    core/memory/hindsight-backup — backup.verify producer; local only (a native-host ZIP is judged by its recorded
- *         proof, never fetched); a missing credential is host state, so it fails the run without touching the manifest
+ * INPUT:  a sealed backup id, the artifact store, the native route, the current catalog's credential read-back and a phase checkpoint
+ * OUTPUT: verifyHindsightBackup() -> re-hashes core.sqlite and a Core-held native.zip against the manifest, reads back a
+ *         native-host ZIP's digest, re-reads a route-b ZIP's in-ZIP proof, re-runs the pair check, then names any credential
+ *         the record saw present and this host lacks; a verified pair rewrites only `verifiedAt` (atomic replace), a broken
+ *         artifact or pair records `verifiedAt: null`
+ * POS:    core/memory/hindsight-backup — backup.verify producer; a native-host ZIP is never fetched, only its digest; an
+ *         unavailable route, a native failure and a missing credential are host state: they fail the run, manifest untouched
  */
 import { isDeepStrictEqual } from "node:util";
 import type { HindsightBackupManifest, HindsightBackupNativeProof, MemoryBackupErrorCode, MemoryBackupProducerRef } from "@taki/shared";
@@ -15,6 +16,7 @@ import {
 } from "./hindsight-backup-failure.ts";
 import { errorCode, type HindsightBackupFileDigest } from "./hindsight-backup-files.ts";
 import { verifyHindsightBackupPair } from "./hindsight-backup-pair.ts";
+import type { HindsightNativeBackupRoute } from "./hindsight-backup-route.ts";
 import type { HindsightBackupFile, HindsightBackupStore } from "./hindsight-backup-store.ts";
 
 export interface HindsightBackupVerifyInput {
@@ -22,12 +24,13 @@ export interface HindsightBackupVerifyInput {
   checkpoint(phase: MemoryBackupProducerRef["phase"]): void;
 }
 interface VerifyDeps {
-  store: HindsightBackupStore; logger: Logger; now: () => string;
+  store: HindsightBackupStore; route: HindsightNativeBackupRoute; logger: Logger; now: () => string;
   missingCredentials(custody: HindsightBackupManifest["custody"]): string[];
 }
 
 /** Codes that describe the artifact itself; only these clear a recorded verification. */
 const ARTIFACT_CODES: readonly MemoryBackupErrorCode[] = ["HINDSIGHT_BACKUP_ARTIFACT_INVALID", "HINDSIGHT_BACKUP_PROOF_MISSING", "HINDSIGHT_BACKUP_PAIR_MISMATCH"];
+const READ_BACK_TIMEOUT_MS = 60_000;
 
 export async function verifyHindsightBackup(deps: VerifyDeps, input: HindsightBackupVerifyInput): Promise<HindsightBackupOutcome> {
   input.checkpoint("verifying");
@@ -36,7 +39,7 @@ export async function verifyHindsightBackup(deps: VerifyDeps, input: HindsightBa
   try {
     const manifest = await stepAsync(() => deps.store.read(input.backupId), (error) => codeOf(error, "HINDSIGHT_BACKUP_STORAGE_FAILED"));
     if (!manifest) return failedOutcome("HINDSIGHT_BACKUP_ARTIFACT_INVALID");
-    const judged = await judge(deps.store, manifest).then(() => null, (error: unknown) => outcomeOf(error, unexpected));
+    const judged = await judge(deps, manifest).then(() => null, (error: unknown) => outcomeOf(error, unexpected));
     if (judged && !judged.ok && ARTIFACT_CODES.includes(judged.code)) {
       await record(deps.store, { manifest, verifiedAt: null });
       return judged;
@@ -54,17 +57,21 @@ export async function verifyHindsightBackup(deps: VerifyDeps, input: HindsightBa
   }
 }
 
-async function judge(store: HindsightBackupStore, manifest: HindsightBackupManifest): Promise<void> {
-  assertDigest(await digest(store, { manifest, file: "core.sqlite" }), manifest.core);
-  const proof = await nativeProof(store, manifest);
+async function judge(deps: VerifyDeps, manifest: HindsightBackupManifest): Promise<void> {
+  assertDigest(await digest(deps.store, { manifest, file: "core.sqlite" }), manifest.core);
+  const proof = await nativeProof(deps, manifest);
   const pair = verifyHindsightBackupPair(manifest, proof);
   if (!pair.ok) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_PAIR_MISMATCH", { reason: pair.reason, bankId: pair.bankId });
 }
 
-/** The proof the pair check judges: re-read from a Core-held route-b ZIP, else the recorded one after its bytes re-hash. */
-async function nativeProof(store: HindsightBackupStore, manifest: HindsightBackupManifest): Promise<HindsightBackupNativeProof> {
+/** The proof the pair check judges: re-read from a Core-held route-b ZIP, else the recorded one after its ZIP digest matches. */
+async function nativeProof(deps: VerifyDeps, manifest: HindsightBackupManifest): Promise<HindsightBackupNativeProof> {
+  const { store } = deps;
   const recorded = manifest.native.proof;
-  if (manifest.native.location !== "core-dir") return recorded;
+  if (manifest.native.location === "native-host") {
+    assertDigest(await nativeHostDigest(deps.route, manifest.native.file), { sha256: recorded.zipSha256, bytes: recorded.zipBytes });
+    return recorded;
+  }
   if (manifest.route === "native-endpoint") {
     assertDigest(await digest(store, { manifest, file: "native.zip" }), { sha256: recorded.zipSha256, bytes: recorded.zipBytes });
     return recorded;
@@ -75,6 +82,14 @@ async function nativeProof(store: HindsightBackupStore, manifest: HindsightBacku
     throw new HindsightBackupFailure("HINDSIGHT_BACKUP_ARTIFACT_INVALID");
   }
   return archive.proof;
+}
+
+async function nativeHostDigest(route: HindsightNativeBackupRoute, file: string): Promise<HindsightBackupFileDigest> {
+  if (!route.available()) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE");
+  const digest = await stepAsync(() => route.readBack({ file, signal: AbortSignal.timeout(READ_BACK_TIMEOUT_MS) }),
+    (error) => codeOf(error, "HINDSIGHT_BACKUP_NATIVE_FAILED"));
+  if (!digest) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_ARTIFACT_INVALID");
+  return digest;
 }
 
 function digest(store: HindsightBackupStore, input: { manifest: HindsightBackupManifest; file: HindsightBackupFile }): Promise<HindsightBackupFileDigest> {

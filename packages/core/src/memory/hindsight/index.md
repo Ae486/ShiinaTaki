@@ -63,6 +63,7 @@
 - hindsight-application-bundle.ts — verified namespace, hashes, native identities and recovery-closure relationships
 - hindsight-application-capability.ts — explicit D77/G1 capability admission, independent of native reflect availability
 - hindsight-application-client.ts — bounded application-state methods with exact response namespace and operation checks
+- hindsight-backup-client.ts — opt-in TAKI-HS-013 native backup POST (proof + native-host ZIP digest, never the ZIP) and digest read-back; closed refusals (route absent, backup in progress/exists, artifact missing) returned as values
 - hindsight-application-command-receipt.ts — exact namespace/request/result proof and complete per-command artifact revision validation
 - hindsight-application-command-runner.ts — exact-identity upload/commit recovery, verified historical receipts and explicit pending outcomes
 - hindsight-application-integrity.ts — scoped semantic digests, native witnesses and fully checked typed body values
