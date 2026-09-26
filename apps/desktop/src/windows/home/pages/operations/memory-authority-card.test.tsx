@@ -29,7 +29,8 @@ describe("memory authority card", () => {
     const markup = card({ status: degradedStatus() });
     expect(markup).toContain("运行时不可用：连接配置已变更，需要重新校验");
     expect(markup).toContain("Hindsight 连接与 Bank");
-    expect(buttons(markup)).toEqual(["重新校验连接"]);
+    // The backup block (Core admits or refuses the capture) follows the lifecycle block.
+    expect(buttons(markup)).toEqual(["重新校验连接", "创建备份"]);
     const [primary, diagnostics] = markup.split("技术诊断");
     expect(primary).not.toContain("HINDSIGHT_TEMPLATE_INVALID");
     expect(diagnostics).toContain("character-nana · HINDSIGHT_TEMPLATE_INVALID");
@@ -93,7 +94,7 @@ describe("memory authority card", () => {
     expect(markup).toContain("已受理（未认领）");
     expect(markup).toContain("执行中");
     const busy = card({ status: hindsightStatus({ operations: { active, recent: [] } }), busyKey: "sync:global" });
-    expect(busy.match(/disabled=""/g)).toHaveLength(3);
+    expect(busy.match(/disabled=""/g)).toHaveLength(4);
     expect(busy.match(/aria-busy="true"/g)).toHaveLength(2);
   });
 

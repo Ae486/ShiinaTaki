@@ -203,3 +203,45 @@ barrels; tests colocated; no real Hindsight/model/user data; boots use a temp da
   (`research/isolated-process-check.mjs`, extended): port 6341, migrations 1..50, `backup.capture` (both routes),
   `backup.admit` and `backup.verify` refused `MEMORY_OPERATION_UNSUPPORTED` on the Local marker, no row, no `backups/`,
   status `hindsight` null under Legacy and Local, 0 fetches, exit 0.
+
+### W4 (2026-09-26, implementer; uncommitted)
+
+- Desktop only (`apps/desktop/src/windows/home/pages/operations/`); no Shared/Core change needed.
+- `memory-hindsight-backup-state.ts` (pure): `hindsightBackupView(status)` is null exactly when `hindsight` is null. Rows:
+  备份状态 未知 (section `backup: null`) / 尚无已校验的备份 / 已有已校验的备份 + 上次备份 `createdAt（N 分钟/小时/天前）` from
+  `ageSeconds` + 校验时间; per-Bank 未备份区间 `游标 from → to · 未落定写入 n` (null renders 未知, never 0), the native Bank id
+  replaced by the lifecycle scope label where `hindsight.banks` maps it. Backup rows are `backup.*` operations from
+  `operations.active` + `recent` (deduped, newest first): an open row -> in-flight line (kind + producer phase, or the
+  state label before claim) and `pending`; otherwise the newest settled row -> failure line (`failed` closed code ->
+  `BACKUP_ERROR_LABEL`, `outcome_unknown` -> restart line). Staged route-b capture = newest completed
+  `backup.capture {route: operator-artifact}` without a completed `backup.admit` for its backupId (a failed admit keeps it).
+  Rollback warning when any replica or lifecycle Bank reports `HINDSIGHT_PROVIDER_ROLLBACK_DETECTED`. Actions: 创建备份
+  (`backup.capture`, status epoch, `route: native-endpoint`); 创建备份（手动导出原生数据）(`operator-artifact`) only when
+  the newest settled capture failed `HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE`; 校验备份 on `lastVerified.backupId`.
+  `backupAdmitAction(staged, fileName)` builds `backup.admit {expectedEpochId: staged capture's epoch, backupId, fileName}`
+  only when the trimmed name passes `HindsightBackupInboxFileSchema`. Ids, codes and pair-mismatch detail sit only in the
+  collapsed 备份诊断.
+- `memory-hindsight-backup-block.tsx`: rendered by `memory-authority-card.tsx` after the lifecycle block; rollback as a
+  danger `FeedbackLine`; the admit form (keyed by backupId) names `backups/<id>.staged/native-request.json` and
+  `backups/inbox`; every action goes through `ops.submit(request, key)` and is disabled while the card is locked
+  (disconnected or a mutation pending) or a backup operation is open; admit also while the file name is invalid.
+- Limits: the staged capture and the last failure are read from `operations.recent` (max 20 rows); a staged capture pushed
+  out of that window disappears from Home until Core lists staged captures in the status section. 校验备份 targets only the
+  last verified backup (a sealed backup whose verify failed is not offered). `home-window.md` still says backup is not on
+  the card — update-spec step.
+- Tests: `memory-hindsight-backup-state.test.ts` (every fixture parses the strict status schema with and without a
+  backup; unknown/none/verified/age units/unmapped Bank; in-flight phase and admitted; every closed code message, mismatch
+  diagnostics, outcome_unknown; operator route only after ROUTE_UNAVAILABLE; staged kept across a failed admit, gone after a
+  completed one; inbox name matrix; rollback from replica and from a lifecycle Bank; capture/verify/admit submitted through
+  the generic controller unchanged), `memory-hindsight-backup-block.test.tsx` (every state renders, no code/id in primary
+  rows, buttons per state, disabled while open/locked/offline, only under Hindsight). `memory-authority-card.test.tsx`:
+  two counts now include 创建备份.
+- Gates: `pnpm typecheck` green; `pnpm lint` green; Desktop 115 files / 663 tests; `pnpm --filter @taki/desktop build` ok
+  (pre-existing >500 kB pet chunk warning); `git diff --check` clean, no trailing whitespace in new files.
+
+### Leader notes after W4 (2026-09-26)
+
+- Follow-up for the formal check (Core/Shared, after W5 lands): the status section must list the open route-b staged
+  captures and the newest sealed backup regardless of verification, so Home does not depend on the 20-row
+  `operations.recent` window (W4 point 1) and a sealed backup whose verify failed can be re-verified (W4 point 2).
+- `home-window.md` backup line is updated in the spec step.
