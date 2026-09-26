@@ -177,7 +177,9 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
   running at the budget is `deferred` (`HINDSIGHT_DEADLINE_EXCEEDED`); any failure other than cancellation or
   `MEMORY_INTEGRITY_ERROR` / `MEMORY_AUTHORITY_MISMATCH` / `MEMORY_REQUEST_ID_CONFLICT` is `degraded`: the Run proceeds
   on the readable replica (partial) with verified capability evidence, or as a memory-unavailable Run
-  (`admission_unavailable`) without it. Those three refuse the Run as a logged structured refusal. Recheck cancellation
+  (`admission_unavailable`) without it. Those three refuse the Run as a logged structured refusal, except that a live
+  connection change or disable seen after an incomplete sync (its guards then fail as `MEMORY_AUTHORITY_MISMATCH`)
+  degrades the Run to `config_changed` / `connection_disabled`, as the same drift does before the sync. Recheck cancellation
   before exposing the captured result. Each unsynced Bank emits one closed-code event (never a raw message).
   Degrade-vs-refuse table: [`memory-hindsight-lifecycle.md`](./memory-hindsight-lifecycle.md).
 - A binding commit refused with `native_version_conflict` / `artifact_conflict` (native consolidated between the pull

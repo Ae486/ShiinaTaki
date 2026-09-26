@@ -66,6 +66,7 @@ no network call and is never a Local or Legacy fallback. Every such Run reaches 
 | every Bank synced and no evidence | same | refuse `HINDSIGHT_APPLICATION_ADMISSION_UNAVAILABLE` |
 | `MEMORY_INTEGRITY_ERROR` / `MEMORY_AUTHORITY_MISMATCH` / `MEMORY_REQUEST_ID_CONFLICT` or cancellation during the sync | same | refuse (rethrow; integrity refusals logged at error) |
 | bound runtime, live config changed / not ready | subsystem `captureRun` via `driftReason()` | degrade `config_changed` / `connection_disabled` |
+| same, observed after an incomplete admission sync (the sync guards fail as `MEMORY_AUTHORITY_MISMATCH`) | `synchronizeHindsightCapture` via `driftReason()` | degrade `config_changed` / `connection_disabled` (no refusal log) |
 | bound runtime, epoch or lineage changed; missing Global Bank | `driftReason()` / `routedBanks()` | refuse (`MEMORY_AUTHORITY_MISMATCH` / `HINDSIGHT_REPLICA_BANK_BINDING_MISMATCH`) |
 | unbound, live config not ready, binding code in `DISABLED_CODES` | `hindsightUnboundReason` | degrade `connection_disabled` |
 | unbound, live config ready, code `HINDSIGHT_TEMPLATE_CONFLICT` or `HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE` | same | degrade `config_changed` |
