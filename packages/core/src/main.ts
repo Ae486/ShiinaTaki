@@ -563,9 +563,10 @@ function shutdown(signal: string): void {
   // Local onboarding and Hindsight activation first refuse new claims and let the active producer checkpoint (conversion stops
   // between sources, activation at a Bank boundary, never inside COMMIT); only then does the memory runtime stop. That stop
   // settles the B5 scheduler (and any manual tick a replica operation awaits), so the operation owner has nothing left in
-  // flight afterwards except setup calls bounded by their own deadlines.
-  hindsightBackup.stop();
-  const memoryStopped = Promise.all([localOnboarding.stop(), hindsightActivation.stop(), hindsightLifecycle.stop()]).then(() => memoryRuntime.stop());
+  // flight afterwards except setup calls bounded by their own deadlines. A backup capture is aborted and awaited first too:
+  // its release restarts the B5 scheduler, which must happen before the runtime stops it for good.
+  const memoryStopped = Promise.all([localOnboarding.stop(), hindsightActivation.stop(), hindsightLifecycle.stop(), hindsightBackup.stop()])
+    .then(() => memoryRuntime.stop());
   void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => memoryStopped).then(() => memoryOperations.stop()).then(() => server.close()).then(async () => {
     skillBoot.catalog.close();
     // Stop MCP publication → cancel candidates → drain under one budget → force-close remaining clients

@@ -106,10 +106,28 @@ describe("hindsight backup capture failures (§4 Capture)", () => {
     h.route.fail = "hang";
     const pending = h.capture();
     await vi.waitFor(() => { expect(h.route.requests).toHaveLength(1); });
-    h.service.stop();
+    await h.service.stop();
     expect(await pending).toMatchObject({ ok: false, code: "HINDSIGHT_BACKUP_NATIVE_FAILED" });
     expect(h.fence.writable()).toBe(true);
     expect(h.scheduler.start).toHaveBeenCalledTimes(1);
+  });
+
+  it("stop() during the Core copy resolves only after the capture released its pause and restarted the scheduler", async () => {
+    const h = harness();
+    let copied = (): void => undefined;
+    const copy = h.db.backupTo.bind(h.db);
+    const backupTo = vi.spyOn(h.db, "backupTo").mockImplementation(async (path) => {
+      await new Promise<void>((done) => { copied = done; });
+      return copy(path);
+    });
+    const pending = h.capture();
+    await vi.waitFor(() => { expect(backupTo).toHaveBeenCalledTimes(1); });
+    const stopped = h.service.stop();
+    setTimeout(() => copied(), 20);
+    await stopped;
+    expect(h.scheduler.start).toHaveBeenCalledTimes(1);
+    expect(h.fence.writable()).toBe(true);
+    expect(await pending).toMatchObject({ ok: false, code: "HINDSIGHT_BACKUP_NATIVE_FAILED" });
   });
 
   it("quarantines a leftover partial dir exactly once and never lists it", async () => {

@@ -1,9 +1,9 @@
 /**
  * INPUT:  Core SQLite (B3 Bank setup rows, replica checkpoints, Pending and D77 parent-write counts), the selected epoch, the
- *         last verified backup manifest and the read time
+ *         last verified backup manifest, the newest sealed backup and staged route-b captures, and the read time
  * OUTPUT: readHindsightBackupStatus() -> the memory.authority.status `hindsight.backup` section: last verified backup, its age,
- *         and per verified native Bank the interval from the backup's native cursor to the current Core replica checkpoint
- *         plus unsettled Core writes
+ *         per verified native Bank the interval from the backup's native cursor to the current Core replica checkpoint
+ *         plus unsettled Core writes, the newest sealed backup whatever its verification and the current epoch's staged captures
  * POS:    core/memory/hindsight-backup — pure synchronous local read shared by status and the emergency seal; never probes the
  *         network; an unreadable count stays null, never a fabricated zero
  */
@@ -13,12 +13,16 @@ import { countPendingHindsightMemoryWrites } from "../../db/hindsight-memory-wri
 import { readReplicaCheckpoint } from "../../db/hindsight-replica-checkpoint-store.ts";
 import { createPendingMemoryRepo } from "../../db/pending-memory-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
+import type { HindsightBackupStagedSummary } from "./hindsight-backup-store.ts";
 
 const MAX_BANKS = 256;
+const MAX_STAGED = 16;
 
 export interface HindsightBackupStatusInput {
   epochId: string | null;
   lastVerified: HindsightBackupManifest | null;
+  /** The newest sealed backup and the staged route-b captures; the emergency seal, which records neither, omits them. */
+  inventory?: { latest: HindsightBackupManifest | null; staged: readonly HindsightBackupStagedSummary[] };
   now: string;
 }
 
@@ -35,8 +39,16 @@ export function readHindsightBackupStatus(db: Database, input: HindsightBackupSt
     lastVerified: backup && verifiedAt !== null ? { backupId: backup.backupId, createdAt: backup.createdAt, verifiedAt,
       nativeCursors: [...nativeCursors].map(([bankId, currentCursor]) => ({ bankId, currentCursor })) } : null,
     ageSeconds: backup && verifiedAt !== null ? Math.max(0, Math.floor((Date.parse(input.now) - Date.parse(backup.createdAt)) / 1000)) : null,
-    missingInterval,
+    missingInterval, ...inventorySection(input),
   });
+}
+
+/** Only a capture staged under the current epoch is admissible, so older epochs' staged dirs are not offered. */
+function inventorySection(input: HindsightBackupStatusInput): Pick<HindsightBackupStatusSection, "latest" | "staged"> {
+  const latest = input.inventory ? input.inventory.latest : input.lastVerified;
+  const staged = (input.inventory?.staged ?? []).filter((capture) => capture.epochId === input.epochId).slice(0, MAX_STAGED);
+  return { latest: latest && { backupId: latest.backupId, createdAt: latest.createdAt, verifiedAt: latest.verifiedAt },
+    staged: staged.map(({ backupId, createdAt }) => ({ backupId, createdAt })) };
 }
 
 function verifiedNativeBanks(db: Database): string[] {

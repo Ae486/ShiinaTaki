@@ -45,6 +45,14 @@ describe("route-b capture (operator-artifact)", () => {
     expect(h.scheduler.start).toHaveBeenCalledTimes(1);
   });
 
+  it("lists the staged capture in the inventory, skipping staged dirs without a matching identity and partial dirs", async () => {
+    const h = await staged();
+    mkdirSync(join(h.store.root, `${OTHER_ID}.staged`));
+    mkdirSync(join(h.store.root, `${OTHER_ID}.partial`));
+    mkdirSync(join(h.store.root, "not-a-uuid.staged"));
+    expect(h.service.inventory()).toEqual({ lastVerified: null, latest: null, staged: [{ backupId: BACKUP_ID, createdAt: AT, epochId: "epoch" }] });
+  });
+
   it("never needs the native endpoint", async () => {
     const h = backupHarness({ dirs, dbs });
     h.route.unavailable = true;

@@ -71,7 +71,7 @@ describe("route b through the operation owner", () => {
     const { j, session, epochId, route, root } = await activated();
     const backupId = await stagedCapture(session, epochId);
     expect(route.requests).toEqual([]);
-    expect(session.authorityStatus().hindsight?.backup?.lastVerified).toBeNull();
+    expect(session.authorityStatus().hindsight?.backup).toMatchObject({ lastVerified: null, latest: null, staged: [{ backupId }] });
     await dropZip({ root, route, backupId });
     const admitted = await session.settled(admit(epochId, backupId));
     expect(admitted).toMatchObject({ state: "completed", errorCode: null, producer: { kind: "backup", backupId, phase: "completed" },
@@ -80,7 +80,7 @@ describe("route b through the operation owner", () => {
     const verified = await session.settled(verify(backupId));
     expect(verified).toMatchObject({ state: "completed", result: { kind: "backup", backupId, mismatch: null } });
     const backup = session.authorityStatus().hindsight?.backup;
-    expect(backup).toMatchObject({ lastVerified: { backupId }, ageSeconds: expect.any(Number) });
+    expect(backup).toMatchObject({ lastVerified: { backupId }, latest: { backupId }, staged: [], ageSeconds: expect.any(Number) });
     expect(backup!.missingInterval.length).toBeGreaterThan(0);
   });
 

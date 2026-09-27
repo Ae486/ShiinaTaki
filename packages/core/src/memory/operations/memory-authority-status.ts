@@ -1,9 +1,10 @@
 /**
  * INPUT:  the authority selection marker, the live Hindsight runtime accessor and connection config, the pure Local and
- *         Hindsight binding snapshots, the B3 setup service, the operation owner and the backup producer's last verified pair
+ *         Hindsight binding snapshots, the B3 setup service, the operation owner and the backup producer's inventory
  * OUTPUT: readMemoryAuthorityStatus() — one strict composite MemoryAuthorityStatus with the `hindsight` lifecycle section under
  *         Hindsight authority (open bank.provision Characters, exclusive-family business and the lifecycle revalidate blocker
- *         feed its actions; the backup block carries the last verified pair, its age and the per-Bank missing interval); an
+ *         feed its actions; the backup block carries the last verified pair, its age, the per-Bank missing interval, the newest
+ *         sealed backup and the staged route-b captures); an
  *         unavailable runtime or an unreadable live connection never fails the read
  * POS:    core/memory/operations — read-only projection, never probes the network; a changed/disabled connection is its own
  *         reason, authority_mismatch only for a real epoch/lineage mismatch; unknown stays unknown (derivedFreshness "unknown")
@@ -41,8 +42,8 @@ export interface MemoryAuthorityStatusInput {
   lifecycle?: Pick<HindsightLifecycleService, "live" | "revalidateBlocker">;
   setup: HindsightSetupService;
   operations: MemoryOperationService;
-  /** The backup producer's last verified pair (a local read); absent leaves the `hindsight.backup` section null. */
-  backup?: Pick<HindsightBackupService, "lastVerified">;
+  /** The backup producer's inventory (a local read); absent leaves the `hindsight.backup` section null. */
+  backup?: Pick<HindsightBackupService, "inventory">;
   now?: () => string;
 }
 
@@ -106,11 +107,13 @@ function provisioning(active: readonly MemoryOperation[]): string[] {
   return active.flatMap((operation) => operation.request.kind === "bank.provision" ? [operation.request.characterId] : []);
 }
 
-/** A local read of the verified-backup record; an unreadable one shows unknown (null) rather than failing the status read. */
+/** A local read of the backup inventory; an unreadable one shows unknown (null) rather than failing the status read. */
 function backupStatus(input: MemoryAuthorityStatusInput, at: { epochId: string; now: string }): HindsightBackupStatusSection | null {
   if (!input.backup) return null;
-  try { return readHindsightBackupStatus(input.db, { epochId: at.epochId, lastVerified: input.backup.lastVerified(), now: at.now }); }
-  catch { return null; }
+  try {
+    const inventory = input.backup.inventory();
+    return readHindsightBackupStatus(input.db, { epochId: at.epochId, lastVerified: inventory.lastVerified, inventory, now: at.now });
+  } catch { return null; }
 }
 
 function exclusive(operation: MemoryOperation): boolean {

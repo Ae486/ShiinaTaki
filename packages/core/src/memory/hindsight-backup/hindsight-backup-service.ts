@@ -1,7 +1,7 @@
 /**
  * INPUT:  the published Hindsight runtime (write fence, replica scheduler, identity), Core SQLite, the artifact store, the
  *         native backup route, the custody reader and the current catalog's credential read-back
- * OUTPUT: createHindsightBackupService() -> markerEpochId/capture/admit/verify/lastVerified/sealed/quarantine/returnInbox/stop;
+ * OUTPUT: createHindsightBackupService() -> markerEpochId/capture/admit/verify/lastVerified/inventory/sealed/quarantine/returnInbox/stop;
  *         capture runs §5.2 exactly: quiesce -> scheduler stop -> one Core identity read -> Database.backupTo into the partial
  *         dir -> native snapshot, pair check and seal (route c) or the staged native request awaiting backup.admit (route b),
  *         always releasing the fence and restarting a previously started scheduler; every failure is a closed
@@ -24,7 +24,7 @@ import {
 import { readHindsightBackupIdentity, type HindsightBackupIdentity, type HindsightBackupRuntimeIdentity } from "./hindsight-backup-identity.ts";
 import { verifyHindsightBackupPair } from "./hindsight-backup-pair.ts";
 import type { HindsightNativeBackupRoute, HindsightNativeBackupSnapshot } from "./hindsight-backup-route.ts";
-import type { HindsightBackupStagedRecord, HindsightBackupStore } from "./hindsight-backup-store.ts";
+import type { HindsightBackupStagedRecord, HindsightBackupStagedSummary, HindsightBackupStore } from "./hindsight-backup-store.ts";
 import { verifyHindsightBackup, type HindsightBackupVerifyInput } from "./hindsight-backup-verify.ts";
 
 const QUIESCE_TIMEOUT_MS = 30_000;
@@ -49,14 +49,22 @@ export interface HindsightBackupService {
   verify(input: HindsightBackupVerifyInput): Promise<HindsightBackupOutcome>;
   /** The newest sealed backup whose pair is verified; a synchronous local read, re-listed after this service changes one. */
   lastVerified(): HindsightBackupManifest | null;
+  /** The status inventory under the same cache: last verified, newest sealed whatever its verification, staged captures. */
+  inventory(): HindsightBackupInventory;
   /** The sealed manifest of a backup id, or null; synchronous for boot observation. */
   sealed(backupId: string): HindsightBackupManifest | null;
   /** Boot observation: a leftover partial dir from a dead capture is moved aside, never listed. */
   quarantine(backupId: string): boolean;
   /** Boot observation of a dead admit: a ZIP claimed into the staged dir goes back under its inbox name. */
   returnInbox(backupId: string, fileName: string): boolean;
-  /** Aborts an in-flight native snapshot so shutdown is not held by the route. */
-  stop(): void;
+  /** Aborts an in-flight native snapshot and resolves once the capture released its pause, so the runtime stops after it. */
+  stop(): Promise<void>;
+}
+
+export interface HindsightBackupInventory {
+  lastVerified: HindsightBackupManifest | null;
+  latest: HindsightBackupManifest | null;
+  staged: HindsightBackupStagedSummary[];
 }
 
 export interface HindsightBackupServiceInput {
@@ -69,31 +77,43 @@ export interface HindsightBackupServiceInput {
 type Deps = HindsightBackupServiceInput & { now: () => string };
 
 export function createHindsightBackupService(input: HindsightBackupServiceInput): HindsightBackupService {
-  const active = new Set<AbortController>();
+  const active = new Map<AbortController, Promise<HindsightBackupOutcome>>();
   const deps: Deps = { ...input, now: input.now ?? (() => new Date().toISOString()) };
-  let verified: { manifest: HindsightBackupManifest | null } | null = null;
+  let cached: HindsightBackupInventory | null = null;
   const changing = async (work: () => Promise<HindsightBackupOutcome>) => {
     try { return await work(); }
-    finally { verified = null; }
+    finally { cached = null; }
   };
+  const inventory = () => cached ??= readInventory(input.store);
   return {
     markerEpochId: () => {
       const selection = readMemoryAuthoritySelection(input.db);
       return selection.mode === "hindsight" ? selection.epochId : null;
     },
     capture: (capture) => changing(async () => {
-      const controller = new AbortController(); active.add(controller);
-      try { return await paused(deps, capture, controller.signal); }
+      const controller = new AbortController();
+      const run = paused(deps, capture, controller.signal); active.set(controller, run);
+      try { return await run; }
       finally { active.delete(controller); }
     }),
     admit: (admit) => changing(() => admitHindsightBackup(deps, admit)),
     verify: (target) => changing(() => verifyHindsightBackup(deps, target)),
-    lastVerified: () => (verified ??= { manifest: input.store.listSync().filter((backup) => backup.verifiedAt !== null).at(-1) ?? null }).manifest,
+    lastVerified: () => inventory().lastVerified,
+    inventory,
     sealed: (backupId) => input.store.readSync(backupId),
     quarantine: (backupId) => input.store.quarantine(backupId),
     returnInbox: (backupId, fileName) => input.store.returnInbox(backupId, fileName),
-    stop: () => { for (const controller of active) controller.abort(); },
+    stop: async () => {
+      for (const controller of active.keys()) controller.abort();
+      await Promise.allSettled(active.values());
+    },
   };
+}
+
+function readInventory(store: HindsightBackupStore): HindsightBackupInventory {
+  const sealed = store.listSync();
+  return { lastVerified: sealed.filter((backup) => backup.verifiedAt !== null).at(-1) ?? null, latest: sealed.at(-1) ?? null,
+    staged: store.listStagedSync() };
 }
 
 async function paused(deps: Deps, capture: HindsightBackupCaptureInput, signal: AbortSignal): Promise<HindsightBackupOutcome> {
