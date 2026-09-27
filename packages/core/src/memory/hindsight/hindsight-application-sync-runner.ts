@@ -1,7 +1,8 @@
 /**
  * INPUT:  authenticated D77 state, captured authority/Bank leases and complete native/application checkpoints
  * OUTPUT: atomic joint snapshot/event publication through the existing B5 scheduler interface; a binding CAS conflict
- *         re-pulls and retries a bounded number of consecutive times before failing the run
+ *         re-pulls and retries a bounded number of consecutive times before failing the run; a reset refusal whose native
+ *         head is behind Core's own checkpoint surfaces as a rollback, never a rebuild
  * POS:    core/memory/hindsight — application-aware pull; policy binding runs between complete pulls, never in SQL transactions
  */
 import { z } from "zod";
@@ -14,6 +15,7 @@ import type { HindsightApplicationReplicaRepo, HindsightApplicationReplicaCheckp
 import type { HindsightClient, HindsightCallContext } from "./hindsight-client.ts";
 import type { HindsightCompatibilityWire } from "./hindsight-contracts.ts";
 import { HindsightApplicationRefusal, type HindsightApplicationClient } from "./hindsight-application-client.ts";
+import { HindsightRollbackError } from "./hindsight-cursor-reset.ts";
 import { admitHindsightApplication, requireHindsightApplicationClient } from "./hindsight-application-capability.ts";
 import { captureHindsightApplicationBaseline, snapshotHindsightApplication, loadHindsightApplicationEvent } from "./hindsight-application-bundle-loader.ts";
 import { requireApplicationScope, sameApplicationValue, type HindsightApplicationScope } from "./hindsight-application-integrity.ts";
@@ -123,6 +125,7 @@ async function synchronize(context: Context, reset: boolean): Promise<MemoryRepl
         throw new Error("HINDSIGHT_REPLICA_GENERATION_MISMATCH", { cause: error });
       }
       if (!(error instanceof HindsightApplicationRefusal) || error.refusal.code !== "state_reset_required") throw error;
+      refuseRollback(error, deps.repo.checkpoint(input.bank.bankId) ?? checkpoint);
       checkpoint = await full(context, true);
     }
   }
@@ -149,6 +152,13 @@ async function bindPasses(context: Context, initial: HindsightApplicationReplica
     checkpoint = await incremental(context, checkpoint);
   }
   return checkpoint;
+}
+
+/** A native head behind Core in Core's own namespace is a restore without Core's copy (§5.7); rebuilding would absorb it. */
+function refuseRollback(error: HindsightApplicationRefusal, current: HindsightApplicationReplicaCheckpoint): void {
+  const native = error.refusal.checkpoint;
+  if (!native || native.state_cursor >= current.checkpoint.state_cursor) return;
+  throw new HindsightRollbackError({ providerLineageId: current.namespace.provider_lineage, bankGeneration: current.namespace.bank_generation });
 }
 
 function bindingConflict(error: unknown): boolean {

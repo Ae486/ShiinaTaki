@@ -72,7 +72,7 @@
 - hindsight-application-recovery-replica.ts — the existing Pending recovery reader interface backed by current D77 projections
 - hindsight-application-source-binding.ts — truthful current-source projection and operation-proven awaiting-source resolution
 - hindsight-application-source-write.ts — an immutable application Source artifact prepared before any native source dispatch
-- hindsight-application-sync-runner.ts — atomic joint publication with fixed operation deadlines or a renewable foreground lease, independent HTTP caps and frozen authority/namespace/checkpoint guards; a binding CAS conflict re-pulls and retries a bounded number of times
+- hindsight-application-sync-runner.ts — atomic joint publication with fixed operation deadlines or a renewable foreground lease, independent HTTP caps and frozen authority/namespace/checkpoint guards; a binding CAS conflict re-pulls and retries a bounded number of times; a reset refusal behind Core's checkpoint is a rollback, not a rebuild
 - hindsight-application-writer.ts — durable original command identity plus independently verified remote receipt/application status
 - hindsight-ingestion-contract.ts — durable source-only plans, original retain payloads, stable operation identities and coverage codecs
 - hindsight-ingestion-lifetime.ts — owner cancellation, serial ingestion chains and a drain that waits for every underlying operation

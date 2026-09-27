@@ -32,6 +32,22 @@ describe("application-aware snapshot and replay integration", () => {
     expect(f.replica.record({ ...bank.scope, memoryId: "memory-a", includeHidden: true })?.policy.visibility).toBe("hidden");
   });
 
+  it("refuses a native head behind its own checkpoint as a rollback without rebuilding the replica", async () => {
+    const f = fixture(); const subsystem = f.subsystem(); const bank = hideMemory(f);
+    await subsystem.state.service.synchronize({ bankId: bank.scope.bankId, context: { timeoutMs: 30_000 } });
+    const before = f.replica.checkpoint(bank.scope.bankId)!;
+    expect(before.checkpoint.state_cursor).toBeGreaterThan(0);
+    const snapshot = vi.spyOn(f.remote.client, "createApplicationSnapshot");
+    vi.spyOn(f.remote.client, "applicationChanges").mockRejectedValueOnce(new HindsightApplicationRefusal({
+      error: "application_state_error", code: "state_reset_required", detail: "restored behind",
+      checkpoint: { native_cursor: 0, state_cursor: before.checkpoint.state_cursor - 1 }, minimum_state_cursor: 0 }));
+    await expect(subsystem.state.service.synchronize({ bankId: bank.scope.bankId, context: { timeoutMs: 30_000 } }))
+      .rejects.toMatchObject({ code: "HINDSIGHT_PROVIDER_ROLLBACK_DETECTED", providerLineageId: before.namespace.provider_lineage,
+        bankGeneration: before.namespace.bank_generation });
+    expect(snapshot).not.toHaveBeenCalled();
+    expect(f.replica.checkpoint(bank.scope.bankId)).toEqual(before);
+  });
+
   it.each(["event-hash", "namespace"] as const)("refuses corrupt %s without publishing part of its checkpoint", async (failure) => {
     const f = fixture(); const subsystem = f.subsystem(); const bank = hideMemory(f);
     const before = f.replica.checkpoint(bank.scope.bankId)!; const changes = f.remote.client.applicationChanges;
