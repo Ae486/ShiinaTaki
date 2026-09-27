@@ -351,3 +351,34 @@ barrels; tests colocated; no real Hindsight/model/user data; boots use a temp da
   runs 5 and 6, not in run 7.
 - For the leader: the capture operation reads `outcome_unknown` on a restored copy; pending writes finish only through
   `replica.sync`; a rollback failure says `automatic_retry_scheduled`.
+
+### W6 follow-up (2026-09-27)
+
+- A, native `TAKI-HS-014` (uncommitted in `H:/hindsight`; recorded in `TAKI_PATCHES.md`; build identity unchanged,
+  bug fix with no contract change):
+  - `engine/application_state/service.py`: `run` retries only repeatable-read runs (hydrate, snapshots, pages, changes,
+    status reads) on `SerializationError` / `DeadlockDetectedError`. 3 attempts in total, jittered backoff. The last error
+    surfaces unchanged. Write (read-committed) runs are not retried.
+  - Idempotent per attempt: the retried bodies only use the transaction's own connection. Nothing leaves the transaction
+    before commit, so an aborted attempt leaves nothing behind.
+  - New `tests/test_taki_application_state_retry.py`, 3 cases: one failure commits exactly once; a persistent failure
+    raises after 3 attempts; a write run is attempted once. The first two fail without the retry.
+  - With 7 related application-state test files: 50 passed, 1 skipped. Scoped Ruff check/format and ty pass.
+  - Owned pg0 instance created and removed; the registry is unchanged.
+- B, Core rollback hold: `db/hindsight-replica-schedule-state.ts`. A failure with `HINDSIGHT_PROVIDER_ROLLBACK_DETECTED`
+  reports `explicit_retry_required` and sets no retry. While that code is current, interval, retry and catch-up runs
+  are not due and no wake is armed. Reconfiguring keeps `explicit_retry_required`. A manual `replica.sync` still runs and
+  refuses the same way, and a success clears the hold. Scoped to that one code: the failure path persists only the code,
+  not `retryable`. The other non-retryable codes (authentication, disabled connection, version) clear after an operator
+  config fix, and the timed retry then picks that up. Holding them too would change existing behavior beyond the ruling.
+  Test in `hindsight-replica-scheduler-repo.test.ts`; it fails without the fix.
+- Gates: `pnpm typecheck` and `pnpm lint` green; Core 422 / 3381 (+1 skipped); `git diff --check` clean.
+
+### Leader notes after W6 (2026-09-27)
+
+- Rulings on the W6 questions: (1) keep the write-time vector-health rule (lifted to `ready` only); (2) native hydrate
+  serialization failures are fixed now as TAKI-HS-014; (3) on a restored host the copied in-progress `backup.capture` row
+  settling `outcome_unknown` is truthful (the artifact was taken during that operation) and is documented in the spec, the
+  sealed manifest stays the backup's own truth; (4) a rollback holds the Bank for explicit runs; (5) a restored Pending
+  completing on the next replica run (scheduler interval or an explicit `replica.sync`) is accepted and documented.
+- Leader gate rerun after the follow-up: typecheck, lint, Core 422 / 3381 (+1 skipped), `git diff --check` passed.
