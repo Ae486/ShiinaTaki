@@ -4,6 +4,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { MemoryReplicaScheduleConfigSchema, type MemoryReplicaCheckpoint } from "@taki/shared";
 import { createHindsightReplicaSchedulerRepo, type HindsightReplicaSchedulerRepo } from "./hindsight-replica-scheduler-repo.ts";
+import { replicaNextWake } from "./hindsight-replica-schedule-state.ts";
 import { publishReplicaCheckpoint } from "./hindsight-replica-checkpoint-store.ts";
 import { MIGRATIONS } from "./migrations/index-list.ts";
 import { openDatabase, type Database } from "./sqlite.ts";
@@ -85,6 +86,28 @@ describe("B5 durable scheduler recovery regressions", () => {
     expect(repo.get(bank.bankId)).toMatchObject({ consecutiveFailures: 1, retryDueAt: null, retryKind: null, retryAttempt: 0 });
     expect(repo.requestCatchUp(bank.bankId).catchUpRequested).toBe(false);
     expect(repo.claim({ bankId: bank.bankId, ownerId: "process-a", leaseDurationMs: 60_000 })).toBeUndefined();
+  });
+
+  it("holds a provider rollback for explicit runs only until a success clears it", () => {
+    const f = fixture(); const checkpoint = installCheckpoint(f.db);
+    const held = { mode: "failed", errorCode: "HINDSIGHT_PROVIDER_ROLLBACK_DETECTED", nextAction: "explicit_retry_required",
+      retryAttempt: 0, retryKind: null, retryDueAt: null };
+    expect(f.repo.fail({ run: take(f.repo), errorCode: "HINDSIGHT_PROVIDER_ROLLBACK_DETECTED" })).toMatchObject(held);
+    f.advance(7 * 60 * 60_000);
+    expect(f.repo.requestCatchUp(bank.bankId).catchUpRequested).toBe(false);
+    expect(f.repo.claim({ bankId: bank.bankId, ownerId: "process-a", leaseDurationMs: 60_000 })).toBeUndefined();
+    expect(replicaNextWake(f.repo.get(bank.bankId)!, f.repo.now())).toBeNull();
+    expect(f.repo.ensureBank({ bank, config: MemoryReplicaScheduleConfigSchema.parse({}) })).toMatchObject(held);
+
+    f.repo.requestManual({ bankId: bank.bankId, kind: "incremental" });
+    expect(replicaNextWake(f.repo.get(bank.bankId)!, f.repo.now())).toBe(f.repo.now());
+    expect(f.repo.fail({ run: take(f.repo), errorCode: "HINDSIGHT_PROVIDER_ROLLBACK_DETECTED" }))
+      .toMatchObject({ ...held, consecutiveFailures: 2 });
+    f.repo.requestManual({ bankId: bank.bankId, kind: "incremental" });
+    expect(f.repo.succeed({ run: take(f.repo), result: { checkpoint, observedCursor: 8 } }))
+      .toMatchObject({ mode: "idle", errorCode: null, nextAction: null, consecutiveFailures: 0 });
+    f.advance(6 * 60 * 60_000);
+    expect(take(f.repo)).toMatchObject({ kind: "incremental", trigger: "interval" });
   });
 
   it("honors every persisted retry delay even when the ordinary and full polls are overdue", () => {

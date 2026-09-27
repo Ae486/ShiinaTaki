@@ -51,7 +51,7 @@
 - hindsight-replica-checkpoint-store.ts — checkpoint read and predecessor CAS publication
 - hindsight-replica-lease-repo.ts — persisted per-Bank owner/run/fence lease lifecycle and exact-token expiry CAS renewal
 - hindsight-replica-scheduler-repo.ts — durable Bank configuration, manual/catch-up claims and unclaimed-manual cancel, lease-bound settlement, and restart recovery
-- hindsight-replica-schedule-state.ts — deterministic retry precedence, independent due intervals, and manual-mode transitions
+- hindsight-replica-schedule-state.ts — deterministic retry precedence, independent due intervals, manual-mode transitions, and the explicit-only hold after a provider rollback
 - hindsight-replica-snapshot-cache.ts — payload-and-witness digests bound to Bank/lineage/generation/page hash, with atomic pruning and journal invalidation
 - pending-memory-repo.ts — idempotent Pending Memory admission, Bank/authority/lease/CAS guards, truthful summaries, and separate overlay reads
 - pending-memory-store.ts — immutable intent/dispatch storage, versioned factual proof integrity, old-row reads and CAS writes

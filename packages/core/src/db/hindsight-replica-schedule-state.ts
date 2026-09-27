@@ -1,6 +1,7 @@
 /**
  * INPUT:  validated Bank scheduling state and one captured clock value
- * OUTPUT: deterministic due selection, configuration changes, and retry transitions
+ * OUTPUT: deterministic due selection, configuration changes, and retry transitions; a provider rollback holds the Bank for
+ *         explicit runs only
  * POS:    core/db — pure policy for the fenced replica scheduler repository
  */
 import {
@@ -10,6 +11,9 @@ import {
 } from "@taki/shared";
 
 type Due = Pick<MemoryReplicaScheduledRun, "kind" | "trigger">;
+
+// Native stays behind Taki on the same lineage until an operator restores a verified pair or decides; a timed run only refuses again.
+function heldForOperator(code: MemoryReplicaErrorCode | null): boolean { return code === "HINDSIGHT_PROVIDER_ROLLBACK_DETECTED"; }
 
 export function initialReplicaSchedule(input: { bank: MemoryReplicaBank; config: MemoryReplicaScheduleConfig; now: string }): MemoryReplicaSyncState {
   return MemoryReplicaSyncStateSchema.parse({
@@ -30,7 +34,8 @@ export function configureReplicaSchedule(state: MemoryReplicaSyncState, config: 
     nextFullDueAt: automatic ? after(state.lastFullReconciliationAt ?? state.createdAt, config.fullReconciliationIntervalMs) : null,
     retryAttempt: automatic ? state.retryAttempt : 0, retryKind: automatic ? state.retryKind : null,
     retryDueAt: automatic ? state.retryDueAt : null, catchUpRequested: automatic && state.catchUpRequested,
-    nextAction: state.errorCode === null ? null : automatic ? "automatic_retry_scheduled" : "explicit_retry_required",
+    nextAction: state.errorCode === null ? null
+      : automatic && !heldForOperator(state.errorCode) ? "automatic_retry_scheduled" : "explicit_retry_required",
     updatedAt: now,
   };
 }
@@ -38,7 +43,7 @@ export function configureReplicaSchedule(state: MemoryReplicaSyncState, config: 
 export function replicaScheduleDue(state: MemoryReplicaSyncState, now: string): Due | undefined {
   if (state.run !== null) return undefined;
   if (state.pendingManualKind !== null) return { kind: state.pendingManualKind, trigger: "manual" };
-  if (!state.automatic) return undefined;
+  if (!state.automatic || heldForOperator(state.errorCode)) return undefined;
   if (state.catchUpRequested) {
     return { kind: isDue(state.nextFullDueAt, now) ? "full" : state.retryKind ?? "incremental", trigger: "catch_up" };
   }
@@ -54,21 +59,22 @@ export function replicaScheduleDue(state: MemoryReplicaSyncState, now: string): 
 export function replicaNextWake(state: MemoryReplicaSyncState, now: string): string | null {
   if (state.run) return state.run.lease.expiresAt;
   if (replicaScheduleDue(state, now)) return now;
-  if (!state.automatic) return null;
+  if (!state.automatic || heldForOperator(state.errorCode)) return null;
   if (state.retryDueAt) return state.retryDueAt;
   const dates = [state.nextDueAt, state.nextFullDueAt].filter((value): value is string => value !== null);
   return dates.sort((a, b) => Date.parse(a) - Date.parse(b))[0] ?? null;
 }
 
 export function failedReplicaSchedule(state: MemoryReplicaSyncState, code: MemoryReplicaErrorCode, now: string): MemoryReplicaSyncState {
-  const attempt = state.automatic ? Math.min(REPLICA_RETRY_DELAYS_MS.length, state.retryAttempt + 1) : 0;
+  const automatic = state.automatic && !heldForOperator(code);
+  const attempt = automatic ? Math.min(REPLICA_RETRY_DELAYS_MS.length, state.retryAttempt + 1) : 0;
   const delay = REPLICA_RETRY_DELAYS_MS[attempt - 1];
   return { ...state, mode: "failed", run: null,
     fullReconciliationState: state.run?.kind === "full" ? "failed" : state.fullReconciliationState,
-    retryAttempt: attempt, retryKind: state.automatic ? state.run?.kind ?? "incremental" : null,
+    retryAttempt: attempt, retryKind: automatic ? state.run?.kind ?? "incremental" : null,
     retryDueAt: delay === undefined ? null : after(now, delay),
     consecutiveFailures: Math.min(Number.MAX_SAFE_INTEGER, state.consecutiveFailures + 1), errorCode: code,
-    nextAction: state.automatic ? "automatic_retry_scheduled" : "explicit_retry_required", updatedAt: now,
+    nextAction: automatic ? "automatic_retry_scheduled" : "explicit_retry_required", updatedAt: now,
   };
 }
 
