@@ -1,0 +1,105 @@
+
+  [38;2;9;127;184m▄[0m[48;2;8;130;178m[38;2;5;133;186m▄[0m       [48;2;10;143;160m[38;2;10;143;165m▄[0m[38;2;7;140;156m▄[0m
+ [38;2;8;125;192m▄[0m [38;2;3;132;191m▀[0m[38;2;2;133;192m▄[0m [38;2;3;132;180m▄[0m[38;2;1;137;184m▄[0m[38;2;3;133;174m▄[0m [38;2;3;142;176m▄[0m[38;2;4;142;169m▀[0m [38;2;10;144;164m▄[0m
+[38;2;6;121;195m▀[0m[38;2;5;128;203m▀[0m[48;2;5;124;195m[38;2;3;125;200m▄[0m[38;2;2;126;196m▄[0m[48;2;3;128;188m[38;2;1;131;196m▄[0m[48;2;0;152;219m[38;2;2;131;191m▄[0m[38;2;1;141;196m▀[0m[38;2;1;135;183m▀[0m[38;2;1;148;198m▀[0m[48;2;1;156;202m[38;2;2;135;180m▄[0m[48;2;4;134;169m[38;2;1;137;177m▄[0m[38;2;3;138;173m▄[0m[48;2;6;137;165m[38;2;2;140;170m▄[0m[38;2;7;144;169m▀[0m[38;2;7;139;158m▀[0m
+   [48;2;2;128;202m[38;2;2;124;201m▄[0m[48;2;1;130;201m[38;2;0;135;212m▄[0m[38;2;2;128;196m▄[0m [48;2;2;142;204m[38;2;7;138;199m▄[0m [38;2;1;135;186m▄[0m[48;2;1;142;186m[38;2;2;144;194m▄[0m[48;2;3;138;176m[38;2;2;134;176m▄[0m
+ [48;2;8;118;200m[38;2;8;121;209m▄[0m[38;2;3;121;203m▀[0m [38;2;3;122;192m▀[0m[38;2;1;138;216m▀[0m[48;2;0;138;210m[38;2;3;128;198m▄[0m[48;2;0;126;188m[38;2;2;131;198m▄[0m[48;2;0;142;205m[38;2;3;132;193m▄[0m[38;2;1;140;196m▀[0m  [38;2;4;134;175m▀[0m[48;2;13;135;167m[38;2;8;136;174m▄[0m 
+
+  [38;2;0;116;217mH[38;2;0;116;215mi[38;2;0;117;214mn[38;2;0;117;213md[38;2;0;118;211ms[38;2;0;118;210mi[38;2;0;119;209mg[38;2;0;120;207mh[38;2;0;120;206mt[38;2;0;121;205m: [38;2;0;122;202mA[38;2;0;123;201mg[38;2;0;123;199me[38;2;0;124;198mn[38;2;0;124;197mt [38;2;0;126;194mM[38;2;0;126;193me[38;2;0;127;192mm[38;2;0;127;190mo[38;2;0;128;189mr[38;2;0;128;188my [38;2;0;130;185mT[38;2;0;130;184mh[38;2;0;131;182ma[38;2;0;131;181mt [38;2;0;133;178mW[38;2;0;133;177mo[38;2;0;134;176mr[38;2;0;134;174mk[38;2;0;135;173ms [38;2;0;136;171mL[38;2;0;137;169mi[38;2;0;137;168mk[38;2;0;138;167me [38;2;0;139;164mH[38;2;0;140;163mu[38;2;0;140;161mm[38;2;0;141;160ma[38;2;0;141;159mn [38;2;0;143;156mM[38;2;0;143;155me[38;2;0;144;153mm[38;2;0;144;152mo[38;2;0;145;151mr[38;2;0;146;150my[0m
+
+2026-09-27 07:44:50,051 - INFO - hindsight_api.config - Database: postgresql://***:***@127.0.0.1:3549/taki_smoke (schema: public)
+2026-09-27 07:44:50,051 - INFO - hindsight_api.config - LLM: provider=mock, model=mock-model
+2026-09-27 07:44:50,052 - INFO - hindsight_api.config - Embeddings: provider=local
+2026-09-27 07:44:50,052 - INFO - hindsight_api.config - Reranker: provider=local
+2026-09-27 07:44:50,052 - INFO - hindsight_api.config - Graph retriever: link_expansion
+2026-09-27 07:44:50,052 - INFO - hindsight_api.extensions.loader - Loading extension from HINDSIGHT_API_TENANT_EXTENSION=hindsight_api.extensions.builtin.tenant:ApiKeyTenantExtension
+2026-09-27 07:44:50,052 - INFO - hindsight_api.extensions.loader - Loaded extension ApiKeyTenantExtension with config keys: ['api_key']
+2026-09-27 07:44:50,053 - INFO - root - Loaded tenant extension: ApiKeyTenantExtension
+2026-09-27 07:44:50,068 - INFO - root - Extension context set on tenant extension
+2026-09-27 07:44:50,197 - INFO - hindsight_api.api.mcp - MCP servers created (stateless_http=False)
+2026-09-27 07:44:51,178 - INFO - hindsight_api.api - HTTP REST API enabled
+2026-09-27 07:44:51,178 - INFO - hindsight_api.api - MCP server enabled at /mcp/
+winloop not installed, using default asyncio event loop
+[38;2;0;116;217mStarting Hindsight API...[0m
+  [38;2;128;128;128mVersion:[0m [38;2;0;119;210mv0.9.0[0m
+  [38;2;128;128;128mURL:[0m [38;2;0;122;203mhttp://127.0.0.1:3547[0m
+  [38;2;128;128;128mDatabase:[0m [38;2;0;128;190mpostgresql://***:***@127.0.0.1:3549/taki_smoke[0m
+  [38;2;128;128;128mLLM:[0m [38;2;0;134;176mmock / mock-model[0m
+  [38;2;128;128;128mEmbeddings:[0m [38;2;0;140;163mlocal[0m
+  [38;2;128;128;128mReranker:[0m [38;2;0;146;150mlocal[0m
+  [38;2;128;128;128mExtensions:[0m [38;2;0;128;190mpgvector (vector) / native (text)[0m
+  [38;2;128;128;128mMCP:[0m [38;2;0;146;150menabled at /mcp[0m
+
+INFO:     Started server process [56092]
+INFO:     Waiting for application startup.
+2026-09-27 07:44:51,252 - INFO - mcp.server.streamable_http_manager - StreamableHTTP session manager started
+2026-09-27 07:44:51,253 - INFO - mcp.server.streamable_http_manager - StreamableHTTP session manager started
+2026-09-27 07:44:51,253 - INFO - hindsight_api.api - MCP lifespans started (multi-bank and single-bank)
+2026-09-27 07:44:51,255 - INFO - root - Metrics initialized - available at /metrics endpoint
+2026-09-27 07:44:51,257 - INFO - hindsight_api.engine.embeddings - Embeddings: initializing local provider with model BAAI/bge-small-en-v1.5
+2026-09-27 07:44:51,260 - INFO - hindsight_api.engine.cross_encoder - Reranker: initializing local provider with model cross-encoder/ms-marco-MiniLM-L-6-v2
+2026-09-27 07:44:51,269 - INFO - sentence_transformers.SentenceTransformer - Load pretrained SentenceTransformer: BAAI/bge-small-en-v1.5
+2026-09-27 07:44:51,362 - INFO - hindsight_api.engine.cross_encoder - Reranker: applied transformers 5.x compatibility patch for XLM-RoBERTa
+Loading weights:   0%|          | 0/105 [00:00<?, ?it/s]Loading weights: 100%|██████████| 105/105 [00:00<00:00, 1971.84it/s]
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 3126.41it/s]
+2026-09-27 07:44:54,065 - INFO - hindsight_api.engine.embeddings - Embeddings: local provider initialized (dim: 384, device: cpu)
+2026-09-27 07:44:55,163 - INFO - hindsight_api.engine.cross_encoder - Reranker: local provider initialized (max_concurrent=4)
+2026-09-27 07:44:55,164 - INFO - hindsight_api.engine.memory_engine - Running database migrations...
+2026-09-27 07:44:55,165 - INFO - hindsight_api.engine.memory_engine - Running migrations on 1 schema(s)...
+2026-09-27 07:44:55,589 - INFO - hindsight_api.migrations - pgvector extension found in public schema - ready to use
+2026-09-27 07:44:55,592 - INFO - hindsight_api.migrations - Running database migrations to head for schema 'public'...
+2026-09-27 07:44:55,592 - INFO - hindsight_api.migrations - Database URL: postgresql://***:***@127.0.0.1:3549/taki_smoke
+2026-09-27 07:44:55,592 - INFO - hindsight_api.migrations - Script location: H:\hindsight\hindsight-api-slim\hindsight_api\alembic
+2026-09-27 07:44:55,760 - INFO - alembic.runtime.migration - Context impl PostgresqlImpl.
+2026-09-27 07:44:55,760 - INFO - alembic.runtime.migration - Will assume transactional DDL.
+2026-09-27 07:44:55,955 - INFO - hindsight_api.migrations - Database migrations completed successfully for schema 'public'
+2026-09-27 07:44:56,121 - INFO - hindsight_api.migrations - Using vector extension: pgvector
+2026-09-27 07:44:56,298 - INFO - hindsight_api.migrations - Target vector extension: pgvector
+2026-09-27 07:44:56,524 - INFO - hindsight_api.engine.memory_engine - Schema migrations completed
+2026-09-27 07:44:56,524 - INFO - hindsight_api.engine.memory_engine - Connecting to database at postgresql://***:***@127.0.0.1:3549/taki_smoke
+2026-09-27 07:44:57,085 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool created (min=5, max=100, cmd_timeout=60s, acquire_timeout=30s)
+2026-09-27 07:44:59,162 - INFO - hindsight_api.engine.task_backend - BrokerTaskBackend initialized
+2026-09-27 07:44:59,162 - INFO - hindsight_api.engine.memory_engine - Memory system initialized (pool and task backend started)
+2026-09-27 07:44:59,162 - INFO - root - Memory system initialized
+2026-09-27 07:44:59,162 - INFO - root - DB pool metrics configured
+2026-09-27 07:44:59,165 - INFO - hindsight.loop_watchdog - Loop watchdog started (stall_threshold=1.00s, poll_interval=0.25s)
+2026-09-27 07:44:59,165 - INFO - root - Worker id: taki-drill-older (source: HINDSIGHT_API_WORKER_ID)
+2026-09-27 07:44:59,168 - INFO - root - Worker poller started (worker_id=taki-drill-older)
+2026-09-27 07:44:59,168 - INFO - root - Tenant extension started
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:3547 (Press CTRL+C to quit)
+2026-09-27 07:44:59,180 - INFO - hindsight_api.engine.maintenance - Maintenance: retention took 0.000s
+2026-09-27 07:44:59,183 - INFO - hindsight_api.worker.poller - Worker taki-drill-older starting polling loop (max_slots=10, reservations=[consolidation=2], shared_pool=8)
+2026-09-27 07:44:59,188 - INFO - hindsight_api.engine.maintenance - Maintenance: consolidation reconcile took 0.016s
+2026-09-27 07:44:59,192 - INFO - hindsight_api.engine.maintenance - Maintenance: scheduled mental model refresh took 0.000s
+INFO:     127.0.0.1:8609 - "GET /health HTTP/1.1" 200 OK
+2026-09-27 07:44:59,710 - INFO - hindsight_api.worker.poller - [WORKER_STATS] worker=taki-drill-older slots=0/10 | reserved: [consolidation=0/2(avail=2)] | shared=0/8(avail=8) | global: pending=0 (queried=0/1 schemas: ) | others: none | pool: size=5 limits=5-100 idle=5 in_use=0 free_holders=100 pending_acquires=0 | proc: unavailable | my_active: none
+INFO:     127.0.0.1:8620 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8622 - "GET /version HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8624 - "GET /ext/taki-memory/version HTTP/1.1" 200 OK
+2026-09-27 07:45:13,257 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/changes
+INFO:     127.0.0.1:8626 - "GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/changes?provider_lineage=1c7c3f99-d7b6-4f78-8a21-7b3a0ae4529f&bank_generation=e15d6f14-2fe0-4ea5-8b5b-1f2d863a0aab&after_state_cursor=1&limit=128 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8628 - "GET /ext/taki-memory/version HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8630 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8632 - "GET /version HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8634 - "GET /ext/taki-memory/version HTTP/1.1" 200 OK
+2026-09-27 07:45:13,482 - WARNING - hindsight_api.api.http - Unknown parameters ignored: [provider_lineage, bank_generation] for GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes
+INFO:     127.0.0.1:8636 - "GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes?provider_lineage=1c7c3f99-d7b6-4f78-8a21-7b3a0ae4529f&bank_generation=9fcf627a-d8aa-4240-8e8e-f932bf5f14f1&after_state_cursor=70&limit=128 HTTP/1.1" 409 Conflict
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-09-27 07:45:13,909 - INFO - hindsight_api.worker.poller - Worker taki-drill-older initiating graceful shutdown
+2026-09-27 07:45:13,909 - INFO - hindsight_api.worker.poller - Worker taki-drill-older graceful shutdown complete
+2026-09-27 07:45:13,910 - INFO - hindsight_api.worker.poller - Worker taki-drill-older polling loop stopped
+2026-09-27 07:45:13,913 - INFO - root - Worker poller stopped
+2026-09-27 07:45:13,913 - INFO - root - Tenant extension stopped
+2026-09-27 07:45:13,913 - INFO - hindsight_api.engine.memory_engine - close() started
+2026-09-27 07:45:13,913 - INFO - hindsight_api.engine.task_backend - BrokerTaskBackend shutdown
+2026-09-27 07:45:13,925 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool closed
+2026-09-27 07:45:13,925 - INFO - root - Memory system closed
+2026-09-27 07:45:13,925 - INFO - mcp.server.streamable_http_manager - StreamableHTTP session manager shutting down
+2026-09-27 07:45:13,925 - INFO - hindsight_api.api - MCP lifespans stopped
+2026-09-27 07:45:13,925 - INFO - mcp.server.streamable_http_manager - StreamableHTTP session manager shutting down
+INFO:     Application shutdown complete.
+INFO:     Finished server process [56092]
+
+Received signal 2, shutting down...

@@ -1,0 +1,5 @@
+Repairing per-bank vector indexes for all banks across base schema and all discovered tenant schemas...
+Loading extension from HINDSIGHT_API_TENANT_EXTENSION=hindsight_api.extensions.builtin.tenant:ApiKeyTenantExtension
+Loaded extension ApiKeyTenantExtension with config keys: ['api_key']
+  schema 'public': 2 bank(s) scanned, 0 present, 6 created, 0 to-create (dry-run), 0 failed
+Done: 1 schema(s), 2 bank(s) scanned, 0 already present, 6 created, 0 to-create (dry-run), 0 failed

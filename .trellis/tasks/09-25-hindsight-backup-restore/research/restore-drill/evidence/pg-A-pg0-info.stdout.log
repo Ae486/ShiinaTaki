@@ -1,0 +1,9 @@
+{
+  "name": "taki-drill-f808a350ff5e",
+  "running": false,
+  "port": 3543,
+  "version": "18.1.0",
+  "username": "taki_smoke",
+  "database": "taki_smoke",
+  "data_dir": "G:\\Temp\\taki-restore-drill-y9VBKk\\pg-A\\pg-data"
+}

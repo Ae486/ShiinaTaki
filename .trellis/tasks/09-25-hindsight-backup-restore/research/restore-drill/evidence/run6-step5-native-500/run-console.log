@@ -1,0 +1,14 @@
+[drill] temp root G:\Temp\taki-restore-drill-yimdWM
+[drill] step 1: Legacy -> Local onboarding -> Hindsight setup + activation (native A, backup flag on)
+[drill] step 2: Write M1 through the retain tool; drain; replica.sync
+[drill] step 3: Backup #1 route b: capture operator-artifact -> hindsight-admin backup --taki-request -> inbox -> admit -> verify
+[drill] step 4: Write M2; drain; replica.sync (Core moves past backup #1)
+[drill] step 5: Incomplete work: tracked retain M3 lands natively while Core cannot confirm it
+[drill] step 5 FAILED: the tracked retain never reached native through the proxy
+[drill] result failed; evidence H:\TakiAgent\.trellis\tasks\09-25-hindsight-backup-restore\research\restore-drill\evidence\
+[drill]   1 passed 
+[drill]   2 passed 
+[drill]   3 passed 
+[drill]   4 passed 
+[drill]   5 failed the tracked retain never reached native through the proxy
+exit 0

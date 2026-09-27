@@ -1,0 +1,27 @@
+[drill] temp root G:\Temp\taki-restore-drill-y9VBKk
+[drill] step 1: Legacy -> Local onboarding -> Hindsight setup + activation (native A, backup flag on)
+[drill] step 2: Write M1 through the retain tool; drain; replica.sync
+[drill] step 3: Backup #1 route b: capture operator-artifact -> hindsight-admin backup --taki-request -> inbox -> admit -> verify
+[drill] step 4: Write M2; drain; replica.sync (Core moves past backup #1)
+[drill] step 5: Incomplete work: tracked retain M3 lands natively while Core cannot confirm it
+[drill] step 6: Backup #2 route c: capture native-endpoint -> verify; record the pre-capture state
+[drill] step 7: Stop Core A and native A
+[drill] step 8: Isolated restore: fresh pg0 -> run-db-migration -> restore -> repair-bank --all -> decommission-workers; native R; Core R on the captured core.sqlite
+[drill] step 9: Read back: authority, lineage, Banks, generations, cursors, memory content; no rollback detection
+[drill] step 10: Resume: M3 completes; no repeated native effect
+[drill] step 11: Use the restored pair: recall + backup.verify on the restored host
+[drill] step 12: Negative: Core from backup #2 against native restored from backup #1
+[drill] result passed; evidence H:\TakiAgent\.trellis\tasks\09-25-hindsight-backup-restore\research\restore-drill\evidence\
+[drill]   1 passed 
+[drill]   2 passed 
+[drill]   3 passed 
+[drill]   4 passed 
+[drill]   5 passed 
+[drill]   6 passed 
+[drill]   7 passed 
+[drill]   8 passed 
+[drill]   9 passed 
+[drill]   10 passed 
+[drill]   11 passed 
+[drill]   12 passed 
+exit 0

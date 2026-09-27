@@ -323,3 +323,31 @@ barrels; tests colocated; no real Hindsight/model/user data; boots use a temp da
   `backup_in_progress` only means a concurrent operator CLI or second Core; `NATIVE_FAILED` with the logged reason is truthful.
 - For the formal check: the native backup compresses on the API event loop (sync `zipfile`), so native reads stall for the
   compression time during a capture; acceptable at owner scale, the check judges whether it needs `to_thread`.
+
+### W6 (2026-09-27)
+
+- AC11 restore drill: `research/restore-drill-2026-09-27.md`; harness and evidence in `research/restore-drill/`
+  (`node restore-drill.mjs`). Run 7 on the final code: all 12 steps passed.
+  - Steps 1-2: activation, then an M1 write. Step 3: route b, CLI `--taki-request`, inbox, admit, verify.
+  - Step 4: an M2 write. Step 5: M3 lands natively while Core stays `submitted`. Step 6: route c, capture then verify.
+  - Step 8: fresh pg0 with migrate, restore, `repair-bank --all` and `decommission-workers`. The restored native rows
+    equal the capture-time rows, and Core runs on the captured `core.sqlite`.
+  - Step 9: read-back matched. Step 10: M3 completed with 0 retain POSTs and no new native documents, units, receipts or
+    async operations. Step 11: recall found M1-M3, and verify passed on the restored host.
+  - Step 12: Core from backup #2 against native from backup #1 gave `HINDSIGHT_PROVIDER_ROLLBACK_DETECTED` with 0
+    `/snapshots` calls and unchanged checkpoints.
+  - Cleanup: the pg0 registry is unchanged, `~/.takiagent` is unchanged, and no processes or listeners are left.
+- Core defects found and fixed, each with a test that fails without the fix:
+  - `memory-coordinator.ts` + `memory-capability-snapshot.ts` (`writableMemoryCapabilities`). A Run may write once its
+    own recall lifted vector health to `ready`. Before, the first writing Run after every boot got "memory capabilities
+    are stale". A weaker state than admitted still refuses, and drift during the write stays unknown. The spec line in
+    `quality-guidelines.md` was updated.
+  - `hindsight-application-sync-runner.ts`. A `state_reset_required` whose native checkpoint is behind Core's is now a
+    rollback, not a rebuild. R7 had been wired only into the plain runner, and production uses the application-aware one.
+    Run 4 showed 3 `/snapshots` calls before this fix.
+- Gates: `pnpm typecheck` and `pnpm lint` green; Core 422 / 3380 (+1 skipped); `git diff --check` clean. No native change.
+- Seen, not fixed: native `application-state/hydrate` sometimes returns 500 (`SerializationError`, a repeatable-read
+  write with no retry). The Run's recall then degrades, and per the spec that Run refuses its writes. It hit step 5 in
+  runs 5 and 6, not in run 7.
+- For the leader: the capture operation reads `outcome_unknown` on a restored copy; pending writes finish only through
+  `replica.sync`; a rollback failure says `automatic_retry_scheduled`.

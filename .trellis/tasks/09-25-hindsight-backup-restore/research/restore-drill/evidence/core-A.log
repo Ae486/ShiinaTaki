@@ -1,0 +1,20 @@
+{"level":30,"time":1790465896523,"pid":65396,"hostname":"tianxuanji","mod":"db","applied":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50],"msg":"migrations applied"}
+{"level":30,"time":1790465896530,"pid":65396,"hostname":"tianxuanji","msg":"Core Host identity loaded"}
+{"level":30,"time":1790465896538,"pid":65396,"hostname":"tianxuanji","mod":"secrets","mod":"secrets","health":"ok","keySource":"credentials-directory","msg":"secret catalog opened"}
+{"level":30,"time":1790465896548,"pid":65396,"hostname":"tianxuanji","mod":"memory","upserted":0,"deleted":0,"total":0,"invalid":[],"msg":"memory index reconciled from workspace"}
+{"level":30,"time":1790465896556,"pid":65396,"hostname":"tianxuanji","mod":"skills","active":0,"invalidated":0,"seeded":0,"seedRejected":0,"msg":"skill lifecycle ready"}
+{"level":30,"time":1790465896557,"pid":65396,"hostname":"tianxuanji","mod":"mcp","msg":"no legacy mcp-servers.json to seed"}
+{"level":30,"time":1790465896565,"pid":65396,"hostname":"tianxuanji","mod":"mcp","servers":0,"published":0,"failed":0,"msg":"mcp reconcile from desired state complete"}
+{"level":30,"time":1790465896588,"pid":65396,"hostname":"tianxuanji","mod":"server","host":"127.0.0.1","port":3542,"msg":"ws server listening"}
+{"level":30,"time":1790465896601,"pid":65396,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1790465896609,"pid":65396,"hostname":"tianxuanji","mod":"pairing","deviceId":"9d877972-5f93-4800-8fb5-275677e30511","deviceName":"restore drill A","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1790465896664,"pid":65396,"hostname":"tianxuanji","mod":"secrets","mod":"secrets","secretRef":"memory.hindsight.connection.api-key","msg":"secret stored"}
+{"level":30,"time":1790465896666,"pid":65396,"hostname":"tianxuanji","mod":"config","key":"TAKI_HINDSIGHT_ENDPOINT","reset":false,"apply":"live","msg":"config stored"}
+{"level":30,"time":1790465896667,"pid":65396,"hostname":"tianxuanji","mod":"config","key":"TAKI_HINDSIGHT_ENABLED","reset":false,"apply":"live","msg":"config stored"}
+{"level":30,"time":1790465904405,"pid":65396,"hostname":"tianxuanji","mod":"hindsight-activation","runId":"46917fa3-4e2d-4820-a143-b33cf2bd0030","transactionId":"938adcfd-608b-44a0-8781-8719533cb350","carried":0,"msg":"Hindsight authority activated"}
+{"level":30,"time":1790465909039,"pid":65396,"hostname":"tianxuanji","characterId":"taki","status":"clean","assessed":0,"blocks":0,"pending":0,"edits":0,"steps":0,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1790465926565,"pid":65396,"hostname":"tianxuanji","mod":"activity","code":"NO_NODE","msg":"no device provides foreground-window; sampler idle until one connects"}
+{"level":30,"time":1790465984847,"pid":65396,"hostname":"tianxuanji","characterId":"taki","status":"failed","assessed":0,"blocks":0,"pending":7,"edits":0,"steps":1,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1790465986653,"pid":65396,"hostname":"tianxuanji","characterId":"taki","status":"failed","assessed":0,"blocks":0,"pending":11,"edits":0,"steps":1,"msg":"Hindsight policy review settled"}
+{"level":30,"time":1790465993126,"pid":65396,"hostname":"tianxuanji","signal":"SIGINT","msg":"shutting down"}
+{"level":30,"time":1790465993131,"pid":65396,"hostname":"tianxuanji","mod":"mcp","clients":0,"msg":"mcp manager closed"}

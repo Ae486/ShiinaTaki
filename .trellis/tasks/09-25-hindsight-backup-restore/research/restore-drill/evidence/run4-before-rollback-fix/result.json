@@ -1,0 +1,3041 @@
+{
+  "status": "failed",
+  "fatal": null,
+  "steps": [
+    {
+      "id": 1,
+      "title": "Legacy -> Local onboarding -> Hindsight setup + activation (native A, backup flag on)",
+      "status": "passed",
+      "observed": {
+        "initial": {
+          "mode": "legacy-markdown",
+          "epochId": null,
+          "providerLineageId": null
+        },
+        "onboarding": [
+          {
+            "operationId": "923abf53-3fca-4a37-9640-904d1343e366",
+            "kind": "local.onboard.prepare",
+            "state": "completed",
+            "reason": null,
+            "errorCode": null,
+            "result": {
+              "kind": "local",
+              "runId": "a1a5bbb2-d35e-4f18-9a20-ca4ae84cf98d",
+              "outcome": "ready",
+              "epochId": "d258125c-d041-4d86-8b3d-82425077add4",
+              "runtimeAvailable": false
+            },
+            "producer": "local"
+          },
+          {
+            "operationId": "f1c6ee3e-3187-4d57-b95a-96b9d66baf14",
+            "kind": "local.onboard.activate",
+            "state": "completed",
+            "reason": null,
+            "errorCode": null,
+            "result": {
+              "kind": "local",
+              "runId": "a1a5bbb2-d35e-4f18-9a20-ca4ae84cf98d",
+              "outcome": "activated",
+              "epochId": "d258125c-d041-4d86-8b3d-82425077add4",
+              "runtimeAvailable": true
+            },
+            "producer": "local"
+          }
+        ],
+        "secret": {
+          "secretRef": "memory.hindsight.connection.api-key",
+          "present": true,
+          "health": "ok"
+        },
+        "validate": {
+          "operationId": "0d3a2d19-fb09-45b7-9a39-aad047ad3025",
+          "kind": "setup.validate",
+          "state": "completed",
+          "reason": null,
+          "errorCode": null,
+          "result": {
+            "kind": "setup",
+            "phase": "compatible",
+            "revision": 2,
+            "latestError": null
+          },
+          "producer": "setup"
+        },
+        "apply": {
+          "operationId": "49fe21f6-a15d-458a-8dc1-a846c59c2d57",
+          "kind": "setup.apply",
+          "state": "completed",
+          "reason": null,
+          "errorCode": null,
+          "result": {
+            "kind": "setup",
+            "phase": "configured",
+            "revision": 6,
+            "latestError": null
+          },
+          "producer": "setup"
+        },
+        "setup": {
+          "phase": "configured",
+          "revision": 6,
+          "banks": [
+            {
+              "scope": "character",
+              "canonicalIdentity": "character:taki",
+              "externalBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "templateRevision": "taki-bank-v1",
+              "templateDigest": "55bf2c07e2bf6c93fa393bb74677029310a67977da35bba6ed4df7dd915aec0f",
+              "status": "verified",
+              "operationIds": [
+                "f0b730a4-8f8b-4276-9c4d-5509c6d40f3a"
+              ],
+              "lastVerifiedAt": "2026-09-26T22:21:30.981Z",
+              "lastError": null
+            },
+            {
+              "scope": "global",
+              "canonicalIdentity": "global",
+              "externalBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "templateRevision": "taki-bank-v1",
+              "templateDigest": "feb8350d679658bfbb426426d1539b26df1551e37fc4afbb43c759479b627537",
+              "status": "verified",
+              "operationIds": [
+                "d5b0782d-c952-456c-98ca-8e6ab74392d3"
+              ],
+              "lastVerifiedAt": "2026-09-26T22:21:29.429Z",
+              "lastError": null
+            }
+          ]
+        },
+        "operation": {
+          "operationId": "8ca443c3-7d1d-4c6f-a4ec-40f4df39b520",
+          "kind": "hindsight.activate",
+          "state": "completed",
+          "reason": null,
+          "errorCode": null,
+          "result": {
+            "kind": "hindsight",
+            "runId": "a1a5bbb2-d35e-4f18-9a20-ca4ae84cf98d",
+            "outcome": "activated",
+            "epochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+            "runtimeAvailable": true,
+            "blocking": []
+          },
+          "producer": "hindsight"
+        },
+        "authority": {
+          "mode": "hindsight",
+          "epochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+          "providerLineageId": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030"
+        },
+        "runtime": {
+          "providerId": "hindsight",
+          "available": true,
+          "unavailableReason": null
+        }
+      },
+      "error": null,
+      "durationMs": 7764,
+      "nativeCalls": {
+        "2130 GET /health 200": 2,
+        "2130 GET /version 200": 2,
+        "2130 GET /ext/taki-memory/version 200": 2,
+        "2130 POST /v1/default/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/import 200": 2,
+        "2130 POST /v1/default/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/import 200": 2,
+        "2130 PUT /v1/default/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633 200": 1,
+        "2130 GET /v1/default/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/operations/<uuid> 200": 9,
+        "2130 GET /v1/default/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/export 200": 1,
+        "2130 PUT /v1/default/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71 200": 1,
+        "2130 GET /v1/default/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/operations/<uuid> 200": 9,
+        "2130 GET /v1/default/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/export 200": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/snapshots 201": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/snapshots/<uuid>/pages/0 200": 2,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/snapshots/<uuid>/pages/1 200": 2,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/snapshots/<uuid>/pages/2 200": 2,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/current-state-transfers/<uuid> 404": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/current-state-transfers 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/current-state-transfers/<uuid>/mappings/0 200": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/cutover-verifications 200": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/cutover-verifications/<uuid>/verify 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/cutover-verifications/<uuid>/certificates/71f4f1c9afad3351114144b0eee92018dcef3a2afb5f6f252acfd96b0389b4c8/pages/0 200": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/snapshots 201": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/snapshots/<uuid>/pages/0 200": 2,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/snapshots/<uuid>/pages/1 200": 2,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/snapshots/<uuid>/pages/2 200": 2,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/current-state-transfers/<uuid> 404": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/current-state-transfers 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/current-state-transfers/<uuid>/mappings/0 200": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/cutover-verifications 200": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/cutover-verifications/<uuid>/verify 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/cutover-verifications/<uuid>/certificates/d9a687ba599e2ab1dee17edf77836e31a1d28ef288853dd745f0973a61baf6a0/pages/0 200": 1
+      },
+      "providerRequests": []
+    },
+    {
+      "id": 2,
+      "title": "Write M1 through the retain tool; drain; replica.sync",
+      "status": "passed",
+      "observed": {
+        "chat": {
+          "runId": "945dcd97-1e22-4964-8f5a-ffe822975eda",
+          "messageId": "30192212-10db-4017-a2fe-58a91538d3ee",
+          "ackMs": 2501,
+          "totalMs": 4525,
+          "outcome": "chat.complete",
+          "error": null,
+          "runState": "completed"
+        },
+        "toolResult": {
+          "ok": true,
+          "requestId": "feeab832-b26e-4cce-85a6-11e8c84a8f72",
+          "providerId": "hindsight",
+          "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+          "data": {
+            "status": "pending",
+            "operationId": "feeab832-b26e-4cce-85a6-11e8c84a8f72",
+            "documentId": "pending-858d591759f2a78fc51d8f66c57b76dc31e50aff07f8e6f5662bd6dffb90d4bb",
+            "sourceRevision": null,
+            "memories": []
+          }
+        },
+        "syncAttempts": [
+          [
+            {
+              "kind": "replica.sync",
+              "state": "completed",
+              "errorCode": null
+            },
+            {
+              "kind": "replica.sync",
+              "state": "completed",
+              "errorCode": null
+            }
+          ]
+        ],
+        "pendingAfter": [
+          {
+            "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+            "summary": {
+              "pendingCount": 0,
+              "nativeConfirmedCount": 0,
+              "completedCount": 0,
+              "supersededCount": 0,
+              "failedCount": 0,
+              "unknownCount": 0,
+              "cancelledCount": 0
+            },
+            "parentWritesPending": 0
+          },
+          {
+            "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "summary": {
+              "pendingCount": 0,
+              "nativeConfirmedCount": 1,
+              "completedCount": 1,
+              "supersededCount": 0,
+              "failedCount": 0,
+              "unknownCount": 0,
+              "cancelledCount": 0
+            },
+            "parentWritesPending": 0
+          }
+        ]
+      },
+      "error": null,
+      "durationMs": 23195,
+      "nativeCalls": {
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/snapshots 201": 2,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/initialize 200": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/snapshots 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/snapshots/<uuid>/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid> 200": 74,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/parts/0 200": 74,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies 200": 44,
+        "2130 PUT /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/parts/0 200": 44,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/seal 200": 44,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/commits 200": 22,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes 200": 26,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/1/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/version 200": 14,
+        "2130 GET /health 200": 9,
+        "2130 GET /version 200": 9,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/snapshots 201": 2,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/initialize 200": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/snapshots 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/snapshots/<uuid>/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/bodies/<uuid> 200": 5,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/bodies/<uuid>/parts/0 200": 5,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/bodies 200": 2,
+        "2130 PUT /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/bodies/<uuid>/parts/0 200": 2,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/bodies/<uuid>/seal 200": 2,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/commits 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/changes 200": 4,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/changes/1/pages/0 200": 1,
+        "2130 POST /v1/default/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/memories/recall 200": 1,
+        "2130 POST /v1/default/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/memories/recall 200": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/retains 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/native-results/retain/<uuid> 200": 3,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/2/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/native-results/retain/<uuid>/results/2f24cae90f477bb15096004694e494991def81a88f02b361dc8768d0c8425734/pages/0 200": 2,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/3/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/4/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/5/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/6/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/7/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/8/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/9/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/10/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/11/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/12/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/13/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/14/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/15/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/16/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/17/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/18/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/19/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/20/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/21/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/22/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/23/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/24/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/25/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/26/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/27/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/28/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/29/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/30/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/31/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/32/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/33/pages/0 200": 1
+      },
+      "providerRequests": [
+        {
+          "kind": "main-retain-call",
+          "model": "smoke-main",
+          "tools": [
+            "avatar_play_motion",
+            "avatar_set_expression",
+            "clipboard_read",
+            "clipboard_write",
+            "exec",
+            "extension_call",
+            "extension_describe",
+            "extension_discover",
+            "get_current_time",
+            "invalidate_memory",
+            "load_skill",
+            "process_list",
+            "read_file",
+            "read_skill_resource",
+            "recall",
+            "reflect",
+            "restore_memory",
+            "retain",
+            "schedule_task",
+            "screenshot",
+            "shell_open",
+            "update_memory",
+            "write_file"
+          ]
+        },
+        {
+          "kind": "main-after-tool",
+          "model": "smoke-main",
+          "tools": [
+            "avatar_play_motion",
+            "avatar_set_expression",
+            "clipboard_read",
+            "clipboard_write",
+            "exec",
+            "extension_call",
+            "extension_describe",
+            "extension_discover",
+            "get_current_time",
+            "invalidate_memory",
+            "load_skill",
+            "process_list",
+            "read_file",
+            "read_skill_resource",
+            "recall",
+            "reflect",
+            "restore_memory",
+            "retain",
+            "schedule_task",
+            "screenshot",
+            "shell_open",
+            "update_memory",
+            "write_file"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Backup #1 route b: capture operator-artifact -> hindsight-admin backup --taki-request -> inbox -> admit -> verify",
+      "status": "passed",
+      "observed": {
+        "capture": {
+          "operationId": "21b0e489-9314-4c52-b4bf-48a71ee43c6f",
+          "kind": "backup.capture",
+          "state": "completed",
+          "reason": null,
+          "errorCode": null,
+          "result": {
+            "kind": "backup",
+            "backupId": "4c4527fd-c4ca-4420-9567-475312a3a050",
+            "verifiedAt": null,
+            "mismatch": null
+          },
+          "producer": {
+            "kind": "backup",
+            "phase": "completed"
+          }
+        },
+        "stagedFiles": [
+          "core-identity.json",
+          "core.sqlite",
+          "native-request.json"
+        ],
+        "cli": {
+          "args": [
+            "backup",
+            "taki-drill-b1.zip",
+            "--schema",
+            "public",
+            "--taki-request",
+            "native-request.json"
+          ],
+          "status": 0,
+          "ms": 21136
+        },
+        "admit": {
+          "operationId": "6cd450c7-d76d-4068-85f8-1fc90e16ada2",
+          "kind": "backup.admit",
+          "state": "completed",
+          "reason": null,
+          "errorCode": null,
+          "result": {
+            "kind": "backup",
+            "backupId": "4c4527fd-c4ca-4420-9567-475312a3a050",
+            "verifiedAt": "2026-09-26T22:22:19.715Z",
+            "mismatch": null
+          },
+          "producer": {
+            "kind": "backup",
+            "phase": "completed"
+          }
+        },
+        "verify": {
+          "operationId": "c586afb0-5d2c-4965-b7f2-439d2375fa13",
+          "kind": "backup.verify",
+          "state": "completed",
+          "reason": null,
+          "errorCode": null,
+          "result": {
+            "kind": "backup",
+            "backupId": "4c4527fd-c4ca-4420-9567-475312a3a050",
+            "verifiedAt": "2026-09-26T22:22:19.965Z",
+            "mismatch": null
+          },
+          "producer": {
+            "kind": "backup",
+            "phase": "completed"
+          }
+        },
+        "manifest": {
+          "backupId": "4c4527fd-c4ca-4420-9567-475312a3a050",
+          "route": "operator-artifact",
+          "native": {
+            "location": "core-dir",
+            "file": "native.zip",
+            "zipSha256": "56e6ed4081077429d34caf067308d1b58e72e9796ff3eabadcea338cee71e3ab",
+            "receipts": {
+              "count": 23,
+              "digest": "0ece7086229c1b9fb2b0b4d9fb1a4d54f6cd9d37db1d283fe1eed8ec901ced9b",
+              "missingCount": 0,
+              "missingSample": []
+            },
+            "banks": [
+              {
+                "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                "bankGeneration": "d84a4abf-a7ad-4031-b593-adbde5ca119e",
+                "currentCursor": 6,
+                "minimumAvailableCursor": 0,
+                "application": {
+                  "nativeCursor": 6,
+                  "stateCursor": 1
+                }
+              },
+              {
+                "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                "bankGeneration": "6ff8059c-653c-412c-8138-545c23200f73",
+                "currentCursor": 34,
+                "minimumAvailableCursor": 0,
+                "application": {
+                  "nativeCursor": 34,
+                  "stateCursor": 33
+                }
+              }
+            ]
+          },
+          "authority": {
+            "epochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+            "providerLineageId": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030"
+          },
+          "banks": [
+            {
+              "bankId": "character:taki",
+              "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "scope": "character",
+              "characterId": "taki",
+              "bankGeneration": "d84a4abf-a7ad-4031-b593-adbde5ca119e",
+              "core": {
+                "replicaCursor": 6,
+                "applicationNativeCursor": 6,
+                "applicationStateCursor": 1,
+                "checkpointHash": "af9c56ce4d0a962a47d2c0a46d8084351384704dbd45f17e1ecd04cc14a14c50"
+              }
+            },
+            {
+              "bankId": "global",
+              "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "scope": "global",
+              "characterId": null,
+              "bankGeneration": "6ff8059c-653c-412c-8138-545c23200f73",
+              "core": {
+                "replicaCursor": 34,
+                "applicationNativeCursor": 34,
+                "applicationStateCursor": 33,
+                "checkpointHash": "12a733b9a8f2c496593a7a6f5a0bd4cc07ee8c444714539e5af8fef01708bbb5"
+              }
+            }
+          ],
+          "terminalOperations": {
+            "count": 23,
+            "digest": "0ece7086229c1b9fb2b0b4d9fb1a4d54f6cd9d37db1d283fe1eed8ec901ced9b"
+          },
+          "core": {
+            "file": "core.sqlite",
+            "sha256": "60a3a4c821437f1eb5ed3a15d5ea7681ebdf81e98a7530972f15a0de4b797a9f",
+            "bytes": 2166784,
+            "pages": 529,
+            "migrationHead": 50
+          },
+          "verifiedAt": "2026-09-26T22:22:19.965Z"
+        }
+      },
+      "error": null,
+      "durationMs": 21953,
+      "nativeCalls": {},
+      "providerRequests": []
+    },
+    {
+      "id": 4,
+      "title": "Write M2; drain; replica.sync (Core moves past backup #1)",
+      "status": "passed",
+      "observed": {
+        "chat": {
+          "runId": "d1a3d774-0c22-4f95-86b8-927047955ee3",
+          "messageId": "e8a3cf9f-df71-43d7-93c2-6b197ec7aab5",
+          "ackMs": 533,
+          "totalMs": 7375,
+          "outcome": "chat.complete",
+          "error": null,
+          "runState": "completed"
+        },
+        "toolResult": {
+          "ok": true,
+          "requestId": "63e5db98-f289-4bf3-8455-99a3697e1978",
+          "providerId": "hindsight",
+          "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+          "data": {
+            "status": "pending",
+            "operationId": "63e5db98-f289-4bf3-8455-99a3697e1978",
+            "documentId": "pending-27c01de7c3f3563094961a418a4f39a0402e6cbbb7f796b788d033e4b7d6842f",
+            "sourceRevision": null,
+            "memories": []
+          }
+        },
+        "syncAttempts": [
+          [
+            {
+              "kind": "replica.sync",
+              "state": "completed",
+              "errorCode": null
+            },
+            {
+              "kind": "replica.sync",
+              "state": "completed",
+              "errorCode": null
+            }
+          ]
+        ],
+        "pendingAfter": [
+          {
+            "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+            "summary": {
+              "pendingCount": 0,
+              "nativeConfirmedCount": 0,
+              "completedCount": 0,
+              "supersededCount": 0,
+              "failedCount": 0,
+              "unknownCount": 0,
+              "cancelledCount": 0
+            },
+            "parentWritesPending": 0
+          },
+          {
+            "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "summary": {
+              "pendingCount": 0,
+              "nativeConfirmedCount": 2,
+              "completedCount": 2,
+              "supersededCount": 0,
+              "failedCount": 0,
+              "unknownCount": 0,
+              "cancelledCount": 0
+            },
+            "parentWritesPending": 0
+          }
+        ]
+      },
+      "error": null,
+      "durationMs": 25781,
+      "nativeCalls": {
+        "2130 GET /health 200": 9,
+        "2130 GET /version 200": 9,
+        "2130 GET /ext/taki-memory/version 200": 12,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes 200": 25,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/changes 200": 3,
+        "2130 POST /v1/default/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/memories/recall 200": 1,
+        "2130 POST /v1/default/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/memories/recall 200": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/hydrate 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/snapshots/<uuid>/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid> 200": 111,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/parts/0 200": 111,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies 200": 43,
+        "2130 PUT /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/parts/0 200": 43,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/seal 200": 43,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/commits 200": 21,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/retains 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/native-results/retain/<uuid> 200": 3,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/34/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/35/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/36/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/37/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/38/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/39/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/40/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/41/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/42/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/43/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/44/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/45/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/46/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/47/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/48/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/49/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/50/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/51/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/52/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/53/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/54/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/55/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/56/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/57/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/58/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/59/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/60/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/61/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/62/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/63/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/64/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/65/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/66/pages/0 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/native-results/retain/<uuid>/results/1839d04931a6ef3e33bec6598eb50890df0ed3f90c5db37864a9cc5a937557e9/pages/0 200": 2
+      },
+      "providerRequests": [
+        {
+          "kind": "main-retain-call",
+          "model": "smoke-main",
+          "tools": [
+            "avatar_play_motion",
+            "avatar_set_expression",
+            "clipboard_read",
+            "clipboard_write",
+            "exec",
+            "extension_call",
+            "extension_describe",
+            "extension_discover",
+            "get_current_time",
+            "invalidate_memory",
+            "load_skill",
+            "process_list",
+            "read_file",
+            "read_skill_resource",
+            "recall",
+            "reflect",
+            "restore_memory",
+            "retain",
+            "schedule_task",
+            "screenshot",
+            "shell_open",
+            "update_memory",
+            "write_file"
+          ]
+        },
+        {
+          "kind": "main-after-tool",
+          "model": "smoke-main",
+          "tools": [
+            "avatar_play_motion",
+            "avatar_set_expression",
+            "clipboard_read",
+            "clipboard_write",
+            "exec",
+            "extension_call",
+            "extension_describe",
+            "extension_discover",
+            "get_current_time",
+            "invalidate_memory",
+            "load_skill",
+            "process_list",
+            "read_file",
+            "read_skill_resource",
+            "recall",
+            "reflect",
+            "restore_memory",
+            "retain",
+            "schedule_task",
+            "screenshot",
+            "shell_open",
+            "update_memory",
+            "write_file"
+          ]
+        },
+        {
+          "kind": "main-text",
+          "model": "smoke-utility",
+          "tools": [
+            "memory_policy_assess",
+            "block_update",
+            "block_read",
+            "policy_review_finish"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Incomplete work: tracked retain M3 lands natively while Core cannot confirm it",
+      "status": "passed",
+      "observed": {
+        "chat": {
+          "runId": "75bf2d6a-5ba4-422a-8e75-f305f70a40e3",
+          "messageId": "c6b49438-9754-4fce-8254-24f7ad94dc0f",
+          "ackMs": 742,
+          "totalMs": 4591,
+          "outcome": "chat.complete",
+          "error": null,
+          "runState": "completed"
+        },
+        "toolResult": {
+          "ok": true,
+          "requestId": "df9d3176-af79-4658-877e-09d9be35278b",
+          "providerId": "hindsight",
+          "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+          "data": {
+            "status": "pending",
+            "operationId": "df9d3176-af79-4658-877e-09d9be35278b",
+            "documentId": "pending-75205fa98476c16256e723575969e60fc99b2dbd5741ad8a912f3dbc66f02438",
+            "sourceRevision": null,
+            "memories": []
+          }
+        },
+        "blockedBank": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+        "nativeDelta": {
+          "documents": 1,
+          "memoryUnits": 18,
+          "nativeReceipts": 1,
+          "newReceiptIds": [
+            "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633:retain:3be1cf80-237e-57a7-8bcc-2606494ba065"
+          ],
+          "asyncOperations": 3,
+          "applicationOperations": 4,
+          "mutationReceipts": 0
+        },
+        "asyncOperations": [
+          {
+            "operation_id": "d5b0782d-c952-456c-98ca-8e6ab74392d3",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "refresh_mental_model",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "f0b730a4-8f8b-4276-9c4d-5509c6d40f3a",
+            "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+            "operation_type": "refresh_mental_model",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "29ec646e-9706-481a-bddf-8ca0a3b026ea",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "retain",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "d5235bd1-e5ca-5e3d-8fff-c96d728c3f57",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "batch_retain",
+            "status": "completed",
+            "worker_id": null,
+            "retry_count": 0
+          },
+          {
+            "operation_id": "b5dad0b2-2680-46f1-a819-06485dc51740",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "consolidation",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "6ce5f479-fb93-47e3-b514-0dacecb10240",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "retain",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "e40af077-5b4e-5099-92da-33b96fe83377",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "batch_retain",
+            "status": "completed",
+            "worker_id": null,
+            "retry_count": 0
+          },
+          {
+            "operation_id": "08ac3ef2-58b3-4dd9-8fb9-59bfc67e9030",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "consolidation",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "00b21883-7f20-4e87-976b-1a7fc101ca56",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "retain",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "3be1cf80-237e-57a7-8bcc-2606494ba065",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "batch_retain",
+            "status": "completed",
+            "worker_id": null,
+            "retry_count": 0
+          },
+          {
+            "operation_id": "061ec698-d73d-4eaf-9ba4-be5142ae633b",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "consolidation",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          }
+        ],
+        "receipt": {
+          "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+          "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+          "operation_kind": "retain",
+          "operation_id": "3be1cf80-237e-57a7-8bcc-2606494ba065",
+          "status": "completed",
+          "has_result": true
+        },
+        "corePending": {
+          "sequence": 3,
+          "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+          "operation_id": "df9d3176-af79-4658-877e-09d9be35278b",
+          "operation_kind": "retain",
+          "phase": "submitted",
+          "remote": "3be1cf80-237e-57a7-8bcc-2606494ba065",
+          "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+          "protocol": "tracked_native_v1",
+          "nativeReceipt": "null",
+          "nativeResultReceipt": null
+        }
+      },
+      "error": null,
+      "durationMs": 12151,
+      "nativeCalls": {
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies 200": 7,
+        "2130 GET /health 200": 8,
+        "2130 GET /version 200": 8,
+        "2130 GET /ext/taki-memory/version 200": 9,
+        "2130 PUT /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/parts/0 200": 7,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes 200": 5,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/seal 200": 7,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/commits 200": 4,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/changes 200": 2,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid> 200": 6,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/parts/0 200": 6,
+        "2130 POST /v1/default/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/memories/recall 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/67/pages/0 200": 1,
+        "2130 POST /v1/default/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/memories/recall 200": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/hydrate 500": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/68/pages/0 200": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/retains 200": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/native-results/retain/<uuid> reset": 1,
+        "2130 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes reset": 1,
+        "2130 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies reset": 9
+      },
+      "providerRequests": [
+        {
+          "kind": "main-retain-call",
+          "model": "smoke-main",
+          "tools": [
+            "avatar_play_motion",
+            "avatar_set_expression",
+            "clipboard_read",
+            "clipboard_write",
+            "exec",
+            "extension_call",
+            "extension_describe",
+            "extension_discover",
+            "get_current_time",
+            "invalidate_memory",
+            "load_skill",
+            "process_list",
+            "read_file",
+            "read_skill_resource",
+            "recall",
+            "reflect",
+            "restore_memory",
+            "retain",
+            "schedule_task",
+            "screenshot",
+            "shell_open",
+            "update_memory",
+            "write_file"
+          ]
+        },
+        {
+          "kind": "main-after-tool",
+          "model": "smoke-main",
+          "tools": [
+            "avatar_play_motion",
+            "avatar_set_expression",
+            "clipboard_read",
+            "clipboard_write",
+            "exec",
+            "extension_call",
+            "extension_describe",
+            "extension_discover",
+            "get_current_time",
+            "invalidate_memory",
+            "load_skill",
+            "process_list",
+            "read_file",
+            "read_skill_resource",
+            "recall",
+            "reflect",
+            "restore_memory",
+            "retain",
+            "schedule_task",
+            "screenshot",
+            "shell_open",
+            "update_memory",
+            "write_file"
+          ]
+        },
+        {
+          "kind": "main-text",
+          "model": "smoke-utility",
+          "tools": [
+            "memory_policy_assess",
+            "block_update",
+            "block_read",
+            "policy_review_finish"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Backup #2 route c: capture native-endpoint -> verify; record the pre-capture state",
+      "status": "passed",
+      "observed": {
+        "capture": {
+          "operationId": "23155ad9-c456-4217-bebb-950ee5480e0b",
+          "kind": "backup.capture",
+          "state": "completed",
+          "reason": null,
+          "errorCode": null,
+          "result": {
+            "kind": "backup",
+            "backupId": "13e6b0dc-8f5d-4b0e-9832-7d49c3e9bfe0",
+            "verifiedAt": "2026-09-26T22:22:59.182Z",
+            "mismatch": null
+          },
+          "producer": {
+            "kind": "backup",
+            "phase": "completed"
+          }
+        },
+        "verify": {
+          "operationId": "fa7004d7-9cdd-422e-97c3-5c7607599136",
+          "kind": "backup.verify",
+          "state": "completed",
+          "reason": null,
+          "errorCode": null,
+          "result": {
+            "kind": "backup",
+            "backupId": "13e6b0dc-8f5d-4b0e-9832-7d49c3e9bfe0",
+            "verifiedAt": "2026-09-26T22:22:59.334Z",
+            "mismatch": null
+          },
+          "producer": {
+            "kind": "backup",
+            "phase": "completed"
+          }
+        },
+        "manifest": {
+          "backupId": "13e6b0dc-8f5d-4b0e-9832-7d49c3e9bfe0",
+          "route": "native-endpoint",
+          "native": {
+            "location": "native-host",
+            "file": "taki-backup-13e6b0dc-8f5d-4b0e-9832-7d49c3e9bfe0.zip",
+            "zipSha256": "6bfa8613b34e8e273d11859dc1abad94999ca04f29527f38f62cfe95b6bcb17f",
+            "receipts": {
+              "count": 49,
+              "digest": "90765e7d58188a8efb5060f4ac7bd2fdec19ed71bc12636fb05923adafd4db31",
+              "missingCount": 0,
+              "missingSample": []
+            },
+            "banks": [
+              {
+                "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                "bankGeneration": "d84a4abf-a7ad-4031-b593-adbde5ca119e",
+                "currentCursor": 6,
+                "minimumAvailableCursor": 0,
+                "application": {
+                  "nativeCursor": 6,
+                  "stateCursor": 1
+                }
+              },
+              {
+                "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                "bankGeneration": "6ff8059c-653c-412c-8138-545c23200f73",
+                "currentCursor": 90,
+                "minimumAvailableCursor": 0,
+                "application": {
+                  "nativeCursor": 90,
+                  "stateCursor": 82
+                }
+              }
+            ]
+          },
+          "authority": {
+            "epochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+            "providerLineageId": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030"
+          },
+          "banks": [
+            {
+              "bankId": "character:taki",
+              "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "scope": "character",
+              "characterId": "taki",
+              "bankGeneration": "d84a4abf-a7ad-4031-b593-adbde5ca119e",
+              "core": {
+                "replicaCursor": 6,
+                "applicationNativeCursor": 6,
+                "applicationStateCursor": 1,
+                "checkpointHash": "af9c56ce4d0a962a47d2c0a46d8084351384704dbd45f17e1ecd04cc14a14c50"
+              }
+            },
+            {
+              "bankId": "global",
+              "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "scope": "global",
+              "characterId": null,
+              "bankGeneration": "6ff8059c-653c-412c-8138-545c23200f73",
+              "core": {
+                "replicaCursor": 62,
+                "applicationNativeCursor": 62,
+                "applicationStateCursor": 68,
+                "checkpointHash": "7d8d2d2df6f4472760f42d1b6848a319f50a0bc6be86a2fbf6c3a7b091661c11"
+              }
+            }
+          ],
+          "terminalOperations": {
+            "count": 49,
+            "digest": "90765e7d58188a8efb5060f4ac7bd2fdec19ed71bc12636fb05923adafd4db31"
+          },
+          "core": {
+            "file": "core.sqlite",
+            "sha256": "64a34a6242f90c7a577335fafc1d0a30a9dcfac1b50fdff7fcd0a0521ca50f88",
+            "bytes": 3149824,
+            "pages": 769,
+            "migrationHead": 50
+          },
+          "verifiedAt": "2026-09-26T22:22:59.334Z"
+        },
+        "nativeHostZip": {
+          "file": "taki-backup-13e6b0dc-8f5d-4b0e-9832-7d49c3e9bfe0.zip",
+          "exists": true,
+          "sha256Matches": true
+        },
+        "nativeChangedAcrossCapture": {
+          "documents": 0,
+          "memoryUnits": 0,
+          "nativeReceipts": 0,
+          "newReceiptIds": [],
+          "asyncOperations": 0,
+          "applicationOperations": 0,
+          "mutationReceipts": 0
+        },
+        "m3Listed": 49,
+        "backupStatus": {
+          "lastVerified": {
+            "backupId": "13e6b0dc-8f5d-4b0e-9832-7d49c3e9bfe0",
+            "createdAt": "2026-09-26T22:22:58.749Z",
+            "verifiedAt": "2026-09-26T22:22:59.334Z",
+            "nativeCursors": [
+              {
+                "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                "currentCursor": 6
+              },
+              {
+                "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                "currentCursor": 90
+              }
+            ]
+          },
+          "ageSeconds": 1,
+          "missingInterval": [
+            {
+              "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "fromNativeCursor": 6,
+              "toReplicaCursor": 6,
+              "pendingCount": 0
+            },
+            {
+              "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "fromNativeCursor": 90,
+              "toReplicaCursor": 62,
+              "pendingCount": 2
+            }
+          ]
+        },
+        "record": {
+          "authority": {
+            "mode": "hindsight",
+            "epochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+            "providerLineageId": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030"
+          },
+          "banks": [
+            {
+              "scope": "character",
+              "characterId": "taki",
+              "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "readiness": "ready",
+              "errorCode": null
+            },
+            {
+              "scope": "global",
+              "characterId": null,
+              "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "readiness": "ready",
+              "errorCode": null
+            }
+          ],
+          "checkpoints": [
+            {
+              "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "provider_lineage_id": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030",
+              "bank_generation": "d84a4abf-a7ad-4031-b593-adbde5ca119e",
+              "authority_epoch_id": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+              "end_cursor": 6,
+              "snapshot_cursor": 6
+            },
+            {
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "provider_lineage_id": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030",
+              "bank_generation": "6ff8059c-653c-412c-8138-545c23200f73",
+              "authority_epoch_id": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+              "end_cursor": 62,
+              "snapshot_cursor": 6
+            }
+          ],
+          "corePending": [
+            {
+              "sequence": 1,
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_id": "feeab832-b26e-4cce-85a6-11e8c84a8f72",
+              "operation_kind": "retain",
+              "phase": "completed",
+              "remote": "d5235bd1-e5ca-5e3d-8fff-c96d728c3f57",
+              "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+              "protocol": "tracked_native_v1",
+              "nativeReceipt": "null",
+              "nativeResultReceipt": "object"
+            },
+            {
+              "sequence": 2,
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_id": "63e5db98-f289-4bf3-8455-99a3697e1978",
+              "operation_kind": "retain",
+              "phase": "completed",
+              "remote": "e40af077-5b4e-5099-92da-33b96fe83377",
+              "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+              "protocol": "tracked_native_v1",
+              "nativeReceipt": "null",
+              "nativeResultReceipt": "object"
+            },
+            {
+              "sequence": 3,
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_id": "df9d3176-af79-4658-877e-09d9be35278b",
+              "operation_kind": "retain",
+              "phase": "submitted",
+              "remote": "3be1cf80-237e-57a7-8bcc-2606494ba065",
+              "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+              "protocol": "tracked_native_v1",
+              "nativeReceipt": "null",
+              "nativeResultReceipt": null
+            }
+          ],
+          "nativeBankState": [
+            {
+              "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "generation": "d84a4abf-a7ad-4031-b593-adbde5ca119e",
+              "current_cursor": 6,
+              "minimum_available_cursor": 0,
+              "deleted": false
+            },
+            {
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+              "current_cursor": 90,
+              "minimum_available_cursor": 0,
+              "deleted": false
+            }
+          ],
+          "nativeApplicationBanks": [
+            {
+              "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "generation": "d84a4abf-a7ad-4031-b593-adbde5ca119e",
+              "native_cursor": 6,
+              "state_cursor": 1,
+              "deleted": false
+            },
+            {
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+              "native_cursor": 90,
+              "state_cursor": 82,
+              "deleted": false
+            }
+          ],
+          "nativeReceipts": [
+            {
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+              "operation_kind": "retain",
+              "operation_id": "d5235bd1-e5ca-5e3d-8fff-c96d728c3f57",
+              "status": "completed",
+              "has_result": true
+            },
+            {
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+              "operation_kind": "retain",
+              "operation_id": "e40af077-5b4e-5099-92da-33b96fe83377",
+              "status": "completed",
+              "has_result": true
+            },
+            {
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+              "operation_kind": "retain",
+              "operation_id": "3be1cf80-237e-57a7-8bcc-2606494ba065",
+              "status": "completed",
+              "has_result": true
+            }
+          ],
+          "documents": [
+            {
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "n": 3
+            }
+          ],
+          "memoryUnits": [
+            {
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "n": 54
+            }
+          ]
+        }
+      },
+      "error": null,
+      "durationMs": 2318,
+      "nativeCalls": {
+        "2130 POST /ext/taki-memory/admin/backups 200": 1,
+        "2130 GET /ext/taki-memory/admin/backups/taki-backup-<uuid>.zip 200": 1
+      },
+      "providerRequests": []
+    },
+    {
+      "id": 7,
+      "title": "Stop Core A and native A",
+      "status": "passed",
+      "observed": {
+        "coreExit": {
+          "code": 0,
+          "signal": null,
+          "forced": false,
+          "egress": {
+            "allowed": {
+              "2128": 3,
+              "2129": 1052
+            },
+            "refused": []
+          }
+        },
+        "corePendingAfterStop": [
+          {
+            "sequence": 1,
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_id": "feeab832-b26e-4cce-85a6-11e8c84a8f72",
+            "operation_kind": "retain",
+            "phase": "completed",
+            "remote": "d5235bd1-e5ca-5e3d-8fff-c96d728c3f57",
+            "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+            "protocol": "tracked_native_v1",
+            "nativeReceipt": "null",
+            "nativeResultReceipt": "object"
+          },
+          {
+            "sequence": 2,
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_id": "63e5db98-f289-4bf3-8455-99a3697e1978",
+            "operation_kind": "retain",
+            "phase": "completed",
+            "remote": "e40af077-5b4e-5099-92da-33b96fe83377",
+            "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+            "protocol": "tracked_native_v1",
+            "nativeReceipt": "null",
+            "nativeResultReceipt": "object"
+          },
+          {
+            "sequence": 3,
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_id": "df9d3176-af79-4658-877e-09d9be35278b",
+            "operation_kind": "retain",
+            "phase": "submitted",
+            "remote": "3be1cf80-237e-57a7-8bcc-2606494ba065",
+            "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+            "protocol": "tracked_native_v1",
+            "nativeReceipt": "null",
+            "nativeResultReceipt": null
+          }
+        ],
+        "nativeExit": {
+          "code": 0,
+          "signal": null,
+          "forced": false
+        }
+      },
+      "error": null,
+      "durationMs": 2574,
+      "nativeCalls": {},
+      "providerRequests": []
+    },
+    {
+      "id": 8,
+      "title": "Isolated restore: fresh pg0 -> run-db-migration -> restore -> repair-bank --all -> decommission-workers; native R; Core R on the captured core.sqlite",
+      "status": "passed",
+      "observed": {
+        "pg0": {
+          "name": "taki-drill-733605ecf63d",
+          "port": 2135
+        },
+        "admin": [
+          {
+            "name": "migrate",
+            "args": [
+              "run-db-migration"
+            ],
+            "status": 0,
+            "ms": 23064
+          },
+          {
+            "name": "restore",
+            "args": [
+              "restore",
+              "<route-c ZIP>",
+              "--yes"
+            ],
+            "status": 0,
+            "ms": 21038
+          },
+          {
+            "name": "repair",
+            "args": [
+              "repair-bank",
+              "--all"
+            ],
+            "status": 0,
+            "ms": 20471
+          },
+          {
+            "name": "decommission",
+            "args": [
+              "decommission-workers",
+              "--yes"
+            ],
+            "status": 0,
+            "ms": 20167
+          }
+        ],
+        "restoredEqualsCapture": {
+          "lineage": true,
+          "banks": true,
+          "bankState": true,
+          "applicationBanks": true,
+          "documents": true,
+          "memoryUnits": true,
+          "memoryUnitTexts": true,
+          "nativeReceipts": true,
+          "mutationReceipts": true,
+          "applicationOperations": true,
+          "changesPerBank": true
+        },
+        "asyncOperations": {
+          "captured": [
+            {
+              "operation_id": "d5b0782d-c952-456c-98ca-8e6ab74392d3",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "refresh_mental_model",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "f0b730a4-8f8b-4276-9c4d-5509c6d40f3a",
+              "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "operation_type": "refresh_mental_model",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "29ec646e-9706-481a-bddf-8ca0a3b026ea",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "retain",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "d5235bd1-e5ca-5e3d-8fff-c96d728c3f57",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "batch_retain",
+              "status": "completed",
+              "worker_id": null,
+              "retry_count": 0
+            },
+            {
+              "operation_id": "b5dad0b2-2680-46f1-a819-06485dc51740",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "consolidation",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "6ce5f479-fb93-47e3-b514-0dacecb10240",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "retain",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "e40af077-5b4e-5099-92da-33b96fe83377",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "batch_retain",
+              "status": "completed",
+              "worker_id": null,
+              "retry_count": 0
+            },
+            {
+              "operation_id": "08ac3ef2-58b3-4dd9-8fb9-59bfc67e9030",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "consolidation",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "00b21883-7f20-4e87-976b-1a7fc101ca56",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "retain",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "3be1cf80-237e-57a7-8bcc-2606494ba065",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "batch_retain",
+              "status": "completed",
+              "worker_id": null,
+              "retry_count": 0
+            },
+            {
+              "operation_id": "061ec698-d73d-4eaf-9ba4-be5142ae633b",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "consolidation",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            }
+          ],
+          "restored": [
+            {
+              "operation_id": "d5b0782d-c952-456c-98ca-8e6ab74392d3",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "refresh_mental_model",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "f0b730a4-8f8b-4276-9c4d-5509c6d40f3a",
+              "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "operation_type": "refresh_mental_model",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "29ec646e-9706-481a-bddf-8ca0a3b026ea",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "retain",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "d5235bd1-e5ca-5e3d-8fff-c96d728c3f57",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "batch_retain",
+              "status": "completed",
+              "worker_id": null,
+              "retry_count": 0
+            },
+            {
+              "operation_id": "b5dad0b2-2680-46f1-a819-06485dc51740",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "consolidation",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "6ce5f479-fb93-47e3-b514-0dacecb10240",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "retain",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "e40af077-5b4e-5099-92da-33b96fe83377",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "batch_retain",
+              "status": "completed",
+              "worker_id": null,
+              "retry_count": 0
+            },
+            {
+              "operation_id": "08ac3ef2-58b3-4dd9-8fb9-59bfc67e9030",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "consolidation",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "00b21883-7f20-4e87-976b-1a7fc101ca56",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "retain",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            },
+            {
+              "operation_id": "3be1cf80-237e-57a7-8bcc-2606494ba065",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "batch_retain",
+              "status": "completed",
+              "worker_id": null,
+              "retry_count": 0
+            },
+            {
+              "operation_id": "061ec698-d73d-4eaf-9ba4-be5142ae633b",
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "operation_type": "consolidation",
+              "status": "completed",
+              "worker_id": "tianxuanji",
+              "retry_count": 0
+            }
+          ]
+        },
+        "nativeBootMs": 40433,
+        "coreCopy": {
+          "sha256Matches": true
+        }
+      },
+      "error": null,
+      "durationMs": 139550,
+      "nativeCalls": {},
+      "providerRequests": []
+    },
+    {
+      "id": 9,
+      "title": "Read back: authority, lineage, Banks, generations, cursors, memory content; no rollback detection",
+      "status": "passed",
+      "observed": {
+        "authority": {
+          "mode": "hindsight",
+          "epochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+          "providerLineageId": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030"
+        },
+        "runtime": {
+          "providerId": "hindsight",
+          "available": true,
+          "unavailableReason": null
+        },
+        "banks": [
+          {
+            "scope": "character",
+            "characterId": "taki",
+            "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+            "readiness": "ready",
+            "errorCode": null
+          },
+          {
+            "scope": "global",
+            "characterId": null,
+            "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "readiness": "ready",
+            "errorCode": null
+          }
+        ],
+        "authorityMatches": true,
+        "banksMatch": true,
+        "checkpoints": {
+          "captured": [
+            {
+              "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "provider_lineage_id": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030",
+              "bank_generation": "d84a4abf-a7ad-4031-b593-adbde5ca119e",
+              "authority_epoch_id": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+              "end_cursor": 6,
+              "snapshot_cursor": 6
+            },
+            {
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "provider_lineage_id": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030",
+              "bank_generation": "6ff8059c-653c-412c-8138-545c23200f73",
+              "authority_epoch_id": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+              "end_cursor": 62,
+              "snapshot_cursor": 6
+            }
+          ],
+          "restored": [
+            {
+              "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "provider_lineage_id": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030",
+              "bank_generation": "d84a4abf-a7ad-4031-b593-adbde5ca119e",
+              "authority_epoch_id": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+              "end_cursor": 6,
+              "snapshot_cursor": 6
+            },
+            {
+              "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "provider_lineage_id": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030",
+              "bank_generation": "6ff8059c-653c-412c-8138-545c23200f73",
+              "authority_epoch_id": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+              "end_cursor": 62,
+              "snapshot_cursor": 6
+            }
+          ]
+        },
+        "checkpointIdentityMatches": true,
+        "cursorsNotBehind": true,
+        "replicaRecordsMatch": true,
+        "memoryTextsMatch": true,
+        "manifestBanksVsNative": [
+          {
+            "bankId": "character:taki",
+            "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+            "generationMatches": true,
+            "replicaCursor": 6,
+            "nativeCurrentCursor": 6
+          },
+          {
+            "bankId": "global",
+            "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "generationMatches": true,
+            "replicaCursor": 62,
+            "nativeCurrentCursor": 90
+          }
+        ],
+        "rollbackInLog": false,
+        "captureOperationOnRestoredCopy": {
+          "operationId": "23155ad9-c456-4217-bebb-950ee5480e0b",
+          "kind": "backup.capture",
+          "state": "outcome_unknown",
+          "reason": "producer_incomplete",
+          "errorCode": null,
+          "result": null,
+          "producer": {
+            "kind": "backup",
+            "phase": "capturing-core"
+          }
+        }
+      },
+      "error": null,
+      "durationMs": 54,
+      "nativeCalls": {},
+      "providerRequests": []
+    },
+    {
+      "id": 10,
+      "title": "Resume: M3 completes; no repeated native effect",
+      "status": "passed",
+      "observed": {
+        "pendingBeforeResume": [
+          {
+            "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+            "summary": {
+              "pendingCount": 0,
+              "nativeConfirmedCount": 0,
+              "completedCount": 0,
+              "supersededCount": 0,
+              "failedCount": 0,
+              "unknownCount": 0,
+              "cancelledCount": 0
+            },
+            "parentWritesPending": 0
+          },
+          {
+            "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "summary": {
+              "pendingCount": 1,
+              "nativeConfirmedCount": 2,
+              "completedCount": 2,
+              "supersededCount": 0,
+              "failedCount": 0,
+              "unknownCount": 0,
+              "cancelledCount": 0
+            },
+            "parentWritesPending": 1
+          }
+        ],
+        "syncAttempts": [
+          [
+            {
+              "kind": "replica.sync",
+              "state": "completed",
+              "errorCode": null
+            },
+            {
+              "kind": "replica.sync",
+              "state": "completed",
+              "errorCode": null
+            }
+          ]
+        ],
+        "m3": {
+          "sequence": 3,
+          "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+          "operation_id": "df9d3176-af79-4658-877e-09d9be35278b",
+          "operation_kind": "retain",
+          "phase": "completed",
+          "remote": "3be1cf80-237e-57a7-8bcc-2606494ba065",
+          "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+          "protocol": "tracked_native_v1",
+          "nativeReceipt": "null",
+          "nativeResultReceipt": "object"
+        },
+        "nativeDelta": {
+          "documents": 0,
+          "memoryUnits": 0,
+          "nativeReceipts": 0,
+          "newReceiptIds": [],
+          "asyncOperations": 0,
+          "applicationOperations": 19,
+          "mutationReceipts": 0
+        },
+        "asyncOperations": [
+          {
+            "operation_id": "d5b0782d-c952-456c-98ca-8e6ab74392d3",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "refresh_mental_model",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "f0b730a4-8f8b-4276-9c4d-5509c6d40f3a",
+            "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+            "operation_type": "refresh_mental_model",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "29ec646e-9706-481a-bddf-8ca0a3b026ea",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "retain",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "d5235bd1-e5ca-5e3d-8fff-c96d728c3f57",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "batch_retain",
+            "status": "completed",
+            "worker_id": null,
+            "retry_count": 0
+          },
+          {
+            "operation_id": "b5dad0b2-2680-46f1-a819-06485dc51740",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "consolidation",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "6ce5f479-fb93-47e3-b514-0dacecb10240",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "retain",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "e40af077-5b4e-5099-92da-33b96fe83377",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "batch_retain",
+            "status": "completed",
+            "worker_id": null,
+            "retry_count": 0
+          },
+          {
+            "operation_id": "08ac3ef2-58b3-4dd9-8fb9-59bfc67e9030",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "consolidation",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "00b21883-7f20-4e87-976b-1a7fc101ca56",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "retain",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          },
+          {
+            "operation_id": "3be1cf80-237e-57a7-8bcc-2606494ba065",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "batch_retain",
+            "status": "completed",
+            "worker_id": null,
+            "retry_count": 0
+          },
+          {
+            "operation_id": "061ec698-d73d-4eaf-9ba4-be5142ae633b",
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "operation_type": "consolidation",
+            "status": "completed",
+            "worker_id": "tianxuanji",
+            "retry_count": 0
+          }
+        ],
+        "m3Calls": [
+          {
+            "method": "GET",
+            "path": "/ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/native-results/retain/3be1cf80-237e-57a7-8bcc-2606494ba065",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/native-results/retain/3be1cf80-237e-57a7-8bcc-2606494ba065",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/native-results/retain/3be1cf80-237e-57a7-8bcc-2606494ba065/results/1df3965a835907b9ec68671d1cb85487ee6827134a530d903f7157b368f953d0/pages/0",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/native-results/retain/3be1cf80-237e-57a7-8bcc-2606494ba065/results/1df3965a835907b9ec68671d1cb85487ee6827134a530d903f7157b368f953d0/pages/0",
+            "status": 200
+          }
+        ],
+        "retainPosts": 0,
+        "rollbackInLog": false
+      },
+      "error": null,
+      "durationMs": 16456,
+      "nativeCalls": {
+        "2133 GET /health 200": 3,
+        "2133 GET /version 200": 3,
+        "2133 GET /ext/taki-memory/version 200": 5,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes 200": 21,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/69/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid> 200": 69,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/parts/0 200": 69,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/70/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/71/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/72/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/73/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/74/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/75/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/76/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/77/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/78/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/79/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/80/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/81/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/82/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/native-results/retain/<uuid> 200": 2,
+        "2133 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies 200": 38,
+        "2133 PUT /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/parts/0 200": 38,
+        "2133 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/seal 200": 38,
+        "2133 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/commits 200": 19,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/83/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/84/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/85/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/86/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/87/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/88/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/89/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/90/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/91/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/92/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/93/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/94/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/95/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/96/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/97/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/98/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/99/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/100/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes/101/pages/0 200": 1,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/native-results/retain/<uuid>/results/1df3965a835907b9ec68671d1cb85487ee6827134a530d903f7157b368f953d0/pages/0 200": 2,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/changes 200": 1
+      },
+      "providerRequests": []
+    },
+    {
+      "id": 11,
+      "title": "Use the restored pair: recall + backup.verify on the restored host",
+      "status": "passed",
+      "observed": {
+        "recall": {
+          "runId": "8927850e-f902-4a06-9de1-ec7b95f4acff",
+          "messageId": "33c22da9-101d-4fa8-a238-ea7e403dd1c5",
+          "ackMs": 975,
+          "totalMs": 10409,
+          "outcome": "chat.complete",
+          "error": null,
+          "runState": "completed"
+        },
+        "toolResult": {
+          "ok": true,
+          "requestId": "memory-branch:global:ea658fa87727737d4babe7522ae4da89dc5bc4ffb0b38c0efb10c8638740f9fc",
+          "providerId": "hindsight",
+          "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+          "data": {
+            "hits": [
+              {
+                "record": {
+                  "unit": {
+                    "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+                    "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "memoryId": "eff89520-39ed-478c-822d-135b59e03930",
+                    "documentId": "pending-75205fa98476c16256e723575969e60fc99b2dbd5741ad8a912f3dbc66f02438",
+                    "chunkId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633_pending-75205fa98476c16256e723575969e60fc99b2dbd5741ad8a912f3dbc66f02438_0",
+                    "text": "The user said: Drill fact three: the lighthouse keeper plays the cello on Sundays.",
+                    "context": "",
+                    "factType": "world",
+                    "state": "valid",
+                    "revision": 2,
+                    "tags": [
+                      "taki-layer:unclassified"
+                    ],
+                    "metadata": {},
+                    "entities": [
+                      "Drill",
+                      "Sundays",
+                      "The"
+                    ],
+                    "sourceMemoryIds": [],
+                    "observationScopes": null,
+                    "eventDate": "2026-09-26T22:22:50.569000+00:00",
+                    "occurredStart": null,
+                    "occurredEnd": null,
+                    "mentionedAt": "2026-09-26T22:22:50.569000+00:00",
+                    "createdAt": "2026-09-26T22:22:52.180386+00:00",
+                    "updatedAt": "2026-09-26T22:22:52.180386+00:00",
+                    "editedAt": null,
+                    "consolidatedAt": "2026-09-26T22:22:56.879628+00:00",
+                    "consolidationFailedAt": null,
+                    "invalidationReason": null,
+                    "invalidatedAt": null,
+                    "proofCount": 1
+                  },
+                  "policy": {
+                    "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+                    "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "memoryId": "eff89520-39ed-478c-822d-135b59e03930",
+                    "layerId": "unclassified",
+                    "importance": 5,
+                    "visibility": "retrieved",
+                    "disclosure": null,
+                    "origin": "observed",
+                    "emotionalWeight": null,
+                    "retention": {
+                      "kind": "permanent"
+                    },
+                    "policyVersion": 1,
+                    "updatedAt": "2026-09-26T22:25:36.747Z"
+                  },
+                  "provenance": {
+                    "actor": "provider",
+                    "origin": "provider-derived",
+                    "characterId": null,
+                    "timelineFromSeq": null,
+                    "timelineToSeq": null,
+                    "capturedAt": "2026-09-26T22:25:36.747Z",
+                    "sanitized": true,
+                    "sourceRef": "hindsight:12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030:6ff8059c-653c-412c-8138-545c23200f73:memory_unit:eff89520-39ed-478c-822d-135b59e03930@2"
+                  }
+                },
+                "scores": [
+                  {
+                    "source": "provider",
+                    "value": 1.078593789057907,
+                    "higherIsBetter": true
+                  }
+                ],
+                "confirmed": true
+              },
+              {
+                "record": {
+                  "unit": {
+                    "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+                    "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "memoryId": "62772cc9-2f78-42c6-90ff-13712c675398",
+                    "documentId": "pending-858d591759f2a78fc51d8f66c57b76dc31e50aff07f8e6f5662bd6dffb90d4bb",
+                    "chunkId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633_pending-858d591759f2a78fc51d8f66c57b76dc31e50aff07f8e6f5662bd6dffb90d4bb_0",
+                    "text": "The user said: Drill fact one: the lighthouse keeper owns a red kayak.",
+                    "context": "",
+                    "factType": "world",
+                    "state": "valid",
+                    "revision": 2,
+                    "tags": [
+                      "taki-layer:unclassified"
+                    ],
+                    "metadata": {},
+                    "entities": [
+                      "Drill",
+                      "The"
+                    ],
+                    "sourceMemoryIds": [],
+                    "observationScopes": null,
+                    "eventDate": "2026-09-26T22:21:38.671000+00:00",
+                    "occurredStart": null,
+                    "occurredEnd": null,
+                    "mentionedAt": "2026-09-26T22:21:38.671000+00:00",
+                    "createdAt": "2026-09-26T22:21:39.553041+00:00",
+                    "updatedAt": "2026-09-26T22:21:39.553041+00:00",
+                    "editedAt": null,
+                    "consolidatedAt": "2026-09-26T22:21:45.101543+00:00",
+                    "consolidationFailedAt": null,
+                    "invalidationReason": null,
+                    "invalidatedAt": null,
+                    "proofCount": 1
+                  },
+                  "policy": {
+                    "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+                    "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "memoryId": "62772cc9-2f78-42c6-90ff-13712c675398",
+                    "layerId": "unclassified",
+                    "importance": 5,
+                    "visibility": "retrieved",
+                    "disclosure": null,
+                    "origin": "observed",
+                    "emotionalWeight": null,
+                    "retention": {
+                      "kind": "permanent"
+                    },
+                    "policyVersion": 1,
+                    "updatedAt": "2026-09-26T22:21:57.302Z"
+                  },
+                  "provenance": {
+                    "actor": "provider",
+                    "origin": "provider-derived",
+                    "characterId": null,
+                    "timelineFromSeq": null,
+                    "timelineToSeq": null,
+                    "capturedAt": "2026-09-26T22:21:57.302Z",
+                    "sanitized": true,
+                    "sourceRef": "hindsight:12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030:6ff8059c-653c-412c-8138-545c23200f73:memory_unit:62772cc9-2f78-42c6-90ff-13712c675398@2"
+                  }
+                },
+                "scores": [
+                  {
+                    "source": "provider",
+                    "value": 1.0610299694383731,
+                    "higherIsBetter": true
+                  }
+                ],
+                "confirmed": true
+              },
+              {
+                "record": {
+                  "unit": {
+                    "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+                    "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "memoryId": "608c17a1-e01d-4f9e-89dc-a8289a9801d7",
+                    "documentId": null,
+                    "chunkId": null,
+                    "text": "The user said: Drill fact three: the lighthouse keeper plays the cello on Sundays. (mentioned_at=2026-09-26 22:22:50.569000+00:00)",
+                    "context": null,
+                    "factType": "observation",
+                    "state": "valid",
+                    "revision": 1,
+                    "tags": [
+                      "taki-layer:unclassified"
+                    ],
+                    "metadata": {},
+                    "entities": [],
+                    "sourceMemoryIds": [
+                      "eff89520-39ed-478c-822d-135b59e03930"
+                    ],
+                    "observationScopes": null,
+                    "eventDate": "2026-09-26T22:22:50.569000+00:00",
+                    "occurredStart": null,
+                    "occurredEnd": null,
+                    "mentionedAt": "2026-09-26T22:22:50.569000+00:00",
+                    "createdAt": "2026-09-26T22:22:56.834148+00:00",
+                    "updatedAt": "2026-09-26T22:22:56.834148+00:00",
+                    "editedAt": null,
+                    "consolidatedAt": null,
+                    "consolidationFailedAt": null,
+                    "invalidationReason": null,
+                    "invalidatedAt": null,
+                    "proofCount": 1
+                  },
+                  "policy": {
+                    "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+                    "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "memoryId": "608c17a1-e01d-4f9e-89dc-a8289a9801d7",
+                    "layerId": "unclassified",
+                    "importance": 5,
+                    "visibility": "retrieved",
+                    "disclosure": null,
+                    "origin": "observed",
+                    "emotionalWeight": null,
+                    "retention": {
+                      "kind": "permanent"
+                    },
+                    "policyVersion": 1,
+                    "updatedAt": "2026-09-26T22:25:36.183Z"
+                  },
+                  "provenance": {
+                    "actor": "provider",
+                    "origin": "provider-derived",
+                    "characterId": null,
+                    "timelineFromSeq": null,
+                    "timelineToSeq": null,
+                    "capturedAt": "2026-09-26T22:25:36.183Z",
+                    "sanitized": true,
+                    "sourceRef": "hindsight:12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030:6ff8059c-653c-412c-8138-545c23200f73:memory_unit:608c17a1-e01d-4f9e-89dc-a8289a9801d7@1"
+                  }
+                },
+                "scores": [
+                  {
+                    "source": "provider",
+                    "value": 1.0419981245950656,
+                    "higherIsBetter": true
+                  }
+                ],
+                "confirmed": true
+              },
+              {
+                "record": {
+                  "unit": {
+                    "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+                    "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "memoryId": "93584c2b-347a-4b61-93bc-58a2f69e7d2e",
+                    "documentId": "pending-27c01de7c3f3563094961a418a4f39a0402e6cbbb7f796b788d033e4b7d6842f",
+                    "chunkId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633_pending-27c01de7c3f3563094961a418a4f39a0402e6cbbb7f796b788d033e4b7d6842f_0",
+                    "text": "The user said: Drill fact two: the lighthouse keeper grows basil on the balcony.",
+                    "context": "",
+                    "factType": "world",
+                    "state": "valid",
+                    "revision": 2,
+                    "tags": [
+                      "taki-layer:unclassified"
+                    ],
+                    "metadata": {},
+                    "entities": [
+                      "Drill",
+                      "The"
+                    ],
+                    "sourceMemoryIds": [],
+                    "observationScopes": null,
+                    "eventDate": "2026-09-26T22:22:24.690000+00:00",
+                    "occurredStart": null,
+                    "occurredEnd": null,
+                    "mentionedAt": "2026-09-26T22:22:24.690000+00:00",
+                    "createdAt": "2026-09-26T22:22:26.063363+00:00",
+                    "updatedAt": "2026-09-26T22:22:26.063363+00:00",
+                    "editedAt": null,
+                    "consolidatedAt": "2026-09-26T22:22:31.894224+00:00",
+                    "consolidationFailedAt": null,
+                    "invalidationReason": null,
+                    "invalidatedAt": null,
+                    "proofCount": 1
+                  },
+                  "policy": {
+                    "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+                    "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "memoryId": "93584c2b-347a-4b61-93bc-58a2f69e7d2e",
+                    "layerId": "unclassified",
+                    "importance": 5,
+                    "visibility": "retrieved",
+                    "disclosure": null,
+                    "origin": "observed",
+                    "emotionalWeight": null,
+                    "retention": {
+                      "kind": "permanent"
+                    },
+                    "policyVersion": 1,
+                    "updatedAt": "2026-09-26T22:22:44.696Z"
+                  },
+                  "provenance": {
+                    "actor": "provider",
+                    "origin": "provider-derived",
+                    "characterId": null,
+                    "timelineFromSeq": null,
+                    "timelineToSeq": null,
+                    "capturedAt": "2026-09-26T22:22:44.696Z",
+                    "sanitized": true,
+                    "sourceRef": "hindsight:12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030:6ff8059c-653c-412c-8138-545c23200f73:memory_unit:93584c2b-347a-4b61-93bc-58a2f69e7d2e@2"
+                  }
+                },
+                "scores": [
+                  {
+                    "source": "provider",
+                    "value": 1.0419785659813428,
+                    "higherIsBetter": true
+                  }
+                ],
+                "confirmed": true
+              },
+              {
+                "record": {
+                  "unit": {
+                    "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+                    "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "memoryId": "50517094-5a7c-4c5f-9d9f-02dd64c8a396",
+                    "documentId": null,
+                    "chunkId": null,
+                    "text": "The user said: Drill fact one: the lighthouse keeper owns a red kayak. (mentioned_at=2026-09-26 22:21:38.671000+00:00)",
+                    "context": null,
+                    "factType": "observation",
+                    "state": "valid",
+                    "revision": 1,
+                    "tags": [
+                      "taki-layer:unclassified"
+                    ],
+                    "metadata": {},
+                    "entities": [],
+                    "sourceMemoryIds": [
+                      "62772cc9-2f78-42c6-90ff-13712c675398"
+                    ],
+                    "observationScopes": null,
+                    "eventDate": "2026-09-26T22:21:38.671000+00:00",
+                    "occurredStart": null,
+                    "occurredEnd": null,
+                    "mentionedAt": "2026-09-26T22:21:38.671000+00:00",
+                    "createdAt": "2026-09-26T22:21:45.040917+00:00",
+                    "updatedAt": "2026-09-26T22:21:45.040917+00:00",
+                    "editedAt": null,
+                    "consolidatedAt": null,
+                    "consolidationFailedAt": null,
+                    "invalidationReason": null,
+                    "invalidatedAt": null,
+                    "proofCount": 1
+                  },
+                  "policy": {
+                    "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+                    "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                    "memoryId": "50517094-5a7c-4c5f-9d9f-02dd64c8a396",
+                    "layerId": "unclassified",
+                    "importance": 5,
+                    "visibility": "retrieved",
+                    "disclosure": null,
+                    "origin": "observed",
+                    "emotionalWeight": null,
+                    "retention": {
+                      "kind": "permanent"
+                    },
+                    "policyVersion": 1,
+                    "updatedAt": "2026-09-26T22:21:56.715Z"
+                  },
+                  "provenance": {
+                    "actor": "provider",
+                    "origin": "provider-derived",
+                    "characterId": null,
+                    "timelineFromSeq": null,
+                    "timelineToSeq": null,
+                    "capturedAt": "2026-09-26T22:21:56.715Z",
+                    "sanitized": true,
+                    "sourceRef": "hindsight:12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030:6ff8059c-653c-412c-8138-545c23200f73:memory_unit:50517094-5a7c-4c5f-9d9f-02dd64c8a396@1"
+                  }
+                },
+                "scores": [
+                  {
+                    "source": "provider",
+                    "value": 1.0144481919121267,
+                    "higherIsBetter": true
+                  }
+                ],
+                "confirmed": true
+              }
+            ],
+            "returned": 5,
+            "pending": [],
+            "truncated": true,
+            "vectorState": "ready",
+            "partial": false,
+            "branchFailures": []
+          }
+        },
+        "recalled": {
+          "m1": true,
+          "m2": true,
+          "m3": true
+        },
+        "verifyOnRestored": {
+          "operationId": "00cd2fd7-289c-43e8-b71d-a178ca704a69",
+          "kind": "backup.verify",
+          "state": "completed",
+          "reason": null,
+          "errorCode": null,
+          "result": {
+            "kind": "backup",
+            "backupId": "13e6b0dc-8f5d-4b0e-9832-7d49c3e9bfe0",
+            "verifiedAt": "2026-09-26T22:25:49.563Z",
+            "mismatch": null
+          },
+          "producer": {
+            "kind": "backup",
+            "phase": "completed"
+          }
+        },
+        "backupStatus": {
+          "lastVerified": {
+            "backupId": "13e6b0dc-8f5d-4b0e-9832-7d49c3e9bfe0",
+            "createdAt": "2026-09-26T22:22:58.749Z",
+            "verifiedAt": "2026-09-26T22:25:49.563Z",
+            "nativeCursors": [
+              {
+                "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+                "currentCursor": 6
+              },
+              {
+                "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+                "currentCursor": 90
+              }
+            ]
+          },
+          "ageSeconds": 171,
+          "missingInterval": [
+            {
+              "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "fromNativeCursor": 6,
+              "toReplicaCursor": 6,
+              "pendingCount": 0
+            },
+            {
+              "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "fromNativeCursor": 90,
+              "toReplicaCursor": 90,
+              "pendingCount": 0
+            }
+          ]
+        }
+      },
+      "error": null,
+      "durationMs": 10699,
+      "nativeCalls": {
+        "2133 GET /health 200": 7,
+        "2133 GET /version 200": 7,
+        "2133 GET /ext/taki-memory/version 200": 7,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes 200": 4,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/changes 200": 3,
+        "2133 POST /v1/default/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/memories/recall 200": 2,
+        "2133 POST /v1/default/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/memories/recall 200": 2,
+        "2133 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/hydrate 200": 2,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/snapshots/<uuid>/pages/0 200": 2,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid> 200": 112,
+        "2133 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/parts/0 200": 112,
+        "2133 GET /ext/taki-memory/admin/backups/taki-backup-<uuid>.zip 200": 1,
+        "2133 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies 200": 1,
+        "2133 PUT /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/parts/0 200": 1,
+        "2133 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies/<uuid>/seal 200": 1
+      },
+      "providerRequests": [
+        {
+          "kind": "main-recall-call",
+          "model": "smoke-main",
+          "tools": [
+            "avatar_play_motion",
+            "avatar_set_expression",
+            "clipboard_read",
+            "clipboard_write",
+            "exec",
+            "extension_call",
+            "extension_describe",
+            "extension_discover",
+            "get_current_time",
+            "invalidate_memory",
+            "load_skill",
+            "process_list",
+            "read_file",
+            "read_skill_resource",
+            "recall",
+            "reflect",
+            "restore_memory",
+            "retain",
+            "schedule_task",
+            "screenshot",
+            "shell_open",
+            "update_memory",
+            "write_file"
+          ]
+        },
+        {
+          "kind": "main-after-tool",
+          "model": "smoke-main",
+          "tools": [
+            "avatar_play_motion",
+            "avatar_set_expression",
+            "clipboard_read",
+            "clipboard_write",
+            "exec",
+            "extension_call",
+            "extension_describe",
+            "extension_discover",
+            "get_current_time",
+            "invalidate_memory",
+            "load_skill",
+            "process_list",
+            "read_file",
+            "read_skill_resource",
+            "recall",
+            "reflect",
+            "restore_memory",
+            "retain",
+            "schedule_task",
+            "screenshot",
+            "shell_open",
+            "update_memory",
+            "write_file"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Negative: Core from backup #2 against native restored from backup #1",
+      "status": "failed",
+      "observed": {
+        "restoredCoreExit": {
+          "code": 0,
+          "signal": null,
+          "forced": false,
+          "egress": {
+            "allowed": {
+              "2128": 2,
+              "2129": 606
+            },
+            "refused": []
+          }
+        },
+        "restoredNativeExit": {
+          "code": 0,
+          "signal": null,
+          "forced": false
+        },
+        "admin": [
+          {
+            "name": "migrate",
+            "args": [
+              "run-db-migration"
+            ],
+            "status": 0,
+            "ms": 23042
+          },
+          {
+            "name": "restore",
+            "args": [
+              "restore",
+              "<route-b ZIP>",
+              "--yes"
+            ],
+            "status": 0,
+            "ms": 21265
+          },
+          {
+            "name": "repair",
+            "args": [
+              "repair-bank",
+              "--all"
+            ],
+            "status": 0,
+            "ms": 20758
+          },
+          {
+            "name": "decommission",
+            "args": [
+              "decommission-workers",
+              "--yes"
+            ],
+            "status": 0,
+            "ms": 21129
+          }
+        ],
+        "olderNative": [
+          {
+            "bank_id": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+            "generation": "d84a4abf-a7ad-4031-b593-adbde5ca119e",
+            "current_cursor": 6,
+            "minimum_available_cursor": 0,
+            "deleted": false
+          },
+          {
+            "bank_id": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "generation": "6ff8059c-653c-412c-8138-545c23200f73",
+            "current_cursor": 34,
+            "minimum_available_cursor": 0,
+            "deleted": false
+          }
+        ],
+        "coreAhead": [
+          {
+            "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+            "coreCursor": 6,
+            "nativeCursor": 6
+          },
+          {
+            "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "coreCursor": 62,
+            "nativeCursor": 34
+          }
+        ],
+        "runtime": {
+          "providerId": "hindsight",
+          "available": true,
+          "unavailableReason": null
+        },
+        "banks": [
+          {
+            "scope": "character",
+            "characterId": "taki",
+            "nativeBankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+            "readiness": "ready",
+            "errorCode": null
+          },
+          {
+            "scope": "global",
+            "characterId": null,
+            "nativeBankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "readiness": "ready",
+            "errorCode": null
+          }
+        ],
+        "replica": [
+          {
+            "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+            "scope": "global",
+            "characterId": null,
+            "automatic": true,
+            "autoIntervalMs": 21600000,
+            "fullReconciliationIntervalMs": 604800000,
+            "mode": "idle",
+            "run": null,
+            "fullReconciliationState": "idle",
+            "nextDueAt": "2026-09-27T04:22:45.622Z",
+            "nextFullDueAt": "2026-10-03T22:21:34.956Z",
+            "retryAttempt": 0,
+            "retryKind": null,
+            "retryDueAt": null,
+            "pendingManualKind": null,
+            "catchUpRequested": false,
+            "lastAttemptAt": "2026-09-26T22:22:27.864Z",
+            "lastSuccessAt": "2026-09-26T22:22:45.622Z",
+            "lastFullReconciliationAt": null,
+            "lastObservedCursor": 62,
+            "lastObservedLineageId": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030",
+            "lastObservedBankGeneration": "6ff8059c-653c-412c-8138-545c23200f73",
+            "consecutiveFailures": 0,
+            "errorCode": null,
+            "nextAction": null,
+            "createdAt": "2026-09-26T22:21:34.956Z",
+            "updatedAt": "2026-09-26T22:22:45.622Z",
+            "checkpoint": {
+              "providerLineageId": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030",
+              "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+              "bankGeneration": "6ff8059c-653c-412c-8138-545c23200f73",
+              "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+              "replicaEpochId": "049ee2a7-d9a2-44d8-9048-480bbf5a7151",
+              "endCursor": 62,
+              "snapshotId": "a9cb9b5e-c62f-400d-a5c9-47578d8417d3",
+              "snapshotCursor": 6,
+              "snapshotManifestDigest": "709c2e3d68405d07467ab707daa69aa5315c2960774ca8901aac8058587d32cd",
+              "manifestDigest": "bf21ccddd6da6a8c38195dc309dae7944e541f513c05fd7ae04e31b309d0f2e4",
+              "verifiedAt": "2026-09-26T22:22:50.635Z"
+            },
+            "lag": 0
+          },
+          {
+            "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+            "scope": "character",
+            "characterId": "taki",
+            "automatic": true,
+            "autoIntervalMs": 21600000,
+            "fullReconciliationIntervalMs": 604800000,
+            "mode": "idle",
+            "run": null,
+            "fullReconciliationState": "idle",
+            "nextDueAt": "2026-09-27T04:22:45.909Z",
+            "nextFullDueAt": "2026-10-03T22:21:34.961Z",
+            "retryAttempt": 0,
+            "retryKind": null,
+            "retryDueAt": null,
+            "pendingManualKind": null,
+            "catchUpRequested": false,
+            "lastAttemptAt": "2026-09-26T22:22:45.685Z",
+            "lastSuccessAt": "2026-09-26T22:22:45.909Z",
+            "lastFullReconciliationAt": null,
+            "lastObservedCursor": 6,
+            "lastObservedLineageId": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030",
+            "lastObservedBankGeneration": "d84a4abf-a7ad-4031-b593-adbde5ca119e",
+            "consecutiveFailures": 0,
+            "errorCode": null,
+            "nextAction": null,
+            "createdAt": "2026-09-26T22:21:34.961Z",
+            "updatedAt": "2026-09-26T22:22:45.909Z",
+            "checkpoint": {
+              "providerLineageId": "12ef8c9f-e9a7-42e6-a9e2-b80ed03bb030",
+              "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+              "bankGeneration": "d84a4abf-a7ad-4031-b593-adbde5ca119e",
+              "authorityEpochId": "e9ea3331-024f-4cfb-892f-01116e3c84fd",
+              "replicaEpochId": "b937767d-045e-476f-a952-2aae4e35cf00",
+              "endCursor": 6,
+              "snapshotId": "572819c8-4b17-4fd0-a838-94ca97955aaa",
+              "snapshotCursor": 6,
+              "snapshotManifestDigest": "9cac889361687cd1473f1addceb8d18c4cb1ab6adf409c7b440625f8be98f5b5",
+              "manifestDigest": "79c8573f76aec90ff93cc2f02f8a9e018406e8277fb7f4b0baec3ab82700bf94",
+              "verifiedAt": "2026-09-26T22:21:37.356Z"
+            },
+            "lag": 0
+          }
+        ],
+        "sync": [
+          {
+            "operationId": "aa7cf96b-b92e-44aa-8dd1-66440758235d",
+            "kind": "replica.sync",
+            "state": "completed",
+            "reason": null,
+            "errorCode": null,
+            "result": {
+              "kind": "replica",
+              "errorCode": null,
+              "nextAction": null,
+              "lastSuccessAt": "2026-09-26T22:28:22.691Z"
+            },
+            "producer": "replica"
+          },
+          {
+            "operationId": "a29428cf-ac08-4364-aeab-5da3beb9c832",
+            "kind": "replica.sync",
+            "state": "failed",
+            "reason": "producer_failed",
+            "errorCode": "HINDSIGHT_REPLICA_SYNC_FAILED",
+            "result": {
+              "kind": "replica",
+              "errorCode": "HINDSIGHT_REPLICA_SYNC_FAILED",
+              "nextAction": "automatic_retry_scheduled",
+              "lastSuccessAt": "2026-09-26T22:22:45.622Z"
+            },
+            "producer": "replica"
+          }
+        ],
+        "snapshotCalls": 3,
+        "changesCalls": [
+          {
+            "method": "GET",
+            "path": "/ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/changes",
+            "status": 200
+          },
+          {
+            "method": "GET",
+            "path": "/ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes",
+            "status": 409
+          }
+        ],
+        "checkpointsUnchanged": true,
+        "rollbackInLog": false,
+        "aheadBanks": [
+          "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633"
+        ]
+      },
+      "error": {
+        "message": "rollback detection did not fire",
+        "detail": [
+          {
+            "operationId": "aa7cf96b-b92e-44aa-8dd1-66440758235d",
+            "kind": "replica.sync",
+            "state": "completed",
+            "reason": null,
+            "errorCode": null,
+            "result": {
+              "kind": "replica",
+              "errorCode": null,
+              "nextAction": null,
+              "lastSuccessAt": "2026-09-26T22:28:22.691Z"
+            },
+            "producer": "replica"
+          },
+          {
+            "operationId": "a29428cf-ac08-4364-aeab-5da3beb9c832",
+            "kind": "replica.sync",
+            "state": "failed",
+            "reason": "producer_failed",
+            "errorCode": "HINDSIGHT_REPLICA_SYNC_FAILED",
+            "result": {
+              "kind": "replica",
+              "errorCode": "HINDSIGHT_REPLICA_SYNC_FAILED",
+              "nextAction": "automatic_retry_scheduled",
+              "lastSuccessAt": "2026-09-26T22:22:45.622Z"
+            },
+            "producer": "replica"
+          }
+        ]
+      },
+      "durationMs": 153885,
+      "nativeCalls": {
+        "2133 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/bodies 200": 1,
+        "2136 GET /health 200": 2,
+        "2136 GET /version 200": 2,
+        "2136 GET /ext/taki-memory/version 200": 3,
+        "2136 GET /ext/taki-memory/banks/taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71/application-state/changes 200": 1,
+        "2136 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/changes 409": 1,
+        "2136 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/snapshots 201": 1,
+        "2136 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/initialize 200": 1,
+        "2136 POST /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/snapshots 200": 1,
+        "2136 GET /ext/taki-memory/banks/taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633/application-state/snapshots/<uuid>/pages/0 200": 1
+      },
+      "providerRequests": []
+    }
+  ],
+  "nativeBootMs": {
+    "A": 40390,
+    "R": 40433,
+    "O": 39359
+  },
+  "isolation": {
+    "pg0": {
+      "A": {
+        "name": "taki-drill-98c0a126bf29",
+        "dataDirUnderTemp": true,
+        "port": 2132
+      },
+      "R": {
+        "name": "taki-drill-733605ecf63d",
+        "dataDirUnderTemp": true,
+        "port": 2135
+      },
+      "O": {
+        "name": "taki-drill-8ef3ddcabc10",
+        "dataDirUnderTemp": true,
+        "port": 2138
+      }
+    },
+    "ports": {
+      "proxy": 2129,
+      "nativeA": 2130,
+      "coreA": 2131,
+      "pgA": 2132,
+      "nativeR": 2133,
+      "coreR": 2134,
+      "pgR": 2135,
+      "nativeO": 2136,
+      "coreO": 2137,
+      "pgO": 2138,
+      "provider": 2128,
+      "policy": {
+        "ownerEnvPortPresent": true,
+        "anyEqualsOwner": false,
+        "anyEquals8974": false,
+        "anyEquals8888": false
+      }
+    },
+    "pg0RegistryBefore": [
+      {
+        "name": "hindsight-test",
+        "mtime": "2026-08-18T16:46:38.458Z"
+      },
+      {
+        "name": "taki-d78-real-06acadec47e7",
+        "mtime": "2026-09-09T11:36:19.594Z"
+      },
+      {
+        "name": "taki-d78-real-654131f0175a",
+        "mtime": "2026-09-10T10:20:55.628Z"
+      },
+      {
+        "name": "taki-d78-real-9e41c8d27fa0",
+        "mtime": "2026-09-11T19:18:22.803Z"
+      },
+      {
+        "name": "taki-d78-real-ca744d0f8a27",
+        "mtime": "2026-09-13T13:14:06.079Z"
+      },
+      {
+        "name": "taki-d78-real-cd01c5453b1e",
+        "mtime": "2026-09-09T19:18:03.157Z"
+      }
+    ],
+    "pg0RegistryAfter": [
+      {
+        "name": "hindsight-test",
+        "mtime": "2026-08-18T16:46:38.458Z"
+      },
+      {
+        "name": "taki-d78-real-06acadec47e7",
+        "mtime": "2026-09-09T11:36:19.594Z"
+      },
+      {
+        "name": "taki-d78-real-654131f0175a",
+        "mtime": "2026-09-10T10:20:55.628Z"
+      },
+      {
+        "name": "taki-d78-real-9e41c8d27fa0",
+        "mtime": "2026-09-11T19:18:22.803Z"
+      },
+      {
+        "name": "taki-d78-real-ca744d0f8a27",
+        "mtime": "2026-09-13T13:14:06.079Z"
+      },
+      {
+        "name": "taki-d78-real-cd01c5453b1e",
+        "mtime": "2026-09-09T19:18:03.157Z"
+      }
+    ],
+    "pg0RegistryUnchanged": true,
+    "ownerTakiUnchanged": true,
+    "ownerTakiBefore": {
+      "exists": true,
+      "mtime": "2026-09-08T11:18:44.115Z",
+      "entries": [
+        {
+          "name": "cli-device.json",
+          "mtime": "2026-07-13T06:39:34.837Z"
+        },
+        {
+          "name": "devices.json",
+          "mtime": "2026-09-08T11:18:44.114Z"
+        },
+        {
+          "name": "host-identity.json",
+          "mtime": "2026-08-19T07:35:23.603Z"
+        },
+        {
+          "name": "mcp-approvals.json",
+          "mtime": "2026-08-04T12:42:08.148Z"
+        },
+        {
+          "name": "mcp-servers.json",
+          "mtime": "2026-08-04T12:51:32.556Z"
+        },
+        {
+          "name": "skill-packages",
+          "mtime": "2026-08-19T08:38:48.536Z"
+        },
+        {
+          "name": "taki.db",
+          "mtime": "2026-09-08T12:02:25.568Z"
+        },
+        {
+          "name": "taki.db-shm",
+          "mtime": "2026-09-25T10:25:16.166Z"
+        },
+        {
+          "name": "taki.db-wal",
+          "mtime": "2026-09-08T12:05:30.610Z"
+        },
+        {
+          "name": "workspace",
+          "mtime": "2026-08-20T16:47:52.195Z"
+        }
+      ]
+    }
+  },
+  "network": {
+    "nativeRefused": {
+      "A": [],
+      "R": [],
+      "O": []
+    },
+    "adminRefused": [],
+    "coreEgress": [
+      {
+        "label": "A",
+        "counters": {
+          "allowed": {
+            "2128": 3,
+            "2129": 1052
+          },
+          "refused": []
+        }
+      },
+      {
+        "label": "R",
+        "counters": {
+          "allowed": {
+            "2128": 2,
+            "2129": 606
+          },
+          "refused": []
+        }
+      },
+      {
+        "label": "O",
+        "counters": {
+          "allowed": {
+            "2129": 13
+          },
+          "refused": []
+        }
+      }
+    ],
+    "providerRequests": 10,
+    "providerUnexpectedPaths": 0
+  },
+  "teardown": {
+    "coreOStop": {
+      "code": 0,
+      "signal": null,
+      "forced": false,
+      "egress": {
+        "allowed": {
+          "2129": 13
+        },
+        "refused": []
+      }
+    },
+    "nativeOStop": {
+      "code": 0,
+      "signal": null,
+      "forced": false
+    },
+    "pg0ARemoval": {
+      "stopExit": 0,
+      "running": false,
+      "data": "removed",
+      "registry": "removed"
+    },
+    "pg0RRemoval": {
+      "stopExit": 0,
+      "running": false,
+      "data": "removed",
+      "registry": "removed"
+    },
+    "pg0ORemoval": {
+      "stopExit": 0,
+      "running": false,
+      "data": "removed",
+      "registry": "removed"
+    },
+    "proxyClose": "closed",
+    "providerClose": "closed",
+    "listenersOnOurPorts": [],
+    "coreExits": [
+      {
+        "label": "A",
+        "code": 0,
+        "signal": null,
+        "forced": false
+      },
+      {
+        "label": "R",
+        "code": 0,
+        "signal": null,
+        "forced": false
+      },
+      {
+        "label": "O",
+        "code": 0,
+        "signal": null,
+        "forced": false
+      }
+    ],
+    "spawnedPids": [
+      53012,
+      54144,
+      64344,
+      67056,
+      50240,
+      39832,
+      63360,
+      57220,
+      66920
+    ],
+    "spawnedStillRunning": [],
+    "newProcessesAfter": [],
+    "newProcessesStillRunningAfter5s": [],
+    "tempRootRemoved": true
+  }
+}

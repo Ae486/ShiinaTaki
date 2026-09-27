@@ -1,0 +1,21 @@
+Setting up PostgreSQL 18.1.0...
+Starting PostgreSQL on port 3543...
+Creating user 'taki_smoke'...
+DO
+[2m2026-09-26T23:37:29.661735Z[0m [33m WARN[0m [2msqlx::pool::acquire[0m[2m:[0m acquired connection, but time to acquire exceeded slow threshold [3maquired_after_secs[0m[2m=[0m2.223423 [3mslow_acquire_threshold_secs[0m[2m=[0m2.0
+Creating database 'taki_smoke'...
+[2m2026-09-26T23:37:31.855945Z[0m [33m WARN[0m [2msqlx::pool::acquire[0m[2m:[0m acquired connection, but time to acquire exceeded slow threshold [3maquired_after_secs[0m[2m=[0m2.1899642 [3mslow_acquire_threshold_secs[0m[2m=[0m2.0
+GRANT
+
+PostgreSQL is running!
+  Instance: taki-drill-f808a350ff5e
+  PID:      35756
+  Port:     3543
+  Username: taki_smoke
+  Password: taki_smoke
+  Database: taki_smoke
+  Data dir: G:\Temp\taki-restore-drill-y9VBKk\pg-A\pg-data
+
+Connection URI: postgresql://taki_smoke:taki_smoke@127.0.0.1:3543/taki_smoke
+
+Use 'pg0 stop --name taki-drill-f808a350ff5e' to stop the server.

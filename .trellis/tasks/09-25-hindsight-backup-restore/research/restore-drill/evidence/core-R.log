@@ -1,0 +1,12 @@
+{"level":30,"time":1790466133618,"pid":62156,"hostname":"tianxuanji","mod":"db","applied":[],"msg":"schema already up to date"}
+{"level":30,"time":1790466133622,"pid":62156,"hostname":"tianxuanji","msg":"Core Host identity loaded"}
+{"level":30,"time":1790466133635,"pid":62156,"hostname":"tianxuanji","mod":"secrets","mod":"secrets","health":"ok","keySource":"credentials-directory","msg":"secret catalog opened"}
+{"level":30,"time":1790466133665,"pid":62156,"hostname":"tianxuanji","mod":"skills","active":0,"invalidated":0,"seeded":0,"seedRejected":0,"msg":"skill lifecycle ready"}
+{"level":30,"time":1790466133666,"pid":62156,"hostname":"tianxuanji","mod":"mcp","msg":"no legacy mcp-servers.json to seed"}
+{"level":30,"time":1790466133688,"pid":62156,"hostname":"tianxuanji","mod":"mcp","servers":0,"published":0,"failed":0,"msg":"mcp reconcile from desired state complete"}
+{"level":30,"time":1790466133733,"pid":62156,"hostname":"tianxuanji","mod":"server","host":"127.0.0.1","port":3545,"msg":"ws server listening"}
+{"level":30,"time":1790466133754,"pid":62156,"hostname":"tianxuanji","mod":"server","msg":"client connected"}
+{"level":30,"time":1790466133759,"pid":62156,"hostname":"tianxuanji","mod":"pairing","deviceId":"73e56ec5-d728-4ce1-888c-bd81a41af5c3","deviceName":"restore drill R","remoteAddress":"127.0.0.1","msg":"loopback operator auto-trusted"}
+{"level":30,"time":1790466161743,"pid":62156,"hostname":"tianxuanji","signal":"SIGINT","msg":"shutting down"}
+{"level":40,"time":1790466161749,"pid":62156,"hostname":"tianxuanji","mod":"memory-auto","kind":"provider","characterId":"taki","code":"MEMORY_PROVIDER_MAINTENANCE_FAILED","msg":"memory provider maintenance failed; will retry"}
+{"level":30,"time":1790466161751,"pid":62156,"hostname":"tianxuanji","mod":"mcp","clients":0,"msg":"mcp manager closed"}
