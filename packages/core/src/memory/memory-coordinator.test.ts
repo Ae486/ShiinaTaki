@@ -85,4 +85,27 @@ describe("memory coordinator", () => {
     const result = await coordinator.mutate({ kind: "edit", bankId: "b", memoryId: "m", expectedRevision: 1, patch: { text: "changed" } });
     expect(result.ok).toBe(false); if (result.ok) throw new Error("expected failure"); expect(result.error.code).toBe("MEMORY_OUTCOME_UNKNOWN");
   });
+  it("lets a captured Run write after its own recall lifted vector health to ready, but not after a stable capability drift", async () => {
+    const epoch = { epochId: "e", providerId: "local", providerLineageId: "l", mode: "authority" as const, status: "active" as const, predecessorEpochId: null, startedAt: "2026-08-19T00:00:00.000Z", endedAt: null, reason: "initial-local" as const };
+    const initialCaps = { providerId: "local", contractVersion: 1 as const, retain: true, recall: true, reflect: false, edit: true, invalidate: true, restore: true, conditionalMutation: true, idempotentWrites: true, sparseRetrieval: true, vectorRetrieval: "degraded" as "degraded" | "ready", derivedMemoryRead: false };
+    let liveCaps = initialCaps;
+    const provider = {
+      providerId: "local", providerLineageId: "l", capabilities: async () => liveCaps,
+      recall: async (context: { requestId: string; authorityEpochId: string }) => {
+        liveCaps = { ...initialCaps, vectorRetrieval: "ready" as const };
+        return { ok: true as const, requestId: context.requestId, providerId: "local", authorityEpochId: context.authorityEpochId, capabilities: liveCaps, data: { hits: [], returned: 0, truncated: false, vectorState: "ready" as const, partial: false, branchFailures: [] } };
+      },
+      retain: async (context: { requestId: string; authorityEpochId: string }) => ({ ok: true as const, requestId: context.requestId, providerId: "local", authorityEpochId: context.authorityEpochId, capabilities: liveCaps, data: { status: "completed", documentId: "doc", sourceRevision: 1, memories: [{ memoryId: "m", revision: 1 }] } }),
+    };
+    const run = await createMemoryCoordinator({ authority: { authorityEpoch: () => epoch } as never, providers: new Map([["local", provider as never]]) }).captureRun();
+    const provenance = { actor: "agent" as const, origin: "explicit-agent" as const, characterId: null, timelineFromSeq: null, timelineToSeq: null, capturedAt: epoch.startedAt, sanitized: true as const, sourceRef: null };
+    const request = { bankId: "b", content: "fact", context: null, timestamp: null, tags: [], entities: [], metadata: {}, observationScopes: null, documentId: "doc", strategy: null, updateMode: "replace" as const, provenance, policy: { layerId: "profile", importance: 5, visibility: "retrieved" as const, disclosure: null, origin: "self" as const, emotionalWeight: null, retention: { kind: "permanent" as const }, policyVersion: 1 as const } };
+    const recalled = await run.coordinator.recall({ bankId: "b", query: "x", queryTimestamp: null, budget: "low", limit: 1, maxTokens: 100, factTypes: ["experience"], layerIds: [], includeInvalidated: false });
+    expect(recalled.ok).toBe(true);
+    const retained = await run.coordinator.retain(request);
+    expect(retained).toMatchObject({ ok: true, data: { status: "completed" } });
+    liveCaps = { ...liveCaps, edit: false };
+    const drifted = await run.coordinator.retain(request);
+    expect(drifted.ok).toBe(false); if (drifted.ok) throw new Error("expected failure"); expect(drifted.error.code).toBe("MEMORY_AUTHORITY_MISMATCH");
+  });
 });

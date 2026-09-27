@@ -16,7 +16,7 @@ import {
 import type { CanonicalMemoryAuthorityRepo } from "../db/canonical-memory-authority-repo.ts";
 import type { MemoryProvider, MemoryProviderCallContext } from "./memory-provider.ts";
 import { createMemoryRunReference, freezeMemoryCapabilities, memoryCapabilityDigest,
-  sameMemoryCapabilities, sameStableMemoryCapabilities } from "./memory-capability-snapshot.ts";
+  sameMemoryCapabilities, sameStableMemoryCapabilities, writableMemoryCapabilities } from "./memory-capability-snapshot.ts";
 import { recallMatchesNamespace } from "./memory-recall-selection.ts";
 
 type Operation = "retain" | "recall" | "reflect" | "mutate";
@@ -132,7 +132,8 @@ async function dispatchToProvider(input: ProviderDispatchInput): Promise<MemoryR
 
 function capabilitiesCurrent(input: ProviderDispatchInput, caps: MemoryProviderCapabilities): boolean {
   const captured = input.binding?.capabilities;
-  if (captured && !(input.operation === "recall" ? sameStableMemoryCapabilities(captured, caps) : sameMemoryCapabilities(captured, caps))) return false;
+  // A Run's own admission recall can lift vector health to ready; refusing its later writes for that would be spurious.
+  if (captured && !(input.operation === "recall" ? sameStableMemoryCapabilities(captured, caps) : writableMemoryCapabilities(captured, caps))) return false;
   const expected = input.call?.expectedCapabilityDigest;
   return expected === undefined || expected === (input.binding?.snapshot.capabilityDigest ?? memoryCapabilityDigest(caps));
 }

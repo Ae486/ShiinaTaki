@@ -1,6 +1,7 @@
 /**
  * INPUT:  Shared provider capabilities and admission-time memory authority references
- * OUTPUT: detached immutable snapshots and one canonical capability digest for Runs, tools, and dispatch
+ * OUTPUT: detached immutable snapshots, one canonical capability digest for Runs, tools, and dispatch, and the write-time
+ *         capability comparison
  * POS:    core/memory — process-local contract helper; dynamic vector health never rewrites admission evidence
  */
 import { createHash } from "node:crypto";
@@ -21,6 +22,12 @@ export function sameMemoryCapabilities(left: MemoryProviderCapabilities, right: 
 
 export function sameStableMemoryCapabilities(left: MemoryProviderCapabilities, right: MemoryProviderCapabilities): boolean {
   return canonicalCapabilities(left, true) === canonicalCapabilities(right, true);
+}
+
+/** A write admitted under weaker vector health may run once it is ready; any other change, including a weaker state, is drift. */
+export function writableMemoryCapabilities(admitted: MemoryProviderCapabilities, current: MemoryProviderCapabilities): boolean {
+  return sameStableMemoryCapabilities(admitted, current)
+    && (current.vectorRetrieval === admitted.vectorRetrieval || current.vectorRetrieval === "ready");
 }
 
 export function createMemoryRunReference(input: Omit<RunMemoryReference, "capabilityDigest">): RunMemoryReference {
