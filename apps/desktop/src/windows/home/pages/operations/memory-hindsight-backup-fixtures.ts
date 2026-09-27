@@ -1,6 +1,6 @@
 /**
  * INPUT:  the memory authority fixtures (hindsightStatus / lifecycleSection / bankStatus) and hand-built backup.* rows
- * OUTPUT: backupSection() / backupOperation() / backupStatus() plus one MemoryAuthorityStatus per backup block state (none,
+ * OUTPUT: backupSection() / STAGED_BACKUP / backupOperation() / backupStatus() plus one MemoryAuthorityStatus per backup block state (none,
  *         unknown, verified, in flight, failed with a code, route unavailable, route-b staged, rollback detected)
  * POS:    ui/windows/home/pages/operations — test support only; not in the production path
  */
@@ -19,12 +19,17 @@ export function backupSection(patch: Partial<HindsightBackupStatusSection> = {})
       { bankId: "global", fromNativeCursor: 40, toReplicaCursor: 52, pendingCount: 1 },
       { bankId: "character-taki", fromNativeCursor: null, toReplicaCursor: null, pendingCount: null },
     ],
+    latest: { backupId: BACKUP_ID, createdAt: AT, verifiedAt: AT },
+    staged: [],
     ...patch,
   };
 }
 
-export const NO_BACKUP = backupSection({ lastVerified: null, ageSeconds: null,
+export const NO_BACKUP = backupSection({ lastVerified: null, ageSeconds: null, latest: null,
   missingInterval: [{ bankId: "global", fromNativeCursor: null, toReplicaCursor: 52, pendingCount: 0 }] });
+
+/** The route-b capture Core lists as staged, awaiting its native ZIP. */
+export const STAGED_BACKUP = { ...NO_BACKUP, staged: [{ backupId: STAGED_ID, createdAt: LATER }] };
 
 /** A settled or running backup.* row; `patch` supplies kind/request and the terminal fields together. */
 export function backupOperation(patch: Partial<MemoryOperation> = {}): MemoryOperation {
@@ -72,6 +77,6 @@ export const BACKUP_STATES = {
   failed: backupStatus(backupSection(), [{ ...failedCapture("HINDSIGHT_BACKUP_PAIR_MISMATCH"),
     result: { kind: "backup", backupId: BACKUP_ID, verifiedAt: null, mismatch: { reason: "receipt_missing", bankId: "global" } } }]),
   routeUnavailable: backupStatus(NO_BACKUP, [failedCapture("HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE")]),
-  staged: backupStatus(NO_BACKUP, [stagedCapture(), failedCapture("HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE")]),
+  staged: backupStatus(STAGED_BACKUP, [stagedCapture(), failedCapture("HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE")]),
   rollback: backupStatus(backupSection(), [], { replica: [ROLLBACK_REPLICA] }),
 } satisfies Record<string, MemoryAuthorityStatus>;

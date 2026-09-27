@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { MemoryAuthorityStatusSchema, type MemoryAuthorityStatus } from "@taki/shared";
 import { AT, lifecycleBank, localStatus, operation } from "./memory-authority-fixtures.ts";
 import { createMemoryOperationsController, type MemoryOperationsClient } from "./memory-operations-controller.ts";
-import { BACKUP_ID, BACKUP_STATES, NO_BACKUP, STAGED_ID, backupOperation, backupSection, backupStatus, failedCapture,
+import { BACKUP_ID, BACKUP_STATES, NO_BACKUP, STAGED_BACKUP, STAGED_ID, backupOperation, backupSection, backupStatus, failedCapture,
   stagedCapture } from "./memory-hindsight-backup-fixtures.ts";
 import { BACKUP_ERROR_LABEL, ROLLBACK_WARNING, backupAdmitAction, hindsightBackupView } from "./memory-hindsight-backup-state.ts";
 
@@ -83,8 +83,10 @@ describe("Hindsight backup view model", () => {
     expect(view(recovered).actions).toEqual([CAPTURE]);
   });
 
-  it("keeps a staged route-b capture admissible until an admit completes, also across a failed admit", () => {
+  it("offers the newest capture Core lists as staged, whatever the operations window holds, also across a failed admit", () => {
     expect(view(BACKUP_STATES.staged).staged).toEqual({ backupId: STAGED_ID, expectedEpochId: "epoch-2" });
+    expect(view(backupStatus(STAGED_BACKUP)).staged).toEqual({ backupId: STAGED_ID, expectedEpochId: "epoch-2" });
+    expect(view(backupStatus(NO_BACKUP, [stagedCapture()])).staged).toBeNull();
     const admit = (state: "failed" | "completed") => backupOperation({
       operationId: "99999999-9999-4999-8999-999999999999", kind: "backup.admit", state, createdAt: LATER, updatedAt: LATER, terminalAt: LATER,
       reason: state === "failed" ? "producer_failed" : null, errorCode: state === "failed" ? "HINDSIGHT_BACKUP_PROOF_MISSING" : null,
@@ -92,9 +94,21 @@ describe("Hindsight backup view model", () => {
       producer: { kind: "backup", backupId: STAGED_ID, phase: state === "failed" ? "verifying" : "completed" },
       result: state === "failed" ? null : { kind: "backup", backupId: STAGED_ID, verifiedAt: LATER, mismatch: null },
     });
-    const refused = view(backupStatus(NO_BACKUP, [stagedCapture(), admit("failed")]));
+    const refused = view(backupStatus(STAGED_BACKUP, [stagedCapture(), admit("failed")]));
     expect(refused).toMatchObject({ staged: { backupId: STAGED_ID }, failure: "导入备份失败：原生备份缺少校验证明" });
     expect(view(backupStatus(NO_BACKUP, [stagedCapture(), admit("completed")])).staged).toBeNull();
+  });
+
+  it("keeps a newest backup whose verify failed on Home and re-verifiable, beside or without a verified one", () => {
+    const failedVerify = { backupId: STAGED_ID, createdAt: LATER, verifiedAt: null };
+    const reverify = { ...VERIFY, request: { kind: "backup.verify", backupId: STAGED_ID } };
+    const beside = view(backupStatus(backupSection({ latest: failedVerify })));
+    expect(beside.rows.at(-1)).toEqual({ label: "最新备份", value: `${LATER}（未通过校验）` });
+    expect(beside.actions).toEqual([CAPTURE, reverify]);
+    expect(beside.diagnostics).toEqual([{ label: "已校验备份", value: BACKUP_ID }, { label: "最新备份", value: STAGED_ID }]);
+    const alone = view(backupStatus({ ...NO_BACKUP, latest: failedVerify }));
+    expect(alone.rows).toEqual([{ label: "备份状态", value: "尚无已校验的备份" }, { label: "最新备份", value: `${LATER}（未通过校验）` }]);
+    expect(alone.actions).toEqual([CAPTURE, reverify]);
   });
 
   it("builds the admit request only for a plain inbox file name", () => {

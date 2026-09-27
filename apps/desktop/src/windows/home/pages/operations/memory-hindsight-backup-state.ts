@@ -1,8 +1,8 @@
 /**
- * INPUT:  a schema-validated MemoryAuthorityStatus: the `hindsight.backup` section, replica / Bank error codes and the
- *         backup.* rows in `operations.active` / `operations.recent`
+ * INPUT:  a schema-validated MemoryAuthorityStatus: the `hindsight.backup` section (last verified, newest sealed, staged
+ *         captures), replica / Bank error codes and the backup.* rows in `operations.active` / `operations.recent`
  * OUTPUT: hindsightBackupView() — state and per-Bank missing-interval rows, in-flight / failure / rollback lines, the
- *         route-b staged capture, diagnostics and the 创建备份 / 校验备份 descriptors; backupAdmitAction() — the 导入备份
+ *         newest route-b staged capture, diagnostics and the 创建备份 / 校验备份 (newest sealed backup) descriptors; backupAdmitAction() — the 导入备份
  *         request for an operator-typed inbox file name (Shared inbox schema)
  * POS:    ui/windows/home/pages/operations — node-testable projection for the memory authority card; Core decides every
  *         outcome, the only client rule is disabling while a backup operation is open; ids and codes only in diagnostics
@@ -13,7 +13,7 @@ import type { LabeledRow } from "../../page-card.tsx";
 import { bankScopeLabel, MEMORY_OPERATION_KIND_LABEL, MEMORY_OPERATION_STATE_LABEL } from "./memory-authority-state.ts";
 
 export interface BackupAction { key: string; label: string; request: MemoryOperationRequest }
-/** A route-b capture Core staged and no completed backup.admit has consumed yet. */
+/** A route-b capture Core lists as staged under the current epoch, still awaiting its native ZIP. */
 export interface StagedCapture { backupId: string; expectedEpochId: string }
 
 export interface HindsightBackupView {
@@ -65,14 +65,13 @@ export function hindsightBackupView(status: MemoryAuthorityStatus): HindsightBac
   const operations = backupOperations(status);
   const open = operations.find(isOpen) ?? null;
   const settled = operations.find((operation) => !isOpen(operation)) ?? null;
-  const staged = stagedCapture(operations);
   return {
     rows: stateRows(section.backup),
     intervals: intervalRows(section),
     rollback: rollbackDetected(status, section) ? ROLLBACK_WARNING : null,
     inFlight: open && inFlightLine(open),
     failure: open || !settled ? null : failureLine(settled),
-    staged,
+    staged: stagedCapture(section.backup, status.authority.epochId),
     pending: open !== null,
     actions: backupActions(operations, section.backup, status.authority.epochId),
     diagnostics: diagnosticRows(section.backup, settled),
@@ -97,24 +96,21 @@ function backupIdOf(operation: MemoryOperation): string | null {
   return operation.producer?.kind === "backup" ? operation.producer.backupId : null;
 }
 
-function stagedCapture(operations: MemoryOperation[]): StagedCapture | null {
-  const capture = operations.find((operation) => operation.request.kind === "backup.capture" && operation.request.route === "operator-artifact"
-    && operation.state === "completed");
-  const backupId = capture ? backupIdOf(capture) : null;
-  if (!capture || capture.request.kind !== "backup.capture" || !backupId) return null;
-  const admitted = operations.some((operation) => operation.request.kind === "backup.admit" && operation.request.backupId === backupId
-    && operation.state === "completed");
-  return admitted ? null : { backupId, expectedEpochId: capture.request.expectedEpochId };
+function stagedCapture(backup: BackupSection, epochId: string | null): StagedCapture | null {
+  const newest = backup?.staged[0];
+  return newest && epochId !== null ? { backupId: newest.backupId, expectedEpochId: epochId } : null;
 }
 
 function stateRows(backup: BackupSection): LabeledRow[] {
   if (!backup) return [{ label: "备份状态", value: UNKNOWN }];
-  const { lastVerified, ageSeconds } = backup;
-  if (!lastVerified) return [{ label: "备份状态", value: "尚无已校验的备份" }];
+  const { lastVerified, ageSeconds, latest } = backup;
+  const unverified: LabeledRow[] = latest && latest.verifiedAt === null ? [{ label: "最新备份", value: `${latest.createdAt}（未通过校验）` }] : [];
+  if (!lastVerified) return [{ label: "备份状态", value: "尚无已校验的备份" }, ...unverified];
   return [
     { label: "备份状态", value: "已有已校验的备份" },
     { label: "上次备份", value: `${lastVerified.createdAt}（${ageLabel(ageSeconds)}）` },
     { label: "校验时间", value: lastVerified.verifiedAt },
+    ...unverified,
   ];
 }
 
@@ -159,14 +155,16 @@ function backupActions(operations: MemoryOperation[], backup: BackupSection, epo
   if (lastCapture?.errorCode === "HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE") {
     actions.push(capture("backup:capture-operator", "创建备份（手动导出原生数据）", "operator-artifact"));
   }
-  const verified = backup?.lastVerified;
-  if (verified) actions.push({ key: "backup:verify", label: MEMORY_OPERATION_KIND_LABEL["backup.verify"], request: { kind: "backup.verify", backupId: verified.backupId } });
+  // The newest sealed backup, verified or not, so one whose verify failed can be verified again.
+  const latest = backup?.latest;
+  if (latest) actions.push({ key: "backup:verify", label: MEMORY_OPERATION_KIND_LABEL["backup.verify"], request: { kind: "backup.verify", backupId: latest.backupId } });
   return actions;
 }
 
 function diagnosticRows(backup: BackupSection, settled: MemoryOperation | null): LabeledRow[] {
   const rows: LabeledRow[] = [];
   if (backup?.lastVerified) rows.push({ label: "已校验备份", value: backup.lastVerified.backupId });
+  if (backup?.latest && backup.latest.backupId !== backup.lastVerified?.backupId) rows.push({ label: "最新备份", value: backup.latest.backupId });
   if (settled) {
     const mismatch = settled.result?.kind === "backup" ? settled.result.mismatch : null;
     const detail = [settled.operationId, backupIdOf(settled), settled.errorCode, mismatch && `${mismatch.reason}${mismatch.bankId ? `@${mismatch.bankId}` : ""}`];
