@@ -17,7 +17,7 @@ const section = {
 describe("Hindsight lifecycle status section", () => {
   it("accepts every readiness state and both new connection codes", () => {
     expect(MemoryHindsightStatusSectionSchema.parse(section)).toEqual(section);
-    const backup = { lastVerified: null, ageSeconds: null, missingInterval: [] };
+    const backup = { lastVerified: null, ageSeconds: null, missingInterval: [], latest: null, staged: [] };
     expect(MemoryHindsightStatusSectionSchema.safeParse({ ...section, backup }).success).toBe(true);
     expect(MemoryHindsightStatusSectionSchema.safeParse({ ...section, backup: { ...backup, ageSeconds: 1 } }).success).toBe(false);
     const occupied = { ...section, banks: [global, { ...section.banks[4], nativeBankId: "taki-hs-v1-c-e", errorCode: "HINDSIGHT_BANK_OCCUPIED" }] };

@@ -181,6 +181,10 @@ export const HindsightBackupStatusSectionSchema = z.strictObject({
   }).nullable(),
   ageSeconds: Count.nullable(),
   missingInterval: MissingIntervalSchema,
+  /** The newest sealed backup whatever its verification, so one whose verify failed stays re-verifiable. */
+  latest: z.strictObject({ backupId: HindsightBackupIdSchema, createdAt: Timestamp, verifiedAt: Timestamp.nullable() }).nullable(),
+  /** Route-b captures of the current epoch still awaiting their native ZIP, newest first. */
+  staged: z.array(z.strictObject({ backupId: HindsightBackupIdSchema, createdAt: Timestamp })).max(16),
 }).superRefine((section, context) => {
   const fail = failWith(context);
   if ((section.lastVerified === null) !== (section.ageSeconds === null)) fail("backup age exists exactly with a verified backup");
@@ -188,6 +192,8 @@ export const HindsightBackupStatusSectionSchema = z.strictObject({
     fail("an interval starts from a verified backup only");
   }
   if (section.lastVerified !== null && !unique(section.lastVerified.nativeCursors.map((bank) => bank.bankId))) fail("each Bank cursor appears once");
+  if (section.lastVerified !== null && section.latest === null) fail("a verified backup is a sealed one");
+  if (!unique(section.staged.map((capture) => capture.backupId))) fail("each staged capture appears once");
 });
 export type HindsightBackupStatusSection = z.infer<typeof HindsightBackupStatusSectionSchema>;
 

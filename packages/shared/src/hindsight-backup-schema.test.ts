@@ -94,13 +94,25 @@ describe("Hindsight backup inbox file", () => {
 describe("Hindsight backup status section", () => {
   const lastVerified = { backupId: BACKUP_ID, createdAt: at, verifiedAt: at, nativeCursors: [{ bankId: "core-g", currentCursor: 12 }] };
   const interval = { bankId: "core-g", fromNativeCursor: 12, toReplicaCursor: 20, pendingCount: 1 };
+  const inventory = { latest: { backupId: BACKUP_ID, createdAt: at, verifiedAt: at }, staged: [] };
+  const none = { lastVerified: null, ageSeconds: null, latest: null, staged: [] };
   it("reports age and intervals only against a verified backup and keeps unknown as null", () => {
-    const section = { lastVerified, ageSeconds: 3600, missingInterval: [interval] };
+    const section = { lastVerified, ageSeconds: 3600, missingInterval: [interval], ...inventory };
     expect(HindsightBackupStatusSectionSchema.parse(section)).toEqual(section);
-    expect(HindsightBackupStatusSectionSchema.safeParse({ lastVerified: null, ageSeconds: null,
+    expect(HindsightBackupStatusSectionSchema.safeParse({ ...none,
       missingInterval: [{ ...interval, fromNativeCursor: null, pendingCount: null }] }).success).toBe(true);
-    for (const invalid of [{ ...section, ageSeconds: null }, { lastVerified: null, ageSeconds: null, missingInterval: [interval] },
+    for (const invalid of [{ ...section, ageSeconds: null }, { ...none, missingInterval: [interval] },
       { ...section, missingInterval: [interval, interval] }, { ...section, ageSeconds: -1 }]) {
+      expect(HindsightBackupStatusSectionSchema.safeParse(invalid).success).toBe(false);
+    }
+  });
+
+  it("lists the newest sealed backup whatever its verification and each staged capture once", () => {
+    const staged = { backupId: "66666666-6666-4666-8666-666666666666", createdAt: at };
+    const failedVerify = { ...none, missingInterval: [], latest: { backupId: BACKUP_ID, createdAt: at, verifiedAt: null }, staged: [staged] };
+    expect(HindsightBackupStatusSectionSchema.parse(failedVerify)).toEqual(failedVerify);
+    for (const invalid of [{ lastVerified, ageSeconds: 1, missingInterval: [], latest: null, staged: [] },
+      { ...failedVerify, staged: [staged, staged] }, { ...failedVerify, staged: [{ ...staged, backupId: "../x" }] }]) {
       expect(HindsightBackupStatusSectionSchema.safeParse(invalid).success).toBe(false);
     }
   });
