@@ -208,7 +208,18 @@ the Home readiness block) is archived as `09-19-active-bank-lifecycle` (commits 
 2026-09-25 formal check (`research/check-2026-09-25.md`, PASS-WITH-FIXES) covers AC1-AC9 and the failure matrix.
 Stage 2 is closed on automated criteria; the owner manual acceptance of Stages 1-2 is deferred to the Stage 6
 acceptance session (D89, owner 2026-09-25) and covered meanwhile by an isolated throwaway native Hindsight smoke.
-Next delivery is Stage 3. From 2026-09-23 all sub-agents run on opus (fable unavailable).
+Stage 3 (backup, restore and common recovery point: Core-first paired capture with writer fence and scheduler pause,
+`backup.capture`/`backup.admit`/`backup.verify` in the exclusive operator-only family `hindsight-backup`, route c = the
+owner-chosen opt-in default-off native endpoint keeping the ZIP on the native host (PR02 option 1) with route b = operator
+CLI + inbox admit as fallback, custody without secret bytes, rollback detection on every production sync path with an
+explicit-run hold, emergency seal hook, status inventory and the Home backup block) is archived as
+`09-25-hindsight-backup-restore` (archive `0937469`); its contract is `.trellis/spec/backend/memory-hindsight-backup.md`.
+The native side is `H:/hindsight` TAKI-HS-013 (backup endpoint + CLI proof) and TAKI-HS-014 (application-state
+serialization retry), uncommitted there like the earlier Taki patches; the compatibility build is unchanged. The W6
+restore drill (`research/restore-drill-2026-09-27.md`) proves AC11 on a throwaway native instance and found two Core
+defects fixed in `6ea0d16`/`7bbd9c3`; the 2026-09-27 formal check (`research/check-2026-09-27.md`) covers AC1-AC12.
+D86 Stage 3 trigger and D92 are closed; D88/D90/D91/D93 stay open. Next delivery is Stage 4 (transitions and emergency
+takeover; U1 is answered). From 2026-09-23 all sub-agents run on opus (fable unavailable).
 The owner's latest direction makes grill conditional across the whole task: proceed when no major unresolved
 requirement needs an owner decision; reopen grill for a concrete material issue during development. No currently known
 owner question blocks continuation.
