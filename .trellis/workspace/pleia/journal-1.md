@@ -1603,3 +1603,53 @@ Stage 2c closed on automated criteria: degraded memory-unavailable Runs with wit
 
 - Owner performs the batched Stage 2 (2a+2b+2c) manual acceptance
 - Plan Stage 3 per plan-review-2026-09-18.md
+
+
+## Session 35: Hindsight closure Stage 3: backup, restore and recovery point
+
+**Date**: 2026-09-28
+**Task**: Hindsight closure Stage 3: backup, restore and recovery point
+**Branch**: `main`
+
+### Summary
+
+W5 native route client + D92, W6 restore drill (AC11) with two Core fixes, rollback hold, formal check with status inventory and shutdown fix, F4 full-path rollback, update-spec, archive
+
+### Main Changes
+
+- Route c native backup client; verify reads back native-host ZIP digest
+- Restore drill passed 12 steps; fixed write-after-recall vector health and production rollback detection
+- Rollback holds the replica Bank for explicit runs; explicit full run refuses a rolled-back head
+- Status lists newest sealed backup and staged captures; Home re-verifies newest
+- New spec memory-hindsight-backup.md; D86 Stage 3 trigger closed, D92 done, D93 opened
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `ce498a2` | (see git log) |
+| `8962979` | (see git log) |
+| `6ea0d16` | (see git log) |
+| `7bbd9c3` | (see git log) |
+| `01a29e0` | (see git log) |
+| `c63f4f7` | (see git log) |
+| `3f0a6d6` | (see git log) |
+| `47f7791` | (see git log) |
+| `5bf80dd` | (see git log) |
+| `1e564b7` | (see git log) |
+| `dfac82c` | (see git log) |
+| `8670f68` | (see git log) |
+| `155f4e4` | (see git log) |
+| `0937469` | (see git log) |
+
+### Testing
+
+- [OK] Shared 544, Core 3386 (+1 skipped), Desktop 664 + build, isolated boot, native pytest on throwaway pg0
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- Stage 4 transitions and emergency takeover

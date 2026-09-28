@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 34
-- **Last Active**: 2026-09-25
+- **Total Sessions**: 35
+- **Last Active**: 2026-09-28
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~1605 | Active |
+| `journal-1.md` | ~1655 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 35 | 2026-09-28 | Hindsight closure Stage 3: backup, restore and recovery point | `ce498a2`, `8962979`, `6ea0d16`, `7bbd9c3`, `01a29e0`, `c63f4f7`, `3f0a6d6`, `47f7791`, `5bf80dd`, `1e564b7`, `dfac82c`, `8670f68`, `155f4e4`, `0937469` | `main` |
 | 34 | 2026-09-25 | Hindsight Stage 2c: active Bank and connection lifecycle | `211d37c`, `3a1428c`, `3605604`, `e5f172d`, `f831880`, `2bf5cb7`, `2c07d6a`, `37b0703`, `3929490`, `1b4ccdb`, `fc6964f`, `356c3cb`, `32909f5`, `a46aebf` | `main` |
 | 33 | 2026-09-24 | Hindsight closure Stage 2b: first Hindsight activation | `31b8f05`, `f34fe08`, `137b7fb`, `b9debf1`, `c6738c5`, `37b0ae3` | `main` |
 | 32 | 2026-09-22 | Hindsight closure Stage 2a: durable Local onboarding | `b095477`, `93febe4`, `dfe994e`, `4224b7d`, `6d60004`, `4b225b8` | `main` |
