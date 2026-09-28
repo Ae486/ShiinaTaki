@@ -48,6 +48,31 @@ describe("application-aware snapshot and replay integration", () => {
     expect(f.replica.checkpoint(bank.scope.bankId)).toEqual(before);
   });
 
+  // A native-only restore leaves the application state cursor equal, so each cursor must refuse on its own.
+  it.each(["state", "native"] as const)("refuses an explicit full run with only the %s cursor behind as a rollback before any snapshot", async (cursor) => {
+    const f = fixture(); const subsystem = f.subsystem(); const bank = hideMemory(f);
+    await subsystem.state.service.synchronize({ bankId: bank.scope.bankId, context: { timeoutMs: 30_000 } });
+    const before = f.replica.checkpoint(bank.scope.bankId)!;
+    const current = cursor === "state" ? before.checkpoint.state_cursor : before.checkpoint.native_cursor;
+    expect(current).toBeGreaterThan(0);
+    expect(bank.server.cursor).toEqual({ native: before.checkpoint.native_cursor, state: before.checkpoint.state_cursor });
+    const snapshot = vi.spyOn(f.remote.client, "createApplicationSnapshot");
+    const full = () => {
+      const lease = f.replica.leases.acquire({ bankId: bank.scope.bankId, ownerId: "explicit-full", durationMs: 30_000 });
+      return subsystem.state.sync.run({ bank: { bankId: bank.scope.bankId, scope: "global", characterId: null },
+        run: { lease, kind: "full", trigger: "manual", predecessor: before.native }, signal: new AbortController().signal,
+        deadlineAt: new Date(Date.now() + 30_000).toISOString() }).finally(() => f.replica.leases.release(lease));
+    };
+    bank.server.cursor[cursor] = current - 1;
+    await expect(full()).rejects.toMatchObject({ code: "HINDSIGHT_PROVIDER_ROLLBACK_DETECTED",
+      providerLineageId: before.namespace.provider_lineage, bankGeneration: before.namespace.bank_generation });
+    expect(snapshot).not.toHaveBeenCalled();
+    expect(f.replica.checkpoint(bank.scope.bankId)).toEqual(before);
+    bank.server.cursor[cursor] = current;
+    await full();
+    expect(snapshot).toHaveBeenCalledOnce();
+  });
+
   it.each(["event-hash", "namespace"] as const)("refuses corrupt %s without publishing part of its checkpoint", async (failure) => {
     const f = fixture(); const subsystem = f.subsystem(); const bank = hideMemory(f);
     const before = f.replica.checkpoint(bank.scope.bankId)!; const changes = f.remote.client.applicationChanges;

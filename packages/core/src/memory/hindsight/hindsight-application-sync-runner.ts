@@ -1,14 +1,15 @@
 /**
  * INPUT:  authenticated D77 state, captured authority/Bank leases and complete native/application checkpoints
  * OUTPUT: atomic joint snapshot/event publication through the existing B5 scheduler interface; a binding CAS conflict
- *         re-pulls and retries a bounded number of consecutive times before failing the run; a reset refusal whose native
- *         head is behind Core's own checkpoint surfaces as a rollback, never a rebuild
+ *         re-pulls and retries a bounded number of consecutive times before failing the run; a native head behind Core's
+ *         own checkpoint in the same lineage and generation, reported by a reset refusal or by a full run's initialize,
+ *         surfaces as a rollback before any snapshot, never a rebuild or a stale publication
  * POS:    core/memory/hindsight — application-aware pull; policy binding runs between complete pulls, never in SQL transactions
  */
 import { z } from "zod";
 import {
   HINDSIGHT_APPLICATION_DEFAULT_TTL_SECONDS, MemoryReplicaBankSchema,
-  type MemoryBankScope, type MemoryAuthorityEpoch, type MemoryReplicaRunResult,
+  type MemoryBankScope, type MemoryAuthorityEpoch, type MemoryReplicaRunResult, type TakiApplicationCheckpoint,
 } from "@taki/shared";
 import type { CanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
 import type { HindsightApplicationReplicaRepo, HindsightApplicationReplicaCheckpoint } from "../../db/hindsight-application-replica-contract.ts";
@@ -125,7 +126,7 @@ async function synchronize(context: Context, reset: boolean): Promise<MemoryRepl
         throw new Error("HINDSIGHT_REPLICA_GENERATION_MISMATCH", { cause: error });
       }
       if (!(error instanceof HindsightApplicationRefusal) || error.refusal.code !== "state_reset_required") throw error;
-      refuseRollback(error, deps.repo.checkpoint(input.bank.bankId) ?? checkpoint);
+      refuseRollback(error.refusal.checkpoint, deps.repo.checkpoint(input.bank.bankId) ?? checkpoint);
       checkpoint = await full(context, true);
     }
   }
@@ -155,9 +156,8 @@ async function bindPasses(context: Context, initial: HindsightApplicationReplica
 }
 
 /** A native head behind Core in Core's own namespace is a restore without Core's copy (§5.7); rebuilding would absorb it. */
-function refuseRollback(error: HindsightApplicationRefusal, current: HindsightApplicationReplicaCheckpoint): void {
-  const native = error.refusal.checkpoint;
-  if (!native || native.state_cursor >= current.checkpoint.state_cursor) return;
+function refuseRollback(native: TakiApplicationCheckpoint | null | undefined, current: HindsightApplicationReplicaCheckpoint): void {
+  if (!native || native.state_cursor >= current.checkpoint.state_cursor && native.native_cursor >= current.checkpoint.native_cursor) return;
   throw new HindsightRollbackError({ providerLineageId: current.namespace.provider_lineage, bankGeneration: current.namespace.bank_generation });
 }
 
@@ -171,9 +171,10 @@ async function full(context: Context, reset: boolean): Promise<HindsightApplicat
   const previous = deps.repo.checkpoint(input.bank.bankId) ?? null;
   const native = deps.repo.nativeCheckpoint(input.bank.bankId) ?? null;
   const scope = await resolveSnapshotScope(context, reset ? null : previous);
-  await client.initializeApplication({ ...scope, context: context.request() });
+  const head = await client.initializeApplication({ ...scope, context: context.request() });
   context.request();
   const sameGeneration = previous !== null && sameApplicationValue(previous.namespace, scope.namespace);
+  if (sameGeneration) refuseRollback(head.checkpoint, previous);
   // One complete snapshot can span many individually bounded HTTP requests.
   // Passing only request() would turn its per-request cap into a second, shorter
   // deadline for the entire body closure and discard every partial cold read.
