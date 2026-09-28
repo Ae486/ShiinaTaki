@@ -96,8 +96,8 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
   the Bank reports `explicit_retry_required` and Cancel only for an `admitted` `replica.sync`. Availability follows the
   current Core status, never a stale snapshot.
 - Unknown values render as 未知; the card never shows `0` pending, a health badge or freshness that the producer did
-  not report. Setup validate/apply live on the Hindsight activation card; every later workflow (transitions, backup,
-  upgrade) is not on this card until its Core operation exists.
+  not report. Setup validate/apply live on the Hindsight activation card. Backup lives in its own block on this card
+  (below). Transitions and upgrade are not on this card until their Core operations exist.
 - Under Hindsight authority the card renders the `hindsight` section as a child block
   (`memory-hindsight-lifecycle-state.ts` `hindsightLifecycleView`, `memory-hindsight-lifecycle-block.tsx`), also while
   the runtime is unavailable: connection rows (drift and 上次校验通过 only for a ready config), one readiness row per
@@ -106,6 +106,24 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
   (`bank.provision` per listed Character) come only from `hindsight.actions`; there is no client allow rule. They submit
   through the generic controller `submit(request, key)` and are disabled while the client is disconnected or any
   mutation is pending. Native Bank ids and error codes appear only in the collapsed 技术诊断.
+- The `hindsight.backup` section renders as a second child block after the lifecycle block
+  (`memory-hindsight-backup-state.ts` `hindsightBackupView`, `memory-hindsight-backup-block.tsx`):
+  - State rows: 备份状态 未知 when the section is null; 尚无已校验的备份; or 已有已校验的备份 with 上次备份 (`createdAt` and
+    its age) and 校验时间. A 最新备份（未通过校验） row appears when the newest sealed backup is unverified.
+  - One 未备份区间 row per native Bank: native cursor -> replica cursor and unsettled writes, labelled by scope where
+    the lifecycle section maps the id.
+  - A danger line when a replica or lifecycle Bank reports `HINDSIGHT_PROVIDER_ROLLBACK_DETECTED`, and the in-flight
+    line (kind and phase) or the newest settled failure (closed-code label; `outcome_unknown` gets the restart line).
+  - Staged capture: the newest `staged` entry of the current epoch shows the 导入备份 form. It names
+    `backups/<id>.staged/native-request.json` and `backups/inbox`, and it submits `backup.admit` only for a file name
+    the Shared inbox schema accepts.
+  - Actions: 创建备份 (`native-endpoint`); 创建备份（手动导出原生数据） (`operator-artifact`) only after the newest settled
+    capture failed `HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE`; 校验备份 re-verifies `latest`, the newest sealed backup whether
+    verified or not. There is no action for an older backup: any sealed backup id stays verifiable through
+    `backup.verify` on the operator surface.
+  - Every action goes through the generic `submit` and is disabled while the card is locked or a backup operation is
+    open. Backup ids, operation ids and codes appear only in the collapsed 备份诊断, except the staged backup id that the
+    import form needs for its path. Contract: [`memory-hindsight-backup.md`](../backend/memory-hindsight-backup.md).
 - Full operation ownership and verification requirements live in
   [`memory-operations.md`](../backend/memory-operations.md).
 

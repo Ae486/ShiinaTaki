@@ -12,7 +12,8 @@ configuration reason: the memory-unavailable Run, primary witnesses kept for lat
 `-kind-connection.ts`, `-lifecycle-settlement.ts`, `operations/memory-hindsight-lifecycle-status.ts`,
 `hindsight-runtime-binding.ts` (`replace`), `boot/hindsight-lifecycle-boot.ts`.
 Out of scope: template revision, model or `deploymentMode` change (Stage 5); a different provider lineage or disabling
-Hindsight as a switch (Stage 4); native Bank delete/reset and backup (Stage 3); queueing behind a busy family (Stage 4).
+Hindsight as a switch (Stage 4); native Bank delete/reset (Stage 3); backup and restore
+([`memory-hindsight-backup.md`](./memory-hindsight-backup.md)); queueing behind a busy family (Stage 4).
 First activation: [`memory-hindsight-activation.md`](./memory-hindsight-activation.md); operation owner:
 [`memory-operations.md`](./memory-operations.md); scheduler: [`memory-replica-sync.md`](./memory-replica-sync.md).
 
@@ -32,7 +33,7 @@ MemoryConnectionResult = { kind: "connection", outcome: "unchanged" | "rebound" 
 MemoryHindsightStatusSection = { connection: { config: "ready" | "disabled" | "unconfigured",
   drift: "none" | "config_changed" | "unreviewed", admittedAt }, banks: [{ scope, characterId, nativeBankId,
   readiness: "ready" | "syncing" | "provisioning" | "failed" | "not_provisioned", errorCode }],
-  actions: { revalidate: boolean, provision: CharacterId[] } };
+  actions: { revalidate: boolean, provision: CharacterId[] }, backup: HindsightBackupStatusSection | null };
 MemoryRuntimeUnavailableReason += "connection_disabled" | "config_changed";
 HINDSIGHT_ERROR_CODES += "HINDSIGHT_BANK_OCCUPIED" | "HINDSIGHT_CONNECTION_DISABLED";
 MemoryHindsightLifecycleErrorCode = MemoryReplicaErrorCode + MEMORY_AUTHORITY_MISMATCH | MEMORY_RUNTIME_UNAVAILABLE
@@ -194,13 +195,15 @@ continues; in the revalidate caller a throw settles the operation `failed` after
   `failed` with a native id, only while the runtime is available.
 - B3 `configured` requires a verified Global row, at least one verified Character row and compatibility; other
   Character rows may be pending or failed.
+- `backup` is passed through as read. It is null without a backup producer or when the inventory is unreadable. Its
+  contract is [`memory-hindsight-backup.md`](./memory-hindsight-backup.md) §3 "Status section".
 
 ## 4. Validation & Error Matrix
 
 | Condition | Required result |
 | --- | --- |
 | provision: no runtime, drift, unmappable id, no verified Global, Bank already ready | `MEMORY_OPERATION_UNSUPPORTED`; no row |
-| either kind while any of the four families is open | `MEMORY_OPERATION_BUSY` + `activeOperationId` |
+| either kind while any exclusive family (including `hindsight-backup`) is open | `MEMORY_OPERATION_BUSY` + `activeOperationId` |
 | provision template conflict | `failed` / `HINDSIGHT_TEMPLATE_CONFLICT`; zero native calls |
 | occupied native Bank, no B3 row | `failed` / `HINDSIGHT_BANK_OCCUPIED`; no PUT, no row |
 | dry-run/import/verify failure | `failed` row for that scope; other Banks keep serving |
