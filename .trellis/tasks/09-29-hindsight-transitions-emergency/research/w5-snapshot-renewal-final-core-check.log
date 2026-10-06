@@ -1,0 +1,46 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ × src/memory/transitions/transition-healthy-source.test.ts > healthy Source upload continuation > reuses original sealed multipart bytes after reply loss and preserves old Source bodies through the roundtrip 30633ms
+   → Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > dispatches with the renewed Native executor after expiry claims a new fence during inventory loading 9675ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > reopens after losing a renewed reply, reuses that durable request and never repeats an earlier delta 10522ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > renews an expired page with at most one successor per invocation (1 consecutive expiries) 9182ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > renews an expired page with at most one successor per invocation (2 consecutive expiries) 9911ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > does not renew on snapshot_not_found 4020ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > does not renew on request_id_conflict 4047ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > does not renew on namespace_mismatch 4036ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > does not renew on untyped_expiry 3912ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses a saved snapshot command for another namespace before dispatch 4014ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses renewal after active-writer invalidates ownership 4045ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses renewal after lost-claim invalidates ownership 4050ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses renewal after core-configuration invalidates ownership 4055ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses changed sealed proof after reopening instead of reusing incompatible historical evidence 4637ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > reuses sealed evidence after a proven Bank executor expires and is claimed by the reopened Core 9728ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > renews a positively expired snapshot after earlier delta preparation and physical Core reconstruction 9644ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/transitions/transition-healthy-source.test.ts > healthy Source upload continuation > reuses original sealed multipart bytes after reply loss and preserves old Source bodies through the roundtrip
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/memory/transitions/transition-healthy-source.test.ts:14:3
+     12|
+     13| describe("healthy Source upload continuation", () => {
+     14|   it("reuses original sealed multipart bytes after reply loss and pres…
+       |   ^
+     15|     const h = await createHealthyTransitionHarness({ aliases: true });
+     16|     try {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 15 passed (16)
+   Start at  19:20:45
+   Duration  139.60s (transform 8.92s, setup 0ms, import 12.66s, tests 126.12s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/transitions/transition-healthy-snapshot-recovery.test.ts src/memory/transitions/transition-healthy-source.test.ts --maxWorkers=1 --reporter=verbose

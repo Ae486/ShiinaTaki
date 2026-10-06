@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "C:/Program Files/nodejs/node.exe",
+    "--test",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_client.mjs"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "timeoutSeconds": 30,
+  "exitCode": 0,
+  "stdout": "\u2714 actual apply public timing includes its conditional capability GET; one POST/lookup and exact claimed executor (424.8395ms)\n\u2714 complete actual Core call includes delayed body and rejects oversized or invalid JSON (105.2402ms)\n\u2714 actual public POST timeout and typed refusal each send exactly once (69.4726ms)\n\u2714 real final transition proof validation rejects corrupt digest after valid JSON/schema (6.8969ms)\n\u2714 launcher refuses wrong parent/job/executable before any Core network call (3.6086ms)\n\u2714 fixed union refuses omission, replacement, duplicates and manifest-declared expansion (1564.2119ms)\n\u2139 tests 6\n\u2139 suites 0\n\u2139 pass 6\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 3266.0204\n",
+  "stderr": "",
+  "milliseconds": 3468.9999999973224
+}

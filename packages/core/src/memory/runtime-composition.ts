@@ -1,11 +1,8 @@
 /**
  * INPUT:  Core boot dependencies for Legacy, Local and explicitly selected Hindsight memory runtimes, plus the boot identity
- * OUTPUT: authority-selected engine, immutable Run capture (a memory-unavailable Run while a setting keeps the selected
- *         Hindsight runtime unbound), background maintenance, durability, the operations() live
- *         accessor, trusted primary custody, the pure Local/Hindsight binding snapshots, same-epoch binding recovery and
- *         the Local -> Hindsight rebind the activation service drives after COMMIT, and replaceHindsightBinding() (the
- *         revalidation swap); every memory-unavailable Hindsight Run is reported to onHindsightUnavailable
- * POS:    core/memory — process composition seam; one Utility Slot, one selected provider chain and ONE published binding per provider
+ * OUTPUT: selected immutable Runs, trusted primary custody, truthful binding/status recovery, operation access and transitions
+ * POS:    core/memory — one Utility Slot/Compaction owner; symmetric epoch retirement, fresh binding and settled process shutdown;
+ *         first activation and same-epoch connection replacement retain their independent receipt contracts
  */
 import type { LanguageModel } from "ai";
 import { join } from "node:path";
@@ -16,8 +13,10 @@ import type { ConfigSource } from "../config/config-source.ts";
 import { loadMemoryConfig } from "../config/memory-config.ts";
 import { loadUtilityConfig } from "../config/utility-config.ts";
 import { createCompactionOperationRepo } from "../db/compaction-operation-repo.ts";
+import { createCanonicalIngestionSourceRepo } from "../db/canonical-ingestion-source-repo.ts";
 import { createPrimaryMemoryCustody, type PrimaryMemoryCustody } from "../db/primary-memory-custody-repo.ts";
 import type { Database } from "../db/sqlite.ts";
+import type { TransitionEvidenceContext } from "./transitions/transition-evidence-context.ts";
 import type { SummaryRepo } from "../db/summary-repo.ts";
 import type { TimelineRepo } from "../db/timeline-repo.ts";
 import type { Logger } from "../logging/logger.ts";
@@ -46,6 +45,7 @@ import type { MemoryOperationsRuntime } from "./operations/memory-operation-cont
 import { selectMemoryRuntime, type BindingRecoveryOutcome } from "./runtime-selector.ts";
 import { createUtilitySlot, type UtilitySlot } from "./utility-slot.ts";
 import { MEMORY_VOICE_RULE } from "./write-convention.ts";
+import { createMemoryTransitionRuntime } from "./transitions/transition-runtime.ts";
 
 interface MemoryRuntimeInput {
   db: Database; dataDir: string; promptDir: string; model: LanguageModel; timeline: TimelineRepo; bootId: string;
@@ -73,13 +73,13 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
   const compaction = createCompactionMaintenance(input, utility, current);
   const lifecycle = createRuntimeLifetime({ scope, utility, autoMemory: compaction.autoMemory });
   const alive = lifecycle.alive;
+  const transitions = createMemoryTransitionRuntime({ db: input.db, local, hindsight: hindsightBinding, selected, custody,
+    alive, settle: compaction.autoMemory.settle, startHindsight: lifecycle.startHindsight,
+    retireBackground: () => { compaction.compact.retirePending(); compaction.autoMemory.retirePending(); utility.retirePending(); } });
   return {
-    selected, memory: selected.memory, fence, custody,
+    selected, memory: selected.memory, fence, custody, transitions, dataDir: input.dataDir,
     snapshot: () => { alive(); return scope.hindsight ? scope.hindsight.snapshot() : diagnosticSnapshot(input.db); },
-    /** Pure Local binding state for onboarding/authority status; no captureRun or Bank probe. */
-    bindingSnapshot: (): LocalBindingSnapshot => local.snapshot(),
-    /** Pure Hindsight binding state for activation/authority status; truthful before, during and after the rebind. */
-    hindsightBindingSnapshot: (): HindsightBindingSnapshot => hindsightBinding.snapshot(),
+    ...createBindingQueries(scope),
     // The ONE live accessor the memory operation owner uses (D-S1-1): resolved per call, never a captured subsystem.
     operations: (): MemoryOperationsRuntime | null => scope.hindsight ? operationsRuntime(scope.hindsight) : null,
     captureRun: async (characterId: string, signal?: AbortSignal): Promise<CapturedMemoryRun> => {
@@ -94,14 +94,20 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
     },
     recordPrimaryCommitted: (commit: PrimaryConversationCommit) => {
       alive();
-      if (scope.hindsight) { scope.hindsight.recordPrimaryCommitted(commit); return; }
-      if (!witnessHindsightPrimaryCommit({ db: input.db, commit, logger: input.logger })) local.current()?.recordPrimaryCommitted(commit);
+      if (witnessHindsightPrimaryCommit({ db: input.db, commit, logger: input.logger })) return;
+      const selection = readMemoryAuthoritySelection(input.db);
+      if (selection.mode === "canonical-local" && selection.epochId) {
+        // Selection can precede construction. The marker routes the source witness in both directions, including
+        // the interval where an old published Hindsight reference still exists but the new Local binding failed.
+        createCanonicalIngestionSourceRepo(input.db).recordPrimaryCommitted({ ...commit, epochId: selection.epochId });
+      }
     },
     autoMemory: compaction.autoMemory, compaction: compaction.compact,
     tidy: { maybeRun: (characterId: string) => { alive(); return current().tidy.maybeRun(characterId); },
       runNow: (characterId: string) => { alive(); return current().tidy.runNow(characterId); } },
     writeMemory: ((request) => { alive(); return current().writeMemory(request); }) satisfies MemoryWriteOp,
-    start: () => { alive(); lifecycle.start(); }, stop: lifecycle.stop,
+    start: () => { alive(); lifecycle.start(); },
+    stop: () => lifecycle.stop(transitions.stop),
     memoryRoot: selected.legacy?.memoryRoot ?? join(input.dataDir, "workspace", "memory"),
     ...createBindingSeams({ input, scope, custody, lifecycle, settle: compaction.autoMemory.settle }),
     migrationRunner: async () => {
@@ -110,6 +116,22 @@ export function composeMemoryRuntime(input: MemoryRuntimeInput) {
       return createLegacyMigrationRunner({ db: input.db, destinationRoot: join(input.dataDir, "workspace", "memory-migration"), fence,
         onActivated: selected.bindCanonical, reconcileCustody: () => { custody.reconcile(); } });
     },
+  };
+}
+
+/** Presence can disprove readiness without loading authority evidence; only a full snapshot can verify a live binding. */
+function createBindingQueries(scope: ReturnType<typeof createSelectedSubsystem>) {
+  return {
+    /** Presence only: never authorizes a Run, read/write or epoch; failed, retired and stopped drafts are absent. */
+    hasPublishedBinding: (provider: "local" | "hindsight"): boolean =>
+      (provider === "local" ? scope.local.current() : scope.hindsightBinding.current()) !== undefined,
+    /** Detached publication metadata for a separately verified status observer; never an authority proof. */
+    bindingPublication: (provider: "local" | "hindsight") =>
+      provider === "local" ? scope.local.publicationState() : scope.hindsightBinding.publicationState(),
+    /** Pure Local binding state for onboarding/authority status; no captureRun or Bank probe. */
+    bindingSnapshot: (verification?: TransitionEvidenceContext): LocalBindingSnapshot => scope.local.snapshot(verification),
+    /** Full Hindsight authority/binding state, including receipt verification before, during and after a rebind. */
+    hindsightBindingSnapshot: (verification?: TransitionEvidenceContext): HindsightBindingSnapshot => scope.hindsightBinding.snapshot(verification),
   };
 }
 
@@ -181,6 +203,8 @@ function createSelectedSubsystem(input: MemoryRuntimeInput, utility: UtilitySlot
     // The binding already recorded the unavailable state; boot continues with an observable, fail-closed facade.
     onBootUnavailable: () => undefined,
     hindsightLive: () => hindsight.current() !== undefined,
+    localLive: () => local.current() !== undefined,
+    onHindsightRetired: () => { void hindsight.retire(); },
   });
   activated = selected.canonical;
   const current = (): SelectedSubsystem => {
@@ -197,21 +221,19 @@ function createRuntimeLifetime(input: {
 }) {
   let stopped = false; let started = false; let completion: Promise<void> | undefined;
   const { scope } = input;
-  const stopCurrent = (): Promise<unknown> => {
-    if (scope.hindsight) return scope.hindsightBinding.stop();
-    // An unavailable binding has no subsystem to stop; the draft was already disposed at publication failure.
-    try { return Promise.resolve(scope.current().stop?.()); } catch { return Promise.resolve(); }
-  };
   return { alive: () => { if (stopped) throw new Error("MEMORY_OPERATION_CANCELLED"); },
     // A boot start failure is recorded by the binding as unavailable (recover repairs it); Core keeps serving.
     start: () => { started = true; try { scope.hindsightBinding.start(); } catch { /* observable through the binding snapshot */ } },
     /** A binding published after start() (activation, recovery) starts immediately; before it, start() will. */
     startHindsight: () => { if (started) scope.hindsightBinding.start(); },
-    stop: () => {
+    stop: (stopTransitions: () => Promise<void>) => {
       if (completion) return completion;
       stopped = true; scope.selected.stop();
-      completion = Promise.allSettled([input.autoMemory.stop(), input.utility.stop(), stopCurrent()])
-        .then((results) => { scope.local.stop(); if (results.some((result) => result.status === "rejected")) throw new Error("MEMORY_SHUTDOWN_FAILED"); });
+      // Abort producers concurrently, then settle every retired/failed binding before the caller closes SQLite.
+      // The transition executor still owns its in-flight target receipt lookup until stopTransitions settles.
+      completion = Promise.allSettled([stopTransitions(), input.autoMemory.stop(), input.utility.stop(),
+        scope.hindsightBinding.stop(), scope.local.stop(), Promise.resolve(scope.selected.legacy?.stop?.())])
+        .then((results) => { if (results.some((result) => result.status === "rejected")) throw new Error("MEMORY_SHUTDOWN_FAILED"); });
       return completion;
     } };
 }

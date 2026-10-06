@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "H:\\hindsight\\.venv\\Scripts\\ty.exe",
+    "check",
+    "--project",
+    "H:/hindsight",
+    "--python",
+    "H:\\hindsight\\.venv\\Scripts\\python.exe",
+    "--extra-search-path",
+    "H:/hindsight/hindsight-api-slim",
+    "--extra-search-path",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+    "--extra-search-path",
+    "H:\\TakiAgent\\.trellis\\tasks\\08-09-hindsight-initial-cutover\\research\\validation",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-working-recovery.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_working_custody.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_working_migration.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_working_recovery.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-working-checks\\run_checks.py",
+    "--output-format",
+    "concise"
+  ],
+  "exitCode": 0,
+  "stdout": "All checks passed!\n",
+  "stderr": "",
+  "seconds": 0.25
+}

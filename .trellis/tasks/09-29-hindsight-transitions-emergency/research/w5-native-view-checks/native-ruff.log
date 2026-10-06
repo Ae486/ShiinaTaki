@@ -1,0 +1,43 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> tests\native_results\test_transition_native_view.py:3:1
+   |
+ 1 |   """Locked source borrowing keeps the ordinary native and immutable-body proofs."""
+ 2 |
+ 3 | / from __future__ import annotations
+ 4 | |
+ 5 | | import copy
+ 6 | | import uuid
+ 7 | | from dataclasses import dataclass
+ 8 | | from typing import Any
+ 9 | | from unittest.mock import AsyncMock
+10 | |
+11 | | import pytest
+12 | |
+13 | | from hindsight_api.engine import logical_snapshot
+14 | | from hindsight_api.engine.application_state import commits, snapshot
+15 | | from hindsight_api.engine.application_state.codec import json_bytes, native_payload_hash
+16 | | from hindsight_api.engine.application_state.models import (
+17 | |     ApplicationStateError,
+18 | |     TakiApplicationBodyRef,
+19 | |     TakiApplicationNamespace,
+20 | |     TakiApplicationNativeHead,
+21 | |     TakiApplicationNativeRecord,
+22 | |     TakiApplicationNativeVersion,
+23 | |     TakiApplicationSnapshotRequest,
+24 | | )
+25 | | from hindsight_api.engine.logical_snapshot import LogicalSnapshotRecord, _SnapshotSource
+26 | | from hindsight_api.engine.replication import (
+27 | |     BankLogicalPayload,
+28 | |     MemoryUnitLogicalPayload,
+29 | |     ReplicationBankState,
+30 | |     TakiDispositionTraits,
+31 | | )
+32 | | from hindsight_api.engine.application_state.store import parse_model
+33 | |
+34 | | from .current_state_helpers import unit
+   | |_______________________________________^
+   |
+help: Organize imports
+
+Found 1 error.
+[*] 1 fixable with the `--fix` option.

@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "H:\\hindsight\\.venv\\Scripts\\ruff.exe",
+    "format",
+    "--check",
+    "--line-length",
+    "120",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-working-recovery.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_working_custody.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_working_migration.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_working_recovery.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-working-checks\\run_checks.py"
+  ],
+  "exitCode": 0,
+  "stdout": "5 files already formatted\n",
+  "stderr": "",
+  "seconds": 0.0940000000045984
+}

@@ -1,0 +1,34 @@
+{
+  "node": "v24.18.0",
+  "loader": "native-type-stripping",
+  "modelRequests": 0,
+  "localData": "synthetic Markdown through genuine B2 snapshot, prepare and activation producers",
+  "results": [
+    {
+      "mode": "legacy-markdown",
+      "exitCode": 0,
+      "websocket": "opened-and-closed",
+      "gracefulSignal": "SIGINT",
+      "runtime": {
+        "providerId": "legacy-markdown",
+        "available": true,
+        "unavailableReason": null
+      },
+      "reopenedDatabase": "integrity-ok",
+      "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\w4-independent-boot\\792b6a9f-8b5c-4345-a956-de21022ae8c8\\legacy-markdown"
+    },
+    {
+      "mode": "canonical-local",
+      "exitCode": 0,
+      "websocket": "opened-and-closed",
+      "gracefulSignal": "SIGINT",
+      "runtime": {
+        "providerId": "local",
+        "available": true,
+        "unavailableReason": null
+      },
+      "reopenedDatabase": "integrity-ok",
+      "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\w4-independent-boot\\792b6a9f-8b5c-4345-a956-de21022ae8c8\\canonical-local"
+    }
+  ]
+}

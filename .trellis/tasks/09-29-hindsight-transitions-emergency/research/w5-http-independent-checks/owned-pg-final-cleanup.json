@@ -1,0 +1,8 @@
+{
+  "fixture": "taki-hindsight-g1-d63d7c8f3454",
+  "stopped": true,
+  "dataRemoved": true,
+  "registryRemoved": true,
+  "portReleased": true,
+  "port": 5432
+}

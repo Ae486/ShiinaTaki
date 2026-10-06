@@ -66,6 +66,20 @@ async function parkBanks(j: HindsightActivationJourney, subsystem: HindsightSubs
 }
 
 describe("Stage 2c — new-Character Bank provisioning", () => {
+  it.each(["bank.provision", "connection.revalidate"] as const)("retirement detaches a hung %s and prevents its late export from publishing or dispatching again", async (kind) => {
+    const j = journey({ characters: [MIKA] }); const { session, epochId } = await activatedInstance(j);
+    const exportTemplate = j.client.exportTemplate.bind(j.client); let release!: () => void;
+    vi.spyOn(j.client, "exportTemplate").mockImplementationOnce(async (...args) => {
+      const value = await exportTemplate(...args); return new Promise((resolve) => { release = () => resolve(value); });
+    });
+    session.operations.submit(kind === "bank.provision" ? { kind, characterId: MIKA } : { kind, expectedEpochId: epochId });
+    await vi.waitFor(() => expect(release).toBeDefined());
+    session.lifecycle.retireEpoch?.(epochId); await session.lifecycle.stop();
+    const before = { banks: bankRows(session), reviewed: createHindsightConnectionRepo(session.db).reviewed(), calls: nativeCalls(j) };
+    release(); await session.operations.stop(); await new Promise<void>((resolve) => setImmediate(resolve));
+    expect({ banks: bankRows(session), reviewed: createHindsightConnectionRepo(session.db).reviewed(), calls: nativeCalls(j) }).toEqual(before);
+  });
+
   it("degrades a new Character, provisions a fresh Bank that binds, recalls Global + Character and ingests the degraded turn once", async () => {
     const j = journey({ characters: [MIKA], model: scriptedGenerateModel([keepSpan(1, 2)]) });
     const subsystems = observeHindsightSubsystems();
@@ -217,7 +231,7 @@ describe("Stage 2c — connection revalidation and rebind", () => {
     const calls = j.application.calls.length;
     await expect(Promise.resolve(inflight.tools.recall!.execute!(query, TOOL_OPTIONS))).rejects.toThrow(/^MEMORY_OPERATION_CANCELLED$/);
     await expect(Promise.resolve(inflight.tools.retain!.execute!({ content: "旧 Run 的写入", layer: "episodes", context: null }, TOOL_OPTIONS)))
-      .rejects.toThrow(/^MEMORY_OPERATION_CANCELLED$/);
+      .resolves.toMatchObject({ ok: false, code: "MEMORY_AUTHORITY_FENCED" });
     expect(j.application.calls.length).toBe(calls);
     const next = await session.runtime.captureRun(JOURNEY_CHARACTER);
     expect(await next.tools.recall!.execute!(query, TOOL_OPTIONS)).toMatchObject({ ok: true });
@@ -477,8 +491,9 @@ describe("Stage 2c — automatic lifecycle triggers", () => {
 });
 
 describe("Stage 2c — D87 activation-interval Character", () => {
-  it("blocks resume on a Character first seen during the interval until 应用配置 verifies its Bank", async () => {
-    const j = journey({ characters: [MIKA] });
+  it("carries a new Character's exact primary witnesses through the fence and provisions its Bank after activation", async () => {
+    const j = journey({ characters: [MIKA], model: scriptedGenerateModel([keepSpan(1, 2)]) });
+    const subsystems = observeHindsightSubsystems();
     const session = j.session;
     const localEpochId = await onboardLocal(session);
     await configureHindsight(session);
@@ -486,24 +501,25 @@ describe("Stage 2c — D87 activation-interval Character", () => {
     j.transport.before(async ({ route }) => {
       if (route !== "verification-verify" || seen) return;
       seen = true;
-      expect((await session.runtime.captureRun(MIKA)).snapshot.providerId).toBe("local");
+      expect((await session.runtime.captureRun(MIKA)).snapshot).toMatchObject({ providerId: "local", capabilities: { recall: false } });
+      expect(session.db.prepare("SELECT count(*) AS n FROM canonical_memory_banks WHERE character_id=:id").get({ id: MIKA })?.n).toBe(0);
+      // A read-only Run capture no longer materializes a Bank. Persist the actual first conversation instead.
+      session.chat("New Character during activation", "Owned response", MIKA);
     });
     const first = await session.settled({ kind: "hindsight.activate", source: { mode: "new", setupRevision: session.setup.status().revision, expectedEpochId: localEpochId } });
-    expect(first).toMatchObject({ state: "failed", errorCode: "HINDSIGHT_LOCAL_COVERAGE_STALE" });
-    const runId = (first.producer as { runId: string }).runId;
-    const blocked = await session.settled({ kind: "hindsight.activate", source: { mode: "resume", runId } });
-    expect(blocked).toMatchObject({ state: "completed", result: { outcome: "prerequisite_blocked",
-      blocking: [expect.objectContaining({ characterId: MIKA, code: "HINDSIGHT_TEMPLATE_NOT_VERIFIED" })] } });
-    const applied = await session.settled({ kind: "setup.apply", expectedRevision: session.setup.status().revision, characterId: MIKA });
-    expect(applied.state).toBe("completed");
-    expect(session.activationStatus().prerequisites.blocking).toEqual([]);
-    expect(readMemoryAuthoritySelection(session.db)).toMatchObject({ mode: "canonical-local", epochId: localEpochId });
-
-    // The recapture re-verifies every Bank under new per-preparation ids; native refuses nothing and the run commits.
-    const resumed = await session.settled({ kind: "hindsight.activate", source: { mode: "resume", runId } });
-    expect(resumed).toMatchObject({ state: "completed", result: { outcome: "activated", runtimeAvailable: true } });
-    expect(readMemoryAuthoritySelection(session.db)).toMatchObject({ mode: "hindsight", epochId: (resumed.producer as { hindsightEpochId: string }).hindsightEpochId });
+    expect(seen).toBe(true); expect(first).toMatchObject({ state: "completed", result: { outcome: "activated", runtimeAvailable: true } });
+    const epochId = readMemoryAuthoritySelection(session.db).epochId!;
+    const witnesses = createHindsightIngestionSourceRepo(session.db); const scope = { epochId, characterId: MIKA };
+    expect(witnesses.unprocessedCount(scope)).toBe(2);
+    expect((await session.runtime.captureRun(MIKA)).snapshot.capabilities.recall).toBe(false);
+    expect(await session.settled({ kind: "bank.provision", characterId: MIKA })).toMatchObject({ state: "completed", result: { readiness: "ready" } });
     const run = await session.runtime.captureRun(MIKA);
     expect(run.snapshot).toMatchObject({ providerId: "hindsight", capabilities: { recall: true } });
+    j.application.control.offline = true;
+    const range = { characterId: MIKA, fromSeq: 1, throughSeq: 2 };
+    expect(await subsystems.at(-1)!.memoryFlush.prepareRetirement({ ...range, operationId: "interval-flush" })).toMatchObject({ status: "success", writes: 2 });
+    expect(witnesses.unprocessedCount(scope)).toBe(0);
+    expect(await subsystems.at(-1)!.memoryFlush.prepareRetirement({ ...range, operationId: "interval-flush-again" })).toMatchObject({ status: "success", writes: 0 });
+    expect(j.model.doGenerateCalls).toHaveLength(1);
   });
 });

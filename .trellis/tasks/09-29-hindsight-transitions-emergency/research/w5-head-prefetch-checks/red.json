@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "--noconftest",
+    "-o",
+    "addopts=",
+    "tests/native_results/test_transition_head_prefetch.py",
+    "-q",
+    "--tb=short"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 1,
+  "stdout": "\ntests/native_results/test_transition_head_prefetch.py::test_locked_bundler_keeps_head_first_batches_and_full_bodies FAILED [100%]\n\n================================== FAILURES ===================================\n________ test_locked_bundler_keeps_head_first_batches_and_full_bodies _________\ntests\\native_results\\test_transition_head_prefetch.py:259: in test_locked_bundler_keeps_head_first_batches_and_full_bodies\n    assert schedules[1] == schedules[0], (\nE   AssertionError: head-first scheduling changed: ordinary=Counter({'ordinary_metadata': 258, 'ordinary_parts': 258, 'batch_metadata': 5, 'batch_sizes': 5, 'batch_parts': 5}), locked=Counter({'ordinary_metadata': 519, 'ordinary_parts': 519, 'batch_metadata': 3, 'batch_sizes': 3, 'batch_parts': 3})\nE   assert Counter({'ord...ch_parts': 3}) == Counter({'ord...ch_parts': 5})\nE     \nE     Differing items:\nE     {'batch_sizes': 3} != {'batch_sizes': 5}\nE     {'batch_metadata': 3} != {'batch_metadata': 5}\nE     {'ordinary_parts': 519} != {'ordinary_parts': 258}\nE     {'ordinary_metadata': 519} != {'ordinary_metadata': 258}\nE     {'batch_parts': 3} != {'batch_parts': 5}...\nE     \nE     ...Full output truncated (24 lines hidden), use '-vv' to show\n=========================== short test summary info ===========================\nFAILED tests/native_results/test_transition_head_prefetch.py::test_locked_bundler_keeps_head_first_batches_and_full_bodies\n============================== 1 failed in 6.04s ==============================\n",
+  "stderr": ""
+}

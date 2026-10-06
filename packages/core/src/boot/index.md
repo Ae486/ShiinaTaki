@@ -4,3 +4,4 @@
 - hindsight-activation-boot.ts — composes the Stage 2b activation service over the production client factory, the live connection fingerprint and the composition binding seams; no boot network call
 - hindsight-lifecycle-boot.ts — composes the Stage 2c lifecycle service (bank.provision / connection.revalidate producer) over the production client factory, the operations view, the Hindsight binding snapshot and the replace seam; no boot network call
 - hindsight-backup-boot.ts — composes the Stage 3 backup producer (capture/admit/verify) over the `<dataDir>/backups/` store, Secret Catalog custody and credential read-back, and the production native route over the live Hindsight connection (TAKI-HS-013 endpoint); no boot filesystem or network effect
+- memory-transition-boot.ts — composed healthy/offline producers and read-only operator overview, full independent readiness and boot-primed status observer; no boot dispatch.

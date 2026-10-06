@@ -4,7 +4,7 @@
  * POS:    core/memory/operations — test support; not in the production path
  */
 import { vi } from "vitest";
-import type { HindsightSetupSnapshot, MemoryReplicaBank, MemoryReplicaRunKind, MemoryReplicaSyncStatus } from "@taki/shared";
+import type { HindsightSetupSnapshot, MemoryReplicaBank, MemoryReplicaRequest, MemoryReplicaRunKind, MemoryReplicaSyncStatus } from "@taki/shared";
 import type { Database } from "../../db/sqlite.ts";
 import { createCanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
@@ -61,8 +61,22 @@ export interface FakeScheduler extends SchedulerView {
   settleClaimed(bankId: string, success: boolean): void;
 }
 
+function settleFakeRequest(requests: Map<string, MemoryReplicaRequest>, input: { state: MemoryReplicaSyncStatus; outcome: TickOutcome; at: string }): void {
+  const { state, outcome, at } = input;
+  const row = [...requests.values()].find((value) => value.bankId === state.bankId && (value.state === "queued" || value.state === "claimed"));
+  if (!row) return;
+  const claimed = outcome.kind !== "supervisor";
+  const failed = outcome.kind === "failure" || outcome.kind === "supervisor";
+  requests.set(row.requestId, { ...row, state: outcome.kind === "claim" ? "claimed" : failed ? "failed" : "succeeded",
+    claim: claimed ? claimedRun(state, at).lease : null, settledAt: outcome.kind === "claim" ? null : at,
+    errorCode: failed ? outcome.errorCode : null,
+    nextAction: failed ? outcome.automatic === false ? "explicit_retry_required" : "automatic_retry_scheduled" : null,
+    lastSuccessAt: state.lastSuccessAt });
+}
+
 function fakeScheduler(banks: MemoryReplicaBank[], clock: () => string) {
   const states = new Map(banks.map((bank) => [bank.bankId, replicaState(bank)]));
+  const requests = new Map<string, MemoryReplicaRequest>();
   const control = { started: true, error: null as MemoryReplicaSyncStatus["errorCode"], outcome: { kind: "success" } as TickOutcome, gate: null as Promise<void> | null };
   const required = (bankId: string) => { const state = states.get(bankId); if (!state) throw new Error("HINDSIGHT_REPLICA_BANK_NOT_SCHEDULED"); return state; };
   const scheduler: FakeScheduler = {
@@ -72,13 +86,18 @@ function fakeScheduler(banks: MemoryReplicaBank[], clock: () => string) {
     setStarted: (value) => { control.started = value; },
     program: (next) => { control.outcome = next; },
     hold: () => { let release = (): void => undefined; control.gate = new Promise<void>((done) => { release = done; }); return () => { control.gate = null; release(); }; },
-    requestManual: vi.fn((bankId: string, kind: MemoryReplicaRunKind = "incremental") => {
+    request: (id) => requests.get(id),
+    requestManual: vi.fn((bankId: string, kind: MemoryReplicaRunKind = "incremental", requestId?: string) => {
       const current = required(bankId);
+      if (requestId) requests.set(requestId, { requestId, bankId, kind, state: "queued", claim: null, createdAt: clock(),
+        settledAt: null, errorCode: null, nextAction: null, lastSuccessAt: null });
       states.set(bankId, { ...current, pendingManualKind: current.pendingManualKind === "full" ? "full" : kind }); return required(bankId);
     }),
-    cancelManual: vi.fn((bankId: string) => {
+    cancelManual: vi.fn((bankId: string, requestId?: string) => {
       const current = required(bankId);
       if (current.run !== null) throw new Error("HINDSIGHT_REPLICA_BUSY");
+      const row = requestId ? requests.get(requestId) : undefined;
+      if (row) requests.set(row.requestId, { ...row, state: "cancelled", settledAt: clock() });
       states.set(bankId, { ...current, pendingManualKind: null }); return required(bankId);
     }),
     tick: vi.fn(async () => {
@@ -87,12 +106,14 @@ function fakeScheduler(banks: MemoryReplicaBank[], clock: () => string) {
       for (const bank of banks) {
         if (control.outcome.kind === "supervisor" && required(bank.bankId).pendingManualKind !== null) control.error = control.outcome.errorCode;
         states.set(bank.bankId, applyOutcome(required(bank.bankId), control.outcome, clock()));
+        settleFakeRequest(requests, { state: required(bank.bankId), outcome: control.outcome, at: clock() });
       }
     }),
     settleClaimed: (bankId, success) => {
       const current = required(bankId); const at = clock();
       states.set(bankId, { ...current, run: null, mode: success ? "idle" : "failed", lastSuccessAt: success ? at : current.lastSuccessAt,
         errorCode: success ? null : "HINDSIGHT_TIMEOUT", nextAction: success ? null : "automatic_retry_scheduled" });
+      settleFakeRequest(requests, { state: required(bankId), outcome: success ? { kind: "success" } : { kind: "failure", errorCode: "HINDSIGHT_TIMEOUT" }, at });
     },
     status: (bankId?: string) => banks.filter((bank) => bankId === undefined || bank.bankId === bankId).map((bank) => required(bank.bankId)),
     lastError: () => control.error,

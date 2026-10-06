@@ -1,0 +1,350 @@
+# Memory Transition Durable Protocol
+
+Shared synchronous evidence ownership and its required regression coverage are defined in
+[Publication and Runtime Ownership](./memory-transition-publication.md#synchronous-native-evidence-validation).
+
+## Scope and source boundary
+
+Locked Native delta baselines may lend their freshly loaded logical source to the private application bundler
+only through the existing `_reuse_body_bytes=True` path. The ordinary `_admit` transaction is protected by its
+Bank/fence locks; this is not general transaction caching or a readonly-RR guarantee. Each admission reloads its
+own source and exact SQL-keyed heads. Canonical SQL-payload hashes, immutable native version/body/Bank checks and
+all document original-text/retain-parameter/availability evidence remain independent. Invalidated memory payloads,
+duplicate native/head keys and mismatched SQL/envelope head keys use ordinary point validation. Archive Python
+ordering and duplicate IDs are not equivalent to SQL collation/ANY. All borrowed indexes expire at bundler return;
+ordinary snapshots/hydration, writes, predecessors and later baseline passes retain their own fresh reads.
+
+W1 provides Shared schemas, migration 052, Core repositories and the existing operation owner's transition family.
+W2 adds the independently versioned PostgreSQL native protocol and its Shared/Core client adapter below. W3 supplies
+complete candidates and reusable baselines; W4 supplies atomic publication, runtime binding and queued effect
+reconciliation under the linked publication contract. Healthy/emergency orchestration and Home remain W5-W7 work.
+No transition driver is composed merely because these methods exist; deployed capability must be probed.
+
+## Admission and ownership
+
+- Kinds are `transition.return-local`, `transition.reenter-hindsight`, and `transition.emergency-local`.
+  Healthy and emergency confirmations are distinct; public `MemoryOperationRequestSchema` applies the aggregate
+  direction and common-baseline refinements as well as the individual union arms.
+- The existing operation owner atomically inserts its row and the immutable transition intent. Exact request retry
+  returns the same operation; altered content under the same request ID refuses. No producer dispatch precedes COMMIT.
+- The optional driver `plan()` is synchronous and side-effect-free. It must supply authenticated actor identity and
+  current source/config/Bank identity and refuse unavailable direction capabilities. Storage compares these against
+  the preview hash and selected predecessor. W1 does not replace the later final-state producer validation.
+- Six exclusive control families and exact queued/claimed manual-sync requests exclude transitions in both directions.
+  Migration triggers also preserve exclusion after a terminal operation projection while its attempt remains unresolved.
+- Claim uses operation `running` plus a bounded lease, generation, attempt ID, owner and revision CAS. Expiry only
+  revokes the executor; it never releases native obligations, deletes evidence or reopens excluded work.
+
+## Queue and factual outcomes
+
+- Admission retains normalized typed mutation/retain requests and Run/Effect IDs as provenance only. No closure is
+  retained. Caller request ID uses the existing bounded string contract, including `memory-branch:<scope>:<hash>`;
+  Core-minted intent/replay and target request IDs are UUIDs.
+- Default server policy is 256 intents, 8 MiB total, 256 KiB per intent and a 120-second admission window. These are
+  explicit conservative policy choices, not measured provider limits; the strict policy schema bounds overrides.
+- A persisted opening and cutoff delimit admission. Exact retry remains observable after cutoff; new old-authority
+  calls refuse. Count/byte/time/scope failures happen before acknowledgment and do not consume sequence numbers.
+  A durable result, terminal attempt or non-running owning operation also refuses new custody, even if an abort left
+  the opening timestamp present or the operation projection has not yet settled. Exact retries still return their
+  original durable outcome.
+- Queue ACK means custody, not a successful memory effect. Post-COMMIT preparation persists one fresh target request
+  under exact mapping/epoch proof and stable queue order. W4 must validate target mapping/revisions and execute it.
+- Unknown is an append-only observation, not a terminal queue result. Recovery looks up the same target request and
+  appends its factual result, preserving old observations and dispatch reservation. It cannot cancel an unknown effect
+  or mint a new request to bypass the missing reply. Unknown prevents queue completion and advancing later dispatch.
+- Pre-COMMIT abort can terminally refuse/cancel queue entries; executing them against the source requires W4's explicit
+  source execution path. W1 does not silently reinterpret the post-COMMIT reservation as source replay.
+
+## Evidence, cancellation and recovery
+
+- Proof and receipt bodies are strict and content-hashed. Proof covers every admitted Bank exactly once and binds the
+  attempt/generation/cutoff; receipt binds source identity, proof, mapping, new epoch and custody hash. W4 must call
+  receipt insertion inside the same outer transaction that publishes authority/custody. W1 verifies the selected
+  published epoch but does not itself publish it or verify external native certificates.
+- The operation adapter ignores unpersisted driver settlement and observes immutable results/resolutions. Exceptions
+  or unreadable evidence do not manufacture a failure receipt. Boot reads evidence without dispatch; committed receipt
+  without runtime settlement reports authority committed plus runtime unavailable and unresolved queue.
+  The unresolved boundary includes the post-driver operation lookup. Receipt reads validate admission operation,
+  request and direction as well as hashes and persisted row identities; a correctly rehashed mismatched body refuses.
+- Pre-claim cancellation wins through the existing operation CAS. Cancelling an unclaimed recovery affects only its
+  new operation; the original fence obligations stay unresolved. Running or committed work cannot be called cancelled.
+  A failure in claimed `admitted`/`draining` phases does not prove that external work never started. Such results retain
+  durable exclusion until explicit release resolution; `settleTransition()` cannot issue cancellation after claim.
+- Explicit recovery has a new authorized operation/request and points to the original transition, exact generation
+  and expected receipt. Original terminal operation/results remain immutable. The new operation may claim the expired
+  attempt and append a resolution only with all queued results settled and exact release/retirement/quarantine proof.
+- W2/W5 verify native release evidence before `resolveTransition()`. The storage boundary validates hashes, current
+  lease, Bank/generation coverage, source/target authority and emergency incident identity. Fixture hashes alone are
+  never acceptance evidence for an external effect. No automatic foreign-history merge is implemented.
+
+## Required regression coverage
+
+### Future authority COMMIT join (W4)
+
+W1 receipt insertion verifies only the selected canonical epoch subset. It is not a complete runtime selection or
+custody publication API. Before composing a driver, W4 must atomically join the selected authority marker
+(`memory_authority_selection`), canonical authority state/epoch, transition receipt, verified candidate/mapping and
+checkpoint identities, exact primary-source custody assignment, and the admitted queue cutoff/ownership. Revalidate
+the expected source predecessor, configuration/inventory and current fence/attempt before publication; a failed join
+rolls back every part. Runtime selection and boot must validate this complete join using the transition receipt type,
+without manufacturing old Local migration or Hindsight first-activation receipts. A W1 fixture that publishes only
+`canonical_memory_authority_state`/epoch and a receipt proves repository guards, not this W4 commit or usable runtime.
+
+### W1 checks
+
+Strict public schemas; actual SQLite admission rollback, competing connections, 051 upgrade/reopen and immutable
+triggers; stale CAS/proof/cutoff/preview refusal; control-family/manual-sync exclusion; pre-claim cancellation; queue
+bounds/order/unknown factual recovery under the same target ID; old terminal history preserved by explicit recovery;
+receipt-only live and boot observation through the existing operation owner. Native and runtime proof remain separate
+later-wave tests, not mocked W1 acceptance.
+
+## W2 native publication and final-proof protocol
+
+- The exact new build is `taki-memory-hindsight-0.9.0-transitions-v1`, with independently probed
+  `contracts.transitions.version=1.0.0` and wire `protocol=taki-transition-v1`. Native migration
+  `e30a9d7f6c21` follows `d77a4f8c2e10`. Existing D78 and D77 contracts and receipts keep their meanings.
+  Every method authenticates the tenant/key, checks Bank restrictions and requires the actual schema/trigger
+  inventory. A DTO executor token is never authentication. PostgreSQL SQL-row storage is the supported backend.
+- Ordinary foreground scopes register durable bounded writers. Acquire captures actual accepted async roots;
+  only their witnessed descendants may drain. Cursor/maintenance/fence lock ordering and SQL publication guards
+  cover canonical rows, native journal and cursor mutations, D77 writes, D78 receipts/plans and association rows.
+  Association ownership includes the row's own Bank and both endpoints across OLD/NEW in one sorted set.
+  Privileged direct administration that disables constraints/triggers is outside the supported writer contract.
+- Additive Native migration `e40b1e8a7d32` replaces only the association function's three endpoint predicates with
+  native UUID comparisons. Never cast indexed endpoint columns to text or omit direct/legacy/archive ownership.
+  Typed OLD/NEW UUID fields and absent/JSON-null values retain their original Bank-set semantics; all row triggers,
+  sorted publication calls, locks and permits are unchanged. Preserve the recorded e30 migration. Verify actual
+  public/tenant upgrades, new-revision-only rollback, complete data/history and function/trigger identities, and
+  all three real association tables with OLD/NEW, cross-Bank, null/missing/archive and cascade/fencing cases.
+  Existing DB functions require an explicit migration: source replacement and `run_migrations=False` cannot apply
+  the repair. A fresh clone must verify pre/post revision and function identity from new connections before apply;
+  a working-pair migration is a separate independently gated action. Endpoint SELECT speed is not full-apply proof.
+- ID-only single/bulk memory deletion discovers its immutable Bank set and registers one writer per Bank in sorted
+  order before the original data transaction. Those same identities cover awaited post-COMMIT graph/consolidation
+  children; a later callback cannot acquire a fresh generation for the old operation. Multi-Bank SQL publication
+  selects the exact registered Bank identity. Queue admission validates inherited writer/transition identities even
+  in active/aborted/no-owner states; those states permit fresh roots, never revive a retired caller.
+  The transactional final Bank discovery must be a subset of this invocation's registered membership, including
+  when initial discovery was empty. A newly appearing requested ID/Bank refuses before any delete; SQL and child
+  admission retain the same closed set. Actual pre-transition schemas keep their prior deletion behavior.
+- Executor/writer expiry revokes publishing permission without reopening the durable fence. Late transition
+  tokens remain invalid even after another owner activates or aborts. Claim advances executor generation while
+  immutable proof retains its original publisher; native reads join its actual append-only publication history.
+  Core accepts an older proof executor only within the same validated transition/request/namespace and native
+  historical chain. Sealed lookup/claim/verification does not repeat native model work.
+- A second verify request while the same live attempt is running refuses before starting another native pass. Poll
+  the original status/proof; after real executor expiry, a new generation can resume its recorded plan. Claim replay
+  must witness an actual generation takeover, not any unrelated revision+1 phase update. Core checks the requested
+  claim attempt/revision and exact submitted decision in each resolution response.
+- Finite maintenance reuses the actual D78 consolidation/model/input/action algorithms under a separately typed
+  transition owner and separate history. It does not synthesize a D78 transfer. Static models without source_query
+  retain their revision/hash with explicit source_query_absent evidence; scheduler status does not waive work.
+  Existing application policies rebind through the original D77 validator/commit, preserving restrictions and
+  original bodies; changed native assessment becomes due. Newly derived unbound objects remain explicit inputs
+  for W3's initial candidate policy rather than receiving fabricated model outcomes.
+- The final native snapshot, complete D77 snapshot/history, auxiliary original/derived native rows, maintenance
+  evidence and proof publish in one PostgreSQL transaction. Read-only transport materialization is separately
+  scoped. Final snapshot evidence is retained beyond ordinary TTL; a consumer must use the exact certificate
+  identity for retained reads, never grant that exception to an arbitrary expired snapshot.
+- Final transition snapshots retain replication/maintenance/transition-fence and plan locks in a single
+  `read_committed` transaction. These locks freeze every mutable native/application/auxiliary input while allowing
+  lease-only owner-row renewal to remain visible. Ordinary and D78 snapshots retain `repeatable_read`.
+  The exact authenticated renew request takes only `FOR NO KEY UPDATE` on its owner row, checks the live namespace,
+  current pointer, full executor, nonterminal phase and unexpired lease, and changes neither revision nor history.
+  It must not wait on its own final snapshot's Bank lock or auxiliary/history FK `KEY SHARE` locks. Claim locks the
+  owner row before its expiry decision so an uncommitted successful renewal cannot be overwritten by a stale claim.
+  Final proof publication performs an exact executor/phase/live-lease CAS and rolls back all pages/proof if it loses.
+  Renewals during sealing must neither cause RR serialization loops nor repeat completed model actions; new mutable
+  snapshot inputs must share the held locks before they can participate in this transition-specific transaction.
+- Re-entry delta sends a complete native/chunk/application descriptor inventory and only changed bodies. It checks
+  the real baseline, every existing native revision/hash, every prior app revision/body hash, explicit deletion/expiry
+  witness and complete reference closure before writing. Changed native IDs are reused, live rows update in place,
+  archived rows use actual native restore, and native-only/derived evidence is retained. Native/app changes and the
+  immutable delta result commit together; lost replies read that same result before embedding or another write.
+- The independent delta publisher appends current Local original-input revisions under exact predecessor/source
+  hashes. Ordinary D77 original equality checks are unchanged. Source publication derives original_witness and
+  encoded_metadata from the actual post-delta native source; no predicted/null/old witness may claim original
+  provenance. Old revision body bytes remain readable. Unchanged artifacts get no extra revision; policy/Block-only
+  changes reuse the native ID/revision/body. Final re-entry proof additionally binds the actual delta result hash.
+
+### Genuine new scopes
+
+`unused_scope` is a separate baseline type; it never pretends to be a prior return-local receipt. A creation marker
+exists only for actual Bank INSERT after the new migration, is not backfilled, and never clears ever_used/deleted.
+Admission also verifies complete native history from cursor zero, exact current Bank/config/template witnesses and
+absence of user records, source chunks, async work, transfer/retain/mutation or D77 artifact/operation history.
+Initial D77 native-head capture and read transport are allowed; they do not prove user use. Used-then-cleared,
+recreated, old-without-creation, pruned-history and changed-template Banks refuse. Acquire stores the real unused
+proof; delta and final proof bind it. W3 independently proves this Local scope was absent from the prior common
+baseline. Existing scopes must still use their exact retired baseline.
+
+The real B3 template producer performs an initial asynchronous mental-model refresh. Its completed initialization
+is allowed only with append-only `memory_transition_initializations` provenance: actual origin.creation_id, the
+first parsed template/import identity, exact operation/model definition, live worker identity, actual model-history
+rows and completed output. The importer owns one writer across all children and its final event. Only its task-local
+scope can admit initialization; a worker derives permission from its immutable admitted operation. A GUC, model ID,
+current emptiness, timestamp or caller token alone proves nothing. Same-template retries keep the original events
+and record real additional operations; all operations and history must be accounted for and completed before unused
+admission. Pending/failed/unknown, missing/extra evidence, altered definitions/templates, or ordinary work interleaved
+with initialization refuse. All non-initialization data/queue use remains sticky; ever_used is never cleared.
+The ledger is part of capability detection, full auxiliary evidence and physical backup/restore; no old Bank,
+restored archive or missing event receives backfilled provenance. Initialization history is preserved as native
+evidence, not projected as user memory or a made-up Local policy.
+
+### Native cancellation and recovery
+
+- A return-local abort with no maintenance plan/effect can release draining/fenced source ownership. Once maintenance
+  begins, an incomplete or unknown effect retains the owner: resume the same plan to a real proof before aborting.
+- Existing-Bank re-entry abort is safe only with no delta/maintenance effect and a byte-exact current retired
+  baseline. Under the same Bank transaction it records immutable aborted history and restores the fence pointer to
+  the original retired owner; ordinary native writes remain refused and a new authorized transition may retry.
+- An equally proven unused-scope abort records unused_baseline_held in quarantined phase. It stays fenced and can
+  be replaced only when all prior aborted histories and the exact birth/unused proof still match. It never enters
+  the ordinary active/aborted write-allowed branch.
+- Any committed or unknown staged delta refuses abort with staged_effects_require_recovery and keeps its original
+  claim/lookup/continuation identity live. No native/app clearing, automatic rollback or foreign-history merge occurs.
+  Retirement/activation still requires the exact final proof and externally supplied Core decision; these primitives
+  do not independently certify W4's Core authority transaction.
+
+### Wire and generated-client checks
+
+Core recognizes both normalized taki_transition_refused and ordinary HTTP detail fence/stale envelopes before
+legacy cursor-reset logic, including D77's own response parser. They become nonretrying fence/executor-loss errors,
+never rebuild permission. Existing unknown legacy cursor-response behavior and D93 remain unchanged.
+
+Canonical OpenAPI gives the nullable artifact union and combined D77/fence error response stable named components;
+wire bodies have no extra root property. Generate all SDKs with pinned tools, preserve maintained wrappers/CLI bytes,
+and verify their offline nullable-union/route contracts. Actual owned PostgreSQL→HTTP→Core evidence must cover typed
+original projection, old byte history and sealed-proof generation takeover separately from pure schema tests.
+
+### Offline native backup/restore
+
+The native administrative backup inventory includes every transition table and sticky Bank origin. Its offline
+restore transaction suspends only the new publication/admission trigger functions with table-owner DDL; immutable
+history and FK constraints remain active. COPY restores original identities rather than producing new Bank births
+or fence rows. After every stream, deferred constraints are checked and exact prior trigger modes are restored before
+commit. An exception rolls back both data and trigger DDL. No HTTP request or engine capability exposes this path.
+
+Actual PostgreSQL restore must preserve all stored columns, original bodies, retired/quarantined owners, proof/outcome
+bytes and origin usage/deletion markers. Expired executors never release the restored fence. Supported pre-e30 archives
+without transition tables leave those tables empty, including creation history; the restored old Bank cannot qualify
+as unused. This retains the existing binary-COPY shape validation rather than broadening arbitrary-version support.
+
+## W3 complete candidates and Source preservation
+
+### Scope and trigger
+
+Use these primitives after W1 fenced admission and W2 exact native proof. They prepare isolated state for W4/W5;
+they do not select authority, publish Blocks, change runtime references, assign custody or settle queued callers.
+Migration053 is additive after052 and must not rewrite old activation receipts or migration lineage.
+
+### Signatures and storage
+
+- `captureTransitionLocal(db, {lease, now, assertConfiguration})` discovers complete current Local state while holding
+  a real SQLite writer reservation. `readTransitionLocalCoverageState` is neutral; old initial-local/B2 entry guards remain.
+- `persistTransitionNativeEvidence`, `buildTransitionLocalCandidate`, `buildTransitionHindsightCandidate` bind exact
+  request/namespace/fence/proof, every admitted Bank (including empty), all pages, original bodies/history and final mappings.
+- `readVerifiedTransitionCandidate(db, candidateId)` independently reconstructs records, Blocks, history, mappings,
+  Source aliases/references and pendingSources. W4 calls it again inside its complete authority COMMIT/boot validation.
+- `installTransitionLocalCandidate` writes real unselected canonical rows, independent per-unit provenance, Sources,
+  policy, lineage/derived/FTS and revision snapshots. It does not temporarily select the epoch or publish global Blocks.
+- `prepareTransitionDelta` persists exact requests and Source upload bytes/ref/namespace before effects;
+  `executeTransitionDelta` checks original native result history first and records the exact result once.
+- Immutable `memory_transition_{captures,native_evidence,candidates,baselines,preparations,delta_results,source_uploads,
+  source_upload_attempts}` documents preserve body hashes; scope/epoch reservations survive retry/reopen.
+  `canonical_memory_{record_provenance,historical_identities,historical_references,source_aliases,source_sets,source_references}`
+  preserve original evidence independently from current live-row FKs. Reference ordinals preserve duplicates and order.
+
+### Contracts
+
+Common baselines become usable only through their exact genuine healthy transition receipt. Every existing scope
+requires the exact retired native baseline; new Local scopes require verified absence from that common baseline and
+the actual native unused-scope proof. Missing/foreign/emergency/pruned history cannot trigger reset or full-copy fallback.
+Epoch/Bank relocation is not a content edit. Complete native/application deltas use explicit reuse/upsert/retire,
+and final mappings join actual post-maintenance revisions rather than stopping at immediate delta outputs.
+
+For a genuinely new Local scope, compile every captured SourceSet reference against the Sources actually upserted
+by that same delta, preserving order and duplicate occurrences, including Sources materialized by real Local copy.
+Each reference must carry the exact current Local epoch/Bank/source body, local intent and no historical artifact
+selector. A direct documentId alone is not a complete SourceSet. Foreign or unprovable historical selectors refuse;
+the existing memory wire variant suffices when all references resolve to same-delta Source keys.
+
+Logical Local IDs are distinct from native IDs. Preserve original IDs only through verified Local lineage/mapping;
+provider-created Sources do not automatically prove Local identity. Multiple append-fragment Source artifacts sharing
+one physical document become independent stable aliases, while the physical native document has only one descriptor.
+The native head's bound artifact may be an append alias. Resolve the physical Source CAS address from verified
+original Local lineage and complete artifact history, separately from that head alias. Project original physical
+bytes/provenance only when its binding equals the current native version exactly. If the original artifact is older,
+keep its real CAS address and stable Local ID while taking current content from the native document; never invent
+version equality. Conflicting or foreign purported original Local IDs refuse before candidate publication.
+Unchanged native ID/revision/body and application versions remain unchanged. Actual Source omissions require same-epoch
+retirement ledger and baseline evidence; an edited-then-retired Source does not require invented transient body history.
+Native-deleted supporting units need exact retained tombstone/journal/original referrer evidence. Do not invent live units,
+permit unrelated missing UUIDs, or remove the Local incoming-support hard-delete refusal.
+
+Source-only alias changes use independently negotiated `contracts.transition_source_evidence.version=1.0.0`:
+
+- `source_evidence` delta body contains only a sealed `application-source.v1` BodyRef and exact `expected_document`.
+  Full legal JSON stays in the existing byte-body codec, not the frozen native JSONB request codec.
+- `application-source-evidence.v1` retains `source_ref`, D77-domain `source_record_hash`, exact previous artifact/body hash
+  and actual `associated_native`. Edited Local evidence carries no fabricated native operation/encoding/witness.
+- `/transitions/executor/source-bodies`, `/{body_id}/parts/{part_number}`, `/{body_id}/seal` validate the exact authenticated
+  executor/Bank/namespace/phase before each stage, reject post-proof writes and preserve ordinary D77 upload fences.
+  Reopen/lost replies reuse original bytes/IDs; a new executor receives a separate immutable attempt envelope.
+- `memory_evidence` selects either exact existing ArtifactVersion or a Source explicitly upserted by this same delta.
+  Resolve the latter to the actual atomic output. Preserve list order, duplicates and different versions of one key.
+  An old selected non-tombstoned Source remains valid after the key's latest head retires. Selected tombstone/missing/
+  foreign/hash-mismatched/undeclared output references refuse. Existing memory/source variants and old hashes stay unchanged.
+- Full ordinary snapshot/event/hydration/replica/binding/body reads and physical backup include the nested Source closure.
+  Association-only rebind may change only native association. Retiring a head-bound alias preserves the physical document,
+  surviving aliases and old referenced versions. Real Local copies create distinct Local Sources for distinct historical
+  versions and retain duplicate reference order, without cloning or inventing native artifact versions.
+
+`candidate.pendingSources` derives only current latest `awaiting_native` Source artifacts from complete verified proof.
+It carries exact namespace, artifact/version, body ref/bytes/hash, original operation/document, evidence and proof identity.
+Old awaiting versions subsequently bound remain raw history, not new unresolved obligations. Pending bytes are not a
+confirmed Local document/fact and create no native mapping. Re-entry preserves these artifacts explicitly. W4 joins
+each to original Pending/parent/custody evidence and records its factual disposition; W5 requires a disposition for
+every item before healthy publication. Known terminal refusal/non-dispatch retains history; unknown stays owned with
+no generic replay. W6 may preserve unknowns honestly in incident/custody. Raw pending inventory alone is not readiness.
+
+Local policyEdit/edit/reinforcement increment policyVersion exactly once only for actual semantic policy changes in the
+existing receipt transaction. No-op/text-only/unchanged-importance edits retain versions. Native reuse can retain Local
+policy-only updatedAt/editedAt only when exact baseline/final fields and unchanged native semantic content prove it.
+Consolidation bookkeeping alone cannot erase Local edits; a real later native field change wins even with an earlier clock.
+
+### Validation and error matrix
+
+| Condition | Required behavior |
+| --- | --- |
+| Missing/duplicate/foreign proof page, body or Bank | `MEMORY_TRANSITION_PROOF_INVALID`; no candidate publication |
+| Source/config/inventory changes after capture | `MEMORY_TRANSITION_STALE` or exact configuration/lease refusal; no new POST |
+| Missing/foreign/emergency baseline or absent retirement evidence | Refuse, preserve prior history and selected authority |
+| Old Source capability or missing client methods | Refuse before new byte upload/delta dispatch |
+| Lost upload seal/delta reply | Read original history, resume exact stored bytes/IDs only |
+| Stale executor or proven native fence | Native refusal before each upload stage/logical effect |
+| Pending Source without physical effect | Explicit pendingSources evidence; no confirmed row/mapping |
+
+### Good, base and bad cases
+
+Good: alias metadata/text changes while physical document/native revisions stay unchanged; pinned old+new+old Source
+references survive; real expired last dependent retires only its unneeded alias. Base: unchanged complete state reuses
+all mapped objects; new truly unused scope receives one durable Local ID. Bad: infer deletion from missing caller rows,
+repoint all references to arbitrary latest, treat old awaiting history as unknown, or replace a retired Bank baseline.
+
+### Required tests
+
+Use actual SQLite migration/reopen/rollback/writer reservation and ordinary Local mutation/retention/copy paths;
+assert complete multibank closure, original IDs, invalidated policies, typed/inert/deep JSON, unchanged reuse, actual
+retirement and post-maintenance mappings. Actual owned native HTTP must cover alias upload/delta/reference/final proof,
+foreign/stale/refusal boundaries, current awaiting Source proof and physical backup/restore. Historical corpus checks
+run on new copies, preserve original files/rows and retain original D77 mappings; they do not certify the W5 real journey.
+
+### Wrong versus correct
+
+Wrong: `max(localTimestamp, nativeTimestamp)` or latest Source lookup guesses causality/identity.
+Correct: join the exact baseline/delta/final native fields and exact selected artifact version/body evidence.
+Wrong: a complete raw archive alone proves usable Local state or pending readiness.
+Correct: independently reconstruct canonical/alias/reference state and carry unresolved Source dispositions to W4/W5.
+
+W4 production handoff contracts continue in [Memory Transition Publication and Runtime Ownership](./memory-transition-publication.md).

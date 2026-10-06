@@ -1,0 +1,88 @@
+/**
+ * INPUT:  the actual fenced all-Bank native sessions and current Local source when re-entering
+ * OUTPUT: persisted complete native evidence plus the checked W3 candidate and final post-maintenance mapping
+ * POS:    core/memory/transitions — healthy orchestration; no alternative transfer or synthetic first-activation history
+ */
+import { randomUUID } from "node:crypto";
+import type { HindsightTransitionStatus, MemoryTransitionIntent, MemoryTransitionUnusedInventory } from "@taki/shared";
+import { captureTransitionLocal, type TransitionCaptureInput } from "../../db/memory-transition-local-capture.ts";
+import { persistTransitionNativeEvidence, readTransitionCandidate } from "../../db/memory-transition-candidate-repo.ts";
+import { prepareTransitionDelta, readTransitionPreparation } from "../../db/memory-transition-delta-repo.ts";
+import { prepareTransitionNativeCommand, readTransitionNativeCommand, markTransitionNativeDispatched } from "../../db/memory-transition-driver-repo.ts";
+import type { Database } from "../../db/sqlite.ts";
+import { loadTransitionNativeEvidence } from "./transition-native-loader.ts";
+import { buildTransitionLocalCandidate } from "./transition-local-candidate.ts";
+import { buildTransitionHindsightCandidate } from "./transition-final-mapping.ts";
+import { executeTransitionDelta } from "./transition-delta-execution.ts";
+import { requireHindsightApplicationClient } from "../hindsight/hindsight-application-capability.ts";
+import { loadBodies } from "../hindsight/hindsight-application-bundle-loader.ts";
+import type { HindsightCallContext } from "../hindsight/hindsight-client.ts";
+import type { TransitionNativeSession } from "./transition-native-session.ts";
+
+interface Input { db: Database; intent: MemoryTransitionIntent; native: TransitionNativeSession;
+  work(): TransitionCaptureInput; request(): HindsightCallContext; changed(): void }
+export async function prepareHealthyTransitionCandidate(input: Input) {
+  const existing = input.db.prepare("SELECT id FROM memory_transition_candidates WHERE transition_id=:id AND slot='final'")
+    .get({ id: input.intent.transitionId });
+  if (existing) return readTransitionCandidate(input.db, String(existing.id));
+  const capture = input.intent.request.expected.sourceProvider === "local" ? captureTransitionLocal(input.db, input.work()) : null;
+  const preparations: string[] = []; const evidenceIds: string[] = [];
+  for (const bank of input.intent.request.expected.banks) {
+    const bankId = bank.nativeBankId ?? bank.targetBankId; if (!bankId) invalid();
+    const fenced = await input.native.fence(bankId);
+    if (capture) {
+      const prepared = await prepareBankDelta(input, { target: fenced, localBankId: bank.sourceBankId, captureId: capture.captureId });
+      await executeTransitionDelta(input.db, { ...input.work(), preparationId: prepared.preparationId,
+        executor: fenced.executor, client: input.native.client, request: input.request });
+      preparations.push(prepared.preparationId); input.changed();
+    }
+    const status = await input.native.verify(bankId);
+    const client = requireHindsightApplicationClient(input.native.client);
+    if (!client.currentSnapshotPage) invalid();
+    const evidence = await loadTransitionNativeEvidence({ status,
+      client: { ...input.native.client, ...client, currentSnapshotPage: client.currentSnapshotPage }, request: input.request });
+    persistTransitionNativeEvidence(input.db, { ...input.work(), evidence });
+    evidenceIds.push(evidence.evidenceId); input.changed();
+  }
+  return capture ? buildTransitionHindsightCandidate(input.db, { ...input.work(), preparationIds: preparations, evidenceIds })
+    : buildTransitionLocalCandidate(input.db, { ...input.work(), evidenceIds });
+}
+async function prepareBankDelta(input: Input, bank: { target: HindsightTransitionStatus; localBankId: string; captureId: string }) {
+  const row = input.db.prepare("SELECT id FROM memory_transition_preparations WHERE transition_id=:transition AND slot=:bank")
+    .get({ transition: input.intent.transitionId, bank: bank.localBankId });
+  if (row) return readTransitionPreparation(input.db, String(row.id));
+  const previous = bank.target.request.baseline_transition_id;
+  const retired = previous ? await input.native.client.transitionStatus({ bankId: bank.target.bank_id,
+    transitionId: previous, context: input.request() }) : null;
+  const unusedInventory = bank.target.request.unused_scope ? await loadUnusedInventory(input, bank.target) : undefined;
+  return prepareTransitionDelta(input.db, { ...input.work(), ...bank, retired, unusedInventory });
+}
+async function loadUnusedInventory(input: Input, status: HindsightTransitionStatus): Promise<MemoryTransitionUnusedInventory> {
+  const client = requireHindsightApplicationClient(input.native.client);
+  if (!client.createCurrentSnapshot || !client.currentSnapshotPage) invalid();
+  const bankId = status.bank_id;
+  const nativeSnapshot = await client.createCurrentSnapshot({ bankId, ttlSeconds: 600, context: input.request() });
+  const nativePages = [];
+  for (let pageNumber = 0; pageNumber < nativeSnapshot.manifest.total_pages; pageNumber++) {
+    nativePages.push(await client.currentSnapshotPage({ bankId, snapshotId: nativeSnapshot.snapshot_id, pageNumber, context: input.request() }));
+  }
+  const namespace = { application_id: "taki" as const, provider_lineage: status.request.provider_lineage,
+    bank_generation: status.request.bank_generation };
+  // Snapshot materialization has a native request identity too. Reopening after a lost POST response must query
+  // through the same idempotent request, never mint a different snapshot request for this unused-scope capture.
+  const command = readTransitionNativeCommand(input.db, { transitionId: input.intent.transitionId, bankId,
+    kind: "application-snapshot", slot: "unused-inventory" }) ?? prepareTransitionNativeCommand(input.db, { ...input.work(),
+    command: { kind: "application-snapshot", bankId, slot: "unused-inventory", request: { namespace, request_id: randomUUID(), ttl_seconds: 600 } } });
+  if (command.kind !== "application-snapshot") invalid();
+  markTransitionNativeDispatched(input.db, { ...input.work(), command });
+  const applicationManifest = await client.createApplicationSnapshot({ bankId, context: input.request(), request: command.request });
+  const applicationPages = [];
+  for (let pageNumber = 0; pageNumber < applicationManifest.total_pages; pageNumber++) {
+    applicationPages.push(await client.applicationSnapshotPage({ bankId, namespace,
+      snapshotId: applicationManifest.snapshot_id!, pageNumber, context: input.request() }));
+  }
+  const bodies = await loadBodies({ bankId, namespace, client, context: input.request(), request: input.request }, applicationPages);
+  return { nativeSnapshot, nativePages, applicationManifest, applicationPages,
+    bodies: [...bodies.values()].map(({ ref, bytes }) => ({ ref, base64: Buffer.from(bytes).toString("base64") })) };
+}
+function invalid(): never { throw new Error("MEMORY_TRANSITION_PROOF_INVALID"); }

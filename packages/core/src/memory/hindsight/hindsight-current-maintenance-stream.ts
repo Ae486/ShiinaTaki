@@ -8,7 +8,8 @@ import { hindsightCurrentStateHash } from "./hindsight-current-state-hash.ts";
 import { currentRequirementKey, currentRequiredSetHash, currentInputManifestHash, currentWitnessListHash,
   currentActionKey } from "./hindsight-current-maintenance-hash.ts";
 
-export function verifyCurrentMaintenanceStream(records: HindsightCutoverEvidenceRecord[], certificate: HindsightCutoverCertificate): void {
+export function verifyCurrentMaintenanceStream(records: HindsightCutoverEvidenceRecord[], certificate: Pick<HindsightCutoverCertificate,
+  "evidence" | "required_set_hash" | "source_scope_count" | "model_count" | "snapshot" | "verification_id" | "provider_lineage" | "bank_generation">): void {
   const requirements = records.filter((record) => record.record_kind === "requirement").map((record) => record.requirement);
   const outcomes = records.filter((record) => record.record_kind === "outcome");
   const actions = records.filter((record) => record.record_kind === "action");

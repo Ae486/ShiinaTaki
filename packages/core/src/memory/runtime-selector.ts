@@ -40,12 +40,16 @@ export interface SelectMemoryRuntimeInput {
   onBootUnavailable?: (error: unknown) => void;
   /** False when the constructed Hindsight runtime was withdrawn afterwards (failed start); recovery then constructs it again. */
   hindsightLive?: () => boolean;
+  localLive?: () => boolean;
+  onHindsightRetired?: () => void;
 }
-interface SelectorState { canonical: boolean; legacy: MemorySubsystem | null; current: MemoryEngine | undefined }
+interface SelectorState { canonical: boolean; legacy: MemorySubsystem | null; current: MemoryEngine | undefined;
+  provider: MemoryAuthoritySelection["mode"]; epochId: string | null; stopped: boolean }
 
 export function selectMemoryRuntime(input: SelectMemoryRuntimeInput): SelectedMemoryRuntime {
   const selection = readMemoryAuthoritySelection(input.db);
-  const state: SelectorState = { canonical: selection.mode !== "legacy-markdown", legacy: null, current: undefined };
+  const state: SelectorState = { canonical: selection.mode !== "legacy-markdown", legacy: null, current: undefined,
+    provider: selection.mode, epochId: selection.epochId, stopped: false };
   if (selection.mode === "hindsight") {
     const construct = requireHindsight(input);
     state.current = bootConstruct(input, () => construct(selection.epochId as string));
@@ -63,23 +67,30 @@ export function selectMemoryRuntime(input: SelectMemoryRuntimeInput): SelectedMe
     memory: delegatingEngine(readCurrent),
     get legacy() { return state.legacy; },
     get canonical() { return state.canonical; },
-    stop: () => { state.current = undefined; },
+    stop: () => { state.stopped = true; state.current = undefined; },
     bindCanonical: (epochId) => bindCanonical(input, state, epochId),
     recoverCanonical: (epochId) => {
+      alive(state);
       if (!state.canonical) throw new Error("MEMORY_AUTHORITY_MISMATCH");
       committedEpoch(readMemoryAuthoritySelection(input.db), epochId);
-      if (state.current) return "healthy";
+      if (state.current && state.provider === "canonical-local" && state.epochId === epochId && (input.localLive?.() ?? true)) return "healthy";
+      state.current = undefined; state.provider = "canonical-local"; state.epochId = epochId;
+      input.onHindsightRetired?.();
       state.current = input.createCanonical(epochId);
       return "published";
     },
     bindHindsight: (epochId) => bindHindsight(input, state, epochId),
     recoverHindsight: (epochId) => {
+      alive(state);
       committedHindsightEpoch(readMemoryAuthoritySelection(input.db), epochId);
-      if (state.current && (input.hindsightLive?.() ?? true)) return "healthy";
+      if (state.current && state.provider === "hindsight" && state.epochId === epochId && (input.hindsightLive?.() ?? true)) return "healthy";
+      state.current = undefined; state.provider = "hindsight"; state.epochId = epochId;
+      input.onLocalRetired?.();
       state.current = requireHindsight(input)(epochId);
       return "published";
     },
     replaceHindsight: async (epochId) => {
+      alive(state);
       committedHindsightEpoch(readMemoryAuthoritySelection(input.db), epochId);
       if (!input.replaceHindsight) throw new Error("MEMORY_INTEGRITY_ERROR: Hindsight authority runtime is not installed");
       let next: { engine: MemoryEngine; retired: Promise<void> };
@@ -105,6 +116,7 @@ function requireHindsight(input: SelectMemoryRuntimeInput): (epochId: string) =>
 }
 
 function bindCanonical(input: SelectMemoryRuntimeInput, state: SelectorState, epochId: string): void {
+  alive(state);
   const committed = readMemoryAuthoritySelection(input.db);
   if (committed.mode === "legacy-markdown") throw new Error("MEMORY_AUTHORITY_MISMATCH");
   const wasCanonical = state.canonical;
@@ -114,10 +126,12 @@ function bindCanonical(input: SelectMemoryRuntimeInput, state: SelectorState, ep
     input.onLegacyRetired?.();
   }
   committedEpoch(committed, epochId);
-  if (wasCanonical) {
-    if (!state.current) throw new Error("MEMORY_INTEGRITY_ERROR: canonical Local runtime is unavailable");
+  if (wasCanonical && state.provider === "canonical-local" && state.epochId === epochId) {
+    if (!state.current || !(input.localLive?.() ?? true)) throw new Error("MEMORY_INTEGRITY_ERROR: canonical Local runtime is unavailable");
     return;
   }
+  state.current = undefined; state.provider = "canonical-local"; state.epochId = epochId;
+  input.onHindsightRetired?.();
   const next = input.createCanonical(epochId);
   input.onCanonicalBound?.();
   state.current = next;
@@ -125,12 +139,15 @@ function bindCanonical(input: SelectMemoryRuntimeInput, state: SelectorState, ep
 
 /** Local is withdrawn only on positive Hindsight marker proof; a failed construction leaves Hindsight selected and unavailable. */
 function bindHindsight(input: SelectMemoryRuntimeInput, state: SelectorState, epochId: string): void {
+  alive(state);
   committedHindsightEpoch(readMemoryAuthoritySelection(input.db), epochId);
   const construct = requireHindsight(input);
   state.canonical = true; state.legacy = null; state.current = undefined;
+  state.provider = "hindsight"; state.epochId = epochId;
   input.onLocalRetired?.();
   state.current = construct(epochId);
 }
+function alive(state: SelectorState): void { if (state.stopped) throw new Error("MEMORY_OPERATION_CANCELLED"); }
 
 function bootConstruct(input: SelectMemoryRuntimeInput, construct: () => MemoryEngine): MemoryEngine | undefined {
   try { return construct(); }

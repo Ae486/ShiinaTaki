@@ -1,0 +1,1060 @@
+{
+  "version": 1,
+  "createdAtUtc": "2026-10-04T12:37:14.722818+00:00",
+  "scope": "Independent 14-source admission and task-only one-time renewal review; original real working pair not accessed",
+  "changedExistingByChecker": [
+    "packages/core/src/memory/transitions/transition-admission-verification.test.ts"
+  ],
+  "productionChangesByChecker": 0,
+  "helperImplementationChangesByChecker": 0,
+  "verdict": "PASS for first explicit renewal and zero-model staging only; unadmitted replacement expiry remains fail-closed",
+  "verification": {
+    "distinctCoreCasesPassed": 37,
+    "nodeCasesPassed": 24,
+    "workspaceTypeChecksPassed": 5,
+    "rootLint": "pass",
+    "auxiliaryChecksPassed": 15,
+    "fullRenewalPreviewToRollbackMilliseconds": 60159.88760000002,
+    "originalPreviewTtlMilliseconds": 120000,
+    "externalHttpModelDispatchCalls": 0,
+    "realWorkingPairOpened": false
+  },
+  "files": {
+    ".trellis/.runtime/w5-reentry-stale-5e63660aa04c4eb4816122fcee449a7c/application.sqlite": {
+      "sha256": "1ac12212606d3280d85bf6364f355112a1aef4f69b7addb7b2510afba68fb632",
+      "bytes": 291049472,
+      "role": "preserved-offline-input"
+    },
+    ".trellis/.runtime/w5-reentry-stale-5e63660aa04c4eb4816122fcee449a7c/copy-manifest.json": {
+      "sha256": "04d59004046c3c1f50904702262a983de62eeb7884498448b34289bca590817e",
+      "bytes": 1246,
+      "role": "preserved-offline-input"
+    },
+    ".trellis/.runtime/w5-reentry-stale-5e63660aa04c4eb4816122fcee449a7c/driver-failure.log": {
+      "sha256": "a117acc8eee6ecfc5cb6c2c17620f53613dc733b3b758d2a62127a6e716a33d4",
+      "bytes": 609,
+      "role": "preserved-offline-input"
+    },
+    ".trellis/.runtime/w5-reentry-stale-5e63660aa04c4eb4816122fcee449a7c/driver-result.json": {
+      "sha256": "0deea9876e27112445f8eac873a823e318b4067bb86b05da7c1f42812ebd615f",
+      "bytes": 16184,
+      "role": "preserved-offline-input"
+    },
+    ".trellis/.runtime/w5-reentry-stale-5e63660aa04c4eb4816122fcee449a7c/journey-checkpoint.json": {
+      "sha256": "f13174dc640d2d7bb40b1d5d5cef7f0ef61c8d85ead9f0a62893d4073f42fb37",
+      "bytes": 13733,
+      "role": "preserved-offline-input"
+    },
+    ".trellis/.runtime/w5-reentry-stale-5e63660aa04c4eb4816122fcee449a7c/model-submissions.json": {
+      "sha256": "a9a51b1bb5bc878414fdd375b2e0254b69956a273ed5446c19a9f00da1f6f131",
+      "bytes": 26,
+      "role": "preserved-offline-input"
+    },
+    ".trellis/.runtime/w5-reentry-stale-5e63660aa04c4eb4816122fcee449a7c/run-plan.json": {
+      "sha256": "67033ff50c36e8c5463333f1a6433ebf1b8d656bcca86637a6595b0adee30d89",
+      "bytes": 921,
+      "role": "preserved-offline-input"
+    },
+    ".trellis/.runtime/w5-reentry-stale-5e63660aa04c4eb4816122fcee449a7c/run-result.json": {
+      "sha256": "955b08af0cab39c2c57e678e5efe9db1647b2f94c8b6e0cb7487eea0b57f30a9",
+      "bytes": 1756,
+      "role": "preserved-offline-input"
+    },
+    ".trellis/.runtime/w5-renewal-independent-e8e3d19f-c33f-47bc-85ef-310381bc0d0d/application.sqlite": {
+      "sha256": "5238da3efc9e21c3c887e6564206d60cf26fd8cc23e5bd11da92b5de34b2a3ec",
+      "bytes": 291053568,
+      "role": "independent-offline-derivative"
+    },
+    ".trellis/.runtime/w5-renewal-independent-e8e3d19f-c33f-47bc-85ef-310381bc0d0d/driver-result.json": {
+      "sha256": "e6885bacdc2f085a98174a3d94192343a59fb22d7104638beeb543248338e4d4",
+      "bytes": 23313,
+      "role": "independent-offline-derivative"
+    },
+    ".trellis/.runtime/w5-renewal-independent-e8e3d19f-c33f-47bc-85ef-310381bc0d0d/journey-checkpoint-history/6-45bde997770a39c1299e060a31d0f4593ee4341499f3748622a20ac9cc238fc4.json": {
+      "sha256": "f13174dc640d2d7bb40b1d5d5cef7f0ef61c8d85ead9f0a62893d4073f42fb37",
+      "bytes": 13733,
+      "role": "independent-derivative-checkpoint-history"
+    },
+    ".trellis/.runtime/w5-renewal-independent-e8e3d19f-c33f-47bc-85ef-310381bc0d0d/journey-checkpoint-history/7-a8f960d9bd9c4547cbd5420e5db0413b81b859e777c2996c806b6db7d50b639b.json": {
+      "sha256": "232f69fe80efbb0ef2e7d33484ee63d5046a1c2f005bbff3b8398651733d4895",
+      "bytes": 19280,
+      "role": "independent-derivative-checkpoint-history"
+    },
+    ".trellis/.runtime/w5-renewal-independent-e8e3d19f-c33f-47bc-85ef-310381bc0d0d/journey-checkpoint.json": {
+      "sha256": "232f69fe80efbb0ef2e7d33484ee63d5046a1c2f005bbff3b8398651733d4895",
+      "bytes": 19280,
+      "role": "independent-offline-derivative"
+    },
+    ".trellis/.runtime/w5-renewal-independent-e8e3d19f-c33f-47bc-85ef-310381bc0d0d/model-submissions.json": {
+      "sha256": "a9a51b1bb5bc878414fdd375b2e0254b69956a273ed5446c19a9f00da1f6f131",
+      "bytes": 26,
+      "role": "independent-offline-derivative"
+    },
+    ".trellis/.runtime/w5-renewal-independent-e8e3d19f-c33f-47bc-85ef-310381bc0d0d/result.json": {
+      "sha256": "75661d2e6e645433bcffd968a673632a6d8830420ee95ed73eee8a83eae0adec",
+      "bytes": 10778,
+      "role": "independent-offline-derivative"
+    },
+    ".trellis/.runtime/w5-renewal-independent-e8e3d19f-c33f-47bc-85ef-310381bc0d0d/synthetic-renewal-approval.json": {
+      "sha256": "bf5979d35d7bd0e472e1c434cd9e40a9bb27bbab65ebf132d464c14d8cf83fa6",
+      "bytes": 879,
+      "role": "independent-offline-derivative"
+    },
+    ".trellis/spec/backend/memory-transition-healthy-drivers.md": {
+      "sha256": "23342310b75a222cd6a561d983d3ec882956e14916bd604166a7910946b62197",
+      "bytes": 16744,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/spec/backend/memory-transition-publication.md": {
+      "sha256": "00f07f4c08b9e8e7e22be11c20c40bd1d6a5cff5a7824e7fcd9d2f3199d63dbc",
+      "bytes": 13506,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/spec/backend/memory-transitions.md": {
+      "sha256": "060069047126257a9d00576b0d23f222b8f8f0e5b968f5b0a04db2cf848ff0c7",
+      "bytes": 31459,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/spec/backend/quality-guidelines.md": {
+      "sha256": "82386ec7886d93af103da5168c1d3575ab189614ba9d6a75b6406200338be862",
+      "bytes": 14454,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-journey-checkpoint.mjs": {
+      "sha256": "ea1a0c4ed7f4eef240fbddb8352c952411f8a2d6a8398745d6b867c93c6a0e44",
+      "bytes": 3612,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-model-budget.py": {
+      "sha256": "8c6fba27b39e8dfee44d4792ab5f9bffdb025f9ed3ba274da11e82253581a384",
+      "bytes": 2657,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-final-source-manifest-v2.json": {
+      "sha256": "f11af891a68f0be930e4c68d7928e0a8eb19e1a0641a5b1675c179d4844c2832",
+      "bytes": 30503,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-audit.json": {
+      "sha256": "4c52a0e146dba898028b4cbad6269cdb22078624880a1637ca3d22dbdc401ec7",
+      "bytes": 1922,
+      "role": "prior-manifest-or-audit"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-audit.py": {
+      "sha256": "42636cfea3015df56cbd48a8252dd79939e2a6b15ce68719d60b6588a761b628",
+      "bytes": 6382,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-boot.log": {
+      "sha256": "e1954323b2c2cf09b13e4d440497363c680a30d2edbd76c790e2ac8f121400e4",
+      "bytes": 1962,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-checkpoint.md": {
+      "sha256": "a718ff4110bb823813b87a94a6000188b1d06fc21a0600ab88a8af22ed220f88",
+      "bytes": 2898,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-cli.log": {
+      "sha256": "8ec61f17b4e423a23b66fc875a9dca723b9777e151658e2f5fe0faa90de6a0c6",
+      "bytes": 1773,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-corpus.log": {
+      "sha256": "53322efc4f8a0cbeb34b9ad5012ea592c4468b000d5acc2077d3085122cc75fd",
+      "bytes": 1859,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-gate.log": {
+      "sha256": "dd14cc66480328b8ffa81ecc9ba0448b2ac25f30f3d871be744debe6283c2264",
+      "bytes": 2214,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-green-initial.log": {
+      "sha256": "7508cf0b229b54ccd908ee219e8a62c511902730f4f8fefeff155d7e5633c8ef",
+      "bytes": 266,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-helper-final.log": {
+      "sha256": "5895dea8cb9745ece01c8397adc06f550f86749bb8df1f41442d5b65130db015",
+      "bytes": 2313,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-implementation.md": {
+      "sha256": "6178fb2c159668292487d9be1c284056a687307f7590f4ef655c0b7848c3d0fd",
+      "bytes": 10264,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-check.md": {
+      "sha256": "62a3cf9752cbe184ec0ea9c8224e7ffa65c31889fe47be0b5206da8fb0afdf5f",
+      "bytes": 14529,
+      "role": "independent-check-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-checkpoint.md": {
+      "sha256": "29221c71bcf93f20786531e77529ed1b22d98a5093c2363acee59ce402cad6d4",
+      "bytes": 2417,
+      "role": "independent-check-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-fixture-initial.log": {
+      "sha256": "7ca37020361298342414a16dd67f9d3f337ef724ce25f54de90fe9e5866d7203",
+      "bytes": 1902,
+      "role": "independent-check-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-gate.log": {
+      "sha256": "aca5a80bf46f95493a7f7137ee726edfa3daf657d37c8f2f65b43fa43a303d87",
+      "bytes": 2420,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-helper.log": {
+      "sha256": "77408336f396bacc923a7e547d76e1a6babbfe4407b085f574970c79c4fc9cfb",
+      "bytes": 2305,
+      "role": "independent-check-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-lint.log": {
+      "sha256": "8fa30d82a7bf469d96bec57bcd44ac76d20a8e5b9ee39d7cc1f310c77501b676",
+      "bytes": 53,
+      "role": "independent-check-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/.trellis/spec/backend/memory-transition-healthy-drivers.md": {
+      "sha256": "23342310b75a222cd6a561d983d3ec882956e14916bd604166a7910946b62197",
+      "bytes": 16744,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/.trellis/spec/backend/memory-transition-publication.md": {
+      "sha256": "00f07f4c08b9e8e7e22be11c20c40bd1d6a5cff5a7824e7fcd9d2f3199d63dbc",
+      "bytes": 13506,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-audit.py": {
+      "sha256": "42636cfea3015df56cbd48a8252dd79939e2a6b15ce68719d60b6588a761b628",
+      "bytes": 6382,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-replay.mjs": {
+      "sha256": "7608c3ee112a8da6799b5253f4fa1b557694640b723bf27f5a053e2f90bc17b0",
+      "bytes": 11432,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs": {
+      "sha256": "d44d85546a1cdc89906a7979e62c77ddb473715e96f578994368df3c02da3673",
+      "bytes": 12067,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs": {
+      "sha256": "f33badb7f21023455623a352cf0558e70025a97f0e4a1ca1d6889a181789bd41",
+      "bytes": 10192,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-driver.mjs": {
+      "sha256": "a316496051b56d383de7874e31f1c4466f55029c176982c3da364b3377e6ccc1",
+      "bytes": 20627,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-native.py": {
+      "sha256": "cbda42b4ddf0338e2973e0239beb7109963648b6f61a3b96b9c3f842f5e46e00",
+      "bytes": 18450,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/manifest.json": {
+      "sha256": "24bab598b861750a696a53d5da76503f784824892ebf240b02a3a0c8ec1127c1",
+      "bytes": 5662,
+      "role": "prior-manifest-or-audit"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/boot/index.md": {
+      "sha256": "28a0f0e08dd989896d0a6084d491ae81dbe31963068f1873912d6ef4856a9ead",
+      "bytes": 1537,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/boot/memory-transition-boot.ts": {
+      "sha256": "fc0efb3598d82aa1d34415f39fa4a0db9583374f603c6837b1888e62dfcd2bc9",
+      "bytes": 4867,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/hindsight-runtime-binding.ts": {
+      "sha256": "268f7c9702a1cdd92e0e9a35dbf3382d976ee24d6e5dafb00c6f30353b39df54",
+      "bytes": 10931,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/index.md": {
+      "sha256": "f7fa5e4e9dda5c5845a76522672f6dc10b956953077432b7042dcdbcd5a93b2b",
+      "bytes": 14398,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/legacy-migration/index.md": {
+      "sha256": "78ca14ff18d163505b4fd57b750c733289ffd689639f53016c14b36a3ae43a87",
+      "bytes": 2555,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/legacy-migration/legacy-activation-repo.ts": {
+      "sha256": "79601377a60b1a400fb3eff40c51d2e1a4bc0f2762d1c3f59e90c047eb7bfd3b",
+      "bytes": 8206,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/local-runtime-binding.ts": {
+      "sha256": "6574c7b4b2bf4608908230a39d9273abf674950cb8f8a6bba7f2a7b9c9569836",
+      "bytes": 6415,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/operations/index.md": {
+      "sha256": "8de0e25381ee83a1f53daf6ffc8eab249d26aea3558b74cfd657f769be6ae35d",
+      "bytes": 6867,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/operations/memory-operation-contract.ts": {
+      "sha256": "2cf4ca5cbd568c6b9a47a0b6baf6f42fe0875960b6e0c248998f5b5a8ddfea38",
+      "bytes": 8312,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/operations/memory-operation-kind-transition.ts": {
+      "sha256": "7967ff03ac381383799dc59a8198a4e1ee292ca209c0a8f8608caa721f4c87d4",
+      "bytes": 3077,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/operations/memory-operation-service.ts": {
+      "sha256": "39ff45cc33df2d490cfba1e03b6fc0c35e0c26184a85edf122756cdab52d62dd",
+      "bytes": 12693,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/operations/memory-operation-transition-storage.ts": {
+      "sha256": "e18c6fa106d2cd713e07b9aca4cebea4685f31c4d1824f4beaf0d8854127c664",
+      "bytes": 5666,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/runtime-composition.ts": {
+      "sha256": "712d1268a3d91b16a6391c02cb8903affa485601105f003ef161f82887480cec",
+      "bytes": 20363,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/transitions/index.md": {
+      "sha256": "5aad0fa6aba365d24744988258bfa872d274a3cbbad9a9351f4da8e218281bb2",
+      "bytes": 5877,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/transitions/transition-admission-verification.test.ts": {
+      "sha256": "e49a65e82a415a11350ecb655b68de301efff7760627e7a18d8d96afa3736548",
+      "bytes": 11355,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/transitions/transition-current-identity.ts": {
+      "sha256": "94710f8aaeefebbc5a3a8e669dd2166888093022eb79b136a79ffc694458edb5",
+      "bytes": 10262,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/transitions/transition-evidence-context.ts": {
+      "sha256": "106920930e6f3318bc237d4843248ab270a17694aa5aff42270c51aa8e7b8685",
+      "bytes": 6593,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/transitions/transition-healthy-execution.ts": {
+      "sha256": "2756a2c2155b269d9846536247d5e79dfa6221f96edafe9a37c5716aae978616",
+      "bytes": 19506,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/transitions/transition-healthy-service.ts": {
+      "sha256": "4438cadeb28f7f4a3a0fc72fabd2eff941ec587fb7fcbeece330ef791ec652c4",
+      "bytes": 8534,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/transitions/transition-independent-projection.test.ts": {
+      "sha256": "6029505d937cba57c110f01221538ee68e92a682b66bb9ea35d3f34ed9d8c92f",
+      "bytes": 2759,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preimages/packages/core/src/memory/transitions/transition-observation-store.ts": {
+      "sha256": "c6145726cf61c09072035f61c4c24070c4294f475e7bf3677edeb4df9f283927",
+      "bytes": 4922,
+      "role": "checker-independent-preimage"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-preview-final.log": {
+      "sha256": "c6363b670ef6fd29c0bf2289943a5407ccfbe357f1e519738de2100a29f50945",
+      "bytes": 250,
+      "role": "independent-check-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-quality.json": {
+      "sha256": "845fbc66f622ee54d634eb45eb7b85fa4e7b9269097b31fa90bc117433f9c3c2",
+      "bytes": 5023,
+      "role": "independent-check-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-regression.log": {
+      "sha256": "7ca37020361298342414a16dd67f9d3f337ef724ce25f54de90fe9e5866d7203",
+      "bytes": 1902,
+      "role": "independent-check-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-independent-types.log": {
+      "sha256": "99df36f528acc3937695a0a2bc389935826a39448a5203e22871fae35d7f03d3",
+      "bytes": 356,
+      "role": "independent-check-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-lint-final.log": {
+      "sha256": "8fa30d82a7bf469d96bec57bcd44ac76d20a8e5b9ee39d7cc1f310c77501b676",
+      "bytes": 53,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-lint.log": {
+      "sha256": "8fa30d82a7bf469d96bec57bcd44ac76d20a8e5b9ee39d7cc1f310c77501b676",
+      "bytes": 53,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages.json": {
+      "sha256": "d78d185f607684ca4d1cde1f43c1ccad826f2d342c9828e12cdb5069bedd08f0",
+      "bytes": 4745,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-projection-regression.log": {
+      "sha256": "0dadd59ab67e05ea4427243630c3a65b11dd1e75e70af5e9fd32c28a10e7797e",
+      "bytes": 360,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-red.log": {
+      "sha256": "ed98528969d1f0254fc834ebd02c41141feecd272b37232ca51d8677c3af00f7",
+      "bytes": 5495,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-regression.log": {
+      "sha256": "0072c5e5a7fbf860a04ebd48bea928379c2b6a558ca7c6e0c74c8c8d42937271",
+      "bytes": 372,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-replay.mjs": {
+      "sha256": "7608c3ee112a8da6799b5253f4fa1b557694640b723bf27f5a053e2f90bc17b0",
+      "bytes": 11432,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-source-manifest.json": {
+      "sha256": "d1a8587bf88015afa62db598bf616e3cab58f167e4c8f582a6f0db30fe06c5e8",
+      "bytes": 28072,
+      "role": "prior-manifest-or-audit"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-types-final.log": {
+      "sha256": "99df36f528acc3937695a0a2bc389935826a39448a5203e22871fae35d7f03d3",
+      "bytes": 356,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-types.log": {
+      "sha256": "b80ee7ff19305988d44f052254fdaa67d71a86d828da31699fc5ae4cdd033e59",
+      "bytes": 356,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-gate-test.py": {
+      "sha256": "36ac132fba099116ccf146d6162769ea7c5e3408dc78e11bc48482219b61fba8",
+      "bytes": 25660,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-check-native-final.log": {
+      "sha256": "6e604e9bd2d813f499fbc356da70ab4f81d2ca21c77d46d12f472a6b46907793",
+      "bytes": 3002,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-check-native-initial.log": {
+      "sha256": "f961bc9da48e6ae6d65e608322e56cb79a0d69c41206497e4ccbf64d672f2d9c",
+      "bytes": 2215,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-check-node-final.log": {
+      "sha256": "615bf05ab37b280eee3e63a4c714a3e17a866cc6bcd3d6251f23f33e2e70c4a6",
+      "bytes": 1158,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-check-quality-final.json": {
+      "sha256": "a2ff7345ce2ce5a332cb79366d164664fb186bc8d4b0d730f07e94c3f18cbdc4",
+      "bytes": 4352,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-checkpoint.md": {
+      "sha256": "e9dca279e8169f76316a0f62b4038e0c6f9ea9b284a18d5ee93f2385781f5edd",
+      "bytes": 3167,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-implementation.md": {
+      "sha256": "a21f2ebd4434cb08d5ee105ed37df2eb6f275a718f999573a0f63ac24dc59d86",
+      "bytes": 14849,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-check.md": {
+      "sha256": "cb64dbea91e65de5fba9b90af01f7092d5b6f9734088451bb1adbc54f41cbdc7",
+      "bytes": 10377,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-checkpoint.md": {
+      "sha256": "19c10f879b4c5d3c561c2e2cbfe757cc15c01bc21f1a1918380dcd268a4c28ce",
+      "bytes": 1694,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-final.log": {
+      "sha256": "16e03a20c30229b8979e5cdffaf017fa4be31c6e74c46df9df087ffe9ac90eaf",
+      "bytes": 2420,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-green-initial.log": {
+      "sha256": "787079e1f5f0dd8c3a77809933aafd7f8764fcdde5472b389dc65d9affbd8ab7",
+      "bytes": 1407,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-green-v2.log": {
+      "sha256": "5f437f0ffcc56dd62e4675b3dfacad54d84b7eb3ec60367c96535b41e2db7a95",
+      "bytes": 1579,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-pause-red.log": {
+      "sha256": "aee5472157528ae0205d55e166669d0b1dc808e6c78a7aef96d3327cc69c3c87",
+      "bytes": 1742,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-preimages/manifest.json": {
+      "sha256": "f8b39585dec730e60620ae23ae980fd1772ac8a1c80ae4c9b2ad0d201bf05583",
+      "bytes": 1222,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-preimages/w5-journey-checkpoint.mjs": {
+      "sha256": "ea1a0c4ed7f4eef240fbddb8352c952411f8a2d6a8398745d6b867c93c6a0e44",
+      "bytes": 3612,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-preimages/w5-reentry-gate-test.py": {
+      "sha256": "a7537cb8e7b648edaf32380d26c0586f48e021f01c2fd2b7e6c3fae8d58566ae",
+      "bytes": 21779,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-preimages/w5-reentry-journey.mjs": {
+      "sha256": "57ae06b9efe5b25b51a89aa9b51946a394585e12574304dfdab250d5e0f07ba4",
+      "bytes": 7634,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-preimages/w5-reentry-journey.test.mjs": {
+      "sha256": "aefe1ed7cd69dd495e773f7b402f69431b2ce4e2c42a10d00fcfa145b42d25d0",
+      "bytes": 13883,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-preimages/w5-reentry-plan.py": {
+      "sha256": "bf73fa8070093b4593e17259acc7aed9f0ccb113274a6601f3df7d2e300870d5",
+      "bytes": 7307,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-preimages/w5-reused-driver.mjs": {
+      "sha256": "4f97bffb6b62b278bdb177081ab92e4d43d7f74f492db28139eab0228a3662ac",
+      "bytes": 19878,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-preimages/w5-reused-native.py": {
+      "sha256": "85151d1fd16cf7a60449f23c42ae22e9105d81fab6098977c3df9dab9d5b627d",
+      "bytes": 17689,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-preimages/w5_reentry_gate.py": {
+      "sha256": "8811b17ce4f5d03f4829bfc06717af0857b7d366b646f61001496896c484dae2",
+      "bytes": 14385,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-red.log": {
+      "sha256": "f3e7a10fe0470070e74fcca73284df9c677a1e2b7b34ffbbf164251439677f1c",
+      "bytes": 4414,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-independent-test.py": {
+      "sha256": "8b6a32612f6357db238ca730bf933607ea6a47409b100008db3c11e4cfcfda4e",
+      "bytes": 12201,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-native-final.log": {
+      "sha256": "7e3f48936390324dfdbf696ae76882733f16a1f520e2c3f01e7e82044e706eac",
+      "bytes": 2214,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-node-final.log": {
+      "sha256": "4fafe791e6f21e4412c379f64de9704d59786441f36e1bd6825a384d4b5d76a6",
+      "bytes": 1157,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-preimages-20261004/manifest.json": {
+      "sha256": "3cf98443e8ff448d816466b6490a77d4dd0e3e35bb2e66af52068b0a2adcd370",
+      "bytes": 392,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-preimages-20261004/w5-remaining-plan.py": {
+      "sha256": "55299d1f1a9f6efac2c220ce941303731d1e3def378d878d64181034273ace7e",
+      "bytes": 6363,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-preimages-20261004/w5-reused-driver.mjs": {
+      "sha256": "75cbbed0804320dc148a0369643ead0d62e0d67f42dc2feb05aef38dab331a73",
+      "bytes": 16295,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-preimages-20261004/w5-reused-native.py": {
+      "sha256": "da028e9e43258878fc731039da282091adaad3464cd2047227a3912bdf2a1e22",
+      "bytes": 14979,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-quality-final.json": {
+      "sha256": "0605201906bf5daad09eddced359111e7a619258706f426de6afcf1ad1be6228",
+      "bytes": 3830,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-source-manifest.json": {
+      "sha256": "4845ddb26060e0de668822bf54b857d29ae9411c928351a4dcab5fa8219362af",
+      "bytes": 6301,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-journey.mjs": {
+      "sha256": "57ae06b9efe5b25b51a89aa9b51946a394585e12574304dfdab250d5e0f07ba4",
+      "bytes": 7634,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-journey.test.mjs": {
+      "sha256": "aefe1ed7cd69dd495e773f7b402f69431b2ce4e2c42a10d00fcfa145b42d25d0",
+      "bytes": 13883,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-plan.py": {
+      "sha256": "bf73fa8070093b4593e17259acc7aed9f0ccb113274a6601f3df7d2e300870d5",
+      "bytes": 7307,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal-independent-corpus.log": {
+      "sha256": "922739bb0d6f58896f06a05751713f48319b705a56d7001ea69c07d76aa8d114",
+      "bytes": 1765,
+      "role": "independent-check-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal-independent-replay.mjs": {
+      "sha256": "5f6147cf76a8cda4853e5f5cf0e9506186852e593a89c9a82fb67c603f6ff903",
+      "bytes": 12315,
+      "role": "independent-check-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal-usage.md": {
+      "sha256": "e8fcd1f2816da4775e842ad91725407ac99289d0eb22331330d5a075390cccb7",
+      "bytes": 5490,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs": {
+      "sha256": "d44d85546a1cdc89906a7979e62c77ddb473715e96f578994368df3c02da3673",
+      "bytes": 12067,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs": {
+      "sha256": "f33badb7f21023455623a352cf0558e70025a97f0e4a1ca1d6889a181789bd41",
+      "bytes": 10192,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-remaining-plan.py": {
+      "sha256": "55299d1f1a9f6efac2c220ce941303731d1e3def378d878d64181034273ace7e",
+      "bytes": 6363,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-driver.mjs": {
+      "sha256": "a316496051b56d383de7874e31f1c4466f55029c176982c3da364b3377e6ccc1",
+      "bytes": 20627,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-native.py": {
+      "sha256": "cbda42b4ddf0338e2973e0239beb7109963648b6f61a3b96b9c3f842f5e46e00",
+      "bytes": 18450,
+      "role": "current-delivery-source-or-evidence"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-supervisor-shutdown.py": {
+      "sha256": "5d349f718e608258e562a18739a22355da85bb1dd42a19d4e7dba6d947e8d25d",
+      "bytes": 2290,
+      "role": "preserved-predecessor"
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5_reentry_gate.py": {
+      "sha256": "4b0c8c02d62d206f3430b409cdec34d5dbbf11c8e7527e03a344cbeda9d5dee3",
+      "bytes": 21181,
+      "role": "preserved-predecessor"
+    },
+    "CLAUDE.md": {
+      "sha256": "05d346e53eb95174f982acfe52ef329a63f5a6384cb676530469f18b5ba2a8a8",
+      "bytes": 11120,
+      "role": "preserved-predecessor"
+    },
+    "H:/TakiAgent/.trellis/.runtime/w5-admission-acceptance-b2c21fe0-fb59-4f96-abe7-a66a3cd3c2a4/result.json": {
+      "sha256": "c7a3e83e1794a60d39a396247578655e511c0fc6c28950607fa970420713b241",
+      "bytes": 26439,
+      "role": "prior-admission-only-result"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/.trellis/spec/backend/memory-transition-healthy-drivers.md": {
+      "sha256": "ee4a05d730aaa29a3985dde0f46bf78f204a7973577fa8aaabeaf0b84546eb89",
+      "bytes": 14582,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/.trellis/spec/backend/memory-transition-publication.md": {
+      "sha256": "0b85c28077bf678f8b6d120bbaba6468e706d69454fdb82aace3a07a599bbec9",
+      "bytes": 12830,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/.trellis/spec/backend/quality-guidelines.md": {
+      "sha256": "82386ec7886d93af103da5168c1d3575ab189614ba9d6a75b6406200338be862",
+      "bytes": 14454,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-driver.mjs": {
+      "sha256": "4f97bffb6b62b278bdb177081ab92e4d43d7f74f492db28139eab0228a3662ac",
+      "bytes": 19878,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-native.py": {
+      "sha256": "85151d1fd16cf7a60449f23c42ae22e9105d81fab6098977c3df9dab9d5b627d",
+      "bytes": 17689,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/eslint.config.js": {
+      "sha256": "fc873306c3edff0ca608362150b23c47f6c3b4c16c43a7aa873a11ac174ac61d",
+      "bytes": 3159,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/boot/index.md": {
+      "sha256": "53677a3532be37084fa0b18b8da93b697694c12313cc6fa7ed70774a2cedd945",
+      "bytes": 1495,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/boot/memory-transition-boot.ts": {
+      "sha256": "ce85d1f435bad0c0edaa50f798c80c3509ee130eff9cf876f37a3fbe1a46e17e",
+      "bytes": 4626,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/hindsight-runtime-binding.ts": {
+      "sha256": "a430250812062555dd3899fafe15ba6ac13aeb12d0e5d9105c22139727ce3b48",
+      "bytes": 10686,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/index.md": {
+      "sha256": "1d167d5ebad194cc121269e1869bc82c6d79c88511fe25d29c9ec46630884230",
+      "bytes": 14320,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/legacy-migration/index.md": {
+      "sha256": "a062775b266df3836528a033d5639238c7cfb7e052146cac56319681ba533c15",
+      "bytes": 2461,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/legacy-migration/legacy-activation-repo.ts": {
+      "sha256": "86e6a6bd18f1c860a8aa7b0825b5c87b534216baaa1e2a5a40817585d6ec3a21",
+      "bytes": 7986,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/local-runtime-binding.ts": {
+      "sha256": "a36112e7222c2e59da83cf70643d78d495ce4e67b2603af6fc6a9f15985fa16b",
+      "bytes": 6226,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/operations/index.md": {
+      "sha256": "90bd0f6ac2c113c6623bb0365fcf7f1bf5c4ec11a992055296ab0422c965a2e0",
+      "bytes": 6841,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/operations/memory-operation-contract.ts": {
+      "sha256": "d2097b13e13224156fddd596586f91aee9f32da7ae0a3374005c6697100a05c0",
+      "bytes": 8048,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/operations/memory-operation-kind-transition.ts": {
+      "sha256": "66420998d4d86ea902400383758cd5c0c82891aa6e6f4a462e45b8f31a1e2c7c",
+      "bytes": 3023,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/operations/memory-operation-service.ts": {
+      "sha256": "5c4a30973107a6606af1f10840543f7e3b5cf6abc7e2ea45c511328d9bcecfe2",
+      "bytes": 12100,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/operations/memory-operation-transition-storage.ts": {
+      "sha256": "3cd053e00ecda4645331ccf3373e55d140b6205d4da3e2e6c7f56368b85e5947",
+      "bytes": 5528,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/runtime-composition.ts": {
+      "sha256": "fb75dda39f702c197274a0db2032610685ea51e731264a6ea0b981156d53b2c4",
+      "bytes": 20164,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/transitions/index.md": {
+      "sha256": "ce822cf3ce548a5734984564c4544ba58273d6ac448251eaa1fa0964b8f70ecb",
+      "bytes": 5697,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/transitions/transition-current-identity.ts": {
+      "sha256": "52c1c9a18f104bee3dcbd92d0437387ec661c746a378fcafca9114c2ef298d9c",
+      "bytes": 10123,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/transitions/transition-evidence-context.ts": {
+      "sha256": "2710d7ff07bce8bf633e0acb58003539aeed84609a3aa4b9c00f7c89cf2fe84f",
+      "bytes": 5944,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/transitions/transition-healthy-execution.ts": {
+      "sha256": "9c0671f4dfd20f0924213b78fd28ba4e67ffe74f330ebfbdeac520dc6467546c",
+      "bytes": 19381,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/transitions/transition-healthy-service.ts": {
+      "sha256": "ed5b46fce01aaa2a8d4dc7df6ba7e589655dfbfdd6eb191a1efd443ce7fbd689",
+      "bytes": 8161,
+      "role": "implementation-preimage"
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d/packages/core/src/memory/transitions/transition-observation-store.ts": {
+      "sha256": "10f015c75925901f44651c1427550447afba458cde4ee0682ae001c07836f4dc",
+      "bytes": 4786,
+      "role": "implementation-preimage"
+    },
+    "H:/hindsight/hindsight-api-slim/hindsight_api/engine/cutover_verification_runner.py": {
+      "sha256": "e02738fcbaf68bab3d4ada861d64c8beeafd7dfc3b6fe6a830ab810450754bca",
+      "bytes": 25596,
+      "role": "preserved-predecessor"
+    },
+    "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_maintenance.py": {
+      "sha256": "03d0df5d88eeef2ab87899b91bc2694395b2b4ff994fc9c885fb5a2bfc7f467e",
+      "bytes": 11100,
+      "role": "preserved-predecessor"
+    },
+    "eslint.config.js": {
+      "sha256": "fc873306c3edff0ca608362150b23c47f6c3b4c16c43a7aa873a11ac174ac61d",
+      "bytes": 3159,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/boot/index.md": {
+      "sha256": "28a0f0e08dd989896d0a6084d491ae81dbe31963068f1873912d6ef4856a9ead",
+      "bytes": 1537,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/boot/memory-transition-boot.test.ts": {
+      "sha256": "f3cf2698d5c508bb2af09d20606e0cf9056219d9ec0a30302e13301b8e118c60",
+      "bytes": 9284,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/boot/memory-transition-boot.ts": {
+      "sha256": "fc0efb3598d82aa1d34415f39fa4a0db9583374f603c6837b1888e62dfcd2bc9",
+      "bytes": 4867,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/db/hindsight-application-replica-publication.ts": {
+      "sha256": "52d2435d4fc74de55947203805f6cbc1f29c6d60fbe14a97d639d9f5f3d8d0ed",
+      "bytes": 13139,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/db/index.md": {
+      "sha256": "be94717c302252a32961c789c8abd52a058dff5c7a352f205906333bedc4503c",
+      "bytes": 20269,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/db/memory-transition-candidate-repo.ts": {
+      "sha256": "fb5bfb92ed6c530aca1c55af7f76997ab2438a01672a5f91152d4c4201929e75",
+      "bytes": 11736,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/db/memory-transition-local-staging.ts": {
+      "sha256": "97b9847d12959fd4b36a819086d9f0e89ee550f998cf7bd2bf166995cc14df9f",
+      "bytes": 5518,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/db/memory-transition-observation.test.ts": {
+      "sha256": "6647270114d2ee922ed9924f9557340dd9f133932b52c4fc326be366a6a10e61",
+      "bytes": 10793,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/db/memory-transition-publication-order.test.ts": {
+      "sha256": "f2c6ae8d9180fe45bb6bbfba2089f5326333afb2783dc35dad3e658e819bce2f",
+      "bytes": 2670,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/db/memory-transition-publication-proof.ts": {
+      "sha256": "e31828fd67c11fb3d2d9386505bf9be56682ce443d2eba8f00756a1301cfc5bb",
+      "bytes": 9446,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/db/memory-transition-publication-reader.ts": {
+      "sha256": "750eb400423d64436f4121b3e8de35d561fe35d86af5ca8fc2fd5799fa8583ed",
+      "bytes": 9984,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/db/memory-transition-publication-repo.ts": {
+      "sha256": "e489e5a5883d4771d83d2f99942be3f137a955da20cf00ee123d2ff45c5de807",
+      "bytes": 8703,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/db/memory-transition-representation.ts": {
+      "sha256": "5cdf6abdea43c8ed4cfadf8548b5e164b998be69a13ff4bd8a24d82f4471dfcc",
+      "bytes": 5676,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/hindsight-runtime-binding.test.ts": {
+      "sha256": "e400c230cadf0447a793489f32ef29195f6bbaf116ca9465a9f3ef0bf776d91e",
+      "bytes": 2582,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/hindsight-runtime-binding.ts": {
+      "sha256": "268f7c9702a1cdd92e0e9a35dbf3382d976ee24d6e5dafb00c6f30353b39df54",
+      "bytes": 10931,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/index.md": {
+      "sha256": "f7fa5e4e9dda5c5845a76522672f6dc10b956953077432b7042dcdbcd5a93b2b",
+      "bytes": 14398,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/legacy-migration/index.md": {
+      "sha256": "78ca14ff18d163505b4fd57b750c733289ffd689639f53016c14b36a3ae43a87",
+      "bytes": 2555,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/legacy-migration/legacy-activation-repo.ts": {
+      "sha256": "79601377a60b1a400fb3eff40c51d2e1a4bc0f2762d1c3f59e90c047eb7bfd3b",
+      "bytes": 8206,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/local-runtime-binding.test.ts": {
+      "sha256": "787201af04c4b602ca8262d200236cdbc20a878191dbfe9b93ca6c2c8b1c2cd4",
+      "bytes": 4830,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/local-runtime-binding.ts": {
+      "sha256": "6574c7b4b2bf4608908230a39d9273abf674950cb8f8a6bba7f2a7b9c9569836",
+      "bytes": 6415,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/operations/index.md": {
+      "sha256": "8de0e25381ee83a1f53daf6ffc8eab249d26aea3558b74cfd657f769be6ae35d",
+      "bytes": 6867,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/operations/memory-operation-contract.ts": {
+      "sha256": "2cf4ca5cbd568c6b9a47a0b6baf6f42fe0875960b6e0c248998f5b5a8ddfea38",
+      "bytes": 8312,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/operations/memory-operation-kind-transition.ts": {
+      "sha256": "7967ff03ac381383799dc59a8198a4e1ee292ca209c0a8f8608caa721f4c87d4",
+      "bytes": 3077,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/operations/memory-operation-service.ts": {
+      "sha256": "39ff45cc33df2d490cfba1e03b6fc0c35e0c26184a85edf122756cdab52d62dd",
+      "bytes": 12693,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/operations/memory-operation-transition-storage.ts": {
+      "sha256": "e18c6fa106d2cd713e07b9aca4cebea4685f31c4d1824f4beaf0d8854127c664",
+      "bytes": 5666,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/runtime-composition.ts": {
+      "sha256": "712d1268a3d91b16a6391c02cb8903affa485601105f003ef161f82887480cec",
+      "bytes": 20363,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/runtime-selector.ts": {
+      "sha256": "a1042ff37157b507ecdba59a17c8514a6e6cf5dee036e3038dc1bb8b7744330d",
+      "bytes": 9520,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/transitions/index.md": {
+      "sha256": "5aad0fa6aba365d24744988258bfa872d274a3cbbad9a9351f4da8e218281bb2",
+      "bytes": 5877,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/transitions/transition-admission-verification.test.ts": {
+      "sha256": "2f49ff176d6928c0419b8b30107661aa72a7fd83f30a3532bc6b8c40d435fd34",
+      "bytes": 12443,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/transitions/transition-current-identity.ts": {
+      "sha256": "94710f8aaeefebbc5a3a8e669dd2166888093022eb79b136a79ffc694458edb5",
+      "bytes": 10262,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/transitions/transition-evidence-context.test.ts": {
+      "sha256": "43cfc590d16c3acbf28b32c98c288e1040cd9ac67b9e81e7dbcf2857c85eb121",
+      "bytes": 8883,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/transitions/transition-evidence-context.ts": {
+      "sha256": "106920930e6f3318bc237d4843248ab270a17694aa5aff42270c51aa8e7b8685",
+      "bytes": 6593,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/transitions/transition-final-mapping.ts": {
+      "sha256": "f1dd6f0ef8f84a0db71cabe79aa9be7165f9405eb7daed68678ac13001024b8e",
+      "bytes": 13698,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-diagnostics.test.ts": {
+      "sha256": "e6b5149495c90b12a6e0b7fa85b3e5da51f67ad4e933720d94872fb0d6de064d",
+      "bytes": 3690,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-execution.ts": {
+      "sha256": "2756a2c2155b269d9846536247d5e79dfa6221f96edafe9a37c5716aae978616",
+      "bytes": 19506,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-scheduling.test.ts": {
+      "sha256": "1d95a865b45f15e3a8a0ee20b36588051a4b2bc0cf274929ab7126eef2823049",
+      "bytes": 8322,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-service.ts": {
+      "sha256": "4438cadeb28f7f4a3a0fc72fabd2eff941ec587fb7fcbeece330ef791ec652c4",
+      "bytes": 8534,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-terminal-boundary.test.ts": {
+      "sha256": "aec9c41e9c07df7a952caa01681e7876cb40aa86cc06817c5680a64f811ae427",
+      "bytes": 2574,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/transitions/transition-independent-projection.test.ts": {
+      "sha256": "6029505d937cba57c110f01221538ee68e92a682b66bb9ea35d3f34ed9d8c92f",
+      "bytes": 2759,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/transitions/transition-local-candidate.ts": {
+      "sha256": "9def05f5b3b06c0bfc8c08b4e2564a01711e548f44bbaefcfe964212fe0ada03",
+      "bytes": 10632,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/transitions/transition-local-projection.ts": {
+      "sha256": "0273f3a5561a7b6b19607000a35bd79d32390b550c6c51695b79491de1ce939a",
+      "bytes": 22083,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/transitions/transition-native-renewal.test.ts": {
+      "sha256": "e69918ffc0361b811e90e478f98508d12174217d5762ff44220ef1847c45f8af",
+      "bytes": 6632,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/transitions/transition-native-session.ts": {
+      "sha256": "a9add5e1624151a21229167276a0fa0548c7551cccdcb02ecea1de1f2738486c",
+      "bytes": 10263,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/transitions/transition-observation-store.test.ts": {
+      "sha256": "03de2b654d1a1c68d9648ee5f9d066febe7af1e181f45282a1695a3a964575da",
+      "bytes": 4782,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/transitions/transition-observation-store.ts": {
+      "sha256": "c6145726cf61c09072035f61c4c24070c4294f475e7bf3677edeb4df9f283927",
+      "bytes": 4922,
+      "role": "current-delivery-source-or-evidence"
+    },
+    "packages/core/src/memory/transitions/transition-pending-sources.ts": {
+      "sha256": "350042f03b7559c9cb1d530a1f5b5a887727ec6f76baab14d81c2e817a98ba8b",
+      "bytes": 2669,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/memory/transitions/transition-runtime.ts": {
+      "sha256": "7c9156978ea3580812dcc007d41d0999e7a846ce78fbe3f5c7abd4c9f3da78aa",
+      "bytes": 8459,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/testing/index.md": {
+      "sha256": "cff4addbf156c7b72250f5b21a62445706515352870e77676e3cabcc50107cc5",
+      "bytes": 5476,
+      "role": "preserved-predecessor"
+    },
+    "packages/core/src/testing/memory-transition-publication-fixtures.ts": {
+      "sha256": "af9fb0e30507de64e401d94b68dbc317844d858520e79f9610b3c2fd1435be67",
+      "bytes": 7946,
+      "role": "preserved-predecessor"
+    }
+  },
+  "notes": "All included logs/processes are stopped. No self entry or running stdout log. Offline derivative approval/request is synthetic and must never be used for real continuation."
+}

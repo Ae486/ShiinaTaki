@@ -1,0 +1,41 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+····x······x······
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/memory-transition-observation.test.ts > receipt-scoped verified observation > rejects changed immutable native-slot after warming, then requires a new full seed after restored bytes
+AssertionError: expected [Function] to throw an error
+ ❯ src/db/memory-transition-observation.test.ts:76:82
+     74|         else f.db.exec(`UPDATE ${table} SET ${damage}_json='{}'`);
+     75|         expect(() => observer.selected("binding")).toThrow();
+     76|         expect(() => readVerifiedTransitionPublication(f.db, receipt.r…
+       |                                                                                  ^
+     77|         f.db.exec("ROLLBACK TO damage"); f.db.exec("RELEASE damage");
+     78|         const verify = vi.spyOn(native, "verifyTransitionNativeEvidenc…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/db/memory-transition-observation.test.ts > receipt-scoped verified observation > rereads mutable marker after warming
+Error: CHECK constraint failed: replica_checkpoint_digest IS NULL OR (length(replica_checkpoint_digest)=64 AND replica_checkpoint_digest NOT GLOB '*[^a-f0-9]*')
+ ❯ Object.exec src/db/sqlite.ts:64:11
+     62|     exec(sql) {
+     63|       assertActive();
+     64|       raw.exec(sql);
+       |           ^
+     65|     },
+     66|     prepare(sql) {
+ ❯ src/db/memory-transition-observation.test.ts:90:37
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 16 passed (18)
+   Start at  03:22:56
+   Duration  15.50s (transform 4.09s, setup 0ms, import 5.32s, tests 9.83s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/db/memory-transition-observation.test.ts --maxWorkers=2 --reporter=dot

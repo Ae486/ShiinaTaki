@@ -33,7 +33,7 @@ export interface UtilitySlotDeps {
   logger: Logger;
 }
 
-export function createUtilitySlot(deps: UtilitySlotDeps): UtilitySlot & { stop(): Promise<void>; settle(): Promise<void> } {
+export function createUtilitySlot(deps: UtilitySlotDeps): UtilitySlot & { stop(): Promise<void>; settle(): Promise<void>; retirePending(): void } {
   const log = deps.logger.child({ mod: "utility-slot" });
   // Falling back to the MAIN model is the shipped default, not a degraded mode: Letta's sleep-time agent inherits the
   // primary's llm_config and "use a stronger model" is documentation guidance (rc §A2). A cheaper/stronger background
@@ -44,16 +44,18 @@ export function createUtilitySlot(deps: UtilitySlotDeps): UtilitySlot & { stop()
   // provider at once, whichever characters they belong to.
   let chain: Promise<unknown> = Promise.resolve();
   let stopped = false;
+  let generation = 0;
 
   function run<T>(label: string, task: () => Promise<T>): Promise<T | undefined> {
     if (stopped) return Promise.resolve(undefined);
+    const admittedGeneration = generation;
     const next = chain.then(async (): Promise<T | undefined> => {
-      if (stopped) return undefined;
+      if (stopped || admittedGeneration !== generation) return undefined;
       totals.calls += 1;
       try {
         const value = await task();
         account(totals, value);
-        return value;
+        return admittedGeneration === generation ? value : undefined;
       } catch {
         // Background work is never load-bearing for a chat turn, so a failure is a warn + a skipped pass; the label
         // is what makes the line diagnosable. Provider exceptions may contain prompts, payloads, or credentials, so
@@ -71,7 +73,9 @@ export function createUtilitySlot(deps: UtilitySlotDeps): UtilitySlot & { stop()
     let current: Promise<unknown>;
     do { current = chain; await current; } while (current !== chain);
   };
-  return { model, run, usage: () => ({ ...totals }), settle, stop: () => { stopped = true; return settle(); } };
+  return { model, run, usage: () => ({ ...totals }), settle, stop: () => { stopped = true; return settle(); },
+    // Emergency closes the old provider first. Its tasks remain usage evidence, but cannot serialize new Local work.
+    retirePending: () => { generation++; chain = Promise.resolve(); } };
 }
 
 function utilityModel(config: UtilityConfig): LanguageModel {

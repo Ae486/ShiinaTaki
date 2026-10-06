@@ -1,0 +1,35 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+··········x······
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/transitions/transition-healthy-scheduling.test.ts > healthy finalization event-loop scheduling > joins a genuinely delayed renewal before full binding and terminal resolution for transition.return-local
+AssertionError: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ src/memory/transitions/transition-healthy-scheduling.test.ts:69:36
+     67|           .toEqual(["bind", "full-ready", "queue", "release"]);
+     68|         expect(fullReads).toBeGreaterThan(0); expect(pending).toBe(0);
+     69|         expect(vi.getTimerCount()).toBe(0);
+       |                                    ^
+     70|         expect(h.records.filter((record) => record.obj?.stage === "hea…
+     71|       } finally { vi.useRealTimers(); await h.close(); }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 16 passed (17)
+   Start at  04:17:08
+   Duration  14.41s (transform 7.01s, setup 0ms, import 9.42s, tests 9.83s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/transitions/transition-native-renewal.test.ts src/memory/transitions/transition-healthy-scheduling.test.ts --maxWorkers=2 --reporter=dot

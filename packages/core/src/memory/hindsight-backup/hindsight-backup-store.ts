@@ -80,13 +80,17 @@ export interface HindsightBackupStore {
   digest(backupId: string, file: HindsightBackupFile): Promise<HindsightBackupFileDigest>;
   /** The sealed dir's native.zip path, for re-reading a Core-held archive. */
   nativePath(backupId: string): string;
-  /** Emergency evidence: a Core copy then its incident manifest under `incident-<id>/`; the dir is removed on any failure. */
-  writeIncident(incidentId: string, input: { write(path: string): Promise<number>; manifest(core: CoreDigest): HindsightIncidentManifest }): Promise<void>;
+  /** A fresh partial copy is inspected before atomic seal. Failure never removes an existing sealed incident. */
+  writeIncident(incidentId: string, input: { write(path: string): Promise<number>;
+    manifest(core: CoreDigest, path: string): HindsightIncidentManifest }): Promise<void>;
+  /** Missing final directory returns null; a present but incomplete, corrupt or misnamed artifact refuses. */
+  readIncident(incidentId: string): Promise<HindsightIncidentManifest | null>;
+  incidentCorePath(incidentId: string): string;
 }
 
 export function createHindsightBackupStore(dataDir: string): HindsightBackupStore {
   const paths = storePaths(join(dataDir, "backups"));
-  return { root: paths.root, ...captureMethods(paths), ...stagedMethods(paths), ...sealedMethods(paths) };
+  return { root: paths.root, ...captureMethods(paths), ...stagedMethods(paths), ...sealedMethods(paths), ...incidentMethods(paths.root) };
 }
 
 interface StorePaths {
@@ -108,7 +112,7 @@ function storePaths(root: string): StorePaths {
   };
 }
 
-function captureMethods(paths: StorePaths): Pick<HindsightBackupStore, "begin" | "captureCore" | "seal" | "discard" | "quarantine" | "writeIncident"> {
+function captureMethods(paths: StorePaths): Pick<HindsightBackupStore, "begin" | "captureCore" | "seal" | "discard" | "quarantine"> {
   const { root } = paths;
   return {
     begin: async (backupId) => {
@@ -129,20 +133,49 @@ function captureMethods(paths: StorePaths): Pick<HindsightBackupStore, "begin" |
       renameSync(partial, join(root, QUARANTINE_DIR, requireBackupId(backupId)));
       return true;
     },
-    writeIncident: async (incidentId, input) => {
+  };
+}
+
+function incidentMethods(root: string): Pick<HindsightBackupStore, "writeIncident" | "readIncident" | "incidentCorePath"> {
+  const directory = (id: string) => join(root, `incident-${z.uuid().parse(id)}`);
+  return {
+    incidentCorePath: (id) => join(directory(id), HINDSIGHT_BACKUP_CORE_FILE),
+    readIncident: async (id) => {
+      const dir = directory(id);
+      if (!await exists(dir)) return null;
+      if (!(await lstat(dir)).isDirectory() || (await lstat(dir)).isSymbolicLink()) invalidIncident();
+      const value = HindsightIncidentManifestSchema.safeParse(readJsonSync(join(dir, MANIFEST_FILE)));
+      if (!value.success || value.data.incidentId !== id) invalidIncident();
+      const path = join(dir, HINDSIGHT_BACKUP_CORE_FILE);
+      if (!(await lstat(path)).isFile() || (await lstat(path)).isSymbolicLink()) invalidIncident();
+      const digest = await digestFile(path);
+      if (digest.sha256 !== value.data.core.sha256 || digest.bytes !== value.data.core.bytes) invalidIncident();
+      return value.data;
+    },
+    writeIncident: async (id, input) => {
       await mkdir(root, { recursive: true, mode: OWNER_DIR });
-      const dir = join(root, `incident-${z.uuid().parse(incidentId)}`);
-      await mkdir(dir, { mode: OWNER_DIR });
+      const target = directory(id); const partial = `${target}.partial`;
+      if (await exists(target)) invalidIncident();
+      // Create-only ownership is acquired outside cleanup. A failed retry cannot delete an earlier partial or seal.
+      await mkdir(partial, { mode: OWNER_DIR });
       try {
-        const core = await captureCore(dir, input.write);
-        await writeOwnerFile(join(dir, MANIFEST_FILE), json(HindsightIncidentManifestSchema.parse(input.manifest(core))));
+        const core = await captureCore(partial, input.write);
+        const path = join(partial, HINDSIGHT_BACKUP_CORE_FILE);
+        const manifest = HindsightIncidentManifestSchema.parse(input.manifest(core, path));
+        if (manifest.incidentId !== id || manifest.core.sha256 !== core.sha256 || manifest.core.bytes !== core.bytes) invalidIncident();
+        const actual = await digestFile(path);
+        if (actual.sha256 !== core.sha256 || actual.bytes !== core.bytes) invalidIncident();
+        await writeOwnerFile(join(partial, MANIFEST_FILE), json(manifest));
+        if (await exists(target)) invalidIncident();
+        await rename(partial, target);
       } catch (error) {
-        await removeDir(dir);
+        await removeDir(partial);
         throw error;
       }
     },
   };
 }
+function invalidIncident(): never { throw new Error("HINDSIGHT_BACKUP_ARTIFACT_INVALID"); }
 
 function stagedMethods(paths: StorePaths): Pick<HindsightBackupStore, "stage" | "readStaged" | "listStagedSync" | "claimInbox" | "returnInbox" | "sealStaged"> {
   return {

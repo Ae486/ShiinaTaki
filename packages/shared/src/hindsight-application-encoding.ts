@@ -10,7 +10,7 @@ import { TakiApplicationNamespaceSchema, TakiApplicationIdSchema, type TakiAppli
 export const HINDSIGHT_APPLICATION_ENCODING = "taki-application-state/tagged-json-binary64-v1";
 export const HINDSIGHT_APPLICATION_NATIVE_ENCODING = "taki-current-state/tagged-json-binary64-v1";
 export type HindsightApplicationDigestDomain = "body" | "part" | "request" | "record" | "page" | "pages"
-  | "snapshot" | "event" | "receipt" | "source-evidence";
+  | "snapshot" | "event" | "receipt" | "source-evidence" | "transition-source-evidence";
 type TaggedFrame = { kind: "value"; value: JsonValue } | { kind: "text"; text: string };
 
 export function hindsightApplicationDigestJson(input: {

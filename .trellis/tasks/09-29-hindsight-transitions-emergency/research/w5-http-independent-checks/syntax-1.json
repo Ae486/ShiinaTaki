@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "C:/Program Files/nodejs/node.exe",
+    "--check",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_client.mjs"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "timeoutSeconds": 30,
+  "exitCode": 0,
+  "stdout": "",
+  "stderr": "",
+  "milliseconds": 218.99999999732245
+}

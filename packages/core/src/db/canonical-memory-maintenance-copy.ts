@@ -4,12 +4,13 @@
  * POS:    core/db — Local copy primitive; callers may compose a correction in the same synchronous transaction
  */
 import {
-  HindsightCurrentCanonicalRecordSchema, HindsightCurrentCanonicalSourceSchema,
-  TakiMemoryPolicyProjectionSchema, type CanonicalMemoryRecord, type CanonicalMemorySource,
+  HindsightCurrentCanonicalRecordSchema,
+  TakiMemoryPolicyProjectionSchema, type CanonicalMemoryRecord,
 } from "@taki/shared";
 import { z } from "zod";
 import type { CanonicalMaintenanceCopyInput, CanonicalMaintenanceCopyResult } from "./canonical-memory-maintenance-contract.ts";
-import { readCanonicalEvidenceSources, remapCanonicalSourceEvidence } from "./canonical-memory-maintenance-evidence.ts";
+import { planCanonicalCopySources, insertCanonicalCopySources, installCanonicalCopySourceSets,
+  type CanonicalCopySources } from "./canonical-memory-copy-sources.ts";
 import { decodeCanonicalMaintenanceMutation, encodeCanonicalMaintenanceMutation,
   runCanonicalMaintenance, validateCanonicalMaintenanceMutation } from "./canonical-memory-maintenance-journal.ts";
 import { canonicalMaintenanceSearchTerms, ensureCanonicalMaintenanceSnapshot,
@@ -17,7 +18,7 @@ import { canonicalMaintenanceSearchTerms, ensureCanonicalMaintenanceSnapshot,
 import { requireExpectedCanonicalRecord } from "./canonical-memory-maintenance-query.ts";
 import {
   addCanonicalLineage, canonicalControlledLayerTags, insertCanonicalUnitAndPolicy,
-  readCanonicalSource, replaceCanonicalFts, requireCanonicalRecord, upsertCanonicalSource,
+  replaceCanonicalFts, requireCanonicalRecord,
 } from "./canonical-memory-maintenance-records.ts";
 import { saveCanonicalSnapshot } from "./canonical-memory-maintenance-storage.ts";
 import { createCanonicalMemoryRepo, stableRequestHash } from "./canonical-memory-repo.ts";
@@ -30,11 +31,9 @@ const SourceMapping = z.strictObject({ sourceDocumentId: Id, documentId: Id });
 const CopyReceipt = z.strictObject({ record: z.unknown(), original: z.unknown(),
   memoryMappings: z.array(MemoryMapping), sourceMappings: z.array(SourceMapping) });
 
-interface CopyPlan {
+interface CopyPlan extends CanonicalCopySources {
   originals: Map<string, CanonicalMemoryRecord>;
-  sources: Map<string, CanonicalMemorySource>;
   memories: Map<string, string>;
-  documents: Map<string, string>;
   crossBank: boolean;
 }
 
@@ -53,13 +52,14 @@ function applyCopy(writer: CanonicalMaintenanceWriter, input: CanonicalMaintenan
   const original = requireExpectedCanonicalRecord(writer.db, input);
   const plan = readCopyPlan(writer.db, input, original);
   const copies = [...plan.originals.values()].map((record) => cloneRecord(record, input, plan));
-  insertCopiedSources(writer.db, input, plan);
+  insertCanonicalCopySources(writer.db, input, plan);
   for (const record of copies) insertCanonicalUnitAndPolicy(writer.db, { unit: record.unit,
-    policy: record.policy, searchTerms: canonicalMaintenanceSearchTerms(writer.tokenizer, record) });
+    policy: record.policy, provenance: record.provenance, searchTerms: canonicalMaintenanceSearchTerms(writer.tokenizer, record) });
   for (const record of copies) for (const sourceMemoryId of record.unit.sourceMemoryIds) {
     addCanonicalLineage(writer.db, { epochId: input.epochId, bankId: input.destinationBankId,
       memoryId: record.unit.memoryId, sourceMemoryId });
   }
+  installCanonicalCopySourceSets(writer.db, input, plan);
   for (const copy of copies) {
     const stored = requireCanonicalRecord(writer.db, { ...input, bankId: input.destinationBankId, memoryId: copy.unit.memoryId });
     replaceCanonicalFts(writer.db, stored.unit, canonicalMaintenanceSearchTerms(writer.tokenizer, stored));
@@ -75,7 +75,7 @@ function applyCopy(writer: CanonicalMaintenanceWriter, input: CanonicalMaintenan
   return { outcome: "applied", record: requireCanonicalRecord(writer.db,
     { ...input, bankId: input.destinationBankId, memoryId }), original: invalidated.record,
     memoryMappings: [...plan.memories].map(([sourceMemoryId, memoryId]) => ({ sourceMemoryId, memoryId })),
-    sourceMappings: [...plan.documents].map(([sourceDocumentId, documentId]) => ({ sourceDocumentId, documentId })) };
+    sourceMappings: [...plan.documents].map(([key, documentId]) => ({ sourceDocumentId: plan.sources.get(key)!.documentId, documentId })) };
 }
 
 function readCopyPlan(db: Database, input: CanonicalMaintenanceCopyInput, original: CanonicalMemoryRecord): CopyPlan {
@@ -91,27 +91,15 @@ function readCopyPlan(db: Database, input: CanonicalMaintenanceCopyInput, origin
       originals.set(memoryId, requireCanonicalRecord(db, { ...input, memoryId })); queue.push(memoryId);
     }
   }
-  const sources = new Map<string, CanonicalMemorySource>();
-  for (const record of originals.values()) {
-    if (crossBank && record.unit.documentId !== null) {
-      const source = readCanonicalSource(db, { ...input, documentId: record.unit.documentId });
-      if (!source) throw new Error("MEMORY_INTEGRITY_ERROR: support source missing");
-      sources.set(source.documentId, source);
-    }
-    for (const source of readCanonicalEvidenceSources(db, { ...input, memoryId: record.unit.memoryId })) {
-      sources.set(source.documentId, source);
-    }
-  }
   const memories = new Map([...originals.keys()].sort().map((id) => [id, copyIdentity(input, "memory", id)]));
-  const documents = new Map([...sources.keys()].sort().map((id) => [id, copyIdentity(input, "source", id)]));
-  return { originals, sources, memories, documents, crossBank };
+  return { ...planCanonicalCopySources(db, input, [...originals.values()]), originals, memories, crossBank };
 }
 
 function cloneRecord(record: CanonicalMemoryRecord, input: CanonicalMaintenanceCopyInput, plan: CopyPlan): CanonicalMemoryRecord {
   const selected = record.unit.memoryId === input.memoryId;
   const memoryId = requireMapped(plan.memories, record.unit.memoryId);
   const documentId = plan.crossBank && record.unit.documentId !== null
-    ? requireMapped(plan.documents, record.unit.documentId) : record.unit.documentId;
+    ? requireMapped(plan.documents, requireMapped(plan.direct, record.unit.memoryId)) : record.unit.documentId;
   const sourceMemoryIds = plan.crossBank ? record.unit.sourceMemoryIds.map((id) => requireMapped(plan.memories, id))
     : record.unit.sourceMemoryIds;
   const policy = { ...record.policy, bankId: input.destinationBankId, memoryId,
@@ -126,20 +114,6 @@ function cloneRecord(record: CanonicalMemoryRecord, input: CanonicalMaintenanceC
     sourceMemoryIds, revision: 1,
     tags: selected ? canonicalControlledLayerTags(record.unit.tags, policy.layerId) : record.unit.tags };
   return HindsightCurrentCanonicalRecordSchema.parse({ ...record, unit, policy });
-}
-
-function insertCopiedSources(db: Database, input: CanonicalMaintenanceCopyInput, plan: CopyPlan): void {
-  for (const original of plan.sources.values()) {
-    const documentId = requireMapped(plan.documents, original.documentId);
-    if (readCanonicalSource(db, { ...input, bankId: input.destinationBankId, documentId })) {
-      throw new Error("MEMORY_REQUEST_ID_CONFLICT");
-    }
-    const mapped = remapCanonicalSourceEvidence(original, { sourceBankId: input.bankId,
-      destinationBankId: input.destinationBankId, memories: plan.memories });
-    const source = HindsightCurrentCanonicalSourceSchema.parse({ ...mapped,
-      bankId: input.destinationBankId, documentId, revision: 1 });
-    upsertCanonicalSource(db, source, source.revision);
-  }
 }
 
 function copyIdentity(input: CanonicalMaintenanceCopyInput, kind: string, originalId: string): string {

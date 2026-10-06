@@ -1,0 +1,144 @@
+{
+  "meaning": "Parent-only fresh-clone e30-to-e40 migration proof; optional existing synthetic-vector apply.",
+  "networkAttemptsRefused": 0,
+  "realModelCalls": 0,
+  "applyLimitSeconds": 180,
+  "observationSeconds": 60,
+  "applyCalls": 1,
+  "stopped": true,
+  "migrationRehearsalCompleted": true,
+  "withApply": true,
+  "migrationProofLimitSeconds": 180,
+  "sourceManifestSha256": "9340f11464caffa680a83503def0e16404df3068ba5743ba78e4a2210a5d2b07",
+  "root": "H:\\TakiAgent\\.trellis\\.runtime\\w5-candidate-native-clone-c79b1bb075ec4ee385c9a30f4a7bb98e",
+  "sourceCount": 1660,
+  "sourceBytes": 550592708,
+  "port": 10110,
+  "started": true,
+  "migrationMilliseconds": 2610.883300018031,
+  "migrationProof": {
+    "previousRevision": "e30a9d7f6c21",
+    "currentRevision": "e40b1e8a7d32",
+    "previousFunctionSha256": "729b937af085b27ba8ea24ed5ef8eabca4f99082deaf46a7271925c1d5f1e9e6",
+    "currentFunctionSha256": "72a1716fac4a7ce714fa2a0bf9e77d1b3ba80b9f59dc189640c3d5e1df8044c3",
+    "sameFunctionOidAndAttributes": true,
+    "otherFunctionsAndTriggersPreserved": true,
+    "allTableRowsAndIndexesPreserved": true,
+    "tableCount": 60,
+    "freshConnectionAfterMigration": true
+  },
+  "migrationAndProofMilliseconds": 20151.708699995652,
+  "pool": {
+    "minimum": 2,
+    "maximum": 5,
+    "commandTimeoutSeconds": 180,
+    "acquireTimeoutSeconds": 10
+  },
+  "syntheticVectorDimension": 384,
+  "identity": {
+    "transition": "6d27eb9b-6bbd-4b56-8ef4-0fda9c5eec53",
+    "operation": "6497dfc9-e287-4cb1-96b5-1020ea1eabc4",
+    "requestHash": "946b0a8228df74206a91ea4154e34d6592082e5afae2c069a71846e8e301b8d7",
+    "cloneGeneration": 2
+  },
+  "syntheticEmbeddingBatches": [
+    68
+  ],
+  "applyCompleted": true,
+  "result": {
+    "requestHash": "946b0a8228df74206a91ea4154e34d6592082e5afae2c069a71846e8e301b8d7",
+    "resultHash": "38401ae273bc46e21f6dbac6bd9908fe6358f0d41e671e3c3952684f49dcf74d",
+    "mappings": 1559,
+    "artifacts": 1558
+  },
+  "exactLookupMatches": true,
+  "applyElapsedMs": 56709.23050001147,
+  "observation": {
+    "pending": false,
+    "completedBefore60Seconds": true
+  },
+  "historicalMaintenancePreserved": true,
+  "deltaRows": 1,
+  "sourcePreserved": true,
+  "inputPreserved": true,
+  "corePreserved": true,
+  "originalPreserved": true,
+  "repairSourcesPreserved": true,
+  "portReleased": true,
+  "stageMilliseconds": [
+    {
+      "name": "normal-clone-claim",
+      "milliseconds": 19.43119999486953
+    },
+    {
+      "name": "full-apply",
+      "milliseconds": 56017.81920000212
+    },
+    {
+      "name": "admit",
+      "milliseconds": 17309.713799972087
+    },
+    {
+      "name": "baseline",
+      "milliseconds": 17259.098799986532
+    },
+    {
+      "name": "preflight_transition_delta",
+      "milliseconds": 1351.2687000038568
+    },
+    {
+      "name": "application-predecessors",
+      "milliseconds": 2921.436700009508
+    },
+    {
+      "name": "prepare_current_state_rows",
+      "milliseconds": 1.2333000195212662
+    },
+    {
+      "name": "admit",
+      "milliseconds": 16923.380099993665
+    },
+    {
+      "name": "baseline",
+      "milliseconds": 16875.80569999409
+    },
+    {
+      "name": "native-renewal",
+      "milliseconds": 21.470899984706193
+    },
+    {
+      "name": "preflight_transition_delta",
+      "milliseconds": 1343.4156999865081
+    },
+    {
+      "name": "write_transition_native_delta",
+      "milliseconds": 6688.352199998917
+    },
+    {
+      "name": "write_transition_application_delta",
+      "milliseconds": 8483.854000020074
+    },
+    {
+      "name": "application-predecessors",
+      "milliseconds": 2773.5372000024654
+    }
+  ],
+  "sqlSummary": {
+    "prefetchMetadata": 96,
+    "ordinaryBodyMetadata": 1393,
+    "invalidationInsert": 68,
+    "semanticLinkInsert": 0,
+    "derivedDeletion": [
+      {
+        "calls": 1,
+        "milliseconds": 4066.4714999729767,
+        "maxMs": 4066.4714999729767
+      }
+    ]
+  },
+  "reviewedResult": {
+    "path": "H:/TakiAgent/.trellis/.runtime/w5-candidate-native-clone-c79b1bb075ec4ee385c9a30f4a7bb98e/result.json",
+    "bytes": 38177,
+    "sha256": "ff029a9d77960a5442c862064f7222d63f168d2b3b8d4984aa31c75c9585a0f5"
+  }
+}

@@ -1,0 +1,11 @@
+
+> takiagent@0.0.0 lint H:\TakiAgent
+> eslint .
+
+
+H:\TakiAgent\packages\core\src\memory\transitions\transition-local-projection.ts
+  52:8  error  Function 'projectTransitionLocalBank' has too many lines (51). Maximum allowed is 50  max-lines-per-function
+
+✖ 1 problem (1 error, 0 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.

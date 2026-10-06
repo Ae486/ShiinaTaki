@@ -1,0 +1,844 @@
+{
+  "task": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency",
+  "nativeRoot": "H:\\hindsight",
+  "takiRoot": "H:\\TakiAgent",
+  "heads": {
+    "H:\\TakiAgent": "fccfc4fb78958c90efebdb4a5a98b355bcb73a40",
+    "H:\\hindsight": "6a749ba3e7d8719e336d9d1d8735a8e09da4366b"
+  },
+  "native": [
+    {
+      "path": "TAKI_PATCHES.md",
+      "beforeW3": "ebc5b525c1d17bb26dca972c1db299fed18bf52e9a2ef03bd7b465b33be139dd",
+      "sha256": "4e0ff41530ff1f924614e60d8c2d0aa3e307cb7ebdac3936e32d9baf297a77da"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/api/taki_transitions.py",
+      "beforeW3": "d6c500b55c0a9d19c30d09612e7a86d9738fe2eab6d3e718d565d9b0d279716a",
+      "sha256": "585237fddf0a6420c1110222d0e7f4a53e477796aa0ef4c049e2607d81a8ec88"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/application_state/commits.py",
+      "beforeW3": "3d98c03c46016c9b0622a2bd55ba545405441ff67b7c991a6830edfa64a7b2f8",
+      "sha256": "268405b60b90d5a017878b89b6f7b362cbf0434320a747b1fc55f1bfb707a11d"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/application_state/models.py",
+      "beforeW3": "bbb5ca9ac59b6ba2b221ddfd25fbf92d1b92e418989c26689484d53b595f351f",
+      "sha256": "9db386f100887cd9d8c73aec74c630d9882cf22bf841f8a78d246713dd08f179"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/application_state/snapshot.py",
+      "beforeW3": "553f5680e1c22d5b134d9198c00ca05caf864491d8e7d21bd42d4d9d45f3e2fa",
+      "sha256": "2318b0f373b547b1985c99cffa8ed492efc07a7ad877f3f15d027f6535c02fdf"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/application_state/source_evidence.py",
+      "beforeW3": null,
+      "sha256": "ebb9b7f3fbe025d6c60fc5ad33d4ccafabba402ef560c29f1edd8a97c1e04424"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/application_state/store.py",
+      "beforeW3": "db60deb7a52667cfeb4a037216408e8f694f35b267d21a0fe9a9345d391b5fae",
+      "sha256": "7a6b0bd12769ab30aaf88f631b17c227f66074bd77f5a546518188d0fb880237"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/memory_engine.py",
+      "beforeW3": "70655df153c0512300b1793bcc7731b9f400b25cba81f2c3070b8bec53b0099e",
+      "sha256": "53a5e397b79ee45d05e4f5234abc440065706314310a1fcf6f48e4512c6426fe"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/taki_compatibility.py",
+      "beforeW3": "1e438d827b002304dc4693252dce61fc3f87783fb715eb763ba63563f4e6180e",
+      "sha256": "1786b84a9056a483eb3e530511cfa13c3511a67f13adf8f5eb74ef58e6092788"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transfer/transition_delta_application.py",
+      "beforeW3": "e56d7b4565274457e29fc6f7fc2e9b64785a9402ed83ea437e5ae39de77d7a0f",
+      "sha256": "47ca4360aaa45bb7b2781fe6bc2bb88b34195d7ed86dd5228d2e3759919b7b97"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transfer/transition_delta_history.py",
+      "beforeW3": null,
+      "sha256": "459fae3c95dd6c8b899001bf034140e15a529bdea875d198e48fa404eb3db128"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transfer/transition_delta_models.py",
+      "beforeW3": "54851afe5f787552e54bd92e5c92b1fad2678827996eb0f912d6684e5ac5ee5c",
+      "sha256": "de8ce130a7f6b17004a7234a6f998666a266ec2a99d406070b0973fb86467448"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transfer/transition_delta_preflight.py",
+      "beforeW3": "507c7eaf8e2cdb1fc7b1686b9a8b4d8b6c853a2831d858fb36e99fc2e86d9d4b",
+      "sha256": "59bbd3947fe06b4256656336b1d57a79eea73d95c607ea435ed02bbf092fa984"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transfer/transition_source_evidence.py",
+      "beforeW3": null,
+      "sha256": "2c752719ba7b6f751fabcc393aa3ad4af9d05c2d3d4decb5a9a35d7d2ba199ce"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transfer/transition_source_references.py",
+      "beforeW3": null,
+      "sha256": "9f1a558345f763f385242aa2eeb8e07f1e8ede7f9d157d8337a4f0b47ef7fb81"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_api_service.py",
+      "beforeW3": "8762f91a496254d19a0c6fc2317be0d9a4f154ca72097f43c66714eb9b0e1e82",
+      "sha256": "abd174b1960dccdd8002ce29576c835131bf7208f5997f8efc3a8426cb4e9db2"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_application_rebind.py",
+      "beforeW3": "2c58216c0f5be517d797fc947442036d2a4a4c0eef4e20f8b4fb999ff0d076f5",
+      "sha256": "f7cbed3c599b5439261af13ca6ca2b93abee6da0413353af4e26ae4513fc386e"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_source_models.py",
+      "beforeW3": null,
+      "sha256": "4c5dea30945a11d892b9844b8d39556f8947cb30339b594a468e252bb4c71fc7"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_source_upload.py",
+      "beforeW3": null,
+      "sha256": "2634fc77bea9356f857f4122966f76d0971e3ee2c498d0e2f1670f7837321f1d"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_historical_references.py",
+      "beforeW3": null,
+      "sha256": "b3c4d80ee0655727171814514ecbef2caa3aa9417c12298819b0580f2a5a6876"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_source_evidence.py",
+      "beforeW3": null,
+      "sha256": "86f870b4656d38c6a28e281339c3d92e504f1667beb342b20751283b30c601e8"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_source_refusals.py",
+      "beforeW3": null,
+      "sha256": "7b11da72ec77dc66fde51a5a3bb9edb28a9cd5cef2ddfe5311270a56cda9120e"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_w3_consumer.py",
+      "beforeW3": null,
+      "sha256": "9206c5bad4f263828aaa913683a6dc14f736f2489ef1c0993d51e7b3eb1656ee"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/transition_source_helpers.py",
+      "beforeW3": null,
+      "sha256": "ad4f448db66046ea4ba14d9c183708cbd6ca2284effbd6c40d9931223e7ac21e"
+    },
+    {
+      "path": "hindsight-clients/go/api/openapi.yaml",
+      "beforeW3": "e64435c7a9ed2c650a5ca97e09d2747811d8f08ac06928b525bff71aa5ba0bd5",
+      "sha256": "87465b63306a0e0a5274674488fa90553e289d424ae1562a549a99b598bab2b5"
+    },
+    {
+      "path": "hindsight-clients/go/api_taki_memory_compatibility.go",
+      "beforeW3": "ad8c41a1a808ffdc0928e71b6a76910da360285b76221f58c45693328394fa9c",
+      "sha256": "f8ffc3fa7b78f9bf427bcf346810aae61fb906ca6c4137e25fc356f576c29e78"
+    },
+    {
+      "path": "hindsight-clients/go/model_source_artifacts_inner.go",
+      "beforeW3": null,
+      "sha256": "79f9e4d091d1042266b5e672cd71dd118657fbe24bada9a1f3e91a7c09b76daf"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_application_source_evidence_body.go",
+      "beforeW3": null,
+      "sha256": "9e66a04a3b87bcae2f3bea1572b3377801b91defeaf866ceedf6fce080854c62"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_compatibility_contracts.go",
+      "beforeW3": "5e9d383321431d8ab29e62c90875818d4acf29c259cb986a4f385a692ca607da",
+      "sha256": "d447e73521f8c523b065374a1c94093f8432b213eb3597b9594cf704b318807a"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_transition_source_part_request.go",
+      "beforeW3": null,
+      "sha256": "dfdcea9086f9e307d7cc482127abd4105efe1932aff799785261a611deaca9b5"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_transition_source_upload_request.go",
+      "beforeW3": null,
+      "sha256": "8c34c39f4dc3dfe2d1b1f926fc98dfbcf236db1d96ee7f10a2d941ec675b23f6"
+    },
+    {
+      "path": "hindsight-clients/go/model_transition_artifact_input.go",
+      "beforeW3": "5bb25b2c9a2f25aab1f5ecc960b6704d60058084ea743405f2d36073adfe314f",
+      "sha256": "f8732a72db13e21d152afede6de43b2bdbd7257dc56f2190ab76a2beffa28f78"
+    },
+    {
+      "path": "hindsight-clients/go/model_transition_delta_source_reference.go",
+      "beforeW3": null,
+      "sha256": "1f615b9692c45f8a6ec1e9830a2b28343a67d433ef10c1fe780d461b82843f20"
+    },
+    {
+      "path": "hindsight-clients/go/model_transition_existing_source_reference.go",
+      "beforeW3": null,
+      "sha256": "428316353c5ac941109b42cbaffe452d51b3ecb643a56d20ee62ed480d66d135"
+    },
+    {
+      "path": "hindsight-clients/go/model_transition_memory_evidence_input.go",
+      "beforeW3": null,
+      "sha256": "484c4bb15af82613cc55e758f631e167eb5650bd47aebb8c2cf7415b2771afa2"
+    },
+    {
+      "path": "hindsight-clients/go/model_transition_memory_evidence_value.go",
+      "beforeW3": null,
+      "sha256": "21b86bb435b9831f8acbd6a248beff9afd95aee500312bd13133067e0e7a2353"
+    },
+    {
+      "path": "hindsight-clients/go/model_transition_source_evidence_input.go",
+      "beforeW3": null,
+      "sha256": "a0a59017267c1bdd17392b126fb92c0788e3c1436614eb8940ace5671e03981b"
+    },
+    {
+      "path": "hindsight-clients/go/model_transition_source_evidence_value.go",
+      "beforeW3": null,
+      "sha256": "cbc9551caeecfb7f4b7cb8aad71b3821f7a896c851e5cff2ed3c49c99350cd7c"
+    },
+    {
+      "path": "hindsight-clients/python/.openapi-generator/FILES",
+      "beforeW3": "21d4388dda3edffb964078854e2451801e18d6e0e91e5344860669662da64de7",
+      "sha256": "62c9da9d613e70427f7e7e477192f90abaeb6f870063c40a781b60505c1ead9c"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/__init__.py",
+      "beforeW3": "35a16063eb8f681cea3aaba5942522cfa75407075179e3911603d56c12cac9d6",
+      "sha256": "09552521dfcc66f1154a853b133f4e0a1eb0c47b894a96525a2a387c7221461f"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/api/taki_memory_compatibility_api.py",
+      "beforeW3": "6eb2426202cc19ee243a2a65b7e58b7877c1379a40d9f19fdf0dcc2469daf983",
+      "sha256": "57b65a4ca60bca354b5395cb33351f7b34dda285258774abea5ae1c1ccedde17"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/__init__.py",
+      "beforeW3": "24b7cb7640b36846892e57438943c7a60b7ead1492946aba089618f8a73ca74e",
+      "sha256": "ef6e605e4e425f5f98606009c34507712a1faf31910208950dae125b35aa09a2"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/source_artifacts_inner.py",
+      "beforeW3": null,
+      "sha256": "1e8a5021143aa2e8d04d7f0f7b9973743b804d84ba8796267ffe2bd115c14611"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_application_body_ref.py",
+      "beforeW3": "6f1dbbcce93e5d264296ff65e69f8eacf993a3e2867f7c988bcf690b1a8f7edd",
+      "sha256": "d3da2e1e47398e55f6b9c9480039b8b2eed06d50fc9ef56461cb8233b952071c"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_application_source_evidence_body.py",
+      "beforeW3": null,
+      "sha256": "1926b693a9db116382803ebf19ac362693608960c010ede2dea9ae447d70902a"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_compatibility_contracts.py",
+      "beforeW3": "0ec3e6db547e4a91be7744031622999dee54d38ccc0230ea28f629065d036724",
+      "sha256": "3bf570911187a7a22d4d70b98e52772f6216d8257f6a5f90cc38d489f4918799"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_compatibility_support.py",
+      "beforeW3": "823b228e0593c807cfc17e695195795be30400a38c4705b0a45d834137722944",
+      "sha256": "fbfd3d0cbba875308e109383c6dc8f62fd7f5ddb73d5d0f258dca3a4140b7569"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_transition_source_part_request.py",
+      "beforeW3": null,
+      "sha256": "6d755f4e550d7bacbfa143f13389b60445a7e9dc45f8db174b51d2fc6a1334e2"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_transition_source_upload_request.py",
+      "beforeW3": null,
+      "sha256": "85e4fef76484324fc735c45c2096625945a82778226b8b852a21a64575fb1990"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/transition_artifact_input.py",
+      "beforeW3": "b1cb6b81abd10d1a06997561a11012ebd944bfbf06c724727aae7e5a9895a0fe",
+      "sha256": "1d2c4db04e0d374a279e4a86832f8af3c80142959f37af97fc82b4e10601f6a1"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/transition_delta_source_reference.py",
+      "beforeW3": null,
+      "sha256": "56601089ec8dbf6b3af6b8dfa7258c81d99428de460aa1a56a02c71d90ea567c"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/transition_existing_source_reference.py",
+      "beforeW3": null,
+      "sha256": "edc3f69c1d16fe89df33f8fc9fd64cd5ecab4eb0b74926ed525a1bad62ffe019"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/transition_memory_evidence_input.py",
+      "beforeW3": null,
+      "sha256": "e983e0e1a6577357b4f2cbb5b68f8b86bdbffd5f3ea6fc3c7002437a340de31d"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/transition_memory_evidence_value.py",
+      "beforeW3": null,
+      "sha256": "8009a3ef91a13edffdae9f3a836d79d53162f8cd575123ea2346d3cdf1b11654"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/transition_source_evidence_input.py",
+      "beforeW3": null,
+      "sha256": "7c235856807a08ae7b0f8ad4cdf9af5a54a36fc73823b12be6f27a5986a18f7d"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/transition_source_evidence_value.py",
+      "beforeW3": null,
+      "sha256": "907c1b808af62146b836eeb0c017da9f9c993d4ef2c239b7ca9f3455026f8af7"
+    },
+    {
+      "path": "hindsight-clients/typescript/generated/sdk.gen.ts",
+      "beforeW3": "2efe8dec0d0936ff48852e4c9a5a423ad657b130974fef7211340261f559cd56",
+      "sha256": "c8c1831164d7d66333b803a601e1987eb6925e5e3bf820a4b428660226802af1"
+    },
+    {
+      "path": "hindsight-clients/typescript/generated/types.gen.ts",
+      "beforeW3": "0e1ef4b6d48f0dbfdd6bc61c990e90a82737d9fbcb96227a8be7f3492169d673",
+      "sha256": "82feba9f5a934f534ef091aeb0437b93d7a75f849970048201747f09c5731086"
+    },
+    {
+      "path": "hindsight-docs/static/openapi.json",
+      "beforeW3": "fe0f1f29ef5ff03e0cd9e0c81204ac5a3224cfa623deeb70abcfe3cb356de185",
+      "sha256": "936e23209154eda72d51c8e4ab3004f4edf36fdf080fe48b67ea7f651d3147d3"
+    }
+  ],
+  "taki": [
+    {
+      "path": ".trellis/spec/backend/canonical-local-memory-runtime.md",
+      "beforeW3": "0afa844c14d084747a77ea727c8595f8cb3eac2f45a33231904e948227dd2ca6",
+      "sha256": "8e4de312314b7e278db5e8b6a80ac2c1a4a200107c51d924cf8dc7438560db93"
+    },
+    {
+      "path": ".trellis/spec/backend/hindsight-application-runtime.md",
+      "beforeW3": "6572c3b15d471b25a888a99711efa7b3cb557d3a04e5295b1f8514b3ca16e978",
+      "sha256": "c74feedbe65d8165b53b62d7e3fb46a24050b5421a75d82115e9b52cbe573a69"
+    },
+    {
+      "path": ".trellis/spec/backend/memory-transitions.md",
+      "beforeW3": "fac5a55f605c36009adbf30e0d474d11a87cf429f29bc728db4bf43ed8397eaa",
+      "sha256": "2eb36b6546f1fe0875a9743f1a4433aae16ad6ccd1c0d38be012b29dc214e858"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-copy-sources.ts",
+      "beforeW3": null,
+      "sha256": "d7d72a40f590e37a66d85262fa852d67a64a4643ac016e0b04159a7bd123f5bc"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-historical-references.ts",
+      "beforeW3": null,
+      "sha256": "ef695836df573fbd2579b756c28ada7988a6baba1f8f21e6c41ec99e7206e79d"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-copy.ts",
+      "beforeW3": null,
+      "sha256": "e6b41db6926137dcc234141738b1e58951dbe267432630eb6e71650e21893f50"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-evidence.ts",
+      "beforeW3": null,
+      "sha256": "5deae556d69a2d0a2bcdc3c4b7f0371865adb6b291fdfc529fb7279619ebd4c8"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-mutations.ts",
+      "beforeW3": null,
+      "sha256": "064ab139456c6fe9aafe8271485cd521b76f7526b13e7deda09d0146d3866e7a"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-records.ts",
+      "beforeW3": null,
+      "sha256": "7f2b300adc56bd0eb2c138b44c371a91bdb9e30eab3c4e105735d3287ed42536"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-retention.ts",
+      "beforeW3": null,
+      "sha256": "3a332acbed269c505711675cb615eaf57179a0e14cce76b5f0ac325436a5c454"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-policy-revision.test.ts",
+      "beforeW3": null,
+      "sha256": "5d9fa67beb9d1bed8a12b3bda3ac03f97f157383de719693d4c695e6254861d5"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-policy-revision.ts",
+      "beforeW3": null,
+      "sha256": "73bed3927b26ff8396c0e40ea723f86c561a7025bcd8c9509c7820c3e1669194"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-repo.ts",
+      "beforeW3": null,
+      "sha256": "b4f680fcf0567add551381995c9d61add6e0f60b6cb51c3dbfc61013277083a7"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-source-references.ts",
+      "beforeW3": null,
+      "sha256": "2f645c822d772dade5d34d1f1f0be0c5343f3096ae8325f33491f0c9d0c8361a"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-command-contract.ts",
+      "beforeW3": null,
+      "sha256": "af8d09289c3869aa8e20b50677e574ae88015da3ca9d1191dc0a7a68b6b9c1ae"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-evidence.ts",
+      "beforeW3": null,
+      "sha256": "2057e9d007ddf19ca049b832346832d2da65e3ccb63e7503df4efb61bc18b08c"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-capture-json.ts",
+      "beforeW3": null,
+      "sha256": "caaeec51cdf544db19f72f3958b5250eb8e0307e585901f6fbb2c3f95b8c328c"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-capture-reader.ts",
+      "beforeW3": null,
+      "sha256": "ab9122406f10cd609cf9bf9c41480ac6f5fe2f7e8d1a88fe9380aaaa90e6a515"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-local-coverage-reader.ts",
+      "beforeW3": null,
+      "sha256": "1574ecb58aa68700f27cac739fcab8855d31fbb4dde8226a2c32c7006d970a73"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-local-coverage-repo.test.ts",
+      "beforeW3": null,
+      "sha256": "b481d08effad891e27c999e99fcea58f898082a5efc1d2063a72b5604e6a8dfc"
+    },
+    {
+      "path": "packages/core/src/db/index.md",
+      "beforeW3": "eec6884e1c0d2e19558539eca695ef8e4d8ddca91efbf35d7436e3799085f09d",
+      "sha256": "9bd1099c52085252c2ec52233ce0c4ede2aa7ae671471562ad6e03dc1c749fd2"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-candidate-repo.ts",
+      "beforeW3": null,
+      "sha256": "a9f1223f507d94c22313117320569839e6ae86a05b39f7e9459f839c958b6091"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-delta-repo.ts",
+      "beforeW3": null,
+      "sha256": "1d358df899b21d1fceed013077f3da3aa983d9f73be1c485cd8b3f6c75227de5"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-document-repo.ts",
+      "beforeW3": null,
+      "sha256": "bf938129ddd10d7c000f66de6f5636af8f408daf05e30c77103f4729ab03a0eb"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-local-capture.ts",
+      "beforeW3": null,
+      "sha256": "d351d5413a2047cc492bc1b73ee7908220beacc3267e7623cff3073cf92d0fd1"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-local-staging.ts",
+      "beforeW3": null,
+      "sha256": "18f28db0ef2cba3651f08f4527d345011e4ea51f85c8e0715c5784ecbe938aec"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-source-upload.ts",
+      "beforeW3": null,
+      "sha256": "ea143b32af434890b687645c120de183a8fed680901b197260a6888224279f88"
+    },
+    {
+      "path": "packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts",
+      "beforeW3": "ceeadace38de2626b5377db90580ef873e9712bfdc6340a2c7882d1fdc5c081a",
+      "sha256": "d0d43e0ea0b3accee73ad55e7e06dbe73d5f47eeb6429c91fefef66260c45147"
+    },
+    {
+      "path": "packages/core/src/db/migrations/053-memory-transition-candidates.test.ts",
+      "beforeW3": null,
+      "sha256": "abca46e5980c5787aadfad0582ec119eab9eb21928da25185da7d71592e76181"
+    },
+    {
+      "path": "packages/core/src/db/migrations/053-memory-transition-candidates.ts",
+      "beforeW3": null,
+      "sha256": "f99541764904f799d34f6ff4c0ca2e5a8612b43c6bb100ab20f6b2ec7afa8931"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index-list.test.ts",
+      "beforeW3": "5b64e4c8bb718832cfabbe2818022e6b0025a8c0240b2ed1ecb7895632b3a1b3",
+      "sha256": "02d72f30a18efce27d7749d37fb3ce61778b15160e1db248d7fbd1a6e878b800"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index-list.ts",
+      "beforeW3": "924597a55930545572c3c97db3423aa1489288ea07459c38b61167f14c2f30e1",
+      "sha256": "f0c5f54336d9417bc2f2ce93c256deb92ac2da672260d943fc9ef71c16cf9e34"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index.md",
+      "beforeW3": "d6742e8af7fbb5705424cd69e99320f1f186f37980764f1c37a6ffb15ddd5aaa",
+      "sha256": "19d974779e71aa41a8794ae3629d9ca152b8f14564d69133d5f9278d7d0b2c40"
+    },
+    {
+      "path": "packages/core/src/db/migrations/lineage-reopen-matrix.test.ts",
+      "beforeW3": "581722530bc1aa2746769826e18a6d2c3e1208e6d19baca059ea272fa25df4fe",
+      "sha256": "8c1757ac5871ec4a43b594d0c55a406acd2b2eabac14eeeee558dc2148e45192"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-binding-context.ts",
+      "beforeW3": null,
+      "sha256": "674db4703ab812246f8292d3bbb416c73c1307fc3be6fe4adfa4bdadcd33df04"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-body-transfer.ts",
+      "beforeW3": null,
+      "sha256": "26d24963d38f8a15559783aaea1968f61c2711b912e19159d75dbfef65d0ed7c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-bundle-loader.ts",
+      "beforeW3": null,
+      "sha256": "ae2805886cc93f3f8ffb915bc3b98df3d45687ec93ce38681c632631a71b7c10"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-bundle.ts",
+      "beforeW3": null,
+      "sha256": "28d6fa0882ac3a41ffce7c759a1b738747f9977589b409750221b63a7d6f51e9"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-client.ts",
+      "beforeW3": null,
+      "sha256": "4c76c967b3f709cf14eb9dff90287527b0ab9a6de602297e0dc9f6099d5788b3"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-policy.ts",
+      "beforeW3": null,
+      "sha256": "cc33ddea922cbabd0a75eceaf4ea63b4f1ae079f87e476e99b7a2ff091cca75c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-projection.ts",
+      "beforeW3": null,
+      "sha256": "43dd5905d101f78714c9a3536d7366608aaf9262f502296912782ea87519d47d"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-source-evidence.ts",
+      "beforeW3": null,
+      "sha256": "35152375812936fcab5b3db3e9e06366a3bbef3cda4f96d0e318226dbf91051e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-client.ts",
+      "beforeW3": "3d5a4769dd84348e79a21c44c054a1fecbc9375e865f4b9351e8b842b99e37c6",
+      "sha256": "34ea4606e9178200d09da1d1b3aa6e8501656f4443b2be0cf219729b26eeda35"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-contracts.ts",
+      "beforeW3": "45e48640564b1cbe2c5395d96267bae77e303b590fe93ea7b00d70da48db90fd",
+      "sha256": "548a4907b12779d87d24056bc1755f009e2c99f05904eb7d0473c9b46961923c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-current-maintenance-stream.ts",
+      "beforeW3": null,
+      "sha256": "ed7dec27ecb7f3d3a5acff77a22a30d83afa166722f1ef40d9fafd62ff4aee18"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-snapshot-validator.ts",
+      "beforeW3": null,
+      "sha256": "a5d72a9751d91b076b14885fefed4ce771baaa14bbe622d952110a01576dcf75"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-source-evidence-replica.test.ts",
+      "beforeW3": null,
+      "sha256": "edcd31afa371e6a12f8d2d338c3ad33f855e98732e3dce1b04fd9ebeb424f2f0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-transition-client.ts",
+      "beforeW3": "cbabcb423d404be1cdf50decf6c3133ee8db35c9b2ba8ac47849961c42ea9c5c",
+      "sha256": "e158a622509a8f47db6de87a37be4e8607498e85640f842bfa4f76e80728811f"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-transition-source-capability.ts",
+      "beforeW3": null,
+      "sha256": "a37ad73f12785713a05547501763ab9339f24eb45dd37fba46289a1bb92517b9"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-transition-source-client.test.ts",
+      "beforeW3": null,
+      "sha256": "b4f7227abfae4bf880b08a1a8d367497bb71a98cc6b1d411848bc18bae4fbcdf"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-transition-source-client.ts",
+      "beforeW3": null,
+      "sha256": "805c1bd4d7374e66b941f9b55390c483a4d1c70ca6c17df6964bdd4d30f68f90"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/index.md",
+      "beforeW3": "2a4dbb70b5ad0b574aac554eb0391bb768b0b8c286ce3f6e6433b681ae8ecff6",
+      "sha256": "b0fce3713e1abd651aafa6ebdbe0a671e06d5d9d84afe885b8550db5fab8db75"
+    },
+    {
+      "path": "packages/core/src/memory/index.md",
+      "beforeW3": null,
+      "sha256": "418eb5a21ce498cf89f5277da7040f85e83d6414c13862646a3b46314d529520"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/index.md",
+      "beforeW3": null,
+      "sha256": "575515c4840958404544380faa8aaeedabc0527ae3b3c2aa2ead1c97e28ac3f7"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-delta-application.ts",
+      "beforeW3": null,
+      "sha256": "4b10b859e52e8fee73bea6ed9c74371c6d13415132ac31743179526af51f5673"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-delta-execution.ts",
+      "beforeW3": null,
+      "sha256": "87b8cf582a7507a098ef3d4739f4c6dbf2d567d9a878010d19aa0de2fa13c2fe"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-delta-rows.ts",
+      "beforeW3": null,
+      "sha256": "773e76c74b5a1edc745455c654e0ea5f1c7b626f127133c725fe61104f1c5daf"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-delta-sources.ts",
+      "beforeW3": null,
+      "sha256": "0e3b89fd9f758e2eece979f8b0726640fd60e89a826ec7d9a8a7290b668eb647"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-delta.test.ts",
+      "beforeW3": null,
+      "sha256": "c5660bf4d14a536baaaa731357312fa057c7717e4b3937b4f124917f1dea9641"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-final-mapping.test.ts",
+      "beforeW3": null,
+      "sha256": "4fc622e4aa650e689a2179539581b4b04f5f400b0767228107c7ab0b9b35188e"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-final-mapping.ts",
+      "beforeW3": null,
+      "sha256": "3dc9c3eba5b4997409eab8bb7771aba3b0ee84e09073d77f1239156225fe18dd"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-historical-references.test.ts",
+      "beforeW3": null,
+      "sha256": "59fc66969cc2ccb407f43f326e8994d5b10fd24576cf245add0d2cfbdc845130"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-historical-references.ts",
+      "beforeW3": null,
+      "sha256": "b3d54650ce251270471b18d1dcf8f14cdb2c9e747e34566d09659635e432ef68"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-candidate.test.ts",
+      "beforeW3": null,
+      "sha256": "5da422afbadf6775b640ed1efff3c05c63b02c188174b458cbe508f27ed81b9c"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-candidate.ts",
+      "beforeW3": null,
+      "sha256": "c3d53a62b0cb30d04b4f987e3ad108fd1e1e9d6449de6f58c08628d2b892eff5"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-encoding.ts",
+      "beforeW3": null,
+      "sha256": "ac1ea1c387c73ac0f343c4a8cd8bee6aae39c3d3040a3426322a680c11ecae9f"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-projection.ts",
+      "beforeW3": null,
+      "sha256": "b1050bcdd75d9db012247e53c6f810547c8d0747dafbcfa6a251ff38c8b96517"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-timestamps.test.ts",
+      "beforeW3": null,
+      "sha256": "d9e8663193e89fe55599d65cfe71c690f30600da8c20392f748e2ee4051e1cdc"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-timestamps.ts",
+      "beforeW3": null,
+      "sha256": "57b05d2c7e5f83e4f9e6eaab3fbb42177067a286e910b79f940412904ae9ae7f"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-native-evidence.ts",
+      "beforeW3": null,
+      "sha256": "67f9bf64ed43db06eb7cb71210711c02a2680f4657ddff52f3d320aafa8df882"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-native-loader.ts",
+      "beforeW3": null,
+      "sha256": "259bd84e25d54231a44551241792795ebdd7d13380aa3ab1c613e19eabbfea69"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-pending-sources.test.ts",
+      "beforeW3": null,
+      "sha256": "077acbdb144b053a5ae2762e354d1908ac513d00b3a7ce1b2c10494ee562fb68"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-pending-sources.ts",
+      "beforeW3": null,
+      "sha256": "02d7f5fa6a04e5b213ae09a66a3cfb429060d7d14112a0d37606763b0e1dd851"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-source-aliases.test.ts",
+      "beforeW3": null,
+      "sha256": "686d6e8835c3c41ed9e308affdf900c9f9c901051444bc31be3e7f5c2d086a8b"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-source-aliases.ts",
+      "beforeW3": null,
+      "sha256": "487e409f986da65870a4f4b6d2d35cf149acc5c5e3b7002974ad660378d5155c"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-source-upload.test.ts",
+      "beforeW3": null,
+      "sha256": "60a27f6fd36fe4695e7054d98935a47b309e3b36d9fcf69561966658a3a09033"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-source-upload.ts",
+      "beforeW3": null,
+      "sha256": "dc3f6d4b97bbc28281b8b6b8240416c43e77495a93df11b2b73b09b78bb9016e"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-unused-delta.test.ts",
+      "beforeW3": null,
+      "sha256": "c79213a1baa531a0da64f7b6f07b52f09578b59a5c13e26e1d73ceaf82ede1c3"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-unused-delta.ts",
+      "beforeW3": null,
+      "sha256": "d14e24736e0d3a425d36a977c7c5d55cf4945120efb46ff7c6a7de2692b43cd0"
+    },
+    {
+      "path": "packages/core/src/testing/index.md",
+      "beforeW3": null,
+      "sha256": "b914704506b4a8982aed86104bee65b04a672b18418e98b92c1cec29b3e90f26"
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-candidate-fixtures.ts",
+      "beforeW3": null,
+      "sha256": "856fcefc81fd5a810bcfc3242b74f524b8d266fdc88441d559271fa1f8a2063e"
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-final-fixtures.ts",
+      "beforeW3": null,
+      "sha256": "bd64021daa1b38424dfe0e0c878cdf444bc1732ea6a3027a1a61776d8a8a8558"
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-reentry-fixtures.ts",
+      "beforeW3": null,
+      "sha256": "57b5a6f8fab1c4e6e275b71c2e4b28fbf3268b8ea6d7b1e2d1b1df3f7dc553ec"
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-source-fixtures.ts",
+      "beforeW3": null,
+      "sha256": "f27bf1b799d53c08aeb9884d75aa59da102b04ade7594064741e4e5b2b7be4da"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-artifact-schema.ts",
+      "beforeW3": null,
+      "sha256": "656e5586b3860c42298b6b9118a5ab83b818722e2834cd0a9c941fbf7537882e"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-content-schema.ts",
+      "beforeW3": null,
+      "sha256": "99f2a5f9b8fa396b3bc111b5973f1c150529ddfd918d2bbdeb0bd4df2c739001"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-encoding.ts",
+      "beforeW3": null,
+      "sha256": "f442c87d47bddc22190d6634072063957f5976e81abbb7ac9e61e7d46c747a10"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-primitives-schema.ts",
+      "beforeW3": null,
+      "sha256": "4255a4d6410ebaa3353e09def0caf34fd879453be07b754cd60ff88341908f64"
+    },
+    {
+      "path": "packages/shared/src/hindsight-connection-schema.ts",
+      "beforeW3": "b9695f14abfed268c2df8ac9f674d8fa378aef1a3532575d2da1ed5e3ceac7e9",
+      "sha256": "78dfe4b571f372c0127ac276b96391bc0da552eb40a4409cfe2397875b0fb8c2"
+    },
+    {
+      "path": "packages/shared/src/hindsight-transition-delta-schema.ts",
+      "beforeW3": "7ea6c2fc2f667c8fd0ce4cd55610eb4faa8ed0904a93f1cb3819af23133b2649",
+      "sha256": "567562c5e53865dcc3fa096145d0cb89649b129da683b2501e383551abe77cc5"
+    },
+    {
+      "path": "packages/shared/src/hindsight-transition-source-schema.ts",
+      "beforeW3": null,
+      "sha256": "0165973ec7645d9e9a6bc66d642062775be9aa3d6632a406a477fb927c4c81f2"
+    },
+    {
+      "path": "packages/shared/src/index.md",
+      "beforeW3": "98de79d82b8811fd736031db2f9e8802c13b36abe9e7f1b296b5cd2d26158efe",
+      "sha256": "72acf71deeb2dc40cdf3c8f85f703096454126ea436d837f29c1711235abbd25"
+    },
+    {
+      "path": "packages/shared/src/index.ts",
+      "beforeW3": "bd3a7ed16733477cc9e7c99b7aedd23837924fa5b3e8cfb3af0e58e4b9850764",
+      "sha256": "29ae31c7019eea7a48796873a847744044f74ca90126b797132cca703d61ef82"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-candidate-schema.test.ts",
+      "beforeW3": null,
+      "sha256": "a5cbbeb6cb798566fd7f624a41f2a5b5e0cbf2d340890a3bc7f74cf7f24bb0fd"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-candidate-schema.ts",
+      "beforeW3": null,
+      "sha256": "447253d17e3b2223ab8100678cd2657233bb965981eb2b520f5ad3cfb845be7b"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-preparation-schema.ts",
+      "beforeW3": null,
+      "sha256": "1d5098b7b7af5b58cf7b142e626ffdb93c84f91e8ff22c508130e8334963df7d"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-source-schema.ts",
+      "beforeW3": null,
+      "sha256": "e6007c5cc56aca072e9b0f3358dcd64a5a9974f48ad9841b27dfd81015762f39"
+    }
+  ],
+  "preservedNativeBaselineCount": 289,
+  "nativeMissing": [],
+  "unexpectedNative": [],
+  "encodingFailures": [],
+  "indexFailures": [],
+  "whitespaceFailures": [],
+  "diffChecks": [
+    {
+      "root": "H:\\TakiAgent",
+      "args": [
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "root": "H:\\TakiAgent",
+      "args": [
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "root": "H:\\hindsight",
+      "args": [
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "root": "H:\\hindsight",
+      "args": [
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exitCode": 0,
+      "output": ""
+    }
+  ],
+  "generatedPython": {
+    "canonicalRun": "97f9a4800627",
+    "compared": 372,
+    "mismatches": []
+  }
+}

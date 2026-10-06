@@ -1,0 +1,25 @@
+{
+  "meaning": "Read-only completed profile analysis and exact proposed A+B implementation scope; production remains frozen",
+  "files": [
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-residual-profile-analysis.md",
+      "bytes": 14657,
+      "sha256": "81dfd5d364572e802146b99e823d4c791d8ddec91bb1b6694d29cc35c6774bca"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/.runtime/w5-candidate-native-clone-c968532a988a40cdbe5a446cbca64399/result.json",
+      "bytes": 192667,
+      "sha256": "a90ff8aacc4fc12d4615fc55751511848b385c4d808095acf12b775169e076ce"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-baseline-source-manifest.json",
+      "bytes": 6949,
+      "sha256": "766ff65824c15aaf081be13c4becfc8ffe83d960e3dd7b5e0e15e2b326a12a5b"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-residual-source-manifest.json",
+      "bytes": 1360,
+      "sha256": "dd30d7557ded6bf5d3b373078ed036b1f12900a0f8650830facc2bb688fd5d68"
+    }
+  ]
+}

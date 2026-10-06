@@ -19,12 +19,15 @@ import { useHindsightActivation } from "./use-hindsight-activation.ts";
 import { useMemoryOperations } from "./use-memory-operations.ts";
 import { useLocalOnboarding } from "./use-local-onboarding.ts";
 import { useOperations } from "./use-operations.ts";
+import { useMemoryTransitions } from "./use-memory-transitions.ts";
+import { MemoryTransitionsCard } from "./memory-transitions-card.tsx";
 
 export function OperationsPage() {
   const ops = useOperations();
   const memoryOps = useMemoryOperations();
   const onboarding = useLocalOnboarding();
   const activation = useHindsightActivation();
+  const transitions = useMemoryTransitions();
 
   return (
     <>
@@ -36,6 +39,7 @@ export function OperationsPage() {
         )}
 
         <MemoryAuthorityCard ops={memoryOps} />
+        <MemoryTransitionsCard view={transitions} />
         <LocalOnboardingCard onboarding={onboarding} />
         <HindsightActivationCard activation={activation} />
 

@@ -13,6 +13,7 @@ import {
 } from "@taki/shared";
 import { z } from "zod";
 import type { Database } from "./sqlite.ts";
+import { advanceCanonicalPolicyVersion } from "./canonical-memory-policy-revision.ts";
 import {
   canonicalMemoryAtomic as atomic, assertCanonicalLocalAuthority as assertActiveEpoch,
   readCanonicalReceipt as receiptRow, saveCanonicalReceipt as saveReceipt,
@@ -144,7 +145,8 @@ function edit(db: Database, input: MutationInput & { patch: Partial<CanonicalMem
   const layerId = input.policy?.layerId ?? current.policy.layerId;
   const tags = input.policy ? controlledLayerTags(current.unit.tags, layerId) : current.unit.tags;
   const unit = CanonicalMemoryUnitSchema.parse({ ...current.unit, ...input.patch, tags, revision: current.unit.revision + 1, editedAt: input.now, updatedAt: input.now });
-  const policy = TakiMemoryPolicyProjectionSchema.parse({ ...current.policy, ...input.policy, layerId, updatedAt: input.policy ? input.now : current.policy.updatedAt });
+  const policy = advanceCanonicalPolicyVersion(current.policy, TakiMemoryPolicyProjectionSchema.parse({ ...current.policy,
+    ...input.policy, layerId, updatedAt: input.policy ? input.now : current.policy.updatedAt }));
   const record = CanonicalMemoryRecordSchema.parse({ unit, policy, provenance: current.provenance });
   updateUnit(db, { record, expectedRevision: input.expectedRevision });
   replaceFts(db, record.unit, input.searchTerms);

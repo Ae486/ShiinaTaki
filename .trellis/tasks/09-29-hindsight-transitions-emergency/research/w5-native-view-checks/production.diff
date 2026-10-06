@@ -1,0 +1,135 @@
+--- H:\TakiAgent\.trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-native-view-resume-preimages\0-transition_snapshot.py
++++ H:\hindsight\hindsight-api-slim\hindsight_api\engine\transition_snapshot.py
+@@ -92,7 +92,11 @@
+     try:
+         checkpoint = await coherent_checkpoint(store)
+         descriptors = await _bundle_records(
+-            store, TakiApplicationSnapshotRequest(namespace=namespace, request_id=uuid.uuid4())
++            store,
++            TakiApplicationSnapshotRequest(namespace=namespace, request_id=uuid.uuid4()),
++            # _admit holds the Bank/fence locks in an ordinary transaction;
++            # neither this fresh source nor its heads survives a write or pass.
++            _locked_source=source if _reuse_body_bytes else None,
+         )
+         # Verify every retained original body, not just its stored descriptor. This
+         # catches private-data corruption that does not advance either cursor.
+--- H:\TakiAgent\.trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-native-view-resume-preimages\1-snapshot.py
++++ H:\hindsight\hindsight-api-slim\hindsight_api\engine\application_state\snapshot.py
+@@ -3,8 +3,11 @@
+ from __future__ import annotations
+ 
+ import uuid
++from dataclasses import dataclass
+ from datetime import datetime, timedelta, timezone
+-
++from typing import TYPE_CHECKING
++
++from ..replication import MemoryUnitLogicalPayload
+ from .codec import digest, json_bytes, native_payload_hash, without_hash
+ from .commits import current_native
+ from .models import (
+@@ -31,6 +34,49 @@
+ from .publication import capture_payload, load_native_source_evidence, load_pages, materialize_pages
+ from .store import ApplicationStateStore, artifact_version, decode_refs, parse_model
+ 
++if TYPE_CHECKING:
++    from ..logical_snapshot import LogicalSnapshotRecord, _SnapshotSource
++
++
++@dataclass
++class _LockedNativeView:
++    heads: list[TakiApplicationNativeHead]
++    records: dict[tuple[str, str], LogicalSnapshotRecord]
++
++
++async def _locked_native_view(store: ApplicationStateStore, source: _SnapshotSource) -> _LockedNativeView:
++    # Only the locked, write-free baseline segment supplies this source. Read
++    # the SQL keys with the same head serializer/order as store.heads(): a
++    # malformed envelope must not impersonate another indexed row when its
++    # ordinary point lookup is omitted. Ambiguous keys keep the original path.
++    rows = await store.conn.fetch(
++        f"SELECT object_kind,object_id,head FROM {store.fq_table('memory_application_native_heads')} "
++        "WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 ORDER BY object_kind,object_id",
++        *store.keys,
++    )
++    heads = [parse_model(TakiApplicationNativeHead, row["head"]) for row in rows]
++    unsafe: set[tuple[str, str]] = set()
++    seen: set[tuple[str, str]] = set()
++    for row, head in zip(rows, heads, strict=True):
++        key = (head.object_kind, head.object_id)
++        if key in seen or key != (row["object_kind"], row["object_id"]):
++            unsafe.add(key)
++        seen.add(key)
++    records: dict[tuple[str, str], LogicalSnapshotRecord] = {}
++    for record in source.records:
++        key = (record.object_kind, record.object_id)
++        if key in records:
++            unsafe.add(key)
++        else:
++            records[key] = record
++        # Archive entities use SQL ANY (deduplication) and database collation
++        # in point reads; bulk Python serialization is not equivalent there.
++        if isinstance(record.payload, MemoryUnitLogicalPayload) and record.payload.state == "invalidated":
++            unsafe.add(key)
++    for key in unsafe:
++        records.pop(key, None)
++    return _LockedNativeView(heads, records)
++
+ 
+ async def initialize_capture(store: ApplicationStateStore) -> None:
+     native = await store.require_live(lock=True)
+@@ -92,19 +138,25 @@
+ async def _bundle_records(
+     store: ApplicationStateStore,
+     request: TakiApplicationSnapshotRequest | TakiApplicationHydrateRequest,
++    *,
++    _locked_source: _SnapshotSource | None = None,
+ ) -> list[TakiApplicationRecordDescriptor]:
+     if not isinstance(request, TakiApplicationHydrateRequest):
+         from ..logical_snapshot import _load_snapshot_source
+ 
+-        heads = await store.heads()
++        view = await _locked_native_view(store, _locked_source) if _locked_source is not None else None
++        heads = view.heads if view is not None else await store.heads()
+         artifacts = await store.artifacts()
+-        source = await _load_snapshot_source(conn=store.conn, fq_table=store.fq_table, bank_id=store.bank_id)
++        source = _locked_source
++        if source is None:
++            source = await _load_snapshot_source(conn=store.conn, fq_table=store.fq_table, bank_id=store.bank_id)
+         native_keys = {(record.object_kind, record.object_id) for record in source.records}
+         head_keys = {(head.object_kind, head.object_id) for head in heads if head.version is not None}
+         if native_keys != head_keys:
+             raise ApplicationStateError("capture_gap", 503)
+         for head in heads:
+-            await _validate_head(store, head)
++            record = view.records.get((head.object_kind, head.object_id)) if view is not None else None
++            await _validate_head(store, head, _locked_record=record)
+         for artifact in artifacts:
+             await store.read_body(artifact.body_ref)
+         return [
+@@ -157,12 +209,23 @@
+     return records
+ 
+ 
+-async def _validate_head(store: ApplicationStateStore, head: TakiApplicationNativeHead) -> None:
++async def _validate_head(
++    store: ApplicationStateStore,
++    head: TakiApplicationNativeHead,
++    *,
++    _locked_record: LogicalSnapshotRecord | None = None,
++) -> None:
+     if head.version is None:
+         return
+     if head.body_ref is None:
+         raise ApplicationStateError("application_state_corrupt", 503)
+-    await current_native(store, head.version)
++    if _locked_record is None:
++        await current_native(store, head.version)
++    elif head.tombstone is not None or native_payload_hash(_locked_record.payload) != head.version.payload_hash:
++        # Match current_native's canonical SQL-payload proof. Model equality
++        # would incorrectly equate nested JSON booleans and numbers. The head
++        # was freshly parsed from its exact indexed row in this locked view.
++        raise ApplicationStateError("native_version_conflict", 412)
+     record = await store.read_body(head.body_ref)
+     if (
+         not isinstance(record, TakiApplicationNativeRecord)

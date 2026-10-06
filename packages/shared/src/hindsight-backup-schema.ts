@@ -7,6 +7,7 @@
  *         backup id or a plain inbox file name
  */
 import { z } from "zod";
+import { MemoryEmergencySnapshotSchema } from "./memory-transition-emergency-schema.ts";
 import { HindsightDeploymentModeSchema } from "./hindsight-connection-schema.ts";
 import { SecretCatalogHealthSchema, SecretRefSchema } from "./secret-catalog-schema.ts";
 
@@ -131,9 +132,10 @@ export const HindsightBackupManifestSchema = z.strictObject({
     nativeManifestVersion: z.literal("2"), schema: Label, proof: HindsightBackupNativeProofSchema,
   }),
   authority: z.strictObject({
-    epochId: Id, activationTransactionId: Id, providerLineageId: z.uuid(), replicaCheckpointDigest: Digest,
+    epochId: Id, activationTransactionId: Id.nullable(), transitionReceiptId: Digest.optional(), providerLineageId: z.uuid(), replicaCheckpointDigest: Digest,
     configFingerprint: Digest, deploymentMode: HindsightDeploymentModeSchema,
-  }),
+  }).refine((authority) => (authority.activationTransactionId === null) === (authority.transitionReceiptId !== undefined),
+    "backup authority names exactly one activation or transition receipt"),
   banks: z.array(CoreBankSchema).max(256),
   /** Core terminal write, Pending and ingestion ids at the Core copy; the native proof answers membership for this list. */
   terminalOperations: z.strictObject({ count: Count, digest: Digest }),
@@ -168,7 +170,8 @@ export type HindsightBackupPairMismatchReason = z.infer<typeof HindsightBackupPa
 export const HindsightBackupPairMismatchSchema = z.strictObject({ reason: HindsightBackupPairMismatchReasonSchema, bankId: Id.nullable() });
 export type HindsightBackupPairMismatch = z.infer<typeof HindsightBackupPairMismatchSchema>;
 
-/** Per Bank: native changes after the last verified backup (to the current Core checkpoint) and unsettled Core writes. */
+/** Per Bank: a comparable backup-to-local-replica interval only; null start means history is unproven.
+ * No live remote head is captured: remote-only writes and total missing memory remain unknown even for equal cursors. */
 const MissingIntervalSchema = z.array(z.strictObject({
   bankId: Id, fromNativeCursor: Cursor.nullable(), toReplicaCursor: Cursor.nullable(), pendingCount: Count.nullable(),
 })).max(256).refine((banks) => unique(banks.map((bank) => bank.bankId)), "each Bank interval appears once");
@@ -205,7 +208,10 @@ export const HindsightIncidentManifestSchema = z.strictObject({
     file: z.literal("core.sqlite"), sha256: Digest, bytes: z.int().positive(), pages: z.int().positive(), migrationHead: z.int().positive(),
   }),
   lastVerifiedBackupId: HindsightBackupIdSchema.nullable(), backupAgeSeconds: Count.nullable(),
-  missingInterval: MissingIntervalSchema,
+  // Status remains a bounded display. An incident must represent every admitted Bank.
+  missingInterval: z.array(z.strictObject({ bankId: Id, fromNativeCursor: Cursor.nullable(),
+    toReplicaCursor: Cursor.nullable(), pendingCount: Count.nullable() })).max(1024),
+  transition: MemoryEmergencySnapshotSchema.optional(),
 }).refine((incident) => (incident.lastVerifiedBackupId === null) === (incident.backupAgeSeconds === null), "backup age exists exactly with a verified backup");
 export type HindsightIncidentManifest = z.infer<typeof HindsightIncidentManifestSchema>;
 

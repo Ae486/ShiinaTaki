@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "C:/Program Files/nodejs/node.exe",
+    "--input-type=module",
+    "-"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "timeoutSeconds": 60,
+  "stdin": "import { ESLint } from 'eslint';\nimport js from '@eslint/js';\nconst checker = new ESLint({overrideConfigFile: true, overrideConfig: [js.configs.recommended,\n{files: ['**/*.mjs'], languageOptions: {globals: Object.fromEntries(\n['process','console','Buffer','URL','performance'].map(name => [name, 'readonly']))}}]});\nconst results = await checker.lintFiles([\"H:\\\\TakiAgent\\\\.trellis\\\\tasks\\\\09-29-hindsight-transitions-emergency\\\\research\\\\w5-http-client.mjs\", \"H:\\\\TakiAgent\\\\.trellis\\\\tasks\\\\09-29-hindsight-transitions-emergency\\\\research\\\\test_w5_http_client.mjs\"]);\nconsole.log(await (await checker.loadFormatter('stylish')).format(results));\nprocess.exitCode = results.some(result => result.errorCount || result.warningCount) ? 1 : 0;\n",
+  "exitCode": 0,
+  "stdout": "\n",
+  "stderr": "",
+  "milliseconds": 1218.9999999973224
+}

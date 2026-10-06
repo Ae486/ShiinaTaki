@@ -1,0 +1,149 @@
+{
+  "version": 1,
+  "createdAtUtc": "2026-10-04T09:31:26.520617+00:00",
+  "scope": "task-owned W5 reentry helper repair; no real pair access",
+  "changedExisting": [
+    "w5-reused-driver.mjs",
+    "w5-reused-native.py"
+  ],
+  "newScripts": [
+    "w5-journey-checkpoint.mjs",
+    "w5-reentry-journey.mjs",
+    "w5_reentry_gate.py",
+    "w5-reentry-plan.py",
+    "w5-reentry-journey.test.mjs",
+    "w5-reentry-gate-test.py"
+  ],
+  "files": [
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-driver.mjs",
+      "bytes": 19878,
+      "sha256": "4f97bffb6b62b278bdb177081ab92e4d43d7f74f492db28139eab0228a3662ac"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-native.py",
+      "bytes": 17689,
+      "sha256": "85151d1fd16cf7a60449f23c42ae22e9105d81fab6098977c3df9dab9d5b627d"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-journey-checkpoint.mjs",
+      "bytes": 3612,
+      "sha256": "ea1a0c4ed7f4eef240fbddb8352c952411f8a2d6a8398745d6b867c93c6a0e44"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-journey.mjs",
+      "bytes": 7634,
+      "sha256": "57ae06b9efe5b25b51a89aa9b51946a394585e12574304dfdab250d5e0f07ba4"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5_reentry_gate.py",
+      "bytes": 14385,
+      "sha256": "8811b17ce4f5d03f4829bfc06717af0857b7d366b646f61001496896c484dae2"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-plan.py",
+      "bytes": 7307,
+      "sha256": "bf73fa8070093b4593e17259acc7aed9f0ccb113274a6601f3df7d2e300870d5"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-journey.test.mjs",
+      "bytes": 13883,
+      "sha256": "aefe1ed7cd69dd495e773f7b402f69431b2ce4e2c42a10d00fcfa145b42d25d0"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-gate-test.py",
+      "bytes": 21779,
+      "sha256": "a7537cb8e7b648edaf32380d26c0586f48e021f01c2fd2b7e6c3fae8d58566ae"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-implementation.md",
+      "bytes": 14849,
+      "sha256": "a21f2ebd4434cb08d5ee105ed37df2eb6f275a718f999573a0f63ac24dc59d86"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-checkpoint.md",
+      "bytes": 3167,
+      "sha256": "e9dca279e8169f76316a0f62b4038e0c6f9ea9b284a18d5ee93f2385781f5edd"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-node-final.log",
+      "bytes": 1157,
+      "sha256": "4fafe791e6f21e4412c379f64de9704d59786441f36e1bd6825a384d4b5d76a6"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-native-final.log",
+      "bytes": 2214,
+      "sha256": "7e3f48936390324dfdbf696ae76882733f16a1f520e2c3f01e7e82044e706eac"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-quality-final.json",
+      "bytes": 3830,
+      "sha256": "0605201906bf5daad09eddced359111e7a619258706f426de6afcf1ad1be6228"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-preimages-20261004/manifest.json",
+      "bytes": 392,
+      "sha256": "3cf98443e8ff448d816466b6490a77d4dd0e3e35bb2e66af52068b0a2adcd370"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-preimages-20261004/w5-remaining-plan.py",
+      "bytes": 6363,
+      "sha256": "55299d1f1a9f6efac2c220ce941303731d1e3def378d878d64181034273ace7e"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-preimages-20261004/w5-reused-driver.mjs",
+      "bytes": 16295,
+      "sha256": "75cbbed0804320dc148a0369643ead0d62e0d67f42dc2feb05aef38dab331a73"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-helper-preimages-20261004/w5-reused-native.py",
+      "bytes": 14979,
+      "sha256": "da028e9e43258878fc731039da282091adaad3464cd2047227a3912bdf2a1e22"
+    }
+  ],
+  "references": [
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-remaining-plan.py",
+      "bytes": 6363,
+      "sha256": "55299d1f1a9f6efac2c220ce941303731d1e3def378d878d64181034273ace7e",
+      "role": "unchanged-read-only-reference"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-model-budget.py",
+      "bytes": 2657,
+      "sha256": "8c6fba27b39e8dfee44d4792ab5f9bffdb025f9ed3ba274da11e82253581a384",
+      "role": "unchanged-read-only-reference"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-supervisor-shutdown.py",
+      "bytes": 2290,
+      "sha256": "5d349f718e608258e562a18739a22355da85bb1dd42a19d4e7dba6d947e8d25d",
+      "role": "unchanged-read-only-reference"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-final-source-manifest-v2.json",
+      "bytes": 30503,
+      "sha256": "f11af891a68f0be930e4c68d7928e0a8eb19e1a0641a5b1675c179d4844c2832",
+      "role": "unchanged-read-only-reference"
+    },
+    {
+      "path": "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_maintenance.py",
+      "bytes": 11100,
+      "sha256": "03d0df5d88eeef2ab87899b91bc2694395b2b4ff994fc9c885fb5a2bfc7f467e",
+      "role": "unchanged-read-only-reference"
+    },
+    {
+      "path": "H:/hindsight/hindsight-api-slim/hindsight_api/engine/cutover_verification_runner.py",
+      "bytes": 25596,
+      "sha256": "e02738fcbaf68bab3d4ada861d64c8beeafd7dfc3b6fe6a830ab810450754bca",
+      "role": "unchanged-read-only-reference"
+    }
+  ],
+  "verification": {
+    "nodeTests": 10,
+    "pythonTests": 5,
+    "qualityChecks": 13,
+    "realModelRequests": 0,
+    "realPairOpened": false
+  }
+}

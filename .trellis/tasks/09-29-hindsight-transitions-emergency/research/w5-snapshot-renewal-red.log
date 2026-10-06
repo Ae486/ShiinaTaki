@@ -1,0 +1,53 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ × src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > reuses sealed evidence after a proven Bank executor expires and is claimed by the reopened Core 5751ms
+   → owned snapshot response loss after materialization
+MEMORY_TRANSITION_CONFLICT: expected 'outcome_unknown' to be 'completed' // Object.is equality
+ × src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > renews a positively expired snapshot after earlier delta preparation and physical Core reconstruction 4839ms
+   → expected 'outcome_unknown' to be 'completed' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > reuses sealed evidence after a proven Bank executor expires and is claimed by the reopened Core
+AssertionError: owned snapshot response loss after materialization
+MEMORY_TRANSITION_CONFLICT: expected 'outcome_unknown' to be 'completed' // Object.is equality
+
+Expected: "completed"
+Received: "outcome_unknown"
+
+ ❯ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts:105:92
+    103|       const recovery = current.composed.owner.submit(await current.com…
+    104|       await current.composed.owner.stop();
+    105|       expect(current.composed.owner.status(recovery.operationId).state…
+       |                                                                                            ^
+    106|       expect(snapshots.expired).toEqual([]); expect(snapshots.history.…
+    107|       expect(current.db.prepare("SELECT * FROM memory_transition_nativ…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > renews a positively expired snapshot after earlier delta preparation and physical Core reconstruction
+AssertionError: expected 'outcome_unknown' to be 'completed' // Object.is equality
+
+Expected: "completed"
+Received: "outcome_unknown"
+
+ ❯ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts:135:73
+    133|       expect(snapshots.expired, JSON.stringify({ candidateErrors, call…
+    134|         operation: current.composed.owner.status(recovery.operationId)…
+    135|       expect(current.composed.owner.status(recovery.operationId).state…
+       |                                                                         ^
+    136|       expect(snapshots.history.size).toBe(2);
+    137|       expect(commands(current.db, transitionId)).toEqual(expect.arrayC…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  19:02:49
+   Duration  22.17s (transform 9.01s, setup 0ms, import 11.18s, tests 10.59s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/transitions/transition-healthy-snapshot-recovery.test.ts --maxWorkers=2 --reporter=verbose

@@ -101,13 +101,14 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
 
 - Shared: `MemoryReplicaScheduleConfigSchema`, `MemoryReplicaScheduledRunSchema`, `MemoryReplicaRunResultSchema`,
   `MemoryReplicaSyncStateSchema`, and `MemoryReplicaSyncStatusSchema`.
-- A scheduled run binds `{ lease, kind, trigger, predecessor }`; a result binds `{ checkpoint, observedCursor }`.
+- A scheduled run binds `{ lease, kind, trigger, predecessor, manualRequestId? }`; a result binds `{ checkpoint, observedCursor }`.
   Bank identity is `{ bankId, scope, characterId }`, with a Character identity only for Character scope.
 - `createHindsightReplicaSchedulerRepo(db, now)` exposes `ensureBank`, `requestManual`, `requestCatchUp`, `recover`,
   `claim`, `promoteToFull`, `succeed`, and `fail`. `ensureBank({ bank })` preserves existing configuration;
   an explicit `config` is required to change it.
 - `createHindsightReplicaScheduler(input)` exposes non-blocking `start()`, bounded `stop()`, `tick()`,
-  `requestManual(bankId, kind)`, `verifiedReconnect()`, `status()`, and the closed supervisor `lastError()`.
+  `requestManual(bankId, kind, requestId?)`, `cancelManual(bankId, requestId?)`, `request(requestId)`,
+  `verifiedReconnect()`, `status()`, and the closed supervisor `lastError()`.
 - `createHindsightReplicaSyncRunner(input)` implements real admitted-client `run`/`rebuild` paths.
   `syncHindsightBankPage` and repository snapshot/journal inputs accept internal `deadlineAt`, `expectedBank`, and
   `expectedAuthority?: Pick<MemoryAuthorityEpoch, "epochId" | "providerLineageId">`. Scheduled publication carries its
@@ -126,6 +127,11 @@ repo.applyPage({ page: canonical, expectedCheckpoint, lease });
   advances the full-reconciliation interval. Manual mode schedules no background due or retry wake.
 - One asynchronous worker serves all configured Banks. A failure in one Bank does not discard another Bank's progress.
   Restart/reconnection performs one eligible catch-up; it does not replay every missed interval.
+- Migration 051 stores exact manual request/claim/outcome evidence separately from latest Bank diagnostics. The
+  operation owner supplies a pre-persisted request ID; queue admission, claim, cancel and settlement update that
+  evidence in the existing schedule transaction. Terminal request records cannot be updated or deleted. A queued
+  request can be cancelled while a previous run owns the Bank; wrong IDs and claimed requests refuse. Pre-051 records
+  remain readable without fabricated IDs. Process-global supervisor errors cannot settle another Bank's request.
 - Claim, run state, lease owner/run/fence/expiry, and schedule version are checked transactionally. Settlement requires
   the same current run and lease plus a result matching the committed checkpoint. Configuration changes and manual
   requests arriving during a run remain intact; only claim consumes a queued request, and full requests are never

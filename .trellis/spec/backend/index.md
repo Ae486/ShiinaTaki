@@ -14,6 +14,8 @@ Before writing backend code:
 
 ## Guidelines Index
 
+W6 offline authority contracts: [Emergency transitions and paired recovery](./memory-transition-emergency.md).
+
 | Guide | Description |
 |-------|-------------|
 | [Directory Structure](./directory-structure.md) | Where files go in `packages/core` and `src-tauri` |
@@ -28,6 +30,9 @@ Before writing backend code:
 | [Current Local Cutover Coverage](./memory-local-cutover-coverage.md) | Immutable complete Local manifests, writer-reserved cutover refusal, typed source evidence and exact native-object projection bindings |
 | [Current-State Transfer and First Activation](./memory-current-state-cutover.md) | D78 structured Bank import, typed hash/mapping evidence, native input/outcome certificate, retained snapshot, drift invalidation and actual B4 raw staging/guards |
 | [Durable Memory Operations](./memory-operations.md) | Core-owned operation owner over B3/B5 producers: single-flight families, Core-minted identity, derived settlement, stage-aware cancel, restart reconciliation, composite `memory.authority.status` read and the operations push channel |
+| [Memory Transition Durable Protocol](./memory-transitions.md) | W1 durable admission/queue; W2 native fences/proof; W3 complete candidates/delta; W4 atomic publication, exact custody, runtime retirement/readiness and original target receipt recovery |
+| [Memory Transition Publication and Runtime](./memory-transition-publication.md) | Shared synchronous evidence validation; W4 atomic authority/custody/queue COMMIT, exact final inventory, source/native readiness, symmetric lifetime and factual target outcomes |
+| [Healthy Transition Drivers](./memory-transition-healthy-drivers.md) | W5 composed healthy producers, immutable original requests,055-to056 partial-maintenance continuation, truthful operation status and separate native/real-data gates |
 | [Local Onboarding](./memory-local-onboarding.md) | `local.onboard.*` over the B2 producer: complete-inventory candidates, isolated replacement epochs, pure verification, trusted primary custody in the Chat path, one published Local runtime binding with receipt-proven recovery, and the `memory.onboarding.*` operator surface |
 | [Hindsight First Activation](./memory-hindsight-activation.md) | `hindsight.activate` over the unchanged B4 primitives: exclusive-family single-flight, fenced Local drain, checkpointed per-Bank chain with exactly-one-POST replay and lease takeover, PR03 custody carry at COMMIT, Local retirement and Hindsight rebind with binding-only recovery, receipt-based boot classification and the `memory.activation.status` read |
 | [Hindsight Bank and Connection Lifecycle](./memory-hindsight-lifecycle.md) | Stage 2c under Hindsight authority: memory-unavailable Runs (degrade vs refuse) with kept witnesses, `bank.provision` (occupancy probe, template guard, first full sync) and `connection.revalidate` (lineage admission, reviewed fingerprint + deployment mode, binding `replace`), exclusive-family single-flight, automatic once-per-key triggers, `verifiedReconnect` callers and the `hindsight` status section with Core-derived actions |

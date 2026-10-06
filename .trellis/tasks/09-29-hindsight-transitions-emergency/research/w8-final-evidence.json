@@ -1,0 +1,183 @@
+{
+  "verdict": "PASS",
+  "scope": "W8 independent isolated automated implementation and retained real-data evidence; owner/manual remains open",
+  "createdAt": "2026-10-06T07:49:19.770810+00:00",
+  "heads": {
+    "H:\\TakiAgent": "fccfc4fb78958c90efebdb4a5a98b355bcb73a40",
+    "H:\\hindsight": "6a749ba3e7d8719e336d9d1d8735a8e09da4366b"
+  },
+  "newTests": {
+    "shared": {
+      "files": 64,
+      "passed": 555
+    },
+    "core": {
+      "files": 490,
+      "passed": 3784,
+      "skipped": 1
+    },
+    "desktop": {
+      "files": 119,
+      "passed": 675
+    },
+    "rust": {
+      "passed": 5
+    },
+    "actualMainBoots": 7
+  },
+  "evidence": [
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-independent-check.md",
+      "bytes": 20563,
+      "sha256": "de6f3f8e421db0f4a40bc4d8f9e174a8a091a3dbde9192b46200e0bd260ec3d4"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-checkpoint.md",
+      "bytes": 3076,
+      "sha256": "fc095517c128e055f1579f7bfac272d8c07f405da281e3cc697e235dd64d807e"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-source-ownership.json",
+      "bytes": 4993,
+      "sha256": "44ff445f2e455016709b5ebc634cce3fca0a127c99a286ea1d799787d054c7e9"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-source-audit.json",
+      "bytes": 7602487,
+      "sha256": "2328f029077fe4a8a6b52c29389ea1e59ff3d9fd2dfefaadadfa9f5bd42b41be"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-source-audit-final.log",
+      "bytes": 9550,
+      "sha256": "9d836aa986db810ae98f888bccf184ab265034deadeb3c3b0462576a67723f8c"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-shared-tests.log",
+      "bytes": 230,
+      "sha256": "ea60a93f9cb06805f9bb543c6bfd9f94c9041774be764c16d7a5de3d7d708335"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-core-tests.log",
+      "bytes": 10201,
+      "sha256": "8ac0bbaacd66adef22abde29887e3dea766476d3f8f75b3e8b7d711c153037c9"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-core-final-tests.log",
+      "bytes": 250,
+      "sha256": "6d533366a29846a48b94c68aa290cf95f9f60412f1264f6f799bc79b584708fc"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-core-repair-tests.log",
+      "bytes": 225,
+      "sha256": "b7a2cde39a89bbe0006257795ca5f12e8bf538768787f7dac9c886433e3a2ebd"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-operator-regression.log",
+      "bytes": 222,
+      "sha256": "37ac7c6e757137108e53a96b4347bfa2fe3e8b52657894a99a1a599c51f08b03"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-desktop-tests.log",
+      "bytes": 1676,
+      "sha256": "1e1f070eb0ba8ba935e90ccb7a7f1f48b5ed94afd5e8acaada64a10d4e199872"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-desktop-final-tests.log",
+      "bytes": 232,
+      "sha256": "d30b1b3efb9e8ef4dbc2ca9c1f0a5d79c0600932885607def1921ef5b1ed5df0"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-typecheck-final.log",
+      "bytes": 434,
+      "sha256": "36b910be3d67e33b496efe77f7cbda2a24223cf325ac15858d287ea299dbc2eb"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-lint-final.log",
+      "bytes": 53,
+      "sha256": "8fa30d82a7bf469d96bec57bcd44ac76d20a8e5b9ee39d7cc1f310c77501b676"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-desktop-build.log",
+      "bytes": 2254,
+      "sha256": "c19791bd3f260b57b4b7cd5cf74acd3fb73e7833fc682a700ddf069129b588f7"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-boot.log",
+      "bytes": 5164,
+      "sha256": "56ee53902ee3b6633d487bfb681845fcb487a6d343346758183dd3f6982008bb"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-boot-final.log",
+      "bytes": 4820,
+      "sha256": "cfb0b0f0a7fc3cdf167522f34ed319898b3db98999a0e2521ef897026f7ce1b8"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-native-static.json",
+      "bytes": 1530,
+      "sha256": "15b80684dd59a4866a56b5d41bf77b5dec00b8ab0f5cdd9c06a4d63bf8ea4c34"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-rust-contracts.log",
+      "bytes": 898,
+      "sha256": "e57bb84de58a3c58bbecc1f5092aa2002e0108c45b9022c7d3e8f3188ab1c7d9"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-validation.json",
+      "bytes": 8909,
+      "sha256": "4d03a588b38876c46d052fd04e1fe3679fc698398c87c363027f588b27fee5fb"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-validation-final.json",
+      "bytes": 7928,
+      "sha256": "49239939e4d4cc7e517358cc02aeb01746682083fd9e4743db38de5df5a2a690"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-healthy-final-result-2026-10-06.md",
+      "bytes": 6436,
+      "sha256": "57d0118faeebcba267b4de7dd6d5c420d342224a0b0099c580c26476a720c9ce"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-healthy-final-result-2026-10-06.json",
+      "bytes": 2084,
+      "sha256": "ccd795c23d7c614edcb19f2dc4db65e516c7f463e21a9e07ad827b70dd613fc2"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w6-final-result-2026-10-06.md",
+      "bytes": 5155,
+      "sha256": "f06679c5b3a7f129ed8e6d2b7c31446dd131e97a4708295a0abb1483a9044563"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w6-final-result-2026-10-06.json",
+      "bytes": 5492,
+      "sha256": "96e9bac3dbd38ce31bccda83f6fbe7332c452983b13847eb2fdfa0894a28ddb7"
+    },
+    {
+      "path": ".trellis/.runtime/w8-boot/85bda41f-239d-4b68-a8c0-33a61a910ddc/result.json",
+      "bytes": 4676,
+      "sha256": "95d102b2207dfbc6f049fdbee895f3580c3e2cee4cf5aa26595776c790b4495c"
+    },
+    {
+      "path": ".trellis/.runtime/w7-browser-artifacts/1f98e5f5-aaa3-476e-9b82-6543ffa33cd4/result.txt",
+      "bytes": 252,
+      "sha256": "ae9a5cdfe543bdaca7644161ce45f13e177dccbb3a45bde9f5157b5df4ce3543"
+    },
+    {
+      "path": ".trellis/.runtime/w7-browser-artifacts/1f98e5f5-aaa3-476e-9b82-6543ffa33cd4/final.png",
+      "bytes": 175953,
+      "sha256": "a8e110fa104f5755becf8cb060849e2f96063001bfc6e5604c65aa27886f145e"
+    }
+  ],
+  "sourceAudit": {
+    "manifests": 67,
+    "matched": 8015,
+    "w8Changed": 21,
+    "unexplainedDrift": 0,
+    "missing": 0,
+    "encodingIssues": 0,
+    "moduleIssues": 0
+  },
+  "manualAcceptance": false,
+  "nativeSourceChangedByW8": false,
+  "corpusReexecutedByW8": false,
+  "gitMutated": false
+}

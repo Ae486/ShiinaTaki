@@ -2,6 +2,11 @@
 
 ## 1. Scope / Trigger
 
+Current W6 emergency/restore extensions are specified in [Offline Emergency Authority and Paired Recovery](./memory-transition-emergency.md).
+The Stage3 historical drill below remains evidence of that stage; W6's current D91 procedure uses complete current
+Native history/guards and full application-body closure. Emergency now has a production transition caller and never
+appears as a verified pair. Backup runtime retirement is epoch-scoped and covers capture, admit and verify.
+
 Use this contract when a change touches the `hindsight-backup` family (`backup.capture`, `backup.admit`,
 `backup.verify`), the artifact store under `<dataDir>/backups/`, the native backup route (TAKI-HS-013) or its client,
 the pair verifier, replica rollback detection and its hold, the `hindsight.backup` status section, the emergency seal,
@@ -199,9 +204,9 @@ point). Owner-only modes where the OS has them. Nothing is deleted automatically
   checkpoint, or a snapshot behind the Bank's B5 `endCursor`.
 - Hold (`heldForOperator`): a Bank failed with this code gets `nextAction: explicit_retry_required`, no retry timer and no
   interval, full or catch-up run. A manual `replica.sync` stays claimable, and the first success clears the hold.
-- Known limit: the seed path (no application checkpoint yet, i.e. after `hindsight.activate` publishes a B5-only
-  checkpoint and before the first application sync) is not classified. A native head behind that B5 `endCursor` fails
-  as `CHECKPOINT_STALE` at publication, not as a rollback.
+- The seed path also compares the initialize native cursor with a same-lineage/generation B5-only checkpoint before
+  application snapshots. Ordinary incremental pages check both `to_checkpoint` coordinates before loading/publishing
+  any event. Either rollback raises the dedicated code and the existing explicit-run hold (D93).
 
 ### Status section (`hindsight.backup`)
 
@@ -211,9 +216,14 @@ point). Owner-only modes where the OS has them. Nothing is deleted automatically
 - `lastVerified`: the newest sealed backup with a `verifiedAt`, carrying each native Bank's `currentCursor` from its
   proof. `ageSeconds` is computed from its `createdAt`. The two are null together.
 - `missingInterval`, for each verified B3 native Bank:
-  - `fromNativeCursor`: the last verified proof's cursor, else null;
+  - `fromNativeCursor`: the last verified proof's cursor only when the current epoch, backup epoch, replica epoch
+    authority, provider lineage and Bank generation match exactly; otherwise null. Historical backup ID/age remain
+    visible independently. Cross-epoch compatibility requires future explicit continuity proof, never equal numbers;
   - `toReplicaCursor`: the current B5 `endCursor`;
   - `pendingCount`: Pending intents plus open D77 parent writes, or null when unreadable.
+- These coordinates bound only known local replica progress. Without a live remote head, remote-only writes and total
+  missing memory remain unknown even when both cursors match. Home states that uncertainty. Incident seals reuse the
+  same compatibility check and preserve the historical backup reference without a false cross-history interval.
 - `latest`: the newest sealed backup whatever its verification, so a backup whose verify failed stays re-verifiable.
 - `staged`: route-b captures of the current epoch with a readable Core identity, newest first, at most 16.
 - The service caches the inventory and re-lists it after every capture, admit and verify. Hand edits under `backups/`

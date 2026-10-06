@@ -42,7 +42,7 @@ export function verifyRetainedLogicalSnapshot(input: { certificate: HindsightCut
   return verifySnapshotContents(metadata, pages.map(normalizeSnapshotPage));
 }
 
-function verifySnapshotContents(metadata: HindsightLogicalSnapshotMetadata, inputPages: HindsightLogicalSnapshotPage[]): VerifiedSnapshot {
+export function verifySnapshotContents(metadata: HindsightLogicalSnapshotMetadata, inputPages: HindsightLogicalSnapshotPage[]): VerifiedSnapshot {
   if (inputPages.length !== metadata.manifest.totalPages) fail("HINDSIGHT_SNAPSHOT_PAGE_MISSING");
   const pages = inputPages.map((page) => HindsightLogicalSnapshotPageSchema.parse(page));
   pages.forEach((page, index) => verifyPage(metadata, page, index));

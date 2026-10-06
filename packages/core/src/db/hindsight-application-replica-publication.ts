@@ -3,9 +3,12 @@
  * OUTPUT: atomic evidence/head/Canonical/FTS/Block publication followed by the native/application checkpoint pair
  * POS:    core/db — application-aware synchronization beside B5; no provider mutation or authority activation
  */
-import { type CanonicalMemoryBank, type TakiApplicationNativeHead, type TakiApplicationRecordDescriptor } from "@taki/shared";
+import { type CanonicalMemoryBank, type TakiApplicationNativeHead, type TakiApplicationRecordDescriptor, type MemoryTransitionNativeEvidence } from "@taki/shared";
+import { verifyTransitionNativeEvidence } from "../memory/transitions/transition-native-evidence.ts";
+import type { TransitionEvidenceContext } from "../memory/transitions/transition-evidence-context.ts";
+import { normalizeSnapshotMetadata } from "../memory/hindsight/hindsight-snapshot-contracts.ts";
 import { verifyHindsightApplicationBundle, verifyHindsightApplicationEvent,
-  verifyHindsightApplicationNativeBaseline } from "../memory/hindsight/hindsight-application-bundle.ts";
+  verifyHindsightApplicationNativeBaseline, verifyHindsightApplicationNativeBaselineContents } from "../memory/hindsight/hindsight-application-bundle.ts";
 import { sameApplicationValue } from "../memory/hindsight/hindsight-application-integrity.ts";
 import { projectHindsightApplicationRecord } from "../memory/hindsight/hindsight-application-projection.ts";
 import { applicationReplicaRecordHash, applicationObjectKey } from "./hindsight-application-replica-codec.ts";
@@ -21,15 +24,36 @@ import type { HindsightApplicationEvidenceAccess, HindsightApplicationEventInput
   HindsightApplicationReplicaCheckpoint, HindsightApplicationReplicaState, HindsightApplicationSnapshotInput } from "./hindsight-application-replica-contract.ts";
 
 export function publishApplicationSnapshot(state: HindsightApplicationReplicaState, input: HindsightApplicationSnapshotInput): HindsightApplicationReplicaCheckpoint {
+  return publishSnapshot(state, input, false);
+}
+
+/** Retained W2 certificates outlive transport TTL; only their complete verified immutable closure grants this path. */
+export function publishTransitionApplicationSnapshot(state: HindsightApplicationReplicaState,
+  input: HindsightApplicationSnapshotInput & { transitionEvidence: MemoryTransitionNativeEvidence; verification?: TransitionEvidenceContext }): HindsightApplicationReplicaCheckpoint {
+  input.verification?.assertOwner(state.db);
+  const bundle = input.verification ? input.verification.bundle(input.transitionEvidence) : verifyTransitionNativeEvidence(input.transitionEvidence);
+  const proof = input.transitionEvidence.status.proof!;
+  if (!sameApplicationValue(bundle.manifest, input.bundle.manifest)
+    || input.transitionEvidence.status.bank_id !== input.bankId
+    || !sameApplicationValue(input.nativeBaseline, normalizeSnapshotMetadata(proof.native_snapshot))) invalid();
+  // Use the independently reconstructed pages and original body bytes, not another bundle that merely repeats the
+  // retained manifest. Only this exact W2 closure receives the transport-expiry exception.
+  return publishSnapshot(state, { ...input, bundle }, true);
+}
+
+function publishSnapshot(state: HindsightApplicationReplicaState, input: HindsightApplicationSnapshotInput, retained: boolean): HindsightApplicationReplicaCheckpoint {
   verifyHindsightApplicationBundle(input.bundle, input);
   if (input.bundle.manifest.kind !== "snapshot") throw new Error("HINDSIGHT_APPLICATION_FULL_SNAPSHOT_REQUIRED");
   const descriptors = input.bundle.pages.flatMap((page) => page.records);
   assertSnapshotPredecessor(input);
-  if (input.nativeBaseline) verifyHindsightApplicationNativeBaseline(input.bundle, input.nativeBaseline);
+  if (input.nativeBaseline) {
+    if (retained) verifyHindsightApplicationNativeBaselineContents(input.bundle, input.nativeBaseline);
+    else verifyHindsightApplicationNativeBaseline(input.bundle, input.nativeBaseline);
+  }
   let result: HindsightApplicationReplicaCheckpoint | undefined;
   state.db.transaction(() => {
     assertApplicationPublication(state, input);
-    assertSnapshotFresh(state, input);
+    if (!retained) assertSnapshotFresh(state, input);
     const access = storeEvidence(state, input, { descriptors, publication: input.bundle });
     const heads = descriptors.flatMap((descriptor) => descriptor.kind === "native" ? [descriptor.head] : []);
     if (heads.filter((head) => head.object_kind === "bank" && head.object_id === input.bankId).length !== 1) invalid();
@@ -41,7 +65,7 @@ export function publishApplicationSnapshot(state: HindsightApplicationReplicaSta
     publishProjections(state, input, { access, heads, bankDeleted: false });
     restoreBlocks(state, input, access);
     result = buildApplicationSnapshotCheckpoint(state, input);
-    assertSnapshotFresh(state, input);
+    if (!retained) assertSnapshotFresh(state, input);
     assertApplicationPublication(state, input);
     publishApplicationCheckpoint(state, { previous: input.expectedCheckpoint, previousNative: input.expectedNativeCheckpoint, next: result });
   });

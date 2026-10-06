@@ -1,0 +1,26 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+stdout | src/memory/transitions/transition-healthy-source.test.ts > healthy Source upload continuation > reuses original sealed multipart bytes after reply loss and preserves old Source bodies through the roundtrip
+W5_SOURCE_DIAGNOSTIC harness 1251
+
+stdout | src/memory/transitions/transition-healthy-source.test.ts > healthy Source upload continuation > reuses original sealed multipart bytes after reply loss and preserves old Source bodies through the roundtrip
+W5_SOURCE_DIAGNOSTIC initial-return 4153
+
+stdout | src/memory/transitions/transition-healthy-source.test.ts > healthy Source upload continuation > reuses original sealed multipart bytes after reply loss and preserves old Source bodies through the roundtrip
+W5_SOURCE_DIAGNOSTIC lost-source-seal 7789
+
+stdout | src/memory/transitions/transition-healthy-source.test.ts > healthy Source upload continuation > reuses original sealed multipart bytes after reply loss and preserves old Source bodies through the roundtrip
+W5_SOURCE_DIAGNOSTIC reentry-recovered 16814
+
+stdout | src/memory/transitions/transition-healthy-source.test.ts > healthy Source upload continuation > reuses original sealed multipart bytes after reply loss and preserves old Source bodies through the roundtrip
+W5_SOURCE_DIAGNOSTIC final-return 30529
+W5_SOURCE_DIAGNOSTIC all-assertions-complete 30535
+
+ ✓ src/memory/transitions/transition-healthy-source.test.ts > healthy Source upload continuation > reuses original sealed multipart bytes after reply loss and preserves old Source bodies through the roundtrip 30573ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  19:34:01
+   Duration  41.73s (transform 8.70s, setup 0ms, import 10.78s, tests 30.58s, environment 0ms)
+

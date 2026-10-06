@@ -1,0 +1,77 @@
+# core/memory/
+- transitions/ — W3 complete proof/candidate/delta preparation; W4 owns authority/custody publication and W5 orchestration (see transitions/index.md)
+- layer-registry.ts — the layer taxonomy as DATA (MemoryLayerDefinitionSchema + V1_MEMORY_LAYERS + writable-layer selectors); `retention` covers permanent / rolling-window / expiring / importance-decay, and is the retention sweeper's only policy source
+- block-registry.ts — the Memory Block taxonomy as DATA (BlockDefinitionSchema + V1_BLOCKS; array order = injection order; ownership/writer/header/budget are all rows)
+- block-store.ts — Memory Block IO: pure-markdown files outside the entry tree (never FTS-indexed), read fresh per turn, written only by the registry's declared writer
+- auto-layer-policy.ts — T5 Q11-1: the AUTOMATIC writer's layer choice set + importance ceiling, both derived from the registry (it may never reach the always-visible rung)
+- frontmatter.ts — zero-dep YAML-frontmatter SUBSET parse/serialize (flat scalars only)
+- entry.ts — memory-entry domain codec: MemoryEntrySchema + frontmatter <-> entry (file text codec); carries `origin` (self|observed) + the R9 reinforcement fields
+- naming.ts — slugify + IdSchema + assertSafeSegment/isSafeSegment (throw vs skip) + resolveWithin (path containment); no fs
+- write-atomic.ts — the ONE Workspace write primitive (temp + rename), shared by the entry store and the block store
+- strip-note.ts — the shared `>` editor-note convention (D22): strips a human-only note block from persona cards and memory blocks
+- store.ts — the sanctioned node:fs site for ENTRY files (Workspace-scoped): atomic write, id allocation, archive, reinforce-in-place, set-disclosure (stale clock restarts), refile across layer dirs (id/dates survive), containment-guarded delete (retention's rolling-window case only), list (invalid files reported, not thrown)
+- dedupe.ts — T5-R9 write-time near-duplicate check: normalized-string key only, never a model call on the write path
+- indexer.ts — index sync: indexEntry (write path) + reconcile (rebuild the derived index from files; reports invalid files); computes the segmented search_terms column
+- search-tokenizer.ts — THE swappable segmentation seam (D53): SearchTokenizer + the Intl.Segmenter v1 impl + the CJK function-word stoplist; index side and query side share one instance
+- fts5-query.ts — FTS5 query hygiene: segment the query through the tokenizer and OR the quoted terms (MATCH), or fall back to an escaped LIKE for input with no usable term
+- disclosure-gate.ts — the "when to recall" keyword gate; the assembler's intention gate is its only consumer (the retriever's AND post-filter was removed in T5 Q2)
+- retriever.ts — the Retriever seam (interface + RankedEntry incl. disclosure/origin; v2 hybrid-vector plan documented)
+- fts5-retriever.ts — v1 Retriever impl: bm25 recall (config-weighted, 4-column) + LIKE fallback + the layer post-filter
+- token-estimator.ts — soft token budgeting: estimateTokens (CJK-aware) + fitToBudget + the R1 tier-3 message estimator (estimateMessageTokens/estimateMessagesTokens: per-message envelope, flat image cost, tool-JSON payloads; constants in-code for calibration)
+- pinned-block.ts — pinned-block policy: non-truncatable layers survive budget; oldest truncatable drop first; exports the shared isPinnedEligible predicate (the tidy report's "never stale" rule)
+- assembler.ts — deterministic per-turn context assembly, PUSH only (T5-R6: no retrieved section — search-policy rows reach the model via memory_search alone), with per-section budgets (blocks in registry order, then pinned rows) + the currentMessage-keyed intention gate; memory rows render a code-computed relative age ("(3 days ago)") and observed-origin rows only inside the untrusted fence
+- persona-provider.ts — reads prompt/ cards (assistant layer + per-character persona), strips the `>` editor note, sync + cached + safe fallback; injected into the assembler (#16)
+- memory-tools.ts — the first agent tools (memory_write/search/archive); thin, characterId-bound, never throw; search hits carry disclosure + origin (observed content fenced) and record a search event; descriptions carry the per-call R18 prefer-correcting and R19 experience-shape hints (prompt surface — the decision flow lives in base-prompt.ts); plus the BACKGROUND set whose memory_write is schema-restricted to the auto layers + importance ceiling (Q11-1 covers every automatic path)
+- memory-engine.ts — the memory subsystem composition root (store+repo+tokenizer+indexer+retriever+assembler+tools; the retriever serves memory_search only, T5-R6; exposes writeEntry, createTools, createBackgroundTools, retention's narrow list/archive/hard-delete seam, and the tidy view — report reads + the maintenance toolset)
+- bootstrap.ts — Legacy Markdown subsystem wiring: engine/reconcile, shared Utility Slot model, provider maintenance, tidy/retention, and one watermark-guarded FlushWriter exposed through MemoryFlushPort; Compaction is Core-owned
+- utility-slot.ts — T5-R11's background model slot: the utility provider when configured else the MAIN model, one GLOBAL serial task chain, sanitized closed failure diagnostics, and cumulative token spend since boot
+- retention-sweeper.ts — shared registry retention verdict plus the legacy sweeper: rolling machine deletion, recoverable archival elsewhere, and reinforcement-aware age; canonical adapters reuse the verdict with authoritative writes
+- render-transcript.ts — shared helper: a timeline segment -> "role: text" transcript for the auto-write prompts
+- write-convention.ts — the ONE shared write-side prompt wording: WRITE_GATE_RULE (T5-R15 behaviour-change test) + MEMORY_VOICE_RULE (T5-R10 first person, user's words); episodic + flush import it so the voices cannot diverge
+- episodic-writer.ts — auto-write path 2: segment -> 0..3 entries in the layer the model chooses, write-gated (silence is the normal outcome), importance clamped below the pin line
+- flush-writer.ts — auto-write path 3: pre-compaction flush as one SILENT tool-enabled turn on the BACKGROUND toolset (prose discarded, successful-write count returned); optionally runs through the shared Utility Slot and shares the write-convention fragments
+- auto-memory.ts — shared detached per-Character maintenance chain plus Legacy provider pass: episodic → ordinary flush → tidy → provider-neutral Compaction; dynamic provider retirement cannot create a second chain
+- memory-flush-port.ts — typed pre-retirement Memory Provider boundary: fenced Legacy watermark and actual Canonical Local ingestion receipts, unavailable Hindsight failure
+- tidy-report.ts — the tidy pass's deterministic health report (rc five-class contract): facts flat (missing trigger, over-budget incl. block used/limit beside full content), hypotheses as questions (stale, near-duplicate) + the new-writes slice carrying the misfiled question; per-class caps with dropped counts stated; observed content fenced; never prescribes an action
+- tidy-tools.ts — the maintenance verbs the foreground agent never gets: memory_reinforce / memory_archive_supersede (the sanctioned promotion route) / memory_set_disclosure / memory_refile / block_rethink (background blocks only) / memory_finish_edits (the structural terminal); never-throw envelopes
+- tidy-pass.ts — the model-led maintenance pass: write-count trigger (maybeRun) + operator runNow over one execute path; clean store = zero model calls; system-reminder input framing; six refinement principles + do-nothing permission + imported R10 voice; stopWhen finish-tool/step-cap; watermark advances only on success; tidy event + counts-only log line
+- memory-provider.ts — async provider context including immutable original caller Run/Attempt/Effect provenance
+- local-memory-provider.ts — structured Local provider with completed-only retain, applied/unchanged CAS mutations, and sparse recall
+- canonical-local-runtime.ts — canonical Local engine with real maintenance, observed writes and admission-bound tools/recall/prompt capture
+- canonical-local-banks.ts — preserved Local scope identities and writer-fenced creation of newly encountered Character Banks
+- canonical-local-subsystem.ts — Local ingestion/tidy/retention/flush, unresolved-source boot refusal and permanent writer retirement
+- canonical-local-write-fence.ts — shared counted work ownership with bounded drain, inherited live-child admission and irreversible retirement
+- canonical-local-writers.ts — fenced Local raw/engine/maintenance writers, typed foreground queue fallback and privileged first-activation ingestion drain
+- fenced-memory-tools.ts — write admission and pre-dispatch typed transition fallback with preserved Effect metadata
+- canonical-ingestion-source.ts — exact primary commit witnesses, sanitized original conversational spans and reversible source metadata
+- canonical-ingestion-model.ts — one Write Gate and source-grounded Local extraction through the process Utility Slot
+- canonical-ingestion-plan.ts — durable gate/extraction plan and stable routed write identities
+- canonical-local-ingestion.ts — exact pending source queue, 20-message cadence, durable retries, forced retirement flush and settle() for the activation drain
+- canonical-local-ingestion-batch.ts — canonical original-source/fact batches and lexical duplicate evidence
+- canonical-layer-policy.ts — registry ownership and automatic policy projection shared by Local provider writes
+- canonical-local-tidy.ts — private CAS-bound canonical maintenance tools over an immutable row/Block review
+- canonical-local-retention.ts — canonical registry retention with revision-bearing targets and actual persisted-effect counts
+- canonical-observed-write.ts — trusted image-description writes via the Local provider with observed provenance and automatic visibility limits
+- canonical-memory-view.ts — revision-bearing opaque references and canonical row projection for reused T5 policy/report code
+- canonical-memory-assembly.ts — admission-frozen canonical prompt data, complete pinned relationships, deliberate profile promotion, intention selection and observed fences
+- runtime-selector.ts — marker/provider/epoch routing with symmetric retirement, unavailable boot and fresh same-epoch repair
+- local-runtime-binding.ts — draft/install/publish/start, permanent old-reference retirement and tracked failed/replaced draft settlement
+- hindsight-runtime-binding.ts — draft publication, same-epoch replacement, epoch retirement, all-draft shutdown settlement and marker-routed primary witnesses
+- hindsight-unbound-run.ts — hindsightUnboundReason() (disabled/unconfigured connection -> connection_disabled, template conflict or a connection unavailable at construction but ready now -> config_changed, else null) and the composition capture that admits the memory-unavailable Run for that cause (reported to onUnavailable) or refuses MEMORY_RUNTIME_UNAVAILABLE
+- runtime-composition.ts — one Utility Slot/Compaction owner, selected binding/custody, complete transitions seam and shutdown joining all provider owners
+- authority-aware-legacy-surfaces.ts — mutable authority wrappers that retire legacy auto-memory, tidy, and direct writes after canonical activation
+- memory-coordinator.ts — provider-neutral authority/capability verification and immutable caller provenance across queued foreground writes
+- memory-capability-snapshot.ts — detached immutable capabilities and one canonical Run/tool/coordinator digest; keeps dynamic vector health separate from stable operation identity
+- canonical-memory-run.ts — one provider-neutral admission bundle for canonical tools, authority/capabilities, automatic recall, and captured prompt assembly
+- automatic-memory-recall.ts — Global/active-Character foreground retrieval that waits for completion by default, with cancellation, an optional shared deadline, partial-bank tolerance, deterministic result/token caps, visibility/retention filtering, dedupe, and fenced ephemeral output
+- pending-memory-safety.ts — bounded canonical outbox payload admission with credential and hidden-envelope refusal
+- pending-memory-writer.ts — explicit canonical outage-write admission with captured authority/Bank identity and unchanged replay timestamps
+- hindsight/ — Hindsight setup/cutover clients and offline-testable replica sync/reconciliation/recovery; runtime authority composition remains separate
+- operations/ — the durable memory operation owner (Stage 1 + 2a): kind registry over the B3 setup service, B5 scheduler and the Local onboarding service; per-kind boot observation before restart reconciliation; the composite memory.authority.status read
+- hindsight-lifecycle/ — the Stage 2c lifecycle producers under a committed Hindsight authority: new-Character Bank provisioning, connection revalidation + rebind, and the automatic triggers
+- hindsight-backup/ — the Stage 3 backup primitives: artifact store below `<dataDir>/backups/` and the pure Core/native pair verifier
+- hindsight-activation/ — the Stage 2b first-activation coordinator: plan/status reads, Local drain over the write fence, cutover lease, per-Bank D78 chain with checkpoints and evidence replay, promotion with the PR03 custody carry, closed error mapping
+- local-onboarding/ — the Local onboarding service (Stage 2a): the only caller of the B2 runner mutations, read projections (discovered run, exceptions, runtime availability), the memory.onboarding.status composite with server-derived actions, and shutdown checkpointing
+- canonical-tools/ — admission-bound capability-filtered canonical tool adapters and non-advertised compatibility aliases
+- image-description-writer.ts — thin, DELETABLE image→text bridge (#17 decision 6, D28): VLM describes a turn's images, PII-scrubs the text, writes ONE episode via the existing store path with origin "observed" (the marker the render sites fence on — D47); detached, warn+drop
+- memory-recall-selection.ts — policy-filtered Canonical hits and separate unconfirmed source/mutation intents

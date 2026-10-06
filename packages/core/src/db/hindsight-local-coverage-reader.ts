@@ -5,7 +5,7 @@
  */
 import { createHash } from "node:crypto";
 import {
-  CanonicalMemorySourceSchema, HINDSIGHT_LOCAL_COVERAGE_ENCODING, HINDSIGHT_LOCAL_COVERAGE_MAX_RECORDS,
+  CanonicalMemorySourceSchema, HindsightCurrentCanonicalSourceSchema, HINDSIGHT_LOCAL_COVERAGE_ENCODING, HINDSIGHT_LOCAL_COVERAGE_MAX_RECORDS,
   HindsightLocalCoverageRecordSchema, type CanonicalMemoryRecord, type CanonicalMemorySource,
   type HindsightLocalCoverageKind, type HindsightLocalCoverageRecord,
 } from "@taki/shared";
@@ -32,13 +32,21 @@ const tables = [
 ] as const;
 
 export function readHindsightLocalCoverageState(db: Database, expectedEpochId?: string): HindsightLocalCoverageState {
-  const epoch = readEpoch(db, expectedEpochId);
+  return readCoverage(db, readEpoch(db, expectedEpochId, true));
+}
+
+/** Transition capture supplies its own durable admission; this does not authorize the first-activation entrypoint. */
+export function readTransitionLocalCoverageState(db: Database, expectedEpochId: string): HindsightLocalCoverageState {
+  return readCoverage(db, readEpoch(db, expectedEpochId, false), true);
+}
+
+function readCoverage(db: Database, epoch: SqlRow, lossless = false): HindsightLocalCoverageState {
   const epochId = String(epoch.epoch_id);
   requireCaptureSize(db, epochId);
   const records = [witness("epoch", epoch, { objectId: epochId, bankId: null })];
   for (const [kind, table, identity] of tables) {
     for (const row of db.prepare(`SELECT * FROM ${table} WHERE authority_epoch_id=:epoch`).all({ epoch: epochId })) {
-      appendRow(db, { records, kind, row, identity });
+      appendRow(db, { records, kind, row, identity, lossless });
     }
   }
   // Blocks have no provider epoch. Their complete current state remains relevant across an authority change.
@@ -54,10 +62,10 @@ export function readHindsightLocalCoverageState(db: Database, expectedEpochId?: 
     contentDigest: coverageHash("full-state", { localEpochId: epochId, bankIds, records }) };
 }
 
-function readEpoch(db: Database, expectedEpochId?: string): SqlRow {
+function readEpoch(db: Database, expectedEpochId: string | undefined, initial: boolean): SqlRow {
   const row = db.prepare(`SELECT e.*,s.updated_at AS authority_updated_at FROM canonical_memory_authority_state s
     JOIN canonical_memory_authority_epochs e ON e.epoch_id=s.active_epoch_id WHERE s.singleton=1`).get();
-  if (!row || row.provider_id !== "local" || row.status !== "active" || row.reason !== "initial-local"
+  if (!row || row.provider_id !== "local" || row.status !== "active" || (initial && row.reason !== "initial-local")
     || (expectedEpochId !== undefined && row.epoch_id !== expectedEpochId)) {
     throw new Error("HINDSIGHT_PREDECESSOR_STALE");
   }
@@ -73,12 +81,12 @@ function requireCaptureSize(db: Database, epochId: string): void {
   if (count > HINDSIGHT_LOCAL_COVERAGE_MAX_RECORDS) throw new Error("HINDSIGHT_LOCAL_COVERAGE_LIMIT_EXCEEDED");
 }
 
-function appendRow(db: Database, input: { records: HindsightLocalCoverageRecord[]; kind: HindsightLocalCoverageKind; row: SqlRow; identity: string }): void {
+function appendRow(db: Database, input: { records: HindsightLocalCoverageRecord[]; kind: HindsightLocalCoverageKind; row: SqlRow; identity: string; lossless: boolean }): void {
   const { row, kind, records } = input;
   const record = witness(kind, row, { bankId: String(row.bank_id), objectId: String(row[input.identity]),
     relatedId: kind === "lineage" ? String(row.source_memory_id) : kind === "derived" ? String(row.kind) : null });
   if (kind === "source") {
-    const source = parseSource(row);
+    const source = parseSource(row, input.lossless);
     record.sourceHashes = { declaredContentHash: source.contentHash,
       retainedTextSha256: source.retainedText === null ? null : createHash("sha256").update(source.retainedText).digest("hex"),
       canonicalSourceHash: canonicalPayloadHash(source) };
@@ -119,12 +127,12 @@ export function coverageHash(domain: string, value: unknown): string {
 
 export function compareKeys(left: string, right: string): number { return left < right ? -1 : left > right ? 1 : 0; }
 
-export function readHindsightLocalSource(db: Database, input: { epochId: string; bankId: string; documentId: string }): CanonicalMemorySource {
+export function readHindsightLocalSource(db: Database, input: { epochId: string; bankId: string; documentId: string; lossless?: boolean }): CanonicalMemorySource {
   const row = db.prepare(`SELECT * FROM canonical_memory_sources
     WHERE authority_epoch_id=:epoch AND bank_id=:bank AND document_id=:document`)
     .get({ epoch: input.epochId, bank: input.bankId, document: input.documentId });
   if (!row) throw new Error("HINDSIGHT_LOCAL_SOURCE_MISSING");
-  return parseSource(row);
+  return parseSource(row, input.lossless);
 }
 
 export function readHindsightLocalSourceRecords(db: Database, source: CanonicalMemorySource): CanonicalMemoryRecord[] {
@@ -138,8 +146,8 @@ export function readHindsightLocalSourceRecords(db: Database, source: CanonicalM
     });
 }
 
-function parseSource(row: SqlRow): CanonicalMemorySource {
-  return CanonicalMemorySourceSchema.parse({ authorityEpochId: row.authority_epoch_id, bankId: row.bank_id,
+function parseSource(row: SqlRow, lossless = false): CanonicalMemorySource {
+  return (lossless ? HindsightCurrentCanonicalSourceSchema : CanonicalMemorySourceSchema).parse({ authorityEpochId: row.authority_epoch_id, bankId: row.bank_id,
     documentId: row.document_id, contentHash: row.content_hash, retainedText: row.retained_text, context: row.context,
     tags: JSON.parse(String(row.tags_json)), metadata: JSON.parse(String(row.metadata_json)),
     observationScopes: row.observation_scopes_json === null ? null : JSON.parse(String(row.observation_scopes_json)),

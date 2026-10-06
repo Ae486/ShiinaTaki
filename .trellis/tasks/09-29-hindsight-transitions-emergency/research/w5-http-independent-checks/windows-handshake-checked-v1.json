@@ -1,0 +1,52 @@
+{
+  "source": {
+    "sha256": "b0acdf7702330f2cb8891b36eca7b4f8b7f3d5d93d870e03dab3117d6e6e7c0a",
+    "entries": 5084,
+    "verified": true
+  },
+  "admissionMilliseconds": 9203.000000001339,
+  "nodeSelf": {
+    "job": "G:\\Temp\\pytest-of-55473\\pytest-374\\test_real_windows_node_admissi0\\job",
+    "pid": 37784,
+    "parentPid": 35052,
+    "executable": "C:\\Program Files\\nodejs\\node.exe",
+    "version": "v24.18.0",
+    "nonce": "ec1c47c4fe004ac996d2f3dc5db4bfcb",
+    "source": {
+      "sha256": "b0acdf7702330f2cb8891b36eca7b4f8b7f3d5d93d870e03dab3117d6e6e7c0a",
+      "entries": 5084,
+      "verified": true
+    }
+  },
+  "nodeCleanup": {
+    "launched": true,
+    "admitted": true,
+    "stopped": true,
+    "exitCode": 1
+  },
+  "nodeResult": {
+    "diagnosticSucceeded": false,
+    "completeHttpBudgetPassed": false,
+    "authorityRecoveryProven": false,
+    "transports": [
+      {
+        "method": "GET",
+        "path": "/health",
+        "started": 10371.3527,
+        "completed": true,
+        "status": 503,
+        "bytes": 38,
+        "finished": 10417.5984,
+        "milliseconds": 46.24570000000131
+      }
+    ],
+    "applyPosts": 0,
+    "claims": 0,
+    "errorClass": "HindsightError"
+  },
+  "socketPaths": [
+    "/health"
+  ],
+  "pythonSiblingStillLiveBeforeOwnCleanup": true,
+  "meaning": "Actual NodeSupervisor and final Node client; owned refusal socket; no PG/model/corpus"
+}

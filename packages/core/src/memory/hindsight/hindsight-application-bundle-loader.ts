@@ -80,7 +80,7 @@ export async function loadHindsightApplicationEvent(input: HindsightApplicationL
   verifyHindsightApplicationEvent(event, input); call(); return event;
 }
 
-async function loadBodies(input: HindsightApplicationLoadInput, pages: TakiApplicationRecordPage[]): Promise<Map<string, HindsightApplicationBody>> {
+export async function loadBodies(input: HindsightApplicationLoadInput, pages: TakiApplicationRecordPage[]): Promise<Map<string, HindsightApplicationBody>> {
   const call = input.request ?? hindsightApplicationDeadline(input.context);
   const bodies = new Map<string, HindsightApplicationBody>(); const queue: TakiApplicationBodyRef[] = [];
   const descriptors = new Map<string, TakiApplicationBodyRef>();
@@ -105,6 +105,7 @@ async function loadBodies(input: HindsightApplicationLoadInput, pages: TakiAppli
       if (body.content.body_schema === "application-native-record.v1" && body.content.value.source_evidence_ref) {
         enqueue(body.content.value.source_evidence_ref);
       }
+      if (body.content.body_schema === "application-source-evidence.v1") enqueue(body.content.value.source_ref);
     }
   }
   call(); return bodies;

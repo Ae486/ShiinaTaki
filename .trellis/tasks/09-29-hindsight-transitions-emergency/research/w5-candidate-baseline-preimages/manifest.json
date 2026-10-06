@@ -1,0 +1,22 @@
+{
+  "files": [
+    {
+      "path": "hindsight_api/engine/application_state/store.py",
+      "sha256": "7a6b0bd12769ab30aaf88f631b17c227f66074bd77f5a546518188d0fb880237",
+      "bytes": 24334
+    },
+    {
+      "path": "hindsight_api/engine/transition_snapshot.py",
+      "sha256": "3e695dffedd3927468c290693a83827a080ba4e561da64c6d298df9b60123291",
+      "bytes": 6619
+    },
+    {
+      "path": "hindsight_api/engine/transfer/transition_delta.py",
+      "sha256": "56d39fb2be52ebfa3299f1a687b7e16f4214b984c8d3ae2c380fe2982de186d9",
+      "bytes": 11507
+    }
+  ],
+  "newFiles": [
+    "hindsight_api/engine/transition_baseline_reads.py"
+  ]
+}

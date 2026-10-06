@@ -1,0 +1,17 @@
+[
+  {
+    "path": "hindsight-api-slim/hindsight_api/engine/llm_interface.py",
+    "sha256": "1f7d2be4e006da1c9e6c0257e6910973b844ac2f70bcbdb9f113b1c76eeb88dc",
+    "bytes": 14407
+  },
+  {
+    "path": "hindsight-api-slim/hindsight_api/engine/providers/openai_compatible_llm.py",
+    "sha256": "df4683157d4f08c2610b042468d2136928fa0e7a7c94771cd16567bdaa700dcc",
+    "bytes": 79269
+  },
+  {
+    "path": "hindsight-api-slim/hindsight_api/engine/consolidation/consolidator.py",
+    "sha256": "10b6bbd96a865f82b70c803c3defc71e16aad3d7abcf44c6394e6d244f5f50a5",
+    "bytes": 172037
+  }
+]

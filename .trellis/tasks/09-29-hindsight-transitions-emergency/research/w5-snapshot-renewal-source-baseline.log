@@ -1,0 +1,31 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ × src/memory/transitions/transition-healthy-source.test.ts > healthy Source upload continuation > reuses original sealed multipart bytes after reply loss and preserves old Source bodies through the roundtrip 31163ms
+   → Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/transitions/transition-healthy-source.test.ts > healthy Source upload continuation > reuses original sealed multipart bytes after reply loss and preserves old Source bodies through the roundtrip
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/memory/transitions/transition-healthy-source.test.ts:14:3
+     12|
+     13| describe("healthy Source upload continuation", () => {
+     14|   it("reuses original sealed multipart bytes after reply loss and pres…
+       |   ^
+     15|     const h = await createHealthyTransitionHarness({ aliases: true });
+     16|     try {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  19:29:14
+   Duration  42.54s (transform 8.86s, setup 0ms, import 10.95s, tests 31.17s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/transitions/transition-healthy-source.test.ts --maxWorkers=1 --reporter=verbose

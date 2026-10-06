@@ -1,4 +1,5 @@
 # core/memory/
+- transitions/ — W3 complete proof/candidate/delta preparation; W4 owns authority/custody publication and W5 orchestration (see transitions/index.md)
 - layer-registry.ts — the layer taxonomy as DATA (MemoryLayerDefinitionSchema + V1_MEMORY_LAYERS + writable-layer selectors); `retention` covers permanent / rolling-window / expiring / importance-decay, and is the retention sweeper's only policy source
 - block-registry.ts — the Memory Block taxonomy as DATA (BlockDefinitionSchema + V1_BLOCKS; array order = injection order; ownership/writer/header/budget are all rows)
 - block-store.ts — Memory Block IO: pure-markdown files outside the entry tree (never FTS-indexed), read fresh per turn, written only by the registry's declared writer
@@ -34,14 +35,14 @@
 - tidy-report.ts — the tidy pass's deterministic health report (rc five-class contract): facts flat (missing trigger, over-budget incl. block used/limit beside full content), hypotheses as questions (stale, near-duplicate) + the new-writes slice carrying the misfiled question; per-class caps with dropped counts stated; observed content fenced; never prescribes an action
 - tidy-tools.ts — the maintenance verbs the foreground agent never gets: memory_reinforce / memory_archive_supersede (the sanctioned promotion route) / memory_set_disclosure / memory_refile / block_rethink (background blocks only) / memory_finish_edits (the structural terminal); never-throw envelopes
 - tidy-pass.ts — the model-led maintenance pass: write-count trigger (maybeRun) + operator runNow over one execute path; clean store = zero model calls; system-reminder input framing; six refinement principles + do-nothing permission + imported R10 voice; stopWhen finish-tool/step-cap; watermark advances only on success; tidy event + counts-only log line
-- memory-provider.ts — async provider and optional vector projection interfaces
+- memory-provider.ts — async provider context including immutable original caller Run/Attempt/Effect provenance
 - local-memory-provider.ts — structured Local provider with completed-only retain, applied/unchanged CAS mutations, and sparse recall
 - canonical-local-runtime.ts — canonical Local engine with real maintenance, observed writes and admission-bound tools/recall/prompt capture
-- canonical-local-banks.ts — preserves existing Local Bank identities and initializes scopes for a new Character
-- canonical-local-subsystem.ts — Local ingestion, precise source witnesses, tidy, retention and pre-retirement flush on the shared Utility Slot behind one write fence; built as a draft, retention starts only via start() after binding publication; exposes fence/ingestion for the activation drain
-- canonical-local-write-fence.ts — write-only Local admission fence: bounded quiesce, structured MEMORY_AUTHORITY_FENCED, explicit release after a pre-COMMIT failure, irrevocable retire after COMMIT
-- canonical-local-writers.ts — the fenced Local surfaces (engine write tools/writeEntry/retention, maintenance, flush, tidy, captured Run tools) over fenced-memory-tools; reads stay open, fenced tool writes return a structured refusal
-- fenced-memory-tools.ts — shared tool-write fencing for the Local (activation) and Hindsight (backup) writer fences: open read tools pass, a fenced write returns the policy refusal, Effect metadata identity kept
+- canonical-local-banks.ts — preserved Local scope identities and writer-fenced creation of newly encountered Character Banks
+- canonical-local-subsystem.ts — Local ingestion/tidy/retention/flush, unresolved-source boot refusal and permanent writer retirement
+- canonical-local-write-fence.ts — shared counted work ownership with bounded drain, inherited live-child admission and irreversible retirement
+- canonical-local-writers.ts — fenced Local raw/engine/maintenance writers, typed foreground queue fallback and privileged first-activation ingestion drain
+- fenced-memory-tools.ts — write admission and pre-dispatch typed transition fallback with preserved Effect metadata
 - canonical-ingestion-source.ts — exact primary commit witnesses, sanitized original conversational spans and reversible source metadata
 - canonical-ingestion-model.ts — one Write Gate and source-grounded Local extraction through the process Utility Slot
 - canonical-ingestion-plan.ts — durable gate/extraction plan and stable routed write identities
@@ -53,13 +54,13 @@
 - canonical-observed-write.ts — trusted image-description writes via the Local provider with observed provenance and automatic visibility limits
 - canonical-memory-view.ts — revision-bearing opaque references and canonical row projection for reused T5 policy/report code
 - canonical-memory-assembly.ts — admission-frozen canonical prompt data, complete pinned relationships, deliberate profile promotion, intention selection and observed fences
-- runtime-selector.ts — marker-first Legacy/Local/Hindsight routing; committed canonical selection retires Legacy before construction and remains unavailable on failure; observable unavailable Local/Hindsight boot, same-epoch recoverCanonical/recoverHindsight that never re-activate, bindHindsight (Local retired on positive marker proof, never restored) and the same-epoch replaceHindsight a revalidation drives
-- local-runtime-binding.ts — the ONE published Local binding: draft → install → publish → start, disposal plus unavailable state on any failure, current() accessor, the pure binding snapshot (no captureRun/Bank probe) and retire() for the Hindsight COMMIT
-- hindsight-runtime-binding.ts — the ONE published Hindsight binding after COMMIT: draft → install → publish, replace() (next draft while the old stays published, swap, old stopped once), start() once the composition runs, disposal plus unavailable state on any failure, the pure binding snapshot, hindsightRuntimeAvailability() and the marker-routed witness for primary commits while unbound
+- runtime-selector.ts — marker/provider/epoch routing with symmetric retirement, unavailable boot and fresh same-epoch repair
+- local-runtime-binding.ts — draft/install/publish/start, detached metadata, full authority snapshots accepting a same-boundary independent context, permanent retirement and failed/replaced draft settlement
+- hindsight-runtime-binding.ts — draft publication, detached replacement-aware metadata, full snapshots with optional same-boundary independent context, epoch retirement, all-draft shutdown and marker-routed primary witnesses
 - hindsight-unbound-run.ts — hindsightUnboundReason() (disabled/unconfigured connection -> connection_disabled, template conflict or a connection unavailable at construction but ready now -> config_changed, else null) and the composition capture that admits the memory-unavailable Run for that cause (reported to onUnavailable) or refuses MEMORY_RUNTIME_UNAVAILABLE
-- runtime-composition.ts — selected Local/Hindsight/Legacy subsystem, one Utility Slot, provider-independent Compaction whose flush resolves from the published binding per call, caller-cancellable Run capture, explicit Legacy retirement, trusted primary custody, bindingSnapshot()/hindsightBindingSnapshot()/recoverLocalBinding()/recoverHindsightBinding(), the activation Local seam and bindHindsight() rebind after COMMIT, marker-routed primary witnesses, a memory-unavailable Run while a known setting keeps the runtime unbound and a structured captureRun refusal for any other unbound state, awaited process shutdown, replaceHindsightBinding() (revalidation swap), onHindsightUnavailable for every memory-unavailable Hindsight Run, and the operations() live accessor (with the runtime's fingerprint and deployment mode) for the operation owner
+- runtime-composition.ts — one Utility Slot/Compaction owner, selected binding/custody, detached publication/presence queries plus context-threaded independent full snapshots, complete transitions seam and joined shutdown
 - authority-aware-legacy-surfaces.ts — mutable authority wrappers that retire legacy auto-memory, tidy, and direct writes after canonical activation
-- memory-coordinator.ts — provider-neutral authority dispatch and immutable Run capture; rejects registry/operation/stable-capability drift while allowing honest recall vector-health changes and writes once vector health is ready
+- memory-coordinator.ts — provider-neutral authority/capability verification and immutable caller provenance across queued foreground writes
 - memory-capability-snapshot.ts — detached immutable capabilities and one canonical Run/tool/coordinator digest; keeps dynamic vector health separate from stable operation identity
 - canonical-memory-run.ts — one provider-neutral admission bundle for canonical tools, authority/capabilities, automatic recall, and captured prompt assembly
 - automatic-memory-recall.ts — Global/active-Character foreground retrieval that waits for completion by default, with cancellation, an optional shared deadline, partial-bank tolerance, deterministic result/token caps, visibility/retention filtering, dedupe, and fenced ephemeral output

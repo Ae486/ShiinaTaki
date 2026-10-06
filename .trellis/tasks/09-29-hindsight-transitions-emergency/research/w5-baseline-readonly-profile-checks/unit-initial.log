@@ -1,0 +1,19 @@
+test_parent_reuses_v2_launch_and_supervisor_without_global_patch (test_w5_baseline_readonly_profile.CustodyAndReportTests.test_parent_reuses_v2_launch_and_supervisor_without_global_patch) ... ok
+test_report_requires_both_proofs_custody_cleanup_and_real_observations (test_w5_baseline_readonly_profile.CustodyAndReportTests.test_report_requires_both_proofs_custody_cleanup_and_real_observations) ... ok
+test_sampler_limit_prevents_extra_io_and_missing_is_not_zero (test_w5_baseline_readonly_profile.CustodyAndReportTests.test_sampler_limit_prevents_extra_io_and_missing_is_not_zero) ... ok
+test_sampler_refuses_replaced_process_before_resource_read (test_w5_baseline_readonly_profile.CustodyAndReportTests.test_sampler_refuses_replaced_process_before_resource_read) ... ok
+test_actual_default_process_imports_no_model (test_w5_baseline_readonly_profile.EntryTests.test_actual_default_process_imports_no_model) ... ok
+test_default_is_noop_even_without_manifest (test_w5_baseline_readonly_profile.EntryTests.test_default_is_noop_even_without_manifest) ... ok
+test_wrong_sealed_v2_manifest_refuses_before_current_verification (test_w5_baseline_readonly_profile.EntryTests.test_wrong_sealed_v2_manifest_refuses_before_current_verification) ... ok
+test_actual_request_and_baseline_return_shape_without_pg (test_w5_baseline_readonly_profile.PreservedInputTests.test_actual_request_and_baseline_return_shape_without_pg) ... ok
+test_async_inclusive_boundaries_and_context_reset_on_cancellation (test_w5_baseline_readonly_profile.ProfileTests.test_async_inclusive_boundaries_and_context_reset_on_cancellation) ... ok
+test_buckets_are_bounded (test_w5_baseline_readonly_profile.ProfileTests.test_buckets_are_bounded) ... ok
+test_nested_exclusive_cpu_and_wall_do_not_double_count (test_w5_baseline_readonly_profile.ProfileTests.test_nested_exclusive_cpu_and_wall_do_not_double_count) ... ok
+test_original_exception_identity_and_frame_cleanup (test_w5_baseline_readonly_profile.ProfileTests.test_original_exception_identity_and_frame_cleanup) ... ok
+test_refuses_dml_locks_side_effects_and_multiple_statements (test_w5_baseline_readonly_profile.ReadOnlyTests.test_refuses_dml_locks_side_effects_and_multiple_statements) ... ok
+test_transparent_return_failure_and_no_bound_values_in_metrics (test_w5_baseline_readonly_profile.ReadOnlyTests.test_transparent_return_failure_and_no_bound_values_in_metrics) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 7.283s
+
+OK

@@ -67,6 +67,20 @@ describe("backup.verify", () => {
 describe("backup.verify — native-host ZIP read-back", () => {
   const file = `taki-backup-${BACKUP_ID}.zip`;
 
+  it("retires a hung old-epoch read-back without changing the sealed manifest after its late reply", async () => {
+    const h = await routeC(); const before = manifestText(h);
+    let release!: () => void;
+    vi.spyOn(h.route, "readBack").mockImplementation(() => new Promise((resolve) => {
+      release = () => resolve(h.route.artifacts.get(file)!);
+    }));
+    const pending = verify(h); await vi.waitFor(() => expect(release).toBeDefined());
+    h.service.retireEpoch!("epoch"); await h.service.stop();
+    expect(await pending).toMatchObject({ ok: false });
+    expect(manifestText(h)).toBe(before);
+    release(); await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(manifestText(h)).toBe(before);
+  });
+
   it.each([
     ["changed", (h: BackupHarness) => { h.route.artifacts.set(file, { sha256: "f".repeat(64), bytes: 4096 }); }],
     ["gone", (h: BackupHarness) => { h.route.artifacts.delete(file); }],

@@ -1,6 +1,6 @@
 /**
  * INPUT:  existing B5 leases/scheduler runners and the provider's on-demand pull/recovery requests
- * OUTPUT: serialized Bank work, renewable foreground read leases and bounded Pending/parent-write recovery
+ * OUTPUT: serialized Bank work, whole multi-Bank capture ownership, renewable read leases and bounded write recovery
  * POS:    core/memory/hindsight — runtime lifetime adapter; existing B5 scheduling/backoff remains authoritative
  */
 import { randomUUID } from "node:crypto";
@@ -11,6 +11,7 @@ import type { HindsightForegroundRunOwner, HindsightReplicaRunInput, HindsightRe
 import type { HindsightMemoryWriteAdvance } from "./hindsight-memory-write-context.ts";
 import { hindsightApplicationDeadline } from "./hindsight-application-body-transfer.ts";
 import { replicaErrorCode, replicaResetRequired } from "./hindsight-replica-errors.ts";
+import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 
 interface Dependencies {
   replica: HindsightApplicationReplicaRepo;
@@ -20,6 +21,7 @@ interface Dependencies {
   assertConnection(): void;
   onRecovered(input: HindsightMemoryWriteAdvance): Promise<void>;
   now?: () => string;
+  workFence?: CanonicalLocalWriteFence;
 }
 export interface HindsightRuntimeSynchronizeInput {
   bankId: string;
@@ -34,15 +36,18 @@ interface OnDemandInput extends HindsightRuntimeSynchronizeInput {
 export function createHindsightRuntimeBankService(deps: Dependencies) {
   const controller = new AbortController(); const ownerId = `hindsight-runtime:${randomUUID()}`;
   const active = new Set<Promise<unknown>>(); const banks = new Map<string, Promise<unknown>>();
-  const track = <T>(bankId: string, action: () => Promise<T>): Promise<T> => {
-    const previous = banks.get(bankId);
+  const own = <T>(action: () => Promise<T>): Promise<T> => {
+    if (controller.signal.aborted) return Promise.reject(new Error("HINDSIGHT_CANCELLED"));
     let task: Promise<T>;
-    try { task = action(); } catch (error) { return Promise.reject(error); }
+    try { task = deps.workFence ? deps.workFence.admit(action) : action(); } catch (error) { return Promise.reject(error); }
+    active.add(task); void task.then(() => active.delete(task), () => active.delete(task)); return task;
+  };
+  const track = <T>(bankId: string, action: () => Promise<T>): Promise<T> => {
+    const previous = banks.get(bankId); const task = own(action);
     // A cancelled waiter settles immediately, but its queue position still
     // represents any earlier active owner for the next arriving caller.
     const barrier = Promise.allSettled(previous ? [previous, task] : [task]);
-    active.add(task); banks.set(bankId, barrier);
-    void task.then(() => active.delete(task), () => active.delete(task));
+    banks.set(bankId, barrier);
     void barrier.then(() => { if (banks.get(bankId) === barrier) banks.delete(bankId); });
     return task;
   };
@@ -56,7 +61,8 @@ export function createHindsightRuntimeBankService(deps: Dependencies) {
     return track(input.bankId, () => runOnDemand(deps, { ...input, signal, ownerId, previous, withPending }));
   };
   const settle = async () => { while (active.size > 0) await Promise.allSettled([...active]); };
-  return { synchronize: (input: HindsightRuntimeSynchronizeInput) => onDemand(input, false),
+  return { capture: own,
+    synchronize: (input: HindsightRuntimeSynchronizeInput) => onDemand(input, false),
     recover: (input: { bankId: string; context: HindsightCallContext }) => onDemand(input, true),
     runner: { run: (input: HindsightReplicaRunInput) => scheduled(input, false),
       rebuild: (input: HindsightReplicaRunInput) => scheduled(input, true) } satisfies HindsightReplicaSchedulerRunner,

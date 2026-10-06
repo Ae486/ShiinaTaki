@@ -36,12 +36,15 @@ Promise<HindsightRevalidateOutcome> {
   const client = deps.client(live.projection);
   const request = (): HindsightCallContext => {
     if (call.signal.aborted) throw call.signal.reason;
+    const selected = readMemoryAuthoritySelection(deps.db);
+    if (selected.mode !== "hindsight" || selected.epochId !== ref.epochId) throw new Error("MEMORY_AUTHORITY_MISMATCH");
     return { timeoutMs: live.projection.requestTimeoutMs, signal: call.signal };
   };
   call.checkpoint("validating");
   const admitted = await admitHindsightApplication({ client, request, expectedLineage: lineage });
   call.checkpoint("verifying-banks");
   await verifyBanks(deps, { client, request });
+  request();
   call.checkpoint("recording");
   record(deps, { epochId: ref.epochId, live, manifest: admitted.manifest });
   return rebind(deps, { ref, live, call });

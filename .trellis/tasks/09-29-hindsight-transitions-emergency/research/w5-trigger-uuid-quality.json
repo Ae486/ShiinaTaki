@@ -1,0 +1,111 @@
+{
+  "checks": [
+    {
+      "command": [
+        "H:/hindsight/.venv/Scripts/ty.exe",
+        "check",
+        "--project",
+        "H:/hindsight",
+        "--python",
+        "H:/hindsight/.venv/Scripts/python.exe",
+        "--extra-search-path",
+        "H:\\hindsight\\hindsight-api-slim",
+        "H:\\hindsight\\hindsight-api-slim\\hindsight_api\\alembic\\versions\\e40b1e8a7d32_optimize_transition_association_lookup.py",
+        "H:\\hindsight\\hindsight-api-slim\\tests\\native_results\\test_transition_association_lookup.py",
+        "H:\\hindsight\\hindsight-api-slim\\tests\\native_results\\test_transition_association_migration.py",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-trigger-uuid-migration-rehearsal.py",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-trigger-uuid-source-audit.py",
+        "--output-format",
+        "concise"
+      ],
+      "exitCode": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "H:/hindsight/.venv/Scripts/ruff.exe",
+        "check",
+        "H:\\hindsight\\hindsight-api-slim\\hindsight_api\\alembic\\versions\\e40b1e8a7d32_optimize_transition_association_lookup.py",
+        "H:\\hindsight\\hindsight-api-slim\\tests\\native_results\\test_transition_association_lookup.py",
+        "H:\\hindsight\\hindsight-api-slim\\tests\\native_results\\test_transition_association_migration.py"
+      ],
+      "exitCode": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "H:/hindsight/.venv/Scripts/ruff.exe",
+        "format",
+        "--check",
+        "H:\\hindsight\\hindsight-api-slim\\hindsight_api\\alembic\\versions\\e40b1e8a7d32_optimize_transition_association_lookup.py",
+        "H:\\hindsight\\hindsight-api-slim\\tests\\native_results\\test_transition_association_lookup.py",
+        "H:\\hindsight\\hindsight-api-slim\\tests\\native_results\\test_transition_association_migration.py"
+      ],
+      "exitCode": 0,
+      "stdout": "3 files already formatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "H:/hindsight/.venv/Scripts/ruff.exe",
+        "check",
+        "--select",
+        "E,F,I",
+        "--line-length",
+        "120",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-trigger-uuid-migration-rehearsal.py",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-trigger-uuid-source-audit.py"
+      ],
+      "exitCode": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "H:/hindsight/.venv/Scripts/ruff.exe",
+        "format",
+        "--check",
+        "--line-length",
+        "120",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-trigger-uuid-migration-rehearsal.py",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-trigger-uuid-source-audit.py"
+      ],
+      "exitCode": 0,
+      "stdout": "2 files already formatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "H:/hindsight/.venv/Scripts/python.exe",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-trigger-uuid-source-audit.py"
+      ],
+      "exitCode": 0,
+      "stdout": "{\"historicalMigrationUnchanged\": true, \"schemas\": [\"default\", \"public\", \"assoc_tenant\"], \"onlyApprovedPredicatesChanged\": true, \"downgradeRestoresHistoricalBody\": true, \"oneStatementPerDirection\": true, \"parentHelperExactAlembicConfig\": true, \"databaseAccess\": false, \"cloneRun\": false}\n",
+      "stderr": ""
+    }
+  ],
+  "sources": [
+    {
+      "path": "H:/hindsight/hindsight-api-slim/hindsight_api/alembic/versions/e40b1e8a7d32_optimize_transition_association_lookup.py",
+      "sha256": "474d4fee2f89b79f30243d40bd1d41bd6b47ff00179d324322248466755e3fba"
+    },
+    {
+      "path": "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_association_lookup.py",
+      "sha256": "f4163b518175c5834f43ea89a60826f983f4dabcf1e15831bbbd313169827b57"
+    },
+    {
+      "path": "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_association_migration.py",
+      "sha256": "356f9303083057fa33b888c9e9dc997a80d62ff493e12f6e10b0fa7cb7c9221b"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-trigger-uuid-migration-rehearsal.py",
+      "sha256": "9dc37f41b1ad94c741d581530e07e0226b414a006066bdef9511c7c3a17fc9d5"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-trigger-uuid-source-audit.py",
+      "sha256": "d7684aa69c3035348b792539a9b92a6a4163aebf3407b9050c8690fd179f428f"
+    }
+  ]
+}

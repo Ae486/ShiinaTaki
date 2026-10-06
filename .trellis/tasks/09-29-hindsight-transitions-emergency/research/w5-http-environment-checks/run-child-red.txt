@@ -1,0 +1,17 @@
+Command (cwd H:/TakiAgent; PYTHONPATH set to research and H:/hindsight/hindsight-api-slim):
+H:/hindsight/.venv/Scripts/python.exe -m pytest --noconftest -o addopts= .trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_http_environment.py -k actual_run_child -q --tb=short -n 0
+Exit: 1
+
+F                                                                        [100%]
+================================== FAILURES ===================================
+________ test_actual_run_child_preserves_windows_before_owned_pg_start ________
+.trellis\tasks\09-29-hindsight-transitions-emergency\research\test_w5_http_environment.py:71: in test_actual_run_child_preserves_windows_before_owned_pg_start
+    composition.run_child(job)
+.trellis\tasks\09-29-hindsight-transitions-emergency\research\w5_http_composition.py:599: in run_child
+    rehearsal.run_reviewed(with_apply=True)
+.trellis\tasks\09-29-hindsight-transitions-emergency\research\test_w5_http_environment.py:51: in run_reviewed
+    assert observed["startExitCode"] == 0
+E   assert 3221225477 == 0
+=========================== short test summary info ===========================
+FAILED .trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_http_environment.py::test_actual_run_child_preserves_windows_before_owned_pg_start
+1 failed, 1 deselected in 4.03s

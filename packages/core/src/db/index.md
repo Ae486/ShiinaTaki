@@ -1,4 +1,14 @@
 # core/db/
+- memory-transition-document-repo.ts — immutable byte documents for captures, evidence, candidates, baselines, deltas and upload attempts
+- memory-transition-local-capture.ts — complete neutral Local discovery under a real SQLite writer reservation; no caller partial manifest
+- memory-transition-candidate-repo.ts — exact evidence persistence, boundary-local verified reads, stable scope/epoch reservation and receipt-joined common baselines
+- memory-transition-local-staging.ts — unselected canonical sources/records/provenance/lineage/FTS installation with no global Block publication
+- memory-transition-delta-repo.ts — complete baseline-guarded request preparation and exact historical result validation/storage
+- memory-transition-source-upload.ts — immutable Source body bytes/ref/namespace/request and executor-attempt identities before upload
+- canonical-memory-historical-references.ts — proved deleted support identities and incoming references independent of live-unit FKs
+- canonical-memory-source-references.ts — actual ordered Source snapshots/aliases and explicit Local edit association intent
+- canonical-memory-copy-sources.ts — distinct genuine copied Local Sources for different historical versions; duplicate references remain ordered
+- canonical-memory-policy-revision.ts — semantic policy changes advance versions; placement/bookkeeping/no-op edits do not
 - effect-repo.ts — Core-owned provider-neutral Effect intent/wait/settlement CAS boundary with authoritative detailed usage rows/events
 - run-repo.ts — durable Run aggregate with atomic admission/context evidence, full internal admission manifests for safe context restoration, CAS lifecycle/retry transitions, and bounded public Receipt/status references
 - run-event-repo.ts — immutable, contiguous, redaction-safe lifecycle evidence ledger queries and appends
@@ -50,7 +60,8 @@
 - hindsight-replica-record-store.ts — strict native B5 persistence and explicit lossless application projection branches, kind-aware FTS repair/search and separate current projection digests
 - hindsight-replica-checkpoint-store.ts — checkpoint read and predecessor CAS publication
 - hindsight-replica-lease-repo.ts — persisted per-Bank owner/run/fence lease lifecycle and exact-token expiry CAS renewal
-- hindsight-replica-scheduler-repo.ts — durable Bank configuration, manual/catch-up claims and unclaimed-manual cancel, lease-bound settlement, and restart recovery
+- hindsight-replica-request-repo.ts — exact durable manual request identities, claims and immutable terminal outcomes
+- hindsight-replica-scheduler-repo.ts — durable Bank configuration, manual/catch-up claims and exact queued cancellation, lease-bound settlement, and restart recovery
 - hindsight-replica-schedule-state.ts — deterministic retry precedence, independent due intervals, manual-mode transitions, and the explicit-only hold after a provider rollback
 - hindsight-replica-snapshot-cache.ts — payload-and-witness digests bound to Bank/lineage/generation/page hash, with atomic pruning and journal invalidation
 - pending-memory-repo.ts — idempotent Pending Memory admission, Bank/authority/lease/CAS guards, truthful summaries, and separate overlay reads
@@ -101,6 +112,27 @@
 - hindsight-memory-write-contract.ts — lossless internal parent-intent state and an immutable operation identity
 - hindsight-memory-write-repo.ts — original target capture, independent child evidence, stable full-operation receipts and the count-only pending parent-write read
 - memory-operation-repo.ts — durable memory_operations ledger: admitted insert (partial-unique-index single flight), state-CAS transition, active/recent/latest-in-family reads, foreign-row listing for per-kind boot observation, restart reconciliation by owner boot id
+- memory-transition-repo.ts — immutable transition admission and source identity, bounded lease takeover, phase/CAS and queue cutoff
+- memory-transition-evidence-repo.ts — admission-bound hash-checked proof/receipt reads and immutable outcomes; claimed failure retains isolation until explicit release
+- memory-transition-queue-repo.ts — bounded normalized custody while ownership remains open, durable target reservation, immutable unknown observations and factual settlement
+- memory-transition-recovery-repo.ts — explicit new recovery admissions and resolution evidence preserving original operation history and durable fence obligations
+- memory-transition-publication-proof.ts — independent final source/config/inventory/custody/candidate/native closure under SQLite writer reservation; rejects observation-context substitution
+- memory-transition-publication-repo.ts — one atomic epoch, representation, marker, custody, queue obligation and immutable receipt COMMIT with one synchronous native-evidence context
+- memory-transition-publication-reader.ts — independent full boot/recovery and scoped verified observation with the same current joins, immutable evidence integrity and legal Local edits
+- memory-transition-representation.ts — Local staging and retained native/application pair installation from independently reconstructed W2 closure
+- memory-transition-custody.ts — bidirectional exact custody, finalized membership boundaries and producer/ancestry-proven consumed spans before and after compaction
+- memory-transition-source-disposition.ts — exact awaiting Source, Pending, parent and source-command joins before healthy publication
+- memory-transition-pending-refusal.ts — storage-validated original Pending identity and positive non-dispatch/zero-effect cancellation evidence for source and target classifiers
+- memory-transition-native-outcome.ts — row-key-bound per-Bank activation/retirement/abort storage and target readiness or source-release proof
+- memory-transition-abort.ts — positive pre-COMMIT release with explicit queued cancellation and immutable source resolution
+- memory-transition-effect-repo.ts — actual Local/Hindsight target receipt lookup, completed/superseded/unknown classification and durable queue receipts
+- memory-transition-target-refusal.ts — exact synchronous Local no-effect response evidence; generic failures never become refusal proof
+- memory-transition-fixtures.ts — isolated transition test identities and proof envelopes; no real native proof or production switching
+- memory-transition-driver-repo.ts — complete Bank registry, immutable original native commands, dispatch-before-I/O and strict observations
+- memory-transition-preview-repo.ts — actor/time/identity-bound immutable preview storage and synchronous confirmation validation
+- memory-transition-driver-failure.ts — strict independent immutable unknown results for failed recovery operations
+- memory-transition-undispatched.ts — positive complete never-dispatched release evidence without synthetic native outcomes
+- memory-transition-verification-dispatch.ts — immutable exact-executor verification dispatch for partial-plan recovery after055
 - hindsight-memory-write-storage.ts — independently hashed byte-preserving state reads and CAS replacement
 - hindsight-policy-work-contract.ts — exact durable work identities, lease/result schemas and immutable proposal validation
 - hindsight-policy-work-repo.ts — durable claims, original prompt/results, explicit retry and terminal queue progress
@@ -108,3 +140,11 @@
 - hindsight-runtime-admission-repo.ts — integrity-checked last-verified D77 and guarded-reflect support across restart
 - hindsight-lifecycle-attempt-reads.ts — read-only automatic once-guard: whether an automatic bank.provision (Character + fingerprint) or connection.revalidate (epoch + fingerprint) row already exists
 - hindsight-runtime-memory-view.ts — complete current Canonical memory rows for internal prompt/report staging
+- memory-transition-emergency-repo.ts — immutable transition-owned capture reservation, incident ACK and exact original identity reads.
+- memory-transition-emergency-quarantine.ts — transactional old-epoch quarantine with the same pure eligibility predicate used by operator action reads; unrelated exclusive work still blocks.
+- memory-transition-surviving-capture.ts — complete paired replica/body closure and transition-owned immutable surviving evidence.
+- memory-transition-surviving-policy.ts — exact predecessor publication/Native/head/mapping/initial-policy correspondence with shared synchronous immutable evidence; current joins rerun and missing policy is never initialized.
+- memory-transition-emergency-candidate.ts — incident-bound Local candidate using W3 projection and complete closure, sharing one fresh synchronous evidence context across construction and read-back while rereading current SQL joins.
+- memory-transition-emergency-publication.ts — offline proof and atomic incident/custody/authority join; one independent evidence context through install/read-back, uncached current SQL checks and final real-clock original-executor COMMIT guard.
+- memory-transition-row-hash.ts — lossless domain-separated hash of original unknown-effect SQLite row bytes.
+- memory-transition-held-primary.ts — exact held unknown ingestion and witnessed-primary disposition across emergency publication.

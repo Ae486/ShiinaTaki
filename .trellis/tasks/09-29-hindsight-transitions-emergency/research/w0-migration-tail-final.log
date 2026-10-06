@@ -1,0 +1,43 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+·x········
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/migrations/041-canonical-memory-maintenance.test.ts > 041 canonical maintenance history and ingestion schema > upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration
+AssertionError: expected [ Array(2) ] to deeply equal [ Array(2) ]
+
+- Expected
++ Received
+
+@@ -8,8 +8,9 @@
+      46,
+      47,
+      48,
+      49,
+      50,
++     51,
+    ],
+    [],
+  ]
+
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts:107:21
+    105|     const after = historyBytes(upgraded); upgraded.close();
+    106|     const reopened = open(file, MIGRATIONS, (versions) => applied.push…
+    107|     expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50],…
+       |                     ^
+    108|     expect(historyBytes(reopened)).toEqual(after);
+    109|     expect(createCanonicalMemoryRepo(reopened).edit(editInput)).toEqua…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  21:14:00
+   Duration  3.62s (transform 1.73s, setup 0ms, import 2.36s, tests 907ms, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/db/migrations/041-canonical-memory-maintenance.test.ts --maxWorkers=2 --reporter=dot

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "inputsVerified": 7,
+  "artifactsVerified": 6,
+  "probesVerified": 4,
+  "nodeSyntaxChecks": 2,
+  "pythonSyntaxChecks": 1,
+  "utf8NoBomWhitespace": "pass",
+  "sourcePreserved": true,
+  "externalCalls": 0,
+  "modelCalls": 0
+}

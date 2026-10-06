@@ -1,0 +1,62 @@
+{
+  "sourceSha256Before": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+  "copyRoot": "H:\\TakiAgent\\.trellis\\.runtime\\w5-core-builder-diagnostic-39429987-71cd-46e4-9305-2edf3bc42a39",
+  "historicalStateOverride": "exact current recovery operation viewed as running",
+  "guards": [
+    {
+      "ordinal": 1,
+      "elapsedMs": 5,
+      "liveNow": "2026-10-03T15:30:27.197Z",
+      "liveClockPass": true
+    },
+    {
+      "ordinal": 2,
+      "elapsedMs": 13,
+      "liveNow": "2026-10-03T15:30:27.205Z",
+      "liveClockPass": true
+    },
+    {
+      "ordinal": 3,
+      "elapsedMs": 232880,
+      "liveNow": "2026-10-03T15:34:20.072Z",
+      "liveClockPass": true
+    },
+    {
+      "ordinal": 4,
+      "elapsedMs": 287275,
+      "liveNow": "2026-10-03T15:35:14.467Z",
+      "liveClockPass": false,
+      "liveClockError": {
+        "errorName": "Error",
+        "code": "MEMORY_TRANSITION_LEASE_LOST",
+        "stack": [
+          "    at requireTransitionLease (file:///H:/TakiAgent/packages/core/src/db/memory-transition-repo.ts:94:11)",
+          "    at Object.assertConfiguration (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-builder-clock-diagnostic.mjs:48:13)",
+          "    at requireTransitionPreparation (file:///H:/TakiAgent/packages/core/src/db/memory-transition-local-capture.ts:87:50)",
+          "    at file:///H:/TakiAgent/packages/core/src/db/memory-transition-candidate-repo.ts:130:20",
+          "    at runTransaction (file:///H:/TakiAgent/packages/core/src/db/sqlite.ts:92:5)",
+          "    at Object.transaction (file:///H:/TakiAgent/packages/core/src/db/sqlite.ts:70:26)",
+          "    at saveTransitionCommonBaseline (file:///H:/TakiAgent/packages/core/src/db/memory-transition-candidate-repo.ts:129:6)",
+          "    at file:///H:/TakiAgent/packages/core/src/memory/transitions/transition-local-candidate.ts:52:5",
+          "    at runTransaction (file:///H:/TakiAgent/packages/core/src/db/sqlite.ts:92:5)",
+          "    at Object.transaction (file:///H:/TakiAgent/packages/core/src/db/sqlite.ts:70:26)"
+        ]
+      }
+    }
+  ],
+  "historicalStart": "2026-10-03T15:30:27.192Z",
+  "leaseUntil": "2026-10-03T15:34:42.674Z",
+  "remainingLeaseMsAtStart": 255482,
+  "builderMs": 288501,
+  "frozenClockBuilderPassed": true,
+  "candidateCounts": {
+    "banks": 2,
+    "records": 1262,
+    "sources": 722,
+    "sourceSets": 1262
+  },
+  "copyCandidateRows": 1,
+  "copyBaselineRows": 1,
+  "sourceSha256After": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+  "sourceUnchanged": true
+}

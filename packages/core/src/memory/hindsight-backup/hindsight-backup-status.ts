@@ -2,7 +2,7 @@
  * INPUT:  Core SQLite (B3 Bank setup rows, replica checkpoints, Pending and D77 parent-write counts), the selected epoch, the
  *         last verified backup manifest, the newest sealed backup and staged route-b captures, and the read time
  * OUTPUT: readHindsightBackupStatus() -> the memory.authority.status `hindsight.backup` section: last verified backup, its age,
- *         per verified native Bank the interval from the backup's native cursor to the current Core replica checkpoint
+ *         per verified native Bank a compatible-history interval from backup to local replica (remote loss stays unknown)
  *         plus unsettled Core writes, the newest sealed backup whatever its verification and the current epoch's staged captures
  * POS:    core/memory/hindsight-backup — pure synchronous local read shared by status and the emergency seal; never probes the
  *         network; an unreadable count stays null, never a fabricated zero
@@ -30,11 +30,20 @@ export function readHindsightBackupStatus(db: Database, input: HindsightBackupSt
   const backup = input.lastVerified;
   const verifiedAt = backup?.verifiedAt ?? null;
   const nativeCursors = new Map(verifiedAt === null ? [] : backup?.native.proof.banks.map((bank) => [bank.bankId, bank.currentCursor] as const));
-  const missingInterval = verifiedNativeBanks(db).map((bankId) => ({
-    bankId, fromNativeCursor: nativeCursors.get(bankId) ?? null,
-    toReplicaCursor: quiet(() => readReplicaCheckpoint(db, bankId)?.endCursor ?? null),
-    pendingCount: input.epochId === null ? null : pendingCount(db, { epochId: input.epochId, bankId }),
-  }));
+  const missingInterval = verifiedNativeBanks(db).map((bankId) => {
+    const checkpoint = quiet(() => readReplicaCheckpoint(db, bankId));
+    const proof = backup?.native.proof.banks.find((bank) => bank.bankId === bankId);
+    // Equal cursor numbers prove nothing across histories. Epoch continuity requires an explicit future proof;
+    // until then only the exact captured authority can share a numeric interval with this replica.
+    const compatible = verifiedAt !== null && checkpoint && proof && input.epochId === checkpoint.authorityEpochId
+      && backup?.authority.epochId === checkpoint.authorityEpochId
+      && backup.authority.providerLineageId === checkpoint.providerLineageId
+      && backup.native.proof.providerLineage === checkpoint.providerLineageId
+      && proof.bankGeneration === checkpoint.bankGeneration;
+    return { bankId, fromNativeCursor: compatible ? proof.currentCursor : null,
+      toReplicaCursor: checkpoint?.endCursor ?? null,
+      pendingCount: input.epochId === null ? null : pendingCount(db, { epochId: input.epochId, bankId }) };
+  });
   return HindsightBackupStatusSectionSchema.parse({
     lastVerified: backup && verifiedAt !== null ? { backupId: backup.backupId, createdAt: backup.createdAt, verifiedAt,
       nativeCursors: [...nativeCursors].map(([bankId, currentCursor]) => ({ bankId, currentCursor })) } : null,

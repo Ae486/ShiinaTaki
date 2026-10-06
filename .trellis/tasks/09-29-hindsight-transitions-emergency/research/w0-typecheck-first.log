@@ -1,0 +1,22 @@
+
+> takiagent@0.0.0 typecheck H:\TakiAgent
+> pnpm -r --parallel typecheck
+
+Scope: 5 of 6 workspace projects
+apps/cli typecheck$ tsc --noEmit
+apps/desktop typecheck$ tsc --noEmit
+e2e typecheck$ tsc --noEmit
+packages/core typecheck$ tsc --noEmit
+packages/shared typecheck$ tsc --noEmit
+apps/cli typecheck: Done
+e2e typecheck: Done
+packages/shared typecheck: Done
+apps/desktop typecheck: Done
+packages/core typecheck: src/db/hindsight-replica-request-repo.ts(11,109): error TS2345: Argument of type 'string' is not assignable to parameter of type 'SqlRow'.
+packages/core typecheck: src/db/hindsight-replica-request-repo.ts(18,25): error TS2554: Expected 0-1 arguments, but got 4.
+packages/core typecheck: src/db/hindsight-replica-request-repo.ts(25,21): error TS2554: Expected 0-1 arguments, but got 4.
+packages/core typecheck: Failed
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @taki/core@0.0.0 typecheck: `tsc --noEmit`
+Exit status 2
+ ELIFECYCLE  Command failed with exit code 2.

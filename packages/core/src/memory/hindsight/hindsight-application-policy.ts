@@ -3,13 +3,14 @@
  * OUTPUT: preserved policy or a deterministic first-policy proposal that must be committed before exposure
  * POS:    core/memory/hindsight — Taki policy only; no database, model, native edit or Pending transition
  */
-import { MemoryProvenanceSchema, TAKI_MEMORY_DEFAULT_IMPORTANCE, TakiApplicationMemoryBodySchema,
+import { MemoryProvenanceSchema, TAKI_MEMORY_DEFAULT_IMPORTANCE, TakiApplicationMemoryBodySchema, HindsightTransitionProofSchema,
   TakiMemoryPolicyProjectionSchema, type CanonicalMemoryRecord, type JsonValue, type MemoryProvenance,
-  type TakiApplicationArtifactVersion, type TakiApplicationMemoryBody, type TakiMemoryPolicyProjection } from "@taki/shared";
+  type TakiApplicationArtifactVersion, type TakiApplicationMemoryBody, type TakiMemoryPolicyProjection, type HindsightTransitionProof } from "@taki/shared";
 import { clampAutoImportance } from "../auto-layer-policy.ts";
 import { isSafeAutomaticMemoryText } from "../canonical-ingestion-source.ts";
 import { canonicalLayerRetention, requireLayerOwnership } from "../canonical-layer-policy.ts";
 import { getLayer } from "../layer-registry.ts";
+import { hindsightTransitionHash } from "./hindsight-transition-proof.ts";
 import { HindsightPolicyRefusal, projectHindsightApplicationPolicy, requireHindsightPolicyAddress,
   requireHindsightPolicyContext, requireHindsightPolicyOwnership, requirePersistedHindsightPolicy,
   type HindsightPolicyAddress, type HindsightPolicyContext, type HindsightPolicyLookup,
@@ -65,6 +66,23 @@ export function resolveHindsightApplicationPolicy(input: HindsightPolicyResoluti
   if (context.native.unit.state !== "valid") throw new HindsightPolicyRefusal("policy_context_invalid");
   requireSafeHindsightMemoryIngress(context);
   return { kind: "initialize", body: initializeBody(context, input.initial) };
+}
+
+/** W3 preserves invalidated native units as invalidated Local records. Ordinary first-policy admission stays valid-only. */
+export function initializeHindsightTransitionPolicy(input: HindsightPolicyResolutionInput & {
+  proof: HindsightTransitionProof;
+}): TakiApplicationMemoryBody {
+  const proof = HindsightTransitionProofSchema.parse(input.proof);
+  const { proof_hash: hash, ...body } = proof;
+  const context = requireHindsightPolicyContext(input.context);
+  if (hash !== hindsightTransitionHash({ domain: "transition-proof.v1", proof: body })
+    || proof.bank_id !== context.bank.bankId || proof.provider_lineage !== context.namespace.provider_lineage
+    || proof.bank_generation !== context.namespace.bank_generation
+    || context.native.native.native_cursor !== null && proof.application_snapshot.checkpoint.native_cursor < context.native.native.native_cursor
+    || input.state.status !== "authenticated-absence" || !input.initial) throw new HindsightPolicyRefusal("capture_required");
+  requireHindsightPolicyAddress(context, input.state);
+  requireSafeHindsightMemoryIngress(context);
+  return initializeBody(context, input.initial);
 }
 
 function initializeBody(context: VerifiedHindsightPolicyContext, initial: NonNullable<HindsightPolicyResolutionInput["initial"]>) {

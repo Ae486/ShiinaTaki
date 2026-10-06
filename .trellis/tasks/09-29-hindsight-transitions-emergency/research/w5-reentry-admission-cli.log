@@ -1,0 +1,36 @@
+CLI --help expected=0 actual=0
+usage: w5-reused-native.py [-h] [--stage {all,return,reentry}]
+                           --submission-cap SUBMISSION_CAP
+                           [--maintenance-approval MAINTENANCE_APPROVAL]
+                           [--reentry-renewal REENTRY_RENEWAL]
+                           {prepare,inspect,connect,run}
+
+positional arguments:
+  {prepare,inspect,connect,run}
+
+options:
+  -h, --help            show this help message and exit
+  --stage {all,return,reentry}
+  --submission-cap SUBMISSION_CAP
+  --maintenance-approval MAINTENANCE_APPROVAL
+                        Exact reviewed per-Bank reentry allowances; omission
+                        deliberately denies all maintenance
+  --reentry-renewal REENTRY_RENEWAL
+                        Explicit one-time reviewed supersession of the expired
+                        unadmitted reentry request
+
+CLI run expected=2 actual=2
+usage: w5-reused-native.py [-h] [--stage {all,return,reentry}]
+                           --submission-cap SUBMISSION_CAP
+                           [--maintenance-approval MAINTENANCE_APPROVAL]
+                           [--reentry-renewal REENTRY_RENEWAL]
+                           {prepare,inspect,connect,run}
+w5-reused-native.py: error: --reentry-renewal applies only to --stage reentry run
+
+CLI inspect expected=2 actual=2
+usage: w5-reused-native.py [-h] [--stage {all,return,reentry}]
+                           --submission-cap SUBMISSION_CAP
+                           [--maintenance-approval MAINTENANCE_APPROVAL]
+                           [--reentry-renewal REENTRY_RENEWAL]
+                           {prepare,inspect,connect,run}
+w5-reused-native.py: error: --reentry-renewal applies only to --stage reentry run

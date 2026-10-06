@@ -1,0 +1,20 @@
+
+ RUN  v4.1.10 H:/TakiAgent/apps/desktop
+
+ ✓ src/windows/home/pages/operations/hindsight-activation-card.test.tsx (11 tests) 111ms
+ ✓ src/windows/home/pages/operations/memory-authority-card.test.tsx (9 tests) 69ms
+ ✓ src/windows/home/pages/operations/local-onboarding-controller.test.ts (23 tests) 36ms
+ ✓ src/windows/home/pages/operations/local-onboarding-card.test.tsx (10 tests) 80ms
+ ✓ src/windows/home/pages/operations/hindsight-activation-actions.test.ts (16 tests) 32ms
+ ✓ src/windows/home/pages/operations/hindsight-activation-state.test.ts (7 tests) 35ms
+ ✓ src/windows/home/pages/operations/memory-hindsight-lifecycle-state.test.ts (6 tests) 20ms
+ ✓ src/windows/home/pages/operations/memory-authority-state.test.ts (8 tests) 20ms
+ ✓ src/windows/home/pages/operations/memory-operations-controller.test.ts (5 tests) 14ms
+ ✓ src/windows/home/pages/operations/memory-hindsight-lifecycle-block.test.tsx (2 tests) 8ms
+
+ Test Files  10 passed (10)
+      Tests  97 passed (97)
+   Start at  10:39:26
+   Duration  5.53s (transform 2.26s, setup 0ms, import 7.01s, tests 426ms, environment 1ms)
+
+JSON report written to H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/evidence-stages-1-2/desktop-results.json

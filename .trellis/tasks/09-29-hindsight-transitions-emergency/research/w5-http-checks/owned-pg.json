@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    ".trellis/tasks/09-07-hindsight-recovery-evidence/research/validation/run_isolated_hindsight.py",
+    "--",
+    "--noconftest",
+    "-o",
+    "addopts=",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_diagnostic.py::test_owned_pg_actual_uvicorn_and_core_client",
+    "-q",
+    "--tb=short",
+    "-n",
+    "0"
+  ],
+  "cwd": "H:/TakiAgent",
+  "exitCode": 0,
+  "stdout": "Owned fixture: H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-1675ed916239\nPostgreSQL: 18.1 ; vector/pg_trgm ready\nPytest log: H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-1675ed916239\\pytest.log\n.                                                                        [100%]\n============================== warnings summary ===============================\ntest_w5_http_diagnostic.py::test_owned_pg_actual_uvicorn_and_core_client\n  H:\\hindsight\\.venv\\Lib\\site-packages\\websockets\\legacy\\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions\n    warnings.warn(  # deprecated in 14.0 - 2024-11-09\n\ntest_w5_http_diagnostic.py::test_owned_pg_actual_uvicorn_and_core_client\n  H:\\hindsight\\.venv\\Lib\\site-packages\\uvicorn\\protocols\\websockets\\websockets_impl.py:17: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated\n    from websockets.server import WebSocketServerProtocol\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n1 passed, 2 warnings in 70.14s (0:01:10)\n{\n    \"Fixture\":  \"taki-hindsight-g1-1675ed916239\",\n    \"Stopped\":  true,\n    \"DataRemoved\":  true,\n    \"RegistryRemoved\":  true,\n    \"Logs\":  \"H:\\\\TakiAgent\\\\.trellis\\\\.runtime\\\\g1-validation\\\\taki-hindsight-g1-1675ed916239\"\n}\n",
+  "stderr": ""
+}

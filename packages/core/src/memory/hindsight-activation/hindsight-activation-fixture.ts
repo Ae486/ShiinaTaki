@@ -41,9 +41,10 @@ export const ACTIVATION_CONFIG = "a".repeat(64);
 export const ACTIVATION_NOW = "2026-09-23T00:00:00.000Z";
 const CHARACTER = "taki";
 
-export function createHindsightActivationHarness(options: { model?: LanguageModel; now?: () => string; path?: string } = {}) {
+export function createHindsightActivationHarness(options: { model?: LanguageModel; now?: () => string; path?: string; migrationVersion?: number } = {}) {
   const dataDir = mkdtempSync(join(tmpdir(), "taki-hindsight-activation-"));
-  const db = openDatabase({ path: options.path ?? join(dataDir, "memory.sqlite"), migrations: MIGRATIONS });
+  const db = openDatabase({ path: options.path ?? join(dataDir, "memory.sqlite"),
+    migrations: MIGRATIONS.filter((migration) => migration.version <= (options.migrationVersion ?? Infinity)) });
   const local = seedLocalB2CoverageFixture(db);
   const authority = createCanonicalMemoryAuthorityRepo(db);
   authority.createBank({ authorityEpochId: local.epochId, bankId: "bank-taki", scope: { kind: "character", characterId: CHARACTER }, name: CHARACTER,

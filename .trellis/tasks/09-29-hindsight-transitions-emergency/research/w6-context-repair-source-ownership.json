@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-06T02:56:15.3338856Z",
+  "task": ".trellis/tasks/09-29-hindsight-transitions-emergency",
+  "reviewer": "/root/w5_postpatch_review",
+  "head": "fccfc4fb78958c90efebdb4a5a98b355bcb73a40",
+  "previousManifest": "w6-checker-source-ownership.json",
+  "files": [
+    {
+      "path": "packages/core/src/memory/transitions/transition-evidence-context.ts",
+      "sha256": "92869fcdb355c3bd0f130b3b6c66f81fe27c3d8ec5241a44c5c5f37a690e5e39"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-projection.ts",
+      "sha256": "13700e85105a87f19418ba492e23d5eec3bdf4b6302476c7a47dfdee0d0c6232"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-emergency-context.test.ts",
+      "sha256": "6ca6500d7643fdc3efda569226cc4dcc5a1b46e50e656d50d60301f1f4b318cc"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-emergency-candidate.ts",
+      "sha256": "2929278b3e437f9ef1167dc82244069ec9a2fe8e2b506a531a392d7940bb5945"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-emergency-publication.ts",
+      "sha256": "cc67192f9b014c774dfed8d3bd328b147df072f0c5b0a9bde71b8dd0803e91d0"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-repo.ts",
+      "sha256": "31f3e29de37944d68fcb611428fce49debf1f3bc8206db4e6c15aea4362a841e"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-reader.ts",
+      "sha256": "3f948ed36fa898c7535b857e21a7631fed5e8686083d4383389f8bb858053980"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-local-staging.ts",
+      "sha256": "337f397a3a77e2694bb3a34167bcfb812f49a76182b9b79415e1d4e658305a72"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-surviving-policy.ts",
+      "sha256": "344adf19bb1450b65cbb12721004cfa034b4b258eefda72aa0dac298edfb72ce"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-surviving-policy.test.ts",
+      "sha256": "1a1339edab71ee13cc0a3141efea4fa9bd06fcc18115610f34bf19b1514db5de"
+    },
+    {
+      "path": ".trellis/spec/backend/memory-transition-emergency.md",
+      "sha256": "e1b18e5b6485505edeb6a736a80f70aa3d030b19009ece60634d320ca5bfb45b"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/index.md",
+      "sha256": "67f90576953609d1774f7dca3c5f8e85ea1672e45114ef2c321665546aca25da"
+    },
+    {
+      "path": "packages/core/src/db/index.md",
+      "sha256": "40caa36fef0750aaf876d7630f118fd6d7baa09fa764207e8239925049bf61fe"
+    }
+  ]
+}

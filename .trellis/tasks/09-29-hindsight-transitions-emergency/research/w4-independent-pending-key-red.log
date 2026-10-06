@@ -1,0 +1,29 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+xx---
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/memory-transition-source-disposition.test.ts > actual Pending and application Source disposition joins > rejects source no-effect evidence whose Pending payload names another operation
+ FAIL  src/db/memory-transition-source-disposition.test.ts > actual Pending and application Source disposition joins > rejects target no-effect evidence whose Pending payload names another operation
+AssertionError: expected [Function read] to throw an error
+ ❯ src/db/memory-transition-source-disposition.test.ts:64:20
+     62|       state.intentHash = canonicalPayloadHash(state.intent);
+     63|       f.db.prepare("UPDATE pending_memory SET state_json=:json WHERE o…
+     64|       expect(read).toThrow();
+       |                    ^
+     65|     } finally { await f.close(); }
+     66|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 skipped (5)
+   Start at  00:18:19
+   Duration  9.85s (transform 6.67s, setup 0ms, import 8.15s, tests 1.34s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/db/memory-transition-source-disposition.test.ts -t Pending payload --maxWorkers=2 --reporter=dot

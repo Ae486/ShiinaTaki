@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "root": "H:\\TakiAgent\\.trellis\\.runtime\\w5-working-synthetic-a4db32041c8e4c33a54e435952898a2e",
+  "port": 10649,
+  "stopped": true,
+  "portReleased": true,
+  "realWorkingPairAccessed": false,
+  "authenticatedMigration": true,
+  "proofReuseAndDriftRefusal": true
+}

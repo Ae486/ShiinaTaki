@@ -1,0 +1,11 @@
+{
+  "manifest": {
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-source-manifest.json",
+    "sha256": "9cb5ecbcf8c13c4e77504da52fd1c2b5fab60f72e60890defa30d40186883a66",
+    "bytes": 9055
+  },
+  "files": 22,
+  "preimages": 19,
+  "productionChanges": 10,
+  "sourceUnchanged": true
+}

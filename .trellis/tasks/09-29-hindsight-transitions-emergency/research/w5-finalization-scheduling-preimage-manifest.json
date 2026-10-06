@@ -1,0 +1,22 @@
+[
+  {
+    "path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+    "sha256": "8a0efdf705a6f1109f51b3b5ab7e6ac3b24acf5ddf359585198da49063ed1630",
+    "bytes": 17937
+  },
+  {
+    "path": "packages/core/src/memory/transitions/transition-native-session.ts",
+    "sha256": "cc9e47384019303e24364ede56b8ba103e4a79676225c452c4750e50069fefce",
+    "bytes": 7903
+  },
+  {
+    "path": "packages/core/src/memory/transitions/index.md",
+    "sha256": "b351cb000db9df366fde32697aa8225bf4bba44258ca9af3ac1c57a41b8a0ba9",
+    "bytes": 5424
+  },
+  {
+    "path": ".trellis/spec/backend/memory-transition-healthy-drivers.md",
+    "sha256": "1cb75ced98169a7b31356800029483718a198f9fc6c35e89005c5fa60d198443",
+    "bytes": 12762
+  }
+]

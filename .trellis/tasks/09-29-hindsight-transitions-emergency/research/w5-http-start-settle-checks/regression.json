@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "H:\\hindsight\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "--noconftest",
+    "-o",
+    "addopts=",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_environment.py::test_exceptional_start_preserves_phase_and_monotonic_anchor",
+    "-q",
+    "--tb=short",
+    "-n",
+    "0"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "timeoutSeconds": 60,
+  "exitCode": 0,
+  "stdout": ".                                                                        [100%]\n1 passed in 0.42s\n",
+  "stderr": ""
+}

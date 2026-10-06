@@ -1,0 +1,3342 @@
+{
+  "description": "Production files used by the first real W5 run, captured after clean stop and before recovery repair; no production module changed during that run.",
+  "head": "fccfc4fb78958c90efebdb4a5a98b355bcb73a40",
+  "files": [
+    {
+      "path": "packages/core/src/activity/activity-layer.ts",
+      "sha256": "512bce893ccdae71347c24e5b031ec2fd62f53f755c6f2f6faf7d4346bd77fe5"
+    },
+    {
+      "path": "packages/core/src/activity/activity-sampler.ts",
+      "sha256": "f4ea7d283182493142b1b98fa38d1ac050e26879f596dab04e61cb9a6d0777b7"
+    },
+    {
+      "path": "packages/core/src/activity/activity-state.ts",
+      "sha256": "74731a3564c05e4d5dd0cc0f6cb15f684358e5764f1be3b5454bd2980286f360"
+    },
+    {
+      "path": "packages/core/src/activity/render-activity.ts",
+      "sha256": "f283a5061e9c1aad0bbe58fd02dc196c0423d6dbafdd45c6d02a76cb73058792"
+    },
+    {
+      "path": "packages/core/src/agents/base-prompt.ts",
+      "sha256": "8dc4fb4b1a082a4c878042fd04dc0938a7361f5c1cc0721ecefba3ffbcebe201"
+    },
+    {
+      "path": "packages/core/src/agents/chat-agent.ts",
+      "sha256": "52ade6a68b9f304622f66ad118c62851a45d8355a5c622bba96968ff64cb21c1"
+    },
+    {
+      "path": "packages/core/src/agents/compaction-coordinator.ts",
+      "sha256": "d4f0c7b0db4d7856bb64f49058c396ab9c792cda891cf46c9d55670b6db9a2a5"
+    },
+    {
+      "path": "packages/core/src/agents/compaction-pass.ts",
+      "sha256": "fb2c9ebe7a73f4b10707aa10c174682514715b271d2ab6fbb860222e101a35f8"
+    },
+    {
+      "path": "packages/core/src/agents/compaction-policy.ts",
+      "sha256": "c396552b1f254f0e04a8a4b8fec9c3f9933ad06948b0cdbefe3eca37829c1a3f"
+    },
+    {
+      "path": "packages/core/src/agents/context-reduction.ts",
+      "sha256": "ad2d8e9fb6d6980bd6679b065c646c9b51e3d6cbe1b61274e43224b9cb460fc0"
+    },
+    {
+      "path": "packages/core/src/agents/context-window.ts",
+      "sha256": "98c0f54d7db57617b7759d2d50226dce3a846a501d2a7503de311b308bb0211e"
+    },
+    {
+      "path": "packages/core/src/agents/conversation-store.ts",
+      "sha256": "a13383f975ba7cb865c72dde83d6b5a00a36490ce1f3605476cdb5ddfa23a98b"
+    },
+    {
+      "path": "packages/core/src/agents/conversation-writer.ts",
+      "sha256": "ac0d81772997acd935d3420c7717b116c8882878e64ed9105b6bac944b6d9400"
+    },
+    {
+      "path": "packages/core/src/agents/model-effect-middleware.ts",
+      "sha256": "354df790c0b7286c7441734e2d56cd20c0b01898ecaff26a130017c40d245a7a"
+    },
+    {
+      "path": "packages/core/src/agents/overflow-error.ts",
+      "sha256": "f8f0290dc738f035f88a00276c5e284cf5be18178ee47ae88f48d9e1a86f15b7"
+    },
+    {
+      "path": "packages/core/src/agents/primary-persistence.ts",
+      "sha256": "f29ef6d2a44e433193cf1938311b6c8c756eb5b0805567caa58ac80f1e23bb49"
+    },
+    {
+      "path": "packages/core/src/agents/replay-folds.ts",
+      "sha256": "27077ea9b8312b24a534620451faff3e33fd1a854212b003c038aab73d2cfb76"
+    },
+    {
+      "path": "packages/core/src/agents/replay-source-loader.ts",
+      "sha256": "c6695e9a346353465268ca44a41e7604c9bd59ea566313ad01a0de05d4fd01ff"
+    },
+    {
+      "path": "packages/core/src/agents/request-measurement.ts",
+      "sha256": "698ca011ba74d5ab0b5edee0cbc7f2f37412b2be5b0235377a7bce4c7e01282f"
+    },
+    {
+      "path": "packages/core/src/agents/request-preparation.ts",
+      "sha256": "49b22cc3b57fe653b137b2e50897a79d2df5cec23f699baccc050ec5b78ae5e9"
+    },
+    {
+      "path": "packages/core/src/agents/retirement-selector.ts",
+      "sha256": "6c051b9310a7822ca887777572aae80ea73fe2302d2d6268a03a526b8fff6d16"
+    },
+    {
+      "path": "packages/core/src/agents/run-observability-telemetry.ts",
+      "sha256": "9ed74a0c27150600bfb11d7789d608d1dad3e55746d61e7e473f22876652b0af"
+    },
+    {
+      "path": "packages/core/src/agents/summary-quality.ts",
+      "sha256": "fd87a783aab0e13b3d719f334764ad262cc309de220291964f41396818fbbdb1"
+    },
+    {
+      "path": "packages/core/src/agents/tool-observability.ts",
+      "sha256": "27c8eba686ca66f8228ccf3309263c83938eb6bd1704509c019499ef8eea3cd6"
+    },
+    {
+      "path": "packages/core/src/agents/tool-set-assembly.ts",
+      "sha256": "6441597f8fe26f8526bb8108af58bc6a8ed35a26a9039046cb7cae7c95d7e0c2"
+    },
+    {
+      "path": "packages/core/src/agents/turn-mapping.ts",
+      "sha256": "0ef8f6ec8eb42d3c6b0d9c368c1fc7101a71b59d695cb251f88b4b28c762eaf4"
+    },
+    {
+      "path": "packages/core/src/agents/turn-queue.ts",
+      "sha256": "59aba2cecce36b58be5fdd279336b945bb8555147960428a30d2ca5ed1dfc4d5"
+    },
+    {
+      "path": "packages/core/src/agents/turn-registry.ts",
+      "sha256": "784911576d7820c76e63854c4f426a01a9a6dc13dc13737f7ca509b4a4e4a5ae"
+    },
+    {
+      "path": "packages/core/src/agents/turn-usage-report.ts",
+      "sha256": "79b598a5c12186abbb9700a480adfef56d13b09c2e6fbc80f144a757b446fb1f"
+    },
+    {
+      "path": "packages/core/src/agents/untrusted-fence.ts",
+      "sha256": "082c892e917c5b6970fda5a8a617ec55fa4641b32caae5a6c7146c966abc4e9a"
+    },
+    {
+      "path": "packages/core/src/agents/window-calibrator.ts",
+      "sha256": "3f2d56de5d2e6eb6e51604722473a45aed8797707075b2347150e433f7613536"
+    },
+    {
+      "path": "packages/core/src/approval/approval-binding.ts",
+      "sha256": "6299f45d78f34441775977db1c096959377183b716f7530965dca2b7e1f27878"
+    },
+    {
+      "path": "packages/core/src/approval/approval-broker.ts",
+      "sha256": "2875cc6ecfe16b3a2bf5acc37e746b3e367ed53b26f31088399093f2130bba2d"
+    },
+    {
+      "path": "packages/core/src/approval/approval-decision-service.ts",
+      "sha256": "a4ebfbd9be0407732b5786aed52e7aad00be697ae5ba47e5aa73f5c793e79578"
+    },
+    {
+      "path": "packages/core/src/approval/approval-gate.ts",
+      "sha256": "eff45a4fce310acfd1df1d637ee25696afc08602d10429adbeaca6b0b7d6f7d3"
+    },
+    {
+      "path": "packages/core/src/approval/approval-interaction-binding.ts",
+      "sha256": "8aaba66f2c74d2330a964fb45680625c3efbb805132e0b29bcec26fd61b4dfa0"
+    },
+    {
+      "path": "packages/core/src/approval/approval-interaction-outcomes.ts",
+      "sha256": "4a19fee0453be0f277f34ebcdbf3dfbef3e9ce2ee161e4fcba1beaeb5dd25d27"
+    },
+    {
+      "path": "packages/core/src/approval/approval-interaction-service.ts",
+      "sha256": "a146d92712a7e2b276dc7c9c11a0f8c48eabec77915098f3abdb2d845bafa7fd"
+    },
+    {
+      "path": "packages/core/src/approval/approval-interaction-state.ts",
+      "sha256": "af3d1aa93ede2f2cf23179f014e920ccd2411d0f82b9e178dc6eebd97175debe"
+    },
+    {
+      "path": "packages/core/src/approval/approval-interaction-store.ts",
+      "sha256": "faf762f7f340df01a728ec28680c0368c69aeac6993043e717cda28c1f077a80"
+    },
+    {
+      "path": "packages/core/src/approval/approval-runtime.ts",
+      "sha256": "a64d334e074f60fc4cb41a8a7f9b18564a1bcae4d536c70c1bf584d2d6ba40fa"
+    },
+    {
+      "path": "packages/core/src/approval/approval-state-repo.ts",
+      "sha256": "2d40efe1d8d0b021e9fb3aaef5148ffa8913648c95c084f08dd8e0fa2c1d3d87"
+    },
+    {
+      "path": "packages/core/src/approval/decision-store.ts",
+      "sha256": "9c0ebf2854cce70b1c77240fa48bbb4d625411bd660b3b33d790ccaca86c2bd1"
+    },
+    {
+      "path": "packages/core/src/archive/member-path.ts",
+      "sha256": "645f632d7354f20653f5450a9470c3f251d904d7ace4d8c9b144fb297374480a"
+    },
+    {
+      "path": "packages/core/src/avatar/avatar-subscriptions.ts",
+      "sha256": "fb3f9b3004c426b7092c02dbc700b85c57d0587f1565ffec0fd9d1d6b2ddab9b"
+    },
+    {
+      "path": "packages/core/src/avatar/avatar-tools.ts",
+      "sha256": "3fa1af45c002fd80d107e7f7ebd76b4328067800419efd7f567cdf875a3ecbb6"
+    },
+    {
+      "path": "packages/core/src/avatar/avatar-vocabulary.ts",
+      "sha256": "aac6145eb6352f9e26c7851314bb934d164c9e439a34918abbb1f8f80d398aa8"
+    },
+    {
+      "path": "packages/core/src/avatar/costume-notice.ts",
+      "sha256": "1c5f0966f23529239b3378711312df2e692abf23e36fef8a4964a5dd29856749"
+    },
+    {
+      "path": "packages/core/src/avatar/play-motion-tool.ts",
+      "sha256": "7a5756cd49dea477deadbc8e8af5cc5681cf93741301c729d9f848ac7acf30ff"
+    },
+    {
+      "path": "packages/core/src/avatar/presentation-stop.ts",
+      "sha256": "060ea7e1112d7674cbbb92912a3e6c308478ae181487f8e0950e550f940b98fb"
+    },
+    {
+      "path": "packages/core/src/avatar/set-expression-tool.ts",
+      "sha256": "0af0ccd86f1e7094fd0ae31c71b4fe77ef85af74c97e59c91d1fc55b2d61b662"
+    },
+    {
+      "path": "packages/core/src/avatar/vocab-name-schema.ts",
+      "sha256": "5be7877c3ca87817e8bd94fd076563296fe638bf50e2a607b4fa88b76c823ba8"
+    },
+    {
+      "path": "packages/core/src/boot/core-bootstrap.ts",
+      "sha256": "448894e9ef7f09d50d189bf27a9fd8f7cdbffd0173b4ad0dfd2c809493729f8a"
+    },
+    {
+      "path": "packages/core/src/boot/hindsight-activation-boot.ts",
+      "sha256": "eaa66f988629a020133ffe72b4c444dceb34bc62968aebc72663f16d09ad123c"
+    },
+    {
+      "path": "packages/core/src/boot/hindsight-backup-boot.ts",
+      "sha256": "9c554ef9a837a1ee81b78d4eba2a9cd120a5c12c28bbe9ed2a0c4cdd3659d2a6"
+    },
+    {
+      "path": "packages/core/src/boot/hindsight-lifecycle-boot.ts",
+      "sha256": "f2eeb813b4f492448d27fb283840abff0378cd21025895dd26bf997713129ae0"
+    },
+    {
+      "path": "packages/core/src/boot/hindsight-setup-boot.ts",
+      "sha256": "c0f0e7697ad6087087182d618f61ba80d128e34c7e5c2d0ee8df48183838d777"
+    },
+    {
+      "path": "packages/core/src/boot/memory-transition-boot.ts",
+      "sha256": "4690a1404cd89d280d7386090928fa658d9db8a1081f3607b132c8c0b87acb0b"
+    },
+    {
+      "path": "packages/core/src/capabilities/canonical-input.ts",
+      "sha256": "d2ce52309f2c5577d7550f392bf919272e095853a2fe9d7ad627a793b6a00bdd"
+    },
+    {
+      "path": "packages/core/src/capabilities/capability-broker-state.ts",
+      "sha256": "9266a905351f7a981282fce42f76e574a519e0876fcb1afe41762b2a5950c84e"
+    },
+    {
+      "path": "packages/core/src/capabilities/capability-broker.ts",
+      "sha256": "db59900234895b97ebabe8aff529c7c1f57e8dd93f37099b9ccdcc8dc4a4c59f"
+    },
+    {
+      "path": "packages/core/src/capabilities/capability-challenge.ts",
+      "sha256": "3c1a9f9228efd04ab36ea4983965c97890c46a09d231c1cfa096e7dbbc669d2f"
+    },
+    {
+      "path": "packages/core/src/capabilities/capability-effect-lifecycle.ts",
+      "sha256": "7fb32c68e8a26ed3b1ae7651679fcb23086b2f7dd64e7af05fce86b6b9d3724c"
+    },
+    {
+      "path": "packages/core/src/capabilities/capability-response.ts",
+      "sha256": "83581346d9907dd12a419ec02498fabff5bff2bf54a4808a9de28660b5e9355f"
+    },
+    {
+      "path": "packages/core/src/capabilities/capability-tools.ts",
+      "sha256": "67a0bde38e03e5c868da030735148fd1acbc880742a34271ec48a044707936d0"
+    },
+    {
+      "path": "packages/core/src/capabilities/capture-stamp.ts",
+      "sha256": "21d07b2c83bf75d68bf21291b14ea4b8d3d712a0952a7b1ce6040d5f91caf4ff"
+    },
+    {
+      "path": "packages/core/src/capabilities/clipboard-read-tool.ts",
+      "sha256": "ecd6663f3151c31bbb20d2bce410be45f0f41565f946636fdd5059acd24cf69b"
+    },
+    {
+      "path": "packages/core/src/capabilities/clipboard-write-tool.ts",
+      "sha256": "319496a75a296b5c93eed81e1bb4fef12b9db42329a2ced6a306049f33823762"
+    },
+    {
+      "path": "packages/core/src/capabilities/exec-tool.ts",
+      "sha256": "56c9a705732b7534cefd51b5394c7acfb025633a7221bd49097808fcf355cb3f"
+    },
+    {
+      "path": "packages/core/src/capabilities/process-list-tool.ts",
+      "sha256": "5f6d0c0a1531fc7b64f40551862af4328fc77854de7e6683df51d3fd52637a18"
+    },
+    {
+      "path": "packages/core/src/capabilities/route-capability.ts",
+      "sha256": "1813aa028eb8beaa199c36077559c66993de7263e090c48dbe760483fb72025d"
+    },
+    {
+      "path": "packages/core/src/capabilities/screenshot-describe.ts",
+      "sha256": "1fb3cfd43cf2156bbaf258e365af19f190a6c56d5b0734ff3f0a8b6413c083fe"
+    },
+    {
+      "path": "packages/core/src/capabilities/screenshot-store.ts",
+      "sha256": "849a5b7459de4a4277c8a3a84d64526bbcf0c1d963da838fc5d1babcac82180b"
+    },
+    {
+      "path": "packages/core/src/capabilities/screenshot-tool.ts",
+      "sha256": "26111d97760f35bac6aac89be3d4beb1278547966c159f916fbf6ae7863f312d"
+    },
+    {
+      "path": "packages/core/src/capabilities/shell-open-tool.ts",
+      "sha256": "5b3f18ebb09b25a367d5e8f021fdbe1b7defa322fd29696ad10b30e1145ce47d"
+    },
+    {
+      "path": "packages/core/src/characters/character-import.ts",
+      "sha256": "1b2b2e1e098763d9559a8d34c171d45f9731813f60fe554c2c7bdfafa7c50215"
+    },
+    {
+      "path": "packages/core/src/characters/character-store.ts",
+      "sha256": "b82778beee8f9437d2ad7025a3eeabe71802007eb3f9b6dcde92be6446d45c01"
+    },
+    {
+      "path": "packages/core/src/characters/costume-availability.ts",
+      "sha256": "9ff2ca1410c5316e06b52e586212b20d313996bd33323191ce4091625bd97478"
+    },
+    {
+      "path": "packages/core/src/characters/cubism-manifest.ts",
+      "sha256": "b2c0f43207d172da5b978e908c5e01d9f69d9895d3810d9dd3400086569b08be"
+    },
+    {
+      "path": "packages/core/src/characters/import-error.ts",
+      "sha256": "69aa8bd544cbe118c6aa8af91b8a4b3df182a8512b29a3a982981d4c88811da2"
+    },
+    {
+      "path": "packages/core/src/characters/member-path.ts",
+      "sha256": "d6323847f8de2d7e4810e2c815de922f35475feb51d8dae8e8f55f06ea5e292b"
+    },
+    {
+      "path": "packages/core/src/characters/zip-archive.ts",
+      "sha256": "4ec66fae7e412ad81b015fa8a15cb299646b812f8d924b4a859725d3c20c0554"
+    },
+    {
+      "path": "packages/core/src/characters/zst-archive.ts",
+      "sha256": "3856cf8b2ad5541bd1ed029f61c3e117edfdecb7c45d81cc224b8eecc410639d"
+    },
+    {
+      "path": "packages/core/src/config/agent-config.ts",
+      "sha256": "0a333ebbfc12c118fe47fc69436d53c9970f1032e1b6561cd32ccc585b85818d"
+    },
+    {
+      "path": "packages/core/src/config/ambient-screenshot-config.ts",
+      "sha256": "ba9c95fd264b2a68ff834227c3bf7eefed8fb916bddfac6d18e45d95aaaefd80"
+    },
+    {
+      "path": "packages/core/src/config/attachment-config.ts",
+      "sha256": "eebf1258726328738586caea2ac5cfe09764da8d3214e519841d2fc6c2944023"
+    },
+    {
+      "path": "packages/core/src/config/config-source.ts",
+      "sha256": "f317f0b7c1d7cc93ac6649ada0fc3d5f73c948d5446aa2d2dcdb645f7cebe576"
+    },
+    {
+      "path": "packages/core/src/config/config-subscriptions.ts",
+      "sha256": "e382a117b182f3fbe8c015bd1056d9b6b6fed5964000b24380630dbe2085795b"
+    },
+    {
+      "path": "packages/core/src/config/config-writer.ts",
+      "sha256": "39ca63d67af3a3996ab2ad51f8895c38cdd3e4bed54c17258929a395707a09ba"
+    },
+    {
+      "path": "packages/core/src/config/context-config.ts",
+      "sha256": "f43cfa5df46d2c7528f848eb076786146ab59bdd2bc6811d7293ea89b81fdf8b"
+    },
+    {
+      "path": "packages/core/src/config/hindsight-config.ts",
+      "sha256": "34854dc5acddf9303ca704a43ef3f397709db4f19603a96f561d220a13bb6f8b"
+    },
+    {
+      "path": "packages/core/src/config/hindsight-policy-config.ts",
+      "sha256": "9d5313da20e55ee9d30164c72c6aad26d513a1026a0c8e61804571afbba9f25f"
+    },
+    {
+      "path": "packages/core/src/config/knob-registry.ts",
+      "sha256": "d1a2df1e559acddf9f0e6d74cc66fe0da5f7c8724338eba541bbcedfadd2680e"
+    },
+    {
+      "path": "packages/core/src/config/memory-config.ts",
+      "sha256": "81b51bad5d0b88ed0696a52b4afc51acc25359f8325c5aa8660c0bb80d90a871"
+    },
+    {
+      "path": "packages/core/src/config/provider-config.ts",
+      "sha256": "7e69a8cc151ce060fe01dbb55945aedef19f711fa4128701ed7b98994550d079"
+    },
+    {
+      "path": "packages/core/src/config/provider-factory.ts",
+      "sha256": "770cae675659763143bdb5fb1eb50f44d8ef42773256d8d2d203b396662d47a9"
+    },
+    {
+      "path": "packages/core/src/config/server-config.ts",
+      "sha256": "a85b6c9d244179ff7007d2cfb882ec98ef5d6a8188570a572e2d2fb0f289fe16"
+    },
+    {
+      "path": "packages/core/src/config/timing-config-validation.ts",
+      "sha256": "04be2440942b8225405a94830c4c88f51f67087d86f06722557e002d6c50a3aa"
+    },
+    {
+      "path": "packages/core/src/config/utility-config.ts",
+      "sha256": "a5a9f93cea01401373d5b8d1bc7f5034c11b01806dc0eec167d72fcc39985cb3"
+    },
+    {
+      "path": "packages/core/src/config/vision-config.ts",
+      "sha256": "98ef01dccd46736b15b9593506eb7be877980c9494ec9d6e2937a24566e5afe6"
+    },
+    {
+      "path": "packages/core/src/db/canonical-ingestion-repo.ts",
+      "sha256": "c2c80ae3c4d86010e8fbd1be4f4bdd7a603ad32980888715037a895a9d40769b"
+    },
+    {
+      "path": "packages/core/src/db/canonical-ingestion-source-repo.ts",
+      "sha256": "1f44be22381060edbd936aab0c31e70221dac82b591f764bec9bc9f98a39b9f6"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-authority-repo.ts",
+      "sha256": "9a75ef0eb3b8c3c7d8d81150abaa05b42ffd3bb1c1707313314ecdb84471c5b6"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-copy-sources.ts",
+      "sha256": "d7d72a40f590e37a66d85262fa852d67a64a4643ac016e0b04159a7bd123f5bc"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-historical-references.ts",
+      "sha256": "ef695836df573fbd2579b756c28ada7988a6baba1f8f21e6c41ec99e7206e79d"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-contract.ts",
+      "sha256": "78b47a0ab53b7c8784595e6d5586fed7a93bef050cb1a054ab1a04baad86df7f"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-copy.ts",
+      "sha256": "e6b41db6926137dcc234141738b1e58951dbe267432630eb6e71650e21893f50"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-evidence.ts",
+      "sha256": "5deae556d69a2d0a2bcdc3c4b7f0371865adb6b291fdfc529fb7279619ebd4c8"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-fixtures.ts",
+      "sha256": "bbd0e550e3d9b04ab84db4b9e9a6a89c5e4bc579b01cd36097dc73f260c52db3"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-ingestion.ts",
+      "sha256": "cca9dfcff567b27d4b62457802ead4f1839743f3b310c49f3dc1fda8746620e8"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-journal.ts",
+      "sha256": "3fae213041c57c143120da5fa4cc2a9dd1f241f2d8df99f562b1bf2f76eefbe5"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-mutations.ts",
+      "sha256": "064ab139456c6fe9aafe8271485cd521b76f7526b13e7deda09d0146d3866e7a"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-query.ts",
+      "sha256": "33437f2c16ac5e7fee3d0d98d9b3fb09b5980f7fe22ad92ffededad1cc83596c"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-records.ts",
+      "sha256": "7f2b300adc56bd0eb2c138b44c371a91bdb9e30eab3c4e105735d3287ed42536"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-repo.ts",
+      "sha256": "62a152c6046152fb94c6e34d6a295259d55fe3ac44832d485e5301663a8141b7"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-retention.ts",
+      "sha256": "3a332acbed269c505711675cb615eaf57179a0e14cce76b5f0ac325436a5c454"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-maintenance-storage.ts",
+      "sha256": "ba887e9753422230515f37ab5d8eff94cb52522f064d2b025596bc12974a5191"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-policy-revision.ts",
+      "sha256": "73bed3927b26ff8396c0e40ea723f86c561a7025bcd8c9509c7820c3e1669194"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-repo.ts",
+      "sha256": "b4f680fcf0567add551381995c9d61add6e0f60b6cb51c3dbfc61013277083a7"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-source-references.ts",
+      "sha256": "2f645c822d772dade5d34d1f1f0be0c5343f3096ae8325f33491f0c9d0c8361a"
+    },
+    {
+      "path": "packages/core/src/db/canonical-memory-sparse-repo.ts",
+      "sha256": "194f3b6100589ed84391cbcdd5d17712fbef1498ab0c402cb0868419b7c9de87"
+    },
+    {
+      "path": "packages/core/src/db/compaction-operation-repo.ts",
+      "sha256": "ff50e6b1c704785608bf76d6b633df0e38451983528634af5ca135de861cc07b"
+    },
+    {
+      "path": "packages/core/src/db/config-repo.ts",
+      "sha256": "6603370404f203f817f259a5d74ee9a5a345df3588fd42cdb9d52d4d03c70094"
+    },
+    {
+      "path": "packages/core/src/db/effect-repo.ts",
+      "sha256": "06911cd23059d1715a5c6441ecb35f219ed8f5fd3417cdea1a8304f72c9f4ffc"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-activation-custody.ts",
+      "sha256": "f70e1b0e79983ee45d55094ec9cf74a9ef22707f445f9b6bdc9d1564127efd78"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-bootstrap-evidence.ts",
+      "sha256": "5fd302b774481589b3096230716587a9deb435b551e4d19dac52eca59ad96986"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-command-contract.ts",
+      "sha256": "af8d09289c3869aa8e20b50677e574ae88015da3ca9d1191dc0a7a68b6b9c1ae"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-command-fixtures.ts",
+      "sha256": "728de2ff0b0621908c4ce5fd1928b5c6d20dae72da2e205966427d69bd7ca6f3"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-command-repo.ts",
+      "sha256": "10949785983154103dbc28f98d9116b93d5d629fcfd904ab4d43183bf92b6e34"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-command-storage.ts",
+      "sha256": "8308e8ff20810c08ea1eb98b14d3b24e645c6e217e88ba645f68b91755b627f2"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-blocks.ts",
+      "sha256": "67729ef83363a05877ddbd4c59ae7523058e18f3fa71f4203960499fb13f6c4c"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-cache.ts",
+      "sha256": "d53e1dc2745e91f755e2251766ddd4686634374a8c26e9e9a145772a2402568a"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-checkpoint.ts",
+      "sha256": "087fac17bed9e21e9046f4107dd545262d0aa2a12e8e5193e2e9eaf87d8bcfca"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-codec.ts",
+      "sha256": "774e2d92c255d7b0a38becd66a6de8e10e95214bfa0e9cf86389e1e571c76a06"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-contract.ts",
+      "sha256": "7eb5779e144a36e6e38b0fdf52e187ab4e6b8fb94ece275edcdac2b3d6f79ff1"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-evidence.ts",
+      "sha256": "2057e9d007ddf19ca049b832346832d2da65e3ccb63e7503df4efb61bc18b08c"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-heads.ts",
+      "sha256": "22ad5e77eeb220e9f170d815a9b193e043d51e52af010299b14a594b28b15fa3"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-publication.ts",
+      "sha256": "13959e5d524fa7489c600913b7ef7f59d555db4587354c75e36f45d084549379"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-query.ts",
+      "sha256": "f2f6a7064b237481775bafd759ef4f93261f0f194344f23a7db8710443972b75"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-records.ts",
+      "sha256": "90f87b0c6fb74ab1e841bf8f8a8c115392bd41b77776f2717ed4a92e8ec08bb2"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-repo.ts",
+      "sha256": "89019b657cd1baaa53d22d3b3b661983daac07b5a92ffdbe81ac868be50419c4"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-authority-repo.ts",
+      "sha256": "dcbc3424433edf7c3713d853b4dfcb480058f32eb1f824036ce8763718351596"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-bank-setup-repo.ts",
+      "sha256": "66073ec9a7b227c60b0bd3346978f246c0b50d3cf8c8d76fe86eb36588c984da"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-connection-repo.ts",
+      "sha256": "fe5c242cb1e864215f57bc86c83205a25b19ef3c4b6d27c840c0d55eff554894"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-candidate-repo.ts",
+      "sha256": "8b249a5d1b7207562f4d816b599f916ec47d4995617ef491b0c5ef376203649d"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-capture-json.ts",
+      "sha256": "caaeec51cdf544db19f72f3958b5250eb8e0307e585901f6fbb2c3f95b8c328c"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-capture-reader.ts",
+      "sha256": "ab9122406f10cd609cf9bf9c41480ac6f5fe2f7e8d1a88fe9380aaaa90e6a515"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-capture-repo.ts",
+      "sha256": "99e1c1f6ce105f65ba738a55db2e91075973834fe7089beacc30f3d54ad45c6b"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-cutover-guard.ts",
+      "sha256": "caa22b2126eb6f66105977734d88c5693df1373f830db916972e1ad8d9ec7334"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-fixtures.ts",
+      "sha256": "0ecc5e25aa53f0aee28341f300d09dcd86107eac3a1c3c6721c23fb1dfc74435"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-import-repo.ts",
+      "sha256": "cdb8b2bdb3d0046765ddced28c4681e05b18301b62b0e8c5dc7b40b5095a2d4b"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-invalidation-repo.ts",
+      "sha256": "147412d37d53c95cb3fce53d90d2015e3bf6d947505fb62b1960a39aeb5679bd"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-preparation-repo.ts",
+      "sha256": "682e8c74929fba0c6e7c9118494b026eee2145eb98bead07b0bd30dea98d87a0"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-replica-publication.ts",
+      "sha256": "0a3de7bf49910ab7c5fd29c92cd31322ef73ee11c095820607121514b34a8af2"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-status-repo.ts",
+      "sha256": "fe604234da81c1692bc4d6ac4d383b7f2df0ecfc4bb87989d713bf757b0335d0"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-current-verification-repo.ts",
+      "sha256": "9c19b954ca1d81182643155178c789569637f711e2a19d1f47bd8d3f2fd170ca"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-cutover-run-repo.ts",
+      "sha256": "a43aa87733dc36af3972f0eb69fd48e55ba1d1e329d8503bdbf1a4a87bfdea5f"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-ingestion-durability.ts",
+      "sha256": "9b264cc39a428045c382ae0b9da453386de0aab811379058c2a0d8909162a3bb"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-ingestion-guard.ts",
+      "sha256": "4e9511a65146ddee9582cd2ec94584fae52c1b2f6da411d819f21a30eafd1735"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-ingestion-repo.ts",
+      "sha256": "6e1b6ff1031a4500575801604c83fde0316ecf7d86f5a6dd99a7ed6dec66ed4b"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-ingestion-source-repo.ts",
+      "sha256": "08c29b1dcb71236d23ecceb12eef4208746dc964641a1ed3801bf4510cf19093"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-lifecycle-attempt-reads.ts",
+      "sha256": "f8538cc2fd497fe08385970d9489e959919c14df32725a0f57c842c8fcb9ec82"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-local-bank-binding.ts",
+      "sha256": "44c151b84d1bab14f4c7d1f840e916295fd220a3928cd93b78286523ff433508"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-local-coverage-b2.ts",
+      "sha256": "85d98124eedcef7f1434a2e2796458702d5297d43f95fe3d139d069dee837e37"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-local-coverage-fixtures.ts",
+      "sha256": "da09be20ef5db0984f78dbe302d24d8a24cd107f7827e25d904487a40d00aafd"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-local-coverage-guard.ts",
+      "sha256": "1e7bc13546e6e0b1bf0400966894daa89b83e327463ca403435076168b0cf85c"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-local-coverage-reader.ts",
+      "sha256": "1574ecb58aa68700f27cac739fcab8855d31fbb4dde8226a2c32c7006d970a73"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-local-coverage-repo.ts",
+      "sha256": "2d5823d63e347da0b9a19af60ed964acab83d5020155abe8d4a468d5c2abb90f"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-memory-write-contract.ts",
+      "sha256": "b4b174a1a876adc47d34230b66e0138212cfd569710687dfab6730f9c4539487"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-memory-write-repo.ts",
+      "sha256": "4ad934b9adff313edf13cc221ea556a37997014e7ba3eb914ba29a457f6a31ac"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-memory-write-storage.ts",
+      "sha256": "a9024c99090eedc52d3210f021e78b1be2c9a07ff029b9ed2fa75e11e80d33f0"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-policy-work-contract.ts",
+      "sha256": "0f292048017d1dd15e11ac65d30161e8963743a026fb7864654e950b68c08f12"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-policy-work-repo.ts",
+      "sha256": "a059020f5750ba2e3d70685bf95c973de42a6f90cec01e5cf964017f1570fea9"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-policy-work-storage.ts",
+      "sha256": "5d911fd314b7da5fff9193948e04a6a1f9bf325bfcec444f04ba6a5a68a82b39"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-replica-checkpoint-store.ts",
+      "sha256": "58e8f79552e125899cfed774ea2a42b668cd44376dbae30bcad6450186227350"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-replica-lease-repo.ts",
+      "sha256": "d86a3453846060dd280764436f2922561743c5a9720dfda24127fa50dfd985c9"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-replica-record-store.ts",
+      "sha256": "e56fa968c1d30d0b2494a9b4a3b3ef9f08a5c8fc4bdc1ccf1d4f46bbdf6ca95e"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-replica-repo.ts",
+      "sha256": "46cad6c98630d60f708ef10981d4da579ccb1cbf8f7fb7c66fc30ca0850388d0"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-replica-request-repo.ts",
+      "sha256": "ed7b6a117f207e5053895263e28beb27b13732089c3fd9a8e94ff29591d33136"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-replica-schedule-state.ts",
+      "sha256": "93baa952841e122d98e6886c627639f438331f9291c130b419c202c277a2039e"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-replica-scheduler-repo.ts",
+      "sha256": "7eed37c62b663d66db0ae870d185a220cd8d8374029fb720f1329319baa195e4"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-replica-snapshot-cache.ts",
+      "sha256": "e379e6310ed804ec104b4cfb912f1ed92f38e41b34f26b3bb114d1e5a1a6dcd3"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-replica-sync-repo.ts",
+      "sha256": "c2edebe282f86658f2b6dc721ce6c6ee8acb537990fd191aee2888c56faf2ddc"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-runtime-admission-repo.ts",
+      "sha256": "e5cb1462a52b69f36afe71f7bcf4ba6608493512644879f174960dbf3ced2567"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-runtime-memory-view.ts",
+      "sha256": "4bad6ce78752c9f06c077f6cfe6b12d681b6439d7948d457026b418793a83d18"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-source-evidence-repo.ts",
+      "sha256": "3b1205523e1ba938734bc952712060a64cbf9060999cbe5881c304f56993a5d2"
+    },
+    {
+      "path": "packages/core/src/db/memory-auto-repo.ts",
+      "sha256": "8e04f2d9e10c2f9a471bc7e386309a06fddd111d192cc234b6decc602aaae945"
+    },
+    {
+      "path": "packages/core/src/db/memory-events-repo.ts",
+      "sha256": "553816128143c4b4998a596f042c0215177fd405c3a657469649a77710c0330b"
+    },
+    {
+      "path": "packages/core/src/db/memory-operation-repo.ts",
+      "sha256": "756291d208deba010a2d9dd26b409d96988c13279988c657c15de1759d4a84ef"
+    },
+    {
+      "path": "packages/core/src/db/memory-repo.ts",
+      "sha256": "9fa22f79079f4b7bf1e98b7e47bfbbc94a1fe7fc22a833e2f7eae28ba00fa9c0"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-abort.ts",
+      "sha256": "60e39c67e82f65eea20c578dcccd290c83009cd367b02b70e6127ea70f223329"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-candidate-repo.ts",
+      "sha256": "a9f1223f507d94c22313117320569839e6ae86a05b39f7e9459f839c958b6091"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-custody.ts",
+      "sha256": "b3fec562984471d311558ee34e01b3f72dcdecd93e482cfdecd1e103baa357b8"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-delta-repo.ts",
+      "sha256": "1d358df899b21d1fceed013077f3da3aa983d9f73be1c485cd8b3f6c75227de5"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-document-repo.ts",
+      "sha256": "bf938129ddd10d7c000f66de6f5636af8f408daf05e30c77103f4729ab03a0eb"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-driver-failure.ts",
+      "sha256": "ea7babd1f8d110748f52977a9ee0b643a16a15735b2038325fdc76a509ab1829"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-driver-repo.ts",
+      "sha256": "2de5b736049f6a8c51834b3747c62385ef6313ed31b018623ae07c87accd3967"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-effect-repo.ts",
+      "sha256": "f874b88e6566e4313b15ce99c4503dd471d352c4dab7f356fcb043896ad741d7"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-evidence-repo.ts",
+      "sha256": "5a5a55ff07714b0a82d7dee1b52b5945b30933e607a8de6f4c883c1525fe9fb9"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-fixtures.ts",
+      "sha256": "ad2e394b645450bc54adf2cb626efb17b480c81865037ad510b7151709d8aba5"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-local-capture.ts",
+      "sha256": "d351d5413a2047cc492bc1b73ee7908220beacc3267e7623cff3073cf92d0fd1"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-local-staging.ts",
+      "sha256": "18f28db0ef2cba3651f08f4527d345011e4ea51f85c8e0715c5784ecbe938aec"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-native-outcome.ts",
+      "sha256": "085c4ea454b563971363c12a526c76610670929a375d251e9e99c48158eb0232"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-pending-refusal.ts",
+      "sha256": "9e9b8e8cd5a1dafb02b18f03a96d211339b7aaed0c3e54ab9cba39a7dc26bdb6"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-preview-repo.ts",
+      "sha256": "565288b164bdad9824ff81b10412ab6b3d0db622e10de15587a95e02707558ed"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-proof.ts",
+      "sha256": "d70f649bd04db43911ae823f70eda6c1c45699a4e3510b1028918f26dca2d81f"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-reader.ts",
+      "sha256": "fb8b5e1986f354695a73dcda7ff02ee83639a255048287fa651817eb7121ede3"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-repo.ts",
+      "sha256": "3cc143cef94d1c5986e109b17356fca59061f365e8123e5118ce6c0d7d0e7558"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-queue-repo.ts",
+      "sha256": "e767acf42920e6fcfc8924060f92c774f8b652ff184287ddd6ad36deb39861db"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-recovery-repo.ts",
+      "sha256": "76232d3ff389d1f83f412036617a7813f8509f710a504f027288373820e3f61e"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-repo.ts",
+      "sha256": "a093441edc112e31fb2b003a75e5f0ca9323a2a3d0967d156b43aa1bee6d403b"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-representation.ts",
+      "sha256": "9a8035d0fa8b016e77ecec2926ad279afc5f99cc148ce61447fc175dadf48051"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-source-disposition.ts",
+      "sha256": "160f0096801dd70b12e882b8361efad3d1e743b488f55f4150f6be06207beb3d"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-source-upload.ts",
+      "sha256": "ea143b32af434890b687645c120de183a8fed680901b197260a6888224279f88"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-target-refusal.ts",
+      "sha256": "6b18b87c730bec61f39adb3aec4075813f3e18c87891a288f021dbeacdcd9217"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-undispatched.ts",
+      "sha256": "b34103f396f54c1c8c4dac233ae692755ebfbc9c29f5906dc7461af95c7a2998"
+    },
+    {
+      "path": "packages/core/src/db/migration-runner.ts",
+      "sha256": "1330212d925418f08ef1587397818a2c9432370115db3a7ffddbb62835b83b6f"
+    },
+    {
+      "path": "packages/core/src/db/migrations/001-timeline.ts",
+      "sha256": "7ae82f283a252049586769af2336b3251a3735a41f9b6da1f313089c43b79609"
+    },
+    {
+      "path": "packages/core/src/db/migrations/002-memory.ts",
+      "sha256": "70b61f94a65e83beffc03f712d135701c151e3f0f755372792d59062764a56d0"
+    },
+    {
+      "path": "packages/core/src/db/migrations/003-memory-auto-state.ts",
+      "sha256": "6efcad5771a5c4ac86022cbef4bffb5d22c11170160e30ab699590c281ef8431"
+    },
+    {
+      "path": "packages/core/src/db/migrations/004-timeline-parts.ts",
+      "sha256": "8c9d6edb42be0bba09f3422bda4cbceb687d6c4500a3e5b21815d1ed5a2d92eb"
+    },
+    {
+      "path": "packages/core/src/db/migrations/005-privacy-pause.ts",
+      "sha256": "91bea36ecd983b3709fc5fcf320abd92bbbe76a0bbcedcedefef47e7dbcb55e4"
+    },
+    {
+      "path": "packages/core/src/db/migrations/006-memory-origin.ts",
+      "sha256": "50e5703b7ccb30407cc6f831cb9fa1ce0d59a802b3d8c7b09c79dea29628b80b"
+    },
+    {
+      "path": "packages/core/src/db/migrations/007-memory-events.ts",
+      "sha256": "360c82cf0a83ccee72be15398bb48d3bf586277e5ad76d2e764c729c4d162afe"
+    },
+    {
+      "path": "packages/core/src/db/migrations/008-memory-fts-unicode61.ts",
+      "sha256": "85c9a4587b32f7ea3f1979f26f803b64a15007133f8af5468acc6d9fba94a34d"
+    },
+    {
+      "path": "packages/core/src/db/migrations/009-memory-events-count.ts",
+      "sha256": "af24745852a3aad9446168c08fa718ab22f0c1ec80b04081d3ebc98eb8486f45"
+    },
+    {
+      "path": "packages/core/src/db/migrations/010-memory-tidy-state.ts",
+      "sha256": "7c348f0b700f1b7a363880de0845ca1fff98240bda1ffa1dee5e0e84fa01e78f"
+    },
+    {
+      "path": "packages/core/src/db/migrations/011-slot-window-state.ts",
+      "sha256": "510e3adf7b7d4ffb63c1b4ddacad66567c49e1cabd8b40e1562696d06e37d2fa"
+    },
+    {
+      "path": "packages/core/src/db/migrations/012-conversation-summary.ts",
+      "sha256": "d1148fb7a493b383e2ed6a362423b51c105a3c759d161df353da0f975fb49a32"
+    },
+    {
+      "path": "packages/core/src/db/migrations/013-config.ts",
+      "sha256": "4750a2a594f8b73c5b08eabd885d42d6d91f3ababd1f3bff4dcb3a1da5bac8e8"
+    },
+    {
+      "path": "packages/core/src/db/migrations/014-governance-policy.ts",
+      "sha256": "9c7819ef1d9a0fd37c4e4596f3784e5b370d38d089af3151b580ed26f311492e"
+    },
+    {
+      "path": "packages/core/src/db/migrations/015-approval.ts",
+      "sha256": "9eea7d571f12df4bca1a10ff8c756df4d893fe4c57c6ab9bc21fe0c72cb2f3df"
+    },
+    {
+      "path": "packages/core/src/db/migrations/016-timeline-input-scrub.ts",
+      "sha256": "f1136bb4bee022f86791c642b385fac48f2aa9ecd946a6f3fe430790507d7e0f"
+    },
+    {
+      "path": "packages/core/src/db/migrations/017-canonical-memory.ts",
+      "sha256": "794560d4fe9dab57cdc1352aee1a418a594985a64eaee803eefca52c19999149"
+    },
+    {
+      "path": "packages/core/src/db/migrations/018-mcp-desired-servers.ts",
+      "sha256": "ae9af5bd3ba28cd0b0aa5fadfc7c9fd3c7bc0cc320223ece33892f2b7cf14bc4"
+    },
+    {
+      "path": "packages/core/src/db/migrations/019-skill-packages.ts",
+      "sha256": "5caacaa7dba29b25d199960f85c32eb051b2647d68cd8a55a805fe1c139d361e"
+    },
+    {
+      "path": "packages/core/src/db/migrations/020-parallel-foundation-convergence.ts",
+      "sha256": "15acab0bf24a91c2ec347182e92d4c464f04468761d7618be7338c901c793ee7"
+    },
+    {
+      "path": "packages/core/src/db/migrations/021-memory-legacy-migration.ts",
+      "sha256": "11350666f734ad2922e4da7978b306448cb4766ed46d6a137d1823264942367f"
+    },
+    {
+      "path": "packages/core/src/db/migrations/022-hindsight-connection-setup.ts",
+      "sha256": "069a92bf87a50cafea325ccf2c644bf54544215c969112ef4a85384056bc8dea"
+    },
+    {
+      "path": "packages/core/src/db/migrations/023-hindsight-initial-cutover.ts",
+      "sha256": "4b475f7f9a2f53de6041b549b68c854eb1d95d255873e91bee74d711cca33997"
+    },
+    {
+      "path": "packages/core/src/db/migrations/024-harness-runs.ts",
+      "sha256": "21724ee89b4af27b2c2d48113294d844ec8ff9dccf95df189a00bf31acedb5a2"
+    },
+    {
+      "path": "packages/core/src/db/migrations/025-run-events.ts",
+      "sha256": "3e6a6e3acfeb1ba220b4ac36ce8c4f2a706b94fca21fab8a3ba375752696f118"
+    },
+    {
+      "path": "packages/core/src/db/migrations/026-run-effects.ts",
+      "sha256": "60271aeb4f96a26d79d8acbb30637cca967dbbc35f182d7b5bbff5d04189a5dd"
+    },
+    {
+      "path": "packages/core/src/db/migrations/027-effect-approval-ref.ts",
+      "sha256": "3bf1473e55a0e9cf45c5badf8020a2fd36a954a470e177a5c1ef731988eee930"
+    },
+    {
+      "path": "packages/core/src/db/migrations/028-recovery-admission.ts",
+      "sha256": "e3791b83d110f80231762d0fc399d92e17cf103d605c3cf13e91ae749e27573f"
+    },
+    {
+      "path": "packages/core/src/db/migrations/029-scheduled-tasks.ts",
+      "sha256": "21916613c78ff20b8b69b690efc70fbbfe9f885f32553bb0101a90c9c4e6a898"
+    },
+    {
+      "path": "packages/core/src/db/migrations/030-scheduled-occurrence-character.ts",
+      "sha256": "045bf978672d6880cbe0c9b09e7b90897a743c73924294c19e42c25afac44fee"
+    },
+    {
+      "path": "packages/core/src/db/migrations/031-run-usage-details.ts",
+      "sha256": "c545265bb6376b1fae769c4e9ff36e6f68f66d37942d898f267f6e2ba1df15e1"
+    },
+    {
+      "path": "packages/core/src/db/migrations/032-conversation-compaction-lifecycle.ts",
+      "sha256": "330392053c013277eda9999b517227d8c0d68538eb6222c84742f89e366150dc"
+    },
+    {
+      "path": "packages/core/src/db/migrations/033-hindsight-replica-sync.ts",
+      "sha256": "c9f5c1cc3d80cd0eac533d2e166e781d3a69474938e8e99d724b265df290f0fd"
+    },
+    {
+      "path": "packages/core/src/db/migrations/034-hindsight-replica-scheduler.ts",
+      "sha256": "bb4877f320caeed70eb0456ce96ebde657d5c1452fb1b11be0db9cc7fffa83a0"
+    },
+    {
+      "path": "packages/core/src/db/migrations/035-pending-memory.ts",
+      "sha256": "3d186a14e618be0f32440fdf11b6db60e9c7c8e6a3eca91332ae4ecbfed10fee"
+    },
+    {
+      "path": "packages/core/src/db/migrations/036-memory-timeline-convergence.ts",
+      "sha256": "1dde5e603d76b6d2d1b5e79ce609b1bc100a9764360bc6b9b7792eeca95c9d98"
+    },
+    {
+      "path": "packages/core/src/db/migrations/037-hindsight-local-coverage.ts",
+      "sha256": "11f2a782cae2173ea73aabd7d31944f9041f15053961de2a72c7a43c5457a714"
+    },
+    {
+      "path": "packages/core/src/db/migrations/038-hindsight-source-evidence.ts",
+      "sha256": "7310bcc402aa42b5001179be8c3a87d10be2b1d21ae6e14ff849ffb7e8a69750"
+    },
+    {
+      "path": "packages/core/src/db/migrations/039-hindsight-current-state.ts",
+      "sha256": "3740b6daf46572dbc7453595948893443a7c84043c66b2c66ae25f81c40549ca"
+    },
+    {
+      "path": "packages/core/src/db/migrations/040-hindsight-cutover-convergence-fixtures.ts",
+      "sha256": "f1895b202dc8b9212d0861d9a95ee64c4659a9b56e204f78b7d27988a12783f2"
+    },
+    {
+      "path": "packages/core/src/db/migrations/040-hindsight-cutover-convergence.ts",
+      "sha256": "cb8e17505e75abe4da7c5fb7c9bb68f7d7b325dbd8fe314b025995860f2f33a0"
+    },
+    {
+      "path": "packages/core/src/db/migrations/040-hindsight-cutover-schema.ts",
+      "sha256": "6e1ca3c3b74774d4347bf30aa3697f9feee0d5966fe6872029a6df937274d6b0"
+    },
+    {
+      "path": "packages/core/src/db/migrations/041-canonical-memory-maintenance.ts",
+      "sha256": "83192dc1a57a500f3b3b706f2df8617467cb3a6c9142886118000fcb293e431e"
+    },
+    {
+      "path": "packages/core/src/db/migrations/042-hindsight-application-state.ts",
+      "sha256": "ac9df29f87898a454998cc58281351f576f08d42f850fbae2e019292a114d237"
+    },
+    {
+      "path": "packages/core/src/db/migrations/043-hindsight-ingestion.ts",
+      "sha256": "f0b1ed5a4b013a956bc51aa243345a4b69f076b034da97fa554303597d107869"
+    },
+    {
+      "path": "packages/core/src/db/migrations/044-hindsight-application-commands.ts",
+      "sha256": "128338f5881b5b9f939a10f6af95aa535563194056f47f578a8c9dededb6b054"
+    },
+    {
+      "path": "packages/core/src/db/migrations/045-hindsight-policy-work.ts",
+      "sha256": "4310267e736fa8272d7f410731265184edb418a1d9206476eae0dbd3d0f752a0"
+    },
+    {
+      "path": "packages/core/src/db/migrations/046-hindsight-runtime-admission.ts",
+      "sha256": "961fc72488577b90de3bd9bbe177dfcb003bd971398e6c65bae86d86982529e2"
+    },
+    {
+      "path": "packages/core/src/db/migrations/047-hindsight-memory-writes.ts",
+      "sha256": "f130823af6924706ec147ba200bc6d4a8c2c55239052da540b7c71f703f3fe46"
+    },
+    {
+      "path": "packages/core/src/db/migrations/048-memory-operations.ts",
+      "sha256": "ae35574d9ca732d0222ab014a435659664355316563be81b8f8d112f9300d7ee"
+    },
+    {
+      "path": "packages/core/src/db/migrations/049-local-onboarding.ts",
+      "sha256": "9998a5a661d74fffe9da7813836bfa32695a48160e031e9085e0e091edd38d60"
+    },
+    {
+      "path": "packages/core/src/db/migrations/050-hindsight-reviewed-deployment-mode.ts",
+      "sha256": "e6b31f401925b7dea20deccb9b2078c21580661a59d819ba35fcc6fc8ffee327"
+    },
+    {
+      "path": "packages/core/src/db/migrations/051-hindsight-replica-requests.ts",
+      "sha256": "5e9bf907e61ec50f0fd65976da8f1077dcd4946af4a4d738f442fbd473d3606e"
+    },
+    {
+      "path": "packages/core/src/db/migrations/052-memory-transitions.ts",
+      "sha256": "0e9a43ee4a4d6ebafb11ffc588ed5fdd725b7d8be31fba45255ae83dba31850f"
+    },
+    {
+      "path": "packages/core/src/db/migrations/053-memory-transition-candidates.ts",
+      "sha256": "f99541764904f799d34f6ff4c0ca2e5a8612b43c6bb100ab20f6b2ec7afa8931"
+    },
+    {
+      "path": "packages/core/src/db/migrations/054-memory-transition-publication.ts",
+      "sha256": "f24516560a03092fcb2e66a117db01f999f2bcee296032159918503fff12d2d4"
+    },
+    {
+      "path": "packages/core/src/db/migrations/055-memory-transition-drivers.ts",
+      "sha256": "2998d5b373a4212461c520de24d6a556ea2d3f31b5095cd2e71cbddb8dbf5768"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index-list.ts",
+      "sha256": "59985dac6a81787213e294edf3a1aeeb0d311a74a8ff45c2b80115052180de95"
+    },
+    {
+      "path": "packages/core/src/db/pending-memory-repo.ts",
+      "sha256": "b78581ae0751ece248a6deadc31a695b6eed94044176f6669575295458b41d35"
+    },
+    {
+      "path": "packages/core/src/db/pending-memory-store.ts",
+      "sha256": "1f0110db032940023fa0c56fc9f9647ed81efdd86caa7dc7e2e1096bf7c18fc4"
+    },
+    {
+      "path": "packages/core/src/db/pending-memory-transition.ts",
+      "sha256": "3c2d8b33f748e70c84b9576185b64140b1c80462f06935e03d8a9818969e4817"
+    },
+    {
+      "path": "packages/core/src/db/primary-memory-custody-repo.ts",
+      "sha256": "05a58a8606539062d4929b41271907dffb2f59edcc05744881ed553eef2eab04"
+    },
+    {
+      "path": "packages/core/src/db/privacy-pause-repo.ts",
+      "sha256": "edd7ec4de2c1b617415d0f36acc1a0b3e3e3d0aad9afbc9a461b8600d3e9dce7"
+    },
+    {
+      "path": "packages/core/src/db/run-event-factory.ts",
+      "sha256": "240da4f1249019bbb265c8c9ecbd17b194c62bc458f56477abc2b3dfb41c3a63"
+    },
+    {
+      "path": "packages/core/src/db/run-event-live.ts",
+      "sha256": "a75b16a249513121c1bd940c295a1123894400ddc8fd14389487ea45147ebdf7"
+    },
+    {
+      "path": "packages/core/src/db/run-event-projection.ts",
+      "sha256": "6ff9e2a631c2d4ee13a80224e4ffaa3fdc98f1b87b41301993a62f6419ff76f0"
+    },
+    {
+      "path": "packages/core/src/db/run-event-repo.ts",
+      "sha256": "65749cb115eebc21b6680e047340395b1e770ec0477fcac3b0e376e27de3072e"
+    },
+    {
+      "path": "packages/core/src/db/run-readers.ts",
+      "sha256": "9cdc69c41de6d87d1ec4726b6443fec9463e7bdacc9ce5f6bb214257548c83a8"
+    },
+    {
+      "path": "packages/core/src/db/run-recovery-repo.ts",
+      "sha256": "1d59fe3e6b6b47528bfbd40644ebd5a9e8946282d3157e516dff05f6df53867b"
+    },
+    {
+      "path": "packages/core/src/db/run-repo.ts",
+      "sha256": "20cd32f4afcd516710c5cd54c47e16797916f82332421c8f9dbcd5336c76381e"
+    },
+    {
+      "path": "packages/core/src/db/run-row-mappers.ts",
+      "sha256": "6662b6d652c0dfd4b5263db0e8db7d013676fcb2ce113137bc44669e7d0a2c0d"
+    },
+    {
+      "path": "packages/core/src/db/scheduled-task-repo.ts",
+      "sha256": "241016aad8009edbb77fee9b6d3f2aeb3c6e8591960ac220cd62b5df9ad0dcc6"
+    },
+    {
+      "path": "packages/core/src/db/sqlite.ts",
+      "sha256": "c91377b5c152771611ef507bba9426a70801246ca190a91438b3cb80bb1ceba1"
+    },
+    {
+      "path": "packages/core/src/db/structured-memory-block-repo.ts",
+      "sha256": "007c20177513f65bae2871bd63ba2c2edeab637efe0a5add543cb05ec3ea4396"
+    },
+    {
+      "path": "packages/core/src/db/summary-repo.ts",
+      "sha256": "229b3c6802ad79e867e9865afad6a6b30ec41603a5304e58da113f05ad9c8963"
+    },
+    {
+      "path": "packages/core/src/db/timeline-repo.ts",
+      "sha256": "72f97e13671df5f472497cc81b534e9d009a44b1541c2805a42bc25b5d0fb672"
+    },
+    {
+      "path": "packages/core/src/db/window-state-repo.ts",
+      "sha256": "be2e010c4f6a57026b4ffb614c1a43cd44c5d5dbd509c3feadcfd26b01764038"
+    },
+    {
+      "path": "packages/core/src/devices/device-registry.ts",
+      "sha256": "938c8dbdc2b68dbb4ca8b52958cd674b79ae248acd8fc01820b1dafdf6ec8383"
+    },
+    {
+      "path": "packages/core/src/devices/paired-device-store.ts",
+      "sha256": "9ee9919e9c086438a62b251f0562b218a5438d6cd666a53b5e887ce52c1bd305"
+    },
+    {
+      "path": "packages/core/src/extensions/extension-composition.ts",
+      "sha256": "efc3ef641336b3a3fa14f3854d3dc64fa6a18daf3e3190b621a2dae873e591c2"
+    },
+    {
+      "path": "packages/core/src/extensions/extension-registry.ts",
+      "sha256": "3e0034298cad7e58e8f1d7e945f363258d7a896a9fc2dacacb39dc5a215eb80f"
+    },
+    {
+      "path": "packages/core/src/extensions/extension-run-context.ts",
+      "sha256": "f535b9d8576cf66b9c20098ca059b00d78cbfe1f7b30423a653bfbd8a6b6d06d"
+    },
+    {
+      "path": "packages/core/src/extensions/extension-sources.ts",
+      "sha256": "2a7f2c02d932cfce17de53e87674a37291b837055bd16445b50923dc8cbd5805"
+    },
+    {
+      "path": "packages/core/src/extensions/extension-tools.ts",
+      "sha256": "7bbb0a23172590a8903e3b16389bc2b194df7f34610ffbd67d3d5108a3213104"
+    },
+    {
+      "path": "packages/core/src/extensions/extension-transfer.ts",
+      "sha256": "85492b4f332cb87e8d3de75d2ef7271bc4b2136137ba1d946b6b1b5195969755"
+    },
+    {
+      "path": "packages/core/src/governance/core-tool-governance-adapter.ts",
+      "sha256": "d390075e32f3bd124afb51faa0d1ebff781ed01adc543ed56e26708eefec2456"
+    },
+    {
+      "path": "packages/core/src/governance/governance-policy-repo.ts",
+      "sha256": "1cca4be5692ca023cb611f3c0808226632d338c6ad68bad417e250e83ef957fb"
+    },
+    {
+      "path": "packages/core/src/governance/governance-policy-service.ts",
+      "sha256": "6431098378cb917bb76a4cc9ac72aa6d362822b2c21b51235b982c8d92395d88"
+    },
+    {
+      "path": "packages/core/src/governance/governed-tool.ts",
+      "sha256": "ed7c3090bc809e9215daf124868d2003a2fc8e6506aba0fec19f83912e22646b"
+    },
+    {
+      "path": "packages/core/src/harness/effect-lifecycle-service.ts",
+      "sha256": "3f1f2dc8615e80fb27950d8bfa31f992ef875cf7e21cbe9e45939e5114046062"
+    },
+    {
+      "path": "packages/core/src/harness/recovery-coordinator.ts",
+      "sha256": "3d893363071406eedc2de567198d95c13051250f1750480fa19e43675a610d67"
+    },
+    {
+      "path": "packages/core/src/harness/run-service.ts",
+      "sha256": "ec3eadfa8d880976a7dce8f61e8f0bea9d32c579cb85bfe004c90b3df66530ba"
+    },
+    {
+      "path": "packages/core/src/harness/run-snapshot-capture.ts",
+      "sha256": "8a8b5e82f9cd8eff8397660582b7e3579140d6324f992b1baef9981a641b6adf"
+    },
+    {
+      "path": "packages/core/src/hosts/host-catalog.ts",
+      "sha256": "8d05cbf019d4b2743a91847276c2057e3601f67de9c07e2e91a1c7f46db8efd4"
+    },
+    {
+      "path": "packages/core/src/hosts/host-context.ts",
+      "sha256": "7a9c2656d0008d196378833b1980a65d51637aef1fe8df95d2004cf8f9955968"
+    },
+    {
+      "path": "packages/core/src/hosts/host-generation-retirement.ts",
+      "sha256": "da62bf089dc349cc70fbc4470d4f832f1ed89edb2f88667a6737fbcba1da40b4"
+    },
+    {
+      "path": "packages/core/src/hosts/host-identity.ts",
+      "sha256": "23d82e375d951972d49ad93dcdb5a2fcd35b6c4043f32ca10e9218a34d2bff53"
+    },
+    {
+      "path": "packages/core/src/index.ts",
+      "sha256": "4a1002a75f3ed0d426404c30895daf17103c3611c53181a9d9b00093a95b207f"
+    },
+    {
+      "path": "packages/core/src/logging/logger.ts",
+      "sha256": "9e2cc5a1c5d80beb13d2ba58d19c275a3f714ff88a885fc4aa7a0b7bb79f5315"
+    },
+    {
+      "path": "packages/core/src/main.ts",
+      "sha256": "649d9dbb586fc1468ddf3f94cc96ae99acc94d4fd3c4cf6adddf5fa94034ef2b"
+    },
+    {
+      "path": "packages/core/src/mcp/legacy-mcp-deny.ts",
+      "sha256": "ccd3de1afd6e2a5ad91dba1931f1ca1dd4cd249842b6aadccfa0f53cb9975507"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-boot.ts",
+      "sha256": "59b4e3516c9e447b2321029e3a7d5f1bc37ec95482bcb998f1d63a269e787e13"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-candidate.ts",
+      "sha256": "e30ca356c54fc3804aa9278bc254ef0c092568f81a00fc0b9a6da6c7f868c917"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-client-close.ts",
+      "sha256": "ad1c373bc8a8219f54c12c3615fdd72f8525409469b488ee9d08fa990014e8b0"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-config.ts",
+      "sha256": "789e99009aa918b7dcbf91dc4552abe32183eb08e87d96e334b3bebe346123b7"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-connect.ts",
+      "sha256": "3696191a029add27c85584da185a38277e254fed68b65594a6e76075284659c3"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-desired-repo.ts",
+      "sha256": "adcf3cc45cdd0d3ff66f9e24846df5a91392cd6762fa013c393b26f68e171b15"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-generations.ts",
+      "sha256": "a35442a29ecadb5b0b2abd8419f66e14197ce6f5f3c9db8369e9a573f54592ae"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-lifecycle-service.ts",
+      "sha256": "8eaee78e660dce76a8bc7ae91b7043a4e3baba44e7434e528fa63dd1f4c266bb"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-manager-state.ts",
+      "sha256": "a1a57e2e4da83d0f6b5921d0415e13469de38af540672c2faa489b2e2f8aee19"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-manager.ts",
+      "sha256": "ac066f4d798bf74da0ecdc09b77d741863e7bb1b558ce5c4d2076bc3c920baed"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-publication.ts",
+      "sha256": "e00f61553415bbc58848575fd8dc430acdd7d7794ab546a9b342694cebceafa3"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-runtime-status.ts",
+      "sha256": "e7670824701affdbea7a23207fe6bbda68d635e6afbe34fdaf8bb7b642378eda"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-schema-compat.ts",
+      "sha256": "b1f4a068397787d1fc98513ce268c4f1b358b1f646669294435a02f3d0af279c"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-stdio-launch.ts",
+      "sha256": "b79b67f7e32976c41c0d4babcb5d3fb4a4327ee841ab4ee2e186d5064cf03a86"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-tool-identity.ts",
+      "sha256": "477cfe7ed697d721973725612186cea137b70b8c7ca06c72dce2443ab4a29d43"
+    },
+    {
+      "path": "packages/core/src/mcp/mcp-turn-tools.ts",
+      "sha256": "4a800be7bfa33050788a1353226d8f33002df34f951a636d190b0e8df17b798c"
+    },
+    {
+      "path": "packages/core/src/media/attachment-gc.ts",
+      "sha256": "277c5bd173e59d0728123b998e4689c5235257fbf59578d536234c8964e05881"
+    },
+    {
+      "path": "packages/core/src/media/attachment-store.ts",
+      "sha256": "a31137a0a6ad8d1deafcc2eca2ac4a34617432f10928f268b181e43704b5f657"
+    },
+    {
+      "path": "packages/core/src/media/directory-size.ts",
+      "sha256": "0abd04726f3e6c322313ce2a540d208d0e271beb6a979f5922a06a171aa08f97"
+    },
+    {
+      "path": "packages/core/src/memory/assembler.ts",
+      "sha256": "90ef13dbb4d56598bf0517f76f09f9150533177178aa28c2623963dcec934283"
+    },
+    {
+      "path": "packages/core/src/memory/authority-aware-legacy-surfaces.ts",
+      "sha256": "487ec11742abe994cf92f3ac2cbc9ac65e377179b7b38c4f43ceaeceafe04086"
+    },
+    {
+      "path": "packages/core/src/memory/auto-layer-policy.ts",
+      "sha256": "4e27f7ffd5f0abc1f349f1a5e052f99389764cf5add7eb1f54943619620cb798"
+    },
+    {
+      "path": "packages/core/src/memory/auto-memory.ts",
+      "sha256": "8b2fa34f7bea282c8327eb7f146198f26f98747cb54213cb29dc064bab25124f"
+    },
+    {
+      "path": "packages/core/src/memory/automatic-memory-recall.ts",
+      "sha256": "6da30893a65e2f5c6903a634cee3465bc04dfc534270e5e97940d0fa9dc22701"
+    },
+    {
+      "path": "packages/core/src/memory/block-registry.ts",
+      "sha256": "1aeeced973f48dc2d23e205b28a2d496d3ba233fdaefd923f77df455027dfb53"
+    },
+    {
+      "path": "packages/core/src/memory/block-store.ts",
+      "sha256": "383e93e68dd91a51f0d4ad448670b761ccefa8bd4bf49600bd68e6fb96bbe861"
+    },
+    {
+      "path": "packages/core/src/memory/bootstrap.ts",
+      "sha256": "3f82f40dc46631b4d075fe559c7e6563d0f8e21c5c7037f8d7415c15ea278d98"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-ingestion-model.ts",
+      "sha256": "8c08a2368cdc22ff7cd34d7447daf0024dba011e42186c283e6ae15cdf693853"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-ingestion-plan.ts",
+      "sha256": "470f48938f6d4535f2bdb3cfdf2dc1626499af81f6f2bc995a8506fa4ef8f609"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-ingestion-source.ts",
+      "sha256": "3c6935725d4593aa39d53aa5c1a80b24f5d7f6849f7d6348982d32f5ab3edb9e"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-layer-policy.ts",
+      "sha256": "5c27cb8bae25047e5cd8b590ddebfe26c4a1a2898a2b801620b27851b863cb8b"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-banks.ts",
+      "sha256": "86db796f3705c48cd50d31ee5a949ba894e26581141043acb27f8494b514fa7c"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-ingestion-batch.ts",
+      "sha256": "5abb6616ada7c5cf00e706705ab722f343676f376489b772a014cd10a0e7afc2"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-ingestion.ts",
+      "sha256": "15181dcab1e6505024e2176d013c6fe1dbd099cccc6fc5c17c9be99cb208dce2"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-retention.ts",
+      "sha256": "b7cdf0ba5fbffad092c300b4885db5935b1043d88148ad76580da7d9d99ca458"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-runtime.ts",
+      "sha256": "c533f832901bedd67f283b5d2473659c99675018ece1bc91b4060b4422eca5a0"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-subsystem.ts",
+      "sha256": "9e65f13d03ef6a24084c3f711f4248203ba52e5e3aa48b1550f8fcb59aa3b30f"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-tidy.ts",
+      "sha256": "74d65df73264b4b937feec6d509e8063391419f385e5ab20a045e9024b9aeec1"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-write-fence.ts",
+      "sha256": "939f351174a3e5a62ad93b805a21e5633eccc9f9d70d0d1381badabece6c935f"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-writers.ts",
+      "sha256": "fe9216f96b06940209d4614cb0063719964334c46ea6909945d28ea75f601fdb"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-memory-assembly.ts",
+      "sha256": "b375405f65f010e261927a7fa046482d0c855272055ef6b4a017663b0981594f"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-memory-run.ts",
+      "sha256": "66d40bec8fab4084010788386a088e5a4f00333feaedf003642acddf06dd066c"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-memory-view.ts",
+      "sha256": "d4b195e2ef27a276f75bd28ee05ff9176bc5dcd49bdac4d1003cc930b8a69a01"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-observed-write.ts",
+      "sha256": "5ae27677f637cd2d01dfce33c9510a0e376577407f3a8572a5546c7c6a64c568"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-tools/canonical-memory-tools.ts",
+      "sha256": "4e0f0f633c20e5cf67820beb85fff5569a02ff618f06dc743f8fd308119455e5"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-tools/invalidate-memory-tool.ts",
+      "sha256": "3c9050816b8de817bc95da4133ee3e707c49b66380a4f8944e93af8aa731b608"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-tools/memory-effect-tool.ts",
+      "sha256": "e2abe2070bad0aef6f31ee55001128158c8fb723ee06cadcbe7059a2188d00fa"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-tools/mutation-tool.ts",
+      "sha256": "1f63774b95c6e06da230e9fb6cdd0de76a8fe8f59ad8ce5a82ae61d34a250e73"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-tools/recall-tool.ts",
+      "sha256": "0e8bd429cfef78d62a60db6f6f4c38f74e7c4e1aafaadb16b655f0bced9ae1e7"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-tools/reflect-tool.ts",
+      "sha256": "d567197a2eca0ff58c85de8daf6d0dff783638172f8750dcd5be205d4ac5735d"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-tools/restore-memory-tool.ts",
+      "sha256": "3e00c488247704c648caf3e560b1eb06fad92110aae81f32ec622bad5cc65aae"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-tools/retain-tool.ts",
+      "sha256": "396729a5618411e9a7ded1fcce923d3a0e085424a0cfc588e53fc9f76eef57db"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-tools/update-memory-tool.ts",
+      "sha256": "7e41288c5907571e52f918f93e87cd4daf9a719cdf1853e6adee3d0f1643ac4d"
+    },
+    {
+      "path": "packages/core/src/memory/dedupe.ts",
+      "sha256": "57974af508cabfd383be543a6e16d9f58105db7fa24638561ffe91f6db6149bd"
+    },
+    {
+      "path": "packages/core/src/memory/disclosure-gate.ts",
+      "sha256": "bc5d0416e950a1cac6774a2d386c784af0a86cc81d547ec7446246bf53c6e9e0"
+    },
+    {
+      "path": "packages/core/src/memory/entry.ts",
+      "sha256": "44348407f27cb83b28fb5354e0015d9db2abc22d254be556486516fade83926a"
+    },
+    {
+      "path": "packages/core/src/memory/episodic-writer.ts",
+      "sha256": "945f39375c3638238346efc1b6ef6b2251904da4329761b91d057c5e33c95250"
+    },
+    {
+      "path": "packages/core/src/memory/fenced-memory-tools.ts",
+      "sha256": "a01f7de65872b4357564f02231546b72a7ac14aa0b7be09daab2d9f88a16ddb8"
+    },
+    {
+      "path": "packages/core/src/memory/flush-writer.ts",
+      "sha256": "92ed25a5917038b034141c356048cc0ba82343990540cc95dd1581c531ad152d"
+    },
+    {
+      "path": "packages/core/src/memory/frontmatter.ts",
+      "sha256": "1659d425973470e0bdb868844b167821cefd0e8f38bbf7fb1f9525f5a29255b4"
+    },
+    {
+      "path": "packages/core/src/memory/fts5-query.ts",
+      "sha256": "e56b65b06bdfa01ad277e5cd494685d8f9219a3f2e656a73780350a41f1ed47f"
+    },
+    {
+      "path": "packages/core/src/memory/fts5-retriever.ts",
+      "sha256": "42c64798a30c21f942887fcb87e0998d3fabc445dd19535a838f7056daf16627"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-activation/hindsight-activation-chain.ts",
+      "sha256": "7137438aaa85e4010464bc25b9a6f2c2aafafb2ff70950dd08a2e74bdae218fb"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-activation/hindsight-activation-drain.ts",
+      "sha256": "7239972f3292b3bca34dd244d42baaddf0af5e1641b67617fbf27c5cc49fcba0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-activation/hindsight-activation-errors.ts",
+      "sha256": "c0f91807efe7fd240267a6fc7a4ad2fee58aa229a1d955672a04a806dbb442c6"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-activation/hindsight-activation-fixture.ts",
+      "sha256": "c5b6352caa5ffd38105fdcf27b573945863f64a4049e086b6457af981f0df528"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-activation/hindsight-activation-journey-fixture.ts",
+      "sha256": "39e949ab992da13de1c6b00cde5968953bca595a6833dcb0c1777239a76370e0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-activation/hindsight-activation-reads.ts",
+      "sha256": "ff22db8a595683f1d16ebd5f64a37ea27e5a04ac3617d14f9e8bb76327d9be45"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-activation/hindsight-activation-service.ts",
+      "sha256": "658a0bc60b878a44557f24ad6d6f40886aa2bc0d853d3a7598a1187335d1a1a2"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-activation/hindsight-activation-status.ts",
+      "sha256": "ebf9c72c06ab08e697f6dec31381194d7ff54ebb2e97eafa5339f2d12119217d"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-admit.ts",
+      "sha256": "da1d7334243426b8f3f921ee26547af698ead71dec6a905c41783a474c6cb203"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-archive.ts",
+      "sha256": "e420e6e9d643637e95bf4e1a097850c3bb8aefa25af9c06c743281a1f7ae073b"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-custody.ts",
+      "sha256": "1e96553831f0ea1cfac2e96f600ebcc609615e647bdbb1f730ff42cd8b2a96f1"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-emergency.ts",
+      "sha256": "e240ac4b76983ed88b89918508ccca926d2e4ff6b92f43df7075118a1a7f4b47"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-failure.ts",
+      "sha256": "3fc180367bb9582bed8abe88ae676da179617fa124822722734f217bbc6fa7e6"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-files.ts",
+      "sha256": "9e268c694e32b2b62ac1db291be0f38ad84e7bbbe06d0e003bbb4ce396214c39"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-fixtures.ts",
+      "sha256": "2d3710d0f1792e01ab778c64807b39439a8a8b64bbf83621fc51d689d6a969c9"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-harness.ts",
+      "sha256": "0cfa3ce734e73aee7d9c75c76ac2a1c2dbef2659efec183d8da14a7a2b2bd685"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-identity.ts",
+      "sha256": "7bb1593ef263332716740189e9994fefdd65594624f1dd899e570ac1b3de3827"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-native-route.ts",
+      "sha256": "f6e2b824bc5aa1291cfba9c0132ee37b2d2eba793850ccf053099bbbc5d60a06"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-pair.ts",
+      "sha256": "58e93cfd7add853f43bc7e436cb0feb328d2f70a8ff43bc578c4e3ec8c124e44"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-receipts.ts",
+      "sha256": "64e315abe3026671b8a344d05cd22bb83aea81af0fa090868bf557fc25042b1e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-route-fixtures.ts",
+      "sha256": "2dbbe3eba89d812e0ac847d3ea7bb9c9f04a64ece3c265304a22b303cd1de9f1"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-route.ts",
+      "sha256": "378084a6748a003cff99bfce1e514338743ffd4b119502c1c4f223d27fb07683"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-service.ts",
+      "sha256": "466097594f7d2824e1cfaf115b43cd361dd5643959a8d9e9df8801a01d1a67a7"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-status.ts",
+      "sha256": "632f96c56666f3d3a341b5a2a2ff4e6917eed80bcc9b6f5ea1dd3cb70b907c99"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-store.ts",
+      "sha256": "244f4a7bba760dc3ba623fa418a9401686ac46e232de740592e10779624c9723"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-backup/hindsight-backup-verify.ts",
+      "sha256": "630e47f9f54c91c98540ba23f5f9a4c746514fe4b1e966ecb5b92e19ada850ec"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-lifecycle/hindsight-bank-occupancy.ts",
+      "sha256": "eb497704b21c0b5068d06f9aa2d7111748503a8ab02b2ec4170906fa91c4c463"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-lifecycle/hindsight-lifecycle-context.ts",
+      "sha256": "b5013f3724d83dda8f6ca12b2505d5648ac796b52e7e2d08acd89977a5959da1"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-lifecycle/hindsight-lifecycle-provision.ts",
+      "sha256": "75cdcb4be67b5f8a46b13a51d121084d20d6dc6067620558f9ae34311ef6e928"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-lifecycle/hindsight-lifecycle-reads.ts",
+      "sha256": "c6161025fa5faf8f2d27297363d997697a21dbadd073f8d9b70774ebdb272ac7"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-lifecycle/hindsight-lifecycle-revalidate.ts",
+      "sha256": "a3e8d79fd780bdb157c69d5243782d959a946c4b4eeb5c459341e430d8e6069d"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-lifecycle/hindsight-lifecycle-service.ts",
+      "sha256": "232eae6764c874ff7670ed32359c36e509ddd986450ff229c1433bf5aea95657"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-lifecycle/hindsight-lifecycle-trigger.ts",
+      "sha256": "40853e7b43dfd13d76beb69f01481d6ce96673ec2f6c322b9a055ed9e7aa8a3e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-runtime-binding.ts",
+      "sha256": "da52039a717c685b925ac1a26cd078b39e767472238885b8364b147a6939488a"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-unbound-run.ts",
+      "sha256": "cf9fcb08d17ecb34390da3852746ec8ff89adb356b82bd175c61eecbb20e8378"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-binding-context.ts",
+      "sha256": "674db4703ab812246f8292d3bbb416c73c1307fc3be6fe4adfa4bdadcd33df04"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-binding-runner.ts",
+      "sha256": "abbd68173d63556cd60b928c2a24921cd6e4f1761194277d36befda0f1c85764"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-body-transfer.ts",
+      "sha256": "26d24963d38f8a15559783aaea1968f61c2711b912e19159d75dbfef65d0ed7c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-bundle-loader.ts",
+      "sha256": "ae2805886cc93f3f8ffb915bc3b98df3d45687ec93ce38681c632631a71b7c10"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-bundle.ts",
+      "sha256": "4239d487381401688603a159c7b4df9d8bf78ffe8cfea816672bca84fe856d26"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-capability.ts",
+      "sha256": "396c4ea9addb051775963f73f91183e4105eec96ee97a10e88123e90a3956b7e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-client.ts",
+      "sha256": "4c76c967b3f709cf14eb9dff90287527b0ab9a6de602297e0dc9f6099d5788b3"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-command-receipt.ts",
+      "sha256": "8da1b937fed0301edcd572214cf6c27d1c89180d9a36341514096c8517c751e4"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-command-runner.ts",
+      "sha256": "4b5465e1e20b418afeebcb37156add727751b2b07f43e3987e97ea9d6984ea99"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-integrity.ts",
+      "sha256": "52a8873be1069bf7099771f690f349777c8344080bee935f79610a12c2ab6a0d"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-policy.ts",
+      "sha256": "cc33ddea922cbabd0a75eceaf4ea63b4f1ae079f87e476e99b7a2ff091cca75c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-projection.ts",
+      "sha256": "43dd5905d101f78714c9a3536d7366608aaf9262f502296912782ea87519d47d"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-recovery-replica.ts",
+      "sha256": "bc568e8d1ceafef59b7f57e548c91d0a9c5c5df1f94502402569da211c73df3a"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-source-binding.ts",
+      "sha256": "fdec0c897e91f2be97ece648bbf0b448d1b080a9ac44c1ef2edd10709ef1cb4f"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-source-evidence.ts",
+      "sha256": "35152375812936fcab5b3db3e9e06366a3bbef3cda4f96d0e318226dbf91051e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-source-write.ts",
+      "sha256": "76d9f9b8ce19f889bb8e823e8d3b148deb8286f310070f556d18ed8049bde39e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-sync-runner.ts",
+      "sha256": "772981c63555c580dd5555885e411fb687c276151c610be4de161ba947cf3607"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-writer.ts",
+      "sha256": "aa7022da61f19e6cfb5bf5b879f4521f144fc3adcf89fdc7eb13ee79d13816d7"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-authority-promotion-service.ts",
+      "sha256": "419fd2f51ade6cd758061b856fe97c175ede78a377c2bf3add6ea5d518e9e0a3"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-backup-client.ts",
+      "sha256": "f65d353b644931cae87f754e1d0783a5a6db1124281e37131071edb86e0d7ff0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-bank-identity.ts",
+      "sha256": "551be3efe6acafb87ba6f2da46c3f17bc60a0750b870e09d2b9d1fc5dc19d07b"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-bank-setup.ts",
+      "sha256": "96b3907ab71cb41d03424fbf76b3d78a2ce60577eebe5710fb81dd722a9c2d0b"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-capture-sync.ts",
+      "sha256": "e431616aaeb0deb5052ee69513fa339d6f0713aa48b80f1e37fdd72629b3dba5"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-client.ts",
+      "sha256": "34ea4606e9178200d09da1d1b3aa6e8501656f4443b2be0cf219729b26eeda35"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-compatibility-service.ts",
+      "sha256": "fb8256155cb79fc0638726b970ce6212b726ef977bb9957d03b134c9958f334c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-contracts.ts",
+      "sha256": "548a4907b12779d87d24056bc1755f009e2c99f05904eb7d0473c9b46961923c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-current-baseline.ts",
+      "sha256": "2a7e2e824532b751a46941a1748b1bfb797caec27edb43315f187e781a4b4bfc"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-current-client.ts",
+      "sha256": "3bc3f70a7133a5e4eb9f928e92cb77b19d79ea7e61071eef2d63a960c113e17e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-current-import-proof.ts",
+      "sha256": "c7babd2e56621b98d7d77e55d0804c3d21ec394f527e712324db3188248c429a"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-current-local-source.ts",
+      "sha256": "4722818c89671610f365d56f0a0cc5b63f09c873a99acccb12b8f4462e60afa3"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-current-maintenance-hash.ts",
+      "sha256": "391f9fa3f83edd6298a07d24467e1aec432955600499a2894e2d45af4b90b13c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-current-maintenance-proof.ts",
+      "sha256": "4248e273d44685a4195abe3bf0b29663b832c86c8f82c5947d58948a9ddd47f7"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-current-maintenance-stream.ts",
+      "sha256": "ed7dec27ecb7f3d3a5acff77a22a30d83afa166722f1ef40d9fafd62ff4aee18"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-current-orchestrator.ts",
+      "sha256": "0ccc93223a5daa1f0eeb3bec7566cc476ddab3d45cc720f0db5ff46e741fa676"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-current-request-preflight.ts",
+      "sha256": "ca4d624328ac5625164df714369af79cabb84fc0ee7177717cb08004a9b325be"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-current-request.ts",
+      "sha256": "d18d8694722202e37d24e183089954910a67f33a16b7de56c19c7a3e2d90ad3f"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-current-state-hash.ts",
+      "sha256": "be5e7b726300873d5f6d5c7f3045b78f65d1d30230dbe33eb3e3029df5761e3c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-current-verification-identity.ts",
+      "sha256": "8d6efccfc308b48b8e7c9475d015e6efe49a8278fa76da73c2be7d50c744aee2"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-cursor-reset.ts",
+      "sha256": "c63d9242d0a4122137f7344b4093786061346e2aa39cb6580de9dc5ac27ff546"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-derived-completion.ts",
+      "sha256": "c7b1b4ee4a43738d3314a7d9b211a4627a9fd3c18298a15be06d652c4d628fe3"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-endpoint-policy.ts",
+      "sha256": "af2b7a5a3e8c3a6de581c237b743105c0d59515dd5b3189d42ca22a4aaba44de"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-errors.ts",
+      "sha256": "5fe31e427b69cca1c0d6d02fe3433a715b351e7b6fee21a741702992931704ec"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-http-transport.ts",
+      "sha256": "2b3fabd763ee583c072c85607674aa39ee5193e928291417cc49568ef2ed84dd"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-import-contracts.ts",
+      "sha256": "aa4c09815b08571bc7c1bb285d75b61115986fcbc0af49f99f63f6f1ade0b535"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-import-identity.ts",
+      "sha256": "e93f7f781716e5fd43c9981ae5c093129110fbcde4df56e02b3e5492088373a0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-import-ledger-repo.ts",
+      "sha256": "707809d47dbd7b7fa51629bcc4253714b15d263937fa4e01a76dc73f62a45dd8"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-import-orchestrator.ts",
+      "sha256": "8c9251d0ee603665aff9443f4b6525e03ce5509bfdbd4ca027df209d1c39fe22"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-incremental-sync.ts",
+      "sha256": "44eecffefe069f20531050edf16e698eb9fa348415b3d719ea05d183d3c4beb6"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-ingestion-contract.ts",
+      "sha256": "5b699dba0fc2227f28d686ac72f0c5d9e5d7c3fdc468462a64957a41e3062b3c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-ingestion-lifetime.ts",
+      "sha256": "438684bf474aaebfe54e94519e651c19f6488061a980dc6c60e3baf6a6d37c23"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-ingestion.ts",
+      "sha256": "4b4f6b3b48543b5b975a8a37d7065138ee3dc13ce28ffe8ed55df51188cd4eb5"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-journal-contracts.ts",
+      "sha256": "564de6a3caa5371b1b1241a753970cb96dd8e6e072e20fddf9ce75d646ecedbf"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-pending-read.ts",
+      "sha256": "f9366c24df73ad106dddf47cbb84dfc6edf89895964feef819c08e5987e0b3f4"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-provider-context.ts",
+      "sha256": "6af9a80085d5949f20bd48be90fa375c61d64b7dba898ee0ceb2d4717347349b"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-provider.ts",
+      "sha256": "26826a1f5332540a469b424da663443e1ebc1a134107660a9eb66a22cdd84924"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-read-projection.ts",
+      "sha256": "ac3139f7e7d16eeaecc384df6fbf98ebdf1f5ec636d0828d6f37b42e9733d042"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-recall.ts",
+      "sha256": "ccbaf760e5b3f6c27388ee041559a99ea7132a834b9f570b18422eb10e5ed17f"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-reflect.ts",
+      "sha256": "caff989e7f7231d9f057b59aa3e11acc3f36a18ba81f7fb3dfec0215ba2d2761"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-runtime.ts",
+      "sha256": "545cc6f34036880627bfdd62dd90c3f7a641b5f35001bd0ac6dcba1d9b449583"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-subsystem.ts",
+      "sha256": "b9ee10a787fa58b8d029f06cdb93aae5c57c7dc7e41b4f803e74f124fc0d09a1"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-write-admission.ts",
+      "sha256": "36e49faa392cf57eac956593774e6278201e0a9c9e14eda7c2251c7fdb2dd84d"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-write-context.ts",
+      "sha256": "bdb5e468228b0e7150245d9085890a12bb310065117b7e8c2b00c14c5f0b1382"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-write-fixtures.ts",
+      "sha256": "a50028ed2277dfaeef7293c36a1c82034212362768560ec51746b8ea5b23d244"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-write-mutation.ts",
+      "sha256": "1fa3ab386b195dc3b9fdd855c99e6fa741971230a0114dc9fbb7074a801dba54"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-write-native-fixtures.ts",
+      "sha256": "f96419d381cd44ae71e568435c02d7a3424a138eb915e8de1f7c48d43e3880df"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-write-policy.ts",
+      "sha256": "c84791cdd9df77ad8f154feee1019acf1342073b7685b022a0127a544910c547"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-write-recovery.ts",
+      "sha256": "e18d5696e2ed0ce3b1f2664ad03e8047e44d5b411cfaa11b8d1c7bd0163a83d6"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-write-result.ts",
+      "sha256": "99ade87e8f05d3669f4d2f9e7de142d6b45673e8a029eea2c87a861c079e5435"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-write-retain.ts",
+      "sha256": "a10cd102525565f58cf0840765d7ab32bb4978dc5b28f72095faf307a928a337"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-writes.ts",
+      "sha256": "2fc3cbd76fcc278b1e44c0a600c6dfd30a59e02c59c9f625114dcee663fc0bb4"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-native-proof.ts",
+      "sha256": "6281691f7fe5dc12cb1373614b08ea4accfa48b0f0be9a56644413bdffe790b0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-native-result-client.ts",
+      "sha256": "c8b3f9fdff4e5332c2d0c394031b575b513d5765216dac7658da50246da391c0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-observed-write.ts",
+      "sha256": "e5ffcd99197cede8ac536e66a4e06c33da200e589e3ab9620d2d0ff3b58b0199"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-pending-client.ts",
+      "sha256": "3d78d180dab3d55daca5101d08804ab9b28503341f86120a9fdce22db44bcdbe"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-pending-native-result.ts",
+      "sha256": "27bca51b8b3dc47e36131923ada68312e525891cc434670e16f7adeb8a008ae6"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-pending-recovery-runner.ts",
+      "sha256": "87cb48b6d61e11e965d99fc4275143802085a1eddbacd8ddafac2b518f83733c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-pending-recovery-stages.ts",
+      "sha256": "7110dec6b2667ae860571d21bbb2d4e176f601c27de83ea678cc86340ff5ddbf"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-pending-replay.ts",
+      "sha256": "e3770df65a6f4ea25987d57c24c66a0a22518024846b02d262f2a16c4f39b94f"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-pending-retain.ts",
+      "sha256": "9e732b679852d8955bda7317e78ce0440bfae2926bdac7878b3ee9d86ae428aa"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-policy-admission.ts",
+      "sha256": "a8f76fc18de2ef8bd240e7954557b3844f01ed5c1cbab4b075c7e4ea58a896f6"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-policy-assessment.ts",
+      "sha256": "2a87c1cb965cfa0b9afa0e3df90864be9983dbc54b6bbdf779ca004468587988"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-policy-context.ts",
+      "sha256": "6887fbe7074f87652b5925454713196df41fa590261ebc117eb11c3bf3205b52"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-policy-curator-context.ts",
+      "sha256": "f6f77672731f028491587ed1474bbd65fc5d969b624a97ee398685a61489a013"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-policy-curator-execution.ts",
+      "sha256": "e6d6e64fa54efd41b522530849e53c7a225145b2603d787cba6222bf0dc4216a"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-policy-curator-fixtures.ts",
+      "sha256": "b1026135f42abcc65a3ba545e8dd6388a8059477fe2d89e899011364eaf223f6"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-policy-curator-lifetime.ts",
+      "sha256": "88fbae9a932b40f8da95496de7538b088698294b2ade12f2944d8035b2a08228"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-policy-curator-model.ts",
+      "sha256": "3c81dbf74e024581b4a4b3ca4a53cb24e2c19b7b787b519fcc4eefb8e495785f"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-policy-curator-prompt.ts",
+      "sha256": "f21f4f79aa0eef0b3999ffe954b35a484fb6477a72aabf989ee57c228d5db029"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-policy-curator-publication.ts",
+      "sha256": "49a5b7ca67da9fb3e9ddef830ff20745a8be9cb65163424256344b3a1b74f4b7"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-policy-curator-targets.ts",
+      "sha256": "59fc5cef8cbf726a83067a429e150551fd13fbba02d196dd336da2d8e44ef57f"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-policy-curator-tools.ts",
+      "sha256": "9e190d4d413f097a6126c87d794781b7d504ab7d790a9f63547ce15e992caf39"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-policy-curator.ts",
+      "sha256": "106c85715c78d2ce1a790e44a590f1a23a0e693ae0e4eb88b3ef73669484f2d3"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-replica-builder.ts",
+      "sha256": "9aacee7579ac161dc0410c6c40e5358343f5a1073275921dc2bfe4e3f2613624"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-replica-errors.ts",
+      "sha256": "80ac5281b904b0bcb66ed653564ab2846f4390e7e3ae7f24cbe9039af0d9e919"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-replica-projection.ts",
+      "sha256": "251dadfb31f660abae68f5152525da272813ae97825fe7537d6999467c1bc083"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-replica-reconcile.ts",
+      "sha256": "08cbcbfbbe4f55e404a3e385445ee66793fa9ec37f4f976feca4b399b868aff0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-replica-run-execution.ts",
+      "sha256": "b419831bdc4d2bed2014ea284c4893e6aeb9515da00972ec30dc6abfc0371b91"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-replica-scheduler.ts",
+      "sha256": "2d61d2c3c1841f733ed2f9bb8ebb86d8dafcd9e216e2b69b760355d99adc7d15"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-replica-snapshot-loader.ts",
+      "sha256": "ab5b1187dc0121041c657fa067c97dca65cb6cf80d43eaecd9e51fa65169e8cd"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-replica-sync-runner.ts",
+      "sha256": "a2e27a30226bf963ceee435a622fb66c646bfe7e009608217da9a5b82c99c518"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-runtime-bank-service.ts",
+      "sha256": "021081ee44e06640c231eb2b54a659ca9772122b68f87cd1e2a6511e0d985ab8"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-runtime-client.ts",
+      "sha256": "2116be8dc750a8b1efbcc8334f05de00c667a468869bff6d143fc20f2c90f232"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-runtime-connection.ts",
+      "sha256": "325adb7e1f4771718aa3cbe3e7bf8d2bc845b1d1c50af92ce8ffb2ce81cb50a2"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-runtime-consumers.ts",
+      "sha256": "e8722acc7fe443fde8d507f46e955501f6ce72a7607ee7a77094fd27281bbbb2"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-runtime-state.ts",
+      "sha256": "34c87abe4133c36b93aa962903244aa69e7f402236cea2f8343aaa6d3640c267"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-runtime-view.ts",
+      "sha256": "5e5407b3f479bf064a5671ccbd8e34a2c42bafcc3ad9a8ec084aa61ceae169b9"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-secret-refs.ts",
+      "sha256": "941b7f324aa7bba7510237ac7abffcdfda689ee01df7a50bc20863157ed228d9"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-setup-errors.ts",
+      "sha256": "705d0b4f07efdf4a3b2b801b4601c454c842b063ad851ab2870b72289b1720d0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-setup-recovery.ts",
+      "sha256": "18aefad29290428f5be346559e4fda0f87f1e1662ede142654f2c2178e696386"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-setup-service.ts",
+      "sha256": "b0790948d11fe38185c70907540d70fc3b87b2175cfaf0251650a88d1027fff3"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-setup-stages.ts",
+      "sha256": "6f5151592a10c2d2352e02ca6c35a08bbf71b6b57a2838dbf89b1874058563b9"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-snapshot-contracts.ts",
+      "sha256": "32ab8f69e534ec567a4a24b5b5847f43f69fe04cca1824169bc61a2a763b30fa"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-snapshot-validator.ts",
+      "sha256": "a5d72a9751d91b076b14885fefed4ce771baaa14bbe622d952110a01576dcf75"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-source-binding-proof.ts",
+      "sha256": "36b90558a4ea6f0a8bcead7aa74c1704ee55ceae00b698949c6337260660b46b"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-source-evidence-projection.ts",
+      "sha256": "f5147411c4a70214a06b4e6ad75885b0da890c5b1ad33d797b2fcc13d9039cb8"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-source-preparation.ts",
+      "sha256": "001c44b5ff403a29a9a299c116b952f0867298c24910170e97fa1c3be0f1fce9"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-transition-capability.ts",
+      "sha256": "34abd5901568f09d8d980ca4f959f5dd73a129501fd5710d3226f68bd87001bf"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-transition-client.ts",
+      "sha256": "e158a622509a8f47db6de87a37be4e8607498e85640f842bfa4f76e80728811f"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-transition-errors.ts",
+      "sha256": "2d8e76f91d6affb17a9a9526664822c1d976a625561804c3cfdbb13b99d91fb9"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-transition-proof.ts",
+      "sha256": "6ce3550e9f54d971c6d6f6d32bfea1c44398b88d3f7de3b2183e7fc2d3756ed0"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-transition-source-capability.ts",
+      "sha256": "a37ad73f12785713a05547501763ab9339f24eb45dd37fba46289a1bb92517b9"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-transition-source-client.ts",
+      "sha256": "805c1bd4d7374e66b941f9b55390c483a4d1c70ca6c17df6964bdd4d30f68f90"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-unavailable-run.ts",
+      "sha256": "5a330f1b4f70b70b9f8acc7941a314ae4096ccb2edd24b808d50f54bcb475cd3"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-writer-fence.ts",
+      "sha256": "e6451c6161ec492cd2971569d7819f59e9c8382cc238b309898b599e190f0d7b"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/taki-bank-template-v1.ts",
+      "sha256": "9d1f05100444af6c03f319df98cb04bfcf5bfe2504d0c059f2731ee531346952"
+    },
+    {
+      "path": "packages/core/src/memory/image-description-writer.ts",
+      "sha256": "175121e0a0d7e475bd60d08b3220bdddb36bb279513718dc964f235c61c8acb4"
+    },
+    {
+      "path": "packages/core/src/memory/indexer.ts",
+      "sha256": "b0e943bd18d08bab895626444e2a8c3fd6b09cb1f0393985599c184b3abe6c86"
+    },
+    {
+      "path": "packages/core/src/memory/layer-registry.ts",
+      "sha256": "6d9361828f7ca7dea290569f0cf733ba69146a0943061c97bc242ded2f6d93ac"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/fenced-memory-engine.ts",
+      "sha256": "86af8dcdb5553188c487264ec534dc2cdcdd85afe2f5fee02b3f0adb40affff1"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-activation-repo.ts",
+      "sha256": "86e6a6bd18f1c860a8aa7b0825b5c87b534216baaa1e2a5a40817585d6ec3a21"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-candidate-repo.ts",
+      "sha256": "aeb24d2a96cc106f59e8c0a7346ddce2900516773e01ab31f52f80f22d0dc2e7"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-canonical-converter.ts",
+      "sha256": "f126dcc6fc83f1a12acb168b74d6003258c380eadb2d9eb93660d58eb1696148"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-canonical-import-repo.ts",
+      "sha256": "62867c85bfd48719b9eec7f1a6a98b4a73e6d91617a980c382033f9a60889e12"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-diagnostics.ts",
+      "sha256": "813980c2064886c4d8505158f6321a0f68e49f6847e4be6fd0bee3fb7ef6be3d"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-identities.ts",
+      "sha256": "6efb49bab283468b0737fb61487da4d93d4a250ecdefa354c6e786931c821a7a"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-migration-exclusion.ts",
+      "sha256": "6221c17bdf7c850441fb79bd7bbbef0419f119396f1e71342fbedf462b3fad5b"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-migration-fixture.ts",
+      "sha256": "17f87aeebbb9d15e90d1e1f1738ade68a42f2e9ff86ee196e7e80125147c31e9"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-migration-ledger-repo.ts",
+      "sha256": "f59a2eccad112dba8cdcc48da87a7706fb22345adb5afbd45778f983506be463"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-migration-reads.ts",
+      "sha256": "dcc0a0d86d8bd60a34d31529d6438d09514dd64c60d6c02c36972e5eb5b156e8"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-migration-runner.ts",
+      "sha256": "b1b593837f70f2834977634b55fdddd3f26c559f93ea89ad2f8eea20b2da1e1a"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-migration-verification.ts",
+      "sha256": "906471a7606e28c4a399fa395493cc5ddc89e6379e4df162088e7f4eb0e5a9b3"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-retain-sanitizer.ts",
+      "sha256": "fdaa6912dbcdfbb5f47576cfd54396b169d3316ef3abebf5176bbe43dbd433f0"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-snapshot.ts",
+      "sha256": "7fa9bb231cd3b4b5ae4a32625fa03986b30f949325716fd38bce617ca949ff05"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-source-normalizer.ts",
+      "sha256": "69870b228d4a8c161dabbd14eafb4c4f27a1cb645d430760df20f83fbfaf4ee1"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-source-stage.ts",
+      "sha256": "8fd6d9ef4486764c40499496e33f419c80f71baa19f919566f16a7f1fc73fc8d"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/memory-authority-fence.ts",
+      "sha256": "ab20a08dcbf12a19407f5d59784f2c38fbb608478c0517e7460ce499c29a7f3f"
+    },
+    {
+      "path": "packages/core/src/memory/local-memory-provider.ts",
+      "sha256": "630b3ed0fa309ec46d365ef89fbbe3feee0a30c4922d5b0b8dffae3073094e3f"
+    },
+    {
+      "path": "packages/core/src/memory/local-onboarding/local-onboarding-fixture.ts",
+      "sha256": "bf84cd8ab926dfba13f2f4c60ca629c31f5877551f325f6813bb68d47ea3c362"
+    },
+    {
+      "path": "packages/core/src/memory/local-onboarding/local-onboarding-reads.ts",
+      "sha256": "e9e472e13620a5ceb24332a657b6c3c84572c4bd278f254e83e5cffbce225f9a"
+    },
+    {
+      "path": "packages/core/src/memory/local-onboarding/local-onboarding-service.ts",
+      "sha256": "d502a48dd9c243133a867b373fdfba906a35733d5969d4479ff40ab8f91c0d2b"
+    },
+    {
+      "path": "packages/core/src/memory/local-onboarding/local-onboarding-status.ts",
+      "sha256": "09ef0cb29a65b0b5c30e2040604e21e5c3bc1e629c4b57e2796e57aacb8cbcf8"
+    },
+    {
+      "path": "packages/core/src/memory/local-runtime-binding.ts",
+      "sha256": "065fca4ec932226139c4603497a7d4c174aef78534ba33f22dcb2c1ee75b21e9"
+    },
+    {
+      "path": "packages/core/src/memory/memory-capability-snapshot.ts",
+      "sha256": "06c896428a662df1fd0f788792faa72be34f435fec1769ed9143bfc142a3a5aa"
+    },
+    {
+      "path": "packages/core/src/memory/memory-coordinator.ts",
+      "sha256": "e99208822fd5700c3315057c3324f8afbcca176beecca6afc1271662b7e7b49c"
+    },
+    {
+      "path": "packages/core/src/memory/memory-engine.ts",
+      "sha256": "81541efda7a6fbeba0077e3d81c082c401b86f2e5e6f172a822b4f6079764274"
+    },
+    {
+      "path": "packages/core/src/memory/memory-flush-port.ts",
+      "sha256": "281849b9896369da9cb11d89f4ecb1f1bc9ed872fa701e52ea7771ae03ce51e2"
+    },
+    {
+      "path": "packages/core/src/memory/memory-provider.ts",
+      "sha256": "c8cd50204908115816973111adb407471a281873ea2d151a80768342469b7a3b"
+    },
+    {
+      "path": "packages/core/src/memory/memory-recall-selection.ts",
+      "sha256": "4cbbc1c844396608a307bd99579008c656537736efa2c40f4b5c92e7142956fd"
+    },
+    {
+      "path": "packages/core/src/memory/memory-tools.ts",
+      "sha256": "3f503835667730feb7aa21cb2ce193be5fc7c5129dd81819b7614c1786cf279f"
+    },
+    {
+      "path": "packages/core/src/memory/naming.ts",
+      "sha256": "a185f8e94d82cb54ff9bd57496a72fc3e7e78c104cd8b0ba3861e2aabdfdeb2e"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-authority-status.ts",
+      "sha256": "5d3690f47cab7458f9f461476be736b76bb25b97ba280ec57089ab495dc361d1"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-hindsight-lifecycle-status.ts",
+      "sha256": "f25163ba069c8d9e0c20b313fda7591d01919be934a1e6c0ea302c5321a5c882"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-backup-fixtures.ts",
+      "sha256": "d63f9550fccef7a463cff599db6541c800ce1b2a511c7506615a4453b475c3e3"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-contract.ts",
+      "sha256": "d2097b13e13224156fddd596586f91aee9f32da7ae0a3374005c6697100a05c0"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-fixtures.ts",
+      "sha256": "b0b91a6536a44997e5fc4cdd7bb84361d7ced14faeff55765ceb3cd611c0478a"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-hindsight-evidence.ts",
+      "sha256": "103fac966bbf7f0abf460fd67b7ec94eb11aa185f44532e5fbb68af5f0ca88fd"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-kind-backup-admit.ts",
+      "sha256": "87d1744bb3c54ff23b4f43cde86dc63d4070e29e4bed0b0a0b78eb5a708752ba"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-kind-backup-capture.ts",
+      "sha256": "489309f9e968319a755d2b19d2825250a80c0b7298819537531723204fdf5b21"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-kind-backup-verify.ts",
+      "sha256": "d282a54c6b25e678a02e7c71b27efa0206b43d6e0cb5de36db8821f48172f444"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-kind-backup.ts",
+      "sha256": "71823d7c577588651feb586aa838f4f1374bfed31be819b22c7e0a6fbf423459"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-kind-bank.ts",
+      "sha256": "c845a40b2205c27b5f56f351a7d574a01689c4e25e812d32fde4b8e66359c6a6"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-kind-connection.ts",
+      "sha256": "dd2a08b81dce8a552f4fbafcce635db9c5d25db9cbad9adfb6cbb46e57ad2052"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-kind-hindsight.ts",
+      "sha256": "e6c8a14aa4dcbd94f3596a15876ad3f03393a6674a498a07f825200cec978ef6"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-kind-local.ts",
+      "sha256": "f8b3c0d2373bf74367f29aaa618c66013be7972232a9734db781b3101486668e"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-kind-replica.ts",
+      "sha256": "12ae8a9c8cf485203cf609204c542e77aa64ed2201e4437a5b5b831d71f10f4f"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-kind-setup.ts",
+      "sha256": "b4276d302f2c33cfb03853952750c3483e5287998bd29b790c43e5936b67ea13"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-kind-transition.ts",
+      "sha256": "929b84ef995e0a93ab6be17b0309823db401f61e32c186034f4449e13d3ef90a"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-kinds.ts",
+      "sha256": "e424d7bf5fc11cdb2fdc8b6d1aeef578f82c124c1219fd16d01fcf9104d8fb14"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-lifecycle-settlement.ts",
+      "sha256": "9f51318620bb25d322b4e8716ae795ec62226ce22a0a789d2b75bc6af351e40e"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-local-evidence.ts",
+      "sha256": "6b7b392543bc5d8634977464ddc848ec09eb757a378f41902edb7cce08842584"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-service.ts",
+      "sha256": "5c4a30973107a6606af1f10840543f7e3b5cf6abc7e2ea45c511328d9bcecfe2"
+    },
+    {
+      "path": "packages/core/src/memory/operations/memory-operation-transition-storage.ts",
+      "sha256": "7b1f7fc835a4370bac65e09d74a3978b444d460cf176ab024e0877a7839a2552"
+    },
+    {
+      "path": "packages/core/src/memory/pending-memory-safety.ts",
+      "sha256": "d98bfd9c03bf182f5724e0896e3bce592b526f69d6f5c8853d46d4d12bafe542"
+    },
+    {
+      "path": "packages/core/src/memory/pending-memory-writer.ts",
+      "sha256": "682bf8c36d8a7455e051edfc073df05ff25666559ef07821a61b2a2d90760e63"
+    },
+    {
+      "path": "packages/core/src/memory/persona-provider.ts",
+      "sha256": "4ad1d71d4bc9463c8b87ce62dcab95a292f75bfb550c15015fa527f0babd7af8"
+    },
+    {
+      "path": "packages/core/src/memory/pinned-block.ts",
+      "sha256": "c0a49eb641cdaee90d72ac501472ccff9ce0b3b566ef73bd94b2cfe2d04cc051"
+    },
+    {
+      "path": "packages/core/src/memory/render-transcript.ts",
+      "sha256": "06c68e34b63ab185001478cc0861fc7d8c40bd96164b93b34c415916335c0044"
+    },
+    {
+      "path": "packages/core/src/memory/retention-sweeper.ts",
+      "sha256": "04de7672cd815e7052aecdb7004f4f1c67521e4e0106396b9c6e90a6d4cabd7e"
+    },
+    {
+      "path": "packages/core/src/memory/retriever.ts",
+      "sha256": "640d3f537fb4726c68df664ed2d13649bcac165d1eba9141c3f7f85bf6007d1b"
+    },
+    {
+      "path": "packages/core/src/memory/runtime-composition.ts",
+      "sha256": "663dcec997d078810fb5568c1246b14c34545f356b989067417078e0db703299"
+    },
+    {
+      "path": "packages/core/src/memory/runtime-selector.ts",
+      "sha256": "a1042ff37157b507ecdba59a17c8514a6e6cf5dee036e3038dc1bb8b7744330d"
+    },
+    {
+      "path": "packages/core/src/memory/search-tokenizer.ts",
+      "sha256": "2d928bd3bf2869aac5250823d8702f0610fd19d73dc1e3ffdeb00c45d5b08b76"
+    },
+    {
+      "path": "packages/core/src/memory/store.ts",
+      "sha256": "ac42653f138778b67d6927d4a5d3b34b6ca4162f1a9bf275bd63341769eba09d"
+    },
+    {
+      "path": "packages/core/src/memory/strip-note.ts",
+      "sha256": "a5147c132be0f60664936f2f48c37fc87f452205a193b353e3c210637aa69292"
+    },
+    {
+      "path": "packages/core/src/memory/tidy-pass.ts",
+      "sha256": "9b13a3521dddd5bac2c12b9b6cceba740fdf71e0908219e4459a332dc0ffb075"
+    },
+    {
+      "path": "packages/core/src/memory/tidy-report.ts",
+      "sha256": "4e91681b1183dbc5817d874de3899b247408487dbb71ec87fc76e661967e8b24"
+    },
+    {
+      "path": "packages/core/src/memory/tidy-tools.ts",
+      "sha256": "7e06e8eabb0859da494f5287a50a6457e471601bee83b24028c41503ac278274"
+    },
+    {
+      "path": "packages/core/src/memory/token-estimator.ts",
+      "sha256": "506346a73f9de2880c7e5e8dc3cf317d1cc04eecc60933b687b6701e157d90a6"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-current-identity.ts",
+      "sha256": "a535fc7fe7c0b6f40c25f79697705d4a32ad64809ddf08dbf07c75ae5b76952c"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-delta-application.ts",
+      "sha256": "4b10b859e52e8fee73bea6ed9c74371c6d13415132ac31743179526af51f5673"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-delta-execution.ts",
+      "sha256": "87b8cf582a7507a098ef3d4739f4c6dbf2d567d9a878010d19aa0de2fa13c2fe"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-delta-rows.ts",
+      "sha256": "773e76c74b5a1edc745455c654e0ea5f1c7b626f127133c725fe61104f1c5daf"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-delta-sources.ts",
+      "sha256": "0e3b89fd9f758e2eece979f8b0726640fd60e89a826ec7d9a8a7290b668eb647"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-final-mapping.ts",
+      "sha256": "3dc9c3eba5b4997409eab8bb7771aba3b0ee84e09073d77f1239156225fe18dd"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-candidate.ts",
+      "sha256": "6a66c0d31daba5821b101a29176356a0367b1a74cf0b7d2f2795b8d8a1ed5931"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+      "sha256": "26e2918849546bd68b7b9d143369d457dddf748d4b13d67684378e20fcd91f46"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-service.ts",
+      "sha256": "a5d55603cec5cb63d981a761f7f989bef760113ca871b1b9e70003cd9ead5cbf"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-status.ts",
+      "sha256": "07ba50718719315e40ade120b073c68bd92dfe744dab10ee07f866f1bbddff2a"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-historical-references.ts",
+      "sha256": "b3d54650ce251270471b18d1dcf8f14cdb2c9e747e34566d09659635e432ef68"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-intent-executor.ts",
+      "sha256": "d0797f049a97c35699897a8d1b274bac7021e121cfbc11038d03e0d62cc93f2a"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-candidate.ts",
+      "sha256": "c3d53a62b0cb30d04b4f987e3ad108fd1e1e9d6449de6f58c08628d2b892eff5"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-encoding.ts",
+      "sha256": "ac1ea1c387c73ac0f343c4a8cd8bee6aae39c3d3040a3426322a680c11ecae9f"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-projection.ts",
+      "sha256": "b1050bcdd75d9db012247e53c6f810547c8d0747dafbcfa6a251ff38c8b96517"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-timestamps.ts",
+      "sha256": "57b05d2c7e5f83e4f9e6eaab3fbb42177067a286e910b79f940412904ae9ae7f"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-native-evidence.ts",
+      "sha256": "67f9bf64ed43db06eb7cb71210711c02a2680f4657ddff52f3d320aafa8df882"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-native-loader.ts",
+      "sha256": "259bd84e25d54231a44551241792795ebdd7d13380aa3ab1c613e19eabbfea69"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-native-session.ts",
+      "sha256": "c7a5675c6810651969960d6ad770932554b52151c633d88e01fe070aba58a7f0"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-pending-sources.ts",
+      "sha256": "02d7f5fa6a04e5b213ae09a66a3cfb429060d7d14112a0d37606763b0e1dd851"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-queue-mapping.ts",
+      "sha256": "84efe549acde55cffad61916271a38c67d6e0abb6a72d180c229807b202c81a5"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-queued-provider.ts",
+      "sha256": "76a01703b00b3c73f8ffbc9a432f05f950afb868a84b74e344231ab72cb855d4"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-runtime.ts",
+      "sha256": "7c9156978ea3580812dcc007d41d0999e7a846ce78fbe3f5c7abd4c9f3da78aa"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-source-aliases.ts",
+      "sha256": "487e409f986da65870a4f4b6d2d35cf149acc5c5e3b7002974ad660378d5155c"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-source-upload.ts",
+      "sha256": "dc3f6d4b97bbc28281b8b6b8240416c43e77495a93df11b2b73b09b78bb9016e"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-unused-delta.ts",
+      "sha256": "c844a24e7756bba901d0c651058847e338a198a8d3f11be5a6c5c6aa916de0aa"
+    },
+    {
+      "path": "packages/core/src/memory/utility-slot.ts",
+      "sha256": "25210dbfc5150864bd25e772a5f260437cdb2b0c263259bfce1edd6ce61af9b1"
+    },
+    {
+      "path": "packages/core/src/memory/write-atomic.ts",
+      "sha256": "e27b80b26b8902e47d9e86dc59a5701ce0b3c5a211abb01a896743b150bb592a"
+    },
+    {
+      "path": "packages/core/src/memory/write-convention.ts",
+      "sha256": "f147594b51445bd2d2249f5e71c5ae989a80a6c067c46c72f38ff85815ce9f91"
+    },
+    {
+      "path": "packages/core/src/observability/observability-query-service.ts",
+      "sha256": "2b5f6822b9430d07b0b9ab8914abaaac8f739569d86c72dc73ceb4f82dc97e80"
+    },
+    {
+      "path": "packages/core/src/observability/tool-effect-observer.ts",
+      "sha256": "8fbd367420ebcdd642604de24f5281720c94638486ad7ef90b8f33b8bc512b62"
+    },
+    {
+      "path": "packages/core/src/perception/ambient-screenshot-sampler.ts",
+      "sha256": "ecd852d6339a795592901671c7023d71cff4cc4227509ef92363bf0a11de5718"
+    },
+    {
+      "path": "packages/core/src/perception/ambient-shot-gc.ts",
+      "sha256": "13cb26a2a22709354d4e77fa716c5f2dc5554228a5ba4b5b3d0abf47d11ff98b"
+    },
+    {
+      "path": "packages/core/src/perception/ambient-shot-store.ts",
+      "sha256": "58c8f798c83ed9e30bae605809342fb413f6fd58f6384eda5616b51d1bf66efc"
+    },
+    {
+      "path": "packages/core/src/perception/foreground-screen.ts",
+      "sha256": "1b5b5717674705bdb88a143330ded105ce638de511edb2716eed7d23f7bf55f9"
+    },
+    {
+      "path": "packages/core/src/perception/perception-card.ts",
+      "sha256": "a5367f64443df3707aebf8df833a4fa2326c891b8cc0b4f93599251081424474"
+    },
+    {
+      "path": "packages/core/src/perception/perception-layer.ts",
+      "sha256": "3aab19ce5326f76e286e359d77d0d2318455c49d61d291e5dac3383a860132d9"
+    },
+    {
+      "path": "packages/core/src/perception/pii-scrub.ts",
+      "sha256": "c3eacab5953f29f61e4cc191f1ec330360946032747b9ab4416efeb20706e500"
+    },
+    {
+      "path": "packages/core/src/perception/privacy-pause.ts",
+      "sha256": "b7d169a3b8bdcdf3a341ba4ea2fda4605ee9ed424b112e7821255a322e91579e"
+    },
+    {
+      "path": "packages/core/src/perception/screen-context.ts",
+      "sha256": "8164b454efd003118fd386e99ba3b2cdd23e17f5939872d85c7afe2e9e4a56c1"
+    },
+    {
+      "path": "packages/core/src/perception/sensitive-processes.ts",
+      "sha256": "a1219302954cd707c9f23b97ad4162927a930ba9844ea1d8d2895e8eca40051c"
+    },
+    {
+      "path": "packages/core/src/perception/sensitive-screen.ts",
+      "sha256": "d0ae748962e21d8c092556cf6ca0472d999ddf54c491d3fa8e92e415372d9e6e"
+    },
+    {
+      "path": "packages/core/src/scheduler/schedule-engine.ts",
+      "sha256": "e22b923438e82009f956444f7971ea1f8b10479788f9917038196fe250c5b9d0"
+    },
+    {
+      "path": "packages/core/src/scheduler/schedule-pattern.ts",
+      "sha256": "5bdd264fdc0ab3f2d2d0105a25e9519add320c0cb0bc3aa34ddb704ab1a9047f"
+    },
+    {
+      "path": "packages/core/src/scheduler/schedule-task-tool.ts",
+      "sha256": "3e6eff4d423f3ba021a87828d220d0fdc92806805ad241395fe8ba9b6e95daf3"
+    },
+    {
+      "path": "packages/core/src/scheduler/scheduled-run-adapter.ts",
+      "sha256": "bcf274461c60c9073dc112f20ed0764fb141b24e1949907f45d90a69b4287ac3"
+    },
+    {
+      "path": "packages/core/src/scheduler/scheduled-task-service.ts",
+      "sha256": "a2c8d27445d769b6ace82a1a610f5de7583b049a0d45594eff195d93c823d434"
+    },
+    {
+      "path": "packages/core/src/scheduler/sweep-runner.ts",
+      "sha256": "3e12044bf80df24c43d888c997ccd96b69a3661cadf0d4eb464cfbb8c4adb636"
+    },
+    {
+      "path": "packages/core/src/secrets/catalog-publication.ts",
+      "sha256": "ea8d72e48eba3bbc13022c1dda04e510467e5b1b2868b581492aa83c9700bb36"
+    },
+    {
+      "path": "packages/core/src/secrets/master-key.ts",
+      "sha256": "614baed7e198e25006203a5db00058527e63db70187f656ef6c15ed4c10208f0"
+    },
+    {
+      "path": "packages/core/src/secrets/mcp-secret-migration.ts",
+      "sha256": "6a93ef32c3f5d89be0f63414d908049206ccc755d586c9577be56a681ef298ac"
+    },
+    {
+      "path": "packages/core/src/secrets/secret-catalog-envelope.ts",
+      "sha256": "3d7e4bae1edd704573c49544836a2fd462301b706a338034e713ec24de570be0"
+    },
+    {
+      "path": "packages/core/src/secrets/secret-catalog-service.ts",
+      "sha256": "d5beb4f90fbb519c3b3bdd13e9f081d6e3245ae0bf06bf63328e94dfeb66695b"
+    },
+    {
+      "path": "packages/core/src/secrets/secret-ref.ts",
+      "sha256": "c90279b5ee341c3cdf1153c8896a54cf3eea1ba158b6177391ed77d6b0b0a2c4"
+    },
+    {
+      "path": "packages/core/src/server/app-error.ts",
+      "sha256": "33d01c8158647210c412303d10508c001b75f6259d6a8755ddb9b0c0b5a7ecb5"
+    },
+    {
+      "path": "packages/core/src/server/connection-registry.ts",
+      "sha256": "77d92546397196046f7e0fff7759c9ae07a086a2b5bd314c3f424c197a844a1b"
+    },
+    {
+      "path": "packages/core/src/server/memory-operation-subscriptions.ts",
+      "sha256": "cfdfd49f2a8054e3baecf88106a9faba284f29cf51e38fbfb124dbd67522f5f5"
+    },
+    {
+      "path": "packages/core/src/server/method-registry.ts",
+      "sha256": "afe6d35a07806310724b38c64f3342811c6dc4b323691480744364ff84164d5c"
+    },
+    {
+      "path": "packages/core/src/server/methods/approval-methods.ts",
+      "sha256": "bffd1abc9e808026ac7629facd31d0cb7cac7acc1f26a9ee615a671ae1e3da7f"
+    },
+    {
+      "path": "packages/core/src/server/methods/approval-respond.ts",
+      "sha256": "fc3a1788f5a1c32da0b29ff6f858a982cc1f49a713948938902e7a9957fc9a25"
+    },
+    {
+      "path": "packages/core/src/server/methods/avatar-report.ts",
+      "sha256": "a4711c62e9d9b94e843da2915920b127e414d4bbee7b0f7c7594b2e4c70e67a7"
+    },
+    {
+      "path": "packages/core/src/server/methods/avatar-subscribe.ts",
+      "sha256": "47619d0b1c8d4803088b45fb368e64cbbb1330a0870c9f2d1c068624de254be0"
+    },
+    {
+      "path": "packages/core/src/server/methods/capability-challenge.ts",
+      "sha256": "155f46abb35c3f64174db2d5b74be4cce0b532b4aa81e6e3b54fb33da2d22a21"
+    },
+    {
+      "path": "packages/core/src/server/methods/capability-respond.ts",
+      "sha256": "ecfd30c0b4770883a306edf4606844f7c086490ca37fa03e4fc6afbd2ed791da"
+    },
+    {
+      "path": "packages/core/src/server/methods/capability-trigger.ts",
+      "sha256": "fbeb331dc5fb713c253f6435717d445e4af1a39a0017acc7c2d50e82b4ed8d9a"
+    },
+    {
+      "path": "packages/core/src/server/methods/character-costume-resolution.ts",
+      "sha256": "885d8d3ffba51f2b7ffeca493e4167da23d867a8d8c8a3cdc7f8a8c8f6208802"
+    },
+    {
+      "path": "packages/core/src/server/methods/character-costumes.ts",
+      "sha256": "34768326940853e449f52a875282dfc0cb130afaf9ee94a9ac7cba5c43a39a77"
+    },
+    {
+      "path": "packages/core/src/server/methods/character-import.ts",
+      "sha256": "af91b8e1684d5ac9774ba930ef717606da0df7b5b2ca5f25b67300d28b772194"
+    },
+    {
+      "path": "packages/core/src/server/methods/character-list.ts",
+      "sha256": "8a668aa0aaaddea79c484cd0b034b40a108a75e7585352c4868412cd9f014601"
+    },
+    {
+      "path": "packages/core/src/server/methods/chat-cancel.ts",
+      "sha256": "97b65ea4f1bc3b133c63ab807d0584b7bc7112b676bf098b126042333ff71f08"
+    },
+    {
+      "path": "packages/core/src/server/methods/chat-send.ts",
+      "sha256": "5683824fcfab2261a5fdfb6dc584fc50ef5c8648dbc0c99b0a2846704ae5d8d6"
+    },
+    {
+      "path": "packages/core/src/server/methods/config-list.ts",
+      "sha256": "5267c7458942ced1d5c5fe8f444ce6eea5eea3971c14241ef55aa438744e2ca1"
+    },
+    {
+      "path": "packages/core/src/server/methods/config-methods.ts",
+      "sha256": "fe9bf095636c8190e2b74406580ed536318dfc0769268b4f62445cb1819efe45"
+    },
+    {
+      "path": "packages/core/src/server/methods/config-set.ts",
+      "sha256": "725c809bcf9193905059e36db5002fad1195889b1f52fdd6e870a7b4c8b173fd"
+    },
+    {
+      "path": "packages/core/src/server/methods/config-subscribe.ts",
+      "sha256": "72550c40530577446a870cbb3f3fac6eeaf18d0b73febe69bff2b142183ef782"
+    },
+    {
+      "path": "packages/core/src/server/methods/connect.ts",
+      "sha256": "11170cf7e2c7856d342b9ed788aba2995b09eb51dcdf393da0195dfbfa1833c1"
+    },
+    {
+      "path": "packages/core/src/server/methods/extension-status.ts",
+      "sha256": "58058dc7e2e40506c87371fa679a29d8f6a40cb87ad91f3e95bdc0627dbd6c23"
+    },
+    {
+      "path": "packages/core/src/server/methods/hindsight-cutover-methods.ts",
+      "sha256": "e4d3200555d77841690646d565ec215824f95145665241ab06756605366ef39e"
+    },
+    {
+      "path": "packages/core/src/server/methods/hindsight-setup-methods.ts",
+      "sha256": "ab3bd0049a2093329a615f3b911501f64677488b8c64bad5207bcd44e980138a"
+    },
+    {
+      "path": "packages/core/src/server/methods/host-catalog-publish.ts",
+      "sha256": "e67452514bef891880c536e7892c689cc424aaed15a7bd078c2815075d564b7b"
+    },
+    {
+      "path": "packages/core/src/server/methods/mcp-methods.ts",
+      "sha256": "6171c57adec05ec5fc32b0dc3cad49bace3b64096b0870b28db425f9d8aeb772"
+    },
+    {
+      "path": "packages/core/src/server/methods/media-clear.ts",
+      "sha256": "63a7b4c91cba8d1d997f3c7b7cc31724ed6da4e45367fb5c28dca9866d97d49c"
+    },
+    {
+      "path": "packages/core/src/server/methods/media-get.ts",
+      "sha256": "c7aad9a6770fff8ab9f922ac4b371a0e99125a361674d512ab8f8cc940230e15"
+    },
+    {
+      "path": "packages/core/src/server/methods/media-usage.ts",
+      "sha256": "96d963641d0a844b45a4ae50af124f0cfa99531460dadd2527d2d45b736f0821"
+    },
+    {
+      "path": "packages/core/src/server/methods/memory-activation-methods.ts",
+      "sha256": "19e8a3b5557a9ec5de9d5f7c314d7b348e016192e2736158853e1ac8352c6caa"
+    },
+    {
+      "path": "packages/core/src/server/methods/memory-authority-status.ts",
+      "sha256": "3c4603d71826ed4c17bd167ab8c584347c310668efa4cf1aab124292c0eaf4c8"
+    },
+    {
+      "path": "packages/core/src/server/methods/memory-migration.ts",
+      "sha256": "19b6472ec0c9079c00073ee2e812c711857f3f37c3c45e5ff328893bc8937c73"
+    },
+    {
+      "path": "packages/core/src/server/methods/memory-onboarding-methods.ts",
+      "sha256": "3f0eaade8dab700546879f639511244608395ddd8a757d1ff9150ee6332a4846"
+    },
+    {
+      "path": "packages/core/src/server/methods/memory-operation-methods.ts",
+      "sha256": "78cd62a3fe0595d06b0992b0fc8e84d299bc60b13ec29615261289d5ecd55f89"
+    },
+    {
+      "path": "packages/core/src/server/methods/memory-status.ts",
+      "sha256": "3dee0b2cdda889ad199d7dbf113df899bf98a2adedb8a26bb6f1becd30f1a22d"
+    },
+    {
+      "path": "packages/core/src/server/methods/memory-tidy.ts",
+      "sha256": "b25f80642d6a41b33adfa6a3b4124caf91858d98ae780ad529127cdac158ec26"
+    },
+    {
+      "path": "packages/core/src/server/methods/memory-transition-methods.ts",
+      "sha256": "e10f83cd0faea1b6b2fa44f5847eaf076d0a15850297ee115c4035f07753a463"
+    },
+    {
+      "path": "packages/core/src/server/methods/observability-methods.ts",
+      "sha256": "1bca72c18491dc9e8254a5932e8ad214b0f2c5cfea2809739d21bcb5a92e8823"
+    },
+    {
+      "path": "packages/core/src/server/methods/perception-card.ts",
+      "sha256": "b1577b8a5dbb9ce11fcad51522242d32e95d987dcf42b4556b8fb4a37f7a7b16"
+    },
+    {
+      "path": "packages/core/src/server/methods/perception-methods.ts",
+      "sha256": "ded01aa690ccdc46b43049da85eb99fa39839d6ccc58788a5375fe3fe7edbc37"
+    },
+    {
+      "path": "packages/core/src/server/methods/perception-pause-get.ts",
+      "sha256": "1c88eb3b812bea7c8b104bc1837e4e079065b221320d3cf1ddd31ec13194d496"
+    },
+    {
+      "path": "packages/core/src/server/methods/perception-pause-set.ts",
+      "sha256": "0d810315cf944bb5537be6ff4f8bc8f8b3c54bd509ab31abeabdfaa829d56030"
+    },
+    {
+      "path": "packages/core/src/server/methods/permission-methods.ts",
+      "sha256": "557a6b106ec67737fd27f29d35f967cc5c88dd723721f34554082372bbae22e4"
+    },
+    {
+      "path": "packages/core/src/server/methods/run-queue.ts",
+      "sha256": "f97fca5920273a8ca35d30cba77d0a29e7772449b04f2aa61b877e070b9e75aa"
+    },
+    {
+      "path": "packages/core/src/server/methods/run-status.ts",
+      "sha256": "d954dcaf8852688925a4583ccb9ba55354c0dc827dbe336340bf391034f84186"
+    },
+    {
+      "path": "packages/core/src/server/methods/scheduled-task-methods.ts",
+      "sha256": "e921272e8500b86892118e84772e2baf77b35808a4acb06d8b833051b6f31c4e"
+    },
+    {
+      "path": "packages/core/src/server/methods/secret-methods.ts",
+      "sha256": "ed30af8d59875dee0f8217c83d293ec49d3003d1ab14d8766c602a000d28f364"
+    },
+    {
+      "path": "packages/core/src/server/methods/skill-methods.ts",
+      "sha256": "996565cabbb898e0da784336dc97f22c7cea7cb431ff65fd152e887c4fe5a5ad"
+    },
+    {
+      "path": "packages/core/src/server/methods/timeline-history.ts",
+      "sha256": "414db0455cfcf2f9e1095cef13b2436f8eabfad9c52061763bb0ab0156399f55"
+    },
+    {
+      "path": "packages/core/src/server/methods/timeline-subscribe.ts",
+      "sha256": "ca2e07840874225ebe2bb957ee4e89bdb31d266cf5c5d5a564276176e062e81d"
+    },
+    {
+      "path": "packages/core/src/server/timeline-subscriptions.ts",
+      "sha256": "9275cd3bb4eb638745a34429948db10e530feab4e3ab04b17e8ba08e029ba612"
+    },
+    {
+      "path": "packages/core/src/server/ws-server.ts",
+      "sha256": "0c5cd1d013b47606d7ed879ab965978931a6cddae5348b397e2d60940da3bd65"
+    },
+    {
+      "path": "packages/core/src/skills/load-skill-tool.ts",
+      "sha256": "69f9377735acdf6d6d7c66787dc39ccbd5476d7915308a8e58f31503bb307467"
+    },
+    {
+      "path": "packages/core/src/skills/read-skill-resource-tool.ts",
+      "sha256": "4596a2265ee0fd66e8f8df6548ed8856856046c6e4b6c73d9abf0b29e8e2485c"
+    },
+    {
+      "path": "packages/core/src/skills/skill-boot.ts",
+      "sha256": "73b6cd84e0574b925f6ac7b0ddd349d6454cb678108079be4822a56823f6277b"
+    },
+    {
+      "path": "packages/core/src/skills/skill-catalog-manager.ts",
+      "sha256": "00c11c06f84152aabd48759d43a0da9142d0bb30174af0d21a00d99350a1b6fc"
+    },
+    {
+      "path": "packages/core/src/skills/skill-lifecycle-service.ts",
+      "sha256": "f442f322cff5ded5d3e182a1f88ca78ab90bff01f51579a7490df3bbcea0e3f9"
+    },
+    {
+      "path": "packages/core/src/skills/skill-package-repo.ts",
+      "sha256": "2e9b9a62a4a747046a7a9383c62ac201b9efe164190e0f38532f4ab13725b788"
+    },
+    {
+      "path": "packages/core/src/skills/skill-package-source.ts",
+      "sha256": "fa5686465c8a6f9ac6063a648cfeb3c6e152b3d90de72f20b339bb1ef8467907"
+    },
+    {
+      "path": "packages/core/src/skills/skill-package-store.ts",
+      "sha256": "2ed88422abe70d78679f8b8e227a6a9bc9d2f81b54804459f17c110c1857a67a"
+    },
+    {
+      "path": "packages/core/src/skills/skill-package-types.ts",
+      "sha256": "2cf5590c7aa1769f5b7e8b50b35023a4736d22000ad5ab6ab51ee61fa2c0f7b3"
+    },
+    {
+      "path": "packages/core/src/skills/skill-scanner.ts",
+      "sha256": "7bfaa2a9703b4af15493abbc26bc6f381cba1d92af062f6349b28c7a17bb8898"
+    },
+    {
+      "path": "packages/core/src/skills/skills-loader.ts",
+      "sha256": "515156badf0262fb299f37db9e1c51188e6b6be82f149d6117b918e61fb979a1"
+    },
+    {
+      "path": "packages/core/src/skills/skills-state.ts",
+      "sha256": "45fb270a67901123ff6aa75437ec78004659d2d9398b8dc59d60096591f2e5d7"
+    },
+    {
+      "path": "packages/core/src/time/current-time-tool.ts",
+      "sha256": "72c05afb0468628ec340ac99df0c5638395dd978c0fa6fd7176d947bf289de02"
+    },
+    {
+      "path": "packages/core/src/time/time-context.ts",
+      "sha256": "4dcd6b30160b891df8b218156011dd3158fa8f161298605f89e15a5ff6733afd"
+    },
+    {
+      "path": "packages/core/src/workspace/fs-error.ts",
+      "sha256": "e9db31ca750f7ae0ac2023a06a757d5d84953cf3d1559aefd3dde87e47adac05"
+    },
+    {
+      "path": "packages/core/src/workspace/read-file-tool.ts",
+      "sha256": "e067643efb9349affe56b0740c340323e58591f07fbefbc03ae123954527e501"
+    },
+    {
+      "path": "packages/core/src/workspace/workspace-paths.ts",
+      "sha256": "0c8b3c16d20ec0e76dde7ed0c46dc27b912f4874bec33888f9053a0534a56231"
+    },
+    {
+      "path": "packages/core/src/workspace/write-file-tool.ts",
+      "sha256": "6ab2cbfc4e359ba04b403459c4e271b98f557e14ded21717426520b354e08673"
+    },
+    {
+      "path": "packages/shared/src/approval-api.ts",
+      "sha256": "da2c6fbd48aeb0f95c08ae15be066b5cbe1d9e28b674baad71b8e9de3572dbd0"
+    },
+    {
+      "path": "packages/shared/src/approval-decision-schema.ts",
+      "sha256": "5c8a08d6dd85cc016785c5cf42bbf858305b4b55184a6e4b26a04da82f6d1324"
+    },
+    {
+      "path": "packages/shared/src/approval-schema.ts",
+      "sha256": "253049ef785b274768af760e3a8712badc84f81c8c1cd65296e9fbcab81cceb9"
+    },
+    {
+      "path": "packages/shared/src/avatar-schema.ts",
+      "sha256": "5dd694b668cff85eb286d7e7611dd18bdbfbc53b347440904d06d757bf79e350"
+    },
+    {
+      "path": "packages/shared/src/capability-outputs.ts",
+      "sha256": "1c49dab9de84fb3a5f53f47fd443928ad3f1f67c4756cc1297b845f53f2c7c38"
+    },
+    {
+      "path": "packages/shared/src/capability-schema.ts",
+      "sha256": "2d19079ec6b74e07c3c8ea21162edfc891d1a25cbe53ef98a07bacaa37d46365"
+    },
+    {
+      "path": "packages/shared/src/character-schema.ts",
+      "sha256": "ebae969a76691df78917d602d02bed545ef9c837d28edf77c1154ba33c6d4d5c"
+    },
+    {
+      "path": "packages/shared/src/chat-schema.ts",
+      "sha256": "f7e579b4a7ce5bcc91fe8a9bcebccb4415504d9433015003b1cadf7db2984eac"
+    },
+    {
+      "path": "packages/shared/src/config-schema.ts",
+      "sha256": "17a8f1db58c955c94cfb0d327d4d00e424dd0a1d007e65ccadcb2f032682e2e7"
+    },
+    {
+      "path": "packages/shared/src/connect-schema.ts",
+      "sha256": "d0c2e214a667339c2ecb237be63e2554173fc46686cfee73769b63f154f900b7"
+    },
+    {
+      "path": "packages/shared/src/effect-lifecycle-schema.ts",
+      "sha256": "fba28b65acf3a5bf895fd4790bc1f67d5094e29e05cb383bc0d8c3f095b249f0"
+    },
+    {
+      "path": "packages/shared/src/error-code-schema.ts",
+      "sha256": "2418c0c8fa85dd10211a59d7f9450c93515dcb9c6e3b04a1f5c3b97bad9d66eb"
+    },
+    {
+      "path": "packages/shared/src/extension-discovery-schema.ts",
+      "sha256": "31580ecd9648c0d9c9dfa4e583c0750dc345dcbfb70a392fa6d82bc35863a33e"
+    },
+    {
+      "path": "packages/shared/src/governance-api.ts",
+      "sha256": "f05a4684b9857a078f2f023b8180d3b225024c90b19f74d2a1008ac5571ac2d2"
+    },
+    {
+      "path": "packages/shared/src/governance-evaluator.ts",
+      "sha256": "c2ae445527c3c57c36fe74d54caf4b28b746c72fa4db4065da2ee9c19bd37e6e"
+    },
+    {
+      "path": "packages/shared/src/governance-registry.ts",
+      "sha256": "7c483b670ec0ed585f2e488cccd0ca30464ec1e5dbc41f81d7881aa061caba8c"
+    },
+    {
+      "path": "packages/shared/src/governance-schema.ts",
+      "sha256": "43bf928384f0a9ab6ebcd9943a1f4b4bbacb873dd0a972ed178be788be2b543d"
+    },
+    {
+      "path": "packages/shared/src/harness-schema.ts",
+      "sha256": "8250c3adf910e417009511a08eac3ad8cf0065293fa47733f992e261a4aae6c8"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-artifact-schema.ts",
+      "sha256": "656e5586b3860c42298b6b9118a5ab83b818722e2834cd0a9c941fbf7537882e"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-body-schema.ts",
+      "sha256": "7528d21008378083c73fe2d5f5f7745f3464c02f8c02bb5f1400e5444287add9"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-content-schema.ts",
+      "sha256": "99f2a5f9b8fa396b3bc111b5973f1c150529ddfd918d2bbdeb0bd4df2c739001"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-encoding.ts",
+      "sha256": "f442c87d47bddc22190d6634072063957f5976e81abbb7ac9e61e7d46c747a10"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-json-reader.ts",
+      "sha256": "b2fe655874810fe8d8adfcde6226b120c643fc6ca4d55ab11347d817ece3ee00"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-json.ts",
+      "sha256": "e99fa10863ab5998c70d288fd63bf8da48664285abc7154ffeae027aebb935c8"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-native-schema.ts",
+      "sha256": "323b62699561aa73453969ac7c3d4507aac606d698e4710c3f3121ba34dc32cf"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-primitives-schema.ts",
+      "sha256": "4255a4d6410ebaa3353e09def0caf34fd879453be07b754cd60ff88341908f64"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-read-schema.ts",
+      "sha256": "dec59a6b173b38627fca40273960ec39f11d152560072f43e660df4ce755de7a"
+    },
+    {
+      "path": "packages/shared/src/hindsight-application-replica-schema.ts",
+      "sha256": "f4d219fae3b0e79cbea1584d8b16a28bf9675b5542017693086403ff9002d250"
+    },
+    {
+      "path": "packages/shared/src/hindsight-backup-schema.ts",
+      "sha256": "d70f973ef43f525c9cd0aefa2b39fb9bc16c366af74a212330d7305c36409cc3"
+    },
+    {
+      "path": "packages/shared/src/hindsight-connection-schema.ts",
+      "sha256": "78dfe4b571f372c0127ac276b96391bc0da552eb40a4409cfe2397875b0fb8c2"
+    },
+    {
+      "path": "packages/shared/src/hindsight-current-canonical-schema.ts",
+      "sha256": "99a6ab8023ee4ff73e81b4f86f225e07a3c753c249f568112d74a1db846aedd6"
+    },
+    {
+      "path": "packages/shared/src/hindsight-current-capture-schema.ts",
+      "sha256": "4a3ca025331fbf6bf6616251a8061a57732c291b6ae2a29f35d9ce23e619d52e"
+    },
+    {
+      "path": "packages/shared/src/hindsight-current-evidence-schema.ts",
+      "sha256": "b03a2b615c42a9d1830bb9fdcb7b8a12079db10832385c25fe7546b2be6dcc79"
+    },
+    {
+      "path": "packages/shared/src/hindsight-current-invalidation-schema.ts",
+      "sha256": "31baad28c02e1e813aee6be098fe9d3a92e0d96b6842c325639fec563aced805"
+    },
+    {
+      "path": "packages/shared/src/hindsight-current-state-encoding.ts",
+      "sha256": "6462733bdb757c5e9c86b0fe121292bfc6755f33e83dbaf37d13288844e491b5"
+    },
+    {
+      "path": "packages/shared/src/hindsight-current-state-schema.ts",
+      "sha256": "d011c1cf00aa99e32e3d1d2dc25aa736d23d610c7716b35b59d96a98c4c4a9e7"
+    },
+    {
+      "path": "packages/shared/src/hindsight-current-status-schema.ts",
+      "sha256": "7d9d02912cf42467483107abe42573b39994ea7de901eee872c9497d763fbaa5"
+    },
+    {
+      "path": "packages/shared/src/hindsight-cutover-schema.ts",
+      "sha256": "5f0bfd7a055d625a9ccd1dd6257d554db7f4955d5818f71e126c410155eba537"
+    },
+    {
+      "path": "packages/shared/src/hindsight-cutover-verification-schema.ts",
+      "sha256": "cf9137b06b8f8a727348b3220b7a10236f68a1961634e4a806b839b16cbeab74"
+    },
+    {
+      "path": "packages/shared/src/hindsight-journal-schema.ts",
+      "sha256": "ccd216a911dacc634697a4ea83cbe71549db544197208ae29d87db6e04cdc51a"
+    },
+    {
+      "path": "packages/shared/src/hindsight-json-schema.ts",
+      "sha256": "f8475cddeff7839990400ddfe8a2545ed35fbea60e29d91a58c5738a37ea802f"
+    },
+    {
+      "path": "packages/shared/src/hindsight-local-coverage-schema.ts",
+      "sha256": "2770d0a4051e3110164afed2ce4cffb1ad3dd90409c36187483e50a827777500"
+    },
+    {
+      "path": "packages/shared/src/hindsight-memory-consumer-schema.ts",
+      "sha256": "f9451e289c3a5fed91e6b8fc792b269cecb1ea27fabf2f7e9275634ffe9592c5"
+    },
+    {
+      "path": "packages/shared/src/hindsight-native-proof-encoding.ts",
+      "sha256": "80eec3a0bae5fa452b3c31f03d8ab3e24617666a5b4b8e0e501d452a7930d946"
+    },
+    {
+      "path": "packages/shared/src/hindsight-native-result-schema.ts",
+      "sha256": "1330da8b631fb7a43eb0a13a7b587535690a1f66360cde7d6712fa2ccf1bfb07"
+    },
+    {
+      "path": "packages/shared/src/hindsight-native-runtime-schema.ts",
+      "sha256": "93e614c98227f26f5ac7bd6858b18eb99081704e5cdfb71e3e2a61958179e5c1"
+    },
+    {
+      "path": "packages/shared/src/hindsight-native-snapshot-schema.ts",
+      "sha256": "4ef14345b14972a66ac4bfdd1fee6d8825f64115838ff09c21eedfc6701a04b9"
+    },
+    {
+      "path": "packages/shared/src/hindsight-setup-schema.ts",
+      "sha256": "657a7ccff2bda2aefc6566f55946577722aa7a4f45057b55a7947607d2f26b6e"
+    },
+    {
+      "path": "packages/shared/src/hindsight-source-evidence-schema.ts",
+      "sha256": "9b2a1ad91f3fa6aca24c3366957d7b44f8e793a6a9eabc519f5f426b0fdfc08f"
+    },
+    {
+      "path": "packages/shared/src/hindsight-transition-delta-schema.ts",
+      "sha256": "567562c5e53865dcc3fa096145d0cb89649b129da683b2501e383551abe77cc5"
+    },
+    {
+      "path": "packages/shared/src/hindsight-transition-schema.ts",
+      "sha256": "14a1aee5534b816adf0fded93bca68c150344f8ecfb8d8c741a6bf1093d141f3"
+    },
+    {
+      "path": "packages/shared/src/hindsight-transition-source-schema.ts",
+      "sha256": "0165973ec7645d9e9a6bc66d642062775be9aa3d6632a406a477fb927c4c81f2"
+    },
+    {
+      "path": "packages/shared/src/host-approval-schema.ts",
+      "sha256": "36571dc887b632e4c0333dc6b1f0ac5d3ae0f47d3549e45f855d65072febfd01"
+    },
+    {
+      "path": "packages/shared/src/host-control-api.ts",
+      "sha256": "c77af6e5f3e2a7f8fde7e1e027e58a6598474da6be5b3657ec629d940cbca59e"
+    },
+    {
+      "path": "packages/shared/src/host-control-schema.ts",
+      "sha256": "7435d389f171c88ff9a62318d93457f9bd3a41380c676825653c72d907ab2ac4"
+    },
+    {
+      "path": "packages/shared/src/index.ts",
+      "sha256": "ed05d7df8e3a225f8c270a954592f712d7bb305d3f93232d30b9cae98036f3f0"
+    },
+    {
+      "path": "packages/shared/src/json-rpc-schema.ts",
+      "sha256": "07e4784cc7077446ce5a1bddb7187b2ac4688a20425f3d273575bad536d9ad58"
+    },
+    {
+      "path": "packages/shared/src/legacy-approval-schema.ts",
+      "sha256": "dc1f7210e1bc194c0bfa64f3740290af61a40510d27d201ddcc5260c92f64a75"
+    },
+    {
+      "path": "packages/shared/src/mcp-lifecycle-schema.ts",
+      "sha256": "66b70db984f7103f63b17a4d221ceb8608436be992c879162c1ce5ff130dbf35"
+    },
+    {
+      "path": "packages/shared/src/media-schema.ts",
+      "sha256": "bec63e50aa51ce7ca8dfd6c22f494c1dc01e589220bc40aeb8dc2b9552bf03d2"
+    },
+    {
+      "path": "packages/shared/src/memory-activation-schema.ts",
+      "sha256": "db7f0846c92c9c7081fb0cda6e8161b1e1811bc9f078d39be2826200d79fa5af"
+    },
+    {
+      "path": "packages/shared/src/memory-authority-status-schema.ts",
+      "sha256": "a353dacabb475e9b86c7e27e285845e8298f539152c26824ae741f5c742a92fb"
+    },
+    {
+      "path": "packages/shared/src/memory-hindsight-lifecycle-schema.ts",
+      "sha256": "86184e07812da3084b161c724c4d3dc065e6a2df556c663d4627f38428e13ece"
+    },
+    {
+      "path": "packages/shared/src/memory-hindsight-operation-schema.ts",
+      "sha256": "95e2916c29464a90ee021b209ce06ae54aa343e1e6a87af0abd179a95df0e6fb"
+    },
+    {
+      "path": "packages/shared/src/memory-local-onboarding-schema.ts",
+      "sha256": "53338edf6dfce41bd298d7834209291c20911295c61cabb5ca6e4610bfdb3df2"
+    },
+    {
+      "path": "packages/shared/src/memory-local-operation-schema.ts",
+      "sha256": "76fd9b24f1e130aaaf51e5b2f3113ef9bee23c01e8c48190b7b88b59ebac38bc"
+    },
+    {
+      "path": "packages/shared/src/memory-migration-schema.ts",
+      "sha256": "e93f61a4b670ccda2d32c89bafafa8207e14b1cc757160254fec7f92b5544c39"
+    },
+    {
+      "path": "packages/shared/src/memory-operation-schema.ts",
+      "sha256": "67c885a8ab9239fe6b67e0658a5dcb7f97b2a40422cb017991af42d483cfd861"
+    },
+    {
+      "path": "packages/shared/src/memory-policy-assessment-schema.ts",
+      "sha256": "e5d2bbb93a74c1d0e8829791cbf6a4ccec3b919e75552d61e463468c38ce6fda"
+    },
+    {
+      "path": "packages/shared/src/memory-provider-domain-schema.ts",
+      "sha256": "4b9003a28efb9e25eef561be21c2087020911a4d5ce804238e4a05585e3e3798"
+    },
+    {
+      "path": "packages/shared/src/memory-provider-envelope-schema.ts",
+      "sha256": "6fcfb6796fdba90399a5306c223bb422359fecd8b9905360d89b10fca2825754"
+    },
+    {
+      "path": "packages/shared/src/memory-provider-operation-schema.ts",
+      "sha256": "2c41dc8344f926b516fd128637290869d573a08c36696758c01e493805898cb4"
+    },
+    {
+      "path": "packages/shared/src/memory-replica-request-schema.ts",
+      "sha256": "33c5912065fdcc6aa19846456eb3faf84e5d357a7dab96294fd59a9fd11e4422"
+    },
+    {
+      "path": "packages/shared/src/memory-replica-schedule-schema.ts",
+      "sha256": "daf32f621ece2bb3bd6b42911d3e59457eb2fcbd756412778eeb7fdb3eaf15d9"
+    },
+    {
+      "path": "packages/shared/src/memory-replica-schema.ts",
+      "sha256": "1c1e60023b7d449bcabac16e6b178ff9f5b2b4e6f37a1f12510d51b06d045b24"
+    },
+    {
+      "path": "packages/shared/src/memory-schema.ts",
+      "sha256": "d1ea9668a1de41632c3a3cdc33c2c3b45908754dc23eb45705617c69878cc5bb"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-candidate-schema.ts",
+      "sha256": "447253d17e3b2223ab8100678cd2657233bb965981eb2b520f5ad3cfb845be7b"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-driver-schema.ts",
+      "sha256": "76fad0549a96ff860e607662808204d8bd161c23b52d137d28c809a7e9aa1b3d"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-preparation-schema.ts",
+      "sha256": "1d5098b7b7af5b58cf7b142e626ffdb93c84f91e8ff22c508130e8334963df7d"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-publication-schema.ts",
+      "sha256": "679d05cdf244cf7f0aa9fdf66be94ebf56b4e578a5977bc67e19d032454981c4"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-queue-schema.ts",
+      "sha256": "9bef81eda7ae978b3bf0fcebde0e4d74b8346fda32155e81759dc8d55993895d"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-schema.ts",
+      "sha256": "ba6aea9d4239eb26889586a1a9f40819363d574adf04bc68c7fc01b964a2e900"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-source-schema.ts",
+      "sha256": "e6007c5cc56aca072e9b0f3358dcd64a5a9974f48ad9841b27dfd81015762f39"
+    },
+    {
+      "path": "packages/shared/src/observability-presentation.ts",
+      "sha256": "d89d8cc6b0750f5a38963174c26fa756e6e7b60b40b47d70a97781d98dca388c"
+    },
+    {
+      "path": "packages/shared/src/observability-schema.ts",
+      "sha256": "c6fe1edc9d0d5e4e7930fb559ed7884b120d511a492b45dac7511f1611c204e5"
+    },
+    {
+      "path": "packages/shared/src/pending-memory-schema.ts",
+      "sha256": "d27e70ce081bbb5965cb215b6d249466aae4f83523df392c13851fad16a97066"
+    },
+    {
+      "path": "packages/shared/src/perception-schema.ts",
+      "sha256": "a4a025577a86720eb392134750914319f8d44ba314a94ca2554a30102e77ace9"
+    },
+    {
+      "path": "packages/shared/src/permission-level-schema.ts",
+      "sha256": "5ec92f2688bd3643fba628bb96a43613d7e846bc3e22e9b0a4a296b0acc35e13"
+    },
+    {
+      "path": "packages/shared/src/ping-schema.ts",
+      "sha256": "ee81bedd7627be7e26089ebebb3acb6b7a9f2659e09875c614de78c839b5d3e6"
+    },
+    {
+      "path": "packages/shared/src/run-event-schema.ts",
+      "sha256": "f90c5c32e638ded70d8dd393a872413752cfa0bc2bc2b5002c7207eec5cd8f5e"
+    },
+    {
+      "path": "packages/shared/src/scheduled-task-schema.ts",
+      "sha256": "da9cd571e4b73da8eb9fe8ce5955c0abd81cc7a4c3aa5763cb53d2fa627f0dc3"
+    },
+    {
+      "path": "packages/shared/src/secret-catalog-schema.ts",
+      "sha256": "f4a2a1c137f926f6a98e249e7a4d05403cbb07262d7c63f3519e0ecf42262f34"
+    },
+    {
+      "path": "packages/shared/src/skill-lifecycle-schema.ts",
+      "sha256": "c1e81c742fbab480b3d55fcf3c583dfaa95c39f2994301134d1affefb32029cb"
+    },
+    {
+      "path": "packages/shared/src/timeline-schema.ts",
+      "sha256": "37b08b9bc5e6bce03939408a31ad7e68df53c712cbc9c10b747061e1e2b5fa11"
+    },
+    {
+      "path": "packages/shared/src/timing-policy-schema.ts",
+      "sha256": "a46cf9f3f4d199e71f30b4978561e401b6b0756de5207d2d9d88e1b7f7145d47"
+    },
+    {
+      "path": "packages/shared/src/ws-defaults.ts",
+      "sha256": "2c5f23d867f39ed8d9bc1d5754950badd7fbb416a782f6d764760535035137db"
+    }
+  ]
+}

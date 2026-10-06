@@ -1,0 +1,64 @@
+{
+  "meaning": "Full offline suite before additive union test, followed by final fixed-union regression. Owned PG explicitly skipped in full suite.",
+  "runs": [
+    {
+      "argv": [
+        "H:/hindsight/.venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "--noconftest",
+        "-o",
+        "addopts=",
+        "test_w5_http_diagnostic.py",
+        "-q",
+        "--tb=short"
+      ],
+      "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+      "exitCode": 0,
+      "stdout": "35 passed, 1 skipped in 81.13s (0:01:21)",
+      "evidence": "Completed exec session 67142; before addition of fixed-union corruption test and embedded dependency digest."
+    },
+    {
+      "argv": [
+        "H:/hindsight/.venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "--noconftest",
+        "-o",
+        "addopts=",
+        "test_w5_http_diagnostic.py",
+        "-k",
+        "fixed_inventory_union",
+        "-q",
+        "--tb=short"
+      ],
+      "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+      "timeoutSeconds": 60,
+      "exitCode": 0,
+      "milliseconds": 13188.00000000192,
+      "stdout": ".                                                                        [100%]\n1 passed, 36 deselected in 8.96s\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "H:/hindsight/.venv/Scripts/python.exe",
+        "-m",
+        "pytest",
+        "--noconftest",
+        "-o",
+        "addopts=",
+        "test_w5_http_diagnostic.py",
+        "-k",
+        "reports or report_digest or prelaunch_inventory",
+        "-q",
+        "--tb=short"
+      ],
+      "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+      "timeoutSeconds": 60,
+      "exitCode": 0,
+      "milliseconds": 11468.999999997322,
+      "stdout": "......................................................                   [100%]\n54 passed, 15 deselected in 8.21s\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -9,7 +9,6 @@ import { createLogger } from "../../logging/logger.ts";
 import { createCanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 import { createHindsightReplicaScheduler, type HindsightReplicaScheduler } from "../hindsight/hindsight-replica-scheduler.ts";
 import type { HindsightReplicaRunInput } from "../hindsight/hindsight-replica-sync-runner.ts";
-import { MemoryOperationRefusal } from "./memory-operation-contract.ts";
 import { AT, CHARACTER, GLOBAL, fakeSetup } from "./memory-operation-fixtures.ts";
 import { createMemoryOperationService, type MemoryOperationService } from "./memory-operation-service.ts";
 
@@ -36,10 +35,11 @@ function fixture(banks: MemoryReplicaBank[] = [GLOBAL]) {
       replicaEpochId: UUID, endCursor: 8, snapshotId: UUID, snapshotCursor: 8, snapshotManifestDigest: "a".repeat(64), manifestDigest: "b".repeat(64), verifiedAt: AT } });
   }
   const calls: HindsightReplicaRunInput[] = []; const gates: Array<() => void> = [];
-  let holding = false;
+  let holding = false; let failManual = false;
   const run = async (input: HindsightReplicaRunInput) => {
     calls.push(input);
     if (holding) await new Promise<void>((resolve) => gates.push(resolve));
+    if (failManual && input.run.trigger === "manual") throw new Error("HINDSIGHT_UNREACHABLE");
     const checkpoint = readReplicaCheckpoint(db, input.bank.bankId);
     if (!checkpoint) throw new Error("fixture missing checkpoint");
     return { checkpoint, observedCursor: checkpoint.endCursor };
@@ -59,6 +59,7 @@ function fixture(banks: MemoryReplicaBank[] = [GLOBAL]) {
   };
   const untilCalls = async (count: number) => { while (calls.length < count) await new Promise((resolve) => setImmediate(resolve)); };
   return { db, repo, calls, build, untilCalls, hold: () => { holding = true; }, release: () => { holding = false; gates.splice(0).forEach((open) => open()); },
+    failManual: () => { failManual = true; },
     advance: (ms: number) => { now = new Date(Date.parse(now) + ms).toISOString(); } };
 }
 
@@ -82,8 +83,6 @@ describe("replica.sync against the real B5 scheduler", () => {
     expect(f.calls[0]?.run.trigger).toBe("catch_up");
     const admitted = service.submit(sync());
     expect(service.status(admitted.operationId).state).toBe("admitted");
-    // The Bank is busy with the earlier run: nothing may be cancelled or fabricated while it settles.
-    expect(() => service.cancel(admitted.operationId)).toThrow(MemoryOperationRefusal);
     f.release(); f.hold(); await f.untilCalls(2);
     expect(f.calls[1]?.run.trigger).toBe("manual");
     expect(service.status(admitted.operationId).state).toBe("running");
@@ -114,9 +113,79 @@ describe("replica.sync against the real B5 scheduler", () => {
     scheduler.start();
     const admitted = service.submit(sync()); await service.stop();
     expect(f.calls).toEqual([]);
-    expect(f.repo.get("global")?.pendingManualKind).toBe("incremental");
+    expect(f.repo.get("global")?.pendingManualKind).toBeNull();
     expect(changes.map((operation) => operation.state)).toEqual(["admitted", "failed"]);
     expect(service.status(admitted.operationId)).toMatchObject({ state: "failed", reason: "producer_failed", errorCode: "HINDSIGHT_REPLICA_SCHEDULE_STALE",
       result: { kind: "replica", errorCode: "HINDSIGHT_REPLICA_SCHEDULE_STALE", nextAction: "automatic_retry_scheduled" } });
+  });
+
+  it.each([0, 1_000])("attributes a failed manual claim after an earlier success with %i ms between admission and settlement", async (elapsed) => {
+    const f = fixture(); const { scheduler, service } = f.build();
+    f.hold(); f.failManual(); scheduler.start();
+    const drain = scheduler.tick(); await f.untilCalls(1);
+    const operation = service.submit(sync()); f.advance(elapsed); f.release();
+    await drain; await service.stop();
+    const settled = service.status(operation.operationId);
+    expect(f.calls.map((call) => call.run.trigger)).toEqual(["catch_up", "manual"]);
+    expect(settled).toMatchObject({ state: "failed", errorCode: "HINDSIGHT_UNREACHABLE",
+      result: { errorCode: "HINDSIGHT_UNREACHABLE", nextAction: "automatic_retry_scheduled" } });
+    const ref = settled.producer;
+    if (ref?.kind !== "replica" || !ref.requestId) throw new Error("missing exact identity");
+    expect(f.repo.request(ref.requestId)).toMatchObject({ state: "failed", claim: f.calls[1]!.run.lease });
+    expect(f.calls[1]!.run.manualRequestId).toBe(ref.requestId);
+  });
+
+  it("cancels only its queued request while an earlier run holds the same Bank", async () => {
+    const f = fixture(); const { scheduler, service } = f.build();
+    f.hold(); scheduler.start(); const drain = scheduler.tick(); await f.untilCalls(1);
+    const operation = service.submit(sync());
+    expect(service.cancel(operation.operationId).state).toBe("cancelled");
+    expect(f.repo.get("global")?.run?.lease).toEqual(f.calls[0]!.run.lease);
+    f.release(); await drain; await service.stop();
+    expect(f.calls).toHaveLength(1);
+    expect(service.status(operation.operationId).state).toBe("cancelled");
+  });
+
+  it("never attributes another Bank's supervisor error to an unclaimed request", async () => {
+    const f = fixture([GLOBAL, CHARACTER]);
+    const broken: HindsightReplicaSchedulerRepo = { ...f.repo, claim: (input) => {
+      if (input.bankId === GLOBAL.bankId) throw new Error("HINDSIGHT_REPLICA_SCHEDULE_STALE");
+      return undefined;
+    } };
+    const { scheduler, service } = f.build(broken); scheduler.start();
+    const operation = service.submit(sync(CHARACTER.bankId)); await service.stop();
+    expect(scheduler.lastError()).toBe("HINDSIGHT_REPLICA_SCHEDULE_STALE");
+    expect(service.status(operation.operationId).state).toBe("admitted");
+    expect(service.cancel(operation.operationId).state).toBe("cancelled");
+  });
+
+  it("keeps a committed request unresolved when the admission status read fails", async () => {
+    const f = fixture(); let unreadable = false;
+    const repo: HindsightReplicaSchedulerRepo = { ...f.repo,
+      requestManual: (input) => { const state = f.repo.requestManual(input); unreadable = true; return state; },
+      get: (bankId) => { if (unreadable) throw new Error("fixture status unavailable"); return f.repo.get(bankId); },
+    };
+    const { scheduler, service, changes } = f.build(repo); scheduler.start();
+    const operation = service.submit(sync()); await service.stop();
+    expect(f.repo.get(GLOBAL.bankId)?.pendingManualRequestId).toBeTruthy();
+    expect(changes.map((row) => row.state)).toEqual(["admitted"]);
+    unreadable = false;
+    expect(service.status(operation.operationId).state).toBe("admitted");
+    await scheduler.tick();
+    expect(service.status(operation.operationId).state).toBe("completed");
+    expect(f.calls.filter((call) => call.run.trigger === "manual")).toHaveLength(1);
+  });
+
+  it("does not turn an unavailable receipt read into a failed operation after execution", async () => {
+    const f = fixture(); let unreadable = true;
+    const repo: HindsightReplicaSchedulerRepo = { ...f.repo, request: (requestId) => {
+      if (unreadable) throw new Error("fixture receipt unavailable"); return f.repo.request(requestId);
+    } };
+    const { scheduler, service, changes } = f.build(repo); scheduler.start();
+    const operation = service.submit(sync()); await service.stop();
+    expect(changes.map((row) => row.state)).toEqual(["admitted"]);
+    unreadable = false;
+    expect(service.status(operation.operationId).state).toBe("completed");
+    expect(f.calls.filter((call) => call.run.trigger === "manual")).toHaveLength(1);
   });
 });

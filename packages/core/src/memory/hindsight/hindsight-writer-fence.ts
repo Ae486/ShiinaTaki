@@ -24,10 +24,11 @@ export interface HindsightWriters {
   captureRun(characterId: string, signal?: AbortSignal): Promise<CapturedMemoryRun>;
 }
 
-export function fenceHindsightWriters(writers: HindsightWriters, fence: CanonicalLocalWriteFence): HindsightWriters {
+export function fenceHindsightWriters(writers: HindsightWriters, fence: CanonicalLocalWriteFence, canQueue?: () => boolean): HindsightWriters {
   const { engine, tidy } = writers;
+  const policy = { ...POLICY, canQueue };
   return {
-    engine: { ...engine, createTools: (characterId, seq) => fenceMemoryToolWrites(engine.createTools(characterId, seq), fence, POLICY) },
+    engine: { ...engine, createTools: (characterId, seq) => fenceMemoryToolWrites(engine.createTools(characterId, seq), fence, policy) },
     maintenance: { run: (characterId, origin) => fence.admit(() => writers.maintenance.run(characterId, origin)) },
     memoryFlush: { prepareRetirement: async (request) => {
       try { return await fence.admit(() => writers.memoryFlush.prepareRetirement(request)); }
@@ -42,7 +43,7 @@ export function fenceHindsightWriters(writers: HindsightWriters, fence: Canonica
     // Chat keeps working through a capture: the Run's reads stay open and its write tools refuse structurally.
     captureRun: async (characterId, signal) => {
       const run = await writers.captureRun(characterId, signal);
-      return Object.freeze({ ...run, tools: fenceMemoryToolWrites(run.tools, fence, POLICY) });
+      return Object.freeze({ ...run, tools: fenceMemoryToolWrites(run.tools, fence, policy) });
     },
   };
 }

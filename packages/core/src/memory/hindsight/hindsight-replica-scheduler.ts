@@ -1,6 +1,6 @@
 /**
  * INPUT:  configured Banks, durable schedule/checkpoints, and the bounded replica data-plane runner
- * OUTPUT: asynchronous single-flight execution, bounded supervisor retries, and truthful per-Bank status
+ * OUTPUT: asynchronous single-flight execution, bounded supervisor retries, exact manual outcomes and per-Bank status
  * POS:    core/memory/hindsight — deterministic B5 scheduling; no chat, Heartbeat policy, Pending replay, or authority wiring
  */
 import { z } from "zod";
@@ -17,12 +17,17 @@ import { replicaErrorCode } from "./hindsight-replica-errors.ts";
 import type { HindsightReplicaSchedulerRunner } from "./hindsight-replica-sync-runner.ts";
 
 export interface HindsightReplicaScheduler {
+  request: HindsightReplicaSchedulerRepo["request"];
   start(): void;
   stop(): Promise<void>;
+  /** Stops new scheduler admissions and settles the accepted run without cancelling its actual producer. */
+  pause(): Promise<void>;
+  /** Irreversibly closes this scheduler's dispatch without awaiting a lost Native reply. */
+  retire(): void;
   tick(): Promise<void>;
-  requestManual(bankId: string, kind?: MemoryReplicaRunKind): MemoryReplicaSyncStatus;
-  /** Clears an unclaimed manual request; throws HINDSIGHT_REPLICA_BUSY once the run is claimed. */
-  cancelManual(bankId: string): MemoryReplicaSyncStatus;
+  requestManual(bankId: string, kind?: MemoryReplicaRunKind, requestId?: string): MemoryReplicaSyncStatus;
+  /** Cancels the exact queued request even while a prior run is active; claimed requests refuse. */
+  cancelManual(bankId: string, requestId?: string): MemoryReplicaSyncStatus;
   verifiedReconnect(): void;
   status(bankId?: string): MemoryReplicaSyncStatus[];
   lastError(): MemoryReplicaErrorCode | null;
@@ -49,6 +54,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
   private readonly leaseDurationMs: number;
   private readonly runTimeoutMs: number;
   private running = false;
+  private transitionPaused = false;
   private rerun = false;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private active: Promise<void> | undefined;
@@ -63,6 +69,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
   }
 
   start(): void {
+    if (this.transitionPaused) throw new Error("MEMORY_AUTHORITY_FENCED");
     if (this.running) return;
     for (const bank of this.banks()) {
       const state = this.input.repo.ensureBank({ bank });
@@ -81,6 +88,24 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
     await this.active;
   }
 
+  async pause(): Promise<void> {
+    this.transitionPaused = true;
+    this.running = false;
+    this.clearWake();
+    for (const bank of this.banks()) {
+      const requestId = this.input.repo.get(bank.bankId)?.pendingManualRequestId;
+      if (requestId) this.input.repo.cancelManual(bank.bankId, requestId);
+    }
+    await this.active;
+  }
+
+  retire(): void {
+    this.transitionPaused = true;
+    this.running = false;
+    this.clearWake();
+    this.cancel?.();
+  }
+
   tick(): Promise<void> {
     if (this.active) return this.active;
     if (!this.running) return Promise.resolve();
@@ -92,11 +117,12 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
     return this.active;
   }
 
-  requestManual(bankId: string, kind: MemoryReplicaRunKind = "incremental"): MemoryReplicaSyncStatus {
+  requestManual(bankId: string, kind: MemoryReplicaRunKind = "incremental", requestId?: string): MemoryReplicaSyncStatus {
+    if (this.transitionPaused) throw new Error("MEMORY_AUTHORITY_FENCED");
     const bank = this.banks().find((candidate) => candidate.bankId === bankId);
     if (!bank) throw new Error("HINDSIGHT_REPLICA_BANK_NOT_SCHEDULED");
     this.input.repo.ensureBank({ bank });
-    this.input.repo.requestManual({ bankId, kind });
+    this.input.repo.requestManual({ bankId, kind, requestId });
     this.supervisorRetries.delete(bankId);
     this.rerun = true;
     this.armTimer();
@@ -106,6 +132,7 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
   }
 
   verifiedReconnect(): void {
+    if (this.transitionPaused) throw new Error("MEMORY_AUTHORITY_FENCED");
     for (const bank of this.banks()) {
       const state = this.input.repo.ensureBank({ bank });
       this.input.repo.recover(bank.bankId);
@@ -124,11 +151,12 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
   }
 
   lastError(): MemoryReplicaErrorCode | null { return this.error; }
+  request(requestId: string) { return this.input.repo.request(requestId); }
 
   started(): boolean { return this.running; }
 
-  cancelManual(bankId: string): MemoryReplicaSyncStatus {
-    this.input.repo.cancelManual(bankId);
+  cancelManual(bankId: string, requestId?: string): MemoryReplicaSyncStatus {
+    this.input.repo.cancelManual(bankId, requestId);
     const status = this.status(bankId)[0];
     if (!status) throw new Error("HINDSIGHT_REPLICA_BANK_NOT_SCHEDULED");
     return status;
@@ -146,9 +174,16 @@ class ReplicaScheduler implements HindsightReplicaScheduler {
       this.rerun = false;
       for (const bank of this.banks()) {
         if (!this.running) return;
-        try { await this.runBank(bank); }
+        let requestId: string | null | undefined;
+        try { requestId = this.input.repo.get(bank.bankId)?.pendingManualRequestId; await this.runBank(bank); }
         catch (error) {
           this.error = replicaErrorCode(error);
+          if (requestId) {
+            // Persist only the request this Bank actually attempted. If storage itself failed, retain the open
+            // identity for later inspection; a process-global supervisor diagnostic cannot settle it.
+            try { this.input.repo.failManual({ bankId: bank.bankId, requestId, errorCode: this.error }); }
+            catch { /* No durable outcome was written; never manufacture one in the operation projection. */ }
+          }
           // The database may be unable to persist failure state. Bound supervisor wakes without fabricating a run.
           this.supervisorRetries.set(bank.bankId, Date.parse(this.input.repo.now()) + REPLICA_RETRY_DELAYS_MS[0]);
         }

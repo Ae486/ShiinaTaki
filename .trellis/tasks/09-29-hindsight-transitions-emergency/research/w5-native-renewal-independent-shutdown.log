@@ -1,0 +1,11 @@
+.Executing <Task pending name='Task-14' coro=<ShutdownTest.test_real_uvicorn_hanging_request_is_cancelled_before_audit() running at H:\TakiAgent\.trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-supervisor-shutdown-test.py:102> wait_for=<Future pending cb=[Task.task_wakeup()] created at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py:427> cb=[_run_until_complete_cb() at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py:180] created at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py:100> took 0.281 seconds
+H:\hindsight\.venv\Lib\site-packages\websockets\legacy\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions
+  warnings.warn(  # deprecated in 14.0 - 2024-11-09
+H:\hindsight\.venv\Lib\site-packages\uvicorn\protocols\websockets\websockets_impl.py:17: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated
+  from websockets.server import WebSocketServerProtocol
+Executing <Task pending name='Task-15' coro=<Server.serve() running at H:\hindsight\.venv\Lib\site-packages\uvicorn\server.py:71> created at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\tasks.py:374> took 0.203 seconds
+..
+----------------------------------------------------------------------
+Ran 3 tests in 1.513s
+
+OK

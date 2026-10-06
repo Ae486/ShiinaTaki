@@ -1,0 +1,263 @@
+✖ one explicit replacement survives append ACK loss/restart and reuses exact admitted request (1371.0447ms)
+✖ a failure before append preserves old checkpoint and permits only the explicitly approved renewal (1019.2835ms)
+✖ renewal refuses requestId without creating a replacement (994.0893ms)
+✖ renewal refuses previewHash without creating a replacement (947.7209ms)
+✖ renewal refuses checkpoint without creating a replacement (953.5635ms)
+✖ renewal refuses anchor without creating a replacement (923.1119ms)
+✖ renewal refuses block without creating a replacement (905.4021ms)
+✖ renewal refuses receipt without creating a replacement (916.7051ms)
+✖ renewal refuses orphan without creating a replacement (909.7748ms)
+✖ renewal refuses admitted without creating a replacement (904.7628ms)
+✖ renewal refuses during-preview without creating a replacement (915.1561ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 0
+ℹ fail 11
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12850.3463
+
+✖ failing tests:
+
+test at .trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-renewal.test.mjs:53:1
+✖ one explicit replacement survives append ACK loss/restart and reuses exact admitted request (1371.0447ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '3da6feb7ce475b2108bdc9aa9f0610b64e3784096ef102b8b68cf5287c11e704'
+  - 'dae8abe0939e8d2131b39080c1c786c39581d24ab20bd9b3356c3adb73343d5b'
+  
+      at validateOriginal (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:51:63)
+      at loadReentryRenewalApproval (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:36:3)
+      at fixture (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:46:25)
+      at async TestContext.<anonymous> (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:54:13)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '3da6feb7ce475b2108bdc9aa9f0610b64e3784096ef102b8b68cf5287c11e704',
+    expected: 'dae8abe0939e8d2131b39080c1c786c39581d24ab20bd9b3356c3adb73343d5b',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-renewal.test.mjs:77:1
+✖ a failure before append preserves old checkpoint and permits only the explicitly approved renewal (1019.2835ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + 'a1aeecaef7bc8a016d0485313e52ff86631229f16a0ecef4b7408303daf7b010'
+  - 'f68f308803daf3bd45d698b94877464efc80bea927bf4f97d1f45e8e5226a062'
+  
+      at validateOriginal (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:51:63)
+      at loadReentryRenewalApproval (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:36:3)
+      at fixture (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:46:25)
+      at async TestContext.<anonymous> (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:78:13)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'a1aeecaef7bc8a016d0485313e52ff86631229f16a0ecef4b7408303daf7b010',
+    expected: 'f68f308803daf3bd45d698b94877464efc80bea927bf4f97d1f45e8e5226a062',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-renewal.test.mjs:92:3
+✖ renewal refuses requestId without creating a replacement (994.0893ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '6dc31e09ba1d00086a04b93aa8f4c83bfabcf5b5c1bc46841ddd00fef7c00088'
+  - '275db90c5c4fdbd90339e20693e0d6a268624e8b6ca216716b5afa72f0d95abb'
+  
+      at validateOriginal (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:51:63)
+      at loadReentryRenewalApproval (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:36:3)
+      at fixture (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:46:25)
+      at async TestContext.<anonymous> (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:93:15)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '6dc31e09ba1d00086a04b93aa8f4c83bfabcf5b5c1bc46841ddd00fef7c00088',
+    expected: '275db90c5c4fdbd90339e20693e0d6a268624e8b6ca216716b5afa72f0d95abb',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-renewal.test.mjs:92:3
+✖ renewal refuses previewHash without creating a replacement (947.7209ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '6b9d9fbeff89f59519b8e56ad75a1610e8dcd3adc5d0918ee8e6a3e81aa5ec46'
+  - 'cfd1ad039e320e409ce7050fd71c703a9973330ae2ac8ea28597f67f615b3a29'
+  
+      at validateOriginal (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:51:63)
+      at loadReentryRenewalApproval (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:36:3)
+      at fixture (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:46:25)
+      at async TestContext.<anonymous> (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:93:15)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '6b9d9fbeff89f59519b8e56ad75a1610e8dcd3adc5d0918ee8e6a3e81aa5ec46',
+    expected: 'cfd1ad039e320e409ce7050fd71c703a9973330ae2ac8ea28597f67f615b3a29',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-renewal.test.mjs:92:3
+✖ renewal refuses checkpoint without creating a replacement (953.5635ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '73fcfe1e46b9a21d8ebdc7ae6bfb7dfee312526d925c29725b76dfd06b0da418'
+  - '438397d3927ec5bcd5552664192cadc4968e11f2d27cd172ed8cf02b320f43ca'
+  
+      at validateOriginal (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:51:63)
+      at loadReentryRenewalApproval (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:36:3)
+      at fixture (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:46:25)
+      at async TestContext.<anonymous> (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:93:15)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '73fcfe1e46b9a21d8ebdc7ae6bfb7dfee312526d925c29725b76dfd06b0da418',
+    expected: '438397d3927ec5bcd5552664192cadc4968e11f2d27cd172ed8cf02b320f43ca',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-renewal.test.mjs:92:3
+✖ renewal refuses anchor without creating a replacement (923.1119ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '9c7682e08a49527165c254d62d1b8616f939c5224d912c0d8d6b13a7540b2130'
+  - 'bd6890ab211fba59cb73bc063c062451a99e6e184db615360be4978accc9175f'
+  
+      at validateOriginal (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:51:63)
+      at loadReentryRenewalApproval (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:36:3)
+      at fixture (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:46:25)
+      at async TestContext.<anonymous> (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:93:15)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '9c7682e08a49527165c254d62d1b8616f939c5224d912c0d8d6b13a7540b2130',
+    expected: 'bd6890ab211fba59cb73bc063c062451a99e6e184db615360be4978accc9175f',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-renewal.test.mjs:92:3
+✖ renewal refuses block without creating a replacement (905.4021ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '91ab2c4b73d16d463ad7bad5f7060bc7a87164f9a0a445a2f8a43c61ecaa4fd0'
+  - '86e15830b40662db6372bcd9c632d31452aad5a64d102266fb34faf9fe4358de'
+  
+      at validateOriginal (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:51:63)
+      at loadReentryRenewalApproval (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:36:3)
+      at fixture (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:46:25)
+      at async TestContext.<anonymous> (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:93:15)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '91ab2c4b73d16d463ad7bad5f7060bc7a87164f9a0a445a2f8a43c61ecaa4fd0',
+    expected: '86e15830b40662db6372bcd9c632d31452aad5a64d102266fb34faf9fe4358de',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-renewal.test.mjs:92:3
+✖ renewal refuses receipt without creating a replacement (916.7051ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '7d44760f66241e5408549911b72597b5245ecc4b727823832d3414e440505716'
+  - 'b06c1a702d433d21c9ca64d5697cc8d109a6784a173e295765768dd98bbba83a'
+  
+      at validateOriginal (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:51:63)
+      at loadReentryRenewalApproval (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:36:3)
+      at fixture (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:46:25)
+      at async TestContext.<anonymous> (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:93:15)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '7d44760f66241e5408549911b72597b5245ecc4b727823832d3414e440505716',
+    expected: 'b06c1a702d433d21c9ca64d5697cc8d109a6784a173e295765768dd98bbba83a',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-renewal.test.mjs:92:3
+✖ renewal refuses orphan without creating a replacement (909.7748ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '1bedb6e59d06291131227232678d65f5fca56691ea0e5c34e67ad8599d3b7161'
+  - 'eab749826f8dca377e12517af13d5665f36f3d5876d6ef48995159a607f33138'
+  
+      at validateOriginal (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:51:63)
+      at loadReentryRenewalApproval (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:36:3)
+      at fixture (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:46:25)
+      at async TestContext.<anonymous> (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:93:15)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '1bedb6e59d06291131227232678d65f5fca56691ea0e5c34e67ad8599d3b7161',
+    expected: 'eab749826f8dca377e12517af13d5665f36f3d5876d6ef48995159a607f33138',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-renewal.test.mjs:92:3
+✖ renewal refuses admitted without creating a replacement (904.7628ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '3d17230a3a3dc44fac845152e8bb931bc6c962685408e83efd29c2ec7b31728a'
+  - '5b5bb68bc72bbda2bc0921e28cc1bf9782160c6e5a6bc30469b510ad8b5230f0'
+  
+      at validateOriginal (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:51:63)
+      at loadReentryRenewalApproval (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:36:3)
+      at fixture (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:46:25)
+      at async TestContext.<anonymous> (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:93:15)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '3d17230a3a3dc44fac845152e8bb931bc6c962685408e83efd29c2ec7b31728a',
+    expected: '5b5bb68bc72bbda2bc0921e28cc1bf9782160c6e5a6bc30469b510ad8b5230f0',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at .trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-renewal.test.mjs:92:3
+✖ renewal refuses during-preview without creating a replacement (915.1561ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '85cbfcbbb63e2141b70d79bd9f75705e8c37c27692ffeb85aa984d1990b5766f'
+  - 'a349b83e452d578848b206c3dcb01c862912998346942d8cd15ae1f822d67f82'
+  
+      at validateOriginal (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:51:63)
+      at loadReentryRenewalApproval (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.mjs:36:3)
+      at fixture (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:46:25)
+      at async TestContext.<anonymous> (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-renewal.test.mjs:93:15)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '85cbfcbbb63e2141b70d79bd9f75705e8c37c27692ffeb85aa984d1990b5766f',
+    expected: 'a349b83e452d578848b206c3dcb01c862912998346942d8cd15ae1f822d67f82',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

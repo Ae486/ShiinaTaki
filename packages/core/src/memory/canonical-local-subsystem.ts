@@ -1,7 +1,7 @@
 /**
  * INPUT:  active Local epoch, timeline, canonical repositories and the process Utility Slot
  * OUTPUT: real Local ingestion/tidy/retention, source witnessing and pre-retirement durability behind one write fence;
- *         start() owns the retention worker; fence/ingestion are exposed for the Hindsight activation drain
+ *         start() owns retention; unresolved source transitions refuse reconstruction until positive release
  * POS:    core/memory — provider-specific background composition built as a draft and started by the runtime binding; Compaction remains Core-owned
  */
 import type { MemoryConfig } from "../config/memory-config.ts";
@@ -20,12 +20,15 @@ import { fenceCanonicalLocalWriters } from "./canonical-local-writers.ts";
 import type { MemoryWriteOp } from "./episodic-writer.ts";
 import { createTidyPass } from "./tidy-pass.ts";
 import type { UtilitySlot } from "./utility-slot.ts";
+import { sourceTransition } from "./transitions/transition-queued-provider.ts";
 
 export function createCanonicalLocalSubsystem(input: {
   db: Database; epochId: string; promptDir: string; timeline: TimelineRepo;
   utility: UtilitySlot; config: MemoryConfig; logger: Logger;
 }) {
-  const engine = createCanonicalLocalRuntime(input);
+  if (sourceTransition(input.db, input.epochId)) throw new Error("MEMORY_TRANSITION_OUTCOME_UNKNOWN");
+  const fence = createCanonicalLocalWriteFence();
+  const engine = createCanonicalLocalRuntime({ ...input, writeFence: fence });
   const autoState = createMemoryAutoRepo(input.db);
   const events = createMemoryEventsRepo(input.db);
   const journal = createCanonicalIngestionRepo({ db: input.db, maintenance: engine.maintenanceStore });
@@ -36,8 +39,8 @@ export function createCanonicalLocalSubsystem(input: {
   for (const bank of engine.authority.listBanks(input.epochId)) {
     if (bank.scope.kind === "character") ingestion.initializeBaseline(bank.scope.characterId);
   }
-  const fence = createCanonicalLocalWriteFence();
   const fenced = fenceCanonicalLocalWriters({ engine, ingestion, tidy, fence,
+    canQueue: () => sourceTransition(input.db, input.epochId) !== undefined,
     onIngestionFailed: (characterId) => input.logger.warn({ code: "MEMORY_INGESTION_FAILED", characterId }, "canonical memory ingestion failed; will retry") });
   // Retention starts only once the binding is published: a draft that fails installation must leave no worker behind.
   let retention: { stop(): void } | undefined;
@@ -48,7 +51,8 @@ export function createCanonicalLocalSubsystem(input: {
   };
   const writeMemory: MemoryWriteOp = ({ layer, ...request }) => fenced.engine.writeEntry({ ...request, type: layer });
   return { engine: fenced.engine, maintenance: fenced.maintenance, memoryFlush: fenced.memoryFlush, tidy: fenced.tidy, writeMemory,
-    fence, ingestion, start, stop: () => retention?.stop(), captureRun: fenced.captureRun,
+    fence, ingestion, provider: engine.provider, start,
+    stop: () => { fence.retire(); retention?.stop(); return ingestion.settle(); }, captureRun: fenced.captureRun,
     recordPrimaryCommitted: (commit: PrimaryConversationCommit) => {
       try { ingestion.recordPrimaryCommitted(commit); }
       catch { input.logger.warn({ code: "MEMORY_INGESTION_WITNESS_FAILED" }, "primary memory source witness was not committed"); }

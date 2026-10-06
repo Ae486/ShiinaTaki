@@ -30,7 +30,7 @@ describe("Hindsight backup view model", () => {
     expect(view(BACKUP_STATES.unknown)).toMatchObject({ rows: [{ label: "备份状态", value: "未知" }], intervals: [], actions: [CAPTURE] });
     const none = view(BACKUP_STATES.none);
     expect(none.rows).toEqual([{ label: "备份状态", value: "尚无已校验的备份" }]);
-    expect(none.intervals).toEqual([{ label: "Global 未备份区间", value: "游标 未知 → 52 · 未落定写入 0" }]);
+    expect(none.intervals).toEqual([{ label: "Global 未备份区间", value: "游标 未知 → 52 · 未落定写入 0 · 远端未同步写入未知" }]);
     expect(none).toMatchObject({ rollback: null, inFlight: null, failure: null, staged: null, pending: false, actions: [CAPTURE], diagnostics: [] });
   });
 
@@ -40,8 +40,8 @@ describe("Hindsight backup view model", () => {
       { label: "备份状态", value: "已有已校验的备份" }, { label: "上次备份", value: `${AT}（2 小时前）` }, { label: "校验时间", value: AT },
     ]);
     expect(verified.intervals).toEqual([
-      { label: "Global 未备份区间", value: "游标 40 → 52 · 未落定写入 1" },
-      { label: "Character · taki 未备份区间", value: "游标 未知 → 未知 · 未落定写入 未知" },
+      { label: "Global 未备份区间", value: "游标 40 → 52 · 未落定写入 1 · 远端未同步写入未知" },
+      { label: "Character · taki 未备份区间", value: "游标 未知 → 未知 · 未落定写入 未知 · 远端未同步写入未知" },
     ]);
     expect(verified.actions).toEqual([CAPTURE, VERIFY]);
     expect(verified.diagnostics).toEqual([{ label: "已校验备份", value: BACKUP_ID }]);

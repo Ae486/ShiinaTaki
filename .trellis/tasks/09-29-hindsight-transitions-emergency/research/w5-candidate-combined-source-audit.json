@@ -1,0 +1,14 @@
+{
+  "historicalMigrationUnchanged": true,
+  "schemas": [
+    "default",
+    "public",
+    "assoc_tenant"
+  ],
+  "onlyApprovedPredicatesChanged": true,
+  "downgradeRestoresHistoricalBody": true,
+  "oneStatementPerDirection": true,
+  "parentHelperExactAlembicConfig": true,
+  "databaseAccess": false,
+  "cloneRun": false
+}

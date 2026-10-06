@@ -52,6 +52,8 @@ export const HindsightCompatibilityWireSchema = z.object({
     cutover_verification: versioned.optional(),
     application_state: HindsightApplicationStateContractSchema.optional(),
     application_reflect: HindsightApplicationReflectContractSchema.optional(),
+    transitions: versioned.optional(),
+    transition_source_evidence: versioned.nullable().optional(),
   }),
 });
 export type HindsightCompatibilityWire = z.infer<typeof HindsightCompatibilityWireSchema>;

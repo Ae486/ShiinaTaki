@@ -26,8 +26,16 @@ export const MEMORY_UNAVAILABLE_SYSTEM_PROMPT = withoutMemoryFloor(BASE_SYSTEM_P
 export function createHindsightUnavailableRun(input: {
   epoch: Pick<MemoryAuthorityEpoch, "epochId" | "providerLineageId">; characterId: string; persona: PersonaProvider;
 }): CapturedMemoryRun {
-  const snapshot = createMemoryRunReference({ providerId: "hindsight", providerLineageId: input.epoch.providerLineageId,
-    authorityEpochId: input.epoch.epochId, contractVersion: 1, capabilities: UNAVAILABLE_CAPABILITIES });
+  return createUnavailableMemoryRun({ ...input, providerId: "hindsight" });
+}
+
+/** A newly created Local Character during a transition has no writable Bank yet; keep the same truthful empty Run. */
+export function createUnavailableMemoryRun(input: {
+  providerId: "local" | "hindsight"; epoch: Pick<MemoryAuthorityEpoch, "epochId" | "providerLineageId">;
+  characterId: string; persona: PersonaProvider;
+}): CapturedMemoryRun {
+  const snapshot = createMemoryRunReference({ providerId: input.providerId, providerLineageId: input.epoch.providerLineageId,
+    authorityEpochId: input.epoch.epochId, contractVersion: 1, capabilities: { ...UNAVAILABLE_CAPABILITIES, providerId: input.providerId } });
   const assemble = captureCanonicalMemoryAssembly({ characterId: input.characterId, persona: input.persona, rows: [], blocks: "" });
   return Object.freeze({ snapshot, tools: Object.freeze({}), prompt: MEMORY_UNAVAILABLE_SYSTEM_PROMPT, assemble });
 }

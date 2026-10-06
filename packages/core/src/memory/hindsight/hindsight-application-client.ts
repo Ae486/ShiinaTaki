@@ -22,6 +22,7 @@ import {
 } from "@taki/shared";
 import type { HindsightCallContext, HindsightRequestInput } from "./hindsight-client.ts";
 import { hindsightError } from "./hindsight-errors.ts";
+import { probeHindsightTransitionSourceCapability } from "./hindsight-transition-source-capability.ts";
 
 export interface HindsightApplicationRead { bankId: string; namespace: TakiApplicationNamespace; context: HindsightCallContext }
 interface ApplicationPost<T> { bankId: string; request: T; context: HindsightCallContext }
@@ -61,7 +62,7 @@ type ApplicationCall = <T>(input: HindsightApplicationRead & {
 
 export function createHindsightApplicationMethods(request: Requester): HindsightApplicationClient {
   const call = applicationCaller(request);
-  return { ...bodyMethods(call), ...readMethods(call), ...operationMethods(call),
+  return { ...bodyMethods(call, request), ...readMethods(call), ...operationMethods(call),
     initializeApplication: (input) => call({ ...input, suffix: "/initialize", schema: TakiApplicationInitializeResponseSchema,
       body: { namespace: TakiApplicationNamespaceSchema.parse(input.namespace) } }),
     pruneApplicationChanges: (input) => call({ ...input, suffix: "/prune", schema: TakiApplicationInitializeResponseSchema,
@@ -69,11 +70,14 @@ export function createHindsightApplicationMethods(request: Requester): Hindsight
   };
 }
 
-function bodyMethods(call: ApplicationCall): Pick<HindsightApplicationClient,
+function bodyMethods(call: ApplicationCall, request: Requester): Pick<HindsightApplicationClient,
   "uploadApplicationBody" | "applicationBody" | "putApplicationBodyPart" | "applicationBodyPart" | "sealApplicationBody"> {
   return {
-    uploadApplicationBody: (input) => call({ ...input, namespace: input.request.namespace, suffix: "/bodies",
-      body: TakiApplicationBodyUploadRequestSchema.parse(input.request), schema: TakiApplicationBodyUploadStatusSchema }),
+    uploadApplicationBody: async (input) => {
+      if (input.request.descriptor.body_schema === "application-source-evidence.v1") await probeHindsightTransitionSourceCapability(request, input.context);
+      return call({ ...input, namespace: input.request.namespace, suffix: "/bodies",
+        body: TakiApplicationBodyUploadRequestSchema.parse(input.request), schema: TakiApplicationBodyUploadStatusSchema });
+    },
     applicationBody: (input) => call({ ...input, suffix: `/bodies/${uuid(input.bodyId)}`, schema: TakiApplicationBodyUploadStatusSchema }),
     putApplicationBodyPart: async (input) => {
       const result = await call({ ...input, namespace: input.request.namespace,

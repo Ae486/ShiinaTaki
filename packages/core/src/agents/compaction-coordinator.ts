@@ -77,6 +77,8 @@ export interface CompactionCoordinator extends AutoMemoryCompact {
   maybeRun(characterId: string, correlation?: CompactionCorrelation): Promise<void>;
   cancel(characterId: string): boolean;
   reconcile(): number;
+  /** Revoke publication for all existing passes before an emergency provider handoff. */
+  retirePending(): void;
 }
 
 interface CapturedCompaction {
@@ -145,7 +147,8 @@ export function createCompactionCoordinator(deps: CompactionCoordinatorDeps): Co
     return true;
   }
 
-  return { maybeRun, cancel, reconcile: () => deps.operations.reconcileExpired(now().toISOString()) };
+  return { maybeRun, cancel, reconcile: () => deps.operations.reconcileExpired(now().toISOString()),
+    retirePending: () => { for (const characterId of controllers.keys()) cancel(characterId); } };
 }
 
 async function execute(input: {

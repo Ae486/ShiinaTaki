@@ -1,0 +1,64 @@
+{
+  "before": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+  "stages": [
+    {
+      "name": "bank1.readAndVerifySavedEvidence",
+      "ok": true,
+      "ms": 49877
+    },
+    {
+      "name": "bank1.projectionContext",
+      "ok": true,
+      "ms": 38585
+    },
+    {
+      "name": "bank1.scopeFacts",
+      "originalBankPresent": true,
+      "originalEpochIsAncestor": true,
+      "kind": "character"
+    },
+    {
+      "name": "bank1.pureLocalProjection",
+      "ok": true,
+      "ms": 43230
+    },
+    {
+      "name": "bank1.readBlocks",
+      "ok": true,
+      "ms": 36927
+    },
+    {
+      "name": "bank2.readAndVerifySavedEvidence",
+      "ok": true,
+      "ms": 13685
+    },
+    {
+      "name": "bank2.projectionContext",
+      "ok": true,
+      "ms": 10502
+    },
+    {
+      "name": "bank2.scopeFacts",
+      "originalBankPresent": true,
+      "originalEpochIsAncestor": true,
+      "kind": "global"
+    },
+    {
+      "name": "bank2.pureLocalProjection",
+      "ok": true,
+      "ms": 11650
+    },
+    {
+      "name": "bank2.readBlocks",
+      "ok": true,
+      "ms": 10312
+    },
+    {
+      "name": "combinedLocalClosure",
+      "ok": true,
+      "ms": 51
+    }
+  ],
+  "after": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+  "sourceUnchanged": true
+}

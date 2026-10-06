@@ -36,12 +36,14 @@ export interface HindsightLifecycleService {
   revalidate(ref: MemoryConnectionProducerRef, checkpoint: (phase: HindsightConnectionPhase) => void): Promise<HindsightRevalidateOutcome>;
   stopRequested(): boolean;
   stop(): Promise<void>;
+  retireEpoch?(epochId: string): void;
 }
 
-interface State { deps: HindsightLifecycleDeps; stopping: boolean; calls: Map<AbortController, Promise<unknown>> }
+interface State { deps: HindsightLifecycleDeps; stopping: boolean;
+  calls: Map<AbortController, { epochId: string; promise: Promise<unknown> }>; retired: Set<string> }
 
 export function createHindsightLifecycleService(deps: HindsightLifecycleDeps): HindsightLifecycleService {
-  const state: State = { deps, stopping: false, calls: new Map() };
+  const state: State = { deps, stopping: false, calls: new Map(), retired: new Set() };
   const runtimeFor = (epochId: string) => { const runtime = deps.runtime(); return runtime?.epochId === epochId ? runtime : null; };
   return {
     authority: () => readMemoryAuthoritySelection(deps.db),
@@ -50,13 +52,17 @@ export function createHindsightLifecycleService(deps: HindsightLifecycleDeps): H
     runtime: deps.runtime,
     revalidateBlocker: (live, epochId) => hindsightRevalidateBlocker(deps.db, { live, runtime: runtimeFor(epochId) }),
     revalidated: (input) => revalidated(deps, input),
-    provision: (ref, checkpoint) => bounded(state, (call) => provisionHindsightBank(deps, { ref, call: { ...call, checkpoint } })),
-    revalidate: (ref, checkpoint) => bounded(state, (call) => revalidateHindsightConnection(deps, { ref, call: { ...call, checkpoint } })),
+    provision: (ref, checkpoint) => bounded(state, ref.admittedEpochId, (call) => provisionHindsightBank(deps, { ref, call: { ...call, checkpoint } })),
+    revalidate: (ref, checkpoint) => bounded(state, ref.epochId, (call) => revalidateHindsightConnection(deps, { ref, call: { ...call, checkpoint } })),
+    retireEpoch: (epochId) => {
+      state.retired.add(epochId);
+      for (const [controller, call] of state.calls) if (call.epochId === epochId) controller.abort(new Error("HINDSIGHT_LIFECYCLE_INTERRUPTED"));
+    },
     stopRequested: () => state.stopping,
     stop: async () => {
       state.stopping = true;
       for (const controller of state.calls.keys()) controller.abort(new Error("HINDSIGHT_LIFECYCLE_INTERRUPTED"));
-      await Promise.allSettled([...state.calls.values()]);
+      await Promise.allSettled([...state.calls.values()].filter((call) => !state.retired.has(call.epochId)).map((call) => call.promise));
     },
   };
 }
@@ -70,14 +76,15 @@ function revalidated(deps: HindsightLifecycleDeps, input: { epochId: string; fin
 }
 
 /** The abort reason, not the transport's own cancellation error, names why a call ended early. */
-async function bounded<T>(state: State, run: (call: Omit<HindsightLifecycleCall<string>, "checkpoint">) => Promise<T>): Promise<T> {
-  if (state.stopping) throw new Error("HINDSIGHT_LIFECYCLE_INTERRUPTED");
+async function bounded<T>(state: State, epochId: string, run: (call: Omit<HindsightLifecycleCall<string>, "checkpoint">) => Promise<T>): Promise<T> {
+  if (state.stopping || state.retired.has(epochId)) throw new Error("HINDSIGHT_LIFECYCLE_INTERRUPTED");
   const live = readHindsightLifecycleLive(state.deps);
   const controller = new AbortController();
   const deadline = live.state === "ready"
     ? setTimeout(() => controller.abort(hindsightError("HINDSIGHT_TIMEOUT")), live.projection.setupTimeoutMs) : undefined;
   const promise = run({ signal: controller.signal });
-  state.calls.set(controller, promise);
+  controller.signal.addEventListener("abort", () => clearTimeout(deadline), { once: true });
+  state.calls.set(controller, { epochId, promise });
   try { return await promise; }
   catch (error) { throw controller.signal.aborted ? controller.signal.reason : error; }
   finally { clearTimeout(deadline); state.calls.delete(controller); }

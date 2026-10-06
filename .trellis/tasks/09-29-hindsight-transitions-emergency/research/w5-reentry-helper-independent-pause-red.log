@@ -1,0 +1,26 @@
+test_pause_checkpoint_cannot_hide_a_different_actual_core_outcome (__main__.IndependentGateTests.test_pause_checkpoint_cannot_hide_a_different_actual_core_outcome) ... FAIL
+
+======================================================================
+FAIL: test_pause_checkpoint_cannot_hide_a_different_actual_core_outcome (__main__.IndependentGateTests.test_pause_checkpoint_cannot_hide_a_different_actual_core_outcome)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\unittest\async_case.py", line 90, in _callTestMethod
+    if self._callMaybeAsync(method) is not None:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\unittest\async_case.py", line 112, in _callMaybeAsync
+    return self._asyncioRunner.run(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 653, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "H:\TakiAgent\.trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-helper-independent-test.py", line 42, in test_pause_checkpoint_cannot_hide_a_different_actual_core_outcome
+    with self.assertRaisesRegex(AssertionError, "CORE_PAUSE"):
+AssertionError: AssertionError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.098s
+
+FAILED (failures=1)

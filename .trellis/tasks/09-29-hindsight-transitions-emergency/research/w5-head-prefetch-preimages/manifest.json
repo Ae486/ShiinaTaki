@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "path": "H:\\hindsight\\hindsight-api-slim\\hindsight_api\\engine\\application_state\\store.py",
+      "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-head-prefetch-preimages\\0-store.py",
+      "bytes": 24780,
+      "sha256": "a17794c287e3fbaa61fdef8761f0baf4dc2466207503864b45a27a2abe1dc8f6"
+    },
+    {
+      "path": "H:\\hindsight\\hindsight-api-slim\\hindsight_api\\engine\\application_state\\snapshot.py",
+      "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-head-prefetch-preimages\\1-snapshot.py",
+      "bytes": 21008,
+      "sha256": "986ab9fab3e643ee5207c9df3cc4fe9c5b02d035223a8af2a9b0f585374e33a1"
+    },
+    {
+      "path": "H:\\hindsight\\hindsight-api-slim\\hindsight_api\\engine\\transition_baseline_reads.py",
+      "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-head-prefetch-preimages\\2-transition_baseline_reads.py",
+      "bytes": 10261,
+      "sha256": "dc842bd5575dc972992bc31b4bf3f98ae77b7180ae719aeae90b48312c062b2a"
+    },
+    {
+      "path": "H:\\hindsight\\hindsight-api-slim\\tests\\native_results\\test_transition_native_view.py",
+      "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-head-prefetch-preimages\\3-test_transition_native_view.py",
+      "bytes": 11303,
+      "sha256": "c4d852639f44f470dafa77447be0fdd712f826478af9bcf626a9a23555eb735b"
+    },
+    {
+      "path": "H:\\hindsight\\TAKI_PATCHES.md",
+      "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-head-prefetch-preimages\\4-TAKI_PATCHES.md",
+      "bytes": 86018,
+      "sha256": "67d85f6f1e2594458527212694b9c007a5989e1bea181af8ca35c2dc500ba3d5"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\spec\\backend\\memory-transition-healthy-drivers.md",
+      "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-head-prefetch-preimages\\5-memory-transition-healthy-drivers.md",
+      "bytes": 21966,
+      "sha256": "bad590be177dd98eab6a79936819c7aec7555789c06995cda2f96c4b3ea7617a"
+    }
+  ]
+}

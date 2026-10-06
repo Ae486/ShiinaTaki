@@ -1,0 +1,14 @@
+test_default_has_no_verification_or_execution (test_w5_native_view_postpatch.CompositionTests.test_default_has_no_verification_or_execution) ... ok
+test_parent_requires_actual_worker_inventory_and_keeps_timing_failure_separate (test_w5_native_view_postpatch.CompositionTests.test_parent_requires_actual_worker_inventory_and_keeps_timing_failure_separate) ... ok
+test_real_modules_route_new_entry_and_nested_verifiers_and_restore_on_error (test_w5_native_view_postpatch.CompositionTests.test_real_modules_route_new_entry_and_nested_verifiers_and_restore_on_error) ... ok
+test_worker_checks_parent_sha_and_reports_complete_inventory_before_and_after (test_w5_native_view_postpatch.CompositionTests.test_worker_checks_parent_sha_and_reports_complete_inventory_before_and_after) ... ok
+test_current_drift_and_parent_manifest_drift_refuse (test_w5_native_view_postpatch.InventoryTests.test_current_drift_and_parent_manifest_drift_refuse) ... ok
+test_inherited_manifest_rewrite_and_missing_reference_refuse (test_w5_native_view_postpatch.InventoryTests.test_inherited_manifest_rewrite_and_missing_reference_refuse) ... ok
+test_missing_duplicate_extra_and_missing_addition_refuse (test_w5_native_view_postpatch.InventoryTests.test_missing_duplicate_extra_and_missing_addition_refuse) ... ok
+test_only_explicit_changed_path_may_replace_inherited_pin (test_w5_native_view_postpatch.InventoryTests.test_only_explicit_changed_path_may_replace_inherited_pin) ... ok
+test_original_verifier_still_refuses_authorized_patch (test_w5_native_view_postpatch.InventoryTests.test_original_verifier_still_refuses_authorized_patch) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.506s
+
+OK

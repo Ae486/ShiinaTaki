@@ -1,0 +1,136 @@
+[
+  {
+    "check": "delivery-source-and-evidence-preserved-except-added-regression",
+    "files": 47,
+    "pass": true
+  },
+  {
+    "check": "implementation-and-independent-preimages",
+    "files": [
+      25,
+      29
+    ],
+    "pass": true
+  },
+  {
+    "check": "prior-observation-scheduling-and-helper-evidence",
+    "files": 75,
+    "pass": true
+  },
+  {
+    "check": "preserved-offline-inputs",
+    "files": 7,
+    "pass": true
+  },
+  {
+    "check": "full-renewal-actual-admission-proof",
+    "launchEndSourceHashes": 22,
+    "previewThroughRollbackMs": 60159.88760000002,
+    "pass": true
+  },
+  {
+    "check": "supervisor-python-ast",
+    "pass": true
+  },
+  {
+    "command": [
+      "node",
+      "--check",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reentry-renewal.mjs"
+    ],
+    "exitCode": 0,
+    "expectedExitCode": 0,
+    "output": ""
+  },
+  {
+    "command": [
+      "node",
+      "--check",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reentry-renewal.test.mjs"
+    ],
+    "exitCode": 0,
+    "expectedExitCode": 0,
+    "output": ""
+  },
+  {
+    "command": [
+      "node",
+      "--check",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reused-driver.mjs"
+    ],
+    "exitCode": 0,
+    "expectedExitCode": 0,
+    "output": ""
+  },
+  {
+    "command": [
+      "node",
+      "--check",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reentry-renewal-independent-replay.mjs"
+    ],
+    "exitCode": 0,
+    "expectedExitCode": 0,
+    "output": ""
+  },
+  {
+    "command": [
+      "H:\\hindsight\\.venv\\Scripts\\python.exe",
+      "-m",
+      "ruff",
+      "check",
+      "--select",
+      "F,E9",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reused-native.py"
+    ],
+    "exitCode": 0,
+    "expectedExitCode": 0,
+    "output": "All checks passed!\n"
+  },
+  {
+    "command": [
+      "H:\\hindsight\\.venv\\Scripts\\python.exe",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reused-native.py",
+      "--help"
+    ],
+    "exitCode": 0,
+    "expectedExitCode": 0,
+    "output": "usage: w5-reused-native.py [-h] [--stage {all,return,reentry}]\n                           --submission-cap SUBMISSION_CAP\n                           [--maintenance-approval MAINTENANCE_APPROVAL]\n                           [--reentry-renewal REENTRY_RENEWAL]\n                           {prepare,inspect,connect,run}\n\npositional arguments:\n  {prepare,inspect,connect,run}\n\noptions:\n  -h, --help            show this help message and exit\n  --stage {all,return,reentry}\n  --submission-cap SUBMISSION_CAP\n  --maintenance-approval MAINTENANCE_APPROVAL\n                        Exact reviewed per-Bank reentry allowances; omission\n                        deliberately denies all maintenance\n  --reentry-renewal REENTRY_RENEWAL\n                        Explicit one-time reviewed supersession of the expired\n                        unadmitted reentry request\n"
+  },
+  {
+    "command": [
+      "H:\\hindsight\\.venv\\Scripts\\python.exe",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reused-native.py",
+      "inspect",
+      "--stage",
+      "reentry",
+      "--submission-cap",
+      "329",
+      "--reentry-renewal",
+      ".trellis\\.runtime\\w5-renewal-independent-e8e3d19f-c33f-47bc-85ef-310381bc0d0d\\synthetic-renewal-approval.json"
+    ],
+    "exitCode": 2,
+    "expectedExitCode": 2,
+    "output": "usage: w5-reused-native.py [-h] [--stage {all,return,reentry}]\n                           --submission-cap SUBMISSION_CAP\n                           [--maintenance-approval MAINTENANCE_APPROVAL]\n                           [--reentry-renewal REENTRY_RENEWAL]\n                           {prepare,inspect,connect,run}\nw5-reused-native.py: error: --reentry-renewal applies only to --stage reentry run\n"
+  },
+  {
+    "command": [
+      "H:\\hindsight\\.venv\\Scripts\\python.exe",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reused-native.py",
+      "run",
+      "--stage",
+      "return",
+      "--submission-cap",
+      "329",
+      "--reentry-renewal",
+      ".trellis\\.runtime\\w5-renewal-independent-e8e3d19f-c33f-47bc-85ef-310381bc0d0d\\synthetic-renewal-approval.json"
+    ],
+    "exitCode": 2,
+    "expectedExitCode": 2,
+    "output": "usage: w5-reused-native.py [-h] [--stage {all,return,reentry}]\n                           --submission-cap SUBMISSION_CAP\n                           [--maintenance-approval MAINTENANCE_APPROVAL]\n                           [--reentry-renewal REENTRY_RENEWAL]\n                           {prepare,inspect,connect,run}\nw5-reused-native.py: error: --reentry-renewal applies only to --stage reentry run\n"
+  },
+  {
+    "check": "utf8-no-bom-whitespace",
+    "files": 30,
+    "pass": true
+  }
+]

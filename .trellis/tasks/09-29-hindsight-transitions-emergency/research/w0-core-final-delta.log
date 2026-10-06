@@ -1,0 +1,42 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+·x····················
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/migrations/041-canonical-memory-maintenance.test.ts > 041 canonical maintenance history and ingestion schema > upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration
+AssertionError: expected [ Array(1) ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+@@ -8,7 +8,8 @@
+      46,
+      47,
+      48,
+      49,
+      50,
++     51,
+    ],
+  ]
+
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts:94:21
+     92|     const before = { history: historyBytes(old), current: currentRows(…
+     93|     const applied: number[][] = []; const upgraded = open(file, MIGRAT…
+     94|     expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50]]…
+       |                     ^
+     95|     expect(historyBytes(upgraded)).toEqual(before.history);
+     96|     expect(currentRows(upgraded)).toEqual(before.current);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 21 passed (22)
+   Start at  21:08:20
+   Duration  5.09s (transform 3.44s, setup 0ms, import 5.67s, tests 2.22s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/db/hindsight-replica-request-repo.test.ts src/db/migrations/041-canonical-memory-maintenance.test.ts src/memory/operations/memory-operation-kind-replica.test.ts --maxWorkers=2 --reporter=dot

@@ -37,7 +37,9 @@ export const MemoryReplicaScheduledRunSchema = z.strictObject({
   kind: MemoryReplicaRunKindSchema,
   trigger: z.enum(["manual", "catch_up", "retry", "interval"]),
   predecessor: MemoryReplicaCheckpointSchema.nullable(),
-}).refine((run) => run.predecessor === null || run.predecessor.bankId === run.lease.bankId, "run predecessor belongs to another Bank");
+  manualRequestId: z.uuid().optional(),
+}).refine((run) => run.predecessor === null || run.predecessor.bankId === run.lease.bankId, "run predecessor belongs to another Bank")
+  .refine((run) => !run.manualRequestId || run.trigger === "manual", "manual identity requires a manual claim");
 export type MemoryReplicaScheduledRun = z.infer<typeof MemoryReplicaScheduledRunSchema>;
 
 export const MemoryReplicaRunResultSchema = z.strictObject({
@@ -83,6 +85,7 @@ export const MemoryReplicaSyncStateSchema = z.strictObject({
   retryKind: MemoryReplicaRunKindSchema.nullable(),
   retryDueAt: Timestamp.nullable(),
   pendingManualKind: MemoryReplicaRunKindSchema.nullable(),
+  pendingManualRequestId: z.uuid().nullable().optional(),
   catchUpRequested: z.boolean(),
   lastAttemptAt: Timestamp.nullable(),
   lastSuccessAt: Timestamp.nullable(),
@@ -100,6 +103,7 @@ export const MemoryReplicaSyncStateSchema = z.strictObject({
   if ((state.scope === "character") !== (state.characterId !== null)) fail("Bank scope and Character binding disagree");
   if ((state.mode === "running") !== (state.run !== null)) fail("running state requires its lease-bound run");
   if (state.run && state.run.lease.bankId !== state.bankId) fail("run belongs to another Bank");
+  if (state.pendingManualRequestId && state.pendingManualKind === null) fail("manual identity requires a queued request");
   if (state.retryDueAt === null ? state.retryKind !== null || state.retryAttempt !== 0 : state.retryKind === null || state.retryAttempt === 0) fail("retry fields disagree");
   if ((state.errorCode === null) !== (state.nextAction === null)) fail("diagnostic fields disagree");
   if ((state.fullReconciliationState === "running") !== (state.run?.kind === "full")) fail("full reconciliation state requires its running claim");

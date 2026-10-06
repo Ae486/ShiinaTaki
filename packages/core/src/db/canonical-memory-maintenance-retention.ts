@@ -13,6 +13,7 @@ import { ensureCanonicalMaintenanceSnapshot } from "./canonical-memory-maintenan
 import { requireExpectedCanonicalRecord } from "./canonical-memory-maintenance-query.ts";
 import { readCanonicalSource, removeCanonicalFts, upsertCanonicalSource } from "./canonical-memory-maintenance-records.ts";
 import type { Database } from "./sqlite.ts";
+import { canonicalSourceReferenced } from "./canonical-memory-source-references.ts";
 
 const Id = z.string().min(1).max(256);
 const Deleted = z.strictObject({ outcome: z.literal("deleted"), bankId: Id, memoryId: Id,
@@ -64,7 +65,7 @@ function cleanSource(db: Database, input: CanonicalMaintenanceMutation, document
   const direct = db.prepare(`SELECT 1 FROM canonical_memory_units
     WHERE authority_epoch_id=:epoch AND bank_id=:bank AND document_id=:doc LIMIT 1`)
     .get({ epoch: input.epochId, bank: input.bankId, doc: documentId });
-  if (!direct && !remaining.some((target) => evidenceTargetExists(db, target))) {
+  if (!direct && !canonicalSourceReferenced(db, { ...input, documentId }) && !remaining.some((target) => evidenceTargetExists(db, target))) {
     retireSource(db, source, input.now); return;
   }
   if (remaining.length === targets.length) return;

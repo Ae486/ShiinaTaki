@@ -180,12 +180,12 @@ describe("current Local coverage persistence and comparison", () => {
       expectedEpochId: value.epochId, bankId: value.bankId, documentId: value.source.documentId })).toThrow("HINDSIGHT_LOCAL_COVERAGE_STALE");
   });
 
-  it("detects real reclassification without mistaking policyVersion for a mutation counter", () => {
+  it("detects real reclassification with the advanced semantic policy version", () => {
     const value = fixture(); const repo = createCanonicalMemoryRepo(value.db);
     repo.edit({ ...mutationInput(value), patch: {}, policy: { layerId: "activity", visibility: "hidden", retention: { kind: "rolling-window", days: 14 } } });
-    expect(repo.record(value.epochId, value.bankId, value.record.unit.memoryId)?.policy.policyVersion).toBe(1);
+    expect(repo.record(value.epochId, value.bankId, value.record.unit.memoryId)?.policy.policyVersion).toBe(2);
     expect(value.coverage.compareCurrent(value.manifest.manifestId).differences)
-      .toContainEqual(expect.objectContaining({ kind: "policy", change: "changed", previousRevision: 1, currentRevision: 1 }));
+      .toContainEqual(expect.objectContaining({ kind: "policy", change: "changed", previousRevision: 1, currentRevision: 2 }));
   });
 
   it("hashes independent policy/provenance payloads even without any source or unit revision advance", () => {

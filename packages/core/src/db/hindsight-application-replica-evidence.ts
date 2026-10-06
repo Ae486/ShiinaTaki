@@ -15,6 +15,7 @@ import { APPLICATION_SCOPE_WHERE, applicationArtifactKey, applicationScopeParams
   applicationStoredBytes, parseApplicationStoredBytes } from "./hindsight-application-replica-codec.ts";
 import type { HindsightApplicationEvidenceAccess } from "./hindsight-application-replica-contract.ts";
 import type { Database, SqlRow } from "./sqlite.ts";
+import { readHindsightApplicationSourceArtifact } from "../memory/hindsight/hindsight-application-source-evidence.ts";
 
 export function createApplicationEvidenceAccess(db: Database, scope: HindsightApplicationScope): HindsightApplicationEvidenceAccess {
   return {
@@ -105,12 +106,17 @@ export function latestApplicationArtifacts(db: Database, scope: HindsightApplica
 /** Delta references may point at any retained historical version, but their exact hash/body must still exist. */
 export function requireApplicationArtifactClosure(access: HindsightApplicationEvidenceAccess, artifact: TakiApplicationArtifact): void {
   const body = access.body(artifact.body_ref).content;
+  if (artifact.key.artifact_kind === "source") {
+    readHindsightApplicationSourceArtifact({ bankId: artifact.bank_id, namespace: artifact.namespace, artifact, evidence: access });
+    return;
+  }
   if (body.body_schema !== `application-${artifact.key.artifact_kind}.v1`) invalid();
   if (body.body_schema !== "application-memory.v1") return;
   if (artifact.binding.kind !== "exact_native" || !sameApplicationValue(body.value.assessment.target, artifact.binding.native)) invalid();
   for (const version of body.value.source_artifacts) {
     const source = access.artifact(version);
-    if (source.key.artifact_kind !== "source" || access.body(source.body_ref).content.body_schema !== "application-source.v1") invalid();
+    if (source.key.artifact_kind !== "source" || source.tombstoned) invalid();
+    readHindsightApplicationSourceArtifact({ bankId: source.bank_id, namespace: source.namespace, artifact: source, evidence: access });
   }
 }
 

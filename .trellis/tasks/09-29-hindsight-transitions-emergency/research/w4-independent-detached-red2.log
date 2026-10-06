@@ -1,0 +1,37 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+x--
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/hindsight/hindsight-runtime-lifetime.test.ts > started Hindsight owners at drain and shutdown > owns both Banks after the caller's admission budget expires during a transition drain
+AssertionError: expected [ 'bank-a' ] to deeply equal [ 'bank-a', 'bank-taki' ]
+
+- Expected
++ Received
+
+  [
+    "bank-a",
+-   "bank-taki",
+  ]
+
+ ❯ src/memory/hindsight/hindsight-runtime-lifetime.test.ts:25:46
+     23|       const draining = subsystem.workFence.quiesce({ timeoutMs: 5000 }…
+     24|       releaseGlobal();
+     25|       await vi.waitFor(() => expect(entered).toEqual(f.banks.map((bank…
+       |                                              ^
+     26|       expect(drained).toBe(false);
+     27|       releaseCharacter(); await draining;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 skipped (3)
+   Start at  00:02:14
+   Duration  12.61s (transform 8.12s, setup 0ms, import 10.06s, tests 2.03s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/hindsight/hindsight-runtime-lifetime.test.ts -t admission budget --maxWorkers=2 --reporter=dot

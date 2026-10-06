@@ -1,0 +1,80 @@
+{
+  "sourceSha256Before": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+  "copyRoot": "H:\\TakiAgent\\.trellis\\.runtime\\w5-core-publication-diagnostic-58176c69-e9ee-4e5c-a481-1635ac02212e",
+  "historicalStateOverride": "exact current recovery operation viewed as running",
+  "timings": [
+    {
+      "stage": "builder",
+      "ms": 40569,
+      "totalMs": 40575
+    },
+    {
+      "stage": "proof",
+      "ms": 39137,
+      "totalMs": 79716
+    }
+  ],
+  "guards": [
+    {
+      "stage": "builder",
+      "elapsedMs": 8,
+      "liveNow": "2026-10-03T15:30:27.200Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "builder",
+      "elapsedMs": 13,
+      "liveNow": "2026-10-03T15:30:27.205Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "builder",
+      "elapsedMs": 38922,
+      "liveNow": "2026-10-03T15:31:06.114Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "builder",
+      "elapsedMs": 39871,
+      "liveNow": "2026-10-03T15:31:07.063Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "proof",
+      "elapsedMs": 40581,
+      "liveNow": "2026-10-03T15:31:07.773Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "proof",
+      "elapsedMs": 79717,
+      "liveNow": "2026-10-03T15:31:46.909Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "publication",
+      "elapsedMs": 79727,
+      "liveNow": "2026-10-03T15:31:46.919Z",
+      "liveClockPass": true
+    }
+  ],
+  "remainingLeaseMsAtStart": 255482,
+  "failure": {
+    "stage": "publication",
+    "code": "MEMORY_TRANSITION_PROOF_INVALID",
+    "stack": [
+      "    at invalid (file:///H:/TakiAgent/packages/core/src/db/memory-transition-publication-repo.ts:99:35)",
+      "    at verifyInstalledLocal (file:///H:/TakiAgent/packages/core/src/db/memory-transition-publication-repo.ts:96:89)",
+      "    at file:///H:/TakiAgent/packages/core/src/db/memory-transition-publication-repo.ts:50:54",
+      "    at runTransaction (file:///H:/TakiAgent/packages/core/src/db/sqlite.ts:92:5)",
+      "    at Object.transaction (file:///H:/TakiAgent/packages/core/src/db/sqlite.ts:70:26)",
+      "    at publishTransition (file:///H:/TakiAgent/packages/core/src/db/memory-transition-publication-repo.ts:26:6)",
+      "    at file:///H:/TakiAgent/packages/core/src/db/memory-transition-publication-repo.ts:22:62",
+      "    at withTransitionEvidenceContext (file:///H:/TakiAgent/packages/core/src/memory/transitions/transition-evidence-context.ts:72:20)",
+      "    at publishMemoryTransition (file:///H:/TakiAgent/packages/core/src/db/memory-transition-publication-repo.ts:22:10)",
+      "    at file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-publication-clock-diagnostic.mjs:63:46"
+    ]
+  },
+  "sourceSha256After": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+  "sourceUnchanged": true
+}

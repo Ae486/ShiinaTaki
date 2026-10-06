@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "H:\\hindsight\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "--noconftest",
+    "-o",
+    "addopts=",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_diagnostic.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_independent.py",
+    "-q",
+    "--tb=short",
+    "-n",
+    "0"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "timeoutSeconds": 180,
+  "exitCode": 0,
+  "stdout": "....................................................................s... [100%]\n71 passed, 1 skipped in 102.58s (0:01:42)\n",
+  "stderr": "",
+  "milliseconds": 109389.99999999942
+}

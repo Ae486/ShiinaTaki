@@ -1,0 +1,219 @@
+{
+  "sourceSha256Before": "a81a1e3ec6e85f3faa287b8b77c704742be7bbf0f05ec594e1a4bc8381c00923",
+  "copyRoot": "H:\\TakiAgent\\.trellis\\.runtime\\w5-scheduled-driver-605da83c-5ff9-44b8-87ec-e9ba7779c497",
+  "modelCalls": 0,
+  "networkCalls": 0,
+  "syntheticNative": true,
+  "polls": [
+    {
+      "ms": 3658,
+      "elapsedMs": 54660,
+      "phase": "committed",
+      "runtime": "ready"
+    },
+    {
+      "ms": 3411,
+      "elapsedMs": 64419,
+      "phase": "committed",
+      "runtime": "ready"
+    },
+    {
+      "ms": 3353,
+      "elapsedMs": 100503,
+      "phase": "committed",
+      "runtime": "ready"
+    },
+    {
+      "ms": 3379,
+      "elapsedMs": 111657,
+      "phase": "committed",
+      "runtime": "ready"
+    },
+    {
+      "ms": 39343,
+      "elapsedMs": 231874,
+      "phase": "binding",
+      "runtime": "ready"
+    },
+    {
+      "ms": 3477,
+      "elapsedMs": 275318,
+      "phase": "binding",
+      "runtime": "ready"
+    },
+    {
+      "ms": 3435,
+      "elapsedMs": 396940,
+      "phase": "settling",
+      "runtime": "ready"
+    },
+    {
+      "ms": 3316,
+      "elapsedMs": 434295,
+      "phase": "settling",
+      "runtime": "ready"
+    }
+  ],
+  "boundaries": [
+    {
+      "name": "nativeOutcome",
+      "startMs": 71039,
+      "ms": 26109
+    },
+    {
+      "name": "nativeOutcome",
+      "startMs": 100567,
+      "ms": 7707
+    },
+    {
+      "name": "bind",
+      "startMs": 111674,
+      "ms": 80853
+    },
+    {
+      "name": "full-Local-readiness",
+      "startMs": 231885,
+      "ms": 39953
+    },
+    {
+      "name": "executeIntents",
+      "startMs": 275337,
+      "ms": 118166
+    },
+    {
+      "name": "nativeRelease",
+      "startMs": 396954,
+      "ms": 34025
+    }
+  ],
+  "heartbeat": [
+    {
+      "outcome": "resolved",
+      "startMs": 71015,
+      "ms": 29507
+    }
+  ],
+  "requestTimeoutMs": 60000,
+  "pollIntervalMs": 10000,
+  "fixtureCorrection": "terminal status revision increments once, matching real Native SQL",
+  "sourceFiles": [
+    {
+      "path": ".trellis/spec/backend/memory-transition-healthy-drivers.md",
+      "sha256": "ee4a05d730aaa29a3985dde0f46bf78f204a7973577fa8aaabeaf0b84546eb89"
+    },
+    {
+      "path": ".trellis/spec/backend/memory-transition-publication.md",
+      "sha256": "0b85c28077bf678f8b6d120bbaba6468e706d69454fdb82aace3a07a599bbec9"
+    },
+    {
+      "path": "packages/core/src/boot/index.md",
+      "sha256": "53677a3532be37084fa0b18b8da93b697694c12313cc6fa7ed70774a2cedd945"
+    },
+    {
+      "path": "packages/core/src/boot/memory-transition-boot.test.ts",
+      "sha256": "f3cf2698d5c508bb2af09d20606e0cf9056219d9ec0a30302e13301b8e118c60"
+    },
+    {
+      "path": "packages/core/src/boot/memory-transition-boot.ts",
+      "sha256": "ce85d1f435bad0c0edaa50f798c80c3509ee130eff9cf876f37a3fbe1a46e17e"
+    },
+    {
+      "path": "packages/core/src/db/index.md",
+      "sha256": "be94717c302252a32961c789c8abd52a058dff5c7a352f205906333bedc4503c"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-observation.test.ts",
+      "sha256": "6647270114d2ee922ed9924f9557340dd9f133932b52c4fc326be366a6a10e61"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-proof.ts",
+      "sha256": "e31828fd67c11fb3d2d9386505bf9be56682ce443d2eba8f00756a1301cfc5bb"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-reader.ts",
+      "sha256": "750eb400423d64436f4121b3e8de35d561fe35d86af5ca8fc2fd5799fa8583ed"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-runtime-binding.test.ts",
+      "sha256": "e400c230cadf0447a793489f32ef29195f6bbaf116ca9465a9f3ef0bf776d91e"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-runtime-binding.ts",
+      "sha256": "a430250812062555dd3899fafe15ba6ac13aeb12d0e5d9105c22139727ce3b48"
+    },
+    {
+      "path": "packages/core/src/memory/index.md",
+      "sha256": "1d167d5ebad194cc121269e1869bc82c6d79c88511fe25d29c9ec46630884230"
+    },
+    {
+      "path": "packages/core/src/memory/local-runtime-binding.test.ts",
+      "sha256": "787201af04c4b602ca8262d200236cdbc20a878191dbfe9b93ca6c2c8b1c2cd4"
+    },
+    {
+      "path": "packages/core/src/memory/local-runtime-binding.ts",
+      "sha256": "a36112e7222c2e59da83cf70643d78d495ce4e67b2603af6fc6a9f15985fa16b"
+    },
+    {
+      "path": "packages/core/src/memory/runtime-composition.ts",
+      "sha256": "fb75dda39f702c197274a0db2032610685ea51e731264a6ea0b981156d53b2c4"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/index.md",
+      "sha256": "c0e8b202bd3be0855abb6a5b9dad4e5c9d9405126c9a7eca0071a4274f1e621c"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-evidence-context.test.ts",
+      "sha256": "43cfc590d16c3acbf28b32c98c288e1040cd9ac67b9e81e7dbcf2857c85eb121"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-evidence-context.ts",
+      "sha256": "2710d7ff07bce8bf633e0acb58003539aeed84609a3aa4b9c00f7c89cf2fe84f"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-service.ts",
+      "sha256": "ed5b46fce01aaa2a8d4dc7df6ba7e589655dfbfdd6eb191a1efd443ce7fbd689"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-projection.ts",
+      "sha256": "0273f3a5561a7b6b19607000a35bd79d32390b550c6c51695b79491de1ce939a"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-observation-store.test.ts",
+      "sha256": "03de2b654d1a1c68d9648ee5f9d066febe7af1e181f45282a1695a3a964575da"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-observation-store.ts",
+      "sha256": "10f015c75925901f44651c1427550447afba458cde4ee0682ae001c07836f4dc"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+      "sha256": "9c0671f4dfd20f0924213b78fd28ba4e67ffe74f330ebfbdeac520dc6467546c"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-native-session.ts",
+      "sha256": "a9add5e1624151a21229167276a0fa0548c7551cccdcb02ecea1de1f2738486c"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-driver.mjs",
+      "sha256": "c7cfce55f4c0bc220196875f34b4d885fc209d804d9c6d6064efb12847ef3070"
+    }
+  ],
+  "compositionMs": 81657,
+  "operationId": "6e275153-2dbf-4010-9f4d-640bfd7e39e9",
+  "transitionId": "df47f32c-48a8-47bc-9792-2e24e8642084",
+  "operationState": "completed",
+  "operationErrorCode": null,
+  "driverMs": 434325,
+  "diagnostics": [],
+  "finalPhase": "terminal",
+  "terminal": {
+    "outcome": "completed",
+    "runtime": "ready",
+    "queue": "settled",
+    "release": "source-retired",
+    "banks": 2
+  },
+  "sourceSha256After": "a81a1e3ec6e85f3faa287b8b77c704742be7bbf0f05ec594e1a4bc8381c00923",
+  "sourceUnchanged": true,
+  "checkedSourceUnchanged": true
+}

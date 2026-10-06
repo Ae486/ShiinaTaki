@@ -18,6 +18,7 @@ import type { HindsightBackupStagedRecord, HindsightBackupStore } from "./hindsi
 
 export interface HindsightBackupAdmitInput {
   backupId: string; fileName: string; expectedEpochId: string;
+  signal?: AbortSignal;
   checkpoint(phase: MemoryBackupProducerRef["phase"]): void;
 }
 interface AdmitDeps { store: HindsightBackupStore; logger: Logger; now: () => string }
@@ -26,6 +27,7 @@ export async function admitHindsightBackup(deps: AdmitDeps, input: HindsightBack
   input.checkpoint("verifying");
   try {
     const staged = await stepAsync(() => deps.store.readStaged(input.backupId), (error) => codeOf(error, "HINDSIGHT_BACKUP_STORAGE_FAILED"));
+    input.signal?.throwIfAborted();
     // Only a Core copy this host staged can be paired; an unknown id has no Core half to prove anything against.
     if (!staged) return failedOutcome("HINDSIGHT_BACKUP_ARTIFACT_INVALID");
     if (staged.core.authority.epochId !== input.expectedEpochId) return failedOutcome("MEMORY_AUTHORITY_MISMATCH");
@@ -45,6 +47,7 @@ export async function admitHindsightBackup(deps: AdmitDeps, input: HindsightBack
 async function sealClaimed(deps: AdmitDeps, claimed: { input: HindsightBackupAdmitInput; staged: HindsightBackupStagedRecord; path: string }): Promise<HindsightBackupOutcome> {
   const { input, staged } = claimed;
   const archive = await stepAsync(() => readHindsightBackupArchive(claimed.path), (error) => codeOf(error, "HINDSIGHT_BACKUP_ARTIFACT_INVALID"));
+  input.signal?.throwIfAborted();
   // The echoed id binds the ZIP to this staged request; a ZIP made before the request existed cannot carry it.
   if (archive.backupId !== input.backupId) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_ARTIFACT_INVALID");
   const pair = verifyHindsightBackupPair(staged.core, archive.proof);

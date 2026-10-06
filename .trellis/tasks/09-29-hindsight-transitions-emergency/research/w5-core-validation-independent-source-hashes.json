@@ -1,0 +1,322 @@
+{
+  "meaning": "Independent Core validation and W4 installed-order scoped PASS; root lint retains five existing length exceptions. Same RETURN may continue under cumulative cap 329; W5 remains incomplete. No large replay rerun.",
+  "checkedAtUtc": "2026-10-03T17:46:24.547474+00:00",
+  "reviewer": "/root/w45_readonly_review",
+  "coreHead": "fccfc4fb78958c90efebdb4a5a98b355bcb73a40",
+  "nativeHead": "6a749ba3e7d8719e336d9d1d8735a8e09da4366b",
+  "currentFiles": {
+    ".trellis/spec/backend/memory-transition-healthy-drivers.md": {
+      "sha256": "08de1c80c3ab1566955ef65877a5aefb28c570da48fde7cf4aa6edc09506bfd9",
+      "bytes": 11041
+    },
+    ".trellis/spec/backend/memory-transition-publication.md": {
+      "sha256": "57d80712a8f9ee4cdd6c41af25918cdd1f32515d950608fdae0ef9c11ca1bdcb",
+      "bytes": 11005
+    },
+    ".trellis/spec/backend/memory-transitions.md": {
+      "sha256": "060069047126257a9d00576b0d23f222b8f8f0e5b968f5b0a04db2cf848ff0c7",
+      "bytes": 31459
+    },
+    "packages/core/src/db/hindsight-application-replica-publication.ts": {
+      "sha256": "52d2435d4fc74de55947203805f6cbc1f29c6d60fbe14a97d639d9f5f3d8d0ed",
+      "bytes": 13139
+    },
+    "packages/core/src/db/index.md": {
+      "sha256": "380ac09e2aa8f5cd627edb9722c6a07b5f3acdbd0aecd0449b757db0b01eb54f",
+      "bytes": 20160
+    },
+    "packages/core/src/db/memory-transition-candidate-repo.ts": {
+      "sha256": "fb5bfb92ed6c530aca1c55af7f76997ab2438a01672a5f91152d4c4201929e75",
+      "bytes": 11736
+    },
+    "packages/core/src/db/memory-transition-local-staging.ts": {
+      "sha256": "97b9847d12959fd4b36a819086d9f0e89ee550f998cf7bd2bf166995cc14df9f",
+      "bytes": 5518
+    },
+    "packages/core/src/db/memory-transition-publication-order.test.ts": {
+      "sha256": "f2c6ae8d9180fe45bb6bbfba2089f5326333afb2783dc35dad3e658e819bce2f",
+      "bytes": 2670
+    },
+    "packages/core/src/db/memory-transition-publication-proof.ts": {
+      "sha256": "3a14faaf2cecceb5c7881b26622b435ea577fb3b6ed32a651b46c71d6e5699f0",
+      "bytes": 9414
+    },
+    "packages/core/src/db/memory-transition-publication-reader.ts": {
+      "sha256": "28e9d76a41393823b2f4966c88edbc9c36f4d19ccede8c54a3dd66b6d486edb5",
+      "bytes": 8150
+    },
+    "packages/core/src/db/memory-transition-publication-repo.ts": {
+      "sha256": "e489e5a5883d4771d83d2f99942be3f137a955da20cf00ee123d2ff45c5de807",
+      "bytes": 8703
+    },
+    "packages/core/src/db/memory-transition-representation.ts": {
+      "sha256": "5cdf6abdea43c8ed4cfadf8548b5e164b998be69a13ff4bd8a24d82f4471dfcc",
+      "bytes": 5676
+    },
+    "packages/core/src/memory/transitions/index.md": {
+      "sha256": "a93d6d54bf6da647cb37d9f30a276881605ddbf3c8e810249dee3b0d24de2393",
+      "bytes": 5129
+    },
+    "packages/core/src/memory/transitions/transition-evidence-context.test.ts": {
+      "sha256": "43cfc590d16c3acbf28b32c98c288e1040cd9ac67b9e81e7dbcf2857c85eb121",
+      "bytes": 8883
+    },
+    "packages/core/src/memory/transitions/transition-evidence-context.ts": {
+      "sha256": "b1b20783ec5602cb0bd3b33361fa06636f0e28fd611bfccdeb89624797e05d4c",
+      "bytes": 4255
+    },
+    "packages/core/src/memory/transitions/transition-final-mapping.ts": {
+      "sha256": "f1dd6f0ef8f84a0db71cabe79aa9be7165f9405eb7daed68678ac13001024b8e",
+      "bytes": 13698
+    },
+    "packages/core/src/memory/transitions/transition-healthy-diagnostics.test.ts": {
+      "sha256": "08334d64a2917f3a465e60eb28f554fef4617cc5d9b8746035642ea3981938d2",
+      "bytes": 2448
+    },
+    "packages/core/src/memory/transitions/transition-healthy-execution.ts": {
+      "sha256": "359501af952e908abf61758ef0054c49afa475c56c7c1da916bbf78ca1b5dd82",
+      "bytes": 17801
+    },
+    "packages/core/src/memory/transitions/transition-healthy-service.ts": {
+      "sha256": "680a89c379f43fc91c6d3b351eef42f14f9801d0ca1aeaf85456f6d93b96a650",
+      "bytes": 7951
+    },
+    "packages/core/src/memory/transitions/transition-local-candidate.ts": {
+      "sha256": "9def05f5b3b06c0bfc8c08b4e2564a01711e548f44bbaefcfe964212fe0ada03",
+      "bytes": 10632
+    },
+    "packages/core/src/memory/transitions/transition-local-projection.ts": {
+      "sha256": "034838c98607f4768a7cb8ef4b3f6598b1598bef7868057967c5570617c28ed0",
+      "bytes": 21785
+    },
+    "packages/core/src/memory/transitions/transition-pending-sources.ts": {
+      "sha256": "350042f03b7559c9cb1d530a1f5b5a887727ec6f76baab14d81c2e817a98ba8b",
+      "bytes": 2669
+    },
+    "packages/core/src/testing/index.md": {
+      "sha256": "cff4addbf156c7b72250f5b21a62445706515352870e77676e3cabcc50107cc5",
+      "bytes": 5476
+    },
+    "packages/core/src/testing/memory-transition-publication-fixtures.ts": {
+      "sha256": "af9fb0e30507de64e401d94b68dbc317844d858520e79f9610b3c2fd1435be67",
+      "bytes": 7946
+    }
+  },
+  "preimages": {
+    "packages/core/src/db/hindsight-application-replica-publication.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__hindsight-application-replica-publication.ts",
+      "sha256": "13959e5d524fa7489c600913b7ef7f59d555db4587354c75e36f45d084549379",
+      "bytes": 12874
+    },
+    "packages/core/src/db/index.md": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__index.md",
+      "sha256": "d3dc19b2b1d723adb390b075a69fd1d070a971f9e829fcc04524d0efc3a7bf8d",
+      "bytes": 20084
+    },
+    "packages/core/src/testing/memory-transition-publication-fixtures.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__testing__memory-transition-publication-fixtures.ts",
+      "sha256": "7283e09b471072bf604486ef44ba19d11f67e7e6354dfc6b1ed1b390999cd46d",
+      "bytes": 7322
+    },
+    "packages/core/src/testing/index.md": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__testing__index.md",
+      "sha256": "53a07e49f014a49dcf5bb5402e05bb0e2db0dccaaa11ddb5d1bdfdce927500b0",
+      "bytes": 5427
+    },
+    "packages/core/src/db/memory-transition-candidate-repo.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__memory-transition-candidate-repo.ts",
+      "sha256": "a9f1223f507d94c22313117320569839e6ae86a05b39f7e9459f839c958b6091",
+      "bytes": 11581
+    },
+    "packages/core/src/db/memory-transition-publication-proof.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__memory-transition-publication-proof.ts",
+      "sha256": "d70f649bd04db43911ae823f70eda6c1c45699a4e3510b1028918f26dca2d81f",
+      "bytes": 8818
+    },
+    "packages/core/src/db/memory-transition-publication-reader.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__memory-transition-publication-reader.ts",
+      "sha256": "fb8b5e1986f354695a73dcda7ff02ee83639a255048287fa651817eb7121ede3",
+      "bytes": 7589
+    },
+    "packages/core/src/db/memory-transition-publication-repo.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__memory-transition-publication-repo.ts",
+      "sha256": "3cc143cef94d1c5986e109b17356fca59061f365e8123e5118ce6c0d7d0e7558",
+      "bytes": 7924
+    },
+    "packages/core/src/db/memory-transition-local-staging.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__memory-transition-local-staging.ts",
+      "sha256": "18f28db0ef2cba3651f08f4527d345011e4ea51f85c8e0715c5784ecbe938aec",
+      "bytes": 5359
+    },
+    "packages/core/src/db/memory-transition-representation.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__memory-transition-representation.ts",
+      "sha256": "9a8035d0fa8b016e77ecec2926ad279afc5f99cc148ce61447fc175dadf48051",
+      "bytes": 5418
+    },
+    "packages/core/src/memory/transitions/transition-local-candidate.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__transition-local-candidate.ts",
+      "sha256": "c3d53a62b0cb30d04b4f987e3ad108fd1e1e9d6449de6f58c08628d2b892eff5",
+      "bytes": 9950
+    },
+    "packages/core/src/memory/transitions/transition-local-projection.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__transition-local-projection.ts",
+      "sha256": "b1050bcdd75d9db012247e53c6f810547c8d0747dafbcfa6a251ff38c8b96517",
+      "bytes": 21274
+    },
+    "packages/core/src/memory/transitions/transition-final-mapping.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__transition-final-mapping.ts",
+      "sha256": "3dc9c3eba5b4997409eab8bb7771aba3b0ee84e09073d77f1239156225fe18dd",
+      "bytes": 12320
+    },
+    "packages/core/src/memory/transitions/transition-pending-sources.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__transition-pending-sources.ts",
+      "sha256": "02d7f5fa6a04e5b213ae09a66a3cfb429060d7d14112a0d37606763b0e1dd851",
+      "bytes": 2530
+    },
+    "packages/core/src/memory/transitions/transition-healthy-execution.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__transition-healthy-execution.ts",
+      "sha256": "5dfee2f0368a3a32f27a4d60b0e26463d1a6acc66d355d8698df0311b897818a",
+      "bytes": 16039
+    },
+    "packages/core/src/memory/transitions/transition-healthy-service.ts": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__transition-healthy-service.ts",
+      "sha256": "a5d55603cec5cb63d981a761f7f989bef760113ca871b1b9e70003cd9ead5cbf",
+      "bytes": 7879
+    },
+    "packages/core/src/memory/transitions/index.md": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__index.md",
+      "sha256": "46d4a61f20d6cf202da6d4e49e5f1cadebaaddc48c6d3ea45c907be28c7a1b59",
+      "bytes": 4910
+    },
+    ".trellis/spec/backend/memory-transitions.md": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/.trellis__spec__backend__memory-transitions.md",
+      "sha256": "1e39e12daec4fbc9801a5f13a2b091cd1646d0f88baa2d607e9ddff1cde882ab",
+      "bytes": 29629
+    },
+    ".trellis/spec/backend/memory-transition-publication.md": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/.trellis__spec__backend__memory-transition-publication.md",
+      "sha256": "e9472f0c07d86aae75a29411e58c7fd2afcf3a7d6c5bdde2298b06a692bd11ce",
+      "bytes": 9511
+    },
+    ".trellis/spec/backend/memory-transition-healthy-drivers.md": {
+      "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/.trellis__spec__backend__memory-transition-healthy-drivers.md",
+      "sha256": "c5089df308a6f049f621bc2a4e5f414d52eebabf3e60e49afc10fc5ab0fc965a",
+      "bytes": 9995
+    }
+  },
+  "remainingRootLintFiles": {
+    "packages/core/src/memory/hindsight-runtime-binding.ts": {
+      "sha256": "da52039a717c685b925ac1a26cd078b39e767472238885b8364b147a6939488a",
+      "bytes": 9626,
+      "inPreviousW5Manifest": false
+    },
+    "packages/core/src/memory/runtime-composition.ts": {
+      "sha256": "663dcec997d078810fb5568c1246b14c34545f356b989067417078e0db703299",
+      "bytes": 19325,
+      "inPreviousW5Manifest": false
+    },
+    "packages/core/src/memory/runtime-selector.ts": {
+      "sha256": "a1042ff37157b507ecdba59a17c8514a6e6cf5dee036e3038dc1bb8b7744330d",
+      "bytes": 9520,
+      "inPreviousW5Manifest": false
+    },
+    "packages/core/src/memory/transitions/transition-native-session.ts": {
+      "sha256": "cc9e47384019303e24364ede56b8ba103e4a79676225c452c4750e50069fefce",
+      "bytes": 7903,
+      "inPreviousW5Manifest": true
+    },
+    "packages/core/src/memory/transitions/transition-runtime.ts": {
+      "sha256": "7c9156978ea3580812dcc007d41d0999e7a846ce78fbe3f5c7abd4c9f3da78aa",
+      "bytes": 8459,
+      "inPreviousW5Manifest": false
+    }
+  },
+  "evidence": {
+    "w5-core-validation-source-manifest.json": {
+      "sha256": "bcf06e76032d77fce66b3d26c34b60dd1be2deba821a35e6a10e60b51beaa6f4",
+      "bytes": 4538
+    },
+    "w5-core-validation-implementation.md": {
+      "sha256": "82be2f2724376154ade7609b0a0e70e914ff75a5da3b46006e2505ae6a8b2f6a",
+      "bytes": 8594
+    },
+    "w5-core-validation-checkpoint.md": {
+      "sha256": "3699c3386a0c3d19e5a6c51bafb69c9a38fdf0f7318f89355380205c06dfd018",
+      "bytes": 4079
+    },
+    "w5-core-publication-clock-diagnostic.mjs": {
+      "sha256": "0166ec1861254bf0e7f2699dbe94bb1ee56beddc8862e4d4c4a52440f059ff1c",
+      "bytes": 6811
+    },
+    "w5-core-publication-clock-final-result.json": {
+      "sha256": "c27291eb6f4adc70f15188f7d5bae9dad1794524ff515c14bf75c15b2af1a4fd",
+      "bytes": 2242
+    },
+    "w5-core-validation-independent-check.md": {
+      "sha256": "54fe30543e7c7cb4c3ce739659556abfc1f0bfc075c1295e6992c731ce7754d9",
+      "bytes": 9673
+    },
+    "w5-checker-source-hashes.json": {
+      "sha256": "79158adcc4369135c69c8e4a0fb1d8651a30cc7f4ba9712580bee23df785679d",
+      "bytes": 19432
+    },
+    "w5-independent-lint-final.log": {
+      "sha256": "cf0d2042a4eb8cea5d8a4cd23d5bccc9bc133e78dcbf14d8b242ce14a926eab7",
+      "bytes": 1541
+    },
+    "w5-native-renewal-independent-check.md": {
+      "sha256": "556d70eeec0a328a3a352a256d2a3e9b641e586d7a51ae93276257eac92165c7",
+      "bytes": 11916
+    },
+    "w5-native-renewal-independent-source-hashes.json": {
+      "sha256": "d6dedae46c42186d8744fd0bfacb043824f72714f562e982b71e9feda66e9296",
+      "bytes": 10586
+    },
+    "w5-core-validation-preimages/manifest-d77-supplement.json": {
+      "sha256": "4f68c1639fada1fe4a9b5ba9202738e63577a9d611dc42ba599478af9d787031",
+      "bytes": 343
+    },
+    "w5-core-validation-preimages/manifest-db-index-supplement.json": {
+      "sha256": "984e7f64d31a510cca5cd287cc1604dfc2f4a107a09e0a3ea5064ed8975891cf",
+      "bytes": 271
+    },
+    "w5-core-validation-preimages/manifest-fixture-supplement.json": {
+      "sha256": "d4495a276adbd55fc80f4b5c2d80cc4d17cbbcb8841118aa2cabf98a0a19e740",
+      "bytes": 347
+    },
+    "w5-core-validation-preimages/manifest-testing-index-supplement.json": {
+      "sha256": "78cdb18bfe8b72bc9779667e849df561c693717b4787b42f5316c832cf589bb3",
+      "bytes": 281
+    },
+    "w5-core-validation-preimages/manifest.json": {
+      "sha256": "7e8a25a47be1253c4e5205862e958d8fa1967f697b1e3e885c3172916cb4f4fe",
+      "bytes": 5715
+    }
+  },
+  "originalDatabase": {
+    "path": "H:/TakiAgent/.trellis/.runtime/stage4-conversion-native/8ce88920d37641aa9689145bd1811a90/w5-healthy-a7ffc67a1666400b8cc7e890d837cb97/application.sqlite",
+    "sha256": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+    "bytes": 268906496
+  },
+  "newVerification": {
+    "tests": {
+      "files": 27,
+      "tests": 178,
+      "maxWorkers": 2,
+      "durationSeconds": 98.27,
+      "exitCode": 0
+    },
+    "workspaceTypecheckExitCode": 0,
+    "scopedEslint": {
+      "files": 18,
+      "exitCode": 0
+    },
+    "rootLint": {
+      "exitCode": 1,
+      "errors": 5,
+      "warnings": 0
+    },
+    "largeReplay": "not rerun; method, source binding, elapsed guards and persisted copy independently reviewed",
+    "newModelRequests": 0
+  }
+}

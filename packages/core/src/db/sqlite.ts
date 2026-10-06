@@ -5,6 +5,7 @@
  *         (backupTo writes only the path its caller owns)
  */
 import { backup, DatabaseSync, type StatementSync } from "node:sqlite";
+import { pathToFileURL } from "node:url";
 import { runMigrations, type Migration } from "./migration-runner.ts";
 
 /** Values SQLite binds or returns (subset of node:sqlite SQLInputValue / SQLOutputValue we use). */
@@ -52,6 +53,14 @@ export function openDatabase(options: OpenDatabaseOptions): Database {
   const applied = runMigrations(db, options.migrations);
   options.onMigrated?.(applied);
   return db;
+}
+
+/** Inspect a completed immutable backup only; never use this for a live database with a WAL. */
+export function openReadonlyDatabase(path: string): Database {
+  // SQLite's immutable URI avoids creating WAL/SHM sidecars beside a sealed WAL-mode backup. Read-only alone
+  // still creates them, and a live database would require its WAL rather than this standalone-file contract.
+  const uri = pathToFileURL(path); uri.searchParams.set("immutable", "1");
+  return wrap(new DatabaseSync(uri.href, { readOnly: true }));
 }
 
 function wrap(raw: DatabaseSync): Database {

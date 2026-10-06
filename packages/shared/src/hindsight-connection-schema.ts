@@ -54,6 +54,8 @@ export const HindsightSupportReasonSchema = z.enum([
   "native_result_schema_unavailable",
   "current_state_transfer_schema_unavailable", "cutover_verification_schema_unavailable",
   "application_state_schema_unavailable", "application_reflect_unavailable",
+  "transition_schema_unavailable",
+  "transition_source_evidence_unavailable",
 ]);
 export const HindsightCompatibilitySupportSchema = z.strictObject({ state: HindsightSupportSchema, reason: HindsightSupportReasonSchema });
 export type HindsightCompatibilitySupport = z.infer<typeof HindsightCompatibilitySupportSchema>;
@@ -92,6 +94,7 @@ export const HindsightCompatibilityProjectionSchema = z.strictObject({
     cutoverVerification: HindsightVersionedContractSchema.optional(),
     applicationState: HindsightVersionedContractSchema.optional(),
     applicationReflect: HindsightVersionedContractSchema.optional(),
+    transitions: HindsightVersionedContractSchema.optional(),
   }),
 });
 export type HindsightCompatibilityProjection = z.infer<typeof HindsightCompatibilityProjectionSchema>;
@@ -105,6 +108,7 @@ export const HINDSIGHT_ERROR_CODES = [
   "HINDSIGHT_CURSOR_RESET_REQUIRED", "HINDSIGHT_SNAPSHOT_INTEGRITY",
   "HINDSIGHT_OPERATION_IDENTITY_CONFLICT", "HINDSIGHT_SETUP_INTERRUPTED", "HINDSIGHT_BANK_OCCUPIED", "HINDSIGHT_CONNECTION_DISABLED",
   "HINDSIGHT_PROVIDER_ROLLBACK_DETECTED",
+  "HINDSIGHT_TRANSITION_FENCED", "HINDSIGHT_TRANSITION_EXECUTOR_LOST",
 ] as const;
 export const HindsightErrorCodeSchema = z.enum(HINDSIGHT_ERROR_CODES);
 export type HindsightErrorCode = z.infer<typeof HindsightErrorCodeSchema>;

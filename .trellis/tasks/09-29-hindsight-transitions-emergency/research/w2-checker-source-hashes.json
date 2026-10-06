@@ -1,0 +1,147 @@
+{
+  "nativeRoot": "H:\\hindsight",
+  "native": [
+    {
+      "path": "TAKI_PATCHES.md",
+      "before": "ba6ad803c3a9e2c4d18d7dbf8d7691137a70f8e8a606d024ec6e8f56383618d9",
+      "after": "ebc5b525c1d17bb26dca972c1db299fed18bf52e9a2ef03bd7b465b33be139dd"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/admin/cli.py",
+      "before": "08e5c9a09692fbbe2995f257e9162aa35ebc62117a3fc74ab239cc0963e8aebc",
+      "after": "d2495869dcfffecab3c23bdfdd8ac0113173966c8f2aeae3713800a08b1e067b"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/alembic/versions/e30a9d7f6c21_add_transition_publication_fences.py",
+      "before": "23804b62ff07d703697321eb385c581ce4819e5b80c80d1ffe1712edd76af00d",
+      "after": "3a310b19a4e6de34a0a9eb7935992105f90df21a0717e96fd6aad9834f9e6433"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/api/http.py",
+      "before": "9abd009f37be64ebe0a647ba98e9c23ebd125d430e8aa76d20a13e76291cde2e",
+      "after": "f9e61ae7e213b20ad5873cf949b6f5683f4e66c9ab7fd02ec108767eddb97dda"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/db/postgresql.py",
+      "before": "627258c473fb879ad97826e26411528f2746f4d26ac64176406d5d704cc042a9",
+      "after": "cf4f961420abe141d5a722d23d2f292d22eec4be1ae9d4231cc03ab17596ff2d"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/memory_engine.py",
+      "before": "2743d63ca5eedaccfcfb984a69e6898df7d30aa0065e77dc4742978111c5dd98",
+      "after": "70655df153c0512300b1793bcc7731b9f400b25cba81f2c3070b8bec53b0099e"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_context.py",
+      "before": "c9b77c0abe7b399f4b159164c2485b9f9830c39fb7834146f4dcf058a06d83d4",
+      "after": "df61e073d864d049c5a3fbeebd98cdd071cad355eb75ffd327d08a0c30e41316"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_initialization.py",
+      "before": null,
+      "after": "83610d6833e97dae8a80dc7cd2903439c623d784ffff9a217026d9d79afb876e"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_maintenance.py",
+      "before": "5c13166236291e92b01d9d13ad1b364d172e4f2b72f252c40ad928528ee1799c",
+      "after": "03d0df5d88eeef2ab87899b91bc2694395b2b4ff994fc9c885fb5a2bfc7f467e"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_service.py",
+      "before": "2cd0e061fb9c9f10fd9bf6ccd1014e84c8177f885c9c9f258d3a8cba81dd1733",
+      "after": "5eaee15df9d58e8aa913ecdad8828d068ebc2da74b28298ac2573586a96e1510"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_snapshot.py",
+      "before": "7fc1d38a5014e4285c0366fac2cd536223b03b607fdceb6280f58e9da9041055",
+      "after": "3e695dffedd3927468c290693a83827a080ba4e561da64c6d298df9b60123291"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_storage.py",
+      "before": "88b1a0a617f86983ddc005a1b82b6ef87065238779d2ae89d753f37fd9c4af27",
+      "after": "5b3664406ee7a28c753e1882e6dd562089048a98f77f3861707e1d17e8ad85fa"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_unused_scope.py",
+      "before": "1d9db69cacc5d5aeb5d0f42ce6d73db6a5803167df94463c9f87cc8bf90727a2",
+      "after": "3efa14f9170ec13a233e8a51a635a311ffdaf8fa9bf957edc606c0c03fa10ab9"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_writers.py",
+      "before": "a7969c21046c0d4dedc6fa5a7c81369fc355d6949e422eb7a76ba3af590f7ebd",
+      "after": "3e98e2db02e50b6512c342a476bd830ca5b2756a87c5516a06d73aeec72bfaa3"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/taki_character_template.json",
+      "before": null,
+      "after": "684c0e7a30331850f72a004bc43a8274183a30bed6f7689a99729f388f905f43"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_core_projection.py",
+      "before": "6e5d82528eaae7b5dadbcee4ac52e081657cfc7974210b30e7a6c391b4b213da",
+      "after": "44433e33ebfce0f980235c60ae84de179e02202c0ee0e72a094db60435a4eab1"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_fence.py",
+      "before": "307a5e0198a24bed003296d7d8a9a5eeb57603cf5779e2bbfce160711e7e80d2",
+      "after": "ac86946fad150c4cfcc273a97f5d8c06b287e97e034e2e1caab6b16347b8f833"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_initialization.py",
+      "before": null,
+      "after": "6bb0ca07a6a39f21b5fe360eaeaa717a10cf1ba088c9a8b7042e78c201852857"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_integrity.py",
+      "before": "af83a16e32d40059a9ea2fc710245f444a05b9760d3f32e3691776972f65b5a9",
+      "after": "770713b69bf1ff2913f18d920372386eec899ea23a2bdb63fe2f4c7ed2bf8470"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_recovery.py",
+      "before": "97ebf79f90c398d94413f7d7310a02fb9864abe725d681859bf67da121d65040",
+      "after": "7185a4cc4eb8b6e3956b01f9ce4629b936fc86609149843780d23b2be9ca313d"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_unused_scope.py",
+      "before": "b14f745103f1fc65b0b3a7eef2c29a4cab87af23ecce0d6e7ba2a22a3d025478",
+      "after": "cfaff6c2710cdefa607042641348852f417587b1df1a3e84070c0e4cc4efa2b2"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_writers.py",
+      "before": null,
+      "after": "36c638c7eeb4fe3dfbf7b44994354f6b73ab1161dba0b81e4e2baae0b47091d8"
+    }
+  ],
+  "takiRoot": "H:\\TakiAgent",
+  "taki": [
+    {
+      "path": ".trellis/spec/backend/memory-transitions.md",
+      "sha256": "fac5a55f605c36009adbf30e0d474d11a87cf429f29bc728db4bf43ed8397eaa"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/design.md",
+      "sha256": "30e2c09bc210380bd5a8ce7d61e2206f2231851bde37be3065eb49ca07011f74"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/validation/w2-projection.fixture.ts",
+      "sha256": "e852e9d18b26e1dddcc7477e90193f68509a84fd9990187dff6531c18d9d5d5b"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w3-interface-notes.md",
+      "sha256": "c9fa3a773ed71428561b2ff3c64f1f47f5a68e3b768169f417dbf5d7bc401cb9"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-transition-client.test.ts",
+      "sha256": "4360dcd09b3cd1868d3662c007e4297fd57bac1e49dd6c3862437ba4ac2a916f"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-transition-client.ts",
+      "sha256": "cbabcb423d404be1cdf50decf6c3133ee8db35c9b2ba8ac47849961c42ea9c5c"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/index.md",
+      "sha256": "2a4dbb70b5ad0b574aac554eb0391bb768b0b8c286ce3f6e6433b681ae8ecff6"
+    }
+  ],
+  "openapiSha256": "fe0f1f29ef5ff03e0cd9e0c81204ac5a3224cfa623deeb70abcfe3cb356de185"
+}

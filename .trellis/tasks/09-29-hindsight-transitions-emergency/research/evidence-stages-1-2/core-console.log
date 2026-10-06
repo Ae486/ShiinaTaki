@@ -1,0 +1,207 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ✓ src/memory/hindsight-runtime-composition.test.ts (23 tests) 12094ms
+     ✓ exposes the operations() live accessor only for the selected Hindsight subsystem  632ms
+     ✓ keeps local independent of configured Hindsight and preserves its directory layout  400ms
+     ✓ keeps legacy independent of configured Hindsight and preserves its directory layout  375ms
+     ✓ constructs selected Hindsight with seeded=false, then hydrates real policy without a Utility model or Legacy fallback  1000ms
+     ✓ constructs selected Hindsight with seeded=true, then hydrates real policy without a Utility model or Legacy fallback  959ms
+     ✓ admits known pins and neutral facts while excluding hidden and other-Character data before consumer delivery  912ms
+     ✓ keeps a captured prompt immutable while a later Run sees the new application policy  599ms
+     ✓ refuses captured execution after epoch drift without changing provider or consulting Legacy  328ms
+     ✓ does not retarget an already captured Character route after B3 Bank mapping changes  438ms
+     ✓ uses verified replica data during an outage while retaining Hindsight identity and explicit partial status  675ms
+     ✓ flushes one exact committed source into real durable two-Bank coverage during an outage  651ms
+     ✓ waits for an abort-ignoring active pull, shares repeated-stop completion and blocks queued/late access  367ms
+     ✓ settles an active captured native recall before completing runtime shutdown  383ms
+     ✓ preserves frozen Effect authority metadata through the foreground lifetime wrapper  331ms
+     ✓ rejects held consumers after stop before entering a closed SQLite handle  323ms
+     ✓ rereads both policy knobs through ConfigSource for each actual curator pass  1275ms
+     ✓ known required pin in active state must not silently disappear when rebinding is unavailable  421ms
+     ✓ known required pin in invalidated state must not silently disappear when rebinding is unavailable  491ms
+     ✓ known required pin in expired state must not silently disappear when rebinding is unavailable  471ms
+ ✓ src/memory/hindsight-lifecycle/hindsight-lifecycle-journey.test.ts (20 tests) 18817ms
+     ✓ degrades a new Character, provisions a fresh Bank that binds, recalls Global + Character and ingests the degraded turn once  1868ms
+     ✓ refuses at admission under a Local marker, a drifted connection and an already ready Bank, with no row  971ms
+     ✓ refuses an occupied Bank with no PUT and no row, and a template conflict with zero native calls  913ms
+     ✓ leaves a failed row on a rejected dry-run while the other Banks keep serving, then provisions idempotently after a first-sync failure  952ms
+     ✓ degrades on a changed timeout, revalidates without touching Bank rows, stops the old scheduler once and ingests the witnessed turn once  1140ms
+     ✓ replaces the binding under an in-flight Run: the old Run's memory calls fail structured, the next Run is served  1101ms
+     ✓ settles a replacement that fails to build as failed runtime_unavailable, leaves the binding unavailable and offers recoverBinding  907ms
+     ✓ refuses a disabled connection, a deployment-mode change and a template change with the authority and binding kept  517ms
+     ✓ refuses a deployment-mode change made across a restart, where the runtime was built on the unreviewed settings  790ms
+     ✓ revalidates a benign change made across a restart, advancing the reviewed fingerprint and mode, then a later key rotation  1054ms
+     ✓ keeps a pre-050 row with no reviewed mode fail-closed for a change made across a restart  904ms
+     ✓ refuses a different provider lineage after admission, keeping the old binding and the reviewed fingerprint  647ms
+     ✓ settles a health check the provider fails (503) or an unsupported version as failed with its closed code, writing no reviewed state and no Bank row  704ms
+     ✓ calls verifiedReconnect once after a foreground success following an outage, never from scheduled runs, and on an unchanged revalidate  1686ms
+     ✓ submits one automatic bank.provision per Character and fingerprint, held across restart, and never retries a failed attempt  922ms
+     ✓ automatically revalidates a changed connection once and the next Run is served with memory  960ms
+     ✓ settles an automatic revalidation against a different lineage as one failed attempt, keeps the binding and never retries it  551ms
+     ✓ settles an automatic revalidation whose health check the provider fails once and never retries it for the same fingerprint  561ms
+     ✓ refuses an automatic submit while another memory family is busy, leaving the Run degraded and nothing queued  703ms
+     ✓ blocks resume on a Character first seen during the interval until 应用配置 verifies its Bank  964ms
+ ✓ src/memory/hindsight/hindsight-capture-sync.test.ts (10 tests) 7417ms
+     ✓ re-pulls and rebinds when native consolidation races the foreground binding commit (D1)  847ms
+     ✓ degrades the Run to its readable replica after bounded conflict retries, then converges later without a duplicate commit  933ms
+     ✓ admits a partial Run for any non-integrity sync failure and logs only a closed code  539ms
+     ✓ degrades to a memory-unavailable Run when the connection changes during the admission sync  537ms
+     ✓ keeps refusing an integrity failure, as a logged structured refusal  394ms
+     ✓ bounds admission by its budget with many pending units; binding finishes in the background exactly once (D2)  1850ms
+     ✓ bounds admission by min(request timeout 60000, half the chat ack deadline undefined) = 7500  526ms
+     ✓ bounds admission by min(request timeout 5000, half the chat ack deadline undefined) = 5000  560ms
+     ✓ bounds admission by min(request timeout 60000, half the chat ack deadline 9000) = 4500  437ms
+     ✓ reads the chat ack deadline at each capture, so a live change applies without a restart  792ms
+ ✓ src/memory/hindsight-activation/hindsight-activation-journey.test.ts (6 tests) 5595ms
+     ✓ activates a healthy Local instance in one operation, rebinds in-process and serves a Hindsight Run  1055ms
+     ✓ witnesses a chat commit during the interval, carries it once into the Hindsight epoch and refuses setup RPCs while open  1443ms
+     ✓ survives a lost submit reply through discovery, refuses a duplicate while open and stops at a Bank boundary on shutdown  771ms
+     ✓ classifies a crash before COMMIT as incomplete without redispatch and a restart after COMMIT from the receipt without re-promoting  896ms
+     ✓ keeps Hindsight selected with a structured unavailable runtime when the rebind fails, witnesses the interval and repairs through recover  807ms
+     ✓ fails closed on a corrupt marker: boot observation stays unknown and no fallback authority is selected  619ms
+ ✓ src/memory/hindsight-activation/hindsight-activation-service.test.ts (20 tests) 8630ms
+     ✓ drives drain, capture, prepare, import, verify, readiness and promotion to a committed receipt with one POST per Bank step  485ms
+     ✓ drains a pending Local span through the fence before capture and fails MEMORY_INGESTION_INCOMPLETE when it cannot  516ms
+     ✓ carries a primary commit witnessed during the interval into the Hindsight epoch exactly once  332ms
+     ✓ fails MEMORY_QUIESCENCE_TIMEOUT when an admitted Local write does not drain and leaves Local writable  1235ms
+     ✓ carries a chat commit witnessed during the forced drain instead of failing the drain as incomplete  424ms
+     ✓ refuses stale coverage, then resume recaptures explicitly and finishes without re-importing an already imported Bank  429ms
+     ✓ verifies a recapture after a posted verification under a new per-preparation id and replays that id after an interrupted verify  570ms
+     ✓ refuses an unowned target object and representation gaps before any transfer is submitted  447ms
+     ✓ persists a drift-proving native refusal as an invalidation and refuses the same preparation on resume  599ms
+     ✓ replays a lost import acknowledgement and a lost verification reply from persisted results with exactly one POST each  616ms
+     ✓ fails an incomplete verification candidate and advances the same candidate on resume  313ms
+     ✓ fails closed on a timeout transport answer without a drift observation and resumes cleanly  362ms
+     ✓ fails closed on a invalid transport answer without a drift observation and resumes cleanly  390ms
+     ✓ honours a stop request only at a Bank boundary and resumes from the persisted evidence  360ms
+     ✓ refuses promotion when the connection drifted mid-run and resumes without new native writes once repaired  370ms
+ ✓ src/memory/operations/memory-operation-kind-lifecycle.test.ts (5 tests) 3856ms
+     ✓ refuses under a Local marker, on a stale epoch and without the lifecycle service, leaving no row  653ms
+     ✓ stamps the Core origin and refuses both kinds while any of the four exclusive families holds an open row  790ms
+     ✓ cancels only before the deferred claim, with no native call  965ms
+     ✓ settles a crashed provision from the B3 row and replica binding, else outcome_unknown without redispatch  736ms
+     ✓ settles a crashed revalidation only from the recorded fingerprint, its evidence and a runtime built on it  709ms
+ ✓ src/memory/operations/memory-operation-kind-hindsight.test.ts (11 tests) 4214ms
+     ✓ mints every identity in Core, runs the chain once, persists checkpoints and settles from the receipt and binding  532ms
+     ✓ refuses the wrong marker, a stale client view, a drifted or unconfigured setup and recover without a matching receipt  351ms
+     ✓ is mutually single-flight with the setup and local-onboarding families and blocks direct setup RPCs while open  318ms
+     ✓ cancels only before the claim and never starts the producer on a lost claim or a stopping service  387ms
+     ✓ classifies foreign rows at boot: committed from the receipt, incomplete under Local, unknown on a mismatch or unreadable marker  545ms
+     ✓ marks an interrupted pre-COMMIT attempt incomplete with the durable phase and lets resume finish without a second POST  389ms
+     ✓ resumes a recaptured run after a restart mid-verify with the per-preparation ids the interrupted attempt posted  500ms
+     ✓ settles a post-COMMIT bind failure as runtime_unavailable, repairs through recover without re-promoting and keeps history immutable  397ms
+     ✓ settles a refused repair as failed with its closed code instead of completing over a swallowed fault  328ms
+     ✓ rebuilds the committed identity from receipts when no operation row carries it  310ms
+ ✓ src/memory/hindsight/hindsight-application-sync-runner.test.ts (7 tests) 2226ms
+     ✓ rebuilds after an authenticated replay floor reset while retaining the real native baseline identity  437ms
+     ✓ refuses an explicit full run with only the state cursor behind as a rollback before any snapshot  348ms
+     ✓ refuses an explicit full run with only the native cursor behind as a rollback before any snapshot  348ms
+     ✓ refuses corrupt event-hash without publishing part of its checkpoint  313ms
+ ✓ src/memory/hindsight/hindsight-foreground-recall-lifetime.test.ts (9 tests) 3525ms
+     ✓ refuses a directly captured Run if its caller cancels after capability capture  575ms
+     ✓ completes a cold provider Recall beyond 10s with a fresh finite allowance per HTTP and hydration stage  300ms
+     ✓ bounds an unseeded Run capture by the admission budget and finishes the cold sync in the background for the next Run  921ms
+     ✓ renews one owned lease across a complete cold synchronization while keeping its publication identity frozen  461ms
+     ✓ cannot cache or publish a cold read after its owner is replaced  312ms
+     ✓ cannot cache or publish a cold read after its owner is cancelled  313ms
+ ✓ src/memory/operations/memory-operation-kind-local.test.ts (8 tests) 1258ms
+ ✓ src/memory/runtime-activation-failure.test.ts (7 tests) 1635ms
+     ✓ recalls migrated and freshly retained memory through the published binding, and again after reopening  336ms
+ ✓ src/db/primary-memory-custody-repo.test.ts (8 tests) 1262ms
+     ✓ assigns new groups to the Hindsight epoch after COMMIT and routes their witnesses by the assigned epoch's provider  460ms
+ ✓ src/db/hindsight-activation-custody.test.ts (3 tests) 1204ms
+     ✓ drains pre-activation witnesses, carries interval witnesses once, seeds cursors and reassigns open groups  496ms
+     ✓ refuses promotion while a Local span is incomplete, keeps Local intact and completes once resume drains it  384ms
+     ✓ lets Hindsight ingestion claim a carried witness exactly once and treats a re-record as the same commit  322ms
+ ✓ src/memory/legacy-migration/legacy-migration-runner.test.ts (8 tests) 1036ms
+ ✓ src/memory/hindsight-unbound-run.test.ts (4 tests) 1230ms
+     ✓ admits a memory-unavailable chat turn and keeps the witness with 'the connection flag disabled'  373ms
+     ✓ returns to the full memory Run through the unchanged same-epoch recovery once the setting is repaired  359ms
+ ✓ src/memory/operations/memory-hindsight-lifecycle-status.test.ts (4 tests) 1038ms
+     ✓ reports the stored admission evidence time for the current epoch and fingerprint only  346ms
+ ✓ src/memory/hindsight-activation/hindsight-activation-status.test.ts (3 tests) 948ms
+     ✓ offers resume for an uncommitted run, recoverBinding for a committed-but-unavailable epoch and nothing once bound  580ms
+ ✓ src/memory/legacy-migration/legacy-candidate-repo.test.ts (6 tests) 1085ms
+ ✓ src/memory/operations/memory-operation-service.test.ts (9 tests) 793ms
+ ✓ src/memory/operations/memory-authority-status.test.ts (7 tests) 645ms
+ ✓ src/memory/local-onboarding/local-onboarding-service.test.ts (5 tests) 995ms
+stderr | src/agents/chat-agent-primary-custody.test.ts > primary turn custody in the Chat persistence path > reuses one group across the context-overflow retry
+APICallError [AI_APICallError]: This model's maximum context length is 65536 tokens. However, you requested 70000 tokens (70000 in the messages, 0 in the completion). Please reduce the length of the messages or completion.
+    at overflowError (H:/TakiAgent/packages/core/src/agents/chat-agent-primary-custody.test.ts:29:10)
+    at H:/TakiAgent/packages/core/src/agents/chat-agent-primary-custody.test.ts:77:69
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+    at runWithTimeout (file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10) {
+  cause: undefined,
+  url: 'https://gw.example.com/v1/chat/completions',
+  requestBodyValues: {},
+  statusCode: 400,
+  responseHeaders: undefined,
+  responseBody: '{"error":{"type":"invalid_request_error","code":"context_length_exceeded"}}',
+  isRetryable: false,
+  data: undefined,
+  Symbol(vercel.ai.error): true,
+  Symbol(vercel.ai.error.AI_APICallError): true
+}
+
+stderr | src/agents/chat-agent-primary-custody.test.ts > primary turn custody in the Chat persistence path > finalizes the user-only terminal failure instead of leaving an open group
+Error: provider down
+    at H:/TakiAgent/packages/core/src/agents/chat-agent-primary-custody.test.ts:86:59
+    at H:/TakiAgent/packages/core/src/agents/chat-agent-primary-custody.test.ts:90:44
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2025:60
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+
+stderr | src/agents/chat-agent-primary-custody.test.ts > primary turn custody in the Chat persistence path > finalizes the retained partial reply instead of leaving an open group
+Error: stream failed
+    at H:/TakiAgent/packages/core/src/agents/chat-agent-primary-custody.test.ts:87:79
+    at H:/TakiAgent/packages/core/src/agents/chat-agent-primary-custody.test.ts:90:44
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2025:60
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+    at new Promise (<anonymous>)
+    at runWithCancel (file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10)
+    at file:///H:/TakiAgent/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+    at new Promise (<anonymous>)
+
+ ✓ src/agents/chat-agent-primary-custody.test.ts (7 tests) 862ms
+ ✓ src/memory/legacy-migration/legacy-migration-exclusion.test.ts (3 tests) 591ms
+ ✓ src/memory/local-runtime-binding.test.ts (5 tests) 395ms
+ ✓ src/memory/hindsight/hindsight-setup-service.test.ts (6 tests) 501ms
+ ✓ src/memory/operations/memory-operation-kind-replica.test.ts (4 tests) 395ms
+ ✓ src/memory/legacy-migration/legacy-source-stage.test.ts (2 tests) 421ms
+ ✓ src/memory/local-onboarding/local-onboarding-reads.test.ts (3 tests) 237ms
+ ✓ src/db/memory-operation-repo.test.ts (3 tests) 246ms
+ ✓ src/memory/hindsight/hindsight-setup-recovery.test.ts (2 tests) 169ms
+ ✓ src/memory/canonical-local-write-fence.test.ts (2 tests) 255ms
+ ✓ src/memory/legacy-migration/legacy-snapshot.test.ts (5 tests) 88ms
+ ✓ src/boot/hindsight-setup-boot.test.ts (1 test) 88ms
+ ✓ src/memory/legacy-migration/legacy-canonical-converter.test.ts (4 tests) 40ms
+ ✓ src/memory/legacy-migration/memory-authority-fence.test.ts (3 tests) 33ms
+ ✓ src/server/methods/memory-onboarding-methods.test.ts (6 tests) 24ms
+ ✓ src/server/methods/memory-operation-methods.test.ts (4 tests) 22ms
+ ✓ src/server/methods/hindsight-setup-methods.test.ts (4 tests) 17ms
+ ✓ src/server/methods/memory-migration.test.ts (8 tests) 17ms
+ ✓ src/memory/legacy-migration/legacy-source-normalizer.test.ts (14 tests) 15ms
+ ✓ src/server/methods/memory-activation-methods.test.ts (2 tests) 16ms
+ ✓ src/memory/legacy-migration/legacy-identities.test.ts (3 tests) 8ms
+ ✓ src/memory/legacy-migration/fenced-memory-engine.test.ts (3 tests) 12ms
+
+ Test Files  43 passed (43)
+      Tests  277 passed (277)
+   Start at  10:33:39
+   Duration  71.19s (transform 10.65s, setup 0ms, import 43.89s, tests 83.95s, environment 6ms)
+
+JSON report written to H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/evidence-stages-1-2/core-results.json

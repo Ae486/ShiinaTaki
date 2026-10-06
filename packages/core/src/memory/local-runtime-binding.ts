@@ -9,6 +9,7 @@ import type { Database } from "../db/sqlite.ts";
 import type { Logger } from "../logging/logger.ts";
 import type { createCanonicalLocalSubsystem } from "./canonical-local-subsystem.ts";
 import { readMemoryAuthoritySelection, type MemoryAuthoritySelection } from "./legacy-migration/legacy-activation-repo.ts";
+import type { TransitionEvidenceContext } from "./transitions/transition-evidence-context.ts";
 
 export type LocalSubsystem = ReturnType<typeof createCanonicalLocalSubsystem>;
 export type LocalBindingState =
@@ -27,10 +28,14 @@ export interface LocalRuntimeBinding {
   /** Builds, installs, publishes and starts one draft; on any failure disposes it, records unavailable and rethrows. */
   publish(epochId: string): LocalSubsystem;
   current(): LocalSubsystem | undefined;
-  snapshot(): LocalBindingSnapshot;
+  /** Detached in-memory state only; revision changes on any publication attempt, withdrawal or stop. */
+  publicationState(): Pick<LocalBindingSnapshot, "binding" | "lifetime"> & { revision: number };
+  snapshot(verification?: TransitionEvidenceContext): LocalBindingSnapshot;
   /** Irreversible: after a Hindsight COMMIT the publication is withdrawn so no caller can route to the retired Local runtime. */
   retire(): void;
-  stop(): void;
+  /** Waits for unpublished and failed drafts as well as the last published subsystem. */
+  settle(): Promise<void>;
+  stop(): Promise<void>;
 }
 
 const REQUIRED_MEMBERS = ["engine", "maintenance", "memoryFlush", "tidy", "writeMemory", "captureRun", "recordPrimaryCommitted", "start", "stop"] as const;
@@ -39,8 +44,21 @@ export function createLocalRuntimeBinding(input: { db: Database; construct: (epo
   let published: LocalSubsystem | undefined;
   let state: LocalBindingState = { kind: "none" };
   let stopped = false;
+  const retiring = new Set<Promise<void>>();
+  const dispose = (subsystem: LocalSubsystem | undefined): void => {
+    if (!subsystem) return;
+    subsystem.fence?.retire();
+    let stopping: Promise<void>;
+    try { stopping = Promise.resolve(subsystem.stop()); } catch { stopping = Promise.reject(new Error("MEMORY_SHUTDOWN_FAILED")); }
+    const task = stopping.catch(() => {
+      input.logger.warn({ code: "MEMORY_SHUTDOWN_FAILED" }, "retired Local runtime did not stop cleanly");
+    });
+    retiring.add(task); void task.finally(() => retiring.delete(task));
+  };
+  const settle = async () => { while (retiring.size) await Promise.all([...retiring]); };
   return {
     publish: (epochId) => {
+      if (stopped) throw new Error("MEMORY_OPERATION_CANCELLED");
       if (published) throw new Error("MEMORY_INTEGRITY_ERROR: Local runtime binding is already published");
       let draft: LocalSubsystem | undefined;
       try {
@@ -56,14 +74,28 @@ export function createLocalRuntimeBinding(input: { db: Database; construct: (epo
         throw error;
       }
     },
-    current: () => published,
-    snapshot: () => {
-      const selection = readMemoryAuthoritySelection(input.db);
+    ...bindingQueries(input.db, () => ({ published, state, stopped })),
+    retire: () => { published?.fence?.retire(); dispose(published); published = undefined; state = { kind: "none" }; },
+    settle,
+    stop: async () => { stopped = true; dispose(published); published = undefined; await settle(); },
+  };
+}
+
+/** Query revision tracks the existing state object's identity; it is not a second binding or authority owner. */
+function bindingQueries(db: Database, read: () => { published: LocalSubsystem | undefined; state: LocalBindingState; stopped: boolean }) {
+  let previous: LocalBindingState | undefined; let wasStopped = false; let revision = 0;
+  return {
+    current: () => read().published,
+    publicationState: (): ReturnType<LocalRuntimeBinding["publicationState"]> => {
+      const { state, stopped } = read();
+      if (state !== previous || stopped !== wasStopped) { revision++; previous = state; wasStopped = stopped; }
+      return { binding: { ...state }, lifetime: stopped ? "stopped" : "running", revision };
+    },
+    snapshot: (verification?: TransitionEvidenceContext): LocalBindingSnapshot => {
+      const { state, stopped, published } = read(); const selection = readMemoryAuthoritySelection(db, verification);
       return { selection: selection.mode, selectedEpochId: selection.epochId, binding: state,
         lifetime: stopped ? "stopped" : "running", flush: published && !stopped ? "available" : "failing" };
     },
-    retire: () => { dispose(published); published = undefined; state = { kind: "none" }; },
-    stop: () => { stopped = true; dispose(published); },
   };
 }
 
@@ -73,11 +105,6 @@ function install(draft: LocalSubsystem): void {
     if (draft[member] === undefined || draft[member] === null) throw new Error(`MEMORY_INTEGRITY_ERROR: Local runtime draft lacks ${member}`);
   }
   if (typeof draft.memoryFlush.prepareRetirement !== "function") throw new Error("MEMORY_INTEGRITY_ERROR: Local runtime draft lacks a flush port");
-}
-
-function dispose(subsystem: LocalSubsystem | undefined): void {
-  // Disposal is best effort: the unavailable state is the durable fact, and a failing stop must not mask the cause.
-  try { subsystem?.stop(); } catch { /* recorded through the binding state */ }
 }
 
 function failureCode(error: unknown): string {

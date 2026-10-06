@@ -51,7 +51,7 @@ describe("canonical Local maintenance scope and policy", () => {
     const result = value.maintenance.policyEdit({ ...request(value, { bankId: "a-bank" }), patch });
     expect(result.record.unit).toEqual({ ...original.unit, revision: 2, updatedAt: later,
       tags: ["keep-tag", "taki-layer:relationship"] });
-    expect(result.record.policy).toEqual({ ...original.policy, ...patch, updatedAt: later });
+    expect(result.record.policy).toEqual({ ...original.policy, ...patch, policyVersion: original.policy.policyVersion + 1, updatedAt: later });
     expect(result.record.provenance).toEqual(original.source.provenance);
     expect(Object.hasOwn(result.record.unit.metadata, "__proto__")).toBe(true);
     expect(value.maintenance.source({ ...request(value, { bankId: "a-bank" }), documentId: original.source.documentId })).toEqual(original.source);

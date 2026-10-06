@@ -1,0 +1,53 @@
+{
+  "source": {
+    "sha256": "d28d651db46f6c0c06d4387ac3d235026f996a1e142e6d9b0a95ecae8ad978ef",
+    "entries": 5084,
+    "verified": true
+  },
+  "manifest": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-checked-v4-source-manifest.json",
+  "checkedV3Sha256": "12ab49508b637cca1ac51567dee58a4d064830720d638c28ca182b81097a7884",
+  "changes": [
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-client.mjs",
+      "before": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-client.mjs",
+        "bytes": 11558,
+        "sha256": "cd8bfaebb78debb444e33d418e8836ebe7862c5f0ea9fbc10570e7ebb5a6502c"
+      },
+      "after": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-client.mjs",
+        "bytes": 11558,
+        "sha256": "a54383982ea808afaf9fbdf6f0121a1b575970851bbaeb36d0ae5f0311e97c26"
+      }
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_composition.py",
+      "before": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_composition.py",
+        "bytes": 27299,
+        "sha256": "512cd8ea5ddc620761f53aa15f8ffa8c270b74383ba3019f363b9560469a3fa3"
+      },
+      "after": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_composition.py",
+        "bytes": 27460,
+        "sha256": "a795b5d61e3850facd1b0aeef9307183e01ab68d7f3088bd2d3d33c0ceb1d965"
+      }
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_inventory.py",
+      "before": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_inventory.py",
+        "bytes": 3256,
+        "sha256": "e4bf64bd8dc5c7b4e6ca7167d838e1dc2f1b24cffcab60cf025a1f89189d4e41"
+      },
+      "after": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_inventory.py",
+        "bytes": 3256,
+        "sha256": "a6592068d2aeb93be596481a249a660a1e4d0b852d98a6a2443bc87ec3c16802"
+      }
+    }
+  ],
+  "unchangedCheckedV3Entries": 5081,
+  "previous404Preserved": true,
+  "dependenciesPreserved": true
+}

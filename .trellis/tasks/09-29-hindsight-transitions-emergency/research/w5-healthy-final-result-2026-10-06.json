@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "healthyJourneyAccepted": true,
+  "transitionId": "6d27eb9b-6bbd-4b56-8ef4-0fda9c5eec53",
+  "receiptId": "c6dc908527eaec7b70c57151a5c08cef0dcde986d787fc69da9f50d00c4ab450",
+  "epochId": "9a27367e-afb5-4a0a-ae55-2fbb7b07e8b4",
+  "operationId": "e43299c6-437c-4303-a650-a39b78c79b84",
+  "resolutionId": "ef72acef9387f489fc7d2ef98dd1f9787ec1bfb58816f0ceaa91a8069ca72685",
+  "runtime": "ready",
+  "queue": "settled",
+  "nativeActiveBanks": 2,
+  "coreSha256": "274e1ccbd651bcd8c64f88f7ceb0d80c56a3701e5a5a62309369cbfbd0235a45",
+  "modelSubmissions": 551,
+  "finalizationModelRequests": 0,
+  "conversionRequests": 0,
+  "completedSteps": 174,
+  "actions": 1428,
+  "sourceManifestSha256": "3e2d20efba5911f4142d07d8115635ac7cbc805a3719d5cc1bd617071572e5cb",
+  "verifiedSourceEntries": 5113,
+  "stopped": true,
+  "portsReleased": true,
+  "originalSiblingPreserved": true,
+  "legacyDriverExit": 1,
+  "legacyDriverFailurePreserved": true,
+  "legacyDriverDisposition": "Zero-upsert assumption omitted proven Local retention; raw timestamp equality omitted proven original-body restoration and native serialization. New read-only audit proves the exact differences; no production state or old result rewritten.",
+  "receiptAudit": {
+    "verifiedPreparedDeltaResults": 2,
+    "retentionReceiptHashes": 68,
+    "revisionSnapshotPairs": 68,
+    "explicitExpiryVerdicts": 68,
+    "policyAndNonLifecycleFieldsPreserved": true,
+    "readOnly": true
+  },
+  "preservationAudit": {
+    "remainingAssertionsWithProvenTimestampAndRevisionProjectionPassed": true,
+    "banks": 2,
+    "documents": 722,
+    "units": 1275,
+    "invalidated": 89,
+    "originalInvalidatedPreserved": 21,
+    "receiptBackedRetentionUpserts": 68,
+    "documentMappings": 722,
+    "policyVersion": 2,
+    "blockRevision": 2
+  },
+  "auditSources": {
+    "w5-final-receipt-audit.mjs": "0adf701337178444aa7a4627ac4338782c640c731fefa7063184dc30fac6b67e",
+    "w5-final-preservation-audit.py": "f6777c3e85711ee89e60fc95ad6a6759b98343fbf937f25520f0521393d85ecb"
+  }
+}

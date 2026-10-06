@@ -1,0 +1,50 @@
+[
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "ruff",
+      "cmd": "& H:/hindsight/.venv/Scripts/python.exe -B -s -m ruff check '.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-actual-embedding-telemetry.py' '.trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_candidate_actual_embedding_telemetry.py'",
+      "chunk_id": "21404a",
+      "wall_time_seconds": 0.5693521,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n"
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "format",
+      "cmd": "& H:/hindsight/.venv/Scripts/python.exe -B -s -m ruff format --check '.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-actual-embedding-telemetry.py' '.trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_candidate_actual_embedding_telemetry.py'",
+      "chunk_id": "ac4ebd",
+      "wall_time_seconds": 0.6291142,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": "2 files already formatted\n"
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "ty",
+      "cmd": "& H:/hindsight/.venv/Scripts/python.exe -B -s -m ty check --python H:/hindsight/.venv/Scripts/python.exe --python-version 3.11 --extra-search-path H:/hindsight/hindsight-api-slim '.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-actual-embedding-telemetry.py' '.trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_candidate_actual_embedding_telemetry.py'",
+      "chunk_id": "e60a1b",
+      "wall_time_seconds": 0.7277141,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n"
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "unit",
+      "cmd": "& H:/hindsight/.venv/Scripts/python.exe -B -s -m unittest discover -s .trellis/tasks/09-29-hindsight-transitions-emergency/research -p test_w5_candidate_actual_embedding_telemetry.py -v",
+      "chunk_id": "9a0702",
+      "wall_time_seconds": 1.0009032,
+      "exit_code": 0,
+      "original_token_count": 164,
+      "output": "test_default_does_not_verify_or_execute (test_w5_candidate_actual_embedding_telemetry.WrapperTests.test_default_does_not_verify_or_execute) ... ok\r\ntest_summary_retains_original_failures_and_budget_separation (test_w5_candidate_actual_embedding_telemetry.WrapperTests.test_summary_retains_original_failures_and_budget_separation) ... ok\r\ntest_v2_delegation_preserves_result_bytes_source_inventory_and_watchdog (test_w5_candidate_actual_embedding_telemetry.WrapperTests.test_v2_delegation_preserves_result_bytes_source_inventory_and_watchdog) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 3 tests in 0.022s\r\n\r\nOK\r\n"
+    }
+  }
+]

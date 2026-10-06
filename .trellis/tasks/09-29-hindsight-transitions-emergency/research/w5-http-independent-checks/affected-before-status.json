@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "H:\\hindsight\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "--noconftest",
+    "-o",
+    "addopts=",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_diagnostic.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_independent.py",
+    "-k",
+    "reports or report_digest or prelaunch_inventory or contradictory_http",
+    "-q",
+    "--tb=short",
+    "-n",
+    "0"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "timeoutSeconds": 60,
+  "exitCode": 0,
+  "stdout": "........................................................................ [ 93%]\n.....                                                                    [100%]\n77 passed, 19 deselected in 15.34s\n",
+  "stderr": "",
+  "milliseconds": 19031.999999999243
+}

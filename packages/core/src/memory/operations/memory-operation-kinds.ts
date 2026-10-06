@@ -15,6 +15,7 @@ import { hindsightActivateKind } from "./memory-operation-kind-hindsight.ts";
 import { localActivateKind, localPrepareKind } from "./memory-operation-kind-local.ts";
 import { replicaSyncKind } from "./memory-operation-kind-replica.ts";
 import { setupApplyKind, setupValidateKind } from "./memory-operation-kind-setup.ts";
+import { transitionKind } from "./memory-operation-kind-transition.ts";
 
 export type MemoryOperationKindRegistry = {
   [K in MemoryOperationKind]: MemoryOperationKindHandler<Extract<MemoryOperationRequest, { kind: K }>>;
@@ -32,6 +33,9 @@ export const MEMORY_OPERATION_KINDS: MemoryOperationKindRegistry = {
   "backup.capture": backupCaptureKind,
   "backup.admit": backupAdmitKind,
   "backup.verify": backupVerifyKind,
+  "transition.return-local": transitionKind,
+  "transition.reenter-hindsight": transitionKind,
+  "transition.emergency-local": transitionKind,
 };
 
 /** Erases the per-kind request narrowing at the dispatch boundary; the service only ever passes a request of the matching kind. */

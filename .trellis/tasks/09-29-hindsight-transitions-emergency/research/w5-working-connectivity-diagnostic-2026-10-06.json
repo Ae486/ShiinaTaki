@@ -1,0 +1,26 @@
+{
+  "kind": "unauthenticated-head-connectivity",
+  "modelRequests": 0,
+  "allowedAddresses": [
+    "101.71.73.135",
+    "119.36.225.121",
+    "api.deepseek.com"
+  ],
+  "status": 401,
+  "socketTrace": [
+    {
+      "event": "resolve",
+      "host": "api.deepseek.com",
+      "port": "443"
+    },
+    {
+      "event": "connect",
+      "address": "('127.0.0.1', 2231)"
+    },
+    {
+      "event": "resolve",
+      "host": "b'api.deepseek.com'",
+      "port": "443"
+    }
+  ]
+}

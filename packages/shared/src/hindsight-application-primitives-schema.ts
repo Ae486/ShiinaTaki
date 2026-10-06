@@ -21,7 +21,7 @@ export const TakiApplicationTimeSchema = z.iso.datetime({ offset: true });
 export const TakiApplicationObjectKindSchema = z.enum(["bank", "document", "memory_unit", "mental_model", "directive"]);
 export const TakiApplicationArtifactKindSchema = z.enum(["bank", "source", "memory", "block"]);
 export const TakiApplicationBodySchemaSchema = z.enum([
-  "application-bank.v1", "application-source.v1", "application-memory.v1", "application-block.v1",
+  "application-bank.v1", "application-source.v1", "application-source-evidence.v1", "application-memory.v1", "application-block.v1",
   "application-commands.v1", "application-read-context.v1", "application-native-record.v1",
   "application-native-source.v1", "application-record-page.v1", "application-affected-versions.v1",
 ]);

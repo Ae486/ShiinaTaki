@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "H:/hindsight/.venv/Scripts/ruff.exe",
+    "format",
+    "--check",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_composition.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_inventory.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_environment_probe.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_environment.py"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "exitCode": 0,
+  "timeoutSeconds": 60,
+  "stdout": "4 files already formatted\n",
+  "stderr": ""
+}

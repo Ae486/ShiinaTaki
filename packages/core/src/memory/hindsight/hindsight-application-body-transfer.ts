@@ -43,7 +43,7 @@ export function hindsightApplicationDeadline(context: HindsightCallContext): () 
 }
 
 export async function uploadHindsightApplicationBody(input: HindsightApplicationScope & {
-  client: HindsightApplicationClient; body: HindsightApplicationBody; context: HindsightCallContext;
+  client: Pick<HindsightApplicationClient, "uploadApplicationBody" | "putApplicationBodyPart" | "sealApplicationBody">; body: HindsightApplicationBody; context: HindsightCallContext;
 }): Promise<TakiApplicationBodyRef> {
   const call = hindsightApplicationDeadline(input.context);
   verifyHindsightApplicationBody(input.body, input);

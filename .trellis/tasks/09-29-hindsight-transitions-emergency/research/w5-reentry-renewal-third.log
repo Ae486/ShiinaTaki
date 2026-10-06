@@ -1,0 +1,19 @@
+✔ one explicit replacement survives append ACK loss/restart and reuses exact admitted request (1811.8255ms)
+✔ a failure before append preserves old checkpoint and permits only the explicitly approved renewal (1270.9811ms)
+✔ renewal refuses requestId without creating a replacement (1014.0123ms)
+✔ renewal refuses previewHash without creating a replacement (954.3284ms)
+✔ renewal refuses checkpoint without creating a replacement (941.7157ms)
+✔ renewal refuses anchor without creating a replacement (923.2805ms)
+✔ renewal refuses block without creating a replacement (1007.5048ms)
+✔ renewal refuses receipt without creating a replacement (1013.4377ms)
+✔ renewal refuses orphan without creating a replacement (902.7267ms)
+✔ renewal refuses admitted without creating a replacement (1002.6468ms)
+✔ renewal refuses during-preview without creating a replacement (1141.4848ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14039.9512

@@ -1,5 +1,5 @@
 # core/memory/canonical-tools/
-- canonical-memory-tools.ts — provider-neutral canonical tool factory with frozen capabilities, Character routes and immutable tool descriptors; never advertises legacy aliases
+- canonical-memory-tools.ts — provider-neutral canonical tools with immutable capabilities, routes and original Run/Attempt/Effect queue provenance
 - memory-effect-tool.ts — immutable authority/capability Effect sidecars and deterministic per-Bank request identities
 - retain-tool.ts — strict retain definition
 - recall-tool.ts — bounded scoped recall definition

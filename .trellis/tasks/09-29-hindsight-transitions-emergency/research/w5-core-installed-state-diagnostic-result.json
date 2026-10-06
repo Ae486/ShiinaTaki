@@ -1,0 +1,15 @@
+{
+  "sourceSha256Before": "49cc1c30d390dc179dfe8ff9b25c085f5d8074f94d7c7a052824231ea076e124",
+  "copyRoot": "H:\\TakiAgent\\.trellis\\.runtime\\w5-core-installed-diagnostic-6d278820-1d8e-43b3-bea9-f2c908f8e78d",
+  "comparisons": [],
+  "failure": {
+    "name": "Error",
+    "code": "REDACTED",
+    "stack": [
+      "    at Object.prepare (file:///H:/TakiAgent/packages/core/src/db/sqlite.ts:68:32)",
+      "    at file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-installed-state-diagnostic.mjs:24:39"
+    ]
+  },
+  "sourceSha256After": "49cc1c30d390dc179dfe8ff9b25c085f5d8074f94d7c7a052824231ea076e124",
+  "sourceUnchanged": true
+}

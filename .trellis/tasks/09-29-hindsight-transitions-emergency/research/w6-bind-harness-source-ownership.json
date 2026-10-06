@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "createdAt": "2026-10-06T04:10:49.1626625Z",
+  "task": ".trellis/tasks/09-29-hindsight-transitions-emergency",
+  "reviewer": "/root/w5_postpatch_review",
+  "head": "fccfc4fb78958c90efebdb4a5a98b355bcb73a40",
+  "scope": "task-harness-only; production TypeScript and Native unchanged",
+  "priorManifests": [
+    {
+      "path": "w6-checker-source-ownership.json",
+      "sha256": "9b8c55feba7956b89bde0227288d2d9677cfc98cdd495afa3344703c090e7d90"
+    },
+    {
+      "path": "w6-context-repair-source-ownership.json",
+      "sha256": "a1b38b035235655a76c941bcb84e04cbee5bcb74d1b48ec6b844af6139dd8d3b"
+    }
+  ],
+  "files": [
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w6-owned-emergency-driver.mjs",
+      "sha256": "791ea74b76b8ec3d913e8bc5353247a4d13b6a1318d0139811461719fb022194"
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w6-owned-audit-boundary.mjs",
+      "sha256": "10ccbb61c59ace370f787656a46689dbb9b08a2bdcc34ed90cb68aad8fc649a0"
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-emergency-process.test.ts",
+      "sha256": "875fd570ba4b294ecd7fad1ed6249e8c31e3ebbbe0a36ed23ad23562ff34cf30"
+    },
+    {
+      "path": "packages/core/src/testing/w6-owned-audit-boundary.test.ts",
+      "sha256": "0bc082ea9598e301d4bd5e7db0cc7570b9dba35171eeb666cd8143c030e4bdae"
+    },
+    {
+      "path": "packages/core/src/testing/index.md",
+      "sha256": "bd92748ed44d816127fc46f868f23ccf483324c7b56c5524100c63266ba407fc"
+    },
+    {
+      "path": ".trellis/spec/backend/memory-transition-emergency.md",
+      "sha256": "6811d22c31c826859c58f3ac998ce107bac0efe1f61667d330efcc59b40778e5"
+    }
+  ]
+}

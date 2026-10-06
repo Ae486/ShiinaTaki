@@ -1,0 +1,11 @@
+{
+  "kind": "initial-synthetic-harness-timeout",
+  "testTimeoutSeconds": 300,
+  "syntheticRoot": "H:/TakiAgent/.trellis/.runtime/w5-working-synthetic-7ece27ba44a64b46b79a00539948617e",
+  "postgresPort": 10317,
+  "postgresPid": 36988,
+  "observed": "Server reached ready, but the capture_output startup harness did not return before the outer test timeout; no database bootstrap occurred.",
+  "repair": "Use dedicated files and DEVNULL stdin for initdb/pg_ctl output, avoiding inherited communicate pipes.",
+  "cleanup": "Verified exact data directory, port, postgres executable and process creation time from the held Windows handle, then normal pg_ctl fast stop returned zero. No matching test Python remained.",
+  "realWorkingPairAccessed": false
+}

@@ -45,7 +45,12 @@ export function hindsightApplicationEvidenceReader(repo: HindsightApplicationRep
 
 export function hindsightApplicationBindingBody(context: HindsightApplicationBindingContext, work: Work) {
   if (work.native.version.object_kind === "bank") return { schema: "application-bank.v1" as const, value: bankBody(context, work) };
-  if (work.native.version.object_kind === "document") return { schema: "application-source.v1" as const, value: sourceBody(context, work) };
+  if (work.native.version.object_kind === "document") {
+    const existing = work.prior ? context.evidence.body(work.prior.body_ref).content : null;
+    if (existing?.body_schema === "application-source-evidence.v1") return { schema: "application-source-evidence.v1" as const,
+      value: { ...existing.value, associated_native: work.native.version } };
+    return { schema: "application-source.v1" as const, value: sourceBody(context, work) };
+  }
   if (work.native.version.object_kind === "memory_unit") return { schema: "application-memory.v1" as const, value: memoryBody(context, work) };
   return invalid();
 }

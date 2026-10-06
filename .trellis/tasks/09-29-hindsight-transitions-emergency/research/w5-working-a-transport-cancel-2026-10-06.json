@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "kind": "owned-working-request-cancellation",
+  "targetPid": 32772,
+  "parentPid": 37152,
+  "localPort": 11519,
+  "remotePort": 18496,
+  "reason": "Finite model budget exhausted after repeated connection failures",
+  "completed": true,
+  "result": {
+    "pid": 32772,
+    "socketsClosed": 1
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "createdAt": "2026-10-04T16:30:34.488876+00:00",
+  "meaning": "Reader queue repair correctness only; no real-corpus performance acceptance or trigger repair.",
+  "priorManifestSha256": "51b86892546896ca275b8da2fb9972d3ffce0ee01ee1f12fad61e9a18d6b6a23",
+  "approvedProductionPaths": [
+    "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_baseline_reads.py"
+  ],
+  "sourceAudit": {
+    "onlyThreePopsAfterCompleteIdentityAndScopeHit": true,
+    "bothTestFilesOnlyAddOneRegressionEach": true,
+    "specOnlyAddsTheApprovedQueueContract": true,
+    "otherPriorSourceReportsAndManifestsUnchanged": true
+  },
+  "files": [
+    {
+      "path": "H:/TakiAgent/.trellis/spec/backend/memory-transition-healthy-drivers.md",
+      "bytes": 20971,
+      "sha256": "93995f7e29b7dda0321d20aba82fa5a16ea340d7a1cf8750676a168baf2dd0fb"
+    },
+    {
+      "path": "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_baseline_reads.py",
+      "bytes": 10261,
+      "sha256": "dc842bd5575dc972992bc31b4bf3f98ae77b7180ae719aeae90b48312c062b2a"
+    },
+    {
+      "path": "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_artifact_reads.py",
+      "bytes": 12368,
+      "sha256": "99cc3267a03a7f86fc4c9601bed26fb41cdd6e0fba38c4c1b1e917d877cb55c4"
+    },
+    {
+      "path": "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_baseline_reads.py",
+      "bytes": 23364,
+      "sha256": "f9d8ba5a70ed1e7c1362f32929a4ce15c92c33579659216c6a95d7082e4cd285"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-ab-source-manifest.json",
+      "bytes": 15050,
+      "sha256": "51b86892546896ca275b8da2fb9972d3ffce0ee01ee1f12fad61e9a18d6b6a23"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-reader-queue-preimages/hindsight_api/engine/transition_baseline_reads.py",
+      "bytes": 9779,
+      "sha256": "e992524883b4c75711cc2fcb3a152f384e3993dfc10f9321ca6c7d449f879b0f"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-reader-queue-preimages/manifest.json",
+      "bytes": 213,
+      "sha256": "c7d36fc137ee7409f7dcd363cd776a1415c08ed3823993815a9a00e3fd7446d0"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-reader-queue-source-audit.py",
+      "bytes": 6704,
+      "sha256": "5e687a2e67e6c96295192f5b76b9ef7aedcafd1ec167d0ad50db034aa170ffcf"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-reader-queue-type-compare.py",
+      "bytes": 3860,
+      "sha256": "645330ec494849dcec2442a2b9a12133f8d05ee801df9750102a758d25c94cea"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-reader-queue-implementation.md",
+      "bytes": 6762,
+      "sha256": "caeb4a5f483fd97fa78f322392ed953ad46dff5278bec8ab8ea4e71f52695c75"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/.runtime/g1-validation/taki-hindsight-g1-7752b51f0729/pytest.log",
+      "bytes": 114671,
+      "sha256": "84f3504235b3737ab6980ddf0dbde8a04a7b6abeef45241c22ca1fd603b18cd2"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/.runtime/g1-validation/taki-hindsight-g1-7752b51f0729/ownership.json",
+      "bytes": 263,
+      "sha256": "ef8788ec12cddf8a033060080896afd766c3b55cf554e1835798286cecf096d9"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/.runtime/g1-validation/taki-hindsight-g1-7a0206ad1b48/pytest.log",
+      "bytes": 788392,
+      "sha256": "29da71b33165099743ab438684dcec2c36a20263895b47f68d99ab1ee3d7a425"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/.runtime/g1-validation/taki-hindsight-g1-7a0206ad1b48/ownership.json",
+      "bytes": 263,
+      "sha256": "3ce94d902920d41aedff4abf9560db6df465679e56f032aa09a6d0cadd9d06fc"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/.runtime/w5-candidate-reader-queue-types-c2064dd72a7d400183363a9b4d89bc64/result.json",
+      "bytes": 517,
+      "sha256": "d15732d889f3909e2079bd34182fcb0f2bd692e9b2fd73ac9a35b3cd480552dc"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/.runtime/w5-candidate-reader-queue-types-c2064dd72a7d400183363a9b4d89bc64/baseline.stdout.json",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/.runtime/w5-candidate-reader-queue-types-c2064dd72a7d400183363a9b4d89bc64/current.stdout.json",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

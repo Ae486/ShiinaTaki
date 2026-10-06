@@ -1,0 +1,110 @@
+{
+  "checks": [
+    {
+      "check": "lint",
+      "argv": [
+        "H:\\hindsight\\.venv\\Scripts\\ruff.exe",
+        "check",
+        "--select",
+        "E,F,I",
+        "--target-version",
+        "py311",
+        "--line-length",
+        "120",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-working-network-continuation.py",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_working_network.py"
+      ],
+      "exitCode": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": "",
+      "seconds": 0.0930000000007567
+    },
+    {
+      "check": "format",
+      "argv": [
+        "H:\\hindsight\\.venv\\Scripts\\ruff.exe",
+        "format",
+        "--check",
+        "--line-length",
+        "120",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-working-network-continuation.py",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_working_network.py"
+      ],
+      "exitCode": 0,
+      "stdout": "2 files already formatted\n",
+      "stderr": "",
+      "seconds": 0.09399999999732245
+    },
+    {
+      "check": "types",
+      "argv": [
+        "H:\\hindsight\\.venv\\Scripts\\ty.exe",
+        "check",
+        "--project",
+        "H:/hindsight",
+        "--python",
+        "H:\\hindsight\\.venv\\Scripts\\python.exe",
+        "--extra-search-path",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+        "--extra-search-path",
+        "H:\\TakiAgent\\.trellis\\tasks\\08-09-hindsight-initial-cutover\\research\\validation",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-working-network-continuation.py",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_working_network.py",
+        "--output-format",
+        "concise"
+      ],
+      "exitCode": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": "",
+      "seconds": 0.2969999999986612
+    },
+    {
+      "check": "tests",
+      "argv": [
+        "H:\\hindsight\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pytest",
+        "--noconftest",
+        "-o",
+        "addopts=",
+        "-o",
+        "asyncio_mode=auto",
+        "-n",
+        "0",
+        "-q",
+        "--tb=short",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_working_network.py"
+      ],
+      "exitCode": 0,
+      "stdout": "...........                                                              [100%]\n11 passed in 0.61s\n",
+      "stderr": "",
+      "seconds": 3.235000000000582
+    },
+    {
+      "check": "affected-empty-approval",
+      "argv": [
+        "H:\\hindsight\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-m",
+        "pytest",
+        "--noconftest",
+        "-o",
+        "addopts=",
+        "-o",
+        "asyncio_mode=auto",
+        "-n",
+        "0",
+        "-q",
+        "--tb=short",
+        "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_working_network.py",
+        "-k",
+        "exhausted_existing_approval"
+      ],
+      "exitCode": 0,
+      "stdout": ".                                                                        [100%]\n1 passed, 10 deselected in 0.52s\n",
+      "stderr": "",
+      "seconds": 3.0940000000045984
+    }
+  ]
+}

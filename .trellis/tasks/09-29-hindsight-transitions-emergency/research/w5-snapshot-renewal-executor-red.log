@@ -1,0 +1,47 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ × src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > dispatches with the renewed Native executor after expiry claims a new fence during inventory loading 5195ms
+   → native-zz-unused: expected 'outcome_unknown' to be 'completed' // Object.is equality
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > reopens after losing a renewed reply, reuses that durable request and never repeats an earlier delta
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > renews an expired page with at most one successor per invocation (1 consecutive expiries)
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > renews an expired page with at most one successor per invocation (2 consecutive expiries)
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > does not renew on snapshot_not_found
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > does not renew on request_id_conflict
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > does not renew on namespace_mismatch
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > does not renew on untyped_expiry
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses a saved snapshot command for another namespace before dispatch
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses renewal after active-writer invalidates ownership
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses renewal after lost-claim invalidates ownership
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses renewal after core-configuration invalidates ownership
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses changed sealed proof after reopening instead of reusing incompatible historical evidence
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > reuses sealed evidence after a proven Bank executor expires and is claimed by the reopened Core
+ ↓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > renews a positively expired snapshot after earlier delta preparation and physical Core reconstruction
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > dispatches with the renewed Native executor after expiry claims a new fence during inventory loading
+AssertionError: native-zz-unused: expected 'outcome_unknown' to be 'completed' // Object.is equality
+
+Expected: "completed"
+Received: "outcome_unknown"
+
+ ❯ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts:121:77
+    119|     try {
+    120|       const original = h.owner.submit(await h.request(undefined, "tran…
+    121|       expect(h.owner.status(original.operationId).state, refused.join(…
+       |                                                                             ^
+    122|       expect(refused).toEqual([]); expect(snapshots.history.size).toBe…
+    123|       expect(h.remote.calls.delta).toBe(4);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 skipped (15)
+   Start at  19:17:50
+   Duration  16.50s (transform 8.77s, setup 0ms, import 10.90s, tests 5.20s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/transitions/transition-healthy-snapshot-recovery.test.ts --maxWorkers=1 --reporter=verbose -t dispatches with the renewed Native executor

@@ -1,0 +1,111 @@
+{
+  "version": 3,
+  "createdAt": "2026-10-04T17:23:20.790269+00:00",
+  "meaning": "Unexecuted parent-only V3 diagnostic; normalize catalog char and preserve closed result-encoding failure facts",
+  "executed": false,
+  "previousManifestSha256": "a93cfd8fd194763345d763b2b9270997fe992128a3cfd3e1f86ff897fbc60b76",
+  "checks": [
+    "4 fake-catalog/temporary-JSON tests passed in 0.022s",
+    "Ruff E/F/I at 120 columns",
+    "Ruff format check",
+    "Exact allowed AST differences only",
+    "V2 13 entries and reader 17 entries unchanged"
+  ],
+  "files": [
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-trigger-readonly-diagnostic.py",
+      "bytes": 20506,
+      "sha256": "b06c78858c13b21cbd08df348db20e90c221f65383796fef8e08d903184e2345"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-trigger-readonly-diagnostic-notes.md",
+      "bytes": 6445,
+      "sha256": "7b18c36c73da1e361cab81c615700b99509778c902de8835e6654fc6ef120750"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-reader-queue-source-manifest.json",
+      "bytes": 4693,
+      "sha256": "b38a102c5e6b9737afc62c6f4063f7dc9b7ecda6e39039e7026aab6555bda47f"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-candidate-native-clone.py",
+      "bytes": 22871,
+      "sha256": "a58da783153ab5e0052310584877b410e0303f473543ea3147eb6e203867b03e"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-candidate-native-audit.py",
+      "bytes": 6329,
+      "sha256": "200bed1bbb2123d287b08aedd1662b09c4b29e3556184a2cb447f728ad3cd768"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-return-recovery-audit.py",
+      "bytes": 4418,
+      "sha256": "f224430c3efbbba0697fce28bec218da06bdb707b462c6b46564e177ba196e62"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-native.py",
+      "bytes": 18450,
+      "sha256": "cbda42b4ddf0338e2973e0239beb7109963648b6f61a3b96b9c3f842f5e46e00"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/inspect-native-reuse.py",
+      "bytes": 9714,
+      "sha256": "a2218b8818e293bf1fd4c8012bb878a7d569d8345fdbf7f599afb39171fe248e"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-supervisor-shutdown.py",
+      "bytes": 2290,
+      "sha256": "5d349f718e608258e562a18739a22355da85bb1dd42a19d4e7dba6d947e8d25d"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5_reentry_gate.py",
+      "bytes": 21181,
+      "sha256": "4b0c8c02d62d206f3430b409cdec34d5dbbf11c8e7527e03a344cbeda9d5dee3"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-trigger-readonly-diagnostic-manifest.json",
+      "bytes": 2851,
+      "sha256": "375c7fe127a35274b97d72cc876ceb4bbe0acd990a56de69f1087b21eb4e4927"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-trigger-readonly-diagnostic-v2.py",
+      "bytes": 23397,
+      "sha256": "2beffbb484e6f4b06077ad11b4b1cae1df26a3c3ad63a52f40f276c96026358e"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-trigger-readonly-diagnostic-v2-notes.md",
+      "bytes": 3002,
+      "sha256": "d6dd36fc232a9896fa0beccafd296c18aed7b51ffe8fd6c617bbb7d0f554db1d"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-trigger-readonly-diagnostic-v2-manifest.json",
+      "bytes": 3850,
+      "sha256": "a93cfd8fd194763345d763b2b9270997fe992128a3cfd3e1f86ff897fbc60b76"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-trigger-readonly-diagnostic-v3.py",
+      "bytes": 26247,
+      "sha256": "09a9ca9b3fc6044be9052a1bb98765e7eab3d80a77cef0687f9de6f1cdc83b73"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-trigger-readonly-diagnostic-v3-test.py",
+      "bytes": 7535,
+      "sha256": "ad522b3b105ebbbb0480a1fb0d93ab6ebb13890b20d551ba5f63a4d4df55e810"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-trigger-readonly-diagnostic-v3.patch",
+      "bytes": 4634,
+      "sha256": "b9cb01b62012d4eb595cc0fd2a65c085bcf995d14d6661119946441e1659861d"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-trigger-readonly-diagnostic-v3-source-audit.json",
+      "bytes": 797,
+      "sha256": "ea5c4d64029320b7c717b0b0108f13430a865f7cf8fdf1d9943d60155ebece97"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-trigger-readonly-diagnostic-v3-notes.md",
+      "bytes": 4289,
+      "sha256": "1ff2200e8ba5ebdcf4c775670021e0a55879b8f50c1f94d5caa9b8672e330e5e"
+    }
+  ]
+}

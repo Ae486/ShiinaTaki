@@ -1,0 +1,20 @@
+{
+  "reproduced": true,
+  "expected": "incomparable histories must not form one numeric missing interval",
+  "backup": {
+    "lineage": "22222222-2222-4222-8222-222222222222",
+    "bankGeneration": "33333333-3333-4333-8333-333333333333",
+    "cursor": 10
+  },
+  "current": {
+    "lineage": "22222222-2222-4222-8222-222222222222",
+    "bankGeneration": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+    "cursor": 5
+  },
+  "actual": {
+    "bankId": "taki-hs-g",
+    "fromNativeCursor": 10,
+    "toReplicaCursor": 5,
+    "pendingCount": 0
+  }
+}

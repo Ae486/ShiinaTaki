@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "createdAtUtc": "2026-10-03T20:38:17.004429+00:00",
+  "preservedManifests": {
+    "w5-core-validation-source-manifest.json": "bcf06e76032d77fce66b3d26c34b60dd1be2deba821a35e6a10e60b51beaa6f4",
+    "w5-postcommit-readiness-source-manifest.json": "5f056f60218dbba7a1b574f7f89c63f77b788e394321fb1ab421f2bba3ca2341",
+    "w5-verified-observation-source-manifest.json": "9cb5ecbcf8c13c4e77504da52fd1c2b5fab60f72e60890defa30d40186883a66",
+    "w5-finalization-scheduling-preimage-manifest.json": "dce8468bf0da30688b7a32dc4519c4182895316626be65afb711257fb02c5ba2"
+  },
+  "originalDatabaseSha256": "a81a1e3ec6e85f3faa287b8b77c704742be7bbf0f05ec594e1a4bc8381c00923",
+  "preimagesVerified": 4,
+  "files": [
+    {
+      "path": ".trellis/spec/backend/memory-transition-healthy-drivers.md",
+      "sha256": "ee4a05d730aaa29a3985dde0f46bf78f204a7973577fa8aaabeaf0b84546eb89",
+      "bytes": 14582,
+      "change": "modified"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/index.md",
+      "sha256": "c0e8b202bd3be0855abb6a5b9dad4e5c9d9405126c9a7eca0071a4274f1e621c",
+      "bytes": 5470,
+      "change": "modified"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+      "sha256": "9c0671f4dfd20f0924213b78fd28ba4e67ffe74f330ebfbdeac520dc6467546c",
+      "bytes": 19381,
+      "change": "modified"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-scheduling.test.ts",
+      "sha256": "1d95a865b45f15e3a8a0ee20b36588051a4b2bc0cf274929ab7126eef2823049",
+      "bytes": 8322,
+      "change": "added"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-native-renewal.test.ts",
+      "sha256": "e69918ffc0361b811e90e478f98508d12174217d5762ff44220ef1847c45f8af",
+      "bytes": 6632,
+      "change": "added"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-native-session.ts",
+      "sha256": "a9add5e1624151a21229167276a0fa0548c7551cccdcb02ecea1de1f2738486c",
+      "bytes": 10263,
+      "change": "modified"
+    }
+  ],
+  "evidence": [
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-implementation.md",
+      "sha256": "2e65b5113a62800bd6ff80a6747501a7a16c85904b54d5f0c75d1ff48062e803",
+      "bytes": 9541
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-audit.py",
+      "sha256": "ae862c73de1bbf385ee2c3b1a7f13f25f1b33b5e6434f52b2c7e4fb8e55966ae",
+      "bytes": 4784
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-proposal.md",
+      "sha256": "7fa313b1bb62bbdbc4e83bcb29c01ae4d739734f08c43086a51bd6449f8b7fe9",
+      "bytes": 7510
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-driver.mjs",
+      "sha256": "c7cfce55f4c0bc220196875f34b4d885fc209d804d9c6d6064efb12847ef3070",
+      "bytes": 11542
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-driver-result.json",
+      "sha256": "48a9e54af3c8b0bedb313a37fd80e9ca376d6014969fe9b6af68db56c778d3a5",
+      "bytes": 6844
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-driver.log",
+      "sha256": "3091aa62311343ebbe4f34fa55c75463bbb5db0fd7e0f2e808d84d32089c9ef2",
+      "bytes": 6561
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-regression-tests.log",
+      "sha256": "4493729cf1cc14316533dd4d60d2c736a23976915db3a437cebebd672a98517e",
+      "bytes": 320
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-final-tests.log",
+      "sha256": "c8301e57ff2e67eab444d04f8fa0bbb88a3047f9c4c01b52ed879e956fe2e30d",
+      "bytes": 259
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-types-final-v2.log",
+      "sha256": "200b048828a3070d7e0970f063d8183336d03cbcf6006207a3c20ec524ac82c4",
+      "bytes": 77
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-lint-final.log",
+      "sha256": "9ab17e3447896b818b21a8cd0ba9004794ba1cf7c3d4ded0041b582bb6dc3595",
+      "bytes": 251
+    }
+  ],
+  "checks": {
+    "strictUtf8NoBom": true,
+    "trailingWhitespace": false,
+    "headersAndIndexes": true,
+    "observerEvidenceUnchanged": true,
+    "replaySourceMatchesDelivery": true
+  }
+}

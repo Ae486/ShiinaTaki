@@ -1,0 +1,18 @@
+{
+  "meaning": "Staged continuation helper source before independent review; later changes need a new manifest",
+  "files": {
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-model-budget.py": "8c6fba27b39e8dfee44d4792ab5f9bffdb025f9ed3ba274da11e82253581a384",
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-model-budget-test.py": "116f194ae84724043ab2d164dd1dab0f7194e60453316a5ce4cd9cad498e87b8",
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-native.py": "dafc4327435be604a9f77693e22965d9d417acf3a011fe06d46cde6e188145db",
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-driver.mjs": "75cbbed0804320dc148a0369643ead0d62e0d67f42dc2feb05aef38dab331a73"
+  },
+  "checks": {
+    "offlineBudgetTests": 4,
+    "nodeSyntax": true,
+    "pythonSyntax": true,
+    "zeroModelSupervisorAttempt": "49db9448fb3b4b73b17a1224fd06d861",
+    "originalCompletedSteps": 9,
+    "originalActions": 59,
+    "modelSubmissions": 209
+  }
+}

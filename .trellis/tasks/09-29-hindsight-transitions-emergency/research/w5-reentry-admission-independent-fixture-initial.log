@@ -1,0 +1,32 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+···················x·················
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/transitions/transition-admission-verification.test.ts > independent synchronous admission verification > rereads the stored preview after expensive work instead of trusting the entry object
+AssertionError: expected [Function] to throw error including 'MEMORY_TRANSITION_STALE' but got 'immutable transition driver evidence'
+
+Expected: "MEMORY_TRANSITION_STALE"
+Received: "immutable transition driver evidence"
+
+ ❯ src/memory/transitions/transition-admission-verification.test.ts:122:47
+    120|         return result;
+    121|       });
+    122|       expect(() => f.owner.submit(f.request)).toThrow("MEMORY_TRANSITI…
+       |                                               ^
+    123|       expect(f.counts()).toEqual(before); expect(execute).not.toHaveBe…
+    124|       expect(f.h.db.prepare("SELECT id FROM memory_transition_previews…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 36 passed (37)
+   Start at  20:12:16
+   Duration  17.64s (transform 8.01s, setup 0ms, import 15.31s, tests 17.32s, environment 1ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/transitions/transition-admission-verification.test.ts src/memory/transitions/transition-independent-projection.test.ts src/memory/transitions/transition-evidence-context.test.ts src/memory/transitions/transition-observation-store.test.ts src/memory/local-runtime-binding.test.ts src/memory/hindsight-runtime-binding.test.ts src/memory/operations/memory-operation-kind-transition.test.ts --maxWorkers=2 --reporter=dot

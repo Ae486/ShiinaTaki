@@ -1,0 +1,106 @@
+{
+  "version": 1,
+  "root": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reentry-admission-preimages-9ad533111cdc4c55a50263ae244fb30d",
+  "files": {
+    "packages/core/src/memory/transitions/transition-evidence-context.ts": {
+      "sha256": "2710d7ff07bce8bf633e0acb58003539aeed84609a3aa4b9c00f7c89cf2fe84f",
+      "bytes": 5944
+    },
+    "packages/core/src/memory/transitions/transition-observation-store.ts": {
+      "sha256": "10f015c75925901f44651c1427550447afba458cde4ee0682ae001c07836f4dc",
+      "bytes": 4786
+    },
+    "packages/core/src/memory/legacy-migration/legacy-activation-repo.ts": {
+      "sha256": "86e6a6bd18f1c860a8aa7b0825b5c87b534216baaa1e2a5a40817585d6ec3a21",
+      "bytes": 7986
+    },
+    "packages/core/src/memory/transitions/transition-current-identity.ts": {
+      "sha256": "52c1c9a18f104bee3dcbd92d0437387ec661c746a378fcafca9114c2ef298d9c",
+      "bytes": 10123
+    },
+    "packages/core/src/memory/operations/memory-operation-transition-storage.ts": {
+      "sha256": "3cd053e00ecda4645331ccf3373e55d140b6205d4da3e2e6c7f56368b85e5947",
+      "bytes": 5528
+    },
+    "packages/core/src/memory/operations/memory-operation-contract.ts": {
+      "sha256": "d2097b13e13224156fddd596586f91aee9f32da7ae0a3374005c6697100a05c0",
+      "bytes": 8048
+    },
+    "packages/core/src/memory/operations/memory-operation-service.ts": {
+      "sha256": "5c4a30973107a6606af1f10840543f7e3b5cf6abc7e2ea45c511328d9bcecfe2",
+      "bytes": 12100
+    },
+    "packages/core/src/memory/operations/memory-operation-kind-transition.ts": {
+      "sha256": "66420998d4d86ea902400383758cd5c0c82891aa6e6f4a462e45b8f31a1e2c7c",
+      "bytes": 3023
+    },
+    "packages/core/src/memory/transitions/transition-healthy-service.ts": {
+      "sha256": "ed5b46fce01aaa2a8d4dc7df6ba7e589655dfbfdd6eb191a1efd443ce7fbd689",
+      "bytes": 8161
+    },
+    "packages/core/src/memory/transitions/transition-healthy-execution.ts": {
+      "sha256": "9c0671f4dfd20f0924213b78fd28ba4e67ffe74f330ebfbdeac520dc6467546c",
+      "bytes": 19381
+    },
+    "packages/core/src/boot/memory-transition-boot.ts": {
+      "sha256": "ce85d1f435bad0c0edaa50f798c80c3509ee130eff9cf876f37a3fbe1a46e17e",
+      "bytes": 4626
+    },
+    "packages/core/src/memory/runtime-composition.ts": {
+      "sha256": "fb75dda39f702c197274a0db2032610685ea51e731264a6ea0b981156d53b2c4",
+      "bytes": 20164
+    },
+    "packages/core/src/memory/local-runtime-binding.ts": {
+      "sha256": "a36112e7222c2e59da83cf70643d78d495ce4e67b2603af6fc6a9f15985fa16b",
+      "bytes": 6226
+    },
+    "packages/core/src/memory/hindsight-runtime-binding.ts": {
+      "sha256": "a430250812062555dd3899fafe15ba6ac13aeb12d0e5d9105c22139727ce3b48",
+      "bytes": 10686
+    },
+    ".trellis/spec/backend/memory-transition-healthy-drivers.md": {
+      "sha256": "ee4a05d730aaa29a3985dde0f46bf78f204a7973577fa8aaabeaf0b84546eb89",
+      "bytes": 14582
+    },
+    ".trellis/spec/backend/memory-transition-publication.md": {
+      "sha256": "0b85c28077bf678f8b6d120bbaba6468e706d69454fdb82aace3a07a599bbec9",
+      "bytes": 12830
+    },
+    ".trellis/spec/backend/quality-guidelines.md": {
+      "sha256": "82386ec7886d93af103da5168c1d3575ab189614ba9d6a75b6406200338be862",
+      "bytes": 14454
+    },
+    "eslint.config.js": {
+      "sha256": "fc873306c3edff0ca608362150b23c47f6c3b4c16c43a7aa873a11ac174ac61d",
+      "bytes": 3159
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-driver.mjs": {
+      "sha256": "4f97bffb6b62b278bdb177081ab92e4d43d7f74f492db28139eab0228a3662ac",
+      "bytes": 19878
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-native.py": {
+      "sha256": "85151d1fd16cf7a60449f23c42ae22e9105d81fab6098977c3df9dab9d5b627d",
+      "bytes": 17689
+    },
+    "packages/core/src/memory/transitions/index.md": {
+      "sha256": "ce822cf3ce548a5734984564c4544ba58273d6ac448251eaa1fa0964b8f70ecb",
+      "bytes": 5697
+    },
+    "packages/core/src/memory/legacy-migration/index.md": {
+      "sha256": "a062775b266df3836528a033d5639238c7cfb7e052146cac56319681ba533c15",
+      "bytes": 2461
+    },
+    "packages/core/src/memory/operations/index.md": {
+      "sha256": "90bd0f6ac2c113c6623bb0365fcf7f1bf5c4ec11a992055296ab0422c965a2e0",
+      "bytes": 6841
+    },
+    "packages/core/src/boot/index.md": {
+      "sha256": "53677a3532be37084fa0b18b8da93b697694c12313cc6fa7ed70774a2cedd945",
+      "bytes": 1495
+    },
+    "packages/core/src/memory/index.md": {
+      "sha256": "1d167d5ebad194cc121269e1869bc82c6d79c88511fe25d29c9ec46630884230",
+      "bytes": 14320
+    }
+  }
+}

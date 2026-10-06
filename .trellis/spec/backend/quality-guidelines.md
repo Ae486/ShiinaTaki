@@ -5,21 +5,41 @@
 | Scope | Cap |
 | --- | --- |
 | TS file | 300-line baseline; 360-line review threshold (`max-lines`, skipBlankLines) |
-| TS function | 50 lines; max 3 params |
+| TS function | 50-line default; reviewed exact-path allowances below; max 3 params |
 | Rust function | 100 lines (clippy `too_many_lines`) |
 | Rust file | 500 lines soft cap — split modules before crossing |
 
 Exemptions: generated code, migrations, test files.
 
-`packages/shared/src/index.ts` has a reviewed 500-line limit as the single public named-re-export entry, including the
-independently versioned D77 application-state contracts. This allowance
+`packages/shared/src/index.ts` has a reviewed 540-line limit as the single public named-re-export entry, including the
+independently versioned D77 application-state, native transition and Source custody contracts. This allowance
 applies only to that exact file: ESLint permits only source-bearing `ExportNamedDeclaration` statements and rejects
 `export *`, imports, local declarations and side effects. All implementation modules retain the 360-line limit.
 
 The 300-line figure is a design signal, not a mechanical formatting target. A cohesive file may use the roughly 20%
 tolerance up to about 360 lines when that keeps one responsibility readable. Do not compress statements, remove useful
-whitespace, or create artificial helper files merely to pass the check. Split a file when it combines distinct
-responsibilities or materially exceeds the relaxed threshold; function and parameter limits remain strict.
+whitespace, or create artificial helper files merely to pass the check. Both file and function length diagnose
+responsibility accumulation. A cohesive owner may receive a documented exact-path threshold after review; unrelated
+responsibilities must still be split. Parameter limits and all other lint rules remain unchanged.
+
+### Reviewed Memory lifecycle function allowances
+
+The 2026-10-04 combined W5 review verified the following closures as single state/lifetime owners. ESLint retains
+errors beyond these finite exact-path limits; the general function limit stays 50 and file limit stays 360.
+
+| Exact path under `packages/core/src/memory/` | Reviewed function / current lines | Limit | Responsibility |
+| --- | --- | --- | --- |
+| `hindsight-runtime-binding.ts` | `createHindsightRuntimeBinding` / 54 | 60 | One published Hindsight binding, draft replacement, failure withdrawal and disposal lifetime. |
+| `runtime-selector.ts` | `selectMemoryRuntime` / 55 | 60 | One selected provider/epoch state, marker-gated binding recovery and retirement. |
+| `transitions/transition-runtime.ts` | `createMemoryTransitionRuntime` / 66 | 70 | One transition runtime, shared liveness and intent-executor lifetime, including synchronous offline retirement over the same proof/publication/bind seams. |
+| `runtime-composition.ts` | `composeMemoryRuntime` / 51 | 60 | One selected runtime and its existing utility/compaction retirement generation. |
+| `transitions/transition-healthy-service.ts` | `createHealthyTransitionService` / 61 | 65 | One healthy driver lifetime with read-only W7 overview and immutable quarantine-aware completion; emergency remains separate. |
+| `transitions/transition-native-session.ts` | `createTransitionNativeSession` / 63 | 65 | One active Bank map and exact acquire/claim/verify/decision/renewal command lifetime. |
+
+These are path-scoped rule overrides, not suppression of findings or authorization for unrelated functionality.
+The W6 additions above retain the same single owner per closure; separate emergency orchestration was split into
+named helpers in its own module instead of receiving a broad function-size exemption.
+Reassess cohesion before extending these limits. No `max-lines` override was needed by this review.
 
 ## Anti-sprawl behavior
 

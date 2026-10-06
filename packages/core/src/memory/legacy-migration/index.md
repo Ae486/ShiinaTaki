@@ -7,7 +7,7 @@
 - legacy-canonical-import-repo.ts — deterministic canonical/Block staging with exact replay and conflict refusal
 - memory-authority-fence.ts — bounded legacy admission drain and irrevocable retirement after durable authority commit
 - fenced-memory-engine.ts — invocation-time retirement fence for legacy engines and previously captured tools
-- legacy-activation-repo.ts — strict marker reads, atomic canonical-local activation receipt transaction and the joined receipt proof same-epoch recovery requires
+- legacy-activation-repo.ts — strict initial marker/receipt proofs plus the complete W4 publication join; optional independent synchronous context shares immutable artifacts while all selected-authority joins stay current
 - legacy-candidate-repo.ts — isolated candidate epoch/run/full-inventory publication, supersession, run-scoped Block plans and candidate reads
 - legacy-source-stage.ts — per-source atomic canonical import with attempt/result/effects proof; failure evidence committed after rollback
 - legacy-migration-verification.ts — pure exact source/canonical/receipt/Block closure proof; lease-private readiness publication; completed runs immutable

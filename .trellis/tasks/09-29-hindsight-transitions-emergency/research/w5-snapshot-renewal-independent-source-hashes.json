@@ -1,0 +1,107 @@
+{
+  "meaning": "Independent repair/helper check overlay; unchanged original manifests; permits only the separately authorized original RETURN continuation, not W5 completion.",
+  "checkedAt": "2026-10-03T12:07:36.268042+00:00",
+  "coreRoot": "H:\\TakiAgent",
+  "nativeRoot": "H:\\hindsight",
+  "reviewer": "/root/w45_readonly_review",
+  "coreHead": "fccfc4fb78958c90efebdb4a5a98b355bcb73a40",
+  "checkedFiles": {
+    ".trellis/spec/backend/memory-transition-healthy-drivers.md": {
+      "sha256": "c5089df308a6f049f621bc2a4e5f414d52eebabf3e60e49afc10fc5ab0fc965a",
+      "bytes": 9995
+    },
+    "packages/core/src/memory/transitions/index.md": {
+      "sha256": "46d4a61f20d6cf202da6d4e49e5f1cadebaaddc48c6d3ea45c907be28c7a1b59",
+      "bytes": 4910
+    },
+    "packages/core/src/memory/transitions/transition-healthy-candidate.ts": {
+      "sha256": "aa2ad5874582c4e371723416cfaf62bd50312179fbf266aa1c64016dc62178f0",
+      "bytes": 5949
+    },
+    "packages/core/src/memory/transitions/transition-healthy-snapshot-recovery.test.ts": {
+      "sha256": "b16a6d171bb24c5ec42e351298f45c3162b4702c0329913e0e63f04141e02e4c",
+      "bytes": 23618
+    },
+    "packages/core/src/memory/transitions/transition-healthy-source.test.ts": {
+      "sha256": "b3f062cd97ad0781959e6defdbfc00d51d12762601daea06f4bf3a75bd0e6204",
+      "bytes": 5055
+    },
+    "packages/core/src/memory/transitions/transition-unused-inventory.ts": {
+      "sha256": "0434292532c47c83e171cd0e3178c4b1669b90b2310bb6ad5639783b9565ca5e",
+      "bytes": 7773
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-model-budget.py": {
+      "sha256": "8c6fba27b39e8dfee44d4792ab5f9bffdb025f9ed3ba274da11e82253581a384",
+      "bytes": 2657
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-model-budget-test.py": {
+      "sha256": "116f194ae84724043ab2d164dd1dab0f7194e60453316a5ce4cd9cad498e87b8",
+      "bytes": 4885
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-native.py": {
+      "sha256": "dafc4327435be604a9f77693e22965d9d417acf3a011fe06d46cde6e188145db",
+      "bytes": 14780
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reused-driver.mjs": {
+      "sha256": "75cbbed0804320dc148a0369643ead0d62e0d67f42dc2feb05aef38dab331a73",
+      "bytes": 16295
+    }
+  },
+  "preservedManifests": {
+    "w4-source-ownership.json": "c11e7015dd8992c0689941f98b0f75a06754d5adbf5dd1547924673c7d7a6f28",
+    "w3-source-ownership.json": "998edcd67c06757f9f400ce4d17a02dcc63f7456f3607e2f992be3f674ee5851",
+    "w4-prior-source-baseline.json": "1cd5cf124305fb12e3323b3039a1dfe8440abd9f58516a634ef0f4c8c7d1ac75",
+    "w5-source-ownership.json": "21673440218d85039ef17405a24f4134880a31f7a6872352dc86a50e1b99ea94",
+    "w5-prior-source-baseline.json": "8e8b4dad76f41d25201253969f0baa7777d9412b9e82757595cc804c3434f67d",
+    "w5-first-real-run-source-hashes.json": "e97459b4918a0ecfd99ea863ba030fd5bb300451d26c8dc9bd5d8bfe7498bef1",
+    "w5-native-billing-prior-hashes.json": "2742b09dedd3dd9af5d30c450564e1c7023ae3a62115fdb59a98d285a86f82d1",
+    "w4-checker-source-hashes.json": "8e9474814dcd503b30922576c657038ba88d8fdb19ee46f127c27dc26ee89915",
+    "w5-checker-source-hashes.json": "79158adcc4369135c69c8e4a0fb1d8651a30cc7f4ba9712580bee23df785679d",
+    "w5-snapshot-renewal-source-hashes.json": "f3d67950fc370905b07617e721a6948233cc4b77edecb309397963cd55ca4464",
+    "w5-resume-helper-prior-2026-10-03.json": "3c6ee1127318e7cced75389b6adff04e38a68091a45e7b449e4c2df5cb817748",
+    "w5-resume-helper-source-2026-10-03.json": "1b6ab6176562074d6b51b23292b29a712364bb8d7f2aff5a8cb6339dec1a39f8"
+  },
+  "predecessorCorePathsVerified": 139,
+  "expectedChangedExistingPaths": [
+    ".trellis/spec/backend/memory-transition-healthy-drivers.md",
+    "packages/core/src/memory/transitions/index.md",
+    "packages/core/src/memory/transitions/transition-healthy-candidate.ts",
+    "packages/core/src/memory/transitions/transition-healthy-source.test.ts"
+  ],
+  "nativePathsVerifiedUnchanged": 355,
+  "unexpectedChanges": [],
+  "checkerProductionChanges": [],
+  "workingPair": {
+    "submitted": 209,
+    "stopped": true,
+    "billingLatchExists": false
+  },
+  "checkerModelRequests": 0,
+  "checkerNativeServiceStarts": 0,
+  "checks": {
+    "coreFocused": {
+      "files": 3,
+      "tests": 22,
+      "exit": 0
+    },
+    "sourceIntegration": {
+      "files": 1,
+      "tests": 1,
+      "exit": 0,
+      "testMs": 17193,
+      "timeoutMs": 60000
+    },
+    "offlineBudget": {
+      "tests": 4,
+      "exit": 0
+    },
+    "workspaceTypecheck": {
+      "exit": 0
+    },
+    "rootLint": {
+      "exit": 1,
+      "knownLengthDiagnostics": 7,
+      "warnings": 0
+    }
+  }
+}

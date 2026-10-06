@@ -1,0 +1,36 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+xx--
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/memory-transition-native-outcome.test.ts > new native scope finalization > rejects a valid abort outcome stored under another Bank's key
+ FAIL  src/db/memory-transition-native-outcome.test.ts > new native scope finalization > rejects a valid activate outcome stored under another Bank's key
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ src/db/memory-transition-native-outcome.test.ts:21:68
+     19|       f.db.prepare("UPDATE memory_transition_native_outcomes SET statu…
+     20|         .run({ transition: stage.intent.transitionId, bank: outcomes[1…
+     21|       expect(() => readTransitionNativeRelease(f.db, stage.input)).toT…
+       |                                                                    ^
+     22|       if (receipt) expect(() => requireTransitionTargetReady(f.db, rec…
+     23|       else expect(() => abortMemoryTransition(f.db, stage.input)).toTh…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 2 skipped (4)
+   Start at  00:11:38
+   Duration  16.82s (transform 7.58s, setup 0ms, import 9.46s, tests 6.83s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/db/memory-transition-native-outcome.test.ts -t another Bank --maxWorkers=2 --reporter=dot

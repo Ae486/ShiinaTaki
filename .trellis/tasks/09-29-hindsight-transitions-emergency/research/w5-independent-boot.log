@@ -1,0 +1,60 @@
+{
+  "node": "v24.18.0",
+  "loader": "native-type-stripping",
+  "modelRequests": 0,
+  "localData": "synthetic Markdown through genuine B2 snapshot, prepare and activation producers",
+  "results": [
+    {
+      "mode": "legacy-markdown",
+      "exitCode": 0,
+      "websocket": "opened-and-closed",
+      "gracefulSignal": "SIGINT",
+      "runtime": {
+        "providerId": "legacy-markdown",
+        "available": true,
+        "unavailableReason": null
+      },
+      "reopenedDatabase": "integrity-ok",
+      "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\w5-boot\\8c9f5ab5-9759-43b0-a19b-c217108f2dc0\\legacy-markdown"
+    },
+    {
+      "mode": "legacy-markdown",
+      "exitCode": 0,
+      "websocket": "opened-and-closed",
+      "gracefulSignal": "SIGINT",
+      "runtime": {
+        "providerId": "legacy-markdown",
+        "available": true,
+        "unavailableReason": null
+      },
+      "reopenedDatabase": "integrity-ok",
+      "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\w5-boot\\8c9f5ab5-9759-43b0-a19b-c217108f2dc0\\legacy-markdown"
+    },
+    {
+      "mode": "canonical-local",
+      "exitCode": 0,
+      "websocket": "opened-and-closed",
+      "gracefulSignal": "SIGINT",
+      "runtime": {
+        "providerId": "local",
+        "available": true,
+        "unavailableReason": null
+      },
+      "reopenedDatabase": "integrity-ok",
+      "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\w5-boot\\8c9f5ab5-9759-43b0-a19b-c217108f2dc0\\canonical-local"
+    },
+    {
+      "mode": "canonical-local",
+      "exitCode": 0,
+      "websocket": "opened-and-closed",
+      "gracefulSignal": "SIGINT",
+      "runtime": {
+        "providerId": "local",
+        "available": true,
+        "unavailableReason": null
+      },
+      "reopenedDatabase": "integrity-ok",
+      "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\w5-boot\\8c9f5ab5-9759-43b0-a19b-c217108f2dc0\\canonical-local"
+    }
+  ]
+}

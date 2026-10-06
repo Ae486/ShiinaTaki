@@ -5,7 +5,7 @@
  */
 import { createHash, randomUUID } from "node:crypto";
 import {
-  CanonicalMemoryUnitSchema, MemoryErrorSchema, MutationRequestSchema, RecallRequestSchema, RetainRequestSchema,
+  CanonicalMemoryUnitSchema, MemoryErrorSchema, MEMORY_ERROR_POLICY, MutationRequestSchema, RecallRequestSchema, RetainRequestSchema,
   RecallHitSchema, type CanonicalMemoryBank, type CanonicalMemoryRecord, type EditableMemoryPatch, type MemoryErrorCode,
   type MemoryProviderCapabilities, type MemoryResult, type MutationRequest, type AppliedMutationResult as MutationResult, type RecallRequest,
   type RecallResult, type RetainRequest, type RetainCompletedResult as RetainResult, type TakiMemoryPolicyProjection,
@@ -305,8 +305,7 @@ function mappedFailure<T>(input: { context: MemoryProviderCallContext; caps: Mem
 }
 
 function failure<T>(input: { context: MemoryProviderCallContext; caps: MemoryProviderCapabilities; code: MemoryErrorCode; message: string; currentRevision?: number }): MemoryResult<T> {
-  const policies = { MEMORY_INVALID_REQUEST: ["validation", false, "fix-request"], MEMORY_NOT_FOUND: ["not-found", false, "refresh-memory"], MEMORY_REQUEST_ID_CONFLICT: ["conflict", false, "fix-request"], MEMORY_REVISION_MISMATCH: ["conflict", false, "refresh-memory"], MEMORY_CAPABILITY_UNSUPPORTED: ["capability", false, "none"], MEMORY_AUTHORITY_MISMATCH: ["authority", false, "check-provider"], MEMORY_OPERATION_CANCELLED: ["availability", false, "none"], MEMORY_OUTCOME_UNKNOWN: ["availability", false, "check-provider"], MEMORY_PROVIDER_UNAVAILABLE: ["availability", true, "check-provider"], MEMORY_INTEGRITY_ERROR: ["integrity", false, "check-provider"], MEMORY_INTERNAL_ERROR: ["internal", false, "check-provider"] } as const;
-  const policy = policies[input.code];
+  const policy = MEMORY_ERROR_POLICY[input.code];
   const [category, retryable, nextAction] = policy;
   const error = MemoryErrorSchema.parse({ code: input.code, category, message: input.message, retryable, nextAction, ...(input.currentRevision === undefined ? {} : { currentRevision: input.currentRevision }) });
   return { ok: false, requestId: input.context.requestId, providerId: "local", authorityEpochId: input.context.authorityEpochId, capabilities: input.caps, error };

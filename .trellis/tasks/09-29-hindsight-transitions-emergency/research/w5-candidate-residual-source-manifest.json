@@ -1,0 +1,30 @@
+{
+  "meaning": "Read-only residual diagnosis and parent-only unexecuted profiler proposal; production remains frozen",
+  "files": [
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-residual-diagnosis-proposal.md",
+      "bytes": 16123,
+      "sha256": "466f3200a6db6d8465ee108f21149b9593291789fd4dbcbe00f433e365b8c795"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-residual-profile.py",
+      "bytes": 12695,
+      "sha256": "b3446049690e13cc67d3fd9dcee460bf25471b8f8f529f5bf20c86d7274e6fd9"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/.runtime/w5-candidate-native-clone-22efe32ae26c4938b6bf3edfd36c8278/result.json",
+      "bytes": 37254,
+      "sha256": "45aa7df021304e1fe8891a2087357d48c2ab8d2e2f0876d056cfe70a2da5645d"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/.runtime/w5-candidate-native-clone-a39825bfe71f4e758dfb6275690ea0e5/result.json",
+      "bytes": 38337,
+      "sha256": "def8bfd1355b7fc851c3c0b19fde2c36a68842a036a82852300cd1d234573d6f"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-candidate-baseline-source-manifest.json",
+      "bytes": 6949,
+      "sha256": "766ff65824c15aaf081be13c4becfc8ffe83d960e3dd7b5e0e15e2b326a12a5b"
+    }
+  ]
+}

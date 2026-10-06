@@ -1,4 +1,8 @@
 # shared/src/
+- memory-transition-candidate-schema.ts — complete Local/native evidence, stable mappings and immutable candidate/common-baseline contracts
+- memory-transition-preparation-schema.ts — exact prepared delta/result and genuinely unused native scope inventory
+- memory-transition-source-schema.ts — explicit Source aliases, ordered version references, immutable upload attempts and current awaiting-source disposition evidence
+- hindsight-transition-source-schema.ts — separately negotiated executor-owned Source byte-upload wire contracts
 - effect-lifecycle-schema.ts — closed provider-neutral effect current-state and authoritative aggregate/cache/reasoning usage contracts with replay/redaction bounds
 - harness-schema.ts — strict provider-neutral Trigger Request, Run/Attempt, immutable authority/capability snapshot, Receipt, and run.status contracts
 - observability-schema.ts — bounded monitor mode, real-field Run query, Chinese semantic trajectory, inspector, and live notification contracts
@@ -42,7 +46,8 @@
 - memory-provider-operation-schema.ts — consistent retain pending/zero-result/per-Bank receipts and mutation supersession contracts alongside recall/reflect
 - memory-provider-envelope-schema.ts — validated success/error envelopes for canonical provider operations
 - memory-replica-schema.ts — bounded ordered journal upsert/tombstone and replica checkpoint contracts
-- memory-replica-schedule-schema.ts — durable Bank configuration, fenced run/result, retry/manual state, and closed truthful status contracts
+- memory-replica-request-schema.ts — durable per-request claim and terminal evidence independent of latest Bank status
+- memory-replica-schedule-schema.ts — durable Bank configuration, fenced run/result, exact manual identities, retry state and truthful status contracts
 - pending-memory-schema.ts — immutable write intents, legacy phases, versioned factual proof/dispatch state, and unconfirmed overlays
 - hindsight-native-result-schema.ts — tracked native commands, immutable paged full results, and compact G1 receipt contracts
 - hindsight-native-proof-encoding.ts — portable typed hash fields and UTF-8 serialization, independent of legacy local hashes
@@ -76,6 +81,13 @@
 - hindsight-native-runtime-schema.ts — validated native fields, preserving omitted values, nulls, and typed JSON
 - memory-policy-assessment-schema.ts — strict D77 memory-body and assessment contracts, plus the shared importance default
 - memory-operation-schema.ts — MEMORY_OPERATION_METHODS + Core-minted durable operation identity/state/request/result contracts and the operator submit/status/list/cancel/subscribe/changed schemas (operator-only, NO Rust mirror)
+- memory-transition-schema.ts — strict transition directions, expected source/baseline identity, durable proof/receipt/result and explicit recovery contracts
+- memory-transition-queue-schema.ts — normalized queued write custody, bounded caller identity, fresh target request identity and separate queued/unknown/factual outcomes
+- memory-transition-publication-schema.ts — immutable receipt/candidate/native checkpoints, exact primary custody and positive awaiting-Source dispositions
+- memory-transition-driver-schema.ts — healthy/offline previews, native command/observation evidence and provider-independent historical progress.
+- memory-transition-operator-schema.ts — closed operator action reasons and bounded transition overview, current-authority identity and original emergency disclosure.
+- hindsight-transition-schema.ts — independent native fence, executor, unused-scope, proof, outcome and error contracts
+- hindsight-transition-delta-schema.ts — complete descriptor delta, current Local application revisions and immutable native/application lineage
 - memory-local-operation-schema.ts — Local onboarding command, exact producer, checkpoint, outcome and closed failure contracts
 - memory-local-onboarding-schema.ts — operator preview/discovery, actionable runtime/custody status, exclusion and invalidation contracts
 - memory-hindsight-operation-schema.ts — hindsight.activate command (new/resume/recover), Core-minted producer identity + per-Bank progress, outcome and the closed activation error-code set
@@ -83,3 +95,4 @@
 - memory-authority-status-schema.ts — MEMORY_AUTHORITY_METHODS + the strict composite memory.authority.status read (authority, runtime availability with closed reasons incl. connection_disabled/config_changed, setup, per-Bank replica/Pending, operations, the Hindsight lifecycle section present exactly under Hindsight authority, derivedFreshness literal unknown)
 - memory-hindsight-lifecycle-schema.ts — Hindsight Bank readiness (ready/syncing/provisioning/failed/not_provisioned) and the memory.authority.status `hindsight` section: live connection config/drift/admission time, per-scope readiness, Core-derived actions, the nullable `backup` block; bank.provision / connection.revalidate request, producer (Core-stamped operator/automatic origin), result and closed lifecycle error codes
 - hindsight-backup-schema.ts — Stage 3 backup contracts: artifact manifest (Core copy, native proof, authority, per-Bank checkpoints, terminal-operation list, presence-only credential custody), pair-mismatch reasons, the `hindsight.backup` status block, backup.capture/admit/verify request/producer/result and closed backup error codes
+- memory-transition-emergency-schema.ts — distinct offline preview, captured scope, immutable incident/surviving candidate/publication and held-unknown contracts.

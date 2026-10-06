@@ -1,0 +1,13 @@
+{
+  "oldBuilderCopy": ".trellis/.runtime/w5-core-builder-diagnostic-39429987-71cd-46e4-9305-2edf3bc42a39/application.sqlite",
+  "repairedBuilderCopy": ".trellis/.runtime/w5-core-publication-diagnostic-58176c69-e9ee-4e5c-a481-1635ac02212e/application.sqlite",
+  "candidateIdEqual": true,
+  "stateHashEqual": true,
+  "mappingHashEqual": true,
+  "targetEpochEqual": true,
+  "stateHash": "c05adf7b6629df18329438b94ae1933013b97f73de2ec863205aacc32ecdaba8",
+  "mappingHash": "fa57cbe4a071cd68c7e8b47cf27074f091226963ffee7c69d184696731faa00f",
+  "preimageComparatorByteIdenticalBeforeOrderingFix": true,
+  "comparisonMethod": "Read both candidate BLOBs through independent readonly node:sqlite connections. Compare exact candidate/state/mapping/epoch fields. Compare preimage and pre-ordering-fix publication source starting at function verifyInstalledLocal byte-for-byte.",
+  "meaning": "Context reuse preserved the old builder output exactly; the same pre-existing installed-state comparator rejects the independently demonstrated derived order difference. This is not a historical real-pair COMMIT claim."
+}

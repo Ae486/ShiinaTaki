@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "C:/Program Files/nodejs/node.exe",
+    "--input-type=module",
+    "-",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-checked-v3-source-manifest.json",
+    "12ab49508b637cca1ac51567dee58a4d064830720d638c28ca182b81097a7884"
+  ],
+  "stdin": "import {verifyInventory} from \"file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-http-client.mjs\";\nconsole.log(JSON.stringify(verifyInventory(process.argv[2],process.argv[3])));",
+  "exitCode": 0,
+  "stdout": "{\"sha256\":\"12ab49508b637cca1ac51567dee58a4d064830720d638c28ca182b81097a7884\",\"entries\":5084,\"verified\":true}\n",
+  "stderr": ""
+}

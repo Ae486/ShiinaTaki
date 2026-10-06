@@ -1,0 +1,117 @@
+{
+  "ruff": {
+    "command": [
+      "H:/hindsight/.venv/Scripts/ruff.exe",
+      "check",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/application_state/store.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_baseline_reads.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_snapshot.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transfer/transition_delta.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transfer/transition_delta_rows.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transfer/transition_delta_application.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/alembic/versions/e40b1e8a7d32_optimize_transition_association_lookup.py",
+      "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_baseline_reads.py",
+      "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_artifact_reads.py",
+      "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_derived_link_batches.py",
+      "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_association_lookup.py",
+      "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_association_migration.py"
+    ],
+    "exitCode": 0,
+    "seconds": 0.0779999999795109,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  "format": {
+    "command": [
+      "H:/hindsight/.venv/Scripts/ruff.exe",
+      "format",
+      "--check",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/application_state/store.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_baseline_reads.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_snapshot.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transfer/transition_delta.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transfer/transition_delta_rows.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transfer/transition_delta_application.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/alembic/versions/e40b1e8a7d32_optimize_transition_association_lookup.py",
+      "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_baseline_reads.py",
+      "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_artifact_reads.py",
+      "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_derived_link_batches.py",
+      "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_association_lookup.py",
+      "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_association_migration.py"
+    ],
+    "exitCode": 0,
+    "seconds": 0.062000000005355105,
+    "stdout": "12 files already formatted\n",
+    "stderr": ""
+  },
+  "ty": {
+    "command": [
+      "H:/hindsight/.venv/Scripts/ty.exe",
+      "check",
+      "--project",
+      "H:/hindsight",
+      "--python",
+      "H:/hindsight/.venv/Scripts/python.exe",
+      "--extra-search-path",
+      "H:\\hindsight\\hindsight-api-slim",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/application_state/store.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_baseline_reads.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_snapshot.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transfer/transition_delta.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transfer/transition_delta_rows.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transfer/transition_delta_application.py",
+      "H:/hindsight/hindsight-api-slim/hindsight_api/alembic/versions/e40b1e8a7d32_optimize_transition_association_lookup.py",
+      "--output-format",
+      "concise"
+    ],
+    "exitCode": 1,
+    "seconds": 0.235000000015134,
+    "stdout": "hindsight_api\\engine\\transfer\\transition_delta.py:97:62: error[invalid-argument-type] Argument to bound method `_read` is incorrect: Expected `UUID`, found `UUID | None`\nFound 1 diagnostic\n",
+    "stderr": ""
+  },
+  "type_baseline": {
+    "command": [
+      "H:/hindsight/.venv/Scripts/python.exe",
+      "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-candidate-baseline-type-compare.py"
+    ],
+    "exitCode": 0,
+    "seconds": 2.2809999999881256,
+    "stdout": "{\"ownedPath\": \"H:\\\\TakiAgent\\\\.trellis\\\\.runtime\\\\w5-candidate-baseline-types-1aea87029cfe4ed099a5300d1111ebb8\", \"preimageHashesVerified\": [{\"path\": \"hindsight_api/engine/application_state/store.py\", \"sha256\": \"7a6b0bd12769ab30aaf88f631b17c227f66074bd77f5a546518188d0fb880237\", \"bytes\": 24334}, {\"path\": \"hindsight_api/engine/transition_snapshot.py\", \"sha256\": \"3e695dffedd3927468c290693a83827a080ba4e561da64c6d298df9b60123291\", \"bytes\": 6619}, {\"path\": \"hindsight_api/engine/transfer/transition_delta.py\", \"sha256\": \"56d39fb2be52ebfa3299f1a687b7e16f4214b984c8d3ae2c380fe2982de186d9\", \"bytes\": 11507}], \"baselineExit\": 1, \"baselineDiagnostics\": 1, \"currentExit\": 1, \"currentDiagnostics\": 1, \"sameDiagnosticsOnExactSource\": true, \"realModelRequests\": 0}\n",
+    "stderr": ""
+  },
+  "reviewer_helper_ruff": {
+    "command": [
+      "H:/hindsight/.venv/Scripts/ruff.exe",
+      "check",
+      "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-candidate-combined-source-audit.py"
+    ],
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  "reviewer_helper_format": {
+    "command": [
+      "H:/hindsight/.venv/Scripts/ruff.exe",
+      "format",
+      "--check",
+      "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-candidate-combined-source-audit.py"
+    ],
+    "exitCode": 0,
+    "stdout": "1 file already formatted\n",
+    "stderr": ""
+  },
+  "reviewer_helper_type": {
+    "command": [
+      "H:/hindsight/.venv/Scripts/ty.exe",
+      "check",
+      "--python",
+      "H:/hindsight/.venv/Scripts/python.exe",
+      "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-candidate-combined-source-audit.py",
+      "--output-format",
+      "concise"
+    ],
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  }
+}

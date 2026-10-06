@@ -1,0 +1,50 @@
+[
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "ruff",
+      "cmd": "& H:/hindsight/.venv/Scripts/python.exe -B -s -m ruff check '.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-baseline-readonly-profile.py' '.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5_baseline_profile_metrics.py' '.trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_baseline_readonly_profile.py'",
+      "chunk_id": "980a94",
+      "wall_time_seconds": 0.6013864,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n"
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "format",
+      "cmd": "& H:/hindsight/.venv/Scripts/python.exe -B -s -m ruff format --check '.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-baseline-readonly-profile.py' '.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5_baseline_profile_metrics.py' '.trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_baseline_readonly_profile.py'",
+      "chunk_id": "d22457",
+      "wall_time_seconds": 0.6585828,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": "3 files already formatted\n"
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "ty",
+      "cmd": "& H:/hindsight/.venv/Scripts/python.exe -B -s -m ty check --python H:/hindsight/.venv/Scripts/python.exe --python-version 3.11 --extra-search-path H:/hindsight/hindsight-api-slim '.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-baseline-readonly-profile.py' '.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5_baseline_profile_metrics.py' '.trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_baseline_readonly_profile.py'",
+      "chunk_id": "2c4dad",
+      "wall_time_seconds": 0.8840145,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n"
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "unit",
+      "cmd": "& H:/hindsight/.venv/Scripts/python.exe -B -s -m unittest discover -s .trellis/tasks/09-29-hindsight-transitions-emergency/research -p test_w5_baseline_readonly_profile.py -v",
+      "chunk_id": "e52730",
+      "wall_time_seconds": 8.2159273,
+      "exit_code": 0,
+      "original_token_count": 629,
+      "output": "test_parent_reuses_v2_launch_and_supervisor_without_global_patch (test_w5_baseline_readonly_profile.CustodyAndReportTests.test_parent_reuses_v2_launch_and_supervisor_without_global_patch) ... ok\r\ntest_report_requires_both_proofs_custody_cleanup_and_real_observations (test_w5_baseline_readonly_profile.CustodyAndReportTests.test_report_requires_both_proofs_custody_cleanup_and_real_observations) ... ok\r\ntest_sampler_limit_prevents_extra_io_and_missing_is_not_zero (test_w5_baseline_readonly_profile.CustodyAndReportTests.test_sampler_limit_prevents_extra_io_and_missing_is_not_zero) ... ok\r\ntest_sampler_refuses_replaced_process_before_resource_read (test_w5_baseline_readonly_profile.CustodyAndReportTests.test_sampler_refuses_replaced_process_before_resource_read) ... ok\r\ntest_actual_default_process_imports_no_model (test_w5_baseline_readonly_profile.EntryTests.test_actual_default_process_imports_no_model) ... ok\r\ntest_default_is_noop_even_without_manifest (test_w5_baseline_readonly_profile.EntryTests.test_default_is_noop_even_without_manifest) ... ok\r\ntest_wrong_sealed_v2_manifest_refuses_before_current_verification (test_w5_baseline_readonly_profile.EntryTests.test_wrong_sealed_v2_manifest_refuses_before_current_verification) ... ok\r\ntest_actual_request_and_baseline_return_shape_without_pg (test_w5_baseline_readonly_profile.PreservedInputTests.test_actual_request_and_baseline_return_shape_without_pg) ... ok\r\ntest_async_inclusive_boundaries_and_context_reset_on_cancellation (test_w5_baseline_readonly_profile.ProfileTests.test_async_inclusive_boundaries_and_context_reset_on_cancellation) ... ok\r\ntest_buckets_are_bounded (test_w5_baseline_readonly_profile.ProfileTests.test_buckets_are_bounded) ... ok\r\ntest_nested_exclusive_cpu_and_wall_do_not_double_count (test_w5_baseline_readonly_profile.ProfileTests.test_nested_exclusive_cpu_and_wall_do_not_double_count) ... ok\r\ntest_original_exception_identity_and_frame_cleanup (test_w5_baseline_readonly_profile.ProfileTests.test_original_exception_identity_and_frame_cleanup) ... ok\r\ntest_refuses_dml_locks_side_effects_and_multiple_statements (test_w5_baseline_readonly_profile.ReadOnlyTests.test_refuses_dml_locks_side_effects_and_multiple_statements) ... ok\r\ntest_transparent_return_failure_and_no_bound_values_in_metrics (test_w5_baseline_readonly_profile.ReadOnlyTests.test_transparent_return_failure_and_no_bound_values_in_metrics) ... ok\r\n\r\n----------------------------------------------------------------------\r\nRan 14 tests in 6.760s\r\n\r\nOK\r\n"
+    }
+  }
+]

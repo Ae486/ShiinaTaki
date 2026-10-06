@@ -1,0 +1,314 @@
+{
+  "meaning": "Independent current checker source; original delivery and predecessor manifests remain immutable",
+  "core": {
+    ".trellis/spec/backend/index.md": {
+      "sha256": "566a1a27280a5ae4ef3065bcb08b0f03adc72d8011328483bc93c5e5784e4c88",
+      "deliveredSha256": "566a1a27280a5ae4ef3065bcb08b0f03adc72d8011328483bc93c5e5784e4c88"
+    },
+    ".trellis/spec/backend/memory-transition-healthy-drivers.md": {
+      "sha256": "960f9008882e4655365c7871df67578e995f0f6365117989a6ae8b07a9ed37ec",
+      "deliveredSha256": "16e541ace4291b331cfc6f2eac5e984a2ca480fddac78ca00a4573019fe40545"
+    },
+    ".trellis/spec/backend/sqlite-migration-lineage.md": {
+      "sha256": "7b2c0f76ad4b0735444389aff733c7ac1a07802d9f80cbcf8712663043269913",
+      "deliveredSha256": "7b2c0f76ad4b0735444389aff733c7ac1a07802d9f80cbcf8712663043269913"
+    },
+    "packages/core/src/boot/index.md": {
+      "sha256": "316ad5192e18d0e547197c0b77b8088cddd1e0e1f34ba066b562125a3b95ca3d",
+      "deliveredSha256": "316ad5192e18d0e547197c0b77b8088cddd1e0e1f34ba066b562125a3b95ca3d"
+    },
+    "packages/core/src/boot/memory-transition-boot.ts": {
+      "sha256": "4690a1404cd89d280d7386090928fa658d9db8a1081f3607b132c8c0b87acb0b",
+      "deliveredSha256": "4690a1404cd89d280d7386090928fa658d9db8a1081f3607b132c8c0b87acb0b"
+    },
+    "packages/core/src/db/index.md": {
+      "sha256": "d3dc19b2b1d723adb390b075a69fd1d070a971f9e829fcc04524d0efc3a7bf8d",
+      "deliveredSha256": "d3dc19b2b1d723adb390b075a69fd1d070a971f9e829fcc04524d0efc3a7bf8d"
+    },
+    "packages/core/src/db/memory-transition-abort.ts": {
+      "sha256": "60e39c67e82f65eea20c578dcccd290c83009cd367b02b70e6127ea70f223329",
+      "deliveredSha256": "60e39c67e82f65eea20c578dcccd290c83009cd367b02b70e6127ea70f223329"
+    },
+    "packages/core/src/db/memory-transition-driver-failure.ts": {
+      "sha256": "ea7babd1f8d110748f52977a9ee0b643a16a15735b2038325fdc76a509ab1829",
+      "deliveredSha256": "ea7babd1f8d110748f52977a9ee0b643a16a15735b2038325fdc76a509ab1829"
+    },
+    "packages/core/src/db/memory-transition-driver-repo.test.ts": {
+      "sha256": "c8b891a31ff38311181bb4edc41cdfb6dad7c6c6f8e3da1e192346d679be3885",
+      "deliveredSha256": "c8b891a31ff38311181bb4edc41cdfb6dad7c6c6f8e3da1e192346d679be3885"
+    },
+    "packages/core/src/db/memory-transition-driver-repo.ts": {
+      "sha256": "2de5b736049f6a8c51834b3747c62385ef6313ed31b018623ae07c87accd3967",
+      "deliveredSha256": "2de5b736049f6a8c51834b3747c62385ef6313ed31b018623ae07c87accd3967"
+    },
+    "packages/core/src/db/memory-transition-evidence-repo.ts": {
+      "sha256": "5a5a55ff07714b0a82d7dee1b52b5945b30933e607a8de6f4c883c1525fe9fb9",
+      "deliveredSha256": "5a5a55ff07714b0a82d7dee1b52b5945b30933e607a8de6f4c883c1525fe9fb9"
+    },
+    "packages/core/src/db/memory-transition-native-outcome.ts": {
+      "sha256": "085c4ea454b563971363c12a526c76610670929a375d251e9e99c48158eb0232",
+      "deliveredSha256": "085c4ea454b563971363c12a526c76610670929a375d251e9e99c48158eb0232"
+    },
+    "packages/core/src/db/memory-transition-preview-repo.ts": {
+      "sha256": "565288b164bdad9824ff81b10412ab6b3d0db622e10de15587a95e02707558ed",
+      "deliveredSha256": "565288b164bdad9824ff81b10412ab6b3d0db622e10de15587a95e02707558ed"
+    },
+    "packages/core/src/db/memory-transition-recovery-repo.ts": {
+      "sha256": "76232d3ff389d1f83f412036617a7813f8509f710a504f027288373820e3f61e",
+      "deliveredSha256": "76232d3ff389d1f83f412036617a7813f8509f710a504f027288373820e3f61e"
+    },
+    "packages/core/src/db/memory-transition-repo.ts": {
+      "sha256": "a093441edc112e31fb2b003a75e5f0ca9323a2a3d0967d156b43aa1bee6d403b",
+      "deliveredSha256": "a093441edc112e31fb2b003a75e5f0ca9323a2a3d0967d156b43aa1bee6d403b"
+    },
+    "packages/core/src/db/memory-transition-undispatched.ts": {
+      "sha256": "b34103f396f54c1c8c4dac233ae692755ebfbc9c29f5906dc7461af95c7a2998",
+      "deliveredSha256": "b34103f396f54c1c8c4dac233ae692755ebfbc9c29f5906dc7461af95c7a2998"
+    },
+    "packages/core/src/db/memory-transition-verification-dispatch.ts": {
+      "sha256": "a856f99bc5224f2dc8e0abcb935218d85967aef1cef1bc5cc161d200defac747",
+      "deliveredSha256": "a856f99bc5224f2dc8e0abcb935218d85967aef1cef1bc5cc161d200defac747"
+    },
+    "packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts": {
+      "sha256": "2d47ebe57a1edd9541dd741a8fdb127d3d8817c353306112f88726f23c2667a4",
+      "deliveredSha256": "2d47ebe57a1edd9541dd741a8fdb127d3d8817c353306112f88726f23c2667a4"
+    },
+    "packages/core/src/db/migrations/053-memory-transition-candidates.test.ts": {
+      "sha256": "c6718e21957c8981a56c12e94a0c946cb0dace1dca7e4f29fd265668b94b1c62",
+      "deliveredSha256": "c6718e21957c8981a56c12e94a0c946cb0dace1dca7e4f29fd265668b94b1c62"
+    },
+    "packages/core/src/db/migrations/054-memory-transition-publication.test.ts": {
+      "sha256": "7d8ec725d72fa450f56916ed4fb9a9e560b5382b238c37a21ab15c909aea78db",
+      "deliveredSha256": "7d8ec725d72fa450f56916ed4fb9a9e560b5382b238c37a21ab15c909aea78db"
+    },
+    "packages/core/src/db/migrations/055-memory-transition-drivers.ts": {
+      "sha256": "2998d5b373a4212461c520de24d6a556ea2d3f31b5095cd2e71cbddb8dbf5768",
+      "deliveredSha256": "2998d5b373a4212461c520de24d6a556ea2d3f31b5095cd2e71cbddb8dbf5768"
+    },
+    "packages/core/src/db/migrations/056-memory-transition-verification-dispatch.test.ts": {
+      "sha256": "d4e0f749f722a2fa42bc91922c780fb56c38f1f229025682e38992a14c21bb43",
+      "deliveredSha256": "d4e0f749f722a2fa42bc91922c780fb56c38f1f229025682e38992a14c21bb43"
+    },
+    "packages/core/src/db/migrations/056-memory-transition-verification-dispatch.ts": {
+      "sha256": "e73c7367886cfbc79d1103b839bf9c229b3ac83e7db24a44b30fb3d63842160b",
+      "deliveredSha256": "e73c7367886cfbc79d1103b839bf9c229b3ac83e7db24a44b30fb3d63842160b"
+    },
+    "packages/core/src/db/migrations/index-list.test.ts": {
+      "sha256": "2aa1fa6be0ddf24f222da613ebff9aed94a3660d0700b99f08227576326f5d37",
+      "deliveredSha256": "2aa1fa6be0ddf24f222da613ebff9aed94a3660d0700b99f08227576326f5d37"
+    },
+    "packages/core/src/db/migrations/index-list.ts": {
+      "sha256": "f2f9df5c4698aa3969e2121cc308d37f1fc3f2b8943b6dcb31dee48853f8dc5e",
+      "deliveredSha256": "f2f9df5c4698aa3969e2121cc308d37f1fc3f2b8943b6dcb31dee48853f8dc5e"
+    },
+    "packages/core/src/db/migrations/index.md": {
+      "sha256": "a414d94859c34cc5c38010a5180164b2f7051841a2d9af36e83a00bb08fa884f",
+      "deliveredSha256": "a414d94859c34cc5c38010a5180164b2f7051841a2d9af36e83a00bb08fa884f"
+    },
+    "packages/core/src/db/migrations/lineage-reopen-matrix.test.ts": {
+      "sha256": "7b251fec7139327901db3f2dd3cbcfd7eadcc3cf04aa96d3b5d9f5603ad18c8d",
+      "deliveredSha256": "7b251fec7139327901db3f2dd3cbcfd7eadcc3cf04aa96d3b5d9f5603ad18c8d"
+    },
+    "packages/core/src/main.ts": {
+      "sha256": "649d9dbb586fc1468ddf3f94cc96ae99acc94d4fd3c4cf6adddf5fa94034ef2b",
+      "deliveredSha256": "649d9dbb586fc1468ddf3f94cc96ae99acc94d4fd3c4cf6adddf5fa94034ef2b"
+    },
+    "packages/core/src/memory/hindsight-activation/hindsight-activation-fixture.ts": {
+      "sha256": "ba1ca9cf6f6d93aa5306b1f27703757512742d0f0cb3523ac262195b74bba4a2",
+      "deliveredSha256": "ba1ca9cf6f6d93aa5306b1f27703757512742d0f0cb3523ac262195b74bba4a2"
+    },
+    "packages/core/src/memory/operations/index.md": {
+      "sha256": "90bd0f6ac2c113c6623bb0365fcf7f1bf5c4ec11a992055296ab0422c965a2e0",
+      "deliveredSha256": "90bd0f6ac2c113c6623bb0365fcf7f1bf5c4ec11a992055296ab0422c965a2e0"
+    },
+    "packages/core/src/memory/operations/memory-operation-kind-transition.ts": {
+      "sha256": "66420998d4d86ea902400383758cd5c0c82891aa6e6f4a462e45b8f31a1e2c7c",
+      "deliveredSha256": "66420998d4d86ea902400383758cd5c0c82891aa6e6f4a462e45b8f31a1e2c7c"
+    },
+    "packages/core/src/memory/operations/memory-operation-transition-storage.ts": {
+      "sha256": "3cd053e00ecda4645331ccf3373e55d140b6205d4da3e2e6c7f56368b85e5947",
+      "deliveredSha256": "3cd053e00ecda4645331ccf3373e55d140b6205d4da3e2e6c7f56368b85e5947"
+    },
+    "packages/core/src/memory/transitions/index.md": {
+      "sha256": "0797ad86274658486dba97cbd4f81853b02064232693c674ed954dec793d4509",
+      "deliveredSha256": "8bd081ce6b64b82294569250216fdbf60274cd0a9124b9a19b407bf0a81c8ed0"
+    },
+    "packages/core/src/memory/transitions/transition-current-identity.ts": {
+      "sha256": "52c1c9a18f104bee3dcbd92d0437387ec661c746a378fcafca9114c2ef298d9c",
+      "deliveredSha256": "52c1c9a18f104bee3dcbd92d0437387ec661c746a378fcafca9114c2ef298d9c"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-boundaries.test.ts": {
+      "sha256": "25f2ddbd92ea53920edef49351348195eaaffb866c44043bb94bc9ac6541eb66",
+      "deliveredSha256": "25f2ddbd92ea53920edef49351348195eaaffb866c44043bb94bc9ac6541eb66"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-candidate.ts": {
+      "sha256": "6a66c0d31daba5821b101a29176356a0367b1a74cf0b7d2f2795b8d8a1ed5931",
+      "deliveredSha256": "6a66c0d31daba5821b101a29176356a0367b1a74cf0b7d2f2795b8d8a1ed5931"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-execution.ts": {
+      "sha256": "5dfee2f0368a3a32f27a4d60b0e26463d1a6acc66d355d8698df0311b897818a",
+      "deliveredSha256": "5dfee2f0368a3a32f27a4d60b0e26463d1a6acc66d355d8698df0311b897818a"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-journey.test.ts": {
+      "sha256": "5a3e947d60f1ef47b16ae8eb5b9dd1db6884f06a9a07e12ee3accda5e1b4c880",
+      "deliveredSha256": "090b4cdacb266b364a07571fbf27d161bad6b71f7a22574629788920e61c893c"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-maintenance.test.ts": {
+      "sha256": "3da49e60e7c7ef46d5e2f54d70e405bf9e2a3a302c5f1e95c40dc81f6a3c0ea0",
+      "deliveredSha256": "bad6e4a225afc98e4c866eb77443e70f8665b7b3b7ea3af78f7ce554bfd0f5d8"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-queue.test.ts": {
+      "sha256": "e877e6b3b7871789f4b84a4b568d3152e33e7f76cd60fc28c429a5653e1c9f85",
+      "deliveredSha256": "e877e6b3b7871789f4b84a4b568d3152e33e7f76cd60fc28c429a5653e1c9f85"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-reconstruction.test.ts": {
+      "sha256": "e0ecacd00b0ea6136efb998d32410a85e0ce219088b34abf85414266c2a7ea10",
+      "deliveredSha256": "e0ecacd00b0ea6136efb998d32410a85e0ce219088b34abf85414266c2a7ea10"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-service.test.ts": {
+      "sha256": "ae2f791992772497ba304cc56b7503abeba88819adc283cb99e8b909604553cd",
+      "deliveredSha256": "ae2f791992772497ba304cc56b7503abeba88819adc283cb99e8b909604553cd"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-service.ts": {
+      "sha256": "a5d55603cec5cb63d981a761f7f989bef760113ca871b1b9e70003cd9ead5cbf",
+      "deliveredSha256": "a5d55603cec5cb63d981a761f7f989bef760113ca871b1b9e70003cd9ead5cbf"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-source.test.ts": {
+      "sha256": "e9d84d52c534390b5c707f1935a773ff8b0b94abc0390ba8d0264808004cbc76",
+      "deliveredSha256": "e9d84d52c534390b5c707f1935a773ff8b0b94abc0390ba8d0264808004cbc76"
+    },
+    "packages/core/src/memory/transitions/transition-healthy-status.ts": {
+      "sha256": "07ba50718719315e40ade120b073c68bd92dfe744dab10ee07f866f1bbddff2a",
+      "deliveredSha256": "07ba50718719315e40ade120b073c68bd92dfe744dab10ee07f866f1bbddff2a"
+    },
+    "packages/core/src/memory/transitions/transition-native-decision.ts": {
+      "sha256": "2403e00d212408762535e7c42c012ef2578684e0afdb9bb0eb532b23d21d5a65",
+      "deliveredSha256": "2403e00d212408762535e7c42c012ef2578684e0afdb9bb0eb532b23d21d5a65"
+    },
+    "packages/core/src/memory/transitions/transition-native-session.ts": {
+      "sha256": "cc9e47384019303e24364ede56b8ba103e4a79676225c452c4750e50069fefce",
+      "deliveredSha256": "cc9e47384019303e24364ede56b8ba103e4a79676225c452c4750e50069fefce"
+    },
+    "packages/core/src/server/methods/index.md": {
+      "sha256": "eceaebde936c242e1f6039d448fbef5e5af7e7cca0ef25aaefe652b27bd08f61",
+      "deliveredSha256": "30e084ae2afd760a7f2b277562631c0a1457fc029b488fc34d191dd790d44331"
+    },
+    "packages/core/src/server/methods/memory-transition-methods.ts": {
+      "sha256": "e10f83cd0faea1b6b2fa44f5847eaf076d0a15850297ee115c4035f07753a463",
+      "deliveredSha256": "e10f83cd0faea1b6b2fa44f5847eaf076d0a15850297ee115c4035f07753a463"
+    },
+    "packages/core/src/testing/index.md": {
+      "sha256": "53a07e49f014a49dcf5bb5402e05bb0e2db0dccaaa11ddb5d1bdfdce927500b0",
+      "deliveredSha256": "53a07e49f014a49dcf5bb5402e05bb0e2db0dccaaa11ddb5d1bdfdce927500b0"
+    },
+    "packages/core/src/testing/memory-transition-candidate-fixtures.ts": {
+      "sha256": "58d1664603ac5b8de1baefc90c9491a2b03850144b2ec297438fb68a644fbd25",
+      "deliveredSha256": "58d1664603ac5b8de1baefc90c9491a2b03850144b2ec297438fb68a644fbd25"
+    },
+    "packages/core/src/testing/memory-transition-delta-artifact-fixtures.ts": {
+      "sha256": "b44780fbe64b96157d79f57be04c1646d27569f0f23bc019c7e9e98e2e1dc7b4",
+      "deliveredSha256": "b44780fbe64b96157d79f57be04c1646d27569f0f23bc019c7e9e98e2e1dc7b4"
+    },
+    "packages/core/src/testing/memory-transition-delta-native-fixtures.ts": {
+      "sha256": "0ff572da6d6e2b5c818e202fdce4776f0ff2bf4ea3b821be347783ba1f91bbf6",
+      "deliveredSha256": "0ff572da6d6e2b5c818e202fdce4776f0ff2bf4ea3b821be347783ba1f91bbf6"
+    },
+    "packages/core/src/testing/memory-transition-final-fixtures.ts": {
+      "sha256": "e8e2f8d42ca5f05cb2ec0627c23810a38ca8a0d77996199b1e9e68d2186d602b",
+      "deliveredSha256": "e8e2f8d42ca5f05cb2ec0627c23810a38ca8a0d77996199b1e9e68d2186d602b"
+    },
+    "packages/core/src/testing/memory-transition-healthy-fixtures.ts": {
+      "sha256": "4aad000665b16228b88ee37ec33421d4d934535d000cd46aab4fd3e5d3521463",
+      "deliveredSha256": "4aad000665b16228b88ee37ec33421d4d934535d000cd46aab4fd3e5d3521463"
+    },
+    "packages/core/src/testing/memory-transition-healthy-journey-fixtures.ts": {
+      "sha256": "e41508eee08ee9221351ae385e32ce6b9a405ba990dd19183754a3fc1ae94d9e",
+      "deliveredSha256": "e41508eee08ee9221351ae385e32ce6b9a405ba990dd19183754a3fc1ae94d9e"
+    },
+    "packages/core/src/testing/memory-transition-healthy-source-transport.ts": {
+      "sha256": "6e07ccce9bd059f3c64db7e54ede433d710a340b1bf46255f26c39992e5e9586",
+      "deliveredSha256": "6e07ccce9bd059f3c64db7e54ede433d710a340b1bf46255f26c39992e5e9586"
+    },
+    "packages/core/src/testing/memory-transition-healthy-transport.ts": {
+      "sha256": "911ebc8d8ca370171e7f11669c136b49beaaffc653fdee80459f6b11a067be62",
+      "deliveredSha256": "911ebc8d8ca370171e7f11669c136b49beaaffc653fdee80459f6b11a067be62"
+    },
+    "packages/core/src/testing/memory-transition-publication-fixtures.ts": {
+      "sha256": "7283e09b471072bf604486ef44ba19d11f67e7e6354dfc6b1ed1b390999cd46d",
+      "deliveredSha256": "7283e09b471072bf604486ef44ba19d11f67e7e6354dfc6b1ed1b390999cd46d"
+    },
+    "packages/shared/src/index.md": {
+      "sha256": "dd3394c9b1d23e67248ddff63b0f2d604d7090044dc56b7b6cd6248c51deb6fc",
+      "deliveredSha256": "dd3394c9b1d23e67248ddff63b0f2d604d7090044dc56b7b6cd6248c51deb6fc"
+    },
+    "packages/shared/src/index.ts": {
+      "sha256": "ed05d7df8e3a225f8c270a954592f712d7bb305d3f93232d30b9cae98036f3f0",
+      "deliveredSha256": "ed05d7df8e3a225f8c270a954592f712d7bb305d3f93232d30b9cae98036f3f0"
+    },
+    "packages/shared/src/memory-transition-driver-schema.ts": {
+      "sha256": "76fad0549a96ff860e607662808204d8bd161c23b52d137d28c809a7e9aa1b3d",
+      "deliveredSha256": "76fad0549a96ff860e607662808204d8bd161c23b52d137d28c809a7e9aa1b3d"
+    },
+    "packages/shared/src/memory-transition-schema.ts": {
+      "sha256": "ba6aea9d4239eb26889586a1a9f40819363d574adf04bc68c7fc01b964a2e900",
+      "deliveredSha256": "ba6aea9d4239eb26889586a1a9f40819363d574adf04bc68c7fc01b964a2e900"
+    },
+    "packages/core/src/server/methods/memory-transition-methods.test.ts": {
+      "sha256": "1b7d2186db196772a8c22db69c5b57c6e5382737f7faed99992abed9fcfa6490",
+      "deliveredSha256": null
+    }
+  },
+  "native": {
+    "hindsight-api-slim/hindsight_api/engine/llm_interface.py": {
+      "sha256": "a6c96fc86c7ed746431c253fc3655ba7bf6fec44045de33091ac7b5da0cee7a6",
+      "deliveredSha256": "a6c96fc86c7ed746431c253fc3655ba7bf6fec44045de33091ac7b5da0cee7a6"
+    },
+    "hindsight-api-slim/hindsight_api/engine/providers/openai_compatible_llm.py": {
+      "sha256": "be3b770d2bd7ce4711585604c27d358529ef4309a2e6e380865ac1b8e132d3bd",
+      "deliveredSha256": "be3b770d2bd7ce4711585604c27d358529ef4309a2e6e380865ac1b8e132d3bd"
+    },
+    "hindsight-api-slim/hindsight_api/engine/consolidation/consolidator.py": {
+      "sha256": "ada4963a18f19cfb304679364aca95fdf8bf68810396a2bff658f47e83bb43d3",
+      "deliveredSha256": "ada4963a18f19cfb304679364aca95fdf8bf68810396a2bff658f47e83bb43d3"
+    },
+    "hindsight-api-slim/tests/test_provider_billing_refusal.py": {
+      "sha256": "ea6f91a96294bf8a4835973026a9b980f30acf0f77010e4a67974b7bb037e513",
+      "deliveredSha256": "ea6f91a96294bf8a4835973026a9b980f30acf0f77010e4a67974b7bb037e513"
+    },
+    "hindsight-api-slim/tests/test_consolidation_retry_budget.py": {
+      "sha256": "ade111b22df5294ad0bfda65d4d229bab265056bf284cc176c003b0e15a4a24c",
+      "deliveredSha256": "ade111b22df5294ad0bfda65d4d229bab265056bf284cc176c003b0e15a4a24c"
+    },
+    "hindsight-api-slim/tests/native_results/test_transition_billing_recovery.py": {
+      "sha256": "c446e5ec5223292eeb4e1d0d68512576241ae3fcb176b1b7c38355d2c8353177",
+      "deliveredSha256": "c446e5ec5223292eeb4e1d0d68512576241ae3fcb176b1b7c38355d2c8353177"
+    }
+  },
+  "preservedManifests": {
+    "w5-source-ownership.json": "21673440218d85039ef17405a24f4134880a31f7a6872352dc86a50e1b99ea94",
+    "w5-prior-source-baseline.json": "8e8b4dad76f41d25201253969f0baa7777d9412b9e82757595cc804c3434f67d",
+    "w5-first-real-run-source-hashes.json": "e97459b4918a0ecfd99ea863ba030fd5bb300451d26c8dc9bd5d8bfe7498bef1",
+    "w5-native-billing-prior-hashes.json": "2742b09dedd3dd9af5d30c450564e1c7023ae3a62115fdb59a98d285a86f82d1",
+    "w4-checker-source-hashes.json": "8e9474814dcd503b30922576c657038ba88d8fdb19ee46f127c27dc26ee89915"
+  },
+  "nativeBaselinePathsVerified": 355,
+  "unexpectedNativeChanges": [],
+  "encodingHeaderIndexIssues": [],
+  "changedSinceDelivery": [
+    ".trellis/spec/backend/memory-transition-healthy-drivers.md",
+    "packages/core/src/memory/transitions/index.md",
+    "packages/core/src/memory/transitions/transition-healthy-journey.test.ts",
+    "packages/core/src/memory/transitions/transition-healthy-maintenance.test.ts",
+    "packages/core/src/server/methods/index.md",
+    "packages/core/src/server/methods/memory-transition-methods.test.ts"
+  ],
+  "originalPreserved": {
+    "files": 1647,
+    "bytes": 421681143,
+    "allHashesMatch": true
+  },
+  "realSubmissions": 209,
+  "realSubmissionCap": 240,
+  "realModelRequestsByChecker": 0,
+  "realGate": "INCOMPLETE; no final native proof, Core COMMIT, Local edits or reentry"
+}

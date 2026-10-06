@@ -1,0 +1,222 @@
+{
+  "task": ".trellis/tasks/09-29-hindsight-transitions-emergency",
+  "wave": "W7",
+  "owner": "/root/w5_head_prefetch_implement",
+  "head": "fccfc4fb78958c90efebdb4a5a98b355bcb73a40",
+  "branch": "main",
+  "sourceFiles": [
+    {
+      "path": "eslint.config.js",
+      "sha256": "9bcdad538a263ad8f90d174aa25a72e8ce8933839fc8fecdbb9675035db7f01b",
+      "bytes": 3862
+    },
+    {
+      "path": "packages/shared/src/index.ts",
+      "sha256": "60616af1fb4f6215a3c759f5cd6b5489c2d823cefdf63c737709a474a9c6875e",
+      "bytes": 53319
+    },
+    {
+      "path": "packages/shared/src/memory-transition-driver-schema.ts",
+      "sha256": "3a13af23c43fc3e4f801d5a8599b82ceb5b7ceac7a297ab887122f93f11a8791",
+      "bytes": 6221
+    },
+    {
+      "path": "packages/shared/src/memory-transition-operator-schema.ts",
+      "sha256": "d85872474917fbb9dd9b2f4c6beaa897ddb0380b7b57dd9b50f67d787efd501e",
+      "bytes": 2492
+    },
+    {
+      "path": "packages/shared/src/index.md",
+      "sha256": "178343ee7dd9252695793e49fb1654691ffffe6116f12e0689d8349594fdac78",
+      "bytes": 14584
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-emergency-quarantine.ts",
+      "sha256": "6a90d38ae6f209d40478a7e4028e3a2603f057b2ab837794f8d92e455fdd4bac",
+      "bytes": 5429
+    },
+    {
+      "path": "packages/core/src/db/index.md",
+      "sha256": "70ffb4d1ab9437ca2d02d84ae73465e2ab2b8f1e508b74d221889bb1b73e617f",
+      "bytes": 21837
+    },
+    {
+      "path": "packages/core/src/boot/memory-transition-boot.ts",
+      "sha256": "128622c2dea33b42d5d010c34de4efff43cf03989f7c9dbdc5797e62692ea539",
+      "bytes": 7218
+    },
+    {
+      "path": "packages/core/src/boot/index.md",
+      "sha256": "def78d878da077f75c905087af89ddabb9142b2a93953a88bc6a4087005fd3e7",
+      "bytes": 1470
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-operator-actions.ts",
+      "sha256": "40d825b86e7e945dbc81ea8b8c533584bedc4732b3f8815cd95e7e59b77cdf0d",
+      "bytes": 5762
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-operator-overview.ts",
+      "sha256": "006ced8ccc03360d64cd24483ae1b0a07870d692a61dd2f9b9364d809d9dfe94",
+      "bytes": 6513
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-operator-overview.test.ts",
+      "sha256": "f3fe3ebf204df5b3e721b84571dd9aa91f5aa502d17c3722e9e9326f1b856925",
+      "bytes": 6589
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-status.ts",
+      "sha256": "688a35cf0408f8b0f157698bade9005f7192707922ed22211e1f9c9f2e819c8a",
+      "bytes": 4616
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-service.ts",
+      "sha256": "13509e7a7d067b6946ec89456ceb50781a724792e2ff3621f9af8119ac47a063",
+      "bytes": 10298
+    },
+    {
+      "path": "packages/core/src/memory/transitions/index.md",
+      "sha256": "6c87f75c28c3528f4101b9fa227750b82721326bb9b7e5b3e54cbde73a5810ea",
+      "bytes": 7150
+    },
+    {
+      "path": "packages/core/src/server/methods/memory-transition-methods.ts",
+      "sha256": "a6fff462db70187a7aeeb851c93d3c593990dff7f53c30767757edff86100ab5",
+      "bytes": 2530
+    },
+    {
+      "path": "packages/core/src/server/methods/memory-transition-methods.test.ts",
+      "sha256": "3306edb9caefd6306495cd828f9cc3c14099d231253cce6a70762dd5b0020bb7",
+      "bytes": 6355
+    },
+    {
+      "path": "packages/core/src/server/methods/index.md",
+      "sha256": "38d7148f6fe0aeac44415c593fcb22ae701f7e0116ed6fbffc3aeaf9a2eb6865",
+      "bytes": 8238
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-operator-fixtures.ts",
+      "sha256": "3750cd9b49b7ea36607c4df0249e223e14593aeb60de34436ea9f68ac5a0f21a",
+      "bytes": 4967
+    },
+    {
+      "path": "packages/core/src/testing/index.md",
+      "sha256": "c6b36556e84dffeecf028423009e130923e84b3506bf99fd4997d823c1115ec1",
+      "bytes": 6394
+    },
+    {
+      "path": "apps/desktop/src/lib/rpc-deadline.ts",
+      "sha256": "2b7b175ed47efc4d077d53227473b40d044f6a36af1b0cfee6d61247926c3d90",
+      "bytes": 6743
+    },
+    {
+      "path": "apps/desktop/src/lib/rpc-deadline.test.ts",
+      "sha256": "cbc68ade37ce377825335708c81381f550de607586496092073de19c7fe9d00f",
+      "bytes": 5387
+    },
+    {
+      "path": "apps/desktop/src/lib/ws-client-memory-operations.ts",
+      "sha256": "27d897c7f64ae5bbaf9cf09bbc4adcce8cce7554974f0e0c6c347f1dfa946d5c",
+      "bytes": 4673
+    },
+    {
+      "path": "apps/desktop/src/lib/ws-client-transitions.test.ts",
+      "sha256": "56dc9b3e6394f826a22a42ea7f56e373de8ff8e21e78bdbbc650aedccd51fe93",
+      "bytes": 3823
+    },
+    {
+      "path": "apps/desktop/src/lib/index.md",
+      "sha256": "770a72b3b135d5a6413d7155ea5487c1c309dd17b0a1df3a835794d10152e872",
+      "bytes": 4505
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-authority-state.ts",
+      "sha256": "544568d1af23db698bde3f394a0733ac0683aa91abba6e8a6d3e963296270dbf",
+      "bytes": 6210
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-operations-controller.ts",
+      "sha256": "2d2f807a10f4f331873d4f55aa0d475d9e5eb696b022604e37d054251f7909c1",
+      "bytes": 8102
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/operations-page.tsx",
+      "sha256": "c2898845539d58ce91f4664301bcdef699c201a726235e639749620bfc382661",
+      "bytes": 3528
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-transition-state.ts",
+      "sha256": "ef1769601c9fb6dfe7857a4f318fadcb052e3b3ff90953e0d775428f1076e7d5",
+      "bytes": 4841
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-transitions-controller.ts",
+      "sha256": "e1ac26918f967cba2c23b4b1aa6817829a1132ad1e08f78c922d11ae307cf668",
+      "bytes": 5036
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/use-memory-transitions.ts",
+      "sha256": "6cf256a5b1cea59f0da641702f0efea5ac716df2414f3950c18cfa11791440ca",
+      "bytes": 1209
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-transitions-card.tsx",
+      "sha256": "7ba61cf1b0129db6cf5d5e3648f5ab171b511debb0996f6969aeb0e9e534f8f4",
+      "bytes": 3169
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-transition-confirmation.tsx",
+      "sha256": "0f4fdb1f3f61a43e6fe65236ed956804f8b9455ffc42c7072b0507712dbbc3cf",
+      "bytes": 3090
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-transition-disclosure.tsx",
+      "sha256": "2da65d95b6743b085d271d85aea923d5bd2de744a9410e82451751bba4c0108d",
+      "bytes": 2061
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-transition-progress.tsx",
+      "sha256": "4f6c6af7c3142904afa2f9ae85a7382fc1d01479c4dfca0e70b39d79a6467fd0",
+      "bytes": 3268
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-transitions-controller.test.ts",
+      "sha256": "6b3938d775a129afa4f5d8960e61349ff8253d165a861574c8bcf5ed550184d4",
+      "bytes": 6602
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-transitions-card.test.tsx",
+      "sha256": "08c69514e4b4479661d8415e1b531c8ced566d36415a194db04784af8fcdc679",
+      "bytes": 3072
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/memory-transitions-browser.test.ts",
+      "sha256": "ae9b7a1f5990048cc9c2bedafb6d0c763f03dc40cf0bddff23b7f64f60a43b9e",
+      "bytes": 9918
+    },
+    {
+      "path": "apps/desktop/src/windows/home/pages/operations/index.md",
+      "sha256": "b90287b1f61e1dbc9dea9e33b619d2cceb5968cf040e64e230b607357067a4d2",
+      "bytes": 6693
+    },
+    {
+      "path": ".trellis/spec/backend/quality-guidelines.md",
+      "sha256": "ae39e38b4e85eed18fe3ae43d92a559799240d3e99b9f75a1439d850c184ac69",
+      "bytes": 15058
+    },
+    {
+      "path": ".trellis/spec/frontend/index.md",
+      "sha256": "485ea7d68d2c801be548b97940e175e696aef40de763e6f9af85af37ba21d6f0",
+      "bytes": 3032
+    },
+    {
+      "path": ".trellis/spec/frontend/memory-transitions.md",
+      "sha256": "113b7f334415c0c3535d9cb3b0f6ec7067d69d4bd9a5cec6214ab39122d9be9d",
+      "bytes": 4839
+    }
+  ],
+  "browserResult": "H:\\TakiAgent\\.trellis\\.runtime\\w7-browser-artifacts\\eef3ca2f-9ca9-4c77-af80-fc244d7ea7e2\\result.txt",
+  "browserResultSha256": "c3e7b1bf91008786619719eff746a1c848ed832bdcd0741eed96d7dcf739d138",
+  "encoding": "UTF-8 without BOM, all listed files validated"
+}

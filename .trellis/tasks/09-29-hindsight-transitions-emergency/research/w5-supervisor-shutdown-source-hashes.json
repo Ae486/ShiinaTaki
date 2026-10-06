@@ -1,0 +1,25 @@
+{
+  "meaning": "Supervisor cleanup overlay; independent review pending",
+  "files": {
+    "w5-supervisor-shutdown-test.py": {
+      "sha256": "df0d2cc88d61cdfd99236b164ffb39d0be76e5f2b2df29b452ec5dae0c58d0ca",
+      "bytes": 5328
+    },
+    "w5-reused-native.py": {
+      "sha256": "da028e9e43258878fc731039da282091adaad3464cd2047227a3912bdf2a1e22",
+      "bytes": 14979
+    },
+    "w5-supervisor-prior-2026-10-03.json": {
+      "sha256": "2bc3ccee9d6680a1f44593f8bffa89435dccfa85aefccd1cda453db9e168506f",
+      "bytes": 19905
+    },
+    "w5-supervisor-shutdown-checkpoint.md": {
+      "sha256": "305c6674e6428f8a957180f13fed2427666910633567441a4d1e53abb96e1d39",
+      "bytes": 2318
+    },
+    "w5-supervisor-shutdown.py": {
+      "sha256": "5d349f718e608258e562a18739a22355da85bb1dd42a19d4e7dba6d947e8d25d",
+      "bytes": 2290
+    }
+  }
+}

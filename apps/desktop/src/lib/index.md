@@ -4,9 +4,9 @@ icons/ (the shared glyph set) and the two window-shared React hooks below.
 - ws-client.ts — operator WS JSON-RPC client to the Core (browser WebSocket): public turn/handshake/monitor subscribe-unsubscribe wiring plus the memory-operation family
 - ws-client-routes.ts — inbound half: the zod boundary (frame parse + chat/avatar/timeline/config/Approval/monitor/memory-operation push routing) and the D29 mid-turn-close abort
 - ws-client-methods.ts — outbound half: handshake plus schema-validated operator methods including extension convergence
-- ws-client-memory-operations.ts — outbound sibling: memory.authority.status + memory.activation.status + memory.operations.submit/status/list/cancel wrappers and the exact-once memory.operations.subscribe
+- ws-client-memory-operations.ts — Shared-validated authority/activation, transition preview/status/overview and operation wrappers; exact-once memory.operations.subscribe per client.
 - ws-client-memory-onboarding.ts — outbound sibling: memory.onboarding.preview/status/exceptions/exclude wrappers and the exact-once memory.onboarding.subscribe (retryable after failure)
-- rpc-deadline.ts — method-class timing table + typed deadline error + json-rpc-2.0 native timeout requester seam
+- rpc-deadline.ts — method-class timing table and native JSON-RPC cleanup; transition reads use bounded long read deadlines, transition submit is a parameter-sensitive long unknown-outcome mutation.
 - timing-policy.ts — window-owned bootstrap/last-good timing policy store; validates full Core config refreshes without persistence
 - timing-policy-sync.ts — exact-once config subscription and serialized full-policy refresh for an authenticated client
 - connection-status.ts — discriminated operator connection states plus the one semantic notice-copy mapping shared by every surface

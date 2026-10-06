@@ -160,7 +160,7 @@ function verifyArtifact(artifact: TakiApplicationArtifact, closure: Closure, sco
   if (hindsightApplicationHash({ ...scope, domain: "record", value: withoutApplicationHash(artifact, "record_hash") }) !== artifact.record_hash) invalid();
   const body = requireBody(artifact.body_ref, closure).content;
   const kind = artifact.key.artifact_kind;
-  if (body.body_schema !== `application-${kind}.v1`) invalid();
+  if (body.body_schema !== `application-${kind}.v1` && !(kind === "source" && body.body_schema === "application-source-evidence.v1")) invalid();
   if (kind === "block") {
     if (artifact.binding.kind !== "core_block") invalid();
   } else if (artifact.binding.kind === "exact_native") {
@@ -175,6 +175,17 @@ function verifyArtifact(artifact: TakiApplicationArtifact, closure: Closure, sco
       requireArtifact(source, closure);
     }
   }
+  if (body.body_schema === "application-source-evidence.v1") {
+    const source = requireBody(body.value.source_ref, closure).content;
+    const previous = requireArtifact(body.value.previous, closure);
+    if (source.body_schema !== "application-source.v1" || source.value.operation_id !== null
+      || source.value.original_witness !== null || source.value.encoded_metadata !== null
+      || artifact.binding.kind !== "exact_native" || !sameApplicationValue(artifact.binding.native, body.value.associated_native)
+      || !sameApplicationValue(body.value.previous.key, artifact.key) || body.value.previous.revision >= artifact.revision
+      || previous && (previous.body_ref.bytes_sha256 !== body.value.previous_body_hash || previous.binding.kind !== "exact_native"
+        || previous.binding.native.object_id !== body.value.associated_native.object_id)
+      || hindsightApplicationHash({ ...scope, domain: "transition-source-evidence", value: source.value.original_source }) !== body.value.source_record_hash) invalid();
+  }
 }
 
 function requireArtifact(version: TakiApplicationArtifactVersion, closure: Closure): TakiApplicationArtifact | undefined {
@@ -186,11 +197,17 @@ function requireArtifact(version: TakiApplicationArtifactVersion, closure: Closu
 function invalid(): never { throw new Error("HINDSIGHT_APPLICATION_BUNDLE_INTEGRITY_ERROR"); }
 
 export function verifyHindsightApplicationNativeBaseline(bundle: HindsightApplicationBundle, raw: HindsightLogicalSnapshotMetadata): void {
+  verifyHindsightApplicationNativeBaselineContents(bundle, raw);
+  if (Date.parse(raw.expiresAt) <= Date.now()) invalid();
+}
+
+/** Content-only verification for a retained transition certificate, whose immutable closure is verified by its caller. */
+export function verifyHindsightApplicationNativeBaselineContents(bundle: HindsightApplicationBundle, raw: HindsightLogicalSnapshotMetadata): void {
   const metadata = HindsightLogicalSnapshotMetadataSchema.parse(raw); const native = metadata.manifest;
   const joint = bundle.manifest;
   if (joint.kind !== "snapshot" || native.bankId !== joint.bank_id || native.providerLineage !== joint.namespace.provider_lineage
     || native.bankGeneration !== joint.namespace.bank_generation || native.endCursor !== joint.checkpoint.native_cursor
-    || snapshotManifestHash(metadata) !== native.manifestDigest || Date.parse(metadata.expiresAt) <= Date.now()) invalid();
+    || snapshotManifestHash(metadata) !== native.manifestDigest) invalid();
   const counts = { bank: 0, document: 0, memoryUnit: { valid: 0, invalidated: 0 }, mentalModel: 0, directive: 0, total: 0 };
   for (const page of bundle.pages) {
     for (const record of page.records) {

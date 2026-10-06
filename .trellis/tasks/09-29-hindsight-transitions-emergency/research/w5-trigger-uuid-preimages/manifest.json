@@ -1,0 +1,23 @@
+{
+  "meaning": "Exact preimages before approved e40 additive repair",
+  "files": [
+    {
+      "path": "H:/hindsight/hindsight-api-slim/hindsight_api/alembic/versions/e30a9d7f6c21_add_transition_publication_fences.py",
+      "preimage": "native-e30.py",
+      "bytes": 32790,
+      "sha256": "3a310b19a4e6de34a0a9eb7935992105f90df21a0717e96fd6aad9834f9e6433"
+    },
+    {
+      "path": "H:/hindsight/TAKI_PATCHES.md",
+      "preimage": "native-TAKI_PATCHES.md",
+      "bytes": 81278,
+      "sha256": "4e0ff41530ff1f924614e60d8c2d0aa3e307cb7ebdac3936e32d9baf297a77da"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/spec/backend/memory-transitions.md",
+      "preimage": "taki-memory-transitions.md",
+      "bytes": 31459,
+      "sha256": "060069047126257a9d00576b0d23f222b8f8f0e5b968f5b0a04db2cf848ff0c7"
+    }
+  ]
+}

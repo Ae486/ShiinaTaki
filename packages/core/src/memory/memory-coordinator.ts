@@ -35,6 +35,7 @@ export interface MemoryCoordinatorCallOptions {
   expectedProviderLineageId?: string;
   expectedCapabilityDigest?: string;
   signal?: AbortSignal;
+  provenance?: MemoryProviderCallContext["provenance"];
 }
 export interface MemoryCoordinator {
   capabilities(): Promise<MemoryProviderCapabilities>;
@@ -126,7 +127,7 @@ async function dispatchToProvider(input: ProviderDispatchInput): Promise<MemoryR
   if (!caps[capabilityFor(operation, request)]) return errorEnvelope({ requestId, epoch, caps, code: "MEMORY_CAPABILITY_UNSUPPORTED", message: "memory operation unsupported" });
   if (!providerCurrent(input, provider)) return errorEnvelope({ requestId, epoch, caps, code: "MEMORY_AUTHORITY_MISMATCH", message: "memory authority changed before dispatch" });
   if (call?.signal?.aborted) return errorEnvelope({ requestId, epoch, caps, code: "MEMORY_OPERATION_CANCELLED", message: "memory operation cancelled" });
-  const context = { requestId, authorityEpochId: epoch.epochId, actor: call?.actor ?? "foreground-agent", signal: call?.signal };
+  const context = { requestId, authorityEpochId: epoch.epochId, actor: call?.actor ?? "foreground-agent", signal: call?.signal, provenance: call?.provenance };
   return invokeProvider({ ...input, provider, context, caps });
 }
 

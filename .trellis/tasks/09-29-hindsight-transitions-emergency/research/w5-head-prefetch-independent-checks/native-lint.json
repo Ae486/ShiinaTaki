@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "H:/hindsight/.venv/Scripts/ruff.exe",
+    "check",
+    "hindsight_api/engine/application_state/store.py",
+    "hindsight_api/engine/application_state/snapshot.py",
+    "hindsight_api/engine/transition_baseline_reads.py",
+    "tests/native_results/test_transition_head_prefetch.py",
+    "tests/native_results/test_transition_native_view.py"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "stdout": "All checks passed!\n",
+  "stderr": ""
+}

@@ -1,0 +1,1474 @@
+{
+  "meaning": "New independent analysis; synthetic transport reproduction and sealed-result read-only arithmetic, not another production gate.",
+  "checks": [
+    {
+      "argv": [
+        "H:/hindsight/.venv/Scripts/python.exe",
+        "-B",
+        "-s",
+        ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-postpatch-scheduling-probe.py"
+      ],
+      "exitCode": 0,
+      "stdout": "{\n  \"meaning\": \"Offline transport reproduction; no PG, model, real corpus or source edits.\\n\\nUse actual head/artifact enumeration, immutable-byte validation and reader batch\\nscheduling. Small synthetic JSON bodies deliberately test only the byte-transport\\nlayer, not full artifact schemas, SQL semantics, baseline proofs or elapsed time.\\nThe corpus-shaped traversal counts come from the sealed prepatch detail profile.\\n\",\n  \"reproduced\": true,\n  \"ordinary\": {\n    \"path\": \"ordinary\",\n    \"pendingAfterHeads\": 1559,\n    \"sql\": {\n      \"head_select\": 1,\n      \"artifact_select\": 1,\n      \"batch_metadata\": 29,\n      \"batch_sizes\": 29,\n      \"batch_parts\": 29,\n      \"ordinary_metadata\": 558,\n      \"ordinary_parts\": 558\n    },\n    \"verifiedBodies\": 4223,\n    \"secondPassExtraSql\": 0\n  },\n  \"locked\": {\n    \"path\": \"locked\",\n    \"pendingAfterHeads\": 0,\n    \"sql\": {\n      \"head_select\": 1,\n      \"artifact_select\": 1,\n      \"batch_metadata\": 17,\n      \"batch_sizes\": 17,\n      \"batch_parts\": 17,\n      \"ordinary_metadata\": 2120,\n      \"ordinary_parts\": 2120\n    },\n    \"verifiedBodies\": 4223,\n    \"secondPassExtraSql\": 0\n  },\n  \"extraOrdinaryPairsAcrossTwoBaselines\": 3124,\n  \"fewerBatchesAcrossTwoBaselines\": 24,\n  \"filesWrittenByProbe\": 0,\n  \"modelCalls\": 0,\n  \"databaseConnections\": 0\n}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "H:/hindsight/.venv/Scripts/ruff.exe",
+        "check",
+        ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-postpatch-scheduling-probe.py"
+      ],
+      "exitCode": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "H:/hindsight/.venv/Scripts/ruff.exe",
+        "format",
+        "--check",
+        ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-postpatch-scheduling-probe.py"
+      ],
+      "exitCode": 0,
+      "stdout": "1 file already formatted\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "H:/hindsight/.venv/Scripts/ty.exe",
+        "check",
+        ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-postpatch-scheduling-probe.py",
+        "--python",
+        "H:/hindsight/.venv/Scripts/python.exe",
+        "--extra-search-path",
+        "H:/hindsight/hindsight-api-slim",
+        "--output-format",
+        "concise"
+      ],
+      "exitCode": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    }
+  ],
+  "probeSha256": "77e52af3582ef59cb22d211f8db5f1ccade652588ed3a986c00b4a88863d1795",
+  "auditedInventoryReports": {
+    "inventory-parent-before": "e23b13ae58b4a961e91061b8738513d3625d013a4148d191df7a10bbd53b265b",
+    "inventory-parent-after": "e23b13ae58b4a961e91061b8738513d3625d013a4148d191df7a10bbd53b265b",
+    "inventory-worker-before": "e23b13ae58b4a961e91061b8738513d3625d013a4148d191df7a10bbd53b265b",
+    "inventory-worker-after": "e23b13ae58b4a961e91061b8738513d3625d013a4148d191df7a10bbd53b265b"
+  },
+  "sourceInventory": {
+    "sha256": "e0ec8c9e8b10706411e1f1bc2c43d1d0022a2b010471ef3bc976e4bea8331f4c",
+    "entries": 382,
+    "inherited_manifests": 7,
+    "verified": true
+  },
+  "workerIdentityVerified": true,
+  "childReportMatchesFile": true,
+  "metrics": {
+    "1dc8a7eda5124dcc948b1b95032ae484": {
+      "resultSha256": "e28d227a9df4c07533c45aff03040a93426919e20437e5b56c7069feb8f5e2c6",
+      "fullApplyMilliseconds": 58174.076199999945,
+      "encoding": [
+        {
+          "inputs": 68,
+          "completed": true,
+          "milliseconds": 2653.943700000127
+        }
+      ],
+      "stages": [
+        {
+          "name": "normal-clone-claim",
+          "path": [
+            "normal-clone-claim"
+          ],
+          "completed": true,
+          "milliseconds": 18.87110000006942
+        },
+        {
+          "name": "full-apply",
+          "path": [
+            "full-apply"
+          ],
+          "completed": true,
+          "milliseconds": 58174.076199999945
+        },
+        {
+          "name": "admit",
+          "path": [
+            "full-apply",
+            "admit"
+          ],
+          "completed": true,
+          "milliseconds": 16919.991200000368
+        },
+        {
+          "name": "baseline",
+          "path": [
+            "full-apply",
+            "admit",
+            "baseline"
+          ],
+          "completed": true,
+          "milliseconds": 16871.48950000028
+        },
+        {
+          "name": "preflight_transition_delta",
+          "path": [
+            "full-apply",
+            "preflight_transition_delta"
+          ],
+          "completed": true,
+          "milliseconds": 1335.846599999968
+        },
+        {
+          "name": "application-predecessors",
+          "path": [
+            "full-apply",
+            "application-predecessors"
+          ],
+          "completed": true,
+          "milliseconds": 2763.5737000000518
+        },
+        {
+          "name": "prepare_current_state_rows",
+          "path": [
+            "full-apply",
+            "prepare_current_state_rows"
+          ],
+          "completed": true,
+          "milliseconds": 2662.700300000324
+        },
+        {
+          "name": "admit",
+          "path": [
+            "full-apply",
+            "admit"
+          ],
+          "completed": true,
+          "milliseconds": 16725.66210000059
+        },
+        {
+          "name": "baseline",
+          "path": [
+            "full-apply",
+            "admit",
+            "baseline"
+          ],
+          "completed": true,
+          "milliseconds": 16671.444699999483
+        },
+        {
+          "name": "native-renewal",
+          "path": [
+            "full-apply",
+            "native-renewal"
+          ],
+          "completed": true,
+          "milliseconds": 20.36560000033205
+        },
+        {
+          "name": "preflight_transition_delta",
+          "path": [
+            "full-apply",
+            "preflight_transition_delta"
+          ],
+          "completed": true,
+          "milliseconds": 1463.9717999998538
+        },
+        {
+          "name": "write_transition_native_delta",
+          "path": [
+            "full-apply",
+            "write_transition_native_delta"
+          ],
+          "completed": true,
+          "milliseconds": 6502.288399999998
+        },
+        {
+          "name": "write_transition_application_delta",
+          "path": [
+            "full-apply",
+            "write_transition_application_delta"
+          ],
+          "completed": true,
+          "milliseconds": 8826.51420000002
+        },
+        {
+          "name": "application-predecessors",
+          "path": [
+            "full-apply",
+            "write_transition_application_delta",
+            "application-predecessors"
+          ],
+          "completed": true,
+          "milliseconds": 3067.163000000619
+        },
+        {
+          "name": "exact-lookup",
+          "path": [
+            "exact-lookup"
+          ],
+          "completed": true,
+          "milliseconds": 709.4553999995696
+        }
+      ],
+      "sqlCalls": 15345,
+      "sqlMilliseconds": 22232.660799922087,
+      "sql": {
+        "fetchrow:SELECT actor_hash,revision,generation,phase,lease_expires_at<clock_timestamp() expired FROM memory_transition_requests WHERE bank_id=$1 AND transition_id=$2": {
+          "calls": 1,
+          "milliseconds": 5.332499999894935,
+          "maxMs": 5.332499999894935
+        },
+        "fetchval:SELECT count(*) FROM memory_transition_deltas WHERE transition_id=$1 OR operation_id=$2": {
+          "calls": 1,
+          "milliseconds": 1.917200000207231,
+          "maxMs": 1.917200000207231
+        },
+        "fetch:SELECT to_jsonb(t)::text AS body FROM memory_transition_steps t WHERE state='complete'": {
+          "calls": 2,
+          "milliseconds": 3317.4024999998437,
+          "maxMs": 1694.6633999996266
+        },
+        "fetch:SELECT to_jsonb(t)::text AS body FROM memory_transition_actions t": {
+          "calls": 2,
+          "milliseconds": 39.12129999935132,
+          "maxMs": 20.155899999735993
+        },
+        "fetchval:SELECT vector_dims(embedding) FROM memory_units WHERE bank_id=$1 AND embedding IS NOT NULL LIMIT 1": {
+          "calls": 1,
+          "milliseconds": 6.252500000300643,
+          "maxMs": 6.252500000300643
+        },
+        "fetchval:SELECT provider_lineage FROM \"replication_provider_lineage\" WHERE singleton = TRUE": {
+          "calls": 4,
+          "milliseconds": 2.9380999994828016,
+          "maxMs": 1.110299999709241
+        },
+        "execute:INSERT INTO \"replication_bank_state\" (bank_id, provider_lineage) VALUES ($1, $2) ON CONFLICT (bank_id) DO NOTHING": {
+          "calls": 4,
+          "milliseconds": 3.0230000002120505,
+          "maxMs": 1.0542999998506275
+        },
+        "fetchrow:SELECT bank_id, provider_lineage, bank_generation, current_cursor, minimum_available_cursor, deleted_at FROM \"replication_bank_state\" WHERE bank_id = $1": {
+          "calls": 12,
+          "milliseconds": 21.13140000255953,
+          "maxMs": 7.026400000540889
+        },
+        "fetchrow:SELECT bank_id, provider_lineage, bank_generation, current_cursor, minimum_available_cursor, deleted_at FROM \"replication_bank_state\" WHERE bank_id = $1 FOR UPDATE": {
+          "calls": 4,
+          "milliseconds": 2.646799998728966,
+          "maxMs": 0.8044999995036051
+        },
+        "fetchrow:SELECT * FROM \"memory_bank_maintenance\" WHERE bank_id=$1 FOR UPDATE": {
+          "calls": 3,
+          "milliseconds": 3.22769999911543,
+          "maxMs": 1.382499999635911
+        },
+        "fetchval:SELECT clock_timestamp()": {
+          "calls": 13,
+          "milliseconds": 7.75070000145206,
+          "maxMs": 0.9794000006877468
+        },
+        "execute:INSERT INTO \"memory_transition_fences\"(bank_id) VALUES($1) ON CONFLICT DO NOTHING": {
+          "calls": 3,
+          "milliseconds": 2.0424000003913534,
+          "maxMs": 0.905899999452231
+        },
+        "fetchrow:SELECT * FROM \"memory_transition_fences\" WHERE bank_id=$1 FOR UPDATE": {
+          "calls": 3,
+          "milliseconds": 1.8329000004086993,
+          "maxMs": 0.6981000005907845
+        },
+        "fetchrow:SELECT * FROM \"memory_transition_requests\" WHERE bank_id=$1 AND transition_id=$2 FOR NO KEY UPDATE": {
+          "calls": 2,
+          "milliseconds": 5.26969999918947,
+          "maxMs": 4.657799999222334
+        },
+        "fetchrow:UPDATE \"memory_transition_requests\" SET generation=generation+1,revision=revision+1,attempt_id=$3,fence_token=$4,lease_expires_at=$5 WHERE bank_id=$1 AND transition_id=$2 RETURNING *": {
+          "calls": 1,
+          "milliseconds": 1.783600000635488,
+          "maxMs": 1.783600000635488
+        },
+        "execute:INSERT INTO \"memory_transition_history\"(bank_id,transition_id,revision,event,event_hash) VALUES($1,$2,$3,$4::jsonb,$5)": {
+          "calls": 1,
+          "milliseconds": 1.537099999950442,
+          "maxMs": 1.537099999950442
+        },
+        "fetchval:SELECT count(*) FROM \"memory_transition_writers\" WHERE bank_id=$1 AND state='running' AND lease_expires_at>$2": {
+          "calls": 6,
+          "milliseconds": 7.501900000534079,
+          "maxMs": 2.965599999697588
+        },
+        "fetchval:SELECT count(*) FROM \"async_operations\" WHERE bank_id=$1 AND status IN ('pending','processing')": {
+          "calls": 6,
+          "milliseconds": 7.630099999914819,
+          "maxMs": 2.344999999877473
+        },
+        "fetchrow:SELECT * FROM \"memory_transition_requests\" WHERE bank_id=$1 AND transition_id=$2": {
+          "calls": 6,
+          "milliseconds": 6.114399999205489,
+          "maxMs": 1.857499999459833
+        },
+        "fetchrow:SELECT * FROM \"memory_transition_deltas\" WHERE bank_id=$1 AND transition_id=$2": {
+          "calls": 3,
+          "milliseconds": 55.247800000870484,
+          "maxMs": 54.097100000035425
+        },
+        "fetchrow:SELECT revision,event,event_hash FROM \"memory_transition_history\" WHERE bank_id=$1 AND transition_id=$2 AND event->($3::text)->>($4::text)=$5 ORDER BY revision LIMIT 1": {
+          "calls": 4,
+          "milliseconds": 8.860799999638402,
+          "maxMs": 2.4094000000332016
+        },
+        "execute:SET LOCAL TIME ZONE 'UTC'": {
+          "calls": 2,
+          "milliseconds": 1.084900000023481,
+          "maxMs": 0.8465000000796863
+        },
+        "fetchrow:SELECT bank_id, name, disposition, mission, COALESCE(config, '{}'::jsonb) AS config, created_at, updated_at FROM \"banks\" WHERE bank_id = $1": {
+          "calls": 10,
+          "milliseconds": 8.178500001122302,
+          "maxMs": 1.4720000008310308
+        },
+        "fetch:SELECT id, bank_id, content_hash, tags, retain_params, created_at, updated_at FROM \"documents\" WHERE bank_id = $1 ORDER BY id": {
+          "calls": 8,
+          "milliseconds": 57.14020000050368,
+          "maxMs": 20.262500000171713
+        },
+        "fetch:SELECT id, bank_id, document_id, chunk_id, text, context, fact_type, revision, tags, metadata, source_memory_ids, observation_scopes, event_date, occurred_start, occurred_end, mentioned_at, created_at, updated_at, edited_at, consolidated_at, consolidation_failed_at, proof_count , NULL::uuid[] AS entity_ids, NULL::text AS invalidation_reason, NULL::timestamptz AS invalidated_at FROM \"memory_units\" WHERE bank_id = $1 ORDER BY id": {
+          "calls": 8,
+          "milliseconds": 88.55280000170751,
+          "maxMs": 19.586500000514206
+        },
+        "fetch:SELECT id, bank_id, document_id, chunk_id, text, context, fact_type, revision, tags, metadata, source_memory_ids, observation_scopes, event_date, occurred_start, occurred_end, mentioned_at, created_at, updated_at, edited_at, consolidated_at, consolidation_failed_at, proof_count , entity_ids, invalidation_reason, invalidated_at FROM \"invalidated_memory_units\" WHERE bank_id = $1 ORDER BY id": {
+          "calls": 8,
+          "milliseconds": 14.057999999749882,
+          "maxMs": 2.2060000001147273
+        },
+        "fetch:SELECT ue.unit_id, e.id AS entity_id, e.canonical_name FROM \"unit_entities\" ue JOIN \"memory_units\" mu ON mu.id = ue.unit_id JOIN \"entities\" e ON e.id = ue.entity_id WHERE mu.bank_id = $1 AND e.bank_id = $1 ORDER BY ue.unit_id, e.canonical_name, e.id": {
+          "calls": 8,
+          "milliseconds": 11.751199998798256,
+          "maxMs": 2.42679999973916
+        },
+        "fetch:SELECT id, bank_id, subtype, name, source_query, content, tags, max_tokens, trigger, last_refreshed_at, created_at, reflect_response, structured_content FROM \"mental_models\" WHERE bank_id = $1 ORDER BY id": {
+          "calls": 8,
+          "milliseconds": 11.79130000036821,
+          "maxMs": 2.354899999772897
+        },
+        "fetch:SELECT id, bank_id, name, content, priority, is_active, tags, created_at, updated_at FROM \"directives\" WHERE bank_id = $1 ORDER BY id": {
+          "calls": 8,
+          "milliseconds": 8.049299999584036,
+          "maxMs": 1.8258999998579384
+        },
+        "fetch:SELECT DISTINCT ON (object_kind, object_id) object_kind, object_id, operation, object_revision FROM \"replication_logical_changes\" WHERE bank_id = $1 AND bank_generation = $2 AND object_kind != 'memory_unit' ORDER BY object_kind, object_id, cursor DESC": {
+          "calls": 8,
+          "milliseconds": 39.56060000018624,
+          "maxMs": 7.238899999720161
+        },
+        "fetchval:SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=to_regclass($1) AND attname='application_capture_required' AND attnum>0 AND NOT attisdropped)": {
+          "calls": 9,
+          "milliseconds": 8.431200000813988,
+          "maxMs": 1.4707000000271364
+        },
+        "fetchrow:SELECT provider_lineage,application_capture_required FROM \"replication_bank_state\" WHERE bank_id=$1 AND bank_generation=$2": {
+          "calls": 8,
+          "milliseconds": 5.899699999645236,
+          "maxMs": 1.040399999510555
+        },
+        "fetch:SELECT head FROM \"memory_application_native_heads\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 ORDER BY object_kind,object_id": {
+          "calls": 10,
+          "milliseconds": 76.98559999789722,
+          "maxMs": 15.053799999805051
+        },
+        "fetchrow:SELECT bank_id,provider_lineage,bank_generation,current_cursor,minimum_available_cursor,deleted_at FROM \"replication_bank_state\" WHERE bank_id=$1": {
+          "calls": 2,
+          "milliseconds": 2.528999998503423,
+          "maxMs": 1.5546999993603094
+        },
+        "fetchval:SELECT EXISTS(SELECT 1 FROM \"banks\" WHERE bank_id=$1)": {
+          "calls": 2,
+          "milliseconds": 1.6400000004068715,
+          "maxMs": 0.9763000007296796
+        },
+        "fetchval:SELECT application_capture_required FROM \"replication_bank_state\" WHERE bank_id=$1": {
+          "calls": 3,
+          "milliseconds": 2.194799998505914,
+          "maxMs": 0.9616999996069353
+        },
+        "fetchrow:SELECT native_cursor,state_cursor,minimum_state_cursor,baseline_native_cursor,initialized_at,deleted_at FROM \"memory_application_banks\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3": {
+          "calls": 4,
+          "milliseconds": 3.395200000340992,
+          "maxMs": 1.3134999999238062
+        },
+        "fetch:SELECT record FROM \"memory_application_artifacts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 ORDER BY artifact_kind,artifact_id,revision DESC": {
+          "calls": 2,
+          "milliseconds": 33.080499999414315,
+          "maxMs": 20.734499999889522
+        },
+        "fetchval:SELECT head FROM \"memory_application_native_heads\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND object_kind=$4 AND object_id=$5": {
+          "calls": 3522,
+          "milliseconds": 2542.2614999752113,
+          "maxMs": 2.2903999997652136
+        },
+        "fetch:SELECT * FROM (SELECT provider_lineage,bank_id,bank_generation,body_id,descriptor,state,expires_at, SUM(octet_length(descriptor)) OVER () AS batch_bytes, COUNT(*) OVER () AS batch_count FROM \"memory_application_bodies\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=ANY($4::uuid[])) batch WHERE batch_bytes<=$5 AND batch_count<=$6": {
+          "calls": 96,
+          "milliseconds": 243.0112999945777,
+          "maxMs": 5.615799999759474
+        },
+        "fetch:SELECT body_id,SUM(octet_length(data)) AS actual_bytes,COUNT(*) AS part_count FROM \"memory_application_body_parts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=ANY($4::uuid[]) GROUP BY body_id ORDER BY body_id": {
+          "calls": 96,
+          "milliseconds": 212.470100003884,
+          "maxMs": 5.406999999649997
+        },
+        "fetch:SELECT * FROM (SELECT provider_lineage,bank_id,bank_generation,body_id,part_number,part_sha256,data, SUM(octet_length(data)) OVER () AS batch_bytes,COUNT(*) OVER () AS batch_count FROM \"memory_application_body_parts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=ANY($4::uuid[])) batch WHERE batch_bytes<=$5 AND batch_count<=$6 ORDER BY body_id,part_number": {
+          "calls": 96,
+          "milliseconds": 336.94590000050084,
+          "maxMs": 4.815599999346887
+        },
+        "fetchrow:SELECT id, bank_id, name, content, priority, is_active, tags, created_at, updated_at FROM \"directives\" WHERE bank_id = $1 AND id = $2": {
+          "calls": 2,
+          "milliseconds": 1.718399998935638,
+          "maxMs": 0.9170999992420548
+        },
+        "fetchrow:SELECT id, bank_id, content_hash, tags, retain_params, created_at, updated_at FROM \"documents\" WHERE id = $1 AND bank_id = $2": {
+          "calls": 1124,
+          "milliseconds": 776.603300001625,
+          "maxMs": 1.4529999998558196
+        },
+        "fetchrow:SELECT descriptor,state,expires_at FROM \"memory_application_bodies\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=$4": {
+          "calls": 1393,
+          "milliseconds": 1016.9589999868549,
+          "maxMs": 1.4043000001038308
+        },
+        "fetch:SELECT part_number,part_sha256,data FROM \"memory_application_body_parts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=$4 ORDER BY part_number": {
+          "calls": 1393,
+          "milliseconds": 932.2383999860904,
+          "maxMs": 1.403599999321159
+        },
+        "fetchrow:SELECT original_text,retain_params FROM \"documents\" WHERE bank_id=$1 AND id=$2": {
+          "calls": 1124,
+          "milliseconds": 778.3660999984932,
+          "maxMs": 1.205600000503182
+        },
+        "fetchrow:SELECT id, bank_id, document_id, chunk_id, text, context, fact_type, revision, tags, metadata, source_memory_ids, observation_scopes, event_date, occurred_start, occurred_end, mentioned_at, created_at, updated_at, edited_at, consolidated_at, consolidation_failed_at, proof_count , NULL::uuid[] AS entity_ids, NULL::text AS invalidation_reason, NULL::timestamptz AS invalidated_at FROM \"memory_units\" WHERE id = $1 AND bank_id = $2": {
+          "calls": 2280,
+          "milliseconds": 2095.6647999928464,
+          "maxMs": 1.8647999995664577
+        },
+        "fetch:SELECT e.canonical_name FROM \"unit_entities\" ue JOIN \"entities\" e ON e.id = ue.entity_id WHERE ue.unit_id = $1 AND e.bank_id = $2 ORDER BY e.canonical_name, e.id": {
+          "calls": 2040,
+          "milliseconds": 1615.9445999792297,
+          "maxMs": 1.4690999996673781
+        },
+        "fetchrow:SELECT id, bank_id, document_id, chunk_id, text, context, fact_type, revision, tags, metadata, source_memory_ids, observation_scopes, event_date, occurred_start, occurred_end, mentioned_at, created_at, updated_at, edited_at, consolidated_at, consolidation_failed_at, proof_count , entity_ids, invalidation_reason, invalidated_at FROM \"invalidated_memory_units\" WHERE id = $1 AND bank_id = $2": {
+          "calls": 240,
+          "milliseconds": 191.4680999916527,
+          "maxMs": 1.3472000000547268
+        },
+        "fetchrow:SELECT id, bank_id, subtype, name, source_query, content, tags, max_tokens, trigger, last_refreshed_at, created_at, reflect_response, structured_content FROM \"mental_models\" WHERE bank_id = $1 AND id = $2": {
+          "calls": 2,
+          "milliseconds": 1.5740999997433391,
+          "maxMs": 0.8342999999513268
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"banks\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 3.3903000003192574,
+          "maxMs": 1.7281999998886022
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"documents\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 27.81949999916833,
+          "maxMs": 13.929799999459647
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"chunks\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.957300000161922,
+          "maxMs": 1.9069999998464482
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"memory_units\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 284.93859999980486,
+          "maxMs": 145.56240000001708
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"invalidated_memory_units\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 8.592499999394931,
+          "maxMs": 4.557199999908335
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"entities\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 1.6722999998819432,
+          "maxMs": 0.9077000004253932
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"observation_history\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 7.257999999637832,
+          "maxMs": 3.7978000000293832
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"mental_models\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.524499999708496,
+          "maxMs": 1.3343999999051448
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"mental_model_history\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.187000000049011,
+          "maxMs": 1.1972000002060668
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"knowledge_pages\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.1130999994056765,
+          "maxMs": 1.144400000157475
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"directives\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 1.3261999984024442,
+          "maxMs": 0.7628999992448371
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"graph_maintenance_queue\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.263899999888963,
+          "maxMs": 1.5079000004334375
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"memory_mutation_receipts\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 1.6359999999622232,
+          "maxMs": 0.9551000002829824
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"memory_native_operation_receipts\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 1.9845000006171176,
+          "maxMs": 1.3218000003689667
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"memory_retain_part_receipts\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 1.7338000006930088,
+          "maxMs": 1.0317000005670707
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"memory_transition_initializations\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 1.6729000008126604,
+          "maxMs": 1.1165000005348702
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"unit_entities\" t WHERE EXISTS(SELECT 1 FROM \"entities\" e WHERE e.id=t.entity_id AND e.bank_id=$1) ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 1.476300000831543,
+          "maxMs": 0.8279000003312831
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"entity_cooccurrences\" t WHERE EXISTS(SELECT 1 FROM \"entities\" e WHERE e.id=t.entity_id_1 AND e.bank_id=$1) ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.5833999998212676,
+          "maxMs": 1.7068999995899503
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"memory_links\" t WHERE t.bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 878.3256999995501,
+          "maxMs": 440.03040000006877
+        },
+        "fetch:SELECT * FROM \"chunks\" WHERE bank_id=$1": {
+          "calls": 2,
+          "milliseconds": 2.2228000007089577,
+          "maxMs": 1.2317000000621192
+        },
+        "fetchval:SELECT record FROM \"memory_application_artifacts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND artifact_kind=$4 AND artifact_id=$5 AND revision=$6 ORDER BY revision DESC LIMIT 1": {
+          "calls": 272,
+          "milliseconds": 212.95470000950445,
+          "maxMs": 1.518699999905948
+        },
+        "fetch:SELECT DISTINCT ON (artifact_kind,artifact_id) record FROM \"memory_application_artifacts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 ORDER BY artifact_kind,artifact_id,revision DESC": {
+          "calls": 3,
+          "milliseconds": 32.135300000845746,
+          "maxMs": 11.04360000044835
+        },
+        "fetchrow:SELECT config FROM public.banks WHERE bank_id = $1": {
+          "calls": 1,
+          "milliseconds": 0.7064000001264503,
+          "maxMs": 0.7064000001264503
+        },
+        "fetchrow:SELECT s.provider_lineage,s.bank_generation,s.deleted_at,f.transition_id FROM \"replication_bank_state\" s JOIN \"memory_transition_fences\" f USING(bank_id) WHERE s.bank_id=$1": {
+          "calls": 1,
+          "milliseconds": 1.6850000001795706,
+          "maxMs": 1.6850000001795706
+        },
+        "fetchrow:UPDATE \"memory_transition_requests\" SET lease_expires_at=clock_timestamp()+$3::interval WHERE bank_id=$1 AND transition_id=$2 AND lease_expires_at>clock_timestamp() RETURNING *": {
+          "calls": 1,
+          "milliseconds": 3.1599000003552646,
+          "maxMs": 3.1599000003552646
+        },
+        "fetchval:SELECT current_cursor FROM \"replication_bank_state\" WHERE bank_id=$1": {
+          "calls": 1,
+          "milliseconds": 0.6139000006442075,
+          "maxMs": 0.6139000006442075
+        },
+        "fetch:SELECT DISTINCT from_unit_id FROM \"memory_links\" WHERE to_unit_id = ANY($1::uuid[]) AND bank_id = $2 AND link_type IN ('temporal', 'semantic')": {
+          "calls": 1,
+          "milliseconds": 5.701100000806036,
+          "maxMs": 5.701100000806036
+        },
+        "execute:INSERT INTO \"graph_maintenance_queue\" (bank_id, unit_id) SELECT $1, v FROM unnest($2::uuid[]) AS t(v) ON CONFLICT (bank_id, unit_id) DO UPDATE SET enqueued_at = \"graph_maintenance_queue\".enqueued_at": {
+          "calls": 1,
+          "milliseconds": 50.920500000756874,
+          "maxMs": 50.920500000756874
+        },
+        "fetch:WITH input_data AS ( SELECT * FROM unnest( $2::text[], $3::vector[], $4::timestamptz[], $5::timestamptz[], $6::timestamptz[], $7::timestamptz[], $8::text[], $9::text[], $10::jsonb[], $11::text[], $12::text[], $13::jsonb[], $14::jsonb[], $15::text[] ) AS t(text, embedding, event_date, occurred_start, occurred_end, mentioned_at, context, fact_type, metadata, chunk_id, document_id, tags_json, observation_scopes_json, text_signals) ) INSERT INTO public.memory_units (bank_id, text, embedding, event_date, occurred_start, occurred_end, mentioned_at, context, fact_type, metadata, chunk_id, document_id, tags, observation_scopes, text_signals, search_vector) SELECT $1, text, embedding, event_date, occurred_start, occurred_end, mentioned_at, context, fact_type, metadata, chunk_id, document_id, COALESCE( (SELECT array_agg(elem) FROM jsonb_array_elements_text(tags_json) AS elem), '{}'::varchar[] ), observation_scopes_json, text_signals, to_tsvector('english'::regconfig, COALESCE(text, '') || ' ' || COALESCE(context, '') || ' ' || COALESCE(text_signals, '')) FROM input_data RETURNING id": {
+          "calls": 1,
+          "milliseconds": 111.42879999988509,
+          "maxMs": 111.42879999988509
+        },
+        "fetchval:SELECT 1 FROM \"memory_units\" WHERE bank_id=$1 AND id=$2::uuid": {
+          "calls": 68,
+          "milliseconds": 47.92329999781941,
+          "maxMs": 1.3875000004190952
+        },
+        "execute:UPDATE \"memory_units\" target SET text=prepared.text,embedding=prepared.embedding,event_date=prepared.event_date,occurred_start=prepared.occurred_start,occurred_end=prepared.occurred_end,mentioned_at=prepared.mentioned_at,context=prepared.context,fact_type=prepared.fact_type,metadata=prepared.metadata,chunk_id=prepared.chunk_id,document_id=prepared.document_id,tags=prepared.tags,observation_scopes=prepared.observation_scopes,text_signals=prepared.text_signals,search_vector=prepared.search_vector,revision=$4 FROM \"memory_units\" prepared WHERE target.bank_id=$1 AND target.id=$2::uuid AND prepared.bank_id=$1 AND prepared.id=$3::uuid": {
+          "calls": 68,
+          "milliseconds": 158.87539999675937,
+          "maxMs": 3.3907999995790306
+        },
+        "execute:DELETE FROM \"memory_units\" WHERE bank_id=$1 AND id=$2::uuid": {
+          "calls": 68,
+          "milliseconds": 88.87180000238004,
+          "maxMs": 1.8022000003838912
+        },
+        "execute:DELETE FROM \"unit_entities\" WHERE unit_id=$1::uuid": {
+          "calls": 68,
+          "milliseconds": 41.07820000626816,
+          "maxMs": 0.9950000003300374
+        },
+        "execute:DELETE FROM \"memory_links\" WHERE bank_id=$1 AND (from_unit_id=ANY($2::uuid[]) OR to_unit_id=ANY($2::uuid[])) AND link_type IN ('temporal','semantic')": {
+          "calls": 1,
+          "milliseconds": 4079.4968000000154,
+          "maxMs": 4079.4968000000154
+        },
+        "executemany:UPDATE \"memory_units\" SET created_at=$3, updated_at=$4, edited_at=$5, consolidated_at=$6, consolidation_failed_at=$7, source_memory_ids=$8::uuid[], proof_count=$9 WHERE bank_id=$1 AND id=$2::uuid": {
+          "calls": 1,
+          "milliseconds": 77.5668999995105,
+          "maxMs": 77.5668999995105
+        },
+        "fetch:SELECT a.attname FROM pg_attribute a WHERE a.attrelid = '\"memory_units\"'::regclass AND a.attnum > 0 AND NOT a.attisdropped ORDER BY a.attnum": {
+          "calls": 68,
+          "milliseconds": 53.5187000004953,
+          "maxMs": 1.228300000548188
+        },
+        "fetch:SELECT entity_id FROM \"unit_entities\" WHERE unit_id = $1": {
+          "calls": 68,
+          "milliseconds": 46.02110000087123,
+          "maxMs": 1.028099999530241
+        },
+        "fetch:SELECT from_unit_id, to_unit_id, link_type, weight FROM public.memory_links WHERE (from_unit_id = $1 OR to_unit_id = $1) AND bank_id = $2 AND link_type = ANY($3::text[]) UNION SELECT d.from_unit_id, d.to_unit_id, d.link_type, d.weight FROM public.invalidated_memory_units a CROSS JOIN LATERAL jsonb_to_recordset(a.causal_links) AS d(from_unit_id uuid, to_unit_id uuid, link_type text, weight float8) WHERE a.bank_id = $2 AND a.causal_links <> '[]'::jsonb AND (d.from_unit_id = $1 OR d.to_unit_id = $1) -- Same guard as CausalLinkDescriptor.from_json_dict: the column is -- schemaless JSON, and a malformed entry would otherwise be copied -- forward as a NULL-endpoint descriptor. AND d.from_unit_id IS NOT NULL AND d.to_unit_id IS NOT NULL AND d.link_type = ANY($3::text[])": {
+          "calls": 68,
+          "milliseconds": 83.6812999959875,
+          "maxMs": 1.7969999998967978
+        },
+        "fetchval:INSERT INTO \"invalidated_memory_units\" (\"id\", \"bank_id\", \"document_id\", \"text\", \"context\", \"event_date\", \"occurred_start\", \"occurred_end\", \"mentioned_at\", \"fact_type\", \"metadata\", \"created_at\", \"updated_at\", \"chunk_id\", \"tags\", \"proof_count\", \"source_memory_ids\", \"consolidated_at\", \"observation_scopes\", \"text_signals\", \"consolidation_failed_at\", \"edited_at\", \"revision\", invalidation_reason, invalidated_at, entity_ids, causal_links) SELECT \"id\", \"bank_id\", \"document_id\", \"text\", \"context\", \"event_date\", \"occurred_start\", \"occurred_end\", \"mentioned_at\", \"fact_type\", \"metadata\", \"created_at\", \"updated_at\", \"chunk_id\", \"tags\", \"proof_count\", \"source_memory_ids\", \"consolidated_at\", \"observation_scopes\", \"text_signals\", \"consolidation_failed_at\", \"edited_at\", \"revision\", $2, now(), $3::uuid[], $5::jsonb FROM \"memory_units\" WHERE id = $1 AND bank_id = $4 RETURNING id": {
+          "calls": 68,
+          "milliseconds": 96.28409999913856,
+          "maxMs": 2.5826999999480904
+        },
+        "execute:DELETE FROM \"memory_units\" WHERE id = $1 AND bank_id = $2": {
+          "calls": 68,
+          "milliseconds": 95.90519999255775,
+          "maxMs": 1.7590999996173196
+        },
+        "execute:UPDATE \"invalidated_memory_units\" SET invalidated_at=$3 WHERE bank_id=$1 AND id=$2::uuid": {
+          "calls": 68,
+          "milliseconds": 76.37070000146196,
+          "maxMs": 1.4430000001084409
+        },
+        "fetchrow:UPDATE \"replication_bank_state\" SET current_cursor = current_cursor + $2, updated_at = clock_timestamp() WHERE bank_id = $1 RETURNING provider_lineage, bank_generation, current_cursor": {
+          "calls": 1,
+          "milliseconds": 1.7523999995319173,
+          "maxMs": 1.7523999995319173
+        },
+        "execute:INSERT INTO \"replication_logical_changes\" ( bank_id, cursor, provider_lineage, bank_generation, batch_id, batch_index, batch_size, object_kind, object_id, operation, object_revision, payload ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb)": {
+          "calls": 68,
+          "milliseconds": 79.9468999985038,
+          "maxMs": 2.674900000783964
+        },
+        "fetchrow:SELECT native_cursor,state_cursor,minimum_state_cursor,baseline_native_cursor,initialized_at,deleted_at FROM \"memory_application_banks\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 FOR UPDATE": {
+          "calls": 3,
+          "milliseconds": 2.369599999838101,
+          "maxMs": 1.1721000000761705
+        },
+        "execute:INSERT INTO \"memory_application_bodies\" (provider_lineage,bank_id,bank_generation,body_id,body_schema,descriptor,state,expires_at) VALUES ($1,$2,$3,$4,$5,$6,'sealed',NULL)": {
+          "calls": 183,
+          "milliseconds": 194.6741000028851,
+          "maxMs": 1.9702999998116866
+        },
+        "execute:INSERT INTO \"memory_application_body_parts\" (provider_lineage,bank_id,bank_generation,body_id,part_number,part_sha256,data) VALUES ($1,$2,$3,$4,$5,$6,$7)": {
+          "calls": 184,
+          "milliseconds": 197.10399999985384,
+          "maxMs": 8.589399999436864
+        },
+        "execute:INSERT INTO \"memory_application_native_heads\" (provider_lineage,bank_id,bank_generation,object_kind,object_id,head) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (provider_lineage,bank_id,bank_generation,object_kind,object_id) DO UPDATE SET head=EXCLUDED.head": {
+          "calls": 180,
+          "milliseconds": 199.63510000070528,
+          "maxMs": 2.231200000096578
+        },
+        "fetchval:SELECT current_setting($1,true)": {
+          "calls": 2,
+          "milliseconds": 1.1254999990342185,
+          "maxMs": 0.6914999994478421
+        },
+        "fetchval:SELECT set_config($1,$2,true)": {
+          "calls": 1,
+          "milliseconds": 0.3727000002982095,
+          "maxMs": 0.3727000002982095
+        },
+        "execute:INSERT INTO \"memory_application_changes\" (provider_lineage,bank_id,bank_generation,state_cursor,manifest,page_refs) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (provider_lineage,bank_id,bank_generation,state_cursor) DO UPDATE SET manifest=EXCLUDED.manifest,page_refs=EXCLUDED.page_refs": {
+          "calls": 2,
+          "milliseconds": 3.624599999966449,
+          "maxMs": 2.217700000073819
+        },
+        "execute:UPDATE \"memory_application_banks\" SET native_cursor=$4,state_cursor=$5, deleted_at=CASE WHEN $6 THEN COALESCE(deleted_at,clock_timestamp()) ELSE deleted_at END WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3": {
+          "calls": 2,
+          "milliseconds": 2.836199999364908,
+          "maxMs": 1.545099999930244
+        },
+        "execute:INSERT INTO \"memory_application_artifacts\" (provider_lineage,bank_id,bank_generation,artifact_kind,artifact_id,revision,record_hash,body_id,record) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)": {
+          "calls": 113,
+          "milliseconds": 122.30810000801284,
+          "maxMs": 2.226100000370934
+        },
+        "fetch:SELECT DISTINCT ON (artifact_kind,artifact_id) record FROM \"memory_application_artifacts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND artifact_kind=$4 ORDER BY artifact_kind,artifact_id,revision DESC": {
+          "calls": 1,
+          "milliseconds": 0.6881999997858657,
+          "maxMs": 0.6881999997858657
+        },
+        "fetchrow:SELECT manifest,page_refs FROM \"memory_application_changes\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND state_cursor=$4": {
+          "calls": 1,
+          "milliseconds": 0.7697000000916887,
+          "maxMs": 0.7697000000916887
+        },
+        "execute:INSERT INTO \"memory_transition_deltas\" (bank_id,transition_id,operation_id,request_hash,request,result) VALUES($1,$2,$3,$4,$5::jsonb,$6::jsonb)": {
+          "calls": 1,
+          "milliseconds": 192.61629999982688,
+          "maxMs": 192.61629999982688
+        },
+        "fetchval:SELECT count(*) FROM memory_transition_deltas WHERE transition_id=$1 AND operation_id=$2 AND request_hash=$3": {
+          "calls": 1,
+          "milliseconds": 1.1469000000943197,
+          "maxMs": 1.1469000000943197
+        }
+      },
+      "sampledApplyAndLookup": {
+        "samples": 127,
+        "wallSeconds": 63.96799999999985,
+        "workerCpuSeconds": 81.296875,
+        "systemBusyPercent": 13.110251120090826,
+        "readBytes": 2793759,
+        "writeBytes": 3258,
+        "pageFaults": 636886,
+        "maximumWorkingSet": 1217544192
+      }
+    },
+    "2e081d2289694da987c48eb7455690a2": {
+      "resultSha256": "d8772db72496b14a7bbf2cb238e253898404988e8be986d7a115459c81e5833a",
+      "fullApplyMilliseconds": 60544.34039999978,
+      "encoding": [
+        {
+          "inputs": 68,
+          "completed": true,
+          "milliseconds": 3227.209300002869
+        }
+      ],
+      "stages": [
+        {
+          "name": "normal-clone-claim",
+          "path": [
+            "normal-clone-claim"
+          ],
+          "completed": true,
+          "milliseconds": 21.278699998219963
+        },
+        {
+          "name": "full-apply",
+          "path": [
+            "full-apply"
+          ],
+          "completed": true,
+          "milliseconds": 60544.34039999978
+        },
+        {
+          "name": "admit",
+          "path": [
+            "full-apply",
+            "admit"
+          ],
+          "completed": true,
+          "milliseconds": 16680.664700001216
+        },
+        {
+          "name": "baseline",
+          "path": [
+            "full-apply",
+            "admit",
+            "baseline"
+          ],
+          "completed": true,
+          "milliseconds": 16609.37329999797
+        },
+        {
+          "name": "preflight_transition_delta",
+          "path": [
+            "full-apply",
+            "preflight_transition_delta"
+          ],
+          "completed": true,
+          "milliseconds": 1419.180500000948
+        },
+        {
+          "name": "application-predecessors",
+          "path": [
+            "full-apply",
+            "application-predecessors"
+          ],
+          "completed": true,
+          "milliseconds": 3115.254600001208
+        },
+        {
+          "name": "prepare_current_state_rows",
+          "path": [
+            "full-apply",
+            "prepare_current_state_rows"
+          ],
+          "completed": true,
+          "milliseconds": 3235.5080999986967
+        },
+        {
+          "name": "admit",
+          "path": [
+            "full-apply",
+            "admit"
+          ],
+          "completed": true,
+          "milliseconds": 16582.419400001527
+        },
+        {
+          "name": "baseline",
+          "path": [
+            "full-apply",
+            "admit",
+            "baseline"
+          ],
+          "completed": true,
+          "milliseconds": 16508.033400001295
+        },
+        {
+          "name": "native-renewal",
+          "path": [
+            "full-apply",
+            "native-renewal"
+          ],
+          "completed": true,
+          "milliseconds": 23.58000000094762
+        },
+        {
+          "name": "preflight_transition_delta",
+          "path": [
+            "full-apply",
+            "preflight_transition_delta"
+          ],
+          "completed": true,
+          "milliseconds": 1281.4682999996876
+        },
+        {
+          "name": "write_transition_native_delta",
+          "path": [
+            "full-apply",
+            "write_transition_native_delta"
+          ],
+          "completed": true,
+          "milliseconds": 7397.50819999972
+        },
+        {
+          "name": "write_transition_application_delta",
+          "path": [
+            "full-apply",
+            "write_transition_application_delta"
+          ],
+          "completed": true,
+          "milliseconds": 9829.010800000106
+        },
+        {
+          "name": "application-predecessors",
+          "path": [
+            "full-apply",
+            "write_transition_application_delta",
+            "application-predecessors"
+          ],
+          "completed": true,
+          "milliseconds": 3356.238399999711
+        },
+        {
+          "name": "native-renewal",
+          "path": [
+            "full-apply",
+            "native-renewal"
+          ],
+          "completed": true,
+          "milliseconds": 8.866699998179683
+        },
+        {
+          "name": "exact-lookup",
+          "path": [
+            "exact-lookup"
+          ],
+          "completed": true,
+          "milliseconds": 905.2588999984437
+        }
+      ],
+      "sqlCalls": 13388,
+      "sqlMilliseconds": 23121.571200012113,
+      "sql": {
+        "fetchrow:SELECT actor_hash,revision,generation,phase,lease_expires_at<clock_timestamp() expired FROM memory_transition_requests WHERE bank_id=$1 AND transition_id=$2": {
+          "calls": 1,
+          "milliseconds": 7.533500000135973,
+          "maxMs": 7.533500000135973
+        },
+        "fetchval:SELECT count(*) FROM memory_transition_deltas WHERE transition_id=$1 OR operation_id=$2": {
+          "calls": 1,
+          "milliseconds": 2.2671000006084796,
+          "maxMs": 2.2671000006084796
+        },
+        "fetch:SELECT to_jsonb(t)::text AS body FROM memory_transition_steps t WHERE state='complete'": {
+          "calls": 2,
+          "milliseconds": 3304.337300000043,
+          "maxMs": 1719.3469000012556
+        },
+        "fetch:SELECT to_jsonb(t)::text AS body FROM memory_transition_actions t": {
+          "calls": 2,
+          "milliseconds": 38.57060000154888,
+          "maxMs": 19.66800000082003
+        },
+        "fetchval:SELECT vector_dims(embedding) FROM memory_units WHERE bank_id=$1 AND embedding IS NOT NULL LIMIT 1": {
+          "calls": 1,
+          "milliseconds": 8.646499998576473,
+          "maxMs": 8.646499998576473
+        },
+        "fetchval:SELECT provider_lineage FROM \"replication_provider_lineage\" WHERE singleton = TRUE": {
+          "calls": 4,
+          "milliseconds": 5.038300001615426,
+          "maxMs": 2.595800000563031
+        },
+        "execute:INSERT INTO \"replication_bank_state\" (bank_id, provider_lineage) VALUES ($1, $2) ON CONFLICT (bank_id) DO NOTHING": {
+          "calls": 4,
+          "milliseconds": 4.428200005349936,
+          "maxMs": 1.3548999995691702
+        },
+        "fetchrow:SELECT bank_id, provider_lineage, bank_generation, current_cursor, minimum_available_cursor, deleted_at FROM \"replication_bank_state\" WHERE bank_id = $1": {
+          "calls": 10,
+          "milliseconds": 23.361599993222626,
+          "maxMs": 7.785399997374043
+        },
+        "fetchrow:SELECT bank_id, provider_lineage, bank_generation, current_cursor, minimum_available_cursor, deleted_at FROM \"replication_bank_state\" WHERE bank_id = $1 FOR UPDATE": {
+          "calls": 4,
+          "milliseconds": 4.876399998465786,
+          "maxMs": 1.6370999983337242
+        },
+        "fetchrow:SELECT * FROM \"memory_bank_maintenance\" WHERE bank_id=$1 FOR UPDATE": {
+          "calls": 3,
+          "milliseconds": 4.2452000016055536,
+          "maxMs": 1.5122000004339498
+        },
+        "fetchval:SELECT clock_timestamp()": {
+          "calls": 15,
+          "milliseconds": 12.498499996581813,
+          "maxMs": 1.554400001623435
+        },
+        "execute:INSERT INTO \"memory_transition_fences\"(bank_id) VALUES($1) ON CONFLICT DO NOTHING": {
+          "calls": 3,
+          "milliseconds": 2.659100002347259,
+          "maxMs": 1.0378000006312504
+        },
+        "fetchrow:SELECT * FROM \"memory_transition_fences\" WHERE bank_id=$1 FOR UPDATE": {
+          "calls": 3,
+          "milliseconds": 3.174699999362929,
+          "maxMs": 1.2739000012516044
+        },
+        "fetchrow:SELECT * FROM \"memory_transition_requests\" WHERE bank_id=$1 AND transition_id=$2 FOR NO KEY UPDATE": {
+          "calls": 3,
+          "milliseconds": 5.576900002779439,
+          "maxMs": 3.673700000945246
+        },
+        "fetchrow:UPDATE \"memory_transition_requests\" SET generation=generation+1,revision=revision+1,attempt_id=$3,fence_token=$4,lease_expires_at=$5 WHERE bank_id=$1 AND transition_id=$2 RETURNING *": {
+          "calls": 1,
+          "milliseconds": 2.1075000004202593,
+          "maxMs": 2.1075000004202593
+        },
+        "execute:INSERT INTO \"memory_transition_history\"(bank_id,transition_id,revision,event,event_hash) VALUES($1,$2,$3,$4::jsonb,$5)": {
+          "calls": 1,
+          "milliseconds": 1.6304999990097713,
+          "maxMs": 1.6304999990097713
+        },
+        "fetchval:SELECT count(*) FROM \"memory_transition_writers\" WHERE bank_id=$1 AND state='running' AND lease_expires_at>$2": {
+          "calls": 7,
+          "milliseconds": 8.924899997509783,
+          "maxMs": 2.4972999999590684
+        },
+        "fetchval:SELECT count(*) FROM \"async_operations\" WHERE bank_id=$1 AND status IN ('pending','processing')": {
+          "calls": 7,
+          "milliseconds": 11.614199996984098,
+          "maxMs": 4.093499999726191
+        },
+        "fetchrow:SELECT * FROM \"memory_transition_requests\" WHERE bank_id=$1 AND transition_id=$2": {
+          "calls": 6,
+          "milliseconds": 8.252299998275703,
+          "maxMs": 1.8061000009765849
+        },
+        "fetchrow:SELECT * FROM \"memory_transition_deltas\" WHERE bank_id=$1 AND transition_id=$2": {
+          "calls": 3,
+          "milliseconds": 53.14509999516304,
+          "maxMs": 51.64589999913005
+        },
+        "fetchrow:SELECT revision,event,event_hash FROM \"memory_transition_history\" WHERE bank_id=$1 AND transition_id=$2 AND event->($3::text)->>($4::text)=$5 ORDER BY revision LIMIT 1": {
+          "calls": 4,
+          "milliseconds": 14.842600005067652,
+          "maxMs": 4.521200000453973
+        },
+        "execute:SET LOCAL TIME ZONE 'UTC'": {
+          "calls": 2,
+          "milliseconds": 4.786199999216478,
+          "maxMs": 4.308600000513252
+        },
+        "fetchrow:SELECT bank_id, name, disposition, mission, COALESCE(config, '{}'::jsonb) AS config, created_at, updated_at FROM \"banks\" WHERE bank_id = $1": {
+          "calls": 6,
+          "milliseconds": 6.586600000446197,
+          "maxMs": 1.4264999990700744
+        },
+        "fetch:SELECT id, bank_id, content_hash, tags, retain_params, created_at, updated_at FROM \"documents\" WHERE bank_id = $1 ORDER BY id": {
+          "calls": 6,
+          "milliseconds": 54.58159999761847,
+          "maxMs": 23.785400000633672
+        },
+        "fetch:SELECT id, bank_id, document_id, chunk_id, text, context, fact_type, revision, tags, metadata, source_memory_ids, observation_scopes, event_date, occurred_start, occurred_end, mentioned_at, created_at, updated_at, edited_at, consolidated_at, consolidation_failed_at, proof_count , NULL::uuid[] AS entity_ids, NULL::text AS invalidation_reason, NULL::timestamptz AS invalidated_at FROM \"memory_units\" WHERE bank_id = $1 ORDER BY id": {
+          "calls": 6,
+          "milliseconds": 81.727899996622,
+          "maxMs": 26.997299999493407
+        },
+        "fetch:SELECT id, bank_id, document_id, chunk_id, text, context, fact_type, revision, tags, metadata, source_memory_ids, observation_scopes, event_date, occurred_start, occurred_end, mentioned_at, created_at, updated_at, edited_at, consolidated_at, consolidation_failed_at, proof_count , entity_ids, invalidation_reason, invalidated_at FROM \"invalidated_memory_units\" WHERE bank_id = $1 ORDER BY id": {
+          "calls": 6,
+          "milliseconds": 15.555499994661659,
+          "maxMs": 3.917499998351559
+        },
+        "fetch:SELECT ue.unit_id, e.id AS entity_id, e.canonical_name FROM \"unit_entities\" ue JOIN \"memory_units\" mu ON mu.id = ue.unit_id JOIN \"entities\" e ON e.id = ue.entity_id WHERE mu.bank_id = $1 AND e.bank_id = $1 ORDER BY ue.unit_id, e.canonical_name, e.id": {
+          "calls": 6,
+          "milliseconds": 13.475399999151705,
+          "maxMs": 5.079099999420578
+        },
+        "fetch:SELECT id, bank_id, subtype, name, source_query, content, tags, max_tokens, trigger, last_refreshed_at, created_at, reflect_response, structured_content FROM \"mental_models\" WHERE bank_id = $1 ORDER BY id": {
+          "calls": 6,
+          "milliseconds": 11.541300002136268,
+          "maxMs": 3.56380000084755
+        },
+        "fetch:SELECT id, bank_id, name, content, priority, is_active, tags, created_at, updated_at FROM \"directives\" WHERE bank_id = $1 ORDER BY id": {
+          "calls": 6,
+          "milliseconds": 7.8911000018706545,
+          "maxMs": 2.269900000101188
+        },
+        "fetch:SELECT DISTINCT ON (object_kind, object_id) object_kind, object_id, operation, object_revision FROM \"replication_logical_changes\" WHERE bank_id = $1 AND bank_generation = $2 AND object_kind != 'memory_unit' ORDER BY object_kind, object_id, cursor DESC": {
+          "calls": 6,
+          "milliseconds": 32.15390000332263,
+          "maxMs": 8.205800000723684
+        },
+        "fetchval:SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=to_regclass($1) AND attname='application_capture_required' AND attnum>0 AND NOT attisdropped)": {
+          "calls": 7,
+          "milliseconds": 8.620199994766153,
+          "maxMs": 1.5349000022979453
+        },
+        "fetchrow:SELECT provider_lineage,application_capture_required FROM \"replication_bank_state\" WHERE bank_id=$1 AND bank_generation=$2": {
+          "calls": 6,
+          "milliseconds": 5.217100002482766,
+          "maxMs": 1.169099999970058
+        },
+        "fetch:SELECT head FROM \"memory_application_native_heads\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 ORDER BY object_kind,object_id": {
+          "calls": 6,
+          "milliseconds": 51.54690000563278,
+          "maxMs": 15.638299999409355
+        },
+        "fetchrow:SELECT bank_id,provider_lineage,bank_generation,current_cursor,minimum_available_cursor,deleted_at FROM \"replication_bank_state\" WHERE bank_id=$1": {
+          "calls": 2,
+          "milliseconds": 2.880100000766106,
+          "maxMs": 1.9173000000591855
+        },
+        "fetchval:SELECT EXISTS(SELECT 1 FROM \"banks\" WHERE bank_id=$1)": {
+          "calls": 2,
+          "milliseconds": 2.478599999449216,
+          "maxMs": 1.649800000450341
+        },
+        "fetchval:SELECT application_capture_required FROM \"replication_bank_state\" WHERE bank_id=$1": {
+          "calls": 3,
+          "milliseconds": 3.126600000541657,
+          "maxMs": 1.3390999993134756
+        },
+        "fetchrow:SELECT native_cursor,state_cursor,minimum_state_cursor,baseline_native_cursor,initialized_at,deleted_at FROM \"memory_application_banks\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3": {
+          "calls": 4,
+          "milliseconds": 4.081499995663762,
+          "maxMs": 1.1463000009825919
+        },
+        "fetch:SELECT object_kind,object_id,head FROM \"memory_application_native_heads\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 ORDER BY object_kind,object_id": {
+          "calls": 2,
+          "milliseconds": 14.957999999751337,
+          "maxMs": 7.522200001403689
+        },
+        "fetch:SELECT record FROM \"memory_application_artifacts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 ORDER BY artifact_kind,artifact_id,revision DESC": {
+          "calls": 2,
+          "milliseconds": 34.27989999909187,
+          "maxMs": 20.92149999953108
+        },
+        "fetch:SELECT * FROM (SELECT provider_lineage,bank_id,bank_generation,body_id,descriptor,state,expires_at, SUM(octet_length(descriptor)) OVER () AS batch_bytes, COUNT(*) OVER () AS batch_count FROM \"memory_application_bodies\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=ANY($4::uuid[])) batch WHERE batch_bytes<=$5 AND batch_count<=$6": {
+          "calls": 72,
+          "milliseconds": 217.4819999781903,
+          "maxMs": 7.458899999619462
+        },
+        "fetch:SELECT body_id,SUM(octet_length(data)) AS actual_bytes,COUNT(*) AS part_count FROM \"memory_application_body_parts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=ANY($4::uuid[]) GROUP BY body_id ORDER BY body_id": {
+          "calls": 72,
+          "milliseconds": 187.482600005751,
+          "maxMs": 7.731600002443884
+        },
+        "fetch:SELECT * FROM (SELECT provider_lineage,bank_id,bank_generation,body_id,part_number,part_sha256,data, SUM(octet_length(data)) OVER () AS batch_bytes,COUNT(*) OVER () AS batch_count FROM \"memory_application_body_parts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=ANY($4::uuid[])) batch WHERE batch_bytes<=$5 AND batch_count<=$6 ORDER BY body_id,part_number": {
+          "calls": 72,
+          "milliseconds": 296.50949998540455,
+          "maxMs": 7.769700001517776
+        },
+        "fetchrow:SELECT descriptor,state,expires_at FROM \"memory_application_bodies\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=$4": {
+          "calls": 4517,
+          "milliseconds": 4092.7620000256866,
+          "maxMs": 2.9648000017914455
+        },
+        "fetch:SELECT part_number,part_sha256,data FROM \"memory_application_body_parts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=$4 ORDER BY part_number": {
+          "calls": 4517,
+          "milliseconds": 3966.232900005707,
+          "maxMs": 2.4587000007159077
+        },
+        "fetchrow:SELECT original_text,retain_params FROM \"documents\" WHERE bank_id=$1 AND id=$2": {
+          "calls": 1124,
+          "milliseconds": 953.6155999303446,
+          "maxMs": 1.9447999984549824
+        },
+        "fetchval:SELECT head FROM \"memory_application_native_heads\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND object_kind=$4 AND object_id=$5": {
+          "calls": 440,
+          "milliseconds": 426.2421000748873,
+          "maxMs": 1.997699997446034
+        },
+        "fetchrow:SELECT id, bank_id, document_id, chunk_id, text, context, fact_type, revision, tags, metadata, source_memory_ids, observation_scopes, event_date, occurred_start, occurred_end, mentioned_at, created_at, updated_at, edited_at, consolidated_at, consolidation_failed_at, proof_count , NULL::uuid[] AS entity_ids, NULL::text AS invalidation_reason, NULL::timestamptz AS invalidated_at FROM \"memory_units\" WHERE id = $1 AND bank_id = $2": {
+          "calls": 328,
+          "milliseconds": 400.94440000029863,
+          "maxMs": 2.3249000005307607
+        },
+        "fetchrow:SELECT id, bank_id, document_id, chunk_id, text, context, fact_type, revision, tags, metadata, source_memory_ids, observation_scopes, event_date, occurred_start, occurred_end, mentioned_at, created_at, updated_at, edited_at, consolidated_at, consolidation_failed_at, proof_count , entity_ids, invalidation_reason, invalidated_at FROM \"invalidated_memory_units\" WHERE id = $1 AND bank_id = $2": {
+          "calls": 240,
+          "milliseconds": 246.8005999835441,
+          "maxMs": 1.7857999991974793
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"banks\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 3.1874000014795456,
+          "maxMs": 2.037700000073528
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"documents\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 27.80709999933606,
+          "maxMs": 14.32089999798336
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"chunks\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 3.6540000037348364,
+          "maxMs": 2.3137000025599264
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"memory_units\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 267.22999999765307,
+          "maxMs": 133.6429999973916
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"invalidated_memory_units\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 8.048500003496883,
+          "maxMs": 4.463600002054591
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"entities\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 1.9743000011658296,
+          "maxMs": 1.2373999998089857
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"observation_history\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 7.470200001989724,
+          "maxMs": 3.96069999987958
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"mental_models\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.8459000059228856,
+          "maxMs": 1.4280000032158569
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"mental_model_history\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.7133000003232155,
+          "maxMs": 1.5349000022979453
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"knowledge_pages\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.5784000026760623,
+          "maxMs": 1.534300001367228
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"directives\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 1.6763999992690515,
+          "maxMs": 0.8546999997633975
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"graph_maintenance_queue\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.3459999974875245,
+          "maxMs": 1.510099998995429
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"memory_mutation_receipts\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 1.724800000374671,
+          "maxMs": 1.0110000002896413
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"memory_native_operation_receipts\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.181299998483155,
+          "maxMs": 1.26770000133547
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"memory_retain_part_receipts\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.153500001440989,
+          "maxMs": 1.1396000008971896
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"memory_transition_initializations\" t WHERE bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 1.9053999967582058,
+          "maxMs": 0.9535999997751787
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"unit_entities\" t WHERE EXISTS(SELECT 1 FROM \"entities\" e WHERE e.id=t.entity_id AND e.bank_id=$1) ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.02999999964959,
+          "maxMs": 1.222099999722559
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"entity_cooccurrences\" t WHERE EXISTS(SELECT 1 FROM \"entities\" e WHERE e.id=t.entity_id_1 AND e.bank_id=$1) ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 2.5992000046244357,
+          "maxMs": 1.4097000021138228
+        },
+        "fetch:SELECT to_jsonb(t)::text AS value FROM \"memory_links\" t WHERE t.bank_id=$1 ORDER BY to_jsonb(t)::text COLLATE \"C\"": {
+          "calls": 2,
+          "milliseconds": 873.3546000003116,
+          "maxMs": 439.87449999985984
+        },
+        "fetch:SELECT * FROM \"chunks\" WHERE bank_id=$1": {
+          "calls": 2,
+          "milliseconds": 3.3394999991287477,
+          "maxMs": 1.7537999992782716
+        },
+        "fetchval:SELECT record FROM \"memory_application_artifacts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND artifact_kind=$4 AND artifact_id=$5 AND revision=$6 ORDER BY revision DESC LIMIT 1": {
+          "calls": 272,
+          "milliseconds": 281.93340001962497,
+          "maxMs": 1.982100002351217
+        },
+        "fetch:SELECT DISTINCT ON (artifact_kind,artifact_id) record FROM \"memory_application_artifacts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 ORDER BY artifact_kind,artifact_id,revision DESC": {
+          "calls": 3,
+          "milliseconds": 32.67829999822425,
+          "maxMs": 10.998400000971742
+        },
+        "fetchrow:SELECT config FROM public.banks WHERE bank_id = $1": {
+          "calls": 1,
+          "milliseconds": 1.0722999977588188,
+          "maxMs": 1.0722999977588188
+        },
+        "fetchrow:SELECT s.provider_lineage,s.bank_generation,s.deleted_at,f.transition_id FROM \"replication_bank_state\" s JOIN \"memory_transition_fences\" f USING(bank_id) WHERE s.bank_id=$1": {
+          "calls": 2,
+          "milliseconds": 3.433599998970749,
+          "maxMs": 2.599999999802094
+        },
+        "fetchrow:UPDATE \"memory_transition_requests\" SET lease_expires_at=clock_timestamp()+$3::interval WHERE bank_id=$1 AND transition_id=$2 AND lease_expires_at>clock_timestamp() RETURNING *": {
+          "calls": 2,
+          "milliseconds": 4.511400002229493,
+          "maxMs": 3.52750000092783
+        },
+        "fetchval:SELECT current_cursor FROM \"replication_bank_state\" WHERE bank_id=$1": {
+          "calls": 1,
+          "milliseconds": 0.8655999990878627,
+          "maxMs": 0.8655999990878627
+        },
+        "fetch:SELECT DISTINCT from_unit_id FROM \"memory_links\" WHERE to_unit_id = ANY($1::uuid[]) AND bank_id = $2 AND link_type IN ('temporal', 'semantic')": {
+          "calls": 1,
+          "milliseconds": 6.06109999716864,
+          "maxMs": 6.06109999716864
+        },
+        "execute:INSERT INTO \"graph_maintenance_queue\" (bank_id, unit_id) SELECT $1, v FROM unnest($2::uuid[]) AS t(v) ON CONFLICT (bank_id, unit_id) DO UPDATE SET enqueued_at = \"graph_maintenance_queue\".enqueued_at": {
+          "calls": 1,
+          "milliseconds": 53.711599997768644,
+          "maxMs": 53.711599997768644
+        },
+        "fetch:WITH input_data AS ( SELECT * FROM unnest( $2::text[], $3::vector[], $4::timestamptz[], $5::timestamptz[], $6::timestamptz[], $7::timestamptz[], $8::text[], $9::text[], $10::jsonb[], $11::text[], $12::text[], $13::jsonb[], $14::jsonb[], $15::text[] ) AS t(text, embedding, event_date, occurred_start, occurred_end, mentioned_at, context, fact_type, metadata, chunk_id, document_id, tags_json, observation_scopes_json, text_signals) ) INSERT INTO public.memory_units (bank_id, text, embedding, event_date, occurred_start, occurred_end, mentioned_at, context, fact_type, metadata, chunk_id, document_id, tags, observation_scopes, text_signals, search_vector) SELECT $1, text, embedding, event_date, occurred_start, occurred_end, mentioned_at, context, fact_type, metadata, chunk_id, document_id, COALESCE( (SELECT array_agg(elem) FROM jsonb_array_elements_text(tags_json) AS elem), '{}'::varchar[] ), observation_scopes_json, text_signals, to_tsvector('english'::regconfig, COALESCE(text, '') || ' ' || COALESCE(context, '') || ' ' || COALESCE(text_signals, '')) FROM input_data RETURNING id": {
+          "calls": 1,
+          "milliseconds": 141.48410000052536,
+          "maxMs": 141.48410000052536
+        },
+        "fetchval:SELECT 1 FROM \"memory_units\" WHERE bank_id=$1 AND id=$2::uuid": {
+          "calls": 68,
+          "milliseconds": 61.71500000709784,
+          "maxMs": 1.6371999990951736
+        },
+        "execute:UPDATE \"memory_units\" target SET text=prepared.text,embedding=prepared.embedding,event_date=prepared.event_date,occurred_start=prepared.occurred_start,occurred_end=prepared.occurred_end,mentioned_at=prepared.mentioned_at,context=prepared.context,fact_type=prepared.fact_type,metadata=prepared.metadata,chunk_id=prepared.chunk_id,document_id=prepared.document_id,tags=prepared.tags,observation_scopes=prepared.observation_scopes,text_signals=prepared.text_signals,search_vector=prepared.search_vector,revision=$4 FROM \"memory_units\" prepared WHERE target.bank_id=$1 AND target.id=$2::uuid AND prepared.bank_id=$1 AND prepared.id=$3::uuid": {
+          "calls": 68,
+          "milliseconds": 182.10749998615938,
+          "maxMs": 4.1388999998162035
+        },
+        "execute:DELETE FROM \"memory_units\" WHERE bank_id=$1 AND id=$2::uuid": {
+          "calls": 68,
+          "milliseconds": 104.10589999082731,
+          "maxMs": 2.5740999990375713
+        },
+        "execute:DELETE FROM \"unit_entities\" WHERE unit_id=$1::uuid": {
+          "calls": 68,
+          "milliseconds": 51.632300037454115,
+          "maxMs": 1.3316999975359067
+        },
+        "execute:DELETE FROM \"memory_links\" WHERE bank_id=$1 AND (from_unit_id=ANY($2::uuid[]) OR to_unit_id=ANY($2::uuid[])) AND link_type IN ('temporal','semantic')": {
+          "calls": 1,
+          "milliseconds": 4391.476400000101,
+          "maxMs": 4391.476400000101
+        },
+        "executemany:UPDATE \"memory_units\" SET created_at=$3, updated_at=$4, edited_at=$5, consolidated_at=$6, consolidation_failed_at=$7, source_memory_ids=$8::uuid[], proof_count=$9 WHERE bank_id=$1 AND id=$2::uuid": {
+          "calls": 1,
+          "milliseconds": 88.19230000153766,
+          "maxMs": 88.19230000153766
+        },
+        "fetch:SELECT a.attname FROM pg_attribute a WHERE a.attrelid = '\"memory_units\"'::regclass AND a.attnum > 0 AND NOT a.attisdropped ORDER BY a.attnum": {
+          "calls": 68,
+          "milliseconds": 59.7813000131282,
+          "maxMs": 2.0464999979594722
+        },
+        "fetch:SELECT entity_id FROM \"unit_entities\" WHERE unit_id = $1": {
+          "calls": 68,
+          "milliseconds": 50.08480000105919,
+          "maxMs": 1.3232000019343104
+        },
+        "fetch:SELECT from_unit_id, to_unit_id, link_type, weight FROM public.memory_links WHERE (from_unit_id = $1 OR to_unit_id = $1) AND bank_id = $2 AND link_type = ANY($3::text[]) UNION SELECT d.from_unit_id, d.to_unit_id, d.link_type, d.weight FROM public.invalidated_memory_units a CROSS JOIN LATERAL jsonb_to_recordset(a.causal_links) AS d(from_unit_id uuid, to_unit_id uuid, link_type text, weight float8) WHERE a.bank_id = $2 AND a.causal_links <> '[]'::jsonb AND (d.from_unit_id = $1 OR d.to_unit_id = $1) -- Same guard as CausalLinkDescriptor.from_json_dict: the column is -- schemaless JSON, and a malformed entry would otherwise be copied -- forward as a NULL-endpoint descriptor. AND d.from_unit_id IS NOT NULL AND d.to_unit_id IS NOT NULL AND d.link_type = ANY($3::text[])": {
+          "calls": 68,
+          "milliseconds": 90.72010000090813,
+          "maxMs": 2.6343000026827212
+        },
+        "fetchval:INSERT INTO \"invalidated_memory_units\" (\"id\", \"bank_id\", \"document_id\", \"text\", \"context\", \"event_date\", \"occurred_start\", \"occurred_end\", \"mentioned_at\", \"fact_type\", \"metadata\", \"created_at\", \"updated_at\", \"chunk_id\", \"tags\", \"proof_count\", \"source_memory_ids\", \"consolidated_at\", \"observation_scopes\", \"text_signals\", \"consolidation_failed_at\", \"edited_at\", \"revision\", invalidation_reason, invalidated_at, entity_ids, causal_links) SELECT \"id\", \"bank_id\", \"document_id\", \"text\", \"context\", \"event_date\", \"occurred_start\", \"occurred_end\", \"mentioned_at\", \"fact_type\", \"metadata\", \"created_at\", \"updated_at\", \"chunk_id\", \"tags\", \"proof_count\", \"source_memory_ids\", \"consolidated_at\", \"observation_scopes\", \"text_signals\", \"consolidation_failed_at\", \"edited_at\", \"revision\", $2, now(), $3::uuid[], $5::jsonb FROM \"memory_units\" WHERE id = $1 AND bank_id = $4 RETURNING id": {
+          "calls": 68,
+          "milliseconds": 105.10609998891596,
+          "maxMs": 2.940800000942545
+        },
+        "execute:DELETE FROM \"memory_units\" WHERE id = $1 AND bank_id = $2": {
+          "calls": 68,
+          "milliseconds": 109.80130000098143,
+          "maxMs": 2.9716999997617677
+        },
+        "execute:UPDATE \"invalidated_memory_units\" SET invalidated_at=$3 WHERE bank_id=$1 AND id=$2::uuid": {
+          "calls": 68,
+          "milliseconds": 82.41980000457261,
+          "maxMs": 2.518900000723079
+        },
+        "fetchrow:UPDATE \"replication_bank_state\" SET current_cursor = current_cursor + $2, updated_at = clock_timestamp() WHERE bank_id = $1 RETURNING provider_lineage, bank_generation, current_cursor": {
+          "calls": 1,
+          "milliseconds": 1.8697000014071818,
+          "maxMs": 1.8697000014071818
+        },
+        "execute:INSERT INTO \"replication_logical_changes\" ( bank_id, cursor, provider_lineage, bank_generation, batch_id, batch_index, batch_size, object_kind, object_id, operation, object_revision, payload ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb)": {
+          "calls": 68,
+          "milliseconds": 102.9443000225001,
+          "maxMs": 2.8587999986484647
+        },
+        "fetchrow:SELECT native_cursor,state_cursor,minimum_state_cursor,baseline_native_cursor,initialized_at,deleted_at FROM \"memory_application_banks\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 FOR UPDATE": {
+          "calls": 3,
+          "milliseconds": 3.535899995767977,
+          "maxMs": 1.542199999676086
+        },
+        "execute:INSERT INTO \"memory_application_bodies\" (provider_lineage,bank_id,bank_generation,body_id,body_schema,descriptor,state,expires_at) VALUES ($1,$2,$3,$4,$5,$6,'sealed',NULL)": {
+          "calls": 183,
+          "milliseconds": 249.75729998550378,
+          "maxMs": 3.749999999854481
+        },
+        "execute:INSERT INTO \"memory_application_body_parts\" (provider_lineage,bank_id,bank_generation,body_id,part_number,part_sha256,data) VALUES ($1,$2,$3,$4,$5,$6,$7)": {
+          "calls": 184,
+          "milliseconds": 260.3692999546183,
+          "maxMs": 8.941600000980543
+        },
+        "execute:INSERT INTO \"memory_application_native_heads\" (provider_lineage,bank_id,bank_generation,object_kind,object_id,head) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (provider_lineage,bank_id,bank_generation,object_kind,object_id) DO UPDATE SET head=EXCLUDED.head": {
+          "calls": 180,
+          "milliseconds": 260.03780000974075,
+          "maxMs": 2.8166000010969583
+        },
+        "fetchval:SELECT current_setting($1,true)": {
+          "calls": 2,
+          "milliseconds": 1.5096999995876104,
+          "maxMs": 0.7716000000073109
+        },
+        "fetchval:SELECT set_config($1,$2,true)": {
+          "calls": 1,
+          "milliseconds": 0.6699000005028211,
+          "maxMs": 0.6699000005028211
+        },
+        "execute:INSERT INTO \"memory_application_changes\" (provider_lineage,bank_id,bank_generation,state_cursor,manifest,page_refs) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (provider_lineage,bank_id,bank_generation,state_cursor) DO UPDATE SET manifest=EXCLUDED.manifest,page_refs=EXCLUDED.page_refs": {
+          "calls": 2,
+          "milliseconds": 5.235900000116089,
+          "maxMs": 2.9961000000184868
+        },
+        "execute:UPDATE \"memory_application_banks\" SET native_cursor=$4,state_cursor=$5, deleted_at=CASE WHEN $6 THEN COALESCE(deleted_at,clock_timestamp()) ELSE deleted_at END WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3": {
+          "calls": 2,
+          "milliseconds": 3.3419999963371083,
+          "maxMs": 2.0258999975339975
+        },
+        "execute:INSERT INTO \"memory_application_artifacts\" (provider_lineage,bank_id,bank_generation,artifact_kind,artifact_id,revision,record_hash,body_id,record) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)": {
+          "calls": 113,
+          "milliseconds": 161.6137000200979,
+          "maxMs": 2.547300002333941
+        },
+        "fetch:SELECT e.canonical_name FROM \"unit_entities\" ue JOIN \"entities\" e ON e.id = ue.entity_id WHERE ue.unit_id = $1 AND e.bank_id = $2 ORDER BY e.canonical_name, e.id": {
+          "calls": 88,
+          "milliseconds": 101.60949999044533,
+          "maxMs": 1.8657999971765094
+        },
+        "fetch:SELECT DISTINCT ON (artifact_kind,artifact_id) record FROM \"memory_application_artifacts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND artifact_kind=$4 ORDER BY artifact_kind,artifact_id,revision DESC": {
+          "calls": 1,
+          "milliseconds": 0.9730999991006684,
+          "maxMs": 0.9730999991006684
+        },
+        "fetchrow:SELECT manifest,page_refs FROM \"memory_application_changes\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND state_cursor=$4": {
+          "calls": 1,
+          "milliseconds": 0.9165999981632922,
+          "maxMs": 0.9165999981632922
+        },
+        "execute:INSERT INTO \"memory_transition_deltas\" (bank_id,transition_id,operation_id,request_hash,request,result) VALUES($1,$2,$3,$4,$5::jsonb,$6::jsonb)": {
+          "calls": 1,
+          "milliseconds": 170.9657999999763,
+          "maxMs": 170.9657999999763
+        },
+        "fetchval:SELECT count(*) FROM memory_transition_deltas WHERE transition_id=$1 AND operation_id=$2 AND request_hash=$3": {
+          "calls": 1,
+          "milliseconds": 1.2156000011600554,
+          "maxMs": 1.2156000011600554
+        }
+      },
+      "sampledApplyAndLookup": {
+        "samples": 131,
+        "wallSeconds": 66.10900000000038,
+        "workerCpuSeconds": 83.90625,
+        "systemBusyPercent": 19.514357658797245,
+        "readBytes": 2663199,
+        "writeBytes": 3736,
+        "pageFaults": 626456,
+        "maximumWorkingSet": 1213423616
+      }
+    }
+  },
+  "conditionalSchedulingSqlSavingMillisecondsAtObservedMeanRates": {
+    "1dc8a7eda5124dcc948b1b95032ae484": 4173.244702290626,
+    "2e081d2289694da987c48eb7455690a2": 5339.852534391018
+  },
+  "limitations": [
+    "Whole-run SQL includes work outside apply.",
+    "Phase telemetry is sampled apply-and-lookup, not exact apply.",
+    "No actual-model PostgreSQL backend telemetry exists.",
+    "Synthetic scheduling does not validate complete domain schemas or SQL semantics.",
+    "Conditional SQL arithmetic is not a measured future saving."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "--noconftest",
+    "-o",
+    "addopts=",
+    "tests/native_results/test_transition_head_prefetch.py",
+    "tests/native_results/test_transition_native_view.py",
+    "-q",
+    "--tb=short"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "stdout": "\ntests/native_results/test_transition_head_prefetch.py::test_locked_bundler_keeps_head_first_batches_and_full_bodies PASSED [  5%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_removes_reload_and_point_reads_but_keeps_body_validation PASSED [ 10%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_refusals[canonical_boolean] PASSED [ 15%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_refusals[payload_hash] PASSED [ 20%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_refusals[body_version] PASSED [ 25%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_refusals[body_hash] PASSED [ 30%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_refusals[body_bank] PASSED [ 35%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_refusals[body_missing] PASSED [ 40%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_inventory_and_head_refusals[missing] PASSED [ 45%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_inventory_and_head_refusals[extra] PASSED [ 50%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_inventory_and_head_refusals[wrong_version] PASSED [ 55%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_inventory_and_head_refusals[malformed] PASSED [ 60%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_inventory_and_head_refusals[tombstone] PASSED [ 65%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_inventory_and_head_refusals[wrong_sql_key] PASSED [ 70%]\ntests/native_results/test_transition_native_view.py::test_duplicate_keys_fall_back_instead_of_overriding[native] PASSED [ 75%]\ntests/native_results/test_transition_native_view.py::test_duplicate_keys_fall_back_instead_of_overriding[head] PASSED [ 80%]\ntests/native_results/test_transition_native_view.py::test_ordinary_snapshot_rereads_after_borrowed_view_returns PASSED [ 85%]\ntests/native_results/test_transition_native_view.py::test_unicode_same_name_entity_order_and_archive_fallback[valid] PASSED [ 90%]\ntests/native_results/test_transition_native_view.py::test_unicode_same_name_entity_order_and_archive_fallback[invalidated] PASSED [ 95%]\ntests/native_results/test_transition_native_view.py::test_unicode_same_name_entity_order_and_archive_fallback[invalidated_duplicate_ids] PASSED [100%]\n\n============================= 20 passed in 7.84s ==============================\n",
+  "stderr": ""
+}

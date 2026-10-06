@@ -57,6 +57,8 @@ export interface HindsightBackupService {
   quarantine(backupId: string): boolean;
   /** Boot observation of a dead admit: a ZIP claimed into the staged dir goes back under its inbox name. */
   returnInbox(backupId: string, fileName: string): boolean;
+  /** Emergency withdrawal preserves unknown work and never joins its unavailable remote producer. */
+  retireEpoch?(epochId: string): void;
   /** Aborts an in-flight native snapshot and resolves once the capture released its pause, so the runtime stops after it. */
   stop(): Promise<void>;
 }
@@ -77,7 +79,8 @@ export interface HindsightBackupServiceInput {
 type Deps = HindsightBackupServiceInput & { now: () => string };
 
 export function createHindsightBackupService(input: HindsightBackupServiceInput): HindsightBackupService {
-  const active = new Map<AbortController, Promise<HindsightBackupOutcome>>();
+  const active = new Map<AbortController, { epochId: string; run: Promise<HindsightBackupOutcome> }>();
+  const retired = new Set<string>();
   const deps: Deps = { ...input, now: input.now ?? (() => new Date().toISOString()) };
   let cached: HindsightBackupInventory | null = null;
   const changing = async (work: () => Promise<HindsightBackupOutcome>) => {
@@ -85,27 +88,39 @@ export function createHindsightBackupService(input: HindsightBackupServiceInput)
     finally { cached = null; }
   };
   const inventory = () => cached ??= readInventory(input.store);
+  const tracked = async (epochId: string, work: (signal: AbortSignal) => Promise<HindsightBackupOutcome>) => {
+    if (retired.has(epochId)) return failedOutcome("MEMORY_AUTHORITY_MISMATCH");
+    const controller = new AbortController(); const run = work(controller.signal);
+    active.set(controller, { epochId, run });
+    try { return await run; } finally { active.delete(controller); }
+  };
   return {
     markerEpochId: () => {
       const selection = readMemoryAuthoritySelection(input.db);
       return selection.mode === "hindsight" ? selection.epochId : null;
     },
     capture: (capture) => changing(async () => {
+      if (retired.has(capture.runtime.epochId)) return failedOutcome("MEMORY_AUTHORITY_MISMATCH");
       const controller = new AbortController();
-      const run = paused(deps, capture, controller.signal); active.set(controller, run);
+      const run = paused(deps, capture, controller.signal); active.set(controller, { epochId: capture.runtime.epochId, run });
       try { return await run; }
       finally { active.delete(controller); }
     }),
-    admit: (admit) => changing(() => admitHindsightBackup(deps, admit)),
-    verify: (target) => changing(() => verifyHindsightBackup(deps, target)),
+    admit: (admit) => changing(() => tracked(admit.expectedEpochId, (signal) => admitHindsightBackup(deps, { ...admit, signal }))),
+    verify: (target) => changing(() => tracked(input.store.readSync(target.backupId)?.authority.epochId ?? "unknown",
+      (signal) => verifyHindsightBackup(deps, { ...target, signal }))),
     lastVerified: () => inventory().lastVerified,
     inventory,
     sealed: (backupId) => input.store.readSync(backupId),
     quarantine: (backupId) => input.store.quarantine(backupId),
     returnInbox: (backupId, fileName) => input.store.returnInbox(backupId, fileName),
+    retireEpoch: (epochId) => {
+      retired.add(epochId);
+      for (const [controller, value] of active) if (value.epochId === epochId) controller.abort(new Error("MEMORY_AUTHORITY_MISMATCH"));
+    },
     stop: async () => {
       for (const controller of active.keys()) controller.abort();
-      await Promise.allSettled(active.values());
+      await Promise.allSettled([...active.values()].filter((value) => !retired.has(value.epochId)).map((value) => value.run));
     },
   };
 }
@@ -128,13 +143,14 @@ async function paused(deps: Deps, capture: HindsightBackupCaptureInput, signal: 
   const schedulerWasStarted = runtime.scheduler.started();
   try {
     await runtime.scheduler.stop();
+    if (signal.aborted) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_NATIVE_FAILED");
     return { ok: true, verifiedAt: await captureQuiesced(deps, { capture, signal }) };
   } catch (error) {
     return outcomeOf(error, (unexpected) => deps.logger.error({ code: "HINDSIGHT_BACKUP_INTERNAL_ERROR",
       err: unexpected instanceof Error ? unexpected.name : "unknown" }, "backup capture failed"));
   } finally {
     runtime.writeFence.release();
-    if (schedulerWasStarted) restartScheduler(runtime, deps.logger);
+    if (schedulerWasStarted && !emergencyRetired(signal)) restartScheduler(runtime, deps.logger);
   }
 }
 
@@ -149,6 +165,7 @@ async function captureQuiesced(deps: Deps, work: { capture: HindsightBackupCaptu
   try {
     const core = await stepAsync(() => deps.store.captureCore(capture.backupId, (path) => deps.db.backupTo(path)),
       () => "HINDSIGHT_BACKUP_CORE_CAPTURE_FAILED");
+    if (work.signal.aborted) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_NATIVE_FAILED");
     const staged: HindsightBackupStagedRecord = {
       request: nativeRequest(identity, { backupId: capture.backupId, createdAt }),
       core: { version: 1, backupId: capture.backupId, createdAt, operationId: capture.operationId,
@@ -160,7 +177,7 @@ async function captureQuiesced(deps: Deps, work: { capture: HindsightBackupCaptu
     return null;
   } catch (error) {
     // An unpaired Core copy is never offered as a backup; the partial dir goes with the failure.
-    await deps.store.discard(capture.backupId).catch(() => deps.logger.warn({ code: "HINDSIGHT_BACKUP_STORAGE_FAILED" }, "partial backup dir was not removed"));
+    if (!emergencyRetired(work.signal)) await deps.store.discard(capture.backupId).catch(() => deps.logger.warn({ code: "HINDSIGHT_BACKUP_STORAGE_FAILED" }, "partial backup dir was not removed"));
     throw error;
   }
 }
@@ -211,4 +228,7 @@ function restartScheduler(runtime: HindsightBackupRuntime, logger: Logger): void
 
 function coreReadCode(error: unknown): MemoryBackupErrorCode {
   return errorMessage(error) === "MEMORY_AUTHORITY_MISMATCH" ? "MEMORY_AUTHORITY_MISMATCH" : "HINDSIGHT_BACKUP_CORE_CAPTURE_FAILED";
+}
+function emergencyRetired(signal: AbortSignal): boolean {
+  return signal.aborted && signal.reason instanceof Error && signal.reason.message === "MEMORY_AUTHORITY_MISMATCH";
 }

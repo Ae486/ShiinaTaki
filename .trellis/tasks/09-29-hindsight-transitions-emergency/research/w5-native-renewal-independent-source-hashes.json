@@ -1,0 +1,211 @@
+{
+  "meaning": "Independent Native renewal and supervisor cleanup check; prior manifests unchanged; permits same RETURN under cumulative cap329, not W5 completion.",
+  "checkedAt": "2026-10-03T13:58:32.597765+00:00",
+  "reviewer": "/root/w45_readonly_review",
+  "coreHead": "fccfc4fb78958c90efebdb4a5a98b355bcb73a40",
+  "nativeHead": "6a749ba3e7d8719e336d9d1d8735a8e09da4366b",
+  "files": {
+    "H:/TakiAgent/.trellis/spec/backend/memory-transitions.md": {
+      "sha256": "1e39e12daec4fbc9801a5f13a2b091cd1646d0f88baa2d607e9ddff1cde882ab",
+      "bytes": 29629
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-native-renewal-checkpoint.md": {
+      "sha256": "f633fef5ccfd8d4a1ce8ae630ab8062b0236b9aee7ad95ca84ae4f08ea5a98ce",
+      "bytes": 1373
+    },
+    "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-native-renewal-implementation.md": {
+      "sha256": "d89d512bbedc0288de73a730d0dd4a143c72e9ee3bb829fac2f4ea68edda388c",
+      "bytes": 11418
+    },
+    "H:/hindsight/hindsight-api-slim/hindsight_api/engine/cutover_verification_certificate.py": {
+      "sha256": "37ec859f93ca2d40bc62ee82810bc4cbe0b6db85cd8eef4c402d5c75b7181f30",
+      "bytes": 10106
+    },
+    "H:/hindsight/hindsight-api-slim/hindsight_api/engine/logical_snapshot.py": {
+      "sha256": "de352c9c09e4b1321231344e77e57d4fb2335d5d3f6195e9a9a1f0e50dcd270a",
+      "bytes": 28072
+    },
+    "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_certificate.py": {
+      "sha256": "36b97400c02e30d7049456e33d42178b33151b6ca249fe970e010e57c7b570a8",
+      "bytes": 8886
+    },
+    "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_service.py": {
+      "sha256": "04c23d00c4a9fb6eb5a8a91a6fcbf84a062116e5f71c7d990bfe8860ad462ea6",
+      "bytes": 20182
+    },
+    "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_storage.py": {
+      "sha256": "416e8a74e5e81a607ca9555876a12bc607bc7fe39635625fb9e8bf46f9069021",
+      "bytes": 15180
+    },
+    "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_proof_renewal.py": {
+      "sha256": "1ad504a865d2db230eb95bd5f1faf655d6353121489cda160c12d6b342e740a6",
+      "bytes": 16638
+    },
+    "H:/hindsight/hindsight-api-slim/tests/test_taki_logical_snapshot.py": {
+      "sha256": "4d38f270674a96775442932be9f16e05d5ff7ea5de685e92c5e2e813b2c273b9",
+      "bytes": 31239
+    },
+    "H:\\TakiAgent\\.trellis\\spec\\backend\\memory-transition-healthy-drivers.md": {
+      "sha256": "c5089df308a6f049f621bc2a4e5f414d52eebabf3e60e49afc10fc5ab0fc965a",
+      "bytes": 9995
+    },
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-model-budget-test.py": {
+      "sha256": "116f194ae84724043ab2d164dd1dab0f7194e60453316a5ce4cd9cad498e87b8",
+      "bytes": 4885
+    },
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-model-budget.py": {
+      "sha256": "8c6fba27b39e8dfee44d4792ab5f9bffdb025f9ed3ba274da11e82253581a384",
+      "bytes": 2657
+    },
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reused-driver.mjs": {
+      "sha256": "75cbbed0804320dc148a0369643ead0d62e0d67f42dc2feb05aef38dab331a73",
+      "bytes": 16295
+    },
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reused-native.py": {
+      "sha256": "da028e9e43258878fc731039da282091adaad3464cd2047227a3912bdf2a1e22",
+      "bytes": 14979
+    },
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-supervisor-prior-2026-10-03.json": {
+      "sha256": "2bc3ccee9d6680a1f44593f8bffa89435dccfa85aefccd1cda453db9e168506f",
+      "bytes": 19905
+    },
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-supervisor-shutdown-checkpoint.md": {
+      "sha256": "305c6674e6428f8a957180f13fed2427666910633567441a4d1e53abb96e1d39",
+      "bytes": 2318
+    },
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-supervisor-shutdown-test.py": {
+      "sha256": "df0d2cc88d61cdfd99236b164ffb39d0be76e5f2b2df29b452ec5dae0c58d0ca",
+      "bytes": 5328
+    },
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-supervisor-shutdown.py": {
+      "sha256": "5d349f718e608258e562a18739a22355da85bb1dd42a19d4e7dba6d947e8d25d",
+      "bytes": 2290
+    },
+    "H:\\TakiAgent\\packages\\core\\src\\memory\\transitions\\index.md": {
+      "sha256": "46d4a61f20d6cf202da6d4e49e5f1cadebaaddc48c6d3ea45c907be28c7a1b59",
+      "bytes": 4910
+    },
+    "H:\\TakiAgent\\packages\\core\\src\\memory\\transitions\\transition-healthy-candidate.ts": {
+      "sha256": "aa2ad5874582c4e371723416cfaf62bd50312179fbf266aa1c64016dc62178f0",
+      "bytes": 5949
+    },
+    "H:\\TakiAgent\\packages\\core\\src\\memory\\transitions\\transition-healthy-snapshot-recovery.test.ts": {
+      "sha256": "b16a6d171bb24c5ec42e351298f45c3162b4702c0329913e0e63f04141e02e4c",
+      "bytes": 23618
+    },
+    "H:\\TakiAgent\\packages\\core\\src\\memory\\transitions\\transition-healthy-source.test.ts": {
+      "sha256": "b3f062cd97ad0781959e6defdbfc00d51d12762601daea06f4bf3a75bd0e6204",
+      "bytes": 5055
+    },
+    "H:\\TakiAgent\\packages\\core\\src\\memory\\transitions\\transition-unused-inventory.ts": {
+      "sha256": "0434292532c47c83e171cd0e3178c4b1669b90b2310bb6ad5639783b9565ca5e",
+      "bytes": 7773
+    }
+  },
+  "nativePreimages": [
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-native-renewal-preimages/logical_snapshot.py",
+      "sha256": "8532b07b9ef06ec90320afaa3ebc587f0290650052738102d89ad52ce96b707b"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-native-renewal-preimages/cutover_verification_certificate.py",
+      "sha256": "b551ebd148d4dc1e0aa14e89c32875a3e259719cfd85f36cccc6a674135601a5"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-native-renewal-preimages/transition_certificate.py",
+      "sha256": "278bae1ec619b1b56d98888684f51a6c43d269d278fea37c1f26da9a60f50c90"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-native-renewal-preimages/transition_storage.py",
+      "sha256": "5b3664406ee7a28c753e1882e6dd562089048a98f77f3861707e1d17e8ad85fa"
+    },
+    {
+      "path": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-native-renewal-preimages/transition_service.py",
+      "sha256": "5eaee15df9d58e8aa913ecdad8828d068ebc2da74b28298ac2573586a96e1510"
+    }
+  ],
+  "supervisorPreimageSha256": "2bc3ccee9d6680a1f44593f8bffa89435dccfa85aefccd1cda453db9e168506f",
+  "preservedManifests": {
+    "w4-source-ownership.json": "c11e7015dd8992c0689941f98b0f75a06754d5adbf5dd1547924673c7d7a6f28",
+    "w3-source-ownership.json": "998edcd67c06757f9f400ce4d17a02dcc63f7456f3607e2f992be3f674ee5851",
+    "w4-prior-source-baseline.json": "1cd5cf124305fb12e3323b3039a1dfe8440abd9f58516a634ef0f4c8c7d1ac75",
+    "w5-source-ownership.json": "21673440218d85039ef17405a24f4134880a31f7a6872352dc86a50e1b99ea94",
+    "w5-prior-source-baseline.json": "8e8b4dad76f41d25201253969f0baa7777d9412b9e82757595cc804c3434f67d",
+    "w5-first-real-run-source-hashes.json": "e97459b4918a0ecfd99ea863ba030fd5bb300451d26c8dc9bd5d8bfe7498bef1",
+    "w5-native-billing-prior-hashes.json": "2742b09dedd3dd9af5d30c450564e1c7023ae3a62115fdb59a98d285a86f82d1",
+    "w4-checker-source-hashes.json": "8e9474814dcd503b30922576c657038ba88d8fdb19ee46f127c27dc26ee89915",
+    "w5-checker-source-hashes.json": "79158adcc4369135c69c8e4a0fb1d8651a30cc7f4ba9712580bee23df785679d",
+    "w5-snapshot-renewal-source-hashes.json": "f3d67950fc370905b07617e721a6948233cc4b77edecb309397963cd55ca4464",
+    "w5-resume-helper-prior-2026-10-03.json": "3c6ee1127318e7cced75389b6adff04e38a68091a45e7b449e4c2df5cb817748",
+    "w5-resume-helper-source-2026-10-03.json": "1b6ab6176562074d6b51b23292b29a712364bb8d7f2aff5a8cb6339dec1a39f8",
+    "w5-snapshot-renewal-independent-source-hashes.json": "61f332f46c0941c6b6c84d568b5a19c5299bb1e7b285698a3bb77f9a97927ff6",
+    "w5-snapshot-renewal-independent-check.md": "07602ff73649cdd0824c4378ad4fef68b8e7e8a1d7cf31f494842b5a9c539593",
+    "w5-native-renewal-source-hashes.json": "c7e76b48faabea8836e1fbbeeb9f532de11c4d64a7f8b85c4fa35da41b1552a5",
+    "w5-supervisor-shutdown-source-hashes.json": "0aa8d404629d70612c14bbc6ac8cb434c5a3709a66b6329bf092e9979454de47"
+  },
+  "priorCorePathsVerified": 141,
+  "expectedCoreChangesAfterSnapshotRepair": [
+    ".trellis/spec/backend/memory-transitions.md"
+  ],
+  "priorNativePathsVerified": 355,
+  "expectedChangedPreviouslyInventoriedNativePaths": [
+    "hindsight-api-slim/hindsight_api/engine/cutover_verification_certificate.py",
+    "hindsight-api-slim/hindsight_api/engine/transition_certificate.py",
+    "hindsight-api-slim/hindsight_api/engine/transition_service.py",
+    "hindsight-api-slim/hindsight_api/engine/transition_storage.py"
+  ],
+  "productionFilesNewlyCoveredByExactPreimage": [
+    "hindsight-api-slim/hindsight_api/engine/logical_snapshot.py"
+  ],
+  "unexpectedChanges": [],
+  "checkerProductionChanges": [],
+  "verification": {
+    "isolatedPg": {
+      "files": 5,
+      "tests": 33,
+      "exit": 0,
+      "seconds": 106.32,
+      "fixture": {
+        "name": "taki-hindsight-g1-82014973ec9e",
+        "root": "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-82014973ec9e",
+        "registry": "C:\\Users\\55473\\.pg0\\instances\\taki-hindsight-g1-82014973ec9e",
+        "started": true,
+        "stopped": true,
+        "port": 5432
+      },
+      "dataRemoved": true,
+      "registryRemoved": true
+    },
+    "supervisorTests": {
+      "tests": 3,
+      "exit": 0
+    },
+    "budgetTests": {
+      "tests": 4,
+      "exit": 0
+    },
+    "ruffCheckExit": 0,
+    "ruffFormatExit": 0,
+    "nativeDiffCheckExit": 0,
+    "packageCwdTyExit": 0,
+    "rootCwdTy": {
+      "exit": 1,
+      "preexistingOptionalArgumentDiagnostics": 2,
+      "baselineExecution": false,
+      "sameSourceExpressionsVerified": true
+    }
+  },
+  "realPair": {
+    "stopped": true,
+    "submitted": 276,
+    "cap": 329,
+    "remaining": 53,
+    "originalCompletedSteps": 9,
+    "originalActions": 59,
+    "currentCompletedSteps": 71,
+    "currentActions": 600,
+    "inspectedParentEvidence": "df849d06bf984b7ea83e7794386462ce"
+  },
+  "checkerRealModelRequests": 0,
+  "checkerRealPairStarts": 0
+}

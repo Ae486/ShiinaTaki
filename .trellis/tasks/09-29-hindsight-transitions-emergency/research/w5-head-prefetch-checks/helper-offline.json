@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "-m",
+    "unittest",
+    "test_w5_head_prefetch_postpatch",
+    "-v"
+  ],
+  "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+  "exitCode": 0,
+  "stdout": "",
+  "stderr": "test_default_has_no_verification_or_execution (test_w5_head_prefetch_postpatch.CompositionTests.test_default_has_no_verification_or_execution) ... ok\ntest_new_cli_default_is_inert_and_actual_v2_entry_is_new_file (test_w5_head_prefetch_postpatch.CompositionTests.test_new_cli_default_is_inert_and_actual_v2_entry_is_new_file) ... ok\ntest_parent_requires_actual_worker_inventory_and_keeps_timing_failure_separate (test_w5_head_prefetch_postpatch.CompositionTests.test_parent_requires_actual_worker_inventory_and_keeps_timing_failure_separate) ... ok\ntest_real_modules_route_new_entry_and_nested_verifiers_and_restore_on_error (test_w5_head_prefetch_postpatch.CompositionTests.test_real_modules_route_new_entry_and_nested_verifiers_and_restore_on_error) ... ok\ntest_worker_admission_failures_keep_sanitized_original_failure_record (test_w5_head_prefetch_postpatch.CompositionTests.test_worker_admission_failures_keep_sanitized_original_failure_record) ... ok\ntest_worker_checks_parent_sha_and_reports_complete_inventory_before_and_after (test_w5_head_prefetch_postpatch.CompositionTests.test_worker_checks_parent_sha_and_reports_complete_inventory_before_and_after) ... ok\ntest_worker_final_inventory_failure_is_recorded_without_losing_prior_failure (test_w5_head_prefetch_postpatch.CompositionTests.test_worker_final_inventory_failure_is_recorded_without_losing_prior_failure) ... ok\ntest_current_drift_parent_digest_and_unknown_declared_path_refuse (test_w5_head_prefetch_postpatch.InventoryTests.test_current_drift_parent_digest_and_unknown_declared_path_refuse) ... ok\ntest_exact_union_and_only_declared_replacement_pass (test_w5_head_prefetch_postpatch.InventoryTests.test_exact_union_and_only_declared_replacement_pass) ... ok\ntest_inherited_repin_and_unsealed_current_source_refuse (test_w5_head_prefetch_postpatch.InventoryTests.test_inherited_repin_and_unsealed_current_source_refuse) ... ok\ntest_missing_extra_duplicate_and_undeclared_replacements_refuse (test_w5_head_prefetch_postpatch.InventoryTests.test_missing_extra_duplicate_and_undeclared_replacements_refuse) ... ok\ntest_predecessor_and_all_inherited_manifest_bytes_stay_sealed (test_w5_head_prefetch_postpatch.InventoryTests.test_predecessor_and_all_inherited_manifest_bytes_stay_sealed) ... ok\n\n----------------------------------------------------------------------\nRan 12 tests in 1.422s\n\nOK\n"
+}

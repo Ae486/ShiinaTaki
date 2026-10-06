@@ -1,0 +1,72 @@
+{
+  "sourceSha256Before": "49cc1c30d390dc179dfe8ff9b25c085f5d8074f94d7c7a052824231ea076e124",
+  "copyRoot": "H:\\TakiAgent\\.trellis\\.runtime\\w5-core-installed-diagnostic-c9dfb6f2-57dd-4c6b-b8e3-e5bbee0c0f45",
+  "comparisons": [
+    {
+      "key": "banks",
+      "expectedCount": 2,
+      "actualCount": 2,
+      "sameSequence": true,
+      "sameMultiset": true,
+      "sameSet": true
+    },
+    {
+      "key": "sources",
+      "expectedCount": 722,
+      "actualCount": 722,
+      "sameSequence": true,
+      "sameMultiset": true,
+      "sameSet": true
+    },
+    {
+      "key": "records",
+      "expectedCount": 1262,
+      "actualCount": 1262,
+      "sameSequence": true,
+      "sameMultiset": true,
+      "sameSet": true
+    },
+    {
+      "key": "derived",
+      "expectedCount": 4,
+      "actualCount": 4,
+      "sameSequence": false,
+      "sameMultiset": true,
+      "sameSet": true
+    },
+    {
+      "key": "blocks",
+      "expectedCount": 2,
+      "actualCount": 2,
+      "sameSequence": true,
+      "sameMultiset": true,
+      "sameSet": true
+    },
+    {
+      "key": "historicalReferences",
+      "expectedCount": 0,
+      "actualCount": 0,
+      "sameSequence": true,
+      "sameMultiset": true,
+      "sameSet": true
+    },
+    {
+      "key": "sourceAliases",
+      "expectedCount": 0,
+      "actualCount": 0,
+      "sameSequence": true,
+      "sameMultiset": true,
+      "sameSet": true
+    },
+    {
+      "key": "sourceSets",
+      "expectedCount": 1262,
+      "actualCount": 1262,
+      "sameSequence": true,
+      "sameMultiset": true,
+      "sameSet": true
+    }
+  ],
+  "sourceSha256After": "49cc1c30d390dc179dfe8ff9b25c085f5d8074f94d7c7a052824231ea076e124",
+  "sourceUnchanged": true
+}

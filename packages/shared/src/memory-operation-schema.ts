@@ -13,6 +13,8 @@ import { MemoryBankProducerRefSchema, MemoryBankProvisionRequestSchema, MemoryBa
   MemoryConnectionRevalidateRequestSchema, MemoryHindsightLifecycleErrorCodeSchema } from "./memory-hindsight-lifecycle-schema.ts";
 import { MemoryBackupAdmitRequestSchema, MemoryBackupCaptureRequestSchema, MemoryBackupErrorCodeSchema, MemoryBackupProducerRefSchema,
   MemoryBackupResultSchema, MemoryBackupVerifyRequestSchema } from "./hindsight-backup-schema.ts";
+import { MemoryTransitionReturnRequestSchema, MemoryTransitionReentryRequestSchema, MemoryTransitionEmergencyRequestSchema,
+  MemoryTransitionProducerRefSchema, MemoryTransitionResultSchema, MemoryTransitionErrorCodeSchema, MemoryTransitionRequestSchema } from "./memory-transition-schema.ts";
 
 export const MEMORY_OPERATION_METHODS = {
   submit: "memory.operations.submit",
@@ -30,6 +32,7 @@ const revision = z.number().int().nonnegative();
 export const MemoryOperationKindSchema = z.enum([
   "setup.validate", "setup.apply", "replica.sync", "local.onboard.prepare", "local.onboard.activate", "hindsight.activate",
   "bank.provision", "connection.revalidate", "backup.capture", "backup.admit", "backup.verify",
+  "transition.return-local", "transition.reenter-hindsight", "transition.emergency-local",
 ]);
 export type MemoryOperationKind = z.infer<typeof MemoryOperationKindSchema>;
 export const MemoryOperationStateSchema = z.enum(["admitted", "running", "completed", "failed", "cancelled", "outcome_unknown"]);
@@ -42,6 +45,7 @@ export type MemoryOperationReason = z.infer<typeof MemoryOperationReasonSchema>;
 export const MemoryOperationRefusalReasonSchema = z.enum([
   "MEMORY_OPERATION_NOT_FOUND", "MEMORY_OPERATION_BUSY", "MEMORY_OPERATION_RUNNING", "MEMORY_OPERATION_SETTLED",
   "MEMORY_OPERATION_UNSUPPORTED", "MEMORY_OPERATION_BANK_UNKNOWN", "MEMORY_OPERATION_REQUIRED",
+  ...MemoryTransitionErrorCodeSchema.options,
 ]);
 export type MemoryOperationRefusalReason = z.infer<typeof MemoryOperationRefusalReasonSchema>;
 
@@ -60,17 +64,24 @@ export const MemoryOperationRequestSchema = z.discriminatedUnion("kind", [
   MemoryBackupCaptureRequestSchema,
   MemoryBackupAdmitRequestSchema,
   MemoryBackupVerifyRequestSchema,
-]);
+  MemoryTransitionReturnRequestSchema, MemoryTransitionReentryRequestSchema, MemoryTransitionEmergencyRequestSchema,
+]).superRefine((request, ctx) => {
+  if (request.kind.startsWith("transition.")) {
+    const result = MemoryTransitionRequestSchema.safeParse(request);
+    if (!result.success) for (const issue of result.error.issues) ctx.addIssue({ code: "custom", message: issue.message, path: issue.path });
+  }
+});
 export type MemoryOperationRequest = z.infer<typeof MemoryOperationRequestSchema>;
 
 export const MemoryOperationProducerRefSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("setup"), attemptId: Id.nullable(), revisionBefore: revision, revisionAfter: revision.nullable() }),
-  z.strictObject({ kind: z.literal("replica"), bankId: Id, admittedAt: Timestamp }),
+  z.strictObject({ kind: z.literal("replica"), bankId: Id, admittedAt: Timestamp, requestId: z.uuid().optional() }),
   MemoryLocalProducerRefSchema,
   MemoryHindsightProducerRefSchema,
   MemoryBankProducerRefSchema,
   MemoryConnectionProducerRefSchema,
   MemoryBackupProducerRefSchema,
+  MemoryTransitionProducerRefSchema,
 ]);
 export type MemoryOperationProducerRef = z.infer<typeof MemoryOperationProducerRefSchema>;
 
@@ -86,11 +97,13 @@ export const MemoryOperationResultSchema = z.discriminatedUnion("kind", [
   MemoryBankResultSchema,
   MemoryConnectionResultSchema,
   MemoryBackupResultSchema,
+  MemoryTransitionResultSchema,
 ]);
 export type MemoryOperationResult = z.infer<typeof MemoryOperationResultSchema>;
 export const MemoryOperationErrorCodeSchema = z.union([
   MemoryReplicaErrorCodeSchema, MemoryLocalErrorCodeSchema, MemoryHindsightActivationErrorCodeSchema, MemoryHindsightLifecycleErrorCodeSchema,
   MemoryBackupErrorCodeSchema,
+  MemoryTransitionErrorCodeSchema,
 ]);
 export type MemoryOperationErrorCode = z.infer<typeof MemoryOperationErrorCodeSchema>;
 
@@ -99,6 +112,7 @@ const PRODUCER_KIND: Record<MemoryOperationKind, MemoryOperationProducerRef["kin
   "setup.validate": "setup", "setup.apply": "setup", "replica.sync": "replica", "local.onboard.prepare": "local",
   "local.onboard.activate": "local", "hindsight.activate": "hindsight", "bank.provision": "bank", "connection.revalidate": "connection",
   "backup.capture": "backup", "backup.admit": "backup", "backup.verify": "backup",
+  "transition.return-local": "transition", "transition.reenter-hindsight": "transition", "transition.emergency-local": "transition",
 };
 
 const MemoryOperationBase = z.strictObject({
@@ -134,6 +148,10 @@ export const MemoryOperationSchema = MemoryOperationBase.superRefine((operation,
   if (operation.producer?.kind === "backup" && operation.result?.kind === "backup" && operation.producer.backupId !== operation.result.backupId) {
     fail("producer and result backup disagree");
   }
+  if (operation.producer?.kind === "transition" && operation.result?.kind === "transition"
+    && (operation.producer.transitionId !== operation.result.transitionId || operation.state !== operation.result.outcome)) fail("transition result identity/outcome disagrees");
+  if (operation.producer?.kind === "transition" && "requestId" in operation.request
+    && operation.producer.requestId !== operation.request.requestId) fail("transition producer and request identity disagree");
 });
 export type MemoryOperation = z.infer<typeof MemoryOperationSchema>;
 

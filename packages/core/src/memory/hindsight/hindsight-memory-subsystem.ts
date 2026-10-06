@@ -1,13 +1,8 @@
 /**
  * INPUT:  active Hindsight configuration/Bank bindings, SQLite, Timeline and the shared Utility Slot
- * OUTPUT: complete provider/run/ingestion/curator/flush composition with the existing B5 scheduler and settled shutdown;
- *         captureRun degrades to a memory-unavailable Run on connection drift, and a refused primary witness is still retained;
- *         background ingestion/curation and flush skip a Character without a routed Bank before any Utility model call; every
- *         memory-unavailable Run reaches onUnavailable, and a fully synced foreground capture calls verifiedReconnect() once
- *         while an automatic Bank waits in availability backoff (G13); an incomplete bounded admission sync is logged per Bank
- *         (warn; error when an integrity failure refuses the Run) and bounded by min(request timeout, half the live chat ack
- *         deadline); writeFence pauses every native writer for backup capture
- * POS:    core/memory/hindsight — selected provider subsystem; Core retains Compaction and no generic native maintenance is duplicated
+ * OUTPUT: provider/ingestion/curator/flush plus the existing scheduler, distinct backup/write and transition/work fences,
+ *         truthful unavailable captures, primary witnesses, per-Bank sync diagnostics and complete settled shutdown
+ * POS:    core/memory/hindsight — selected draft; unresolved source/native activation refuses construction; Core owns Compaction
  */
 import { TIMING_CONFIG_KEYS, TIMING_POLICY_DEVELOPMENT_DEFAULTS, TimingDurationMsSchema } from "@taki/shared";
 import type { ConfigSource } from "../../config/config-source.ts";
@@ -41,6 +36,7 @@ import { createHindsightIngestion } from "./hindsight-ingestion.ts";
 import { createHindsightPolicyCurator, type HindsightPolicyCurator } from "./hindsight-policy-curator.ts";
 import { createHindsightReplicaScheduler, type HindsightReplicaScheduler } from "./hindsight-replica-scheduler.ts";
 import { fenceHindsightWriters } from "./hindsight-writer-fence.ts";
+import { sourceTransition } from "../transitions/transition-queued-provider.ts";
 
 interface Input {
   db: Database; epochId: string; config: MemoryConfig; source: ConfigSource; secrets: SecretCatalogService;
@@ -50,8 +46,11 @@ interface Input {
 }
 
 export function createHindsightMemorySubsystem(input: Input) {
+  if (sourceTransition(input.db, input.epochId)) throw new Error("MEMORY_TRANSITION_OUTCOME_UNKNOWN");
+  const writeFence = createCanonicalLocalWriteFence();
+  const workFence = createCanonicalLocalWriteFence();
   const runtime = createHindsightRuntimeConnection({ ...input, config: input.source });
-  const state = createHindsightRuntimeState({ db: input.db, runtime, config: input.config, now: input.now });
+  const state = createHindsightRuntimeState({ db: input.db, runtime, config: input.config, now: input.now, workFence });
   const foreground = createHindsightMemoryRuntime({ state, promptDir: input.promptDir,
     admissionBudgetMs: () => admissionBudgetMs(input.source, runtime.connection.requestTimeoutMs),
     onUnavailable: (event) => {
@@ -87,7 +86,6 @@ export function createHindsightMemorySubsystem(input: Input) {
   // Retirement of an unrouted Character's source stays refused (never "not required"), so uncovered Timeline rows are kept.
   const memoryFlush: MemoryFlushPort = { prepareRetirement: (request) => runtime.characterRouted(request.characterId)
     ? ingestion.flushPort.prepareRetirement(request) : Promise.resolve({ status: "retryable_failure", code: "MEMORY_FLUSH_INCOMPLETE" }) };
-  const writeFence = createCanonicalLocalWriteFence();
   const writers = fenceHindsightWriters({ engine: foreground.engine, maintenance, memoryFlush, tidy,
     writeMemory: createHindsightObservedWriter(state),
     captureRun: async (characterId, signal) => {
@@ -95,10 +93,10 @@ export function createHindsightMemorySubsystem(input: Input) {
       // Epoch/lineage mismatch throws here; only a changed or disabled connection degrades the Run.
       const drift = runtime.driftReason(); ingestion.initializeBaseline(characterId);
       return drift === "none" ? foreground.captureRun(characterId, signal) : foreground.unavailableRun(characterId, drift);
-    } }, writeFence);
-  return { ...writers, snapshot: foreground.snapshot, state, ingestion, curator, scheduler, writeFence,
+    } }, writeFence, () => sourceTransition(input.db, input.epochId) !== undefined);
+  return { ...writers, snapshot: foreground.snapshot, state, ingestion, curator, scheduler, writeFence, workFence,
     start: () => { runtime.assertConnection(); scheduler.start(); },
-    stop: () => stopSubsystem({ state, ingestion, curator, scheduler, foreground }),
+    stop: () => { writeFence.retire(); workFence.retire(); return stopSubsystem({ state, ingestion, curator, scheduler, foreground }); },
     recordPrimaryCommitted: (commit: PrimaryConversationCommit) => recordWitness(input, { runtime, ingestion }, commit) };
 }
 

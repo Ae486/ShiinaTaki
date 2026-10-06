@@ -1,0 +1,25 @@
+error[unresolved-attribute]: Module `sys` has no member `_base_executable`
+  --> .trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-candidate-actual-embedding-v2.py:72:21
+   |
+70 |         assert expected == identity.value, "DIRECT_WORKER_HANDLE_MISMATCH"
+71 |         assert Path(identity.value["executable"]).resolve() == BASE_PYTHON, "DIRECT_WORKER_IMAGE_MISMATCH"
+72 |         assert Path(sys._base_executable).resolve() == BASE_PYTHON, "DIRECT_WORKER_BASE_MISMATCH"
+   |                     ^^^^^^^^^^^^^^^^^^^^
+73 |         assert Path(sys.executable).resolve() == control.PYTHON.resolve(), "DIRECT_WORKER_LOGICAL_EXECUTABLE_MISMATCH"
+74 |         assert Path(sys.prefix).resolve() == VENV, "DIRECT_WORKER_VENV_MISMATCH"
+   |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `sys` has no member `_base_executable`
+  --> .trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-candidate-actual-embedding-v2.py:89:31
+   |
+87 |             "identity": identity.value,
+88 |             "executable": sys.executable,
+89 |             "baseExecutable": sys._base_executable,
+   |                               ^^^^^^^^^^^^^^^^^^^^
+90 |             "prefix": sys.prefix,
+91 |             "basePrefix": sys.base_prefix,
+   |
+info: rule `unresolved-attribute` is enabled by default
+
+Found 2 diagnostics

@@ -1,0 +1,44 @@
+[
+  {
+    "path": "H:/hindsight/hindsight-api-slim/hindsight_api/engine/transition_snapshot.py",
+    "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-resume-preimages\\0-transition_snapshot.py",
+    "bytes": 7179,
+    "sha256": "2b48b796b543c626357770759076031aed64d995fe004768eb363c9a9f294f4a"
+  },
+  {
+    "path": "H:/hindsight/hindsight-api-slim/hindsight_api/engine/application_state/snapshot.py",
+    "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-resume-preimages\\1-snapshot.py",
+    "bytes": 18032,
+    "sha256": "2318b0f373b547b1985c99cffa8ed492efc07a7ad877f3f15d027f6535c02fdf"
+  },
+  {
+    "path": "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_baseline_reads.py",
+    "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-resume-preimages\\2-test_transition_baseline_reads.py",
+    "bytes": 23364,
+    "sha256": "f9d8ba5a70ed1e7c1362f32929a4ce15c92c33579659216c6a95d7082e4cd285"
+  },
+  {
+    "path": "H:/hindsight/TAKI_PATCHES.md",
+    "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-resume-preimages\\3-TAKI_PATCHES.md",
+    "bytes": 84812,
+    "sha256": "8fbdfc75d3eb2d0bedee812a3ad9e9cdd29f181daa8b8d93bd838da335d75c40"
+  },
+  {
+    "path": "H:/TakiAgent/.trellis/spec/backend/memory-transitions.md",
+    "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-resume-preimages\\4-memory-transitions.md",
+    "bytes": 32482,
+    "sha256": "4d770ca3a71b2aeb3ddb41f5064da2fcd9aa764d820dfcd7dce30f1bb0a7736d"
+  },
+  {
+    "path": "H:/TakiAgent/.trellis/spec/backend/memory-transition-healthy-drivers.md",
+    "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-resume-preimages\\5-memory-transition-healthy-drivers.md",
+    "bytes": 20971,
+    "sha256": "93995f7e29b7dda0321d20aba82fa5a16ea340d7a1cf8750676a168baf2dd0fb"
+  },
+  {
+    "path": "H:/hindsight/hindsight-api-slim/tests/native_results/test_transition_native_view.py",
+    "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-resume-preimages\\6-test_transition_native_view.py",
+    "bytes": 5504,
+    "sha256": "a14ecfed62cedc2bffbf5aa31fe8f20f2f05d2732751c4b87ff9205bbad0f957"
+  }
+]

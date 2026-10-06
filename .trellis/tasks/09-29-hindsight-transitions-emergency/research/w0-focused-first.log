@@ -1,0 +1,127 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+·························xxxxx········
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/operations/memory-operation-kind-replica.test.ts > replica.sync against the real B5 scheduler > settles through the changed push right after submit + one awaited tick, with no later status read
+AssertionError: expected [] to deeply equal [ 'manual' ]
+
+- Expected
++ Received
+
+- [
+-   "manual",
+- ]
++ []
+
+ ❯ src/memory/operations/memory-operation-kind-replica.test.ts:72:53
+     70|     expect(admitted.state).toBe("admitted");
+     71|     await service.stop();
+     72|     expect(f.calls.map((call) => call.run.trigger)).toEqual(["manual"]…
+       |                                                     ^
+     73|     expect(changes.map((operation) => operation.state)).toEqual(["admi…
+     74|     expect(changes[1]).toMatchObject({ operationId: admitted.operation…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/memory/operations/memory-operation-kind-replica.test.ts > replica.sync against the real B5 scheduler > never reports a run that was already in flight at admission as this operation's outcome, even in the same millisecond
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/memory/operations/memory-operation-kind-replica.test.ts:78:3
+     76|   });
+     77|
+     78|   it("never reports a run that was already in flight at admission as t…
+       |   ^
+     79|     const f = fixture(); const { scheduler, service, changes } = f.bui…
+     80|     f.hold(); scheduler.start();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/memory/operations/memory-operation-kind-replica.test.ts > replica.sync against the real B5 scheduler > cancels an unclaimed request while another Bank's run holds the drain, and the scheduler never runs it
+AssertionError: expected null to be 'incremental' // Object.is equality
+
+- Expected:
+"incremental"
+
++ Received:
+null
+
+ ❯ src/memory/operations/memory-operation-kind-replica.test.ts:101:56
+     99|     expect(f.calls[0]?.bank.bankId).toBe("global");
+    100|     const admitted = service.submit(sync("character"));
+    101|     expect(f.repo.get("character")?.pendingManualKind).toBe("increment…
+       |                                                        ^
+    102|     expect(service.cancel(admitted.operationId)).toMatchObject({ state…
+    103|     expect(f.repo.get("character")?.pendingManualKind).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/memory/operations/memory-operation-kind-replica.test.ts > replica.sync against the real B5 scheduler > settles failed with the supervisor code when the drain throws before the claim
+AssertionError: expected null to be 'incremental' // Object.is equality
+
+- Expected:
+"incremental"
+
++ Received:
+null
+
+ ❯ src/memory/operations/memory-operation-kind-replica.test.ts:117:53
+    115|     const admitted = service.submit(sync()); await service.stop();
+    116|     expect(f.calls).toEqual([]);
+    117|     expect(f.repo.get("global")?.pendingManualKind).toBe("incremental"…
+       |                                                     ^
+    118|     expect(changes.map((operation) => operation.state)).toEqual(["admi…
+    119|     expect(service.status(admitted.operationId)).toMatchObject({ state…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/memory/operations/memory-operation-service.test.ts > memory operation service — replica.sync > admits immediately, is readable from any caller while running, and settles completed after the tick
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'global', 'incremental' ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+    "global",
+    "incremental",
++   "2ce9d965-6961-476b-9850-63d855b56c0e",
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/memory/operations/memory-operation-service.test.ts:47:48
+     45|     const admitted = f.service.submit(sync());
+     46|     expect(admitted).toMatchObject({ state: "admitted", kind: "replica…
+     47|     expect(f.runtime!.scheduler.requestManual).toHaveBeenCalledWith("g…
+       |                                                ^
+     48|     expect(f.runtime!.scheduler.status("global")[0]?.pendingManualKind…
+     49|     expect(f.service.status(admitted.operationId).state).toBe("admitte…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/memory/operations/memory-operation-service.test.ts > memory operation service — replica.sync > admits immediately, is readable from any caller while running, and settles completed after the tick
+Error: Hook timed out in 10000ms.
+If this is a long-running hook, pass a timeout value as the last argument or configure it globally with "hookTimeout".
+ ❯ src/memory/operations/memory-operation-service.test.ts:13:1
+     11| const dbs: Database[] = [];
+     12| const services: MemoryOperationService[] = [];
+     13| afterEach(async () => {
+       | ^
+     14|   for (const service of services.splice(0)) await service.stop();
+     15|   for (const db of dbs.splice(0)) db.close();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  2 failed | 3 passed (5)
+      Tests  5 failed | 33 passed (38)
+   Start at  20:45:36
+   Duration  16.03s (transform 5.68s, setup 0ms, import 9.53s, tests 19.68s, environment 1ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/operations/memory-operation-kind-replica.test.ts src/memory/operations/memory-operation-service.test.ts src/db/hindsight-replica-scheduler-repo.test.ts src/memory/hindsight-backup/hindsight-backup-status.test.ts src/memory/hindsight/hindsight-application-sync-runner.test.ts --maxWorkers=2 --reporter=dot

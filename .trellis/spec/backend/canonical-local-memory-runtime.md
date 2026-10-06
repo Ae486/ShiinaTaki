@@ -114,8 +114,13 @@ BlockReplaceInput.expectedEpochId?: string;   // structured-memory-block-repo.ts
   `writeEntry`/`writeMemory`, retention archive/hardDelete, maintenance and tidy reject; `prepareRetirement` returns
   `retryable_failure` + `MEMORY_AUTHORITY_FENCED`, which Compaction already retries. `recall`/`reflect`, `assemble` and
   reports stay open, so chat keeps working during an activation.
-- `captureRun` skips the Bank/baseline write while fenced instead of refusing: the custody group Chat opens initializes
-  eligibility itself. The retention sweeper runs only while `fence.writable()` and the epoch is still this subsystem's.
+- The fenced writer wrapper skips ingestion Bank/baseline initialization during `captureRun`. W4 also threads the
+  same fence into `ensureCanonicalLocalBanks`, so capture and direct assembly cannot lazily create a new Character
+  Bank while fenced. New-Character capture is memory-unavailable; direct assembly refuses before any Bank write.
+  Chat custody still initializes eligibility independently and can introduce a newly witnessed Character. Final
+  coverage must therefore include actual Timeline, assigned groups, Banks and Blocks, even when the setup inventory
+  hash did not change. This supersedes the pre-W4 lazy-Bank caveat without removing the final D87 inventory gate.
+  The retention sweeper runs only while `fence.writable()` and the epoch is still this subsystem's.
 - `CanonicalLocalIngestion.settle()` loops until no per-Character chain is queued; the activation drain calls it after
   quiesce and before forcing ingestion (see [`memory-hindsight-activation.md`](./memory-hindsight-activation.md)).
 - Tidy Block writes pass `expectedEpochId: review.input.epochId`; the repo compares it with
@@ -186,3 +191,15 @@ ingestion.recordPrimaryCommitted(primaryCommit);
 await ingestion.maybeRun({ characterId });
 await ingestion.flushPort.prepareRetirement(retirement);
 ```
+
+### Transitioned Local evidence
+
+Migration053 preserves unit-specific provenance, actual historical deleted supports and ordered Source reference
+snapshots independently from live Sources. `canonical-memory-source-references.ts` supplies the real evidenceSources,
+copy and retention consumers. Copy keeps different historical versions as different new Local Sources and repeated
+references in their original order. Source edits mark explicit associations as Local intent; unknown metadata is not
+rewritten. Hard deletion still refuses incoming supports, including invalidated dependents, and retains retired IDs.
+
+`canonical-memory-policy-revision.ts` advances policyVersion for actual semantic policy changes in existing operation
+transactions. No-op/text-only/same-importance changes preserve the version. See memory-transitions.md for exact
+candidate capture, final mapping, Source alias and timestamp provenance contracts; ordinary first-activation guards remain.

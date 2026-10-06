@@ -1,0 +1,82 @@
+[
+  {
+    "path": "packages/core/src/db/memory-transition-candidate-repo.ts",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__memory-transition-candidate-repo.ts",
+    "sha256": "a9f1223f507d94c22313117320569839e6ae86a05b39f7e9459f839c958b6091"
+  },
+  {
+    "path": "packages/core/src/db/memory-transition-publication-proof.ts",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__memory-transition-publication-proof.ts",
+    "sha256": "d70f649bd04db43911ae823f70eda6c1c45699a4e3510b1028918f26dca2d81f"
+  },
+  {
+    "path": "packages/core/src/db/memory-transition-publication-reader.ts",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__memory-transition-publication-reader.ts",
+    "sha256": "fb8b5e1986f354695a73dcda7ff02ee83639a255048287fa651817eb7121ede3"
+  },
+  {
+    "path": "packages/core/src/db/memory-transition-publication-repo.ts",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__memory-transition-publication-repo.ts",
+    "sha256": "3cc143cef94d1c5986e109b17356fca59061f365e8123e5118ce6c0d7d0e7558"
+  },
+  {
+    "path": "packages/core/src/db/memory-transition-local-staging.ts",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__memory-transition-local-staging.ts",
+    "sha256": "18f28db0ef2cba3651f08f4527d345011e4ea51f85c8e0715c5784ecbe938aec"
+  },
+  {
+    "path": "packages/core/src/db/memory-transition-representation.ts",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__db__memory-transition-representation.ts",
+    "sha256": "9a8035d0fa8b016e77ecec2926ad279afc5f99cc148ce61447fc175dadf48051"
+  },
+  {
+    "path": "packages/core/src/memory/transitions/transition-local-candidate.ts",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__transition-local-candidate.ts",
+    "sha256": "c3d53a62b0cb30d04b4f987e3ad108fd1e1e9d6449de6f58c08628d2b892eff5"
+  },
+  {
+    "path": "packages/core/src/memory/transitions/transition-local-projection.ts",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__transition-local-projection.ts",
+    "sha256": "b1050bcdd75d9db012247e53c6f810547c8d0747dafbcfa6a251ff38c8b96517"
+  },
+  {
+    "path": "packages/core/src/memory/transitions/transition-final-mapping.ts",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__transition-final-mapping.ts",
+    "sha256": "3dc9c3eba5b4997409eab8bb7771aba3b0ee84e09073d77f1239156225fe18dd"
+  },
+  {
+    "path": "packages/core/src/memory/transitions/transition-pending-sources.ts",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__transition-pending-sources.ts",
+    "sha256": "02d7f5fa6a04e5b213ae09a66a3cfb429060d7d14112a0d37606763b0e1dd851"
+  },
+  {
+    "path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__transition-healthy-execution.ts",
+    "sha256": "5dfee2f0368a3a32f27a4d60b0e26463d1a6acc66d355d8698df0311b897818a"
+  },
+  {
+    "path": "packages/core/src/memory/transitions/transition-healthy-service.ts",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__transition-healthy-service.ts",
+    "sha256": "a5d55603cec5cb63d981a761f7f989bef760113ca871b1b9e70003cd9ead5cbf"
+  },
+  {
+    "path": "packages/core/src/memory/transitions/index.md",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/packages__core__src__memory__transitions__index.md",
+    "sha256": "46d4a61f20d6cf202da6d4e49e5f1cadebaaddc48c6d3ea45c907be28c7a1b59"
+  },
+  {
+    "path": ".trellis/spec/backend/memory-transitions.md",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/.trellis__spec__backend__memory-transitions.md",
+    "sha256": "1e39e12daec4fbc9801a5f13a2b091cd1646d0f88baa2d607e9ddff1cde882ab"
+  },
+  {
+    "path": ".trellis/spec/backend/memory-transition-publication.md",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/.trellis__spec__backend__memory-transition-publication.md",
+    "sha256": "e9472f0c07d86aae75a29411e58c7fd2afcf3a7d6c5bdde2298b06a692bd11ce"
+  },
+  {
+    "path": ".trellis/spec/backend/memory-transition-healthy-drivers.md",
+    "preimage": "H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-preimages/.trellis__spec__backend__memory-transition-healthy-drivers.md",
+    "sha256": "c5089df308a6f049f621bc2a4e5f414d52eebabf3e60e49afc10fc5ab0fc965a"
+  }
+]

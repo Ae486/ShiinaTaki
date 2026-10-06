@@ -1,0 +1,23 @@
+{
+  "fixtures": [
+    {
+      "root": "H:\\TakiAgent\\.trellis\\.runtime\\w5-candidate-native-clone-http-env-04d60c69c5ac4079b7bdc86d5ec4d6d0",
+      "noPostmasterPid": true,
+      "portReleased": true,
+      "syntheticDataRetained": true
+    },
+    {
+      "root": "H:\\TakiAgent\\.trellis\\.runtime\\w5-candidate-native-clone-http-env-0bbaedbaa1d24597ad68c04b39e28ccf",
+      "noPostmasterPid": true,
+      "portReleased": true,
+      "syntheticDataRetained": true
+    },
+    {
+      "root": "H:\\TakiAgent\\.trellis\\.runtime\\w5-candidate-native-clone-http-env-bc5a5072cae34ffdadb8d08b3ced1803",
+      "noPostmasterPid": true,
+      "portReleased": true,
+      "syntheticDataRetained": true
+    }
+  ],
+  "realCorpusAccessed": false
+}

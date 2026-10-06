@@ -1,0 +1,90 @@
+Owned fixture: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-82014973ec9e
+PostgreSQL: 18.1 ; vector/pg_trgm ready
+Pytest log: H:\TakiAgent\.trellis\.runtime\g1-validation\taki-hindsight-g1-82014973ec9e\pytest.log
+
+tests/native_results/test_transition_proof_renewal.py::test_ordinary_snapshot_retains_its_repeatable_view_with_concurrent_writer 
+tests/native_results/test_transition_proof_renewal.py::test_final_snapshot_does_not_block_its_exact_executor_renewal 
+[gw0] PASSED tests/native_results/test_transition_proof_renewal.py::test_ordinary_snapshot_retains_its_repeatable_view_with_concurrent_writer 
+tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[actor] 
+[gw1] PASSED tests/native_results/test_transition_proof_renewal.py::test_final_snapshot_does_not_block_its_exact_executor_renewal 
+tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[attempt] 
+[gw0] PASSED tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[actor] 
+tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[generation] 
+[gw1] PASSED tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[attempt] 
+tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[token] 
+[gw0] PASSED tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[generation] 
+tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[transition] 
+[gw1] PASSED tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[token] 
+tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[expired] 
+[gw0] PASSED tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[transition] 
+tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[terminal] 
+[gw1] PASSED tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[expired] 
+tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[pointer] 
+[gw0] PASSED tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[terminal] 
+tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[namespace] 
+[gw1] PASSED tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[pointer] 
+tests/native_results/test_transition_proof_renewal.py::test_claim_waits_for_uncommitted_renewal_before_testing_expiry 
+[gw0] PASSED tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[namespace] 
+tests/native_results/test_transition_proof_renewal.py::test_expiry_at_final_publication_rolls_back_all_proof_rows_and_resumes_completed_steps 
+[gw1] PASSED tests/native_results/test_transition_proof_renewal.py::test_claim_waits_for_uncommitted_renewal_before_testing_expiry 
+tests/native_results/test_transition_fence.py::test_fence_survives_executor_expiry_and_lookup_does_not_repeat_acquire 
+[gw0] PASSED tests/native_results/test_transition_proof_renewal.py::test_expiry_at_final_publication_rolls_back_all_proof_rows_and_resumes_completed_steps 
+tests/native_results/test_transition_fence.py::test_accepted_foreground_writer_drains_and_late_child_keeps_retired_identity 
+[gw1] PASSED tests/native_results/test_transition_fence.py::test_fence_survives_executor_expiry_and_lookup_does_not_repeat_acquire 
+tests/native_results/test_transition_fence.py::test_queue_descendants_drain_but_new_admissions_cannot_extend_cutoff 
+[gw0] PASSED tests/native_results/test_transition_fence.py::test_accepted_foreground_writer_drains_and_late_child_keeps_retired_identity 
+tests/native_results/test_transition_fence.py::test_sql_publication_barrier_waits_for_inflight_commit 
+[gw1] PASSED tests/native_results/test_transition_fence.py::test_queue_descendants_drain_but_new_admissions_cannot_extend_cutoff 
+tests/native_results/test_transition_fence.py::test_resumed_bank_rejects_late_queue_admission_from_retired_writer[writer] 
+[gw0] PASSED tests/native_results/test_transition_fence.py::test_sql_publication_barrier_waits_for_inflight_commit 
+tests/native_results/test_transition_fence.py::test_resumed_bank_rejects_late_queue_admission_from_retired_writer[transition] 
+[gw1] PASSED tests/native_results/test_transition_fence.py::test_resumed_bank_rejects_late_queue_admission_from_retired_writer[writer] 
+tests/native_results/test_transition_fence.py::test_unowned_bank_rejects_stale_inherited_queue_identity[False] 
+[gw0] PASSED tests/native_results/test_transition_fence.py::test_resumed_bank_rejects_late_queue_admission_from_retired_writer[transition] 
+tests/native_results/test_transition_fence.py::test_unowned_bank_rejects_stale_inherited_queue_identity[True] 
+[gw1] PASSED tests/native_results/test_transition_fence.py::test_unowned_bank_rejects_stale_inherited_queue_identity[False] 
+tests/native_results/test_transition_proof.py::test_final_native_application_proof_is_fenced_complete_and_recoverable[False] 
+[gw0] PASSED tests/native_results/test_transition_fence.py::test_unowned_bank_rejects_stale_inherited_queue_identity[True] 
+tests/native_results/test_transition_proof.py::test_final_native_application_proof_is_fenced_complete_and_recoverable[True] 
+[gw1] PASSED tests/native_results/test_transition_proof.py::test_final_native_application_proof_is_fenced_complete_and_recoverable[False] 
+tests/native_results/test_transition_recovery.py::test_duplicate_live_verification_does_not_start_another_native_pass 
+[gw1] PASSED tests/native_results/test_transition_recovery.py::test_duplicate_live_verification_does_not_start_another_native_pass 
+tests/native_results/test_transition_recovery.py::test_applied_delta_abort_refusal_preserves_claim_and_factual_lookup 
+[gw0] PASSED tests/native_results/test_transition_proof.py::test_final_native_application_proof_is_fenced_complete_and_recoverable[True] 
+tests/native_results/test_transition_recovery.py::test_safe_reentry_abort_restores_retired_fence_and_allows_new_attempt 
+[gw1] PASSED tests/native_results/test_transition_recovery.py::test_applied_delta_abort_refusal_preserves_claim_and_factual_lookup 
+tests/native_results/test_transition_recovery.py::test_incomplete_return_maintenance_resumes_exact_plan_before_abort_can_release 
+[gw0] PASSED tests/native_results/test_transition_recovery.py::test_safe_reentry_abort_restores_retired_fence_and_allows_new_attempt 
+tests/native_results/test_cutover_snapshot_boundaries.py::test_g1_snapshot_remains_usable_without_optional_cutover_retention_column 
+[gw1] PASSED tests/native_results/test_transition_recovery.py::test_incomplete_return_maintenance_resumes_exact_plan_before_abort_can_release 
+tests/native_results/test_cutover_snapshot_boundaries.py::test_certified_snapshot_remains_after_real_expiry_and_cleanup 
+[gw0] PASSED tests/native_results/test_cutover_snapshot_boundaries.py::test_g1_snapshot_remains_usable_without_optional_cutover_retention_column 
+tests/native_results/test_cutover_snapshot_boundaries.py::test_pruned_post_candidate_interval_refuses_resume_but_preserves_history 
+[gw0] PASSED tests/native_results/test_cutover_snapshot_boundaries.py::test_pruned_post_candidate_interval_refuses_resume_but_preserves_history 
+tests/native_results/test_cutover_snapshot_boundaries.py::test_policy_digest_observes_static_proxy_even_with_older_resolved_config 
+[gw1] PASSED tests/native_results/test_cutover_snapshot_boundaries.py::test_certified_snapshot_remains_after_real_expiry_and_cleanup 
+tests/native_results/test_cutover_snapshot_boundaries.py::test_unjournaled_mode_tracking_drift_cannot_be_adopted_as_new_baseline 
+[gw0] PASSED tests/native_results/test_cutover_snapshot_boundaries.py::test_policy_digest_observes_static_proxy_even_with_older_resolved_config 
+tests/native_results/test_cutover_snapshot_boundaries.py::test_replaced_attempt_cannot_publish_after_its_slow_work_resumes 
+[gw1] PASSED tests/native_results/test_cutover_snapshot_boundaries.py::test_unjournaled_mode_tracking_drift_cannot_be_adopted_as_new_baseline 
+[gw0] PASSED tests/native_results/test_cutover_snapshot_boundaries.py::test_replaced_attempt_cannot_publish_after_its_slow_work_resumes 
+
+============================ slowest 10 durations =============================
+9.99s setup    tests/native_results/test_transition_proof_renewal.py::test_final_snapshot_does_not_block_its_exact_executor_renewal
+9.58s setup    tests/native_results/test_transition_proof_renewal.py::test_ordinary_snapshot_retains_its_repeatable_view_with_concurrent_writer
+5.93s call     tests/native_results/test_transition_recovery.py::test_applied_delta_abort_refusal_preserves_claim_and_factual_lookup
+5.90s call     tests/native_results/test_transition_proof.py::test_final_native_application_proof_is_fenced_complete_and_recoverable[True]
+5.84s call     tests/native_results/test_transition_recovery.py::test_safe_reentry_abort_restores_retired_fence_and_allows_new_attempt
+3.86s setup    tests/native_results/test_transition_recovery.py::test_incomplete_return_maintenance_resumes_exact_plan_before_abort_can_release
+3.79s setup    tests/native_results/test_transition_proof_renewal.py::test_expiry_at_final_publication_rolls_back_all_proof_rows_and_resumes_completed_steps
+3.49s setup    tests/native_results/test_transition_proof_renewal.py::test_claim_waits_for_uncommitted_renewal_before_testing_expiry
+3.45s setup    tests/native_results/test_transition_fence.py::test_accepted_foreground_writer_drains_and_late_child_keeps_retired_identity
+3.38s setup    tests/native_results/test_transition_proof_renewal.py::test_renewal_refuses_lost_or_foreign_owner_without_mutation[actor]
+======================= 33 passed in 106.32s (0:01:46) ========================
+{
+    "Fixture":  "taki-hindsight-g1-82014973ec9e",
+    "Stopped":  true,
+    "DataRemoved":  true,
+    "RegistryRemoved":  true,
+    "Logs":  "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-82014973ec9e"
+}

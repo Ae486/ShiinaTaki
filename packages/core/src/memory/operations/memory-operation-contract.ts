@@ -4,7 +4,7 @@
  *         owner's own row lookups
  * OUTPUT: the handler contract every operation kind implements (admission carries the Core-stamped origin), the
  *         settlement/observation shapes, the closed refusal error and the mutual single-flight guard for the setup /
- *         local-onboarding / hindsight-activation / hindsight-lifecycle / hindsight-backup families
+ *         local-onboarding / hindsight-activation / hindsight-lifecycle / hindsight-backup / memory-transition families
  * POS:    core/memory/operations — internal contract shared by the kind handlers and the service; no persistence here
  */
 import type {
@@ -12,6 +12,7 @@ import type {
   MemoryOperationReason, MemoryOperationRefusalReason, MemoryOperationRequest, MemoryOperationResult, MemoryReplicaBank, PendingMemorySummary,
 } from "@taki/shared";
 import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
+import type { MemoryReplicaRequest } from "@taki/shared";
 import type { HindsightActivationService } from "../hindsight-activation/hindsight-activation-service.ts";
 import type { HindsightBackupService } from "../hindsight-backup/hindsight-backup-service.ts";
 import type { HindsightLifecycleService } from "../hindsight-lifecycle/hindsight-lifecycle-service.ts";
@@ -19,6 +20,8 @@ import type { HindsightReplicaScheduler } from "../hindsight/hindsight-replica-s
 import type { HindsightConnectionDrift } from "../hindsight/hindsight-runtime-connection.ts";
 import type { HindsightSetupService } from "../hindsight/hindsight-setup-service.ts";
 import type { LocalOnboardingService } from "../local-onboarding/local-onboarding-service.ts";
+import type { MemoryTransitionDriver, MemoryTransitionOperationStorage } from "./memory-operation-transition-storage.ts";
+import type { TransitionEvidenceContext } from "../transitions/transition-evidence-context.ts";
 
 /** The narrow live view of the selected Hindsight subsystem; null when the authority runtime is not Hindsight. */
 export interface MemoryOperationsRuntime {
@@ -27,7 +30,7 @@ export interface MemoryOperationsRuntime {
   configFingerprint: string;
   deploymentMode: HindsightConnectionProjection["deploymentMode"];
   scheduler: Pick<HindsightReplicaScheduler, "started" | "start" | "stop" | "requestManual" | "cancelManual" | "tick" | "status" | "lastError"
-    | "verifiedReconnect">;
+    | "verifiedReconnect" | "request">;
   /** The subsystem's native-writer fence; only backup capture quiesces it, and always releases it. */
   writeFence: Pick<CanonicalLocalWriteFence, "quiesce" | "release">;
   banks(): MemoryReplicaBank[];
@@ -48,6 +51,11 @@ export interface MemoryOperationContext {
   lifecycle?: HindsightLifecycleService;
   /** Absent when Core composes without a Hindsight backup producer; the backup kinds then refuse at admission. */
   backup?: HindsightBackupService;
+  transition?: MemoryTransitionDriver;
+  transitionStorage?: MemoryTransitionOperationStorage;
+  /** Fresh independent scope for one synchronous admission transaction; absent from execution and observation. */
+  admissionVerification?: TransitionEvidenceContext;
+  replicaRequest?(requestId: string): MemoryReplicaRequest | undefined;
   /** The owner's own durable rows, so a kind can resolve a prior command (retry) without trusting the client. */
   lookup(operationId: string): MemoryOperation | undefined;
   activeInFamily(family: string): MemoryOperation | undefined;
@@ -56,7 +64,7 @@ export interface MemoryOperationContext {
 }
 
 /** Setup, Local onboarding, Hindsight activation, lifecycle and backup are mutually single-flight (grill G6); the open row wins and is named. */
-export const EXCLUSIVE_MEMORY_FAMILIES = ["setup", "local-onboarding", "hindsight-activation", "hindsight-lifecycle", "hindsight-backup"] as const;
+export const EXCLUSIVE_MEMORY_FAMILIES = ["setup", "local-onboarding", "hindsight-activation", "hindsight-lifecycle", "hindsight-backup", "memory-transition"] as const;
 export function refuseWhileExclusiveFamilyBusy(ctx: Pick<MemoryOperationContext, "activeInFamily">): void {
   for (const family of EXCLUSIVE_MEMORY_FAMILIES) {
     const active = ctx.activeInFamily(family);
@@ -65,7 +73,7 @@ export function refuseWhileExclusiveFamilyBusy(ctx: Pick<MemoryOperationContext,
 }
 
 export interface MemoryOperationSettlement {
-  state: "completed" | "failed" | "outcome_unknown";
+  state: "completed" | "failed" | "cancelled" | "outcome_unknown";
   reason: MemoryOperationReason | null;
   errorCode: MemoryOperationErrorCode | null;
   result: MemoryOperationResult | null;
@@ -92,6 +100,10 @@ export interface MemoryOperationAdmission { origin: MemoryHindsightLifecycleOrig
 
 export interface MemoryOperationKindHandler<R extends MemoryOperationRequest = MemoryOperationRequest> {
   family(request: R): string;
+  /** Stable request replay returns its original row and never dispatches a second effect. */
+  existing?(request: R, ctx: MemoryOperationContext): MemoryOperation | undefined;
+  /** Runs inside the same transaction as insertAdmitted, before any acknowledgement or dispatch. */
+  persistAdmission?(operation: MemoryOperation, ctx: MemoryOperationContext): void;
   /** Synchronous refusal point; throws MemoryOperationRefusal before any row exists. */
   admit(request: R, ctx: MemoryOperationContext, admission: MemoryOperationAdmission): MemoryOperationProducerRef;
   /** Resolves null when the producer has not settled yet; observe() then classifies later reads. */

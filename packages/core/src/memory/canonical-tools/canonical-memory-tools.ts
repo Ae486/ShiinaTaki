@@ -214,6 +214,7 @@ function callOptions(deps: ToolDeps, options?: unknown, requestId?: string) {
   const source = effect?.sourceRef.type === "memory" ? effect.sourceRef : undefined;
   return {
     requestId: requestId ?? source?.requestId,
+    provenance: effect ? { callerId: effect.runId, runId: effect.runId, attemptId: effect.attemptId, effectId: effect.effectId } : undefined,
     expectedAuthorityEpochId: deps.authority?.epochId,
     expectedProviderId: deps.authority?.providerId,
     expectedProviderLineageId: deps.authority?.providerLineageId,

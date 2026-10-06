@@ -1,0 +1,17 @@
+{
+  "completed": true,
+  "startedAt": "2026-10-06T03:39:24.104Z",
+  "receiptId": "5da1b2448bcc7ccaf0a41d5cbfa50fc9ea5e6f77e3610082300c7ea9477eed31",
+  "candidateId": "c10685da68d8d5f6e8861f2c322d14b7ef1e823053d0b0aaeace5fbafb336c10",
+  "retention": {
+    "records": 1275,
+    "sources": 722,
+    "banks": 2,
+    "invalidated": 89,
+    "receiptBackedRetentionChanges": 0,
+    "lifecycleReceiptHash": "5d22e7122307304ecd2ed2ef5d62b69b12e9256acc731deb31a80fb333229cf9",
+    "stateHash": "0aa33b6085965461edcdbfe7c165808248f63c94cb1af4a873cf564ee7dc4a09"
+  },
+  "coreUnchanged": true,
+  "finishedAt": "2026-10-06T03:42:34.232Z"
+}

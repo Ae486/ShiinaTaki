@@ -1,0 +1,108 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+xxxxxx
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/transitions/transition-admission-verification.test.ts > independent synchronous admission verification > shares immutable work across both plans, epoch stamp and default Local readiness, then closes before execution
+AssertionError: expected undefined to be defined
+ ❯ src/memory/transitions/transition-admission-verification.test.ts:55:23
+     53|       expect(plans).toHaveBeenCalledTimes(2);
+     54|       const context = plans.mock.calls[0]![1] as TransitionEvidenceCon…
+     55|       expect(context).toBeDefined(); expect(plans.mock.calls[1]![1]).t…
+       |                       ^
+     56|       expect(snapshots.mock.calls).toEqual([[context], [context]]);
+     57|       const ids = verify.mock.calls.map(([evidence]) => evidence.evide…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/memory/transitions/transition-admission-verification.test.ts > independent synchronous admission verification > refuses expiry after expensive first-plan validation and rolls back without dispatch
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ src/memory/transitions/transition-admission-verification.test.ts:78:47
+     76|         return result;
+     77|       });
+     78|       expect(() => f.service.plan(f.request)).toThrow("MEMORY_TRANSITI…
+       |                                               ^
+     79|       expect(f.counts()).toEqual(before);
+     80|       expect(() => f.owner.submit(f.request)).toThrow("MEMORY_TRANSITI…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/memory/transitions/transition-admission-verification.test.ts > independent synchronous admission verification > retains the second-plan current configuration guard and transaction rollback
+ FAIL  src/memory/transitions/transition-admission-verification.test.ts > independent synchronous admission verification > retains the second-plan current binding guard and transaction rollback
+AssertionError: expected [Function] to throw error including 'MEMORY_TRANSITION_PROOF_INVALID' but got 'Cannot read properties of undefined (…'
+
+Expected: "MEMORY_TRANSITION_PROOF_INVALID"
+Received: "Cannot read properties of undefined (reading 'assertOwner')"
+
+ ❯ src/memory/transitions/transition-admission-verification.test.ts:107:50
+    105|       expect(() => f.owner.submit(f.request)).toThrow("MEMORY_TRANSITI…
+    106|       expect(calls).toBe(2); expect(f.counts()).toEqual(before);
+    107|       expect(() => context!.assertOwner(f.h.db)).toThrow("MEMORY_TRANS…
+       |                                                  ^
+    108|     } finally { vi.restoreAllMocks(); await f.close(); }
+    109|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/memory/transitions/transition-admission-verification.test.ts > independent synchronous admission verification > retains the second-plan current block guard and transaction rollback
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ src/memory/transitions/transition-admission-verification.test.ts:105:47
+    103|         });
+    104|       }
+    105|       expect(() => f.owner.submit(f.request)).toThrow("MEMORY_TRANSITI…
+       |                                               ^
+    106|       expect(calls).toBe(2); expect(f.counts()).toEqual(before);
+    107|       expect(() => context!.assertOwner(f.h.db)).toThrow("MEMORY_TRANS…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/memory/transitions/transition-independent-projection.test.ts > independent boundary pure projection reuse > reuses complete semantic identity, freezes output and discards entries at boundary exit
+AssertionError: expected 'expected { bank: { …(10) }, sources: …' to be 'fixture rollback' // Object.is equality
+
+- Expected
++ Received
+
+- fixture rollback
++ expected { bank: { …(10) }, sources: [], …(7) } to be { bank: { …(10) }, sources: [], …(7) } // Object.is equality
++
++ If it should pass with deep equality, replace "toBe" with "toStrictEqual"
++
++ Expected: { bank: { …(10) }, sources: [], …(7) }
++ Received: serializes to the same string
++
+
+ ❯ src/memory/transitions/transition-independent-projection.test.ts:32:40
+     30|       expect(first).toBeDefined();
+     31|     } catch (error) {
+     32|       expect((error as Error).message).toBe("fixture rollback");
+       |                                        ^
+     33|       const values = [0, 1].map(() => withTransitionEvidenceContext(f.…
+     34|         projectTransitionLocalBank({ evidence: verification.read(f.db,…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  6 failed (6)
+   Start at  19:12:51
+   Duration  16.12s (transform 11.47s, setup 0ms, import 14.79s, tests 8.07s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/transitions/transition-admission-verification.test.ts src/memory/transitions/transition-independent-projection.test.ts --maxWorkers=2 --reporter=dot

@@ -1,0 +1,39 @@
+{
+  "root": "H:\\TakiAgent\\.trellis\\.runtime\\w5-candidate-native-clone-http-env-04d60c69c5ac4079b7bdc86d5ec4d6d0",
+  "meaning": "Actual run_child environment and PG start; synthetic rehearsal boundary",
+  "retainedKeysMatch": {
+    "APPDATA": false,
+    "COMSPEC": false,
+    "LOCALAPPDATA": false,
+    "NUMBER_OF_PROCESSORS": false,
+    "PATH": false,
+    "PATHEXT": false,
+    "PROCESSOR_ARCHITECTURE": false,
+    "SYSTEMROOT": false,
+    "TEMP": false,
+    "TMP": false,
+    "USERNAME": false,
+    "USERPROFILE": false,
+    "WINDIR": false,
+    "PYTHON_DOTENV_DISABLED": true,
+    "UV_NO_ENV_FILE": true,
+    "PYTHONUTF8": true,
+    "HF_HUB_OFFLINE": true,
+    "TRANSFORMERS_OFFLINE": true,
+    "TOKENIZERS_PARALLELISM": true,
+    "HF_HUB_DISABLE_IMPLICIT_TOKEN": true,
+    "HF_TOKEN_PATH": true
+  },
+  "forbiddenKeysAbsent": true,
+  "httpSettingsMatch": true,
+  "startExitCode": 3221225477,
+  "cleanup": {
+    "stopped": true,
+    "portReleased": true,
+    "attempts": []
+  },
+  "phase.json": {
+    "phase": "pg-started",
+    "monotonic": 37584.046
+  }
+}

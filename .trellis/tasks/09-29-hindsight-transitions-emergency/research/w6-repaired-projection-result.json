@@ -1,0 +1,36 @@
+{
+  "startedAt": "2026-10-06T02:01:56.249Z",
+  "completed": true,
+  "banks": [
+    {
+      "sources": 562,
+      "records": 1007,
+      "reusedPolicies": 13,
+      "incidentMatched": true
+    },
+    {
+      "sources": 160,
+      "records": 268,
+      "reusedPolicies": 0,
+      "incidentMatched": true
+    }
+  ],
+  "unchanged": true,
+  "counts": {
+    "banks": 2,
+    "sources": 722,
+    "records": 1275,
+    "derived": 4,
+    "blocks": 2,
+    "history": 741,
+    "historicalReferences": 0,
+    "sourceAliases": 0,
+    "sourceSets": 1275
+  },
+  "pendingSources": 0,
+  "hashesAfter": [
+    "41fb3b3d289575f7cd8e276b8c9fea696a8a89581b4c3aac5b31d21688afec76",
+    "cc6dc6567eb3dc88512134f6444945c8c8bdf779a8352f0cd6bf599897569e6b"
+  ],
+  "finishedAt": "2026-10-06T02:04:19.508Z"
+}

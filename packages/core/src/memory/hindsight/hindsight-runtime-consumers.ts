@@ -5,8 +5,9 @@
  */
 import type { ToolSet } from "ai";
 import type { CapturedMemoryRun } from "../canonical-memory-run.ts";
+import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 
-export function createHindsightRuntimeConsumers() {
+export function createHindsightRuntimeConsumers(workFence?: CanonicalLocalWriteFence) {
   const active = new Set<Promise<unknown>>(); let stopped = false;
   const alive = () => {
     if (stopped) throw new Error("MEMORY_OPERATION_CANCELLED");
@@ -34,8 +35,11 @@ export function createHindsightRuntimeConsumers() {
   };
   const settle = async () => { while (active.size > 0) await Promise.allSettled([...active]); };
   return { wrapTools,
-    capture: (action: () => Promise<CapturedMemoryRun>) => track(async () => {
-      const run = await action(); alive(); return wrapRun(run);
+    capture: (action: () => Promise<CapturedMemoryRun>) => track(() => {
+      const complete = async () => { const run = await action(); alive(); return wrapRun(run); };
+      // Capture may synchronize several Banks in sequence. They inherit this one live owner, so a drain cannot
+      // finish after the first Bank and then reject the second Bank of an already admitted capture.
+      return workFence ? workFence.admit(complete) : complete();
     }),
     stop: () => { stopped = true; return settle(); }, settle };
 }

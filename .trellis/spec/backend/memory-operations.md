@@ -18,14 +18,15 @@ MEMORY_OPERATION_METHODS = { submit: "memory.operations.submit", status: "memory
   changed: "memory.operations.changed" };
 MEMORY_AUTHORITY_METHODS = { status: "memory.authority.status" };
 MemoryOperationKind = "setup.validate" | "setup.apply" | "replica.sync" | "local.onboard.prepare" | "local.onboard.activate"
-  | "hindsight.activate" | "bank.provision" | "connection.revalidate" | "backup.capture" | "backup.admit" | "backup.verify";
+  | "hindsight.activate" | "bank.provision" | "connection.revalidate" | "backup.capture" | "backup.admit" | "backup.verify"
+  | "transition.return-local" | "transition.reenter-hindsight" | "transition.emergency-local";
 MemoryOperationState = "admitted" | "running" | "completed" | "failed" | "cancelled" | "outcome_unknown";
 MemoryOperationReason = "core_restart" | "producer_refused" | "producer_failed" | "cancelled_before_claim" | "runtime_unavailable"
   | "producer_incomplete" | "commitment_unknown";
 MemoryOperationRefusalReason = "MEMORY_OPERATION_NOT_FOUND" | "…_BUSY" | "…_RUNNING" | "…_SETTLED" | "…_UNSUPPORTED" | "…_BANK_UNKNOWN"
   | "MEMORY_OPERATION_REQUIRED";
 MemoryOperationErrorCode = MemoryReplicaErrorCode | MemoryLocalErrorCode | MemoryHindsightActivationErrorCode
-  | MemoryHindsightLifecycleErrorCode | MemoryBackupErrorCode;   // arms agree on kind
+  | MemoryHindsightLifecycleErrorCode | MemoryBackupErrorCode | MemoryTransitionErrorCode;   // arms agree on kind
 ```
 
 Producer and result arms are tied to the kind by the explicit, non-exported `PRODUCER_KIND` table in
@@ -40,6 +41,11 @@ Producer and result arms are tied to the kind by the explicit, non-exported `PRO
 | `bank.provision` | `bank` | `hindsight-lifecycle` |
 | `connection.revalidate` | `connection` | `hindsight-lifecycle` |
 | `backup.capture`, `backup.admit`, `backup.verify` | `backup` | `hindsight-backup` |
+| `transition.return-local`, `transition.reenter-hindsight`, `transition.emergency-local` | `transition` | `memory-transition` |
+
+Transition storage and explicit recovery follow [Memory Transition Durable Protocol](./memory-transitions.md).
+The optional transition driver is not composed by W1: the registered kinds refuse without it, and Home exposes no
+transition action. A producer return value alone cannot settle a transition; the adapter reads durable evidence.
 
 Core: `createMemoryOperationService({ db, live, setup, local?, hindsight?, lifecycle?, backup?, bootId, onChanged, logger })` ->
 `{ submit(request, admission?), status, list, recent, latest(family), cancel, stop }`; kind handlers implement
@@ -65,12 +71,17 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
   neither cancels, completes nor replays an operation. `status`/`list` return the same truth to every operator.
 - Settlement is derived from what the producer persisted: a setup kind settles from the returned snapshot
   (`phase === "failed"` -> `failed` with `latestError.code`); `replica.sync` requests the manual run, awaits one
-  scheduler `tick()`, then classifies the Bank state (`lastSuccessAt >= admittedAt` -> `completed`; a claim at or
-  after admission with `errorCode` -> `failed` + `nextAction`; unclaimed with a supervisor error -> `failed`).
+  scheduler `tick()`, then reads its exact durable manual request. Migration 051 stores request identity, captured
+  lease/run/fence and terminal diagnostics independently of the latest Bank status. Only that request's `succeeded`
+  or `failed` outcome settles the operation; timestamps and process-global supervisor errors never attribute work.
   An operation the producer has not settled stays open; `observe()` classifies it on the next read. Never fabricate
   success, `0 pending`, health or completion.
+  A scheduler admission error can occur after its queue transaction commits (during status projection). Read the
+  exact request before classifying refusal: an existing request keeps its factual state, and unreadable evidence
+  stays unresolved. Likewise, receipt-read failure after execution is not a producer-failure receipt.
 - Cancellation is stage-aware: `replica.sync` may be cancelled only before the scheduler claims it (repo
-  `cancelManual` is a CAS that clears `pendingManualKind` while `run === null`); a claimed run refuses
+  `cancelManual(bankId, requestId)` atomically cancels the exact queued request and clears its pending pointer,
+  including while a previous run holds the same Bank); a claimed request refuses
   `MEMORY_OPERATION_RUNNING`; setup kinds have no cancel; a terminal row refuses `MEMORY_OPERATION_SETTLED`.
 - Restart reconciliation: rows owned by another `bootId` become `outcome_unknown` / `core_restart` when the service is
   constructed. A busy B3 setup phase found at boot becomes `failed` / `HINDSIGHT_SETUP_INTERRUPTED` (retryable), with
@@ -87,9 +98,10 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
   `hindsight` lifecycle section is non-null exactly under marker `hindsight`, also while the runtime is unavailable
   ([`memory-hindsight-lifecycle.md`](./memory-hindsight-lifecycle.md) §3 "Status section and actions").
   `derivedFreshness` is the literal `"unknown"` while D79-D82 are open. `memory.status` stays the Local maintenance read.
-- A still-queued manual request (`pendingManualKind !== null`) proves the Bank state is not this operation's outcome
-  (the claim consumes the request and this owner is its only producer); only then may `lastAttemptAt >= admittedAt`
-  attribute a run to the operation. A same-millisecond overlap with a previous run must never settle `completed`.
+- Manual request admission, claim, cancellation and terminal outcome share the scheduler's SQLite transactions.
+  Claims carry `manualRequestId`; later automatic/manual runs cannot overwrite the request's immutable outcome.
+  A supervisor error before claim can settle only the exact queued request attempted for that Bank, while clearing
+  that request so it cannot execute after a failed operation. If persistence fails, the request stays unresolved.
 - Adding a kind = one handler file + one registry row + Shared request/result arms. Handlers call live producers; they
   do not own timers, leases or retry loops.
 - Family `local-onboarding` (both `local.onboard.*` kinds): `admit` is synchronous and side-effect free; the producer
@@ -97,7 +109,8 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
   wins the CAS and no producer side effect happens. A kind's `observeBoot` runs read-only before the generic foreign-row
   reconciliation: outcomes provable from the durable receipt/run are reconstructed, everything else becomes
   `outcome_unknown` with `commitment_unknown` (COMMIT not provable) or `producer_incomplete` (run never published) and
-  an explicit recovery action. Setup/replica kinds have no `observeBoot` and keep the `core_restart` fallback. The
+  an explicit recovery action. Replica boot observation reads exact request outcomes even without a live runtime;
+  legacy refs without `requestId` and unfinished requests keep the `core_restart` unknown fallback. Setup retains that fallback. The
   full producer, custody and binding contract is [`memory-local-onboarding.md`](./memory-local-onboarding.md).
 - Family `hindsight-activation` (`hindsight.activate`, source modes `new` / `resume` / `recover`) follows the same
   deferred-claim and `observeBoot` rules; its producer, custody and rebind contract is
@@ -119,12 +132,11 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
   automatic lifecycle trigger passes `automatic`, and lifecycle producer refs persist it for the once-guard. Clients
   never supply an origin.
 
-### Known precision limits (recorded 2026-09-19, see deferred-decisions D84)
+### Historical compatibility and remaining observation limits
 
-- `scheduler.lastError()` is process-global: a queued request for Bank B can be settled `failed` with a supervisor code
-  produced by Bank A's drain in the same tick — truthful that the scheduler failed, imprecise in attribution.
-- Cancelling an unclaimed request while a previous run still holds the Bank is refused `MEMORY_OPERATION_RUNNING`
-  (the repo refuses while `run !== null`); the operation itself was not claimed.
+- Pre-051 schedule/operation rows remain readable, without invented request IDs or retroactive attribution. Legacy
+  internal manual requests keep their existing coalescing behavior; tracked operation requests refuse conflicting
+  pending requests and cannot be overwritten or cancelled by an unqualified legacy call.
 - An operation left unclaimed with no supervisor error (for example the scheduler stopped after admission) stays open
   until the next `status`/`list` read re-classifies it, or becomes `outcome_unknown` at the next boot.
 - Result-schema parse failures in the method guards rethrow the ZodError as `INTERNAL_ERROR` text, matching the
@@ -144,7 +156,7 @@ Storage: migration 048 `memory_operations` (STRICT) with the partial unique inde
 | Core restart with non-terminal rows | `outcome_unknown` / `core_restart`; no automatic re-dispatch |
 | Core restart with a busy setup phase | `failed` / `HINDSIGHT_SETUP_INTERRUPTED`; evidence preserved; Banks -> `pending` |
 | status read while the runtime throws | `runtime.available=false` with a closed reason; the read still succeeds |
-| scheduler drain threw during a manual run | `failed` with `scheduler.lastError()` |
+| scheduler drain threw before a manual claim | only an exact persisted request failure settles; otherwise unresolved |
 | production `memory.migration.stage/resume/verify/exclude/activate` | `MEMORY_OPERATION_REFUSED` / `MEMORY_OPERATION_REQUIRED`; only dryRun/status/exceptions reads remain |
 | Core restart with a non-terminal `local.onboard.*` row | `observeBoot` classifies from the receipt; otherwise `outcome_unknown` / `commitment_unknown` or `producer_incomplete` |
 | submit any setup / Local / activation / lifecycle / backup kind while another of the five families is open | `MEMORY_OPERATION_BUSY` + that row's `activeOperationId` |
@@ -189,10 +201,10 @@ Wrong: infer completion from the request flag.
 if (state.pendingManualKind === null) settle({ state: "completed" });
 ```
 
-Correct: classify only from the persisted Bank outcome relative to this operation's admission.
+Correct: classify only from the exact persisted request outcome.
 
 ```ts
 await scheduler.tick();
-const state = scheduler.status(bankId)[0];
-if (state.lastSuccessAt && Date.parse(state.lastSuccessAt) >= Date.parse(admittedAt)) return completed(state);
+const request = scheduler.request(requestId);
+if (request?.state === "succeeded") return completed(request);
 ```

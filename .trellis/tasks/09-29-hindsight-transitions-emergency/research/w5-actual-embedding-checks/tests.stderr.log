@@ -1,0 +1,23 @@
+test_cleanup_failure_truth_and_retained_evidence (__main__.CustodyTests.test_cleanup_failure_truth_and_retained_evidence) ... ok
+test_cleanup_success_uses_exact_path (__main__.CustodyTests.test_cleanup_success_uses_exact_path) ... ok
+test_clone_hook_persists_pointer_before_start_and_wraps_lookup (__main__.CustodyTests.test_clone_hook_persists_pointer_before_start_and_wraps_lookup) ... ok
+test_guard_refusal_never_runs_pg_ctl (__main__.CustodyTests.test_guard_refusal_never_runs_pg_ctl) ... ok
+test_malformed_pointer_does_not_claim_stopped (__main__.CustodyTests.test_malformed_pointer_does_not_claim_stopped) ... ok
+test_parent_report_when_child_wrote_no_report (__main__.CustodyTests.test_parent_report_when_child_wrote_no_report) ... ok
+test_pid_path_port_executable_and_creation_identity (__main__.CustodyTests.test_pid_path_port_executable_and_creation_identity) ... ok
+test_dimension_refuses_before_prepare (__main__.EmbeddingTests.test_dimension_refuses_before_prepare) ... ok
+test_environment_excludes_secrets_overrides_and_model_download (__main__.EmbeddingTests.test_environment_excludes_secrets_overrides_and_model_download) ... ok
+test_frozen_date_formatter_remains_equivalent_without_engine_initialization (__main__.EmbeddingTests.test_frozen_date_formatter_remains_equivalent_without_engine_initialization) ... ok
+test_hf_credential_redirect_does_not_change_model_cache (__main__.EmbeddingTests.test_hf_credential_redirect_does_not_change_model_cache) ... ok
+test_offline_initialization_failure_has_no_fallback (__main__.EmbeddingTests.test_offline_initialization_failure_has_no_fallback) ... ok
+test_original_preparation_augmentation_and_encoder_delegate (__main__.EmbeddingTests.test_original_preparation_augmentation_and_encoder_delegate) ... ok
+test_result_removes_synthetic_claims_and_separates_budget (__main__.EmbeddingTests.test_result_removes_synthetic_claims_and_separates_budget) ... ok
+test_both_monotonic_deadlines_and_only_exact_child_terminated (__main__.WatchdogTests.test_both_monotonic_deadlines_and_only_exact_child_terminated) ... ok
+test_completed_child_never_terminated (__main__.WatchdogTests.test_completed_child_never_terminated) ... ok
+test_parent_watchdog_error_terminates_held_child_and_writes_failure (__main__.WatchdogTests.test_parent_watchdog_error_terminates_held_child_and_writes_failure) ... ok
+test_real_owned_fake_worker_blocked_in_sync_sleep_is_terminated (__main__.WatchdogTests.test_real_owned_fake_worker_blocked_in_sync_sleep_is_terminated) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 4.793s
+
+OK

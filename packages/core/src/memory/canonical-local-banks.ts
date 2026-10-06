@@ -7,6 +7,7 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import type { CanonicalMemoryBank } from "@taki/shared";
 import type { CanonicalMemoryAuthorityRepo } from "../db/canonical-memory-authority-repo.ts";
+import type { CanonicalLocalWriteFence } from "./canonical-local-write-fence.ts";
 
 const CharacterId = z.string().min(1).max(256);
 export interface CanonicalLocalBanks { global: CanonicalMemoryBank; character: CanonicalMemoryBank; }
@@ -15,10 +16,15 @@ export function ensureCanonicalLocalBanks(input: {
   authority: CanonicalMemoryAuthorityRepo;
   epochId: string;
   characterId: string;
+  writeFence?: CanonicalLocalWriteFence;
 }): CanonicalLocalBanks {
   CharacterId.parse(input.characterId);
   input.authority.activeEpoch(input.epochId);
   const banks = input.authority.listBanks(input.epochId);
+  if (input.writeFence && (!banks.some((bank) => bank.scope.kind === "global")
+    || !banks.some((bank) => bank.scope.kind === "character" && bank.scope.characterId === input.characterId))) {
+    return input.writeFence.admitSync(() => ensureCanonicalLocalBanks({ ...input, writeFence: undefined }));
+  }
   // Existing Bank identity/configuration always wins. These neutral defaults match canonical migration's
   // Local initialization and apply only when a newly created Character has no Bank yet.
   const global = banks.find((bank) => bank.scope.kind === "global") ?? input.authority.createBank({

@@ -1,0 +1,133 @@
+[
+  {
+    "name": "native-ruff",
+    "cwd": "H:/hindsight/hindsight-api-slim",
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ruff.exe",
+      "check",
+      "hindsight_api/engine/application_state/store.py",
+      "hindsight_api/engine/application_state/snapshot.py",
+      "hindsight_api/engine/transition_baseline_reads.py",
+      "tests/native_results/test_transition_native_view.py",
+      "tests/native_results/test_transition_head_prefetch.py"
+    ],
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "name": "native-format",
+    "cwd": "H:/hindsight/hindsight-api-slim",
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ruff.exe",
+      "format",
+      "--check",
+      "hindsight_api/engine/application_state/store.py",
+      "hindsight_api/engine/application_state/snapshot.py",
+      "hindsight_api/engine/transition_baseline_reads.py",
+      "tests/native_results/test_transition_native_view.py",
+      "tests/native_results/test_transition_head_prefetch.py"
+    ],
+    "exitCode": 0,
+    "stdout": "5 files already formatted\n",
+    "stderr": ""
+  },
+  {
+    "name": "native-ty",
+    "cwd": "H:/hindsight/hindsight-api-slim",
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ty.exe",
+      "check",
+      "hindsight_api/engine/application_state/store.py",
+      "hindsight_api/engine/application_state/snapshot.py",
+      "hindsight_api/engine/transition_baseline_reads.py",
+      "--output-format",
+      "concise"
+    ],
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "name": "helper-ruff",
+    "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ruff.exe",
+      "check",
+      "w5_head_prefetch_inventory.py",
+      "w5-head-prefetch-postpatch.py",
+      "test_w5_head_prefetch_postpatch.py"
+    ],
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "name": "helper-format",
+    "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ruff.exe",
+      "format",
+      "--check",
+      "w5_head_prefetch_inventory.py",
+      "w5-head-prefetch-postpatch.py",
+      "test_w5_head_prefetch_postpatch.py"
+    ],
+    "exitCode": 0,
+    "stdout": "3 files already formatted\n",
+    "stderr": ""
+  },
+  {
+    "name": "helper-ty",
+    "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+    "argv": [
+      "H:/hindsight/.venv/Scripts/ty.exe",
+      "check",
+      "w5_head_prefetch_inventory.py",
+      "w5-head-prefetch-postpatch.py",
+      "--output-format",
+      "concise"
+    ],
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "name": "old-sealed-rejection",
+    "exitCode": 0,
+    "refusal": "POSTPATCH_SOURCE_DRIFT",
+    "meaning": "Expected actual-source rejection by unchanged previous verifier"
+  },
+  {
+    "name": "scoped-diff-check",
+    "cwd": "H:/hindsight",
+    "argv": [
+      "git",
+      "diff",
+      "--check",
+      "--",
+      "hindsight-api-slim/hindsight_api/engine/application_state/store.py",
+      "hindsight-api-slim/hindsight_api/engine/application_state/snapshot.py",
+      "hindsight-api-slim/hindsight_api/engine/transition_baseline_reads.py",
+      "hindsight-api-slim/tests/native_results/test_transition_native_view.py",
+      "TAKI_PATCHES.md"
+    ],
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "warning: in the working copy of 'TAKI_PATCHES.md', LF will be replaced by CRLF the next time Git touches it\n"
+  },
+  {
+    "name": "scoped-diff-check",
+    "cwd": "H:/TakiAgent",
+    "argv": [
+      "git",
+      "diff",
+      "--check",
+      "--",
+      ".trellis/spec/backend/memory-transition-healthy-drivers.md"
+    ],
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

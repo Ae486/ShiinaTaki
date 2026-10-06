@@ -1,0 +1,11 @@
+{
+  "manifest": {
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-source-manifest.json",
+    "sha256": "f984db6db6bbfbb0d57fe4e61c1056677f02506617c3637d9e7517460f6b2da2",
+    "bytes": 4665
+  },
+  "files": 6,
+  "preimages": 4,
+  "originalDatabaseUnchanged": true,
+  "observerEvidenceUnchanged": true
+}

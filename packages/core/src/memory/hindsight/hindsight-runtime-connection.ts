@@ -13,6 +13,7 @@ import { resolveHindsightConfig, type HindsightResolvedConfig } from "../../conf
 import { createCanonicalMemoryAuthorityRepo } from "../../db/canonical-memory-authority-repo.ts";
 import { createHindsightBankSetupRepo } from "../../db/hindsight-bank-setup-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
+import { requireTransitionTargetReady } from "../../db/memory-transition-native-outcome.ts";
 import type { SecretCatalogService } from "../../secrets/secret-catalog-service.ts";
 import { createHindsightClient, type HindsightClient } from "./hindsight-client.ts";
 import { hindsightConnectionFingerprint } from "./hindsight-compatibility-service.ts";
@@ -47,6 +48,7 @@ export function readHindsightLiveConnection(input: { config: ConfigSource; secre
 }
 
 export function createHindsightRuntimeConnection(input: HindsightRuntimeConnectionInput) {
+  requireTransitionTargetReady(input.db, input.epochId);
   const authority = createCanonicalMemoryAuthorityRepo(input.db); const epoch = authority.authorityEpoch(input.epochId);
   if (epoch.providerId !== "hindsight") throw new Error("MEMORY_AUTHORITY_MISMATCH");
   const configured = resolveHindsightConfig(input.config);

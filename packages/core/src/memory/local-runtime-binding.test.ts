@@ -16,6 +16,20 @@ function binding(construct: (epochId: string) => LocalSubsystem) {
 }
 
 describe("one published Local runtime binding", () => {
+  it("settles a failed draft's asynchronous shutdown even after a repaired draft was retired", async () => {
+    let release!: () => void;
+    const failed = draft({ start: () => { throw new Error("start failed"); },
+      stop: () => new Promise<void>((resolve) => { release = resolve; }) });
+    const f = binding(vi.fn().mockReturnValueOnce(failed).mockReturnValue(draft()));
+    try {
+      expect(() => f.binding.publish("same-epoch")).toThrow("start failed");
+      f.binding.publish("same-epoch"); f.binding.retire();
+      let stopped = false; const stopping = f.binding.stop().then(() => { stopped = true; });
+      await Promise.resolve(); expect(stopped).toBe(false);
+      release(); await stopping; expect(stopped).toBe(true);
+      expect(() => f.binding.publish("same-epoch")).toThrow("MEMORY_OPERATION_CANCELLED");
+    } finally { f.db.close(); }
+  });
   it("publishes a complete draft, starts it after publication and reports a pure snapshot", () => {
     const value = draft();
     const f = binding(() => value);
@@ -23,10 +37,15 @@ describe("one published Local runtime binding", () => {
     expect(f.binding.publish("epoch-1")).toBe(value);
     expect(value.start).toHaveBeenCalledOnce();
     expect(f.binding.current()).toBe(value);
+    const publication = f.binding.publicationState();
+    publication.binding = { kind: "none" };
+    expect(f.binding.publicationState().binding).toEqual({ kind: "published", epochId: "epoch-1" });
+    expect(f.binding.publicationState().revision).toBe(publication.revision);
     expect(f.binding.snapshot()).toMatchObject({ binding: { kind: "published", epochId: "epoch-1" }, flush: "available" });
     expect(value.captureRun).not.toHaveBeenCalled();
     expect(() => f.binding.publish("epoch-1")).toThrow("MEMORY_INTEGRITY_ERROR");
     f.binding.stop();
+    expect(f.binding.publicationState().revision).toBeGreaterThan(publication.revision);
     expect(value.stop).toHaveBeenCalledOnce();
     expect(f.binding.snapshot()).toMatchObject({ lifetime: "stopped", flush: "failing" });
     f.db.close();

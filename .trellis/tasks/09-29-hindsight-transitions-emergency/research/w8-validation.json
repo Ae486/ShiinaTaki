@@ -1,0 +1,72 @@
+[
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "taki-diff",
+      "command": "git diff --check",
+      "result": {
+        "chunk_id": "4fa742",
+        "wall_time_seconds": 0.7440792,
+        "exit_code": 0,
+        "original_token_count": 303,
+        "output": "warning: in the working copy of '.trellis/tasks/08-09-hindsight-memory-provider/task.json', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'docs/deferred-decisions.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/core/src/db/index.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/core/src/db/migrations/index-list.test.ts', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/core/src/db/migrations/index.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/core/src/db/migrations/lineage-reopen-matrix.test.ts', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/core/src/memory/hindsight-backup/index.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/core/src/testing/index.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'packages/shared/src/index.md', CRLF will be replaced by LF the next time Git touches it\n"
+      }
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "taki-cached-diff",
+      "command": "git diff --cached --check",
+      "result": {
+        "chunk_id": "26adc8",
+        "wall_time_seconds": 0.5105505,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "native-diff",
+      "command": "git diff --check",
+      "result": {
+        "chunk_id": "5a4219",
+        "wall_time_seconds": 0.8266253,
+        "exit_code": 0,
+        "original_token_count": 1341,
+        "output": "warning: in the working copy of 'TAKI_PATCHES.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/admin/cli.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/api/http.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/cutover_verification_candidate.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/cutover_verification_certificate.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/cutover_verification_context.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/cutover_verification_model.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/cutover_verification_runner.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/cutover_verification_state.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/cutover_verification_store.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/cutover_verification_view.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/logical_snapshot.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/reflect/agent.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/replication.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/taki_compatibility.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/engine/transfer/current_state_rows.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/hindsight_api/extensions/builtin/taki_memory.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/tests/native_results/test_cutover_compatibility.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/tests/native_results/test_cutover_maintenance_migration.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/tests/test_taki_extension_contract.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-api-slim/tests/test_taki_logical_snapshot.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/go/api/openapi.yaml', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/go/api_taki_memory_compatibility.go', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/go/model_taki_compatibility_contracts.go', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/python/hindsight_client_api/__init__.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/python/hindsight_client_api/api/taki_memory_compatibility_api.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/python/hindsight_client_api/models/__init__.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/python/hindsight_client_api/models/taki_compatibility_contracts.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/python/hindsight_client_api/models/taki_compatibility_support.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/python/hindsight_client_api/models/taki_memory_error_response.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/typescript/generated/client/client.gen.ts', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/typescript/generated/sdk.gen.ts', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-clients/typescript/generated/types.gen.ts', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'hindsight-control-plane/bin/cli.js', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'scripts/generate-clients.sh', LF will be replaced by CRLF the next time Git touches it\n"
+      }
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "native-cached-diff",
+      "command": "git diff --cached --check",
+      "result": {
+        "chunk_id": "ecf4fa",
+        "wall_time_seconds": 0.5816732,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "name": "trellis",
+      "command": "python ./.trellis/scripts/task.py validate 09-29-hindsight-transitions-emergency",
+      "result": {
+        "chunk_id": "6b8800",
+        "wall_time_seconds": 0.8596311,
+        "exit_code": 0,
+        "original_token_count": 154,
+        "output": "\u001b[0;34m=== Validating Context Files ===\u001b[0m\r\nTarget dir: H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\r\n\r\n  \u001b[1;33mimplement.jsonl:21: Warning: .trellis/spec/backend/memory-transitions.md is 33379 bytes, exceeds context_injection.max_file_bytes (32768); injection will truncate it\u001b[0m\r\n  \u001b[0;32mimplement.jsonl: ✓ (43 entries)\u001b[0m\r\n  \u001b[1;33mcheck.jsonl:23: Warning: .trellis/spec/backend/memory-transitions.md is 33379 bytes, exceeds context_injection.max_file_bytes (32768); injection will truncate it\u001b[0m\r\n  \u001b[0;32mcheck.jsonl: ✓ (52 entries)\u001b[0m\r\n\r\n\u001b[0;32m✓ All validations passed\u001b[0m\r\n"
+      }
+    }
+  }
+]

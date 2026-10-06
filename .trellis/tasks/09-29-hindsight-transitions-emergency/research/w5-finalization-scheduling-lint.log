@@ -1,0 +1,10 @@
+
+H:\TakiAgent\packages\core\src\memory\transitions\transition-native-session.ts
+   26:8    error  Function 'createTransitionNativeSession' has too many lines (63). Maximum allowed is 50  max-lines-per-function
+  119:29   error  '_expiry' is assigned a value but never used                                             @typescript-eslint/no-unused-vars
+  119:53   error  '_live' is assigned a value but never used                                               @typescript-eslint/no-unused-vars
+  119:76   error  '_writers' is assigned a value but never used                                            @typescript-eslint/no-unused-vars
+  119:107  error  '_operations' is assigned a value but never used                                         @typescript-eslint/no-unused-vars
+
+✖ 5 problems (5 errors, 0 warnings)
+

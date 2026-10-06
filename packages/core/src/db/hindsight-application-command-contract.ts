@@ -73,7 +73,8 @@ export function verifyApplicationCommandClosure(input: {
     if (command.command === "retire_artifact") continue;
     const body = all.get(command.body_ref.body_id);
     if (!body || !sameApplicationValue(body.ref, command.body_ref)
-      || body.ref.body_schema !== `application-${command.key.artifact_kind}.v1`) invalid();
+      || body.ref.body_schema !== `application-${command.key.artifact_kind}.v1`
+        && !(command.command === "rebind_artifact" && command.key.artifact_kind === "source" && body.ref.body_schema === "application-source-evidence.v1")) invalid();
     required.add(body.ref.body_id);
   }
   if (required.size !== all.size) invalid();

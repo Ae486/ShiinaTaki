@@ -8,6 +8,7 @@ import {
   MEMORY_AUTHORITY_METHODS,
   MEMORY_METHODS,
   MEMORY_OPERATION_METHODS,
+  MEMORY_TRANSITION_METHODS,
   PERMISSION_METHODS,
   SKILL_METHODS,
   TIMING_POLICY_DEVELOPMENT_DEFAULTS,
@@ -30,6 +31,14 @@ function rpcHarness() {
 }
 
 describe("RPC deadline method policy", () => {
+  it("gives transition preview a bounded read deadline and parameter-sensitive submit an unknown outcome", () => {
+    expect(rpcMethodPolicy(MEMORY_TRANSITION_METHODS.preview)).toEqual({ class: "long", timing: "longRpcMs", timeoutOutcome: "read-only" });
+    expect(rpcMethodPolicy(MEMORY_TRANSITION_METHODS.status).timeoutOutcome).toBe("read-only");
+    expect(rpcMethodPolicy(MEMORY_TRANSITION_METHODS.overview).timeoutOutcome).toBe("read-only");
+    expect(rpcMethodPolicy(MEMORY_OPERATION_METHODS.submit, { request: { kind: "transition.emergency-local" } }))
+      .toEqual({ class: "long", timing: "longRpcMs", timeoutOutcome: "unknown" });
+    expect(rpcMethodPolicy(MEMORY_OPERATION_METHODS.submit, { request: { kind: "replica.sync" } }).class).toBe("interactive");
+  });
   it("classifies handshake, chat acknowledgement, long work, reads, and mutations", () => {
     expect(rpcMethodPolicy(CHAT_METHODS.send)).toEqual({ class: "chat-ack", timing: "chatAckMs", timeoutOutcome: "unknown" });
     expect(rpcMethodPolicy(CHARACTER_METHODS.import)).toEqual({ class: "long", timing: "longRpcMs", timeoutOutcome: "unknown" });

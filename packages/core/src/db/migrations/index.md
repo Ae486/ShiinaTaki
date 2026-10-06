@@ -52,3 +52,10 @@
 - 048-memory-operations.ts — Core-minted durable memory operation ledger; partial unique index = single-flight per family; owner boot id drives restart reconciliation
 - 049-local-onboarding.ts — additive Local onboarding storage: migration candidates/supersession, run-scoped Block plans, source effect proofs, primary group/member custody
 - 050-hindsight-reviewed-deployment-mode.ts — nullable reviewed deployment mode beside the reviewed B3 fingerprint (NULL = pre-050 row, readers fail closed)
+- 051-hindsight-replica-requests.ts — additive manual request identity, exact claim/outcome records and immutable terminal guards
+- 052-memory-transitions.ts — additive immutable transition evidence/queue/recovery tables, lease projection and control-plane/manual-sync exclusion triggers
+- 053-memory-transition-candidates.ts — immutable W3 capture/candidate/baseline/delta/upload documents; stable IDs; independent provenance, tombstone identities and ordered Source references
+- 054-memory-transition-publication.ts — exact old-marker rebuild with a distinct transition receipt; immutable publication, native outcome, target effect and Local refusal evidence
+- 055-memory-transition-drivers.ts — immutable healthy preview, all-Bank driver, native command/dispatch/observation and factual non-dispatch/failure history
+- 056-memory-transition-verification-dispatch.ts — additive immutable new-verification dispatch without fabricating missing055 history
+- 057-memory-transition-emergency.ts — additive immutable emergency capture, incident, surviving evidence, quarantine and foreign branch history; atomic admission trigger replacement.

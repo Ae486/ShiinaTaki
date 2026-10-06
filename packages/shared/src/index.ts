@@ -12,6 +12,7 @@ export type { JsonRpcClientFrame, JsonRpcErrorObject, JsonRpcErrorResponse, Json
 export { ErrorCodeSchema } from "./error-code-schema.ts";
 export type { ErrorCode } from "./error-code-schema.ts";
 
+export { MemoryReplicaRequestSchema, type MemoryReplicaRequest } from "./memory-replica-request-schema.ts";
 export {
   HOST_CATALOG_SCHEMA_VERSION, HOST_CONTROL_METHODS, HOST_CONTROL_PROTOCOL_VERSION,
   CapabilityAuthorizationLineageSchema, CapabilityAuthorizationSchema, CapabilityCancellationSchema, CapabilityCancelReasonSchema, CapabilityCancelSchema, CapabilityExecuteSchema,
@@ -436,11 +437,11 @@ export { HindsightNativeRecallRequestSchema, HindsightNativeRecallResponseSchema
   HindsightNativeReflectRequestSchema, HindsightNativeReflectResponseSchema } from "./hindsight-native-runtime-schema.ts";
 export type { HindsightNativeRecallRequest, HindsightNativeRecallResponse,
   HindsightNativeReflectRequest, HindsightNativeReflectResponse } from "./hindsight-native-runtime-schema.ts";
-export { TakiApplicationBankBodySchema, TakiApplicationSourceBodySchema, TakiApplicationBlockBodySchema,
+export { TakiApplicationBankBodySchema, TakiApplicationSourceBodySchema, TakiApplicationSourceEvidenceBodySchema, TakiApplicationBlockBodySchema,
   TakiApplicationBindingSchema, TakiApplicationArtifactSchema, TakiApplicationActorSchema, TakiApplicationCommandSchema,
   TakiApplicationCommandsSchema, TakiApplicationCommitRequestSchema, TakiApplicationCommitReceiptSchema,
   TakiApplicationCommitStatusSchema, TakiApplicationErrorResponseSchema, TakiApplicationAffectedVersionsSchema } from "./hindsight-application-artifact-schema.ts";
-export type { TakiApplicationBankBody, TakiApplicationSourceBody, TakiApplicationBlockBody, TakiApplicationBinding,
+export type { TakiApplicationBankBody, TakiApplicationSourceBody, TakiApplicationSourceEvidenceBody, TakiApplicationBlockBody, TakiApplicationBinding,
   TakiApplicationArtifact, TakiApplicationActor, TakiApplicationCommand, TakiApplicationCommands,
   TakiApplicationCommitRequest, TakiApplicationCommitReceipt, TakiApplicationCommitStatus,
   TakiApplicationErrorResponse, TakiApplicationAffectedVersions } from "./hindsight-application-artifact-schema.ts";
@@ -517,3 +518,47 @@ export { HindsightBackupIdSchema, HindsightBackupRouteSchema, HindsightBackupInb
   HindsightBackupStatusSectionSchema, HindsightIncidentManifestSchema, MemoryBackupErrorCodeSchema, MemoryBackupCaptureRequestSchema, MemoryBackupAdmitRequestSchema, MemoryBackupVerifyRequestSchema, MemoryBackupProducerRefSchema, MemoryBackupResultSchema } from "./hindsight-backup-schema.ts";
 export type { HindsightBackupRoute, HindsightCredentialCustody, HindsightBackupNativeProof, HindsightBackupBank, HindsightBackupManifest, HindsightBackupPairMismatchReason, HindsightBackupPairMismatch, HindsightBackupNativeRequest, HindsightBackupArchiveProof, HindsightNativeArchiveManifest,
   HindsightBackupStatusSection, HindsightIncidentManifest, MemoryBackupErrorCode, MemoryBackupCaptureRequest, MemoryBackupAdmitRequest, MemoryBackupVerifyRequest, MemoryBackupProducerRef, MemoryBackupResult } from "./hindsight-backup-schema.ts";
+export { MemoryTransitionKindSchema, MemoryTransitionErrorCodeSchema, MemoryTransitionBankSchema, MemoryTransitionIdentitySchema, MemoryTransitionRecoverySchema, MemoryTransitionResolutionSchema,
+  MemoryTransitionRequestSchema, MemoryTransitionQueuePolicySchema, MemoryTransitionIntentSchema, MemoryTransitionAttemptSchema,
+  MemoryTransitionFinalProofSchema, MemoryTransitionReceiptSchema, MemoryTransitionResultSchema, MemoryTransitionProducerRefSchema,
+  MemoryTransitionStatusSchema, type MemoryTransitionIdentity, type MemoryTransitionRequest, type MemoryTransitionIntent,
+  type MemoryTransitionAttempt, type MemoryTransitionFinalProof, type MemoryTransitionReceipt, type MemoryTransitionResult, type MemoryTransitionRecovery, type MemoryTransitionResolution } from "./memory-transition-schema.ts";
+export { MemoryTransitionCommandSchema, MemoryTransitionQueuedIntentSchema, MemoryTransitionQueueExecutionSchema, MemoryTransitionQueueOutcomeSchema,
+  type MemoryTransitionQueuedIntent, type MemoryTransitionQueueExecution, type MemoryTransitionQueueOutcome } from "./memory-transition-queue-schema.ts";
+export { HINDSIGHT_TRANSITION_BUILD, HINDSIGHT_TRANSITION_VERSION, HINDSIGHT_TRANSITION_MAX_BYTES,
+  HindsightTransitionUnusedScopeSchema, HindsightTransitionAcquireSchema, HindsightTransitionExecutorSchema, HindsightTransitionClaimSchema,
+  HindsightTransitionProofSchema, HindsightTransitionOutcomeRequestSchema, HindsightTransitionOutcomeSchema,
+  HindsightTransitionStatusSchema, HindsightTransitionFailureSchema, HindsightTransitionAuxiliaryPageSchema,
+  type HindsightTransitionUnusedScope, type HindsightTransitionAcquire, type HindsightTransitionExecutor, type HindsightTransitionClaim,
+  type HindsightTransitionProof, type HindsightTransitionOutcomeRequest, type HindsightTransitionOutcome,
+  type HindsightTransitionStatus, type HindsightTransitionFailure, type HindsightTransitionAuxiliaryPage } from "./hindsight-transition-schema.ts";
+export { HindsightTransitionNativeDescriptorSchema, HindsightTransitionApplicationDescriptorSchema, HindsightTransitionDeltaRequestSchema,
+  HindsightTransitionDeltaResultSchema, type HindsightTransitionNativeDescriptor, type HindsightTransitionApplicationDescriptor,
+  type HindsightTransitionDeltaRequest, type HindsightTransitionDeltaResult } from "./hindsight-transition-delta-schema.ts";
+export { MemoryTransitionHistoricalReferenceSchema, type MemoryTransitionHistoricalReference,
+  MemoryTransitionLocalStateSchema, MemoryTransitionLocalCaptureSchema, MemoryTransitionNativeEvidenceSchema,
+  MemoryTransitionScopeMappingSchema, MemoryTransitionObjectMappingSchema, MemoryTransitionCandidateSchema, MemoryTransitionCommonBaselineSchema,
+  type MemoryTransitionLocalState, type MemoryTransitionLocalCapture, type MemoryTransitionNativeEvidence, type MemoryTransitionScopeMapping,
+  type MemoryTransitionObjectMapping, type MemoryTransitionCandidate, type MemoryTransitionCommonBaseline } from "./memory-transition-candidate-schema.ts";
+export { MemoryTransitionPreparationSchema, MemoryTransitionDeltaEvidenceSchema, MemoryTransitionUnusedInventorySchema,
+  type MemoryTransitionPreparation, type MemoryTransitionDeltaEvidence, type MemoryTransitionUnusedInventory } from "./memory-transition-preparation-schema.ts";
+export { HindsightCurrentCanonicalDerivedSchema } from "./hindsight-current-canonical-schema.ts";
+export { HINDSIGHT_TRANSITION_SOURCE_EVIDENCE_VERSION, HindsightTransitionSourceUploadSchema, HindsightTransitionSourcePartSchema,
+  type HindsightTransitionSourceUpload, type HindsightTransitionSourcePart } from "./hindsight-transition-source-schema.ts";
+export { MemoryTransitionSourceAliasSchema, MemoryTransitionSourceReferenceSchema, MemoryTransitionSourceSetSchema, MemoryTransitionSourceUploadSchema, MemoryTransitionSourceUploadAttemptSchema,
+  MemoryTransitionPendingSourceSchema, type MemoryTransitionPendingSource,
+  type MemoryTransitionSourceAlias, type MemoryTransitionSourceReference, type MemoryTransitionSourceSet, type MemoryTransitionSourceUpload, type MemoryTransitionSourceUploadAttempt } from "./memory-transition-source-schema.ts";
+export { MemoryTransitionCustodySchema, MemoryTransitionPublicationSchema, MemoryTransitionSourceDispositionSchema,
+  type MemoryTransitionCustody, type MemoryTransitionPublication, type MemoryTransitionSourceDisposition } from "./memory-transition-publication-schema.ts";
+export { MEMORY_TRANSITION_METHODS, MemoryHealthyTransitionKindSchema, MemoryTransitionPreviewParamsSchema, MemoryTransitionPreviewSchema,
+  MemoryHealthyTransitionPreviewSchema, MemoryEmergencyTransitionPreviewSchema, type MemoryHealthyTransitionPreview, type MemoryEmergencyTransitionPreview,
+  MemoryTransitionDriverBankSchema, MemoryTransitionNativeCommandSchema, MemoryTransitionNativeObservationSchema, MemoryTransitionUndispatchedSchema,
+  MemoryTransitionProgressSchema, MemoryTransitionReadParamsSchema, MemoryTransitionReadSchema, type MemoryTransitionPreview,
+  type MemoryTransitionDriverBank, type MemoryTransitionNativeCommand, type MemoryTransitionNativeObservation,
+  type MemoryTransitionUndispatched, type MemoryTransitionRead } from "./memory-transition-driver-schema.ts";
+export { MemoryTransitionActionReasonSchema, MemoryTransitionActionSchema, MemoryTransitionOverviewParamsSchema, MemoryTransitionEmergencyDisclosureSchema,
+  MemoryTransitionOverviewSchema, type MemoryTransitionActionReason, type MemoryTransitionOverview } from "./memory-transition-operator-schema.ts";
+export { MemoryEmergencyCaptureSchema, MemoryEmergencyBankCoverageSchema, MemoryEmergencySnapshotSchema,
+  MemorySurvivingBankEvidenceSchema, MemoryEmergencyCandidateSchema, type MemoryEmergencyCandidate, type MemorySurvivingBankEvidence,
+  MemoryEmergencyUnknownEffectSchema, MemoryEmergencyPublicationSchema, type MemoryEmergencyUnknownEffect, type MemoryEmergencyPublication,
+  type MemoryEmergencyCapture, type MemoryEmergencyBankCoverage, type MemoryEmergencySnapshot } from "./memory-transition-emergency-schema.ts";

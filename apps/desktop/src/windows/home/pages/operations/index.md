@@ -1,7 +1,7 @@
 # windows/home/pages/operations/
 The operations page: Local onboarding, Hindsight activation, the memory authority / Hindsight operations card, manual memory maintenance,
 the memory/context status card, and storage usage with the D46 attachment purge. Every number comes from a WS read — the page computes nothing the Core owns.
-- operations-page.tsx — page root: memory authority card, Local onboarding card, Hindsight activation card, tidy trigger + defect counts, status card, storage card; loading rides Skeleton and the failed status/usage read carries a retry
+- operations-page.tsx — page root: authority, repeated transitions/emergency recovery, Local onboarding, first Hindsight activation, tidy, status and storage cards.
 - storage-card.tsx — media.usage display + the two-step attachment purge; confirmation and Cancel lock once clearing starts (outcomes ride FeedbackLine)
 - use-operations.ts — the page's ws touchpoint: memory.tidy plus the cached memory.status / media.usage reads (a failed re-read keeps the last counters on screen; refresh() backs the retry)
 - use-media-clear.ts — destructive purge owner: immediate exact-once guard, media.clear call, terminal release, and refresh
@@ -11,10 +11,17 @@ the memory/context status card, and storage usage with the D46 attachment purge.
 - memory-hindsight-lifecycle-block.tsx — the card's Hindsight connection + Bank readiness block: 重新校验连接 / 创建 Bank buttons through the generic submit, collapsed diagnostics
 - memory-hindsight-lifecycle-state.ts — pure projection of the status `hindsight` section: connection rows, per-scope readiness rows, diagnostics (native ids, error codes) and action descriptors from Core `actions` only
 - memory-hindsight-backup-block.tsx — the card's Hindsight backup block: rollback warning, state / age / per-Bank missing interval, in-flight or failure line, route-b 导入备份 form, 创建备份 / 校验备份 through the generic submit, collapsed 备份诊断
-- memory-hindsight-backup-state.ts — pure projection of `hindsight.backup` plus the backup.* operation rows: closed-code messages, the newest staged route-b capture and the unverified newest backup from the section, action descriptors (校验备份 targets the newest sealed backup) and the inbox-validated admit request; the only client rule is disabling while a backup operation is open
+- memory-hindsight-backup-state.ts — pure projection of `hindsight.backup` plus the backup.* operation rows: closed-code messages, explicit unknown remote-only writes, the newest staged route-b capture and the unverified newest backup from the section, action descriptors (校验备份 targets the newest sealed backup) and the inbox-validated admit request; the only client rule is disabling while a backup operation is open
 - memory-hindsight-backup-fixtures.ts — test support (not in the production path): one MemoryAuthorityStatus per backup block state plus backup.* operation rows
 - memory-operations-controller.ts — framework-free guard shared by the Stage 1 and Hindsight cards: one injected status read per instance behind the changed-push subscription, generic serialized submit(request, key)/cancel, coalesced refetch on push and after every mutation outcome, no replay
 - use-memory-operations.ts — the React seam for memory.authority.status + memory.operations.*: state + the controller lifecycle bound to the authenticated client, generic submit / submitSync / cancel
+- memory-transition-state.ts — contextual closed Chinese refusal/Native phase labels, one confirmed request and separate authority/runtime/queue facts; no permission derivation.
+- memory-transitions-controller.ts — disposable preview generation and consumed request identity over the existing operation subscription/mutation controller; never replays after replacement.
+- use-memory-transitions.ts — Home-client-bound transition hook with last-good status and explicit preview/confirm/recovery/cancel actions.
+- memory-transitions-card.tsx — current authority/actions, inline confirmation and bounded durable history under every provider/runtime state.
+- memory-transition-confirmation.tsx — one healthy confirmation or separate emergency confirmation with cancel focus and Escape restoration.
+- memory-transition-disclosure.tsx — nullable surviving Bank evidence, backup age and explicitly unknown remote loss.
+- memory-transition-progress.tsx — original operation facts, separate commit/runtime/queue outcomes, Core-permitted recovery/cancel and diagnostics.
 - memory-authority-fixtures.ts — test support (not in the production path): MemoryAuthorityStatus / Bank / MemoryOperation fixtures plus the Hindsight lifecycle section (every readiness state) shared by the card, view-model and controller tests
 - local-onboarding-card.tsx — memory.onboarding.status card: authority vs runtime facts, progress, Core-derived action buttons, exceptions list and technical diagnostics
 - local-onboarding-exceptions.tsx — bounded source diagnostics with the per-source exclusion reason form and cursor paging

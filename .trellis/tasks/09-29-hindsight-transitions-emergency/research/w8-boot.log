@@ -1,0 +1,225 @@
+file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-boot.mjs:75
+      ended.then((result) => { throw new Error(`Core exited before ready: ${JSON.stringify(result)}\n${output}`); })]);
+                                     ^
+
+Error: Core exited before ready: {"code":1,"signal":null}
+{"level":30,"time":1791271075202,"pid":41380,"hostname":"tianxuanji","mod":"db","applied":[],"msg":"schema already up to date"}
+{"level":30,"time":1791271075209,"pid":41380,"hostname":"tianxuanji","msg":"Core Host identity loaded"}
+{"level":30,"time":1791271075217,"pid":41380,"hostname":"tianxuanji","mod":"secrets","mod":"secrets","health":"locked","keySource":"none","msg":"secret catalog opened"}
+{"level":50,"time":1791271075469,"pid":41380,"hostname":"tianxuanji","code":"MEMORY_HINDSIGHT_BINDING_UNAVAILABLE","epochId":"7e3ee203-72ad-48e7-a7ba-b69fa00cc610","cause":"HINDSIGHT_APPLICATION_CONNECTION_UNAVAILABLE","msg":"Hindsight runtime binding failed; runtime stays unavailable"}
+{"level":30,"time":1791271075479,"pid":41380,"hostname":"tianxuanji","mod":"skills","active":0,"invalidated":0,"seeded":0,"seedRejected":0,"msg":"skill lifecycle ready"}
+{"level":40,"time":1791271075479,"pid":41380,"hostname":"tianxuanji","mod":"secrets","health":"locked","msg":"secret migration skipped: catalog not readable; plaintext source untouched"}
+{"level":30,"time":1791271075480,"pid":41380,"hostname":"tianxuanji","mod":"mcp","msg":"no legacy mcp-servers.json to seed"}
+{"level":30,"time":1791271075486,"pid":41380,"hostname":"tianxuanji","mod":"mcp","servers":0,"published":0,"failed":0,"msg":"mcp reconcile from desired state complete"}
+file:///H:/TakiAgent/packages/core/src/db/hindsight-connection-repo.ts:38
+
+  return HindsightSetupSnapshotSchema.parse({
+
+                                      ^
+
+
+
+ZodError: [
+
+  {
+
+    "expected": "string",
+
+    "code": "invalid_type",
+
+    "path": [
+
+      "compatibility",
+
+      "baseApiVersion"
+
+    ],
+
+    "message": "Invalid input: expected string, received undefined"
+
+  },
+
+  {
+
+    "expected": "string",
+
+    "code": "invalid_type",
+
+    "path": [
+
+      "compatibility",
+
+      "compatibilityVersion"
+
+    ],
+
+    "message": "Invalid input: expected string, received undefined"
+
+  },
+
+  {
+
+    "expected": "string",
+
+    "code": "invalid_type",
+
+    "path": [
+
+      "compatibility",
+
+      "compatibilityBuild"
+
+    ],
+
+    "message": "Invalid input: expected string, received undefined"
+
+  },
+
+  {
+
+    "code": "invalid_value",
+
+    "values": [
+
+      "postgresql",
+
+      "oracle",
+
+      "unknown"
+
+    ],
+
+    "path": [
+
+      "compatibility",
+
+      "databaseDialect"
+
+    ],
+
+    "message": "Invalid option: expected one of \"postgresql\"|\"oracle\"|\"unknown\""
+
+  },
+
+  {
+
+    "code": "invalid_value",
+
+    "values": [
+
+      "sql_rows",
+
+      "alternative_store",
+
+      "unknown"
+
+    ],
+
+    "path": [
+
+      "compatibility",
+
+      "storageMode"
+
+    ],
+
+    "message": "Invalid option: expected one of \"sql_rows\"|\"alternative_store\"|\"unknown\""
+
+  },
+
+  {
+
+    "expected": "object",
+
+    "code": "invalid_type",
+
+    "path": [
+
+      "compatibility",
+
+      "support"
+
+    ],
+
+    "message": "Invalid input: expected object, received undefined"
+
+  },
+
+  {
+
+    "expected": "number",
+
+    "code": "invalid_type",
+
+    "path": [
+
+      "compatibility",
+
+      "journalVersion"
+
+    ],
+
+    "message": "Invalid input: expected number, received undefined"
+
+  },
+
+  {
+
+    "expected": "number",
+
+    "code": "invalid_type",
+
+    "path": [
+
+      "compatibility",
+
+      "snapshotVersion"
+
+    ],
+
+    "message": "Invalid input: expected number, received undefined"
+
+  },
+
+  {
+
+    "expected": "object",
+
+    "code": "invalid_type",
+
+    "path": [
+
+      "compatibility",
+
+      "contracts"
+
+    ],
+
+    "message": "Invalid input: expected object, received undefined"
+
+  }
+
+]
+
+    at parseRow (file:///H:/TakiAgent/packages/core/src/db/hindsight-connection-repo.ts:38:39)
+
+    at Object.read (file:///H:/TakiAgent/packages/core/src/db/hindsight-connection-repo.ts:26:27)
+
+    at reconcileInterruptedSetup (file:///H:/TakiAgent/packages/core/src/memory/hindsight/hindsight-setup-recovery.ts:15:39)
+
+    at composeHindsightSetup (file:///H:/TakiAgent/packages/core/src/boot/hindsight-setup-boot.ts:38:23)
+
+    at file:///H:/TakiAgent/packages/core/src/main.ts:250:24
+
+
+
+Node.js v24.18.0
+
+
+    at file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-boot.mjs:75:38
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async runCore (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-boot.mjs:74:19)
+    at async smoke (file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-boot.mjs:185:18)
+    at async file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-boot.mjs:23:3
+
+Node.js v24.18.0

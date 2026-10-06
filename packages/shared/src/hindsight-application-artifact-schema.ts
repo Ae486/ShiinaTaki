@@ -28,6 +28,13 @@ export const TakiApplicationSourceBodySchema = z.strictObject({
   original_witness: TakiApplicationOriginalWitnessSchema.nullable(), operation_id: z.uuid().nullable(),
 });
 export type TakiApplicationSourceBody = z.infer<typeof TakiApplicationSourceBodySchema>;
+export const TakiApplicationSourceEvidenceBodySchema = z.strictObject({ source_ref: TakiApplicationBodyRefSchema,
+  source_record_hash: Hash, previous: TakiApplicationArtifactVersionSchema, previous_body_hash: Hash,
+  associated_native: TakiApplicationNativeVersionSchema,
+}).refine((value) => value.source_ref.body_schema === "application-source.v1"
+  && value.previous.key.artifact_kind === "source" && value.associated_native.object_kind === "document",
+"Source evidence requires exact Source input and document association");
+export type TakiApplicationSourceEvidenceBody = z.infer<typeof TakiApplicationSourceEvidenceBodySchema>;
 export const TakiApplicationBlockBodySchema = z.strictObject({
   block_id: Id, scope: MemoryBankScopeSchema, content: z.string(), block_revision: Revision,
   updated_at: Time, writer: z.enum(["user", "background"]), block_contract_version: z.literal(1).default(1),

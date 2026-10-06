@@ -1,0 +1,32 @@
+{
+  "command": "H:/hindsight/.venv/Scripts/python.exe .trellis/tasks/09-07-hindsight-recovery-evidence/research/validation/run_isolated_hindsight.py -- tests/native_results/test_transition_baseline_reads.py tests/native_results/test_transition_artifact_reads.py tests/native_results/test_transition_derived_link_batches.py tests/native_results/test_transition_association_lookup.py tests/native_results/test_transition_association_migration.py tests/native_results/test_transition_delta.py tests/native_results/test_transition_backup.py::test_offline_restore_preserves_retired_quarantine_and_trigger_rollback -q --tb=short -n 0",
+  "exitCode": 0,
+  "passed": 105,
+  "failed": 0,
+  "seconds": 521.11,
+  "fixtureRoot": "H:/TakiAgent/.trellis/.runtime/g1-validation/taki-hindsight-g1-2bb2df24e40a",
+  "ownership": {
+    "name": "taki-hindsight-g1-2bb2df24e40a",
+    "root": "H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-2bb2df24e40a",
+    "registry": "C:\\Users\\55473\\.pg0\\instances\\taki-hindsight-g1-2bb2df24e40a",
+    "started": true,
+    "stopped": true,
+    "port": 5432
+  },
+  "stopped": true,
+  "dataRemoved": true,
+  "registryRemoved": true,
+  "portNotListening": true,
+  "realModelCalls": 0,
+  "workingPairAccess": false,
+  "oldCloneAccess": false,
+  "passedByFile": {
+    "test_transition_association_lookup.py": 40,
+    "test_transition_derived_link_batches.py": 5,
+    "test_transition_baseline_reads.py": 30,
+    "test_transition_delta.py": 16,
+    "test_transition_artifact_reads.py": 11,
+    "test_transition_backup.py": 1,
+    "test_transition_association_migration.py": 2
+  }
+}

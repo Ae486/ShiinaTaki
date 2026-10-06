@@ -1,0 +1,20 @@
+# core/memory/legacy-migration/
+- legacy-diagnostics.ts — closed durable diagnostic codes and privacy-safe bounded details
+- legacy-identities.ts — length-delimited domain-separated SHA-256 identities and canonical JSON hashes
+- legacy-migration-ledger-repo.ts — durable resumable source/results/exclusion state guarded by fenced leases
+- legacy-snapshot.ts — complete hash-addressed immutable backup/snapshot publication and dry-run manifest
+- legacy-canonical-converter.ts — migration-only entry/Block projection into provider-neutral canonical data
+- legacy-canonical-import-repo.ts — deterministic canonical/Block staging with exact replay and conflict refusal
+- memory-authority-fence.ts — bounded legacy admission drain and irrevocable retirement after durable authority commit
+- fenced-memory-engine.ts — invocation-time retirement fence for legacy engines and previously captured tools
+- legacy-activation-repo.ts — strict initial marker/receipt proofs plus a separate complete W4 transition-publication boot join
+- legacy-candidate-repo.ts — isolated candidate epoch/run/full-inventory publication, supersession, run-scoped Block plans and candidate reads
+- legacy-source-stage.ts — per-source atomic canonical import with attempt/result/effects proof; failure evidence committed after rollback
+- legacy-migration-verification.ts — pure exact source/canonical/receipt/Block closure proof; lease-private readiness publication; completed runs immutable
+- legacy-migration-reads.ts — read-only dry-run/preview report, run status, bounded exceptions and positive activation receipt
+- legacy-migration-exclusion.ts — synchronous lease-guarded explicit exclusion; exact duplicates idempotent, changed audit identity conflicts
+- legacy-migration-runner.ts — cooperative prepare/resume orchestration, fresh-verify activation, optional custody reconciliation before resume/activate; post-commit callback failures never restore legacy authority
+- legacy-migration-fixture.ts — test-only isolated SQLite + synthetic Legacy workspace harness shared by the producer tests
+- legacy-canonical-converter.test.ts — canonical lifecycle, zero-result, replay, Block isolation, and conflict coverage
+- legacy-retain-sanitizer.ts — frozen credential/hidden-envelope refusal reused by canonical staging and Pending Memory admission
+- legacy-source-normalizer.ts — strict Markdown/frontmatter and Memory Block compatibility normalization

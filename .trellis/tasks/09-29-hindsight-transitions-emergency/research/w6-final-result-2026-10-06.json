@@ -1,0 +1,122 @@
+{
+  "completed": true,
+  "scope": "W6 isolated automated acceptance; owner/manual remains open",
+  "actualRecovery": {
+    "completed": true,
+    "supervisor": "H:\\TakiAgent\\.trellis\\.runtime\\stage4-w6\\db280d150f6340618b340a70439b43f7\\emergency-history\\b389441a92e74f2988071642a3ef832e\\supervisor-result.json",
+    "supervisorSha256": "82c1ec833d94d59859119c98bd3f9ced8ebead47be50b8ad49c07f349d68cd69",
+    "coreSha256": "90eeaaa1482bfea5b7c5cfbb998064ee9305f463c58f0c7f8530d972c8828c15",
+    "selection": [
+      "canonical-local",
+      "c4f53993-517e-4d97-96cd-7e916620ce29",
+      "5da1b2448bcc7ccaf0a41d5cbfa50fc9ea5e6f77e3610082300c7ea9477eed31"
+    ],
+    "operationId": "bfdb9a3d-8ee7-4e51-9cba-9b26712b0c1a",
+    "operationResult": {
+      "kind": "transition",
+      "transitionId": "0faf660d-9d8c-4215-ae5f-954f9f574734",
+      "receiptId": "5da1b2448bcc7ccaf0a41d5cbfa50fc9ea5e6f77e3610082300c7ea9477eed31",
+      "authorityCommitted": true,
+      "runtime": "ready",
+      "queue": "settled",
+      "outcome": "completed",
+      "errorCode": null
+    },
+    "preservedUnknownOperations": {
+      "0505474f-3dc3-4b04-8a03-409e8634d239": "outcome_unknown",
+      "391a96ee-e370-4129-911c-2fc37a717f0b": "outcome_unknown",
+      "b661d113-93e3-4b2a-bfdd-ab61d21f1dca": "outcome_unknown"
+    },
+    "phases": [
+      {
+        "phase": "emergency",
+        "completed": true,
+        "driverStopped": true,
+        "driverForcedStop": false,
+        "driverExitCode": 0,
+        "coreBeforeSha256": "2efaa2332a7cee5c7fbed50c58d9f0e3f74d5f0c4049d5ba6b0e6d2210b54949",
+        "driverPid": 36860,
+        "driverResultSha256": "3082ac06ab46b8766cebc812790a093cbd51a225b156e683c424f563080dda21",
+        "coreAfterSha256": "90eeaaa1482bfea5b7c5cfbb998064ee9305f463c58f0c7f8530d972c8828c15",
+        "checkpointSha256": "973500c2ec8a5a9f0e5897effc77a8284a5a6b8b037bf6ad617aba7c5c90b3bb"
+      },
+      {
+        "phase": "restart",
+        "completed": true,
+        "driverStopped": true,
+        "driverForcedStop": false,
+        "driverExitCode": 0,
+        "coreBeforeSha256": "90eeaaa1482bfea5b7c5cfbb998064ee9305f463c58f0c7f8530d972c8828c15",
+        "driverPid": 38428,
+        "driverResultSha256": "34a2079c03f354cebb993d1c816af9aeca0f0db957d93f5e3242612f2610ca55",
+        "coreAfterSha256": "90eeaaa1482bfea5b7c5cfbb998064ee9305f463c58f0c7f8530d972c8828c15"
+      }
+    ],
+    "immutableReadOnly": true,
+    "sourcesPreserved": true,
+    "inputsPreserved": true,
+    "d91Completed": false
+  },
+  "d91": {
+    "root": "H:\\TakiAgent\\.trellis\\.runtime\\stage4-w6-restore\\06f1a45b700f447aa313d355ee94f35e",
+    "backupId": "b4157111-fe4c-4acb-a3fb-a853d73925f6",
+    "sourceSchema": "public",
+    "targetSchema": "w6_restore_dfb3b25982d04f558f481a65988a5649",
+    "tableCount": 56,
+    "nativeArchiveSha256": "241d0ea12c1c83d636f034e8306f7e209ab0c6b33897ca4385c96d7ac20fb42b",
+    "nativeArchiveBytes": 134826043,
+    "fullHistoryHash": "6a8786a5a85da833ec6b4f77975b3f80818b38289ca2b33a942abd659899b050",
+    "triggerModesHash": "61eb5415950ffa64d5803a47590967e94152daf1b45f2e9a3a76f744671efc9f",
+    "preflight": {
+      "completed": true,
+      "epochId": "9a27367e-afb5-4a0a-ae55-2fbb7b07e8b4",
+      "transitionReceiptId": "c6dc908527eaec7b70c57151a5c08cef0dcde986d787fc69da9f50d00c4ab450",
+      "banks": [
+        {
+          "bankId": "taki-hs-v1-c-d60b8f9887b9060b6c4bf519d7c87b71",
+          "checkpointHash": "70cb13371efb15c1f5b148263d460eaeeb62883252820775a089d65a0963fd47",
+          "closureHash": "9224c52fec5361ab822fc84578b10187d0bb9420c40d56cdd6f48071e2384460",
+          "heads": 1572,
+          "artifacts": 2717,
+          "bodies": 5452
+        },
+        {
+          "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+          "checkpointHash": "7d7722cc7878a4bd861643db5d9a578ea6a8e8f0f1c56772348293b693d3e6a5",
+          "closureHash": "ca44cdde5c64c709b7252061cde26231333896f7d8fcf506f4402df8ee618e7a",
+          "heads": 431,
+          "artifacts": 770,
+          "bodies": 1543
+        }
+      ],
+      "nativeTargetSchema": "w6_restore_dfb3b25982d04f558f481a65988a5649",
+      "coreSha256": "bddfa927585ad629100d62efaa08baec1e512244ee174cf8a7edc9021f002e66",
+      "credentialHealth": "ok",
+      "credentialRefs": [
+        "memory.hindsight.connection.api-key"
+      ],
+      "inputsUnchanged": true,
+      "coreStarted": false,
+      "modelStarted": false
+    },
+    "sourcesPreserved": true,
+    "inputsPreserved": true,
+    "pgStopped": true,
+    "portClosed": true,
+    "fixtureCredentialCustody": true,
+    "externalCredentialsRead": false,
+    "modelStarted": false,
+    "conversionExecuted": false,
+    "evidence": {
+      "supervisor-result.json": "99fc4c77d8e1e3360a34553b3cba3ccf18006e4a8457f6cb7d5aef88eefb646d",
+      "source-files.json": "6edf1055addb49fa283e1f846114fe7a3c626be4ef1fc0480f5eedd844f591c9",
+      "stage-result.json": "c8cf75763d2621b9505898a5e3703ca88182e1bb4337a92ec7d2dc53657c8f29",
+      "native-restore-result.json": "6046e29eb270be91b16b8b916c2ba5465c0cf11252080f9a94b9188ee845e3a0",
+      "seal-result.json": "fa856e357a1b7fc74afc457e954624c8bccb66bfbcaf4c82d8266a4bdf3982d9",
+      "core-restore-preflight.json": "5ce1b305d0aa49186bfc73e976b9cd822681b76997118f747840c78389e748c5"
+    }
+  },
+  "w7Completed": false,
+  "w8Completed": false,
+  "manualAcceptance": false
+}

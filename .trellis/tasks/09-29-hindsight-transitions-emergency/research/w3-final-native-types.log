@@ -1,0 +1,1979 @@
+error[invalid-argument-type]: Argument to bound method `__init__` is incorrect
+  --> hindsight-api-slim\hindsight_api\api\taki_transitions.py:54:47
+   |
+52 |     reasons = {"taki_transition_fenced": "bank_fenced", "taki_transition_writer_stale": "writer_stale"}
+53 |     reason = reasons.get(error.reason)
+54 |     return transition_refusal(TransitionError(reason)) if reason is not None else None
+   |                                               ^^^^^^ Expected `Literal["unsupported_storage", "identity_mismatch", "request_conflict", "transition_not_found", "bank_not_found", ... omitted 25 literals]`, found `(Unknown & ~None) | str`
+   |
+info: Element `str` of this union is not assignable to `Literal["unsupported_storage", "identity_mismatch", "request_conflict", "transition_not_found", "bank_not_found", ... omitted 25 literals]`
+info: Method defined here
+   --> hindsight-api-slim\hindsight_api\engine\transition_models.py:211:9
+    |
+210 | class TransitionError(RuntimeError):
+211 |     def __init__(self, reason: TransitionReason, status_code: int = 409) -> None:
+    |         ^^^^^^^^       ------------------------ Parameter declared here
+212 |         self.response = TakiTransitionErrorResponse(reason=reason)
+213 |         self.status_code = status_code
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `__init__` is incorrect
+   --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:526:9
+    |
+524 |         provider=member.provider,
+525 |         api_key=member.api_key or "",
+526 |         base_url=member.base_url,
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^ Expected `str`, found `str | None`
+527 |         model=member.model,
+528 |         reasoning_effort=member.reasoning_effort or config.llm_reasoning_effort,
+    |
+info: Element `None` of this union is not assignable to `str`
+info: Method defined here
+   --> hindsight-api-slim\hindsight_api\engine\llm_wrapper.py:589:9
+    |
+587 |     """
+588 |
+589 |     def __init__(
+    |         ^^^^^^^^
+590 |         self,
+591 |         provider: str,
+592 |         api_key: str,
+593 |         base_url: str,
+    |         ------------- Parameter declared here
+594 |         model: str,
+595 |         reasoning_effort: str = "low",
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `_build_llm` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:1463:58
+     |
+1461 |             **default_call_defaults.as_kwargs(),
+1462 |         )
+1463 |         self._llm_config = _build_llm(_default_base_llm, config, "", default_call_defaults)
+     |                                                          ^^^^^^ Expected `HindsightConfig`, found `StaticConfigProxy`
+1464 |
+1465 |         # Store client and model for convenience (deprecated: use _llm_config.call() instead).
+     |
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:544:5
+    |
+544 | def _build_llm(
+    |     ^^^^^^^^^^
+545 |     base: LLMConfig,
+546 |     config: HindsightConfig,
+    |     ----------------------- Parameter declared here
+547 |     prefix: str,
+548 |     defaults: _LLMCallDefaults,
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `_build_llm` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:1508:64
+     |
+1506 |             **retain_call_defaults.as_kwargs(),
+1507 |         )
+1508 |         self._retain_llm_config = _build_llm(_retain_base_llm, config, "retain_", retain_call_defaults)
+     |                                                                ^^^^^^ Expected `HindsightConfig`, found `StaticConfigProxy`
+1509 |
+1510 |         # Reflect LLM config - for think/observe operations (can use lighter models)
+     |
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:544:5
+    |
+544 | def _build_llm(
+    |     ^^^^^^^^^^
+545 |     base: LLMConfig,
+546 |     config: HindsightConfig,
+    |     ----------------------- Parameter declared here
+547 |     prefix: str,
+548 |     defaults: _LLMCallDefaults,
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `_build_llm` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:1547:66
+     |
+1545 |             **reflect_call_defaults.as_kwargs(),
+1546 |         )
+1547 |         self._reflect_llm_config = _build_llm(_reflect_base_llm, config, "reflect_", reflect_call_defaults)
+     |                                                                  ^^^^^^ Expected `HindsightConfig`, found `StaticConfigProxy`
+1548 |
+1549 |         # Consolidation LLM config - for mental model consolidation (can use efficient models)
+     |
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:544:5
+    |
+544 | def _build_llm(
+    |     ^^^^^^^^^^
+545 |     base: LLMConfig,
+546 |     config: HindsightConfig,
+    |     ----------------------- Parameter declared here
+547 |     prefix: str,
+548 |     defaults: _LLMCallDefaults,
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `_build_llm` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:1587:38
+     |
+1585 |         )
+1586 |         self._consolidation_llm_config = _build_llm(
+1587 |             _consolidation_base_llm, config, "consolidation_", consolidation_call_defaults
+     |                                      ^^^^^^ Expected `HindsightConfig`, found `StaticConfigProxy`
+1588 |         )
+     |
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:544:5
+    |
+544 | def _build_llm(
+    |     ^^^^^^^^^^
+545 |     base: LLMConfig,
+546 |     config: HindsightConfig,
+    |     ----------------------- Parameter declared here
+547 |     prefix: str,
+548 |     defaults: _LLMCallDefaults,
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-return-type]: Return type does not match returned value
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:1789:20
+     |
+1787 |         # from the task's _schema field.
+1788 |         if request_context.internal:
+1789 |             return _current_schema.get()
+     |                    ^^^^^^^^^^^^^^^^^^^^^ expected `str`, found `str | None`
+1790 |
+1791 |         # For MCP requests already authenticated via MCP_AUTH_TOKEN, skip tenant re-validation.
+     |
+    ::: hindsight-api-slim\hindsight_api\engine\memory_engine.py:1764:87
+     |
+1762 |         return result
+1763 |
+1764 |     async def _authenticate_tenant(self, request_context: "RequestContext | None") -> str:
+     |                                                                                       --- Expected `str` because of return type
+1765 |         """
+1766 |         Authenticate tenant and set schema in context variable.
+     |
+info: rule `invalid-return-type` is enabled by default
+
+error[invalid-return-type]: Return type does not match returned value
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:1795:20
+     |
+1793 |         # extension would fail when MCP_AUTH_TOKEN and TENANT_API_KEY differ.
+1794 |         if request_context.mcp_authenticated:
+1795 |             return _current_schema.get()
+     |                    ^^^^^^^^^^^^^^^^^^^^^ expected `str`, found `str | None`
+1796 |
+1797 |         # Authenticate through tenant extension (always set, may be default no-auth extension)
+     |
+    ::: hindsight-api-slim\hindsight_api\engine\memory_engine.py:1764:87
+     |
+1762 |         return result
+1763 |
+1764 |     async def _authenticate_tenant(self, request_context: "RequestContext | None") -> str:
+     |                                                                                       --- Expected `str` because of return type
+1765 |         """
+1766 |         Authenticate tenant and set schema in context variable.
+     |
+info: rule `invalid-return-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:2322:13
+     |
+2320 |         await self.submit_async_retain(
+2321 |             bank_id,
+2322 |             groups[0].contents,
+     |             ^^^^^^^^^^^^^^^^^^ Expected `list[dict[str, Any]]`, found `list[RetainContentDict]`
+2323 |             request_context=request_context,
+2324 |             document_tags=request.document_tags,
+     |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `retrieve` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:2630:59
+     |
+2628 |         try:
+2629 |             # Retrieve file from storage
+2630 |             file_data = await self._file_storage.retrieve(storage_key)
+     |                                                           ^^^^^^^^^^^ Expected `str`, found `Any | None`
+2631 |
+2632 |             # Convert to markdown using the ordered fallback chain stored in the task payload.
+     |
+info: Element `None` of this union is not assignable to `str`
+info: Method defined here
+  --> hindsight-api-slim\hindsight_api\engine\storage\base.py:30:15
+   |
+29 |     @abstractmethod
+30 |     async def retrieve(self, key: str) -> bytes:
+   |               ^^^^^^^^       -------- Parameter declared here
+31 |         """
+32 |         Retrieve file by storage key.
+   |
+info: Union variant `bound method FileStorage.retrieve(key: str) -> CoroutineType[Any, Any, bytes]` is incompatible with this call site
+info: Attempted to call union type `Unknown | (bound method FileStorage.retrieve(key: str) -> CoroutineType[Any, Any, bytes])`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:2671:25
+     |
+2669 |                 await self._operation_validator.on_file_convert_complete(
+2670 |                     FileConvertResult(
+2671 |                         bank_id=bank_id,
+     |                         ^^^^^^^^^^^^^^^ Expected `str`, found `Any | None`
+2672 |                         parser_name=winning_parser,
+2673 |                         filename=filename,
+     |
+info: Element `None` of this union is not assignable to `str`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `delete` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:2788:49
+     |
+2786 |         if config.file_delete_after_retain:
+2787 |             try:
+2788 |                 await self._file_storage.delete(storage_key)
+     |                                                 ^^^^^^^^^^^ Expected `str`, found `Any | None`
+2789 |                 logger.info(f"[FILE_CONVERT_RETAIN] Deleted file bytes for {storage_key} (conversion completed)")
+2790 |             except Exception as e:
+     |
+info: Element `None` of this union is not assignable to `str`
+info: Method defined here
+  --> hindsight-api-slim\hindsight_api\engine\storage\base.py:46:15
+   |
+45 |     @abstractmethod
+46 |     async def delete(self, key: str) -> None:
+   |               ^^^^^^       -------- Parameter declared here
+47 |         """
+48 |         Delete file by storage key.
+   |
+info: Union variant `bound method FileStorage.delete(key: str) -> CoroutineType[Any, Any, None]` is incompatible with this call site
+info: Attempted to call union type `Unknown | (bound method FileStorage.delete(key: str) -> CoroutineType[Any, Any, None])`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `__init__` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:3926:40
+     |
+3924 |                 if self._pg0_password is not None:
+3925 |                     kwargs["password"] = self._pg0_password
+3926 |                 pg0 = EmbeddedPostgres(**kwargs)
+     |                                        ^^^^^^^^ Expected `dict[str, str] | None`, found `object`
+3927 |                 # Check if pg0 is already running before we start it
+3928 |                 was_already_running = await pg0.is_running()
+     |
+info: Method defined here
+  --> hindsight-api-slim\hindsight_api\pg0.py:21:9
+   |
+19 |     """Manages an embedded PostgreSQL server instance using pg0-embedded."""
+20 |
+21 |     def __init__(
+   |         ^^^^^^^^
+22 |         self,
+23 |         port: int | None = None,
+   |
+  ::: hindsight-api-slim\hindsight_api\pg0.py:28:9
+   |
+26 |         database: str = DEFAULT_DATABASE,
+27 |         name: str = "hindsight",
+28 |         config: dict[str, str] | None = None,
+   |         ------------------------------------ Parameter declared here
+29 |         **kwargs,
+30 |     ):
+   |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `__init__` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:3926:40
+     |
+3924 |                 if self._pg0_password is not None:
+3925 |                     kwargs["password"] = self._pg0_password
+3926 |                 pg0 = EmbeddedPostgres(**kwargs)
+     |                                        ^^^^^^^^ Expected `int | None`, found `object`
+3927 |                 # Check if pg0 is already running before we start it
+3928 |                 was_already_running = await pg0.is_running()
+     |
+info: Method defined here
+  --> hindsight-api-slim\hindsight_api\pg0.py:21:9
+   |
+19 |     """Manages an embedded PostgreSQL server instance using pg0-embedded."""
+20 |
+21 |     def __init__(
+   |         ^^^^^^^^
+22 |         self,
+23 |         port: int | None = None,
+   |         ----------------------- Parameter declared here
+24 |         username: str = DEFAULT_USERNAME,
+25 |         password: str = DEFAULT_PASSWORD,
+   |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `__init__` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:3926:40
+     |
+3924 |                 if self._pg0_password is not None:
+3925 |                     kwargs["password"] = self._pg0_password
+3926 |                 pg0 = EmbeddedPostgres(**kwargs)
+     |                                        ^^^^^^^^ Expected `str`, found `object`
+3927 |                 # Check if pg0 is already running before we start it
+3928 |                 was_already_running = await pg0.is_running()
+     |
+info: Method defined here
+  --> hindsight-api-slim\hindsight_api\pg0.py:21:9
+   |
+19 |     """Manages an embedded PostgreSQL server instance using pg0-embedded."""
+20 |
+21 |     def __init__(
+   |         ^^^^^^^^
+22 |         self,
+23 |         port: int | None = None,
+24 |         username: str = DEFAULT_USERNAME,
+   |         -------------------------------- Parameter declared here
+25 |         password: str = DEFAULT_PASSWORD,
+26 |         database: str = DEFAULT_DATABASE,
+   |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `__init__` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:3926:40
+     |
+3924 |                 if self._pg0_password is not None:
+3925 |                     kwargs["password"] = self._pg0_password
+3926 |                 pg0 = EmbeddedPostgres(**kwargs)
+     |                                        ^^^^^^^^ Expected `str`, found `object`
+3927 |                 # Check if pg0 is already running before we start it
+3928 |                 was_already_running = await pg0.is_running()
+     |
+info: Method defined here
+  --> hindsight-api-slim\hindsight_api\pg0.py:21:9
+   |
+19 |     """Manages an embedded PostgreSQL server instance using pg0-embedded."""
+20 |
+21 |     def __init__(
+   |         ^^^^^^^^
+22 |         self,
+23 |         port: int | None = None,
+24 |         username: str = DEFAULT_USERNAME,
+25 |         password: str = DEFAULT_PASSWORD,
+   |         -------------------------------- Parameter declared here
+26 |         database: str = DEFAULT_DATABASE,
+27 |         name: str = "hindsight",
+   |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `__init__` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:3926:40
+     |
+3924 |                 if self._pg0_password is not None:
+3925 |                     kwargs["password"] = self._pg0_password
+3926 |                 pg0 = EmbeddedPostgres(**kwargs)
+     |                                        ^^^^^^^^ Expected `str`, found `object`
+3927 |                 # Check if pg0 is already running before we start it
+3928 |                 was_already_running = await pg0.is_running()
+     |
+info: Method defined here
+  --> hindsight-api-slim\hindsight_api\pg0.py:21:9
+   |
+19 |     """Manages an embedded PostgreSQL server instance using pg0-embedded."""
+20 |
+21 |     def __init__(
+   |         ^^^^^^^^
+22 |         self,
+23 |         port: int | None = None,
+24 |         username: str = DEFAULT_USERNAME,
+25 |         password: str = DEFAULT_PASSWORD,
+26 |         database: str = DEFAULT_DATABASE,
+   |         -------------------------------- Parameter declared here
+27 |         name: str = "hindsight",
+28 |         config: dict[str, str] | None = None,
+   |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `__init__` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:3926:40
+     |
+3924 |                 if self._pg0_password is not None:
+3925 |                     kwargs["password"] = self._pg0_password
+3926 |                 pg0 = EmbeddedPostgres(**kwargs)
+     |                                        ^^^^^^^^ Expected `str`, found `object`
+3927 |                 # Check if pg0 is already running before we start it
+3928 |                 was_already_running = await pg0.is_running()
+     |
+info: Method defined here
+  --> hindsight-api-slim\hindsight_api\pg0.py:21:9
+   |
+19 |     """Manages an embedded PostgreSQL server instance using pg0-embedded."""
+20 |
+21 |     def __init__(
+   |         ^^^^^^^^
+22 |         self,
+23 |         port: int | None = None,
+   |
+  ::: hindsight-api-slim\hindsight_api\pg0.py:27:9
+   |
+25 |         password: str = DEFAULT_PASSWORD,
+26 |         database: str = DEFAULT_DATABASE,
+27 |         name: str = "hindsight",
+   |         ----------------------- Parameter declared here
+28 |         config: dict[str, str] | None = None,
+29 |         **kwargs,
+   |
+info: rule `invalid-argument-type` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `supports_bm25` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:4133:43
+     |
+4131 |                         text_search_extension=config.text_search_extension,
+4132 |                         pg_search_tokenizer=config.text_search_extension_pg_search_tokenizer,
+4133 |                         ensure_extensions=self._backend.supports_bm25,
+     |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4134 |                     )
+4135 |                 else:
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `run_migrations` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:4143:29
+     |
+4141 |                     for tenant in tenants:
+4142 |                         if tenant.schema:
+4143 |                             self._backend.run_migrations(
+     |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4144 |                                 self.db_url, schema=self._backend.normalize_schema(tenant.schema)
+4145 |                             )
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `normalize_schema` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:4144:53
+     |
+4142 |                         if tenant.schema:
+4143 |                             self._backend.run_migrations(
+4144 |                                 self.db_url, schema=self._backend.normalize_schema(tenant.schema)
+     |                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4145 |                             )
+4146 |                 logger.info("Schema migrations completed")
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `initialize` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:4217:15
+     |
+4215 |                 await conn.execute(f"SET max_parallel_workers_per_gather = {max_parallel_gather}")
+4216 |
+4217 |         await self._backend.initialize(
+     |               ^^^^^^^^^^^^^^^^^^^^^^^^
+4218 |             self.db_url,
+4219 |             min_size=self._pool_min_size,
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `initialize` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:4218:13
+     |
+4217 |         await self._backend.initialize(
+4218 |             self.db_url,
+     |             ^^^^^^^^^^^ Expected `str`, found `Unknown | None | (str & ~AlwaysFalsy)`
+4219 |             min_size=self._pool_min_size,
+4220 |             max_size=self._pool_max_size,
+     |
+info: Element `None` of this union is not assignable to `str`
+info: Method defined here
+   --> hindsight-api-slim\hindsight_api\engine\db\base.py:306:15
+    |
+305 |     @abstractmethod
+306 |     async def initialize(
+    |               ^^^^^^^^^^
+307 |         self,
+308 |         dsn: str,
+    |         -------- Parameter declared here
+309 |         *,
+310 |         min_size: int = 5,
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `get_pool` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:4230:22
+     |
+4228 |         # still use pool.acquire() / acquire_with_retry(pool) directly.
+4229 |         # These will be migrated to use self._backend.acquire() over time.
+4230 |         self._pool = self._backend.get_pool()
+     |                      ^^^^^^^^^^^^^^^^^^^^^^
+4231 |
+4232 |         if self._read_database_url:
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `__init__` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:4261:48
+     |
+4259 |         from ..config_resolver import ConfigResolver
+4260 |
+4261 |         self._config_resolver = ConfigResolver(backend=self._backend, tenant_extension=self._tenant_extension)
+     |                                                ^^^^^^^^^^^^^^^^^^^^^ Expected `DatabaseBackend`, found `DatabaseBackend | None`
+4262 |         logger.debug("Config resolver initialized for hierarchical configuration")
+     |
+info: Element `None` of this union is not assignable to `DatabaseBackend`
+info: Method defined here
+  --> hindsight-api-slim\hindsight_api\config_resolver.py:75:9
+   |
+73 |     """Resolves hierarchical configuration with tenant/bank overrides."""
+74 |
+75 |     def __init__(self, backend: "DatabaseBackend", tenant_extension: TenantExtension | None = None):
+   |         ^^^^^^^^       -------------------------- Parameter declared here
+76 |         """
+77 |         Initialize config resolver.
+   |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `__init__` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:4324:13
+     |
+4322 |             ]
+4323 |         self._webhook_manager = WebhookManager(
+4324 |             backend=self._backend,
+     |             ^^^^^^^^^^^^^^^^^^^^^ Expected `DatabaseBackend`, found `DatabaseBackend | None`
+4325 |             global_webhooks=webhook_global,
+4326 |             tenant_extension=self._tenant_extension,
+     |
+info: Element `None` of this union is not assignable to `DatabaseBackend`
+info: Method defined here
+  --> hindsight-api-slim\hindsight_api\webhooks\manager.py:44:9
+   |
+42 |     """
+43 |
+44 |     def __init__(
+   |         ^^^^^^^^
+45 |         self,
+46 |         backend: "DatabaseBackend",
+   |         -------------------------- Parameter declared here
+47 |         global_webhooks: list[WebhookConfig],
+48 |         tenant_extension: "TenantExtension | None" = None,
+   |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-return-type]: Return type does not match returned value
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:4360:34
+     |
+4358 |         logger.info("Memory system initialized (pool and task backend started)")
+4359 |
+4360 |     async def _get_pool(self) -> asyncpg.Pool:
+     |                                  ------------ Expected `Pool` because of return type
+4361 |         """Get the connection pool (must call initialize() first)."""
+4362 |         if not self._initialized:
+4363 |             await self.initialize()
+4364 |         return self._pool
+     |                ^^^^^^^^^^ expected `Pool`, found `Unknown | None`
+4365 |
+4366 |     async def _get_read_backend(self) -> DatabaseBackend:
+     |
+info: rule `invalid-return-type` is enabled by default
+
+error[invalid-return-type]: Return type does not match returned value
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:4373:16
+     |
+4371 |         if not self._initialized:
+4372 |             await self.initialize()
+4373 |         return self._read_backend
+     |                ^^^^^^^^^^^^^^^^^^ expected `DatabaseBackend`, found `DatabaseBackend | None`
+4374 |
+4375 |     async def _get_backend(self) -> DatabaseBackend:
+     |
+    ::: hindsight-api-slim\hindsight_api\engine\memory_engine.py:4366:42
+     |
+4364 |         return self._pool
+4365 |
+4366 |     async def _get_read_backend(self) -> DatabaseBackend:
+     |                                          --------------- Expected `DatabaseBackend` because of return type
+4367 |         """Get the read-only backend (replica when configured, otherwise primary).
+     |
+info: rule `invalid-return-type` is enabled by default
+
+error[invalid-return-type]: Return type does not match returned value
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:4375:37
+     |
+4373 |         return self._read_backend
+4374 |
+4375 |     async def _get_backend(self) -> DatabaseBackend:
+     |                                     --------------- Expected `DatabaseBackend` because of return type
+4376 |         """Get the database backend, auto-initializing if needed."""
+4377 |         if not self._initialized:
+4378 |             await self.initialize()
+4379 |         return self._backend
+     |                ^^^^^^^^^^^^^ expected `DatabaseBackend`, found `DatabaseBackend | None`
+4380 |
+4381 |     async def health_check(self) -> dict:
+     |
+info: rule `invalid-return-type` is enabled by default
+
+error[call-non-callable]: Object of type `object` is not callable
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:4504:19
+     |
+4502 |         """
+4503 |         if hasattr(self._task_backend, "wait_for_pending_tasks"):
+4504 |             await self._task_backend.wait_for_pending_tasks()
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4505 |
+4506 |     def _format_readable_date(self, dt: datetime) -> str:
+     |
+info: rule `call-non-callable` is enabled by default
+
+error[invalid-argument-type]: Argument to function `run` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:4560:28
+     |
+4559 |         ctx = request_context if request_context is not None else RC()
+4560 |         return asyncio.run(self.retain_async(bank_id, content, context, event_date, request_context=ctx))
+     |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `Coroutine[Any, Any, Unknown]`, found `Awaitable[Unknown]`
+4561 |
+4562 |     @_bind_bank_id()
+     |
+info: Function defined here
+  --> stdlib\asyncio\runners.pyi:94:9
+   |
+93 | else:
+94 |     def run(main: Coroutine[Any, Any, _T], *, debug: bool | None = None) -> _T:
+   |         ^^^ ----------------------------- Parameter declared here
+95 |         """Execute the coroutine and return the result.
+   |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `import_documents` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:5423:13
+     |
+5421 |             bank_id=bank_id,
+5422 |             archive_bytes=archive_bytes,
+5423 |             on_conflict=on_conflict,
+     |             ^^^^^^^^^^^^^^^^^^^^^^^ Expected `Literal["skip", "replace", "new-id"]`, found `str`
+5424 |             outbox_callback_factory=outbox_factory,
+5425 |         )
+     |
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\transfer\importer.py:144:11
+    |
+144 | async def import_documents(
+    |           ^^^^^^^^^^^^^^^^
+145 |     *,
+146 |     backend: Any,
+    |
+   ::: hindsight-api-slim\hindsight_api\engine\transfer\importer.py:153:5
+    |
+151 |     bank_id: str,
+152 |     archive_bytes: bytes,
+153 |     on_conflict: OnConflict = "skip",
+    |     -------------------------------- Parameter declared here
+154 |     ops: Any = None,
+155 |     outbox_callback_factory: Any = None,
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `run` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:5491:13
+     |
+5490 |           return asyncio.run(
+5491 | /             self.recall_async(
+5492 | |                 bank_id,
+5493 | |                 query,
+5494 | |                 budget=budget,
+5495 | |                 max_tokens=max_tokens,
+5496 | |                 enable_trace=enable_trace,
+5497 | |                 fact_type=[fact_type],
+5498 | |                 request_context=RequestContext(),
+5499 | |             )
+     | |_____________^ Expected `Coroutine[Any, Any, Unknown]`, found `Awaitable[Unknown]`
+5500 |           )
+     |
+info: Function defined here
+  --> stdlib\asyncio\runners.pyi:94:9
+   |
+93 | else:
+94 |     def run(main: Coroutine[Any, Any, _T], *, debug: bool | None = None) -> _T:
+   |         ^^^ ----------------------------- Parameter declared here
+95 |         """Execute the coroutine and return the result.
+   |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `_resolve_reranker_max_candidates` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:5667:68
+     |
+5665 |         # Reranker candidate cap, optionally scaled by the same budget level (env-configured,
+5666 |         # 0/unset → flat reranker_max_candidates). Static config, so read from get_config().
+5667 |         reranker_max_candidates = _resolve_reranker_max_candidates(get_config(), budget)
+     |                                                                    ^^^^^^^^^^^^ Expected `HindsightConfig`, found `StaticConfigProxy`
+5668 |
+5669 |         # Recall pipeline stages, resolved per bank. A bank can switch off arms its
+     |
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:834:5
+    |
+834 | def _resolve_reranker_max_candidates(config: HindsightConfig, budget: "Budget | None") -> int:
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ----------------------- Parameter declared here
+835 |     """Map a Budget level to the cross-encoder candidate cap.
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-parameter-default]: Default value of type `None` is not assignable to annotated parameter type `RequestContext`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:5858:9
+     |
+5856 |         include_chunks: bool = False,
+5857 |         max_chunk_tokens: int = 8192,
+5858 |         request_context: "RequestContext" = None,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+5859 |         semaphore_wait: float = 0.0,
+5860 |         prefer_observations: bool = False,
+     |
+info: rule `invalid-parameter-default` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:6571:28
+     |
+6569 |                 elif observation_ids_ordered:
+6570 |                     async with acquire_with_retry(backend) as obs_conn:
+6571 |                         if self._backend.ops.uses_observation_sources_table:
+     |                            ^^^^^^^^^^^^^^^^^
+6572 |                             obs_source_rows = await obs_conn.fetch(
+6573 |                                 f"""
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:7191:12
+     |
+7189 |         if source_column not in ("document_id", "chunk_id"):
+7190 |             raise ValueError(f"Unsupported source_column: {source_column!r}")
+7191 |         if self._backend.ops.uses_observation_sources_table:
+     |            ^^^^^^^^^^^^^^^^^
+7192 |             bank_clause = f" AND src.bank_id = ${bank_placeholder}" if bank_placeholder else ""
+7193 |             return (
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:7296:44
+     |
+7294 |                     _obs = (
+7295 |                         await _store.observations_for_sources(
+7296 |                             conn=conn, ops=self._backend.ops, fq_table=fq_table, bank_id=bank_id, unit_ids=_sids
+     |                                            ^^^^^^^^^^^^^^^^^
+7297 |                         )
+7298 |                         if _sids
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:7392:78
+     |
+7391 |                 _store = get_memories()
+7392 |                 replication_supported = _store.writes_memory_rows_in_sql and self._backend.ops.supports_taki_replication
+     |                                                                              ^^^^^^^^^^^^^^^^^
+7393 |                 if replication_supported:
+7394 |                     await lock_replication_bank_state(conn=conn, fq_table=fq_table, bank_id=bank_id)
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:7584:70
+     |
+7583 |         _store = get_memories()
+7584 |         replication_supported = _store.writes_memory_rows_in_sql and self._backend.ops.supports_taki_replication
+     |                                                                      ^^^^^^^^^^^^^^^^^
+7585 |         logical_changes: list[PendingLogicalChange] = []
+7586 |         invalidated_obs = 0
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:7658:44
+     |
+7656 |                     if _src_ids:
+7657 |                         invalidated_obs = await _store.delete_stale_observations(
+7658 |                             conn=conn, ops=self._backend.ops, fq_table=fq_table, bank_id=bank_id, fact_ids=_src_ids
+     |                                            ^^^^^^^^^^^^^^^^^
+7659 |                         )
+7660 |                         await _store.mark_consolidated(
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:7701:33
+     |
+7699 |                         invalidated_obs = await _store.delete_stale_observations(
+7700 |                             conn=conn,
+7701 |                             ops=self._backend.ops,
+     |                                 ^^^^^^^^^^^^^^^^^
+7702 |                             fq_table=fq_table,
+7703 |                             bank_id=bank_id,
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:7753:28
+     |
+7751 |                         unit_uuids = [uuid_module.UUID(uid) for uid in unit_ids]
+7752 |                         unit_uuid_set = {str(u) for u in unit_uuids}
+7753 |                         if self._backend.ops.uses_observation_sources_table:
+     |                            ^^^^^^^^^^^^^^^^^
+7754 |                             affected_obs = await conn.fetch(
+7755 |                                 f"""
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:7897:78
+     |
+7896 |                 _store = get_memories()
+7897 |                 replication_supported = _store.writes_memory_rows_in_sql and self._backend.ops.supports_taki_replication
+     |                                                                              ^^^^^^^^^^^^^^^^^
+7898 |                 was_archived = False
+7899 |                 deleted_revision: int | None = None
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `begin_txn` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:8009:89
+     |
+8007 |                     if deleted:
+8008 |                         # Tag the store tombstone so it commits atomically with this transaction.
+8009 |                         _del_txn = await _store.begin_txn(conn=conn, fq_table=fq_table, bank_id=bank_id, mutating=True)
+     |                                                                                         ^^^^^^^^^^^^^^^ Expected `str`, found `str | None | @Todo`
+8010 |                         await _store.delete_facts(bank_id, [unit_id], txn=_del_txn)
+     |
+info: Element `None` of this union is not assignable to `str`
+info: Method defined here
+   --> hindsight-api-slim\hindsight_api\engine\memories\base.py:428:15
+    |
+426 |     # ------------------------------------------------------------------ writes
+427 |
+428 |     async def begin_txn(self, *, conn, fq_table, bank_id: str, mutating: bool) -> "MemoryTxn | None":
+    |               ^^^^^^^^^                          ------------ Parameter declared here
+429 |         """Open a cross-store write-group transaction around a unit of work, or ``None``.
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `delete_facts` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:8010:51
+     |
+8008 |                         # Tag the store tombstone so it commits atomically with this transaction.
+8009 |                         _del_txn = await _store.begin_txn(conn=conn, fq_table=fq_table, bank_id=bank_id, mutating=True)
+8010 |                         await _store.delete_facts(bank_id, [unit_id], txn=_del_txn)
+     |                                                   ^^^^^^^ Expected `str`, found `str | None | @Todo`
+8011 |
+8012 |                 if deleted and replication_supported and deleted_revision is not None:
+     |
+info: Element `None` of this union is not assignable to `str`
+info: Method defined here
+   --> hindsight-api-slim\hindsight_api\engine\memories\base.py:522:15
+    |
+521 |     @abstractmethod
+522 |     async def delete_facts(self, bank_id: str, unit_ids: list[str], *, txn: "MemoryTxn | None" = None) -> None:
+    |               ^^^^^^^^^^^^       ------------ Parameter declared here
+523 |         """Remove units. Safe to call for ids that were never written."""
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:8714:32
+     |
+8712 | …                     # with a fresh idempotency namespace. Slice 0B's provider-lineage journal
+8713 | …                     # tombstone is a separate durable record and must not reuse this cleanup.
+8714 | …                     if self._backend.ops.supports_memory_revisions:
+     |                          ^^^^^^^^^^^^^^^^^
+8715 | …                         await conn.execute(
+8716 | …                             f"DELETE FROM {fq_table('memory_mutation_receipts')} WHERE bank_id = $1",
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:8756:93
+     |
+8754 |             if bank_internal_id:
+8755 |                 await retry_with_backoff(
+8756 |                     lambda: bank_utils.drop_bank_vector_indexes(conn, bank_internal_id, ops=self._backend.ops)
+     |                                                                                             ^^^^^^^^^^^^^^^^^
+8757 |                 )
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:8821:69
+     |
+8819 |         store = get_memories()
+8820 |         backend = await self._get_backend()
+8821 |         replication_supported = store.writes_memory_rows_in_sql and self._backend.ops.supports_taki_replication
+     |                                                                     ^^^^^^^^^^^^^^^^^
+8822 |         logical_changes: list[PendingLogicalChange] = []
+8823 |         async with acquire_with_retry(backend) as conn:
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:9008:69
+     |
+9006 |         store = get_memories()
+9007 |         backend = await self._get_backend()
+9008 |         replication_supported = store.writes_memory_rows_in_sql and self._backend.ops.supports_taki_replication
+     |                                                                     ^^^^^^^^^^^^^^^^^
+9009 |         async with acquire_with_retry(backend) as conn:
+9010 |             if replication_supported:
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:9121:69
+     |
+9120 |         store = get_memories()
+9121 |         replication_supported = store.writes_memory_rows_in_sql and self._backend.ops.supports_taki_replication
+     |                                                                     ^^^^^^^^^^^^^^^^^
+9122 |         deleted_count = 0
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+error[invalid-argument-type]: Argument to function `get_memory_mutation_receipt` is incorrect
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:9408:25
+     |
+9406 |                         fq_table=fq_table,
+9407 |                         bank_id=bank_id,
+9408 |                         mutation_id=mutation_uuid,
+     |                         ^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `UUID`, found `None | UUID`
+9409 |                         memory_id=memory_uuid,
+9410 |                         request_hash=mutation_request_hash,
+     |
+info: Element `None` of this union is not assignable to `UUID`
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\memories\conditional_mutation.py:165:11
+    |
+165 | async def get_memory_mutation_receipt(
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+166 |     *,
+167 |     conn: Any,
+168 |     fq_table: Callable[[str], str],
+169 |     bank_id: str,
+170 |     mutation_id: uuid.UUID,
+    |     ---------------------- Parameter declared here
+171 |     memory_id: uuid.UUID,
+172 |     request_hash: str,
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:9666:26
+     |
+9664 |                                 raise NativeReceiptError("receipt_corrupt")
+9665 |                             return native_receipt.result.original_mutation.model_dump(mode="python")
+9666 |                     elif self._backend.ops.supports_taki_replication:
+     |                          ^^^^^^^^^^^^^^^^^
+9667 |                         await lock_replication_bank_state(conn=conn, fq_table=fq_table, bank_id=bank_id)
+9668 |                     if conditional_supported:
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `reassert_entities_batch` may be missing on object of type `Unknown | None | EntityResolver`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:9738:39
+     |
+9736 | …                     # prune (retain #2662 race) blocks until commit, then link exactly
+9737 | …                     # the resolved set the embedding named.
+9738 | …                     await self.entity_resolver.reassert_entities_batch(
+     |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+9739 | …                         bank_id, edit_plan.entity_resolution.resolved_entities, conn=conn
+9740 | …                     )
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `resolved_entities` may be missing on object of type `Any | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:9739:46
+     |
+9737 | …                     # the resolved set the embedding named.
+9738 | …                     await self.entity_resolver.reassert_entities_batch(
+9739 | …                         bank_id, edit_plan.entity_resolution.resolved_entities, conn=conn
+     |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+9740 | …                     )
+9741 | …                     await self.entity_resolver.link_units_to_entities_batch(
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `link_units_to_entities_batch` may be missing on object of type `Unknown | None | EntityResolver`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:9741:39
+     |
+9739 | …                         bank_id, edit_plan.entity_resolution.resolved_entities, conn=conn
+9740 | …                     )
+9741 | …                     await self.entity_resolver.link_units_to_entities_batch(
+     |                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+9742 | …                         [
+9743 | …                             (str(memory_uuid), eid, edit_plan.entity_date)
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+    --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:9898:37
+     |
+9896 | …                     result_data = await store.get_memory_unit(
+9897 | …                         conn=conn,
+9898 | …                         ops=self._backend.ops,
+     |                               ^^^^^^^^^^^^^^^^^
+9899 | …                         fq_table=fq_table,
+9900 | …                         bank_id=bank_id,
+     |
+info: rule `possibly-missing-attribute` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:10054:17
+      |
+10053 |             ctx = BankReadContext(
+10054 |                 bank_id=bank_id, operation=BankReadOperation.GET_GRAPH_DATA, request_context=request_context
+      |                 ^^^^^^^^^^^^^^^ Expected `str`, found `str | None`
+10055 |             )
+10056 |             await self._validate_operation(self._operation_validator.validate_bank_read(ctx))
+      |
+info: Element `None` of this union is not assignable to `str`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `graph_units` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:10067:17
+      |
+10065 |                 conn=conn,
+10066 |                 fq_table=fq_table,
+10067 |                 bank_id=bank_id,
+      |                 ^^^^^^^^^^^^^^^ Expected `str`, found `str | None`
+10068 |                 fact_type=fact_type,
+10069 |                 search_query=q,
+      |
+info: Element `None` of this union is not assignable to `str`
+info: Method defined here
+    --> hindsight-api-slim\hindsight_api\engine\memories\base.py:1069:15
+     |
+1068 |     @abstractmethod
+1069 |     async def graph_units(
+     |               ^^^^^^^^^^^
+1070 |         self,
+1071 |         *,
+1072 |         conn,
+1073 |         fq_table,
+1074 |         bank_id: str,
+     |         ------------ Parameter declared here
+1075 |         fact_type: str | None = None,
+1076 |         search_query: str | None = None,
+     |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `graph_direct_links` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:10099:47
+      |
+10097 |             all_relevant_ids = unit_ids + source_memory_ids
+10098 |             links = await store.graph_direct_links(
+10099 |                 conn=conn, fq_table=fq_table, bank_id=bank_id, unit_ids=[str(u) for u in all_relevant_ids]
+      |                                               ^^^^^^^^^^^^^^^ Expected `str`, found `str | None`
+10100 |             )
+      |
+info: Element `None` of this union is not assignable to `str`
+info: Method defined here
+    --> hindsight-api-slim\hindsight_api\engine\memories\base.py:1095:15
+     |
+1094 |     @abstractmethod
+1095 |     async def graph_direct_links(self, *, conn, fq_table, bank_id: str, unit_ids: list[str]) -> list[dict[str, Any]]:
+     |               ^^^^^^^^^^^^^^^^^^                          ------------ Parameter declared here
+1096 |         """Memory-to-memory edges among ``unit_ids`` for the graph view."""
+     |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `graph_entity_rows` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:10163:47
+      |
+10161 |             entity_lookup_ids = unit_ids + source_memory_ids
+10162 |             unit_entities = await store.graph_entity_rows(
+10163 |                 conn=conn, fq_table=fq_table, bank_id=bank_id, unit_ids=[str(u) for u in entity_lookup_ids]
+      |                                               ^^^^^^^^^^^^^^^ Expected `str`, found `str | None`
+10164 |             )
+      |
+info: Element `None` of this union is not assignable to `str`
+info: Method defined here
+    --> hindsight-api-slim\hindsight_api\engine\memories\base.py:1091:15
+     |
+1090 |     @abstractmethod
+1091 |     async def graph_entity_rows(self, *, conn, fq_table, bank_id: str, unit_ids: list[str]) -> list[dict[str, Any]]:
+     |               ^^^^^^^^^^^^^^^^^                          ------------ Parameter declared here
+1092 |         """``(unit_id, entity_id, canonical_name)`` rows for the graph view's entity edges."""
+     |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `extract_facts_from_text` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:10420:13
+      |
+10418 |             text=content,
+10419 |             event_date=event_date,
+10420 |             llm_config=retain_llm,
+      |             ^^^^^^^^^^^^^^^^^^^^^ Expected `LLMProvider`, found `Unknown | ConfiguredLLMProvider`
+10421 |             agent_name=agent_name or "",
+10422 |             config=resolved_config,
+      |
+info: Element `ConfiguredLLMProvider` of this union is not assignable to `LLMProvider`
+info: Function defined here
+    --> hindsight-api-slim\hindsight_api\engine\retain\fact_extraction.py:1807:11
+     |
+1807 | async def extract_facts_from_text(
+     |           ^^^^^^^^^^^^^^^^^^^^^^^
+1808 |     text: str,
+1809 |     event_date: datetime | None,
+1810 |     llm_config: LLMConfig,
+     |     --------------------- Parameter declared here
+1811 |     agent_name: str,
+1812 |     config,
+     |
+info: rule `invalid-argument-type` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:10510:21
+      |
+10508 |             return await get_memories().list_memory_units(
+10509 |                 conn=conn,
+10510 |                 ops=self._backend.ops,
+      |                     ^^^^^^^^^^^^^^^^^
+10511 |                 fq_table=fq_table,
+10512 |                 bank_id=bank_id,
+      |
+info: rule `possibly-missing-attribute` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:10566:21
+      |
+10564 |             return await get_memories().get_memory_unit(
+10565 |                 conn=conn,
+10566 |                 ops=self._backend.ops,
+      |                     ^^^^^^^^^^^^^^^^^
+10567 |                 fq_table=fq_table,
+10568 |                 bank_id=bank_id,
+      |
+info: rule `possibly-missing-attribute` is enabled by default
+
+error[invalid-return-type]: Return type does not match returned value
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:10951:24
+      |
+10949 |             )
+10950 |             if not doc:
+10951 |                 return None
+      |                        ^^^^ expected `dict[str, Any]`, found `None`
+10952 |
+10953 |             count_result = await conn.fetchrow(
+      |
+     ::: hindsight-api-slim\hindsight_api\engine\memory_engine.py:10920:10
+      |
+10918 |         offset: int = 0,
+10919 |         request_context: "RequestContext",
+10920 |     ) -> dict[str, Any]:
+      |          -------------- Expected `dict[str, Any]` because of return type
+10921 |         """
+10922 |         List all chunks for a given document, ordered by chunk_index.
+      |
+info: rule `invalid-return-type` is enabled by default
+
+error[invalid-return-type]: Return type does not match returned value
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:11035:20
+      |
+11033 |         doc = await self.get_document(document_id, bank_id, request_context=request_context)
+11034 |         if not doc:
+11035 |             return None
+      |                    ^^^^ expected `dict[str, Any]`, found `None`
+11036 |
+11037 |         original_text = doc.get("original_text")
+      |
+     ::: hindsight-api-slim\hindsight_api\engine\memory_engine.py:11011:10
+      |
+11009 |         *,
+11010 |         request_context: "RequestContext",
+11011 |     ) -> dict[str, Any]:
+      |          -------------- Expected `dict[str, Any]` because of return type
+11012 |         """
+11013 |         Reprocess a document by re-running retain with its existing content and parameters.
+      |
+info: rule `invalid-return-type` is enabled by default
+
+error[invalid-return-type]: Return type does not match returned value
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:11039:20
+      |
+11037 |         original_text = doc.get("original_text")
+11038 |         if not original_text:
+11039 |             return None
+      |                    ^^^^ expected `dict[str, Any]`, found `None`
+11040 |
+11041 |         # Rebuild the content dict from retain_params
+      |
+     ::: hindsight-api-slim\hindsight_api\engine\memory_engine.py:11011:10
+      |
+11009 |         *,
+11010 |         request_context: "RequestContext",
+11011 |     ) -> dict[str, Any]:
+      |          -------------- Expected `dict[str, Any]` because of return type
+11012 |         """
+11013 |         Reprocess a document by re-running retain with its existing content and parameters.
+      |
+info: rule `invalid-return-type` is enabled by default
+
+error[invalid-method-override]: Invalid override of method `get_bank_profile`
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:11532:15
+      |
+11530 |       ) -> dict[str, Any] | None: ...
+11531 |
+11532 |       async def get_bank_profile(
+      |  _______________^
+11533 | |         self,
+11534 | |         bank_id: str,
+11535 | |         *,
+11536 | |         request_context: "RequestContext",
+11537 | |         create_if_missing: bool = True,
+11538 | |     ) -> dict[str, Any] | None:
+      | |______________________________^ Definition is incompatible with `MemoryEngineInterface.get_bank_profile`
+11539 |           """
+11540 |           Get bank profile (name, disposition + mission).
+      |
+     ::: hindsight-api-slim\hindsight_api\engine\interface.py:177:15
+      |
+  176 |       @abstractmethod
+  177 |       async def get_bank_profile(
+      |  _______________-
+  178 | |         self,
+  179 | |         bank_id: str,
+  180 | |         *,
+  181 | |         request_context: "RequestContext",
+  182 | |         create_if_missing: bool = True,
+  183 | |     ) -> dict[str, Any] | None:
+      | |______________________________- `MemoryEngineInterface.get_bank_profile` defined here
+  184 |           """
+  185 |           Get bank profile including disposition and mission.
+      |
+info: This violates the Liskov Substitution Principle
+info: rule `invalid-method-override` is enabled by default
+
+error[invalid-argument-type]: Argument to function `tool_search_mental_models` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:12372:21
+      |
+12370 |                 return await tool_search_mental_models(
+12371 |                     self,
+12372 |                     conn,
+      |                     ^^^^ Expected `Connection`, found `DatabaseConnection`
+12373 |                     bank_id,
+12374 |                     q,
+      |
+info: Function defined here
+  --> hindsight-api-slim\hindsight_api\engine\reflect\tools.py:60:11
+   |
+60 | async def tool_search_mental_models(
+   |           ^^^^^^^^^^^^^^^^^^^^^^^^^
+61 |     memory_engine: "MemoryEngine",
+62 |     conn: "Connection",
+   |     ------------------ Parameter declared here
+63 |     bank_id: str,
+64 |     query: str,
+   |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `tool_recall` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:12458:17
+      |
+12456 |                 created_after=created_after,
+12457 |                 created_before=created_before,
+12458 |                 **({"read_admission": _read_admission} if _read_admission is not None else {}),
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `int`, found `Unknown | ReflectReadAdmission`
+12459 |             )
+      |
+info: Element `ReflectReadAdmission` of this union is not assignable to `int`
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\reflect\tools.py:266:11
+    |
+266 | async def tool_recall(
+    |           ^^^^^^^^^^^
+267 |     memory_engine: "MemoryEngine",
+268 |     bank_id: str,
+    |
+   ::: hindsight-api-slim\hindsight_api\engine\reflect\tools.py:275:5
+    |
+273 |     tags_match: str = "any",
+274 |     tag_groups: "list | None" = None,
+275 |     connection_budget: int = 1,
+    |     -------------------------- Parameter declared here
+276 |     max_chunk_tokens: int = 1000,
+277 |     fact_types: list[str] | None = None,
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `tool_expand` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:12464:21
+      |
+12462 |             async with backend.acquire() as conn:
+12463 |                 return await tool_expand(
+12464 |                     conn,
+      |                     ^^^^ Expected `Connection`, found `DatabaseConnection`
+12465 |                     bank_id,
+12466 |                     memory_ids,
+      |
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\reflect\tools.py:334:11
+    |
+334 | async def tool_expand(
+    |           ^^^^^^^^^^^
+335 |     conn: "Connection",
+    |     ------------------ Parameter declared here
+336 |     bank_id: str,
+337 |     memory_ids: list[str],
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `run_reflect_agent` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:12527:25
+      |
+12525 |                   agent_result = await asyncio.wait_for(
+12526 |                       run_reflect_agent(
+12527 | /                         llm_config=self._reflect_llm_config.with_config(
+12528 | |                             resolved_reflect_config, bank_id=bank_id, operation=_operation_label
+12529 | |                         ),
+      | |_________________________^ Expected `LLMProvider`, found `Unknown | ConfiguredLLMProvider`
+12530 |                           bank_id=bank_id,
+12531 |                           query=query,
+      |
+info: Element `ConfiguredLLMProvider` of this union is not assignable to `LLMProvider`
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\reflect\agent.py:368:11
+    |
+368 | async def run_reflect_agent(
+    |           ^^^^^^^^^^^^^^^^^
+369 |     llm_config: "LLMProvider",
+    |     ------------------------- Parameter declared here
+370 |     bank_id: str,
+371 |     query: str,
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `append` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:12635:37
+      |
+12633 |                               if fact_type in based_on:
+12634 |                                   based_on[fact_type].append(
+12635 | /                                     MemoryFact(
+12636 | |                                         id=memory_id,
+12637 | |                                         text=memory_data.get("text", ""),
+12638 | |                                         fact_type=fact_type,
+12639 | |                                         context=memory_data.get("context"),
+12640 | |                                         occurred_start=memory_data.get("occurred_start"),
+12641 | |                                         occurred_end=memory_data.get("occurred_end"),
+12642 | |                                     )
+      | |_____________________________________^ Expected `dict[str, Any]`, found `MemoryFact`
+12643 |                                   )
+12644 |                   elif tc.tool == "search_observations" and "observations" in tc.output:
+      |
+info: Method defined here
+    --> stdlib\builtins.pyi:2843:9
+     |
+2841 |         """Return a shallow copy of the list."""
+2842 |
+2843 |     def append(self, object: _T, /) -> None:
+     |         ^^^^^^       ---------- Parameter declared here
+2844 |         """Append object to the end of the list."""
+     |
+info: Union variant `bound method list[dict[str, Any]].append(object: dict[str, Any], /) -> None` is incompatible with this call site
+info: Attempted to call union type `(bound method list[MemoryFact].append(object: MemoryFact, /) -> None) | (bound method list[dict[str, Any]].append(object: dict[str, Any], /) -> None)`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `append` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:12653:60
+      |
+12651 |                                 continue  # Skip observations not actually used by the agent
+12652 |                             seen_memory_ids.add(obs_id)
+12653 |                             based_on["observation"].append(MemoryFact(**obs_data))
+      |                                                            ^^^^^^^^^^^^^^^^^^^^^^ Expected `dict[str, Any]`, found `MemoryFact`
+12654 |
+12655 |             # Extract mental models from tool outputs - only include models the agent actually used
+      |
+info: Method defined here
+    --> stdlib\builtins.pyi:2843:9
+     |
+2841 |         """Return a shallow copy of the list."""
+2842 |
+2843 |     def append(self, object: _T, /) -> None:
+     |         ^^^^^^       ---------- Parameter declared here
+2844 |         """Append object to the end of the list."""
+     |
+info: Union variant `bound method list[dict[str, Any]].append(object: dict[str, Any], /) -> None` is incompatible with this call site
+info: Attempted to call union type `(bound method list[MemoryFact].append(object: MemoryFact, /) -> None) | (bound method list[dict[str, Any]].append(object: dict[str, Any], /) -> None)`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `append` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:12713:21
+      |
+12711 |               for directive_raw in directives_raw:
+12712 |                   based_on["directives"].append(
+12713 | /                     {
+12714 | |                         "id": directive_raw["id"],
+12715 | |                         "name": directive_raw["name"],
+12716 | |                         "content": directive_raw["content"],
+12717 | |                     }
+      | |_____________________^ Expected `MemoryFact`, found `dict[str, Any] & dict[Unknown | str, Unknown]`
+12718 |                   )
+      |
+info: Method defined here
+    --> stdlib\builtins.pyi:2843:9
+     |
+2841 |         """Return a shallow copy of the list."""
+2842 |
+2843 |     def append(self, object: _T, /) -> None:
+     |         ^^^^^^       ---------- Parameter declared here
+2844 |         """Append object to the end of the list."""
+     |
+info: Union variant `bound method list[MemoryFact].append(object: MemoryFact, /) -> None` is incompatible with this call site
+info: Attempted to call union type `(bound method list[MemoryFact].append(object: MemoryFact, /) -> None) | (bound method list[dict[str, Any]].append(object: dict[str, Any], /) -> None)`
+info: rule `invalid-argument-type` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:13019:25
+      |
+13018 |             # Get backend-specific SQL fragments for tag listing
+13019 |             tag_parts = self._backend.ops.build_tag_listing_parts(fq_table(table))
+      |                         ^^^^^^^^^^^^^^^^^
+13020 |             tag_source = tag_parts.tag_source
+13021 |             non_empty_check = tag_parts.non_empty_check
+      |
+info: rule `possibly-missing-attribute` is enabled by default
+
+error[invalid-argument-type]: Argument to function `delete_stale_observations_for_memories` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:13516:13
+      |
+13514 |             conn,
+13515 |             bank_id,
+13516 |             fact_ids,
+      |             ^^^^^^^^ Expected `list[str | UUID]`, found `list[str]`
+13517 |             ops=self._backend.ops,
+13518 |             logical_changes=logical_changes,
+      |
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\retain\fact_storage.py:191:11
+    |
+191 | async def delete_stale_observations_for_memories(
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+192 |     conn,
+193 |     bank_id: str,
+194 |     fact_ids: "list[str | uuid.UUID]",
+    |     --------------------------------- Parameter declared here
+195 |     ops=None,
+196 |     logical_changes: "list[PendingLogicalChange] | None" = None,
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+warning[possibly-missing-attribute]: Attribute `ops` may be missing on object of type `DatabaseBackend | None`
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:13517:17
+      |
+13515 |             bank_id,
+13516 |             fact_ids,
+13517 |             ops=self._backend.ops,
+      |                 ^^^^^^^^^^^^^^^^^
+13518 |             logical_changes=logical_changes,
+13519 |         )
+      |
+info: rule `possibly-missing-attribute` is enabled by default
+
+error[invalid-argument-type]: Argument to function `build_structured_delta_prompt` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14421:21
+      |
+14419 |                       source_query=source_query,
+14420 |                       max_output_tokens=delta_max_tokens,
+14421 | /                     **(
+14422 | |                         {
+14423 | |                             "current_input": True,
+14424 | |                             "lifecycle_inputs": _cutover_proof.lifecycle_inputs,
+14425 | |                             "capture": prompt_capture,
+14426 | |                         }
+14427 | |                         if _cutover_proof is not None
+14428 | |                         else {}
+14429 | |                     ),
+      | |_____________________^ Expected `StructuredDeltaPromptCapture | None`, found `Unknown | bool | list[NativeLifecycleInput] | StructuredDeltaPromptCapture | None`
+14430 |                   )
+14431 |                   if _cutover_proof is not None and prompt_capture is not None:
+      |
+info: Union elements `bool` and `list[NativeLifecycleInput]` are not assignable to `StructuredDeltaPromptCapture | None`
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\reflect\prompts.py:764:5
+    |
+764 | def build_structured_delta_prompt(
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+765 |     *,
+766 |     current_document_json: str,
+    |
+   ::: hindsight-api-slim\hindsight_api\engine\reflect\prompts.py:774:5
+    |
+772 |     current_input: bool = False,
+773 |     lifecycle_inputs: "list[NativeLifecycleInput] | None" = None,
+774 |     capture: "StructuredDeltaPromptCapture | None" = None,
+    |     ----------------------------------------------------- Parameter declared here
+775 | ) -> str:
+776 |     """Build the user prompt for a structured-delta mental model refresh.
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `build_structured_delta_prompt` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14421:21
+      |
+14419 |                       source_query=source_query,
+14420 |                       max_output_tokens=delta_max_tokens,
+14421 | /                     **(
+14422 | |                         {
+14423 | |                             "current_input": True,
+14424 | |                             "lifecycle_inputs": _cutover_proof.lifecycle_inputs,
+14425 | |                             "capture": prompt_capture,
+14426 | |                         }
+14427 | |                         if _cutover_proof is not None
+14428 | |                         else {}
+14429 | |                     ),
+      | |_____________________^ Expected `bool`, found `Unknown | bool | list[NativeLifecycleInput] | StructuredDeltaPromptCapture | None`
+14430 |                   )
+14431 |                   if _cutover_proof is not None and prompt_capture is not None:
+      |
+info: Union element `list[NativeLifecycleInput]`, and 2 more union elements, are not assignable to `bool`
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\reflect\prompts.py:764:5
+    |
+764 | def build_structured_delta_prompt(
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+765 |     *,
+766 |     current_document_json: str,
+    |
+   ::: hindsight-api-slim\hindsight_api\engine\reflect\prompts.py:772:5
+    |
+770 |     max_output_tokens: int | None = None,
+771 |     max_input_tokens: int | None = None,
+772 |     current_input: bool = False,
+    |     --------------------------- Parameter declared here
+773 |     lifecycle_inputs: "list[NativeLifecycleInput] | None" = None,
+774 |     capture: "StructuredDeltaPromptCapture | None" = None,
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `build_structured_delta_prompt` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14421:21
+      |
+14419 |                       source_query=source_query,
+14420 |                       max_output_tokens=delta_max_tokens,
+14421 | /                     **(
+14422 | |                         {
+14423 | |                             "current_input": True,
+14424 | |                             "lifecycle_inputs": _cutover_proof.lifecycle_inputs,
+14425 | |                             "capture": prompt_capture,
+14426 | |                         }
+14427 | |                         if _cutover_proof is not None
+14428 | |                         else {}
+14429 | |                     ),
+      | |_____________________^ Expected `list[NativeLifecycleInput] | None`, found `Unknown | bool | list[NativeLifecycleInput] | StructuredDeltaPromptCapture | None`
+14430 |                   )
+14431 |                   if _cutover_proof is not None and prompt_capture is not None:
+      |
+info: Union elements `bool` and `StructuredDeltaPromptCapture` are not assignable to `list[NativeLifecycleInput] | None`
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\reflect\prompts.py:764:5
+    |
+764 | def build_structured_delta_prompt(
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+765 |     *,
+766 |     current_document_json: str,
+    |
+   ::: hindsight-api-slim\hindsight_api\engine\reflect\prompts.py:773:5
+    |
+771 |     max_input_tokens: int | None = None,
+772 |     current_input: bool = False,
+773 |     lifecycle_inputs: "list[NativeLifecycleInput] | None" = None,
+    |     ------------------------------------------------------------ Parameter declared here
+774 |     capture: "StructuredDeltaPromptCapture | None" = None,
+775 | ) -> str:
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `build_structured_delta_prompt` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14421:21
+      |
+14419 |                       source_query=source_query,
+14420 |                       max_output_tokens=delta_max_tokens,
+14421 | /                     **(
+14422 | |                         {
+14423 | |                             "current_input": True,
+14424 | |                             "lifecycle_inputs": _cutover_proof.lifecycle_inputs,
+14425 | |                             "capture": prompt_capture,
+14426 | |                         }
+14427 | |                         if _cutover_proof is not None
+14428 | |                         else {}
+14429 | |                     ),
+      | |_____________________^ Expected `int | None`, found `Unknown | bool | list[NativeLifecycleInput] | StructuredDeltaPromptCapture | None`
+14430 |                   )
+14431 |                   if _cutover_proof is not None and prompt_capture is not None:
+      |
+info: Union elements `list[NativeLifecycleInput]` and `StructuredDeltaPromptCapture` are not assignable to `int | None`
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\reflect\prompts.py:764:5
+    |
+764 | def build_structured_delta_prompt(
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+765 |     *,
+766 |     current_document_json: str,
+    |
+   ::: hindsight-api-slim\hindsight_api\engine\reflect\prompts.py:771:5
+    |
+769 |     source_query: str,
+770 |     max_output_tokens: int | None = None,
+771 |     max_input_tokens: int | None = None,
+    |     ----------------------------------- Parameter declared here
+772 |     current_input: bool = False,
+773 |     lifecycle_inputs: "list[NativeLifecycleInput] | None" = None,
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `_execute_mental_model_refresh` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14649:21
+      |
+14647 |                     mental_model,
+14648 |                     request_context=request_context,
+14649 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `str`, found `Unknown | CutoverModelProofContext`
+14650 |                 )
+14651 |             if run is None:
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `str`
+info: Method defined here
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14025:15
+      |
+14023 |         return newest_in_scope
+14024 |
+14025 |     async def _execute_mental_model_refresh(
+      |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+14026 |         self,
+14027 |         bank_id: str,
+14028 |         mental_model: dict[str, Any],
+14029 |         *,
+14030 |         operation_label: str = "refresh_mental_model",
+      |         --------------------------------------------- Parameter declared here
+14031 |         request_context: "RequestContext",
+14032 |         _cutover_proof: "CutoverModelProofContext | None" = None,
+      |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument to function `_generate_structured_output` is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14675:21
+      |
+14673 |                     content_text,
+14674 |                     response_schema,
+14675 |                     self._reflect_llm_config,
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^ Expected `LLMProvider`, found `Unknown | LLMProvider | MultiLLMProvider`
+14676 |                     f"mm-{mental_model_id[:8]}",
+14677 |                     mental_model.get("max_tokens"),
+      |
+info: Element `MultiLLMProvider` of this union is not assignable to `LLMProvider`
+info: Function defined here
+   --> hindsight-api-slim\hindsight_api\engine\reflect\agent.py:107:11
+    |
+107 | async def _generate_structured_output(
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+108 |     answer: str,
+109 |     response_schema: dict,
+110 |     llm_config: "LLMProvider",
+    |     ------------------------- Parameter declared here
+111 |     reflect_id: str,
+112 |     max_tokens: int | None = None,
+    |
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14697:21
+      |
+14695 |                     refresh_watermark=run.processed_watermark,
+14696 |                     request_context=request_context,
+14697 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `str | None`, found `Unknown | CutoverModelProofContext`
+14698 |                 )
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `str | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14697:21
+      |
+14695 |                     refresh_watermark=run.processed_watermark,
+14696 |                     request_context=request_context,
+14697 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `str | None`, found `Unknown | CutoverModelProofContext`
+14698 |                 )
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `str | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14697:21
+      |
+14695 |                     refresh_watermark=run.processed_watermark,
+14696 |                     request_context=request_context,
+14697 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `str | None`, found `Unknown | CutoverModelProofContext`
+14698 |                 )
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `str | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14697:21
+      |
+14695 |                     refresh_watermark=run.processed_watermark,
+14696 |                     request_context=request_context,
+14697 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `int | None`, found `Unknown | CutoverModelProofContext`
+14698 |                 )
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `int | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14697:21
+      |
+14695 |                     refresh_watermark=run.processed_watermark,
+14696 |                     request_context=request_context,
+14697 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `list[str] | None`, found `Unknown | CutoverModelProofContext`
+14698 |                 )
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `list[str] | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14697:21
+      |
+14695 |                     refresh_watermark=run.processed_watermark,
+14696 |                     request_context=request_context,
+14697 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `dict[str, Any] | None`, found `Unknown | CutoverModelProofContext`
+14698 |                 )
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `dict[str, Any] | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14697:21
+      |
+14695 |                     refresh_watermark=run.processed_watermark,
+14696 |                     request_context=request_context,
+14697 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `dict[str, Any] | None`, found `Unknown | CutoverModelProofContext`
+14698 |                 )
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `dict[str, Any] | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14721:21
+      |
+14719 |                     last_refreshed_source_query=run.source_query,
+14720 |                     request_context=request_context,
+14721 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `str | None`, found `Unknown | CutoverModelProofContext`
+14722 |                 )
+14723 |                 raise MentalModelRefreshError(
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `str | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14721:21
+      |
+14719 |                     last_refreshed_source_query=run.source_query,
+14720 |                     request_context=request_context,
+14721 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `str | None`, found `Unknown | CutoverModelProofContext`
+14722 |                 )
+14723 |                 raise MentalModelRefreshError(
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `str | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14721:21
+      |
+14719 |                     last_refreshed_source_query=run.source_query,
+14720 |                     request_context=request_context,
+14721 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `str | None`, found `Unknown | CutoverModelProofContext`
+14722 |                 )
+14723 |                 raise MentalModelRefreshError(
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `str | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14721:21
+      |
+14719 |                     last_refreshed_source_query=run.source_query,
+14720 |                     request_context=request_context,
+14721 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `int | None`, found `Unknown | CutoverModelProofContext`
+14722 |                 )
+14723 |                 raise MentalModelRefreshError(
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `int | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14721:21
+      |
+14719 |                     last_refreshed_source_query=run.source_query,
+14720 |                     request_context=request_context,
+14721 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `list[str] | None`, found `Unknown | CutoverModelProofContext`
+14722 |                 )
+14723 |                 raise MentalModelRefreshError(
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `list[str] | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14721:21
+      |
+14719 |                     last_refreshed_source_query=run.source_query,
+14720 |                     request_context=request_context,
+14721 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `dict[str, Any] | None`, found `Unknown | CutoverModelProofContext`
+14722 |                 )
+14723 |                 raise MentalModelRefreshError(
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `dict[str, Any] | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14721:21
+      |
+14719 |                     last_refreshed_source_query=run.source_query,
+14720 |                     request_context=request_context,
+14721 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `datetime | None`, found `Unknown | CutoverModelProofContext`
+14722 |                 )
+14723 |                 raise MentalModelRefreshError(
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `datetime | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14721:21
+      |
+14719 |                     last_refreshed_source_query=run.source_query,
+14720 |                     request_context=request_context,
+14721 |                     **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `dict[str, Any] | None`, found `Unknown | CutoverModelProofContext`
+14722 |                 )
+14723 |                 raise MentalModelRefreshError(
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `dict[str, Any] | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14771:17
+      |
+14769 |                 structured_content=(run.final_structured.model_dump() if run.final_structured is not None else None),
+14770 |                 request_context=request_context,
+14771 |                 **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `str | None`, found `Unknown | CutoverModelProofContext`
+14772 |             )
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `str | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14771:17
+      |
+14769 |                 structured_content=(run.final_structured.model_dump() if run.final_structured is not None else None),
+14770 |                 request_context=request_context,
+14771 |                 **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `str | None`, found `Unknown | CutoverModelProofContext`
+14772 |             )
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `str | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14771:17
+      |
+14769 |                 structured_content=(run.final_structured.model_dump() if run.final_structured is not None else None),
+14770 |                 request_context=request_context,
+14771 |                 **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `int | None`, found `Unknown | CutoverModelProofContext`
+14772 |             )
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `int | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14771:17
+      |
+14769 |                 structured_content=(run.final_structured.model_dump() if run.final_structured is not None else None),
+14770 |                 request_context=request_context,
+14771 |                 **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `list[str] | None`, found `Unknown | CutoverModelProofContext`
+14772 |             )
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `list[str] | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:14771:17
+      |
+14769 |                 structured_content=(run.final_structured.model_dump() if run.final_structured is not None else None),
+14770 |                 request_context=request_context,
+14771 |                 **({"_cutover_proof": _cutover_proof} if _cutover_proof is not None else {}),
+      |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `dict[str, Any] | None`, found `Unknown | CutoverModelProofContext`
+14772 |             )
+      |
+info: Element `CutoverModelProofContext` of this union is not assignable to `dict[str, Any] | None`
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-return-type]: Return type does not match returned value
+     --> hindsight-api-slim\hindsight_api\engine\memory_engine.py:17254:16
+      |
+17252 |             await self._apply_default_bank_template(bank_id, request_context)
+17253 |
+17254 |         return dict(row) if row is not None else None
+      |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `dict[str, Any]`, found `dict[str, Any] | None`
+17255 |
+17256 |     async def list_webhooks(
+      |
+     ::: hindsight-api-slim\hindsight_api\engine\memory_engine.py:17211:10
+      |
+17209 |         http_config_json: str,
+17210 |         request_context: "RequestContext",
+17211 |     ) -> dict[str, Any]:
+      |          -------------- Expected `dict[str, Any]` because of return type
+17212 |         """Insert a webhook row in the bank's resolved schema.
+      |
+info: rule `invalid-return-type` is enabled by default
+
+error[invalid-argument-type]: Argument to bound method `get` is incorrect
+  --> hindsight-api-slim\hindsight_api\engine\transfer\transition_source_evidence.py:40:39
+   |
+38 |         raise TransitionError("body_mismatch")
+39 |     supplied = item.body.root.body
+40 |     descriptor = plan.descriptors.get(("document", item.native_source_id))
+   |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Expected `tuple[Literal["bank", "document", "memory_unit", "mental_model", "directive"], str]`, found `tuple[Literal["document"], str | None]`
+41 |     if (
+42 |         request.unused_scope is not None
+   |
+info: Matching overload defined here
+    --> stdlib\builtins.pyi:3015:9
+     |
+3013 |     # Positional-only in dict, but not in MutableMapping
+3014 |     @overload  # type: ignore[override]
+3015 |     def get(self, key: _KT, default: None = None, /) -> _VT | None:
+     |         ^^^       -------- Parameter declared here
+3016 |         """Return the value for key if key is in the dictionary, else default."""
+     |
+info: Non-matching overloads for bound method `get`:
+info:   (self, key: _KT@dict, default: _VT@dict, /) -> _VT@dict
+info:   (self, key: _KT@dict, default: _T@get, /) -> _VT@dict | _T@get
+info: rule `invalid-argument-type` is enabled by default
+
+error[invalid-argument-type]: Argument is incorrect
+  --> hindsight-api-slim\hindsight_api\engine\transition_application_rebind.py:78:93
+   |
+76 |     if not commands:
+77 |         return
+78 |     commands_ref = await store.save_body("application-commands.v1", TakiApplicationCommands(commands=commands))
+   |                                                                                             ^^^^^^^^^^^^^^^^^ Expected `list[TakiApplicationPutArtifact | TakiApplicationRebindArtifact | TakiApplicationRetireArtifact]`, found `list[TakiApplicationRebindArtifact] & ~AlwaysFalsy`
+79 |     request = TakiApplicationCommitRequest(
+80 |         namespace=store.namespace,
+   |
+info: rule `invalid-argument-type` is enabled by default
+
+Found 107 diagnostics

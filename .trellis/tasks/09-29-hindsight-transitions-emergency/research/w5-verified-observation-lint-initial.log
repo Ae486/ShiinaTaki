@@ -1,0 +1,6 @@
+
+H:\TakiAgent\packages\core\src\memory\hindsight-runtime-binding.ts
+  53:8  error  Function 'createHindsightRuntimeBinding' has too many lines (54). Maximum allowed is 50  max-lines-per-function
+
+✖ 1 problem (1 error, 0 warnings)
+

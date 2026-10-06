@@ -13,6 +13,7 @@ import { resolveHindsightApplicationPolicy } from "./hindsight-application-polic
 import { projectHindsightPolicyLayerTags } from "./hindsight-policy-admission.ts";
 import { decodeHindsightApplicationBody, requireApplicationScope, sameApplicationValue, type HindsightApplicationBody,
   type HindsightApplicationScope } from "./hindsight-application-integrity.ts";
+import { readHindsightApplicationSourceArtifact } from "./hindsight-application-source-evidence.ts";
 
 export interface HindsightApplicationEvidenceReader {
   body(ref: TakiApplicationBodyRef): HindsightApplicationBody;
@@ -44,7 +45,10 @@ export function projectHindsightApplicationRecord(input: HindsightApplicationPro
       bankId: input.bankId, objectRevision: native.version.object_revision,
       payload: { ...nativeCamelFields(native), kind: head.object_kind } } });
   }
-  if (head.binding_state !== "bound") return { status: "withheld", reason: head.binding_state };
+  if (head.binding_state !== "bound") {
+    if (head.object_kind === "document") return projectSource(input, { native, artifact: null, body: null });
+    return { status: "withheld", reason: head.binding_state };
+  }
   const artifact = boundArtifact(input);
   const body = input.evidence.body(artifact.body_ref).content;
   if (head.object_kind === "memory_unit" && body.body_schema === "application-memory.v1") {
@@ -61,8 +65,9 @@ export function projectHindsightApplicationRecord(input: HindsightApplicationPro
       policy: policy.policy, provenance: body.value.provenance });
     return projected(input, { kind: "memory_unit", value });
   }
-  if (head.object_kind === "document" && body.body_schema === "application-source.v1") {
-    return projectSource(input, { native, artifact, body: body.value });
+  if (head.object_kind === "document") {
+    const source = readHindsightApplicationSourceArtifact({ ...input, artifact });
+    return projectSource(input, { native, artifact, body: source.source });
   }
   return invalid();
 }
@@ -89,7 +94,7 @@ function projectBank(input: HindsightApplicationProjectionInput, native: TakiApp
 }
 
 function projectSource(input: HindsightApplicationProjectionInput, source: {
-  native: TakiApplicationNativeRecord; artifact: TakiApplicationArtifact; body: TakiApplicationSourceBody;
+  native: TakiApplicationNativeRecord; artifact: TakiApplicationArtifact | null; body: TakiApplicationSourceBody | null;
 }): HindsightApplicationProjection {
   const ref = source.native.source_evidence_ref;
   const evidence = ref === null ? null : input.evidence.body(ref).content;
@@ -100,17 +105,18 @@ function projectSource(input: HindsightApplicationProjectionInput, source: {
   const context = current?.context ?? null;
   if (text !== null && text.trim() && !isSafeAutomaticMemoryText(text)
     || context !== null && context.trim() && !isSafeAutomaticMemoryText(context)) invalid();
-  const original = source.body.original_source;
-  const proven = originalSourceStillExact(source) && text === original.retainedText && context === original.context;
+  const original = source.body?.original_source;
+  const proven = source.body && original && originalSourceStillExact({ native: source.native, body: source.body })
+    && text === original.retainedText && context === original.context;
   const version = source.native.version;
   const provenance = proven ? original.provenance : { actor: "provider", origin: "provider-derived",
     characterId: input.bankScope.characterId, timelineFromSeq: null, timelineToSeq: null,
-    capturedAt: source.artifact.updated_at, sanitized: true,
+    capturedAt: source.artifact?.updated_at ?? String(nativeCamelFields(source.native).updatedAt), sanitized: true,
     sourceRef: `hindsight:${input.namespace.provider_lineage}:${input.namespace.bank_generation}:${version.object_kind}:${version.object_id}@${version.object_revision}` };
   const value = HindsightCurrentCanonicalSourceSchema.parse({ ...nativeCamelFields(source.native),
     authorityEpochId: input.authorityEpochId, revision: version.object_revision, retainedText: text, context, provenance,
     metadata: restoreHindsightApplicationMetadata({ native: nativeMetadata(source.native),
-      original: original.metadata, encoded: source.body.encoded_metadata }) });
+      original: original?.metadata ?? null, encoded: source.body?.encoded_metadata ?? null }) });
   return projected(input, { kind: "document", value });
 }
 

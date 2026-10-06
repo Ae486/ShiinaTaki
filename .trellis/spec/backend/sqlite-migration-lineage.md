@@ -44,8 +44,22 @@ Parent: [Database Guidelines](./database-guidelines.md).
   tables are empty; it preserves original marker column bytes, adds NULL native fields and keeps Local authority.
   Already-current 023 is a no-op, including nonempty modern imports and active Hindsight markers. Unknown/partial
   schemas or nonempty early imports refuse atomically until an explicit, evidence-backed identity mapping exists.
+- Migration054 recognizes the exact current authority marker before rebuilding it with the distinct transition receipt
+  discriminator. Preserve all three old marker modes byte-for-byte, adding NULL only; never manufacture B2/B4 history.
+  Unknown attached schema and SQL/receipt/COMMIT failure roll back the full marker rebuild and new evidence tables.
+- Migration055 adds healthy-driver previews, native command/dispatch/observation evidence and immutable per-operation
+  failures. It has already been recorded by an isolated real-corpus run; its SQL must not be retroactively changed.
+- Migration056 adds exact native verification dispatches, binding the Bank, transition and current executor before
+  a new verification call. A055database has no historical rows: do not backfill an inferred dispatch or interpret
+  absence as non-dispatch. Recovery records only a newly required continuation after factual native evidence.
+  Upgrade/reopen preserves055commands/receipts byte-for-byte; SQL, receipt and COMMIT failure roll back056atomically.
 
 ## 4. Validation & Error Matrix
+
+Migration057 adds immutable emergency capture/incident/surviving-evidence/quarantine/foreign-branch rows and replaces
+only its named transition-admission triggers in the same transaction. Upgrade from056 and reopen preserve original
+operation/intents/attempts/receipt bytes. SQL, migration-receipt and actual COMMIT failures roll back both the new
+schema and replaced trigger definitions; no fabricated legacy incident or historical dispatch is backfilled.
 
 | Condition | Required result |
 | --- | --- |

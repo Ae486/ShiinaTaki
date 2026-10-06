@@ -1,0 +1,508 @@
+error[unresolved-import]: Cannot resolve imported module `mlx.core`
+    --> hindsight_api\engine\cross_encoder.py:1307:20
+     |
+1306 |         try:
+1307 |             import mlx.core  # noqa: F401
+     |                    ^^^^^^^^
+1308 |             import mlx_lm  # noqa: F401
+1309 |         except ImportError as exc:
+     |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. H:\hindsight\.venv\Lib\site-packages (site-packages)
+info:   4. H:\hindsight\hindsight-all (editable install)
+info:   5. H:\hindsight\hindsight-clients\python (editable install)
+info:   ... and 5 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+error[unresolved-import]: Cannot resolve imported module `mlx_lm`
+    --> hindsight_api\engine\cross_encoder.py:1308:20
+     |
+1306 |         try:
+1307 |             import mlx.core  # noqa: F401
+1308 |             import mlx_lm  # noqa: F401
+     |                    ^^^^^^
+1309 |         except ImportError as exc:
+1310 |             # Only swallow "package not installed" errors. Anything else (e.g. a
+     |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. H:\hindsight\.venv\Lib\site-packages (site-packages)
+info:   4. H:\hindsight\hindsight-all (editable install)
+info:   5. H:\hindsight\hindsight-clients\python (editable install)
+info:   ... and 5 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+error[unresolved-import]: Cannot resolve imported module `mlx.nn`
+  --> hindsight_api\engine\jina_mlx_reranker.py:20:16
+   |
+18 | class _MLPProjector:
+19 |     def __init__(self):
+20 |         import mlx.nn as nn
+   |                ^^^^^^^^^^^^
+21 |
+22 |         self.linear1 = nn.Linear(1024, 512, bias=False)
+   |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. H:\hindsight\.venv\Lib\site-packages (site-packages)
+info:   4. H:\hindsight\hindsight-all (editable install)
+info:   5. H:\hindsight\hindsight-clients\python (editable install)
+info:   ... and 5 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+error[unresolved-import]: Cannot resolve imported module `mlx.nn`
+  --> hindsight_api\engine\jina_mlx_reranker.py:26:16
+   |
+25 |     def __call__(self, x):
+26 |         import mlx.nn as nn
+   |                ^^^^^^^^^^^^
+27 |
+28 |         x = self.linear1(x)
+   |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. H:\hindsight\.venv\Lib\site-packages (site-packages)
+info:   4. H:\hindsight\hindsight-all (editable install)
+info:   5. H:\hindsight\hindsight-clients\python (editable install)
+info:   ... and 5 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+error[unresolved-import]: Cannot resolve imported module `mlx.core`
+  --> hindsight_api\engine\jina_mlx_reranker.py:35:12
+   |
+34 | def _load_projector(projector_path: str) -> _MLPProjector:
+35 |     import mlx.core as mx
+   |            ^^^^^^^^^^^^^^
+36 |     from safetensors import safe_open
+   |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. H:\hindsight\.venv\Lib\site-packages (site-packages)
+info:   4. H:\hindsight\hindsight-all (editable install)
+info:   5. H:\hindsight\hindsight-clients\python (editable install)
+info:   ... and 5 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+error[unresolved-import]: Cannot resolve imported module `mlx_lm`
+  --> hindsight_api\engine\jina_mlx_reranker.py:93:14
+   |
+92 |     def __init__(self, model_path: str, projector_path: str):
+93 |         from mlx_lm import load
+   |              ^^^^^^
+94 |
+95 |         self.model, self.tokenizer = load(model_path)
+   |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. H:\hindsight\.venv\Lib\site-packages (site-packages)
+info:   4. H:\hindsight\hindsight-all (editable install)
+info:   5. H:\hindsight\hindsight-clients\python (editable install)
+info:   ... and 5 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+error[unresolved-import]: Cannot resolve imported module `mlx.core`
+   --> hindsight_api\engine\jina_mlx_reranker.py:106:16
+    |
+104 |         Sorted by descending relevance_score.
+105 |         """
+106 |         import mlx.core as mx
+    |                ^^^^^^^^^^^^^^
+107 |
+108 |         prompt = _format_prompt(query, documents, self._SPECIAL_TOKENS)
+    |
+info: Searched in the following paths during module resolution:
+info:   1. H:\hindsight\hindsight-api-slim (first-party code)
+info:   2. vendored://stdlib (stdlib typeshed stubs vendored by ty)
+info:   3. H:\hindsight\.venv\Lib\site-packages (site-packages)
+info:   4. H:\hindsight\hindsight-all (editable install)
+info:   5. H:\hindsight\hindsight-clients\python (editable install)
+info:   ... and 5 more paths. Run with `-v` to see all paths.
+info: make sure your Python environment is properly configured: https://docs.astral.sh/ty/modules/#python-environment
+info: rule `unresolved-import` is enabled by default
+
+error[unresolved-attribute]: Module `fcntl` has no member `flock`
+   --> hindsight_api\engine\providers\codex_auth.py:113:21
+    |
+111 |             while True:
+112 |                 try:
+113 |                     fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    |                     ^^^^^^^^^^^
+114 |                     break
+115 |                 except (BlockingIOError, OSError):
+    |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `flock` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `fcntl` has no member `LOCK_EX`
+   --> hindsight_api\engine\providers\codex_auth.py:113:53
+    |
+111 |             while True:
+112 |                 try:
+113 |                     fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    |                                                     ^^^^^^^^^^^^^
+114 |                     break
+115 |                 except (BlockingIOError, OSError):
+    |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `LOCK_EX` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `fcntl` has no member `LOCK_NB`
+   --> hindsight_api\engine\providers\codex_auth.py:113:69
+    |
+111 |             while True:
+112 |                 try:
+113 |                     fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    |                                                                     ^^^^^^^^^^^^^
+114 |                     break
+115 |                 except (BlockingIOError, OSError):
+    |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `LOCK_NB` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `fcntl` has no member `flock`
+   --> hindsight_api\engine\providers\codex_auth.py:123:21
+    |
+121 |             finally:
+122 |                 with contextlib.suppress(OSError):
+123 |                     fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+    |                     ^^^^^^^^^^^
+    |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `flock` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `fcntl` has no member `LOCK_UN`
+   --> hindsight_api\engine\providers\codex_auth.py:123:53
+    |
+121 |             finally:
+122 |                 with contextlib.suppress(OSError):
+123 |                     fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+    |                                                     ^^^^^^^^^^^^^
+    |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `LOCK_UN` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `signal` has no member `SIGKILL`
+   --> hindsight_api\engine\providers\llamacpp_llm.py:248:62
+    |
+246 |             except subprocess.TimeoutExpired:
+247 |                 if hasattr(os, "killpg"):
+248 |                     os.killpg(os.getpgid(self._process.pid), signal.SIGKILL)
+    |                                                              ^^^^^^^^^^^^^^
+249 |                 else:
+250 |                     self._process.kill()
+    |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `SIGKILL` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `fcntl` has no member `flock`
+   --> hindsight_api\engine\providers\nous_auth.py:136:17
+    |
+134 |         while True:
+135 |             try:
+136 |                 fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    |                 ^^^^^^^^^^^
+137 |                 break
+138 |             except (BlockingIOError, OSError):
+    |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `flock` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `fcntl` has no member `LOCK_EX`
+   --> hindsight_api\engine\providers\nous_auth.py:136:49
+    |
+134 |         while True:
+135 |             try:
+136 |                 fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    |                                                 ^^^^^^^^^^^^^
+137 |                 break
+138 |             except (BlockingIOError, OSError):
+    |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `LOCK_EX` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `fcntl` has no member `LOCK_NB`
+   --> hindsight_api\engine\providers\nous_auth.py:136:65
+    |
+134 |         while True:
+135 |             try:
+136 |                 fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    |                                                                 ^^^^^^^^^^^^^
+137 |                 break
+138 |             except (BlockingIOError, OSError):
+    |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `LOCK_NB` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `fcntl` has no member `flock`
+   --> hindsight_api\engine\providers\nous_auth.py:146:17
+    |
+144 |         finally:
+145 |             with contextlib.suppress(OSError):
+146 |                 fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+    |                 ^^^^^^^^^^^
+    |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `flock` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `fcntl` has no member `LOCK_UN`
+   --> hindsight_api\engine\providers\nous_auth.py:146:49
+    |
+144 |         finally:
+145 |             with contextlib.suppress(OSError):
+146 |                 fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+    |                                                 ^^^^^^^^^^^^^
+    |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `LOCK_UN` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Object of type `<module 'resource'> | None` has no attribute `getrusage`
+   --> hindsight_api\metrics.py:737:26
+    |
+735 |             """Get process CPU times."""
+736 |             try:
+737 |                 rusage = _resource_mod.getrusage(_resource_mod.RUSAGE_SELF)
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^
+738 |                 yield metrics.Observation(rusage.ru_utime, {"type": "user"})
+739 |                 yield metrics.Observation(rusage.ru_stime, {"type": "system"})
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Object of type `<module 'resource'> | None` has no attribute `RUSAGE_SELF`
+   --> hindsight_api\metrics.py:737:50
+    |
+735 |             """Get process CPU times."""
+736 |             try:
+737 |                 rusage = _resource_mod.getrusage(_resource_mod.RUSAGE_SELF)
+    |                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+738 |                 yield metrics.Observation(rusage.ru_utime, {"type": "user"})
+739 |                 yield metrics.Observation(rusage.ru_stime, {"type": "system"})
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Object of type `<module 'resource'> | None` has no attribute `getrusage`
+   --> hindsight_api\metrics.py:746:26
+    |
+744 |             """Get process memory usage in bytes."""
+745 |             try:
+746 |                 rusage = _resource_mod.getrusage(_resource_mod.RUSAGE_SELF)
+    |                          ^^^^^^^^^^^^^^^^^^^^^^^
+747 |                 # ru_maxrss is in kilobytes on Linux, bytes on macOS
+748 |                 max_rss = rusage.ru_maxrss
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Object of type `<module 'resource'> | None` has no attribute `RUSAGE_SELF`
+   --> hindsight_api\metrics.py:746:50
+    |
+744 |             """Get process memory usage in bytes."""
+745 |             try:
+746 |                 rusage = _resource_mod.getrusage(_resource_mod.RUSAGE_SELF)
+    |                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+747 |                 # ru_maxrss is in kilobytes on Linux, bytes on macOS
+748 |                 max_rss = rusage.ru_maxrss
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `os` has no member `uname`
+   --> hindsight_api\metrics.py:749:20
+    |
+747 |                 # ru_maxrss is in kilobytes on Linux, bytes on macOS
+748 |                 max_rss = rusage.ru_maxrss
+749 |                 if os.uname().sysname == "Linux":
+    |                    ^^^^^^^^
+750 |                     max_rss *= 1024  # Convert KB to bytes
+751 |                 yield metrics.Observation(max_rss, {"type": "rss_max"})
+    |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `uname` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Object of type `<module 'resource'> | None` has no attribute `getrlimit`
+   --> hindsight_api\metrics.py:764:34
+    |
+762 |                 else:
+763 |                     # Fallback: use resource limits
+764 |                     soft, hard = _resource_mod.getrlimit(_resource_mod.RLIMIT_NOFILE)
+    |                                  ^^^^^^^^^^^^^^^^^^^^^^^
+765 |                     yield metrics.Observation(soft, {"limit": "soft"})
+766 |             except Exception:
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Object of type `<module 'resource'> | None` has no attribute `RLIMIT_NOFILE`
+   --> hindsight_api\metrics.py:764:58
+    |
+762 |                 else:
+763 |                     # Fallback: use resource limits
+764 |                     soft, hard = _resource_mod.getrlimit(_resource_mod.RLIMIT_NOFILE)
+    |                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+765 |                     yield metrics.Observation(soft, {"limit": "soft"})
+766 |             except Exception:
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `resource` has no member `getrusage`
+    --> hindsight_api\worker\poller.py:1550:21
+     |
+1548 |             import sys
+1549 |
+1550 |             usage = resource.getrusage(resource.RUSAGE_SELF)
+     |                     ^^^^^^^^^^^^^^^^^^
+1551 |             rss = usage.ru_maxrss
+1552 |             if sys.platform != "darwin":
+     |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `getrusage` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+error[unresolved-attribute]: Module `resource` has no member `RUSAGE_SELF`
+    --> hindsight_api\worker\poller.py:1550:40
+     |
+1548 |             import sys
+1549 |
+1550 |             usage = resource.getrusage(resource.RUSAGE_SELF)
+     |                                        ^^^^^^^^^^^^^^^^^^^^
+1551 |             rss = usage.ru_maxrss
+1552 |             if sys.platform != "darwin":
+     |
+info: The member may be available on other Python versions or platforms
+info: Python 3.11 was assumed when resolving the `RUSAGE_SELF` attribute
+   --> pyproject.toml:264:18
+    |
+263 | [tool.ty.environment]
+264 | python-version = "3.11"
+    |                  ^^^^^^ Python version configuration
+265 |
+266 | [tool.ty.src]
+    |
+info: rule `unresolved-attribute` is enabled by default
+
+Found 27 diagnostics

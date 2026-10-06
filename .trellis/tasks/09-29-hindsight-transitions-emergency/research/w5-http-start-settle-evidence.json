@@ -1,0 +1,95 @@
+{
+  "meaning": "Separate evidence for the exceptional startup settle repair",
+  "files": [
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_environment.py",
+      "bytes": 6305,
+      "sha256": "8a0260e45191098f0ed62eb456f5d2494d9c8a52b71906e4e96c35bb8188ca31"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-checked-v4-source-manifest.json",
+      "bytes": 1112262,
+      "sha256": "d28d651db46f6c0c06d4387ac3d235026f996a1e142e6d9b0a95ecae8ad978ef"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-check.md",
+      "bytes": 2589,
+      "sha256": "2f67c088bda49fc54f1ae0f76c540659c137580db874872a2ee889275107f336"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\check.py",
+      "bytes": 1884,
+      "sha256": "d21ea6a4f5f862bbcecc8e8357307cceecce4f7523de4fbc02733ad4855009e9"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\format.json",
+      "bytes": 553,
+      "sha256": "36f091983aadacfd8b6f082f994c8bab8485fef09ec78ffee0d7fda69a2cf034"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\node-source.json",
+      "bytes": 693,
+      "sha256": "8fb33a673366857a399cfd961de45d7168146724a326ad495f5f3a56dde60cb1"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\node-syntax.json",
+      "bytes": 280,
+      "sha256": "8b0fb694d3bd327ae83d0f7372a4d72063afbc7c6fb3cfcb6916342801571dc1"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\preimages\\preimages.json",
+      "bytes": 920,
+      "sha256": "85f4b9ee3347d46f9f122e68004e7580c7a8846945afb158242d91521a9de6e2"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\preimages\\test_w5_http_environment.py",
+      "bytes": 5370,
+      "sha256": "b3e14acb8d515c970015d7b1a0604a2e8dd569d3e02c12e22cc19224d80f3c5c"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\preimages\\w5-http-checked-v3-source-manifest.json",
+      "bytes": 1112181,
+      "sha256": "12ab49508b637cca1ac51567dee58a4d064830720d638c28ca182b81097a7884"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\preimages\\w5-http-client.mjs",
+      "bytes": 11558,
+      "sha256": "cd8bfaebb78debb444e33d418e8836ebe7862c5f0ea9fbc10570e7ebb5a6502c"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\preimages\\w5_http_composition.py",
+      "bytes": 27299,
+      "sha256": "512cd8ea5ddc620761f53aa15f8ffa8c270b74383ba3019f363b9560469a3fa3"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\preimages\\w5_http_inventory.py",
+      "bytes": 3256,
+      "sha256": "e4bf64bd8dc5c7b4e6ca7167d838e1dc2f1b24cffcab60cf025a1f89189d4e41"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\regression.json",
+      "bytes": 561,
+      "sha256": "801bd93fc3f87ece36876f4634a662fd61ab22ff0903eba69c90ca1af07e491f"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\ruff.json",
+      "bytes": 530,
+      "sha256": "9c8ddb1f3a02b28706e8903fee1e4bde2811ef6525654501bf378a9e38a93f9d"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\seal.py",
+      "bytes": 2571,
+      "sha256": "48fe9f4901db1c8ab3d32f2cba22a9716cb81e79bde2ee1450538d1d308e8c9c"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\source.json",
+      "bytes": 2424,
+      "sha256": "b35816dfc7dea79d5775d8ee9cd92e9c506c1783f1c1ef2dffc668b0eb3db458"
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-start-settle-checks\\typecheck.json",
+      "bytes": 558,
+      "sha256": "56bc08ca9b2c158e731cbfdab03dea120bada2bfa8dc1e213fbe9b6825c90b88"
+    }
+  ]
+}

@@ -91,19 +91,21 @@ export function createMaintenanceAutoMemory(input: {
   maintenance: () => AutoMemoryMaintenance | undefined;
   compact?: AutoMemoryCompact;
   logger: AutoMemoryLogger;
-}): AutoMemory & { stop(): Promise<void>; settle(): Promise<void> } {
+}): AutoMemory & { stop(): Promise<void>; settle(): Promise<void>; retirePending(): void } {
   // Per-character promise chain: a second trigger waits for the first, so it reads the advanced watermark (no double-fire).
   const chains = new Map<string, Promise<void>>();
   let stopped = false;
+  let generation = 0;
 
   function onTurnCompleted(characterId: string, origin: TurnOrigin = "primary"): Promise<void> {
     if (stopped) return Promise.resolve();
+    const admittedGeneration = generation;
     const prev = chains.get(characterId) ?? Promise.resolve();
     // Defer to a macrotask so the just-finished chat turn returns to the caller before any auto-write work begins.
     const next = prev.then(() => new Promise<void>((resolve) => {
       setImmediate(() => {
-        if (stopped) { resolve(); return; }
-        void runMaintenanceChain({ ...input, stopped: () => stopped }, characterId, origin).then(resolve, resolve);
+        if (stopped || admittedGeneration !== generation) { resolve(); return; }
+        void runMaintenanceChain({ ...input, stopped: () => stopped || admittedGeneration !== generation }, characterId, origin).then(resolve, resolve);
       });
     }));
     chains.set(characterId, next);
@@ -114,7 +116,8 @@ export function createMaintenanceAutoMemory(input: {
   }
 
   const settle = async () => { while (chains.size > 0) await Promise.allSettled([...chains.values()]); };
-  return { onTurnCompleted, settle, stop: () => { stopped = true; return settle(); } };
+  return { onTurnCompleted, settle, stop: () => { stopped = true; return settle(); },
+    retirePending: () => { generation++; chains.clear(); } };
 }
 
 async function runMaintenanceChain(

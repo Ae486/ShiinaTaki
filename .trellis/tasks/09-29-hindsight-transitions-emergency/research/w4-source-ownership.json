@@ -1,0 +1,548 @@
+{
+  "task": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency",
+  "takiRoot": "H:\\TakiAgent",
+  "nativeRoot": "H:/hindsight",
+  "head": "fccfc4fb78958c90efebdb4a5a98b355bcb73a40",
+  "baselineSha256": "1cd5cf124305fb12e3323b3039a1dfe8440abd9f58516a634ef0f4c8c7d1ac75",
+  "preservedW3OwnershipSha256": "998edcd67c06757f9f400ce4d17a02dcc63f7456f3607e2f992be3f674ee5851",
+  "files": [
+    {
+      "path": ".trellis/spec/backend/index.md",
+      "beforeW4": "79863cecf20cbffcb911abe31bbfc22a3403d9bae4bb061502afa575756ab300",
+      "afterW4": "812fcdc172e6862871f35f78e6054d346e777a0b04bc1954b050c37add2ff619",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": ".trellis/spec/backend/memory-transition-publication.md",
+      "beforeW4": null,
+      "afterW4": "b598aa91cf45ede5b365ecf3ee91cfc9ce012561d5ad2138eb012a293e2bb735",
+      "baseline": "new-W4"
+    },
+    {
+      "path": ".trellis/spec/backend/memory-transitions.md",
+      "beforeW4": "e2c2fdf49cdad5eec0c09991b9fa0212164ba6e3d805b5d346a90c3910d82291",
+      "afterW4": "21c18612692571749cd25961d3433a163e62660ab42128c72af0cc9334cd1e94",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": ".trellis/spec/backend/sqlite-migration-lineage.md",
+      "beforeW4": "28b9fb27671be510b45f07e0f6b57cc96d2e2f5a2342a7b55c42f7285a1438bf",
+      "afterW4": "79a2a7afc45e052892f375a3d01f114b9a9e577a0f4c06c1456bb5a855f6c162",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-publication.ts",
+      "beforeW4": "7d08a72dbfdc854caa26190fb3d9ee006941ebb93fafb78603edb9c1eb233144",
+      "afterW4": "13959e5d524fa7489c600913b7ef7f59d555db4587354c75e36f45d084549379",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-repo.test.ts",
+      "beforeW4": "64ca947cba7106417474e55b9f0c55d5d2741290522e48f0ed07115e7e3b7465",
+      "afterW4": "74dcc8cd1182953467f209d92992d7aadfb376f860dc2c2ffa7fbb10cf78b340",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/db/index.md",
+      "beforeW4": "9bd1099c52085252c2ec52233ce0c4ede2aa7ae671471562ad6e03dc1c749fd2",
+      "afterW4": "f254c713f8370333fc98b2c69508f9f464152df9904fdbc991cb048d196c9f9a",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-abort.test.ts",
+      "beforeW4": null,
+      "afterW4": "cf60748812d3682cee1b2bfdfd2267c0da24c665bc8909d485314a5cefa1de01",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-abort.ts",
+      "beforeW4": null,
+      "afterW4": "2a0acd145433cdcf4a1b538d02d876377b62191f92002714c183061917ed6999",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-custody.test.ts",
+      "beforeW4": null,
+      "afterW4": "fb1bb88ef33f138b941325f7071156fa1ab29de73f037bf309b9113f76e103d4",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-custody.ts",
+      "beforeW4": null,
+      "afterW4": "d2804e09b25b8cc2c52f39898ff686fbb7b43ecd7cea33567295466237fe3da1",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-effect-repo.test.ts",
+      "beforeW4": null,
+      "afterW4": "2c337ab23df5271018d02951e30d94a4e2b746e7b16cc6dfa3e31b7e535234b5",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-effect-repo.ts",
+      "beforeW4": null,
+      "afterW4": "701770f0da8fb0f1c0ece1a5f0a0b83fec1c9443b6c00a49ae3ceed60874b3df",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-native-outcome.test.ts",
+      "beforeW4": null,
+      "afterW4": "1b044fde87caa00cedfe833158bc9bfbed2a294285e955b52162991a2955361a",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-native-outcome.ts",
+      "beforeW4": null,
+      "afterW4": "b403c4c56f6497365da985a4f51b275bfeace36b6c337adaf80a39db3c7570e3",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-pending-refusal.ts",
+      "beforeW4": null,
+      "afterW4": "64a3e6b7dd3e33e4c62dd2335112ee6031dee4bf0b7e2b114d7e12ae53640121",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-proof.ts",
+      "beforeW4": null,
+      "afterW4": "d70f649bd04db43911ae823f70eda6c1c45699a4e3510b1028918f26dca2d81f",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-reader.ts",
+      "beforeW4": null,
+      "afterW4": "fb8b5e1986f354695a73dcda7ff02ee83639a255048287fa651817eb7121ede3",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-repo.ts",
+      "beforeW4": null,
+      "afterW4": "3cc143cef94d1c5986e109b17356fca59061f365e8123e5118ce6c0d7d0e7558",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication.test.ts",
+      "beforeW4": null,
+      "afterW4": "81bba1cbe299e40664a1c70eb9003c456859fff8375382a11ac26390c64d39df",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-representation.ts",
+      "beforeW4": null,
+      "afterW4": "9a8035d0fa8b016e77ecec2926ad279afc5f99cc148ce61447fc175dadf48051",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-source-disposition.test.ts",
+      "beforeW4": null,
+      "afterW4": "f6933948af6112097c2d18c3c511c79b1788b5d57eb178ace811420c7db6ebd5",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-source-disposition.ts",
+      "beforeW4": null,
+      "afterW4": "0df7e5be180135f2d00f51b97890a998902faeec19a1ab626257e3e4ce8a0ed3",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-target-refusal.ts",
+      "beforeW4": null,
+      "afterW4": "6b18b87c730bec61f39adb3aec4075813f3e18c87891a288f021dbeacdcd9217",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/migrations/041-canonical-memory-maintenance.test.ts",
+      "beforeW4": "d0d43e0ea0b3accee73ad55e7e06dbe73d5f47eeb6429c91fefef66260c45147",
+      "afterW4": "688ed051eaeb99458f112cc874523c56b9af498e3af9cfacf18b4409876b1fc2",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/db/migrations/053-memory-transition-candidates.test.ts",
+      "beforeW4": "abca46e5980c5787aadfad0582ec119eab9eb21928da25185da7d71592e76181",
+      "afterW4": "a4f1eddc95bcbfbeadd219316bb127daf51c790fda14913492e343fe5cf973bd",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/db/migrations/054-memory-transition-publication.test.ts",
+      "beforeW4": null,
+      "afterW4": "9a983a668405f0a3e53a8190da2bca5934ac9f0253f16c09529bb387332aacd3",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/migrations/054-memory-transition-publication.ts",
+      "beforeW4": null,
+      "afterW4": "f24516560a03092fcb2e66a117db01f999f2bcee296032159918503fff12d2d4",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index-list.test.ts",
+      "beforeW4": "02d72f30a18efce27d7749d37fb3ce61778b15160e1db248d7fbd1a6e878b800",
+      "afterW4": "7949e03eecdb9e101d3c93e35c5cc780c5de842cf2e9bcf19429ff41655a7c50",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index-list.ts",
+      "beforeW4": "f0c5f54336d9417bc2f2ce93c256deb92ac2da672260d943fc9ef71c16cf9e34",
+      "afterW4": "f327529f5fd8678912ed91aa52d16b70e61d13cfc7866767592e680a6255dea5",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/db/migrations/index.md",
+      "beforeW4": "19d974779e71aa41a8794ae3629d9ca152b8f14564d69133d5f9278d7d0b2c40",
+      "afterW4": "4493740e8773d01e91bb400eb3b76ee58c77eaf72dc0d6a6a3286a5b86b0e711",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/db/migrations/lineage-reopen-matrix.test.ts",
+      "beforeW4": "8c1757ac5871ec4a43b594d0c55a406acd2b2eabac14eeeee558dc2148e45192",
+      "afterW4": "2197233f4bd1744c72027871b99dab04169bf226c539a25ff5551434e509a449",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/db/primary-memory-custody-repo.ts",
+      "beforeW4": "4778f89342d5e4f193d1966a24e78356952a53009d3bc190cb6f3f38b2d722e9",
+      "afterW4": "05a58a8606539062d4929b41271907dffb2f59edcc05744881ed553eef2eab04",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-banks.ts",
+      "beforeW4": "461e84c78ca590dfd8a37a5583f3621d082edea95126f6b332c7fe8469eb522a",
+      "afterW4": "86db796f3705c48cd50d31ee5a949ba894e26581141043acb27f8494b514fa7c",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-runtime.ts",
+      "beforeW4": "8cae3b54d89d93c6e285c404f6b3127617bfe6f88e2b709739f7281d43c7b5e0",
+      "afterW4": "c533f832901bedd67f283b5d2473659c99675018ece1bc91b4060b4422eca5a0",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-subsystem.ts",
+      "beforeW4": "69dff15b8c2d3a395f3d6c170fd3fa23fd44d7dfcb093c27917266470f1ead28",
+      "afterW4": "9e65f13d03ef6a24084c3f711f4248203ba52e5e3aa48b1550f8fcb59aa3b30f",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-write-fence.test.ts",
+      "beforeW4": "440fb5a63317ec795c06b09cd2f23b987d463c831a981dcd287f082bafebdf3d",
+      "afterW4": "4bfe1e3f24776e60b7eaae3f67aab08bc04bee8e577d5100c9321304707d534c",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-write-fence.ts",
+      "beforeW4": "5d3e8f4684f5f1b85739cee21023558b19de069eb9f6eadd0dd58146adabf6d4",
+      "afterW4": "939f351174a3e5a62ad93b805a21e5633eccc9f9d70d0d1381badabece6c935f",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-local-writers.ts",
+      "beforeW4": "2ce1ae3c5e4261cdc8f93176bf97d0939e1fb5846edea45949d04eeabae62edf",
+      "afterW4": "fe9216f96b06940209d4614cb0063719964334c46ea6909945d28ea75f601fdb",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-tools/canonical-memory-tools.ts",
+      "beforeW4": "caeb9872b8c353cbf8692e1e470029eb4513fe786040fd42bba17eca25573898",
+      "afterW4": "4e0f0f633c20e5cf67820beb85fff5569a02ff618f06dc743f8fd308119455e5",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/canonical-tools/index.md",
+      "beforeW4": "513ec1ace668b3a96bc9cd70a00dfb9bb1130b2fa926ea2381b3fdf9bbe2fd97",
+      "afterW4": "1709c5cb4f567b7816f4551702d597331b601d2c4b4f54ce36d6e07db4a5b7a9",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/fenced-memory-tools.ts",
+      "beforeW4": "bfd342226f7fe0f988c5f5c5ce9a19b6e384cd4f57acdffb20572437af7c7917",
+      "afterW4": "a01f7de65872b4357564f02231546b72a7ac14aa0b7be09daab2d9f88a16ddb8",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-runtime-binding.test.ts",
+      "beforeW4": null,
+      "afterW4": "6fbd0d496356ad3505c72f47ca2e529fc9785169a08901d779b15636c4c17306",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-runtime-binding.ts",
+      "beforeW4": "f1f9aaabd54db2ea28901b1983a48d99501924fad81a2c9055140b2232d37f04",
+      "afterW4": "da52039a717c685b925ac1a26cd078b39e767472238885b8364b147a6939488a",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-application-bundle.ts",
+      "beforeW4": "28d6fa0882ac3a41ffce7c759a1b738747f9977589b409750221b63a7d6f51e9",
+      "afterW4": "4239d487381401688603a159c7b4df9d8bf78ffe8cfea816672bca84fe856d26",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-provider-context.ts",
+      "beforeW4": "245e5eaa74fe75565a9794a54dc765768c34962a7b76d9528720ee768a489a9f",
+      "afterW4": "6af9a80085d5949f20bd48be90fa375c61d64b7dba898ee0ceb2d4717347349b",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-provider.ts",
+      "beforeW4": "228ebe16c3203e615f00ef508765b1238820cb07e0808670384b5d36a12aad64",
+      "afterW4": "26826a1f5332540a469b424da663443e1ebc1a134107660a9eb66a22cdd84924",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-runtime.ts",
+      "beforeW4": "2e478d80f9981e0d9c25ec55647d3d6ce5397148c7d093809c220e1a0044a913",
+      "afterW4": "545cc6f34036880627bfdd62dd90c3f7a641b5f35001bd0ac6dcba1d9b449583",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-memory-subsystem.ts",
+      "beforeW4": "91d011bbe53349e6923c41f0f073e64b94a78d80da765bd2ad2dcce04f4563d6",
+      "afterW4": "b9ee10a787fa58b8d029f06cdb93aae5c57c7dc7e41b4f803e74f124fc0d09a1",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-replica-scheduler.test.ts",
+      "beforeW4": "f4ecf77ec226c02380b8d52334a20d8acb017ae902c212730353cef9a5fac7e4",
+      "afterW4": "eb3e3e3b8b22a0b64d5e3422b65c360a304249afd352339dcf48bec07741dcf0",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-replica-scheduler.ts",
+      "beforeW4": "4ebe858611258fcc716db826314095190de200b4a4b548cb0b3bb160be186d5b",
+      "afterW4": "2d61d2c3c1841f733ed2f9bb8ebb86d8dafcd9e216e2b69b760355d99adc7d15",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-runtime-bank-service.ts",
+      "beforeW4": "fdcb46ea42c499f931fe9ecd2fe4fc8b71e65ed9d30d2b3da286a6490517ccc5",
+      "afterW4": "9c749819d307ae5f902e565a5ee873906a85ac52bd6a4d5280b03c6751e33caf",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-runtime-connection.ts",
+      "beforeW4": "6ef10de8f399037bb1b1811c499f067485ecbcdb7d08d93c6a07efaf60209725",
+      "afterW4": "325adb7e1f4771718aa3cbe3e7bf8d2bc845b1d1c50af92ce8ffb2ce81cb50a2",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-runtime-consumers.ts",
+      "beforeW4": "4cfdc691a13aab8c2d7b5b06ff801578296655e5ecd901047ac3e535293acd4d",
+      "afterW4": "e8722acc7fe443fde8d507f46e955501f6ce72a7607ee7a77094fd27281bbbb2",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-runtime-lifetime.test.ts",
+      "beforeW4": null,
+      "afterW4": "216cdf10db40db90224caede9681223e832e5c9bf85b22904a089d4ebe67d426",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-runtime-state.ts",
+      "beforeW4": "b594d03089295810920770916157c4b22282e36d59ecfcce2d911f6b60f6a690",
+      "afterW4": "34c87abe4133c36b93aa962903244aa69e7f402236cea2f8343aaa6d3640c267",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-unavailable-run.ts",
+      "beforeW4": "428fc78988940d151bc410484b476df070c2c981af1ec26b7d4f8e73a4483791",
+      "afterW4": "5a330f1b4f70b70b9f8acc7941a314ae4096ccb2edd24b808d50f54bcb475cd3",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/hindsight-writer-fence.ts",
+      "beforeW4": "556920fadae8db8724d385f36f93f6e868ff8375706237ae0925eda00e1c3e61",
+      "afterW4": "e6451c6161ec492cd2971569d7819f59e9c8382cc238b309898b599e190f0d7b",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/hindsight/index.md",
+      "beforeW4": "b0fce3713e1abd651aafa6ebdbe0a671e06d5d9d84afe885b8550db5fab8db75",
+      "afterW4": "5ae45294b3333765584137742a9ff5ee67aa96e89f19949d9cca54a7ff3fbbc6",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/memory/index.md",
+      "beforeW4": "418eb5a21ce498cf89f5277da7040f85e83d6414c13862646a3b46314d529520",
+      "afterW4": "b27ebc342d4a1c8a964aef3b9074ec4a7c2d90a2ae2c344c0e4fc90eacbe6822",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/index.md",
+      "beforeW4": "6a06fa702d9dd46e6f7cef086fb046e8ed5baf0621ba6c1ee7fbbb85f0bded32",
+      "afterW4": "a062775b266df3836528a033d5639238c7cfb7e052146cac56319681ba533c15",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/legacy-migration/legacy-activation-repo.ts",
+      "beforeW4": "65efa21fb3a438272fb1b94cd1dc79c5b2eebf01833ffd23586fb238c766db8f",
+      "afterW4": "86e6a6bd18f1c860a8aa7b0825b5c87b534216baaa1e2a5a40817585d6ec3a21",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/local-memory-provider.ts",
+      "beforeW4": "96a2981fe3dd71319f5cde9dd9b1c3c8c19528df0df3bdf509a9c2f5278e242b",
+      "afterW4": "630b3ed0fa309ec46d365ef89fbbe3feee0a30c4922d5b0b8dffae3073094e3f",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/local-runtime-binding.test.ts",
+      "beforeW4": "f7b428c837d1c6544edd63f80c06b13364134169d18f7c1d6f445a008000dfca",
+      "afterW4": "baa29712347e9ec1d5192460ff571a7727e02c9bce88116f2ebd39637477aaaa",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/local-runtime-binding.ts",
+      "beforeW4": "903b6235c46a3e46f564249446bae8b3227b28742b5a1c1422be032a1ae9ac79",
+      "afterW4": "065fca4ec932226139c4603497a7d4c174aef78534ba33f22dcb2c1ee75b21e9",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/memory-coordinator.ts",
+      "beforeW4": "ac005d4497505e90cfe64a7cf1f078dee47d67bbceae0340a932d7bd4c3a0545",
+      "afterW4": "e99208822fd5700c3315057c3324f8afbcca176beecca6afc1271662b7e7b49c",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/memory-provider.ts",
+      "beforeW4": "ed2b93db3e8650e03849f2a23ceb69e93679960d52ef2e05615f651afa88057c",
+      "afterW4": "c8cd50204908115816973111adb407471a281873ea2d151a80768342469b7a3b",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/runtime-composition.ts",
+      "beforeW4": "3d3937e3d1e99337617c33876d9e64d1aab7dd1ef3afa57ec251786c39dc61ed",
+      "afterW4": "663dcec997d078810fb5568c1246b14c34545f356b989067417078e0db703299",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/runtime-selector.ts",
+      "beforeW4": "30f6a2ce36249082489726d1a404d65cef9ce7fce47528fcbf948d75ba13a11d",
+      "afterW4": "a1042ff37157b507ecdba59a17c8514a6e6cf5dee036e3038dc1bb8b7744330d",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/index.md",
+      "beforeW4": "d69dab3be9ed4c8121b349afbcad5a91e1c1164f6a07b1edac0693af245fad29",
+      "afterW4": "d65463034ca38d511b0b4fceefc951cad218975d5285f3c6af6f87987d1ed4df",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-intent-executor.test.ts",
+      "beforeW4": null,
+      "afterW4": "5fdea257ef0d9dce2106c1792fceaaeeb4eed4c9346e66f9eeea05a12ffbb9f3",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-intent-executor.ts",
+      "beforeW4": null,
+      "afterW4": "d0797f049a97c35699897a8d1b274bac7021e121cfbc11038d03e0d62cc93f2a",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-queue-mapping.ts",
+      "beforeW4": null,
+      "afterW4": "84efe549acde55cffad61916271a38c67d6e0abb6a72d180c229807b202c81a5",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-queued-provider.ts",
+      "beforeW4": null,
+      "afterW4": "76a01703b00b3c73f8ffbc9a432f05f950afb868a84b74e344231ab72cb855d4",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-runtime-recovery.test.ts",
+      "beforeW4": null,
+      "afterW4": "53d9d78d0a6da8f8ad33b5ffe4331479c703dc163ea46e5a217865a1bef190e9",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-runtime.test.ts",
+      "beforeW4": null,
+      "afterW4": "c5c3928585082af9a638f9d2110f81cd151a4dbb378f52bdcb90bc90761cb1e2",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-runtime.ts",
+      "beforeW4": null,
+      "afterW4": "7c9156978ea3580812dcc007d41d0999e7a846ce78fbe3f5c7abd4c9f3da78aa",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/testing/index.md",
+      "beforeW4": "b914704506b4a8982aed86104bee65b04a672b18418e98b92c1cec29b3e90f26",
+      "afterW4": "6e94b4ff35ba473d825237120cabdf6334467e34ddcc61cf8c52286d74e8bbd4",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-candidate-fixtures.ts",
+      "beforeW4": "856fcefc81fd5a810bcfc3242b74f524b8d266fdc88441d559271fa1f8a2063e",
+      "afterW4": "43b9ae99c2453cb030fb6c34b3d7c6b29e8c649e8fa2f8dfb2cca61cd7d6592d",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-cycle-fixtures.ts",
+      "beforeW4": null,
+      "afterW4": "e04984a3eea173c087bf8689b4fc6bf0a49e0d51ad9826a1789d6197eccf0218",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-final-fixtures.ts",
+      "beforeW4": "bd64021daa1b38424dfe0e0c878cdf444bc1732ea6a3027a1a61776d8a8a8558",
+      "afterW4": "b9c603a911e54c5d90b00839fb0a27a68d9fb32c88b04d7e642d420b29a73dfe",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-outcome-fixtures.ts",
+      "beforeW4": null,
+      "afterW4": "c432325a42b7d2bd4e4f1169b634f81cecff301e3d2347ab49abd7199a2324ab",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-publication-fixtures.ts",
+      "beforeW4": null,
+      "afterW4": "7fa9484c37a6b3b4bc463396604bd89ef58e3b952e30b0bc1207e0145dc6b71e",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-unused-fixtures.ts",
+      "beforeW4": null,
+      "afterW4": "fc1b3cc40e4807a0728166e255172b0f05b814f131f0505b0018152b9759a428",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/shared/src/index.md",
+      "beforeW4": "72acf71deeb2dc40cdf3c8f85f703096454126ea436d837f29c1711235abbd25",
+      "afterW4": "2d8ca4951b9cfc2ade25ac137a2e5d0cc8c87136cb4d0e6f2bbc39790adceecb",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/shared/src/index.ts",
+      "beforeW4": "29ae31c7019eea7a48796873a847744044f74ca90126b797132cca703d61ef82",
+      "afterW4": "fac8c6a487d5642bf07a52f1d9cb60022e40874b30a6258f4221f15ef921e9f9",
+      "baseline": "checked-pre-W4"
+    },
+    {
+      "path": "packages/shared/src/memory-provider-domain-schema.ts",
+      "beforeW4": "3ddb8912bbd73a78be8d90288ccccb14c2b08a43e2affdf728d6033b154cbc3d",
+      "afterW4": "4b9003a28efb9e25eef561be21c2087020911a4d5ce804238e4a05585e3e3798",
+      "baseline": "HEAD"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-publication-schema.ts",
+      "beforeW4": null,
+      "afterW4": "679d05cdf244cf7f0aa9fdf66be94ebf56b4e578a5977bc67e19d032454981c4",
+      "baseline": "new-W4"
+    },
+    {
+      "path": "packages/shared/src/memory-transition-queue-schema.ts",
+      "beforeW4": "36663cc27b6921145144e2b53a4fcb41070cd795373d96fd3d296aa626e6534d",
+      "afterW4": "9bef81eda7ae978b3bf0fcebde0e4d74b8346fda32155e81759dc8d55993895d",
+      "baseline": "checked-pre-W4"
+    }
+  ],
+  "nativeCheckedPaths": 349,
+  "nativeChangedPaths": [],
+  "utf8ModuleIndexIssues": [],
+  "meaning": "Final W4 source hashes versus immutable checked pre-W4 or HEAD. No prior-wave evidence rewritten."
+}

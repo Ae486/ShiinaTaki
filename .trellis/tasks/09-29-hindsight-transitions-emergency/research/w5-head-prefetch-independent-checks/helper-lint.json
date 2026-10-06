@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "H:/hindsight/.venv/Scripts/ruff.exe",
+    "check",
+    "w5_head_prefetch_inventory.py",
+    "w5-head-prefetch-postpatch.py",
+    "test_w5_head_prefetch_postpatch.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-head-prefetch-independent-checks\\test_registration.py"
+  ],
+  "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+  "exitCode": 0,
+  "stdout": "All checks passed!\n",
+  "stderr": ""
+}

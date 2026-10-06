@@ -1,0 +1,91 @@
+{
+  "scope": "Synthetic-only post-COMMIT helper and wrapper; no actual working-copy reads, services or network.",
+  "firstPass": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "lint",
+        "cmd": "& H:/hindsight/.venv/Scripts/ruff.exe check --select E,F,I --target-version py311 --line-length 120 .trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-working-postcommit-continuation.py .trellis/tasks/09-29-hindsight-transitions-emergency/research/w5_postcommit_custody.py .trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_working_postcommit.py",
+        "chunk_id": "f04a46",
+        "wall_time_seconds": 0.3697428,
+        "exit_code": 1,
+        "original_token_count": 340,
+        "output": "F401 [*] `pathlib.Path` imported but unused\n  --> .trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_working_postcommit.py:8:21\n   |\n 6 | import sqlite3\n 7 | from copy import deepcopy\n 8 | from pathlib import Path\n   |                     ^^^^\n 9 | from types import SimpleNamespace\n10 | from unittest.mock import Mock\n   |\nhelp: Remove unused import: `pathlib.Path`\n\nE501 Line too long (165 > 120)\n  --> .trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_working_postcommit.py:35:121\n   |\n33 | …,\n34 | …\n35 | …e_epoch_id,mode,provider_lineage_id,replica_checkpoint_digest,activation_transaction_id\",\n   |                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n36 | …ovider_lineage_id,predecessor_epoch_id,reason,ended_at\",\n37 | …\n   |\n\nE501 Line too long (132 > 120)\n  --> .trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_working_postcommit.py:36:121\n   |\n34 | …id,slot,body\",\n35 | …receipt_id,active_epoch_id,mode,provider_lineage_id,replica_checkpoint_digest,activation_transaction_id\",\n36 | …der_id,status,provider_lineage_id,predecessor_epoch_id,reason,ended_at\",\n   |                                                              ^^^^^^^^^^^^\n37 | …e_epoch_id\",\n38 | …_json\",\n   |\n\nFound 3 errors.\n[*] 1 fixable with the `--fix` option.\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "types",
+        "cmd": "& H:/hindsight/.venv/Scripts/ty.exe check --project H:/hindsight --python H:/hindsight/.venv/Scripts/python.exe --extra-search-path H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research .trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-working-postcommit-continuation.py .trellis/tasks/09-29-hindsight-transitions-emergency/research/w5_postcommit_custody.py .trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_working_postcommit.py --output-format concise",
+        "chunk_id": "8f7b7f",
+        "wall_time_seconds": 0.55765,
+        "exit_code": 0,
+        "original_token_count": 5,
+        "output": "All checks passed!\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "tests",
+        "cmd": "& H:/hindsight/.venv/Scripts/python.exe -B -m pytest --noconftest -o addopts= -n 0 -q --tb=short -p no:cacheprovider .trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_working_postcommit.py",
+        "chunk_id": "af9d6d",
+        "wall_time_seconds": 3.7107329,
+        "exit_code": 0,
+        "original_token_count": 26,
+        "output": ".......................                                                  [100%]\r\n23 passed in 0.69s\r\n"
+      }
+    }
+  ],
+  "finalChecks": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "lint",
+        "cmd": "& H:/hindsight/.venv/Scripts/ruff.exe check --select E,F,I --target-version py311 --line-length 120 .trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-working-postcommit-continuation.py .trellis/tasks/09-29-hindsight-transitions-emergency/research/w5_postcommit_custody.py .trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_working_postcommit.py",
+        "chunk_id": "c88161",
+        "wall_time_seconds": 0.4069431,
+        "exit_code": 0,
+        "original_token_count": 5,
+        "output": "All checks passed!\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "format",
+        "cmd": "& H:/hindsight/.venv/Scripts/ruff.exe format --check --line-length 120 .trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-working-postcommit-continuation.py .trellis/tasks/09-29-hindsight-transitions-emergency/research/w5_postcommit_custody.py .trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_working_postcommit.py",
+        "chunk_id": "097b60",
+        "wall_time_seconds": 0.3915461,
+        "exit_code": 0,
+        "original_token_count": 7,
+        "output": "3 files already formatted\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "types",
+        "cmd": "& H:/hindsight/.venv/Scripts/ty.exe check --project H:/hindsight --python H:/hindsight/.venv/Scripts/python.exe --extra-search-path H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/ .trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-working-postcommit-continuation.py .trellis/tasks/09-29-hindsight-transitions-emergency/research/w5_postcommit_custody.py .trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_working_postcommit.py --output-format concise",
+        "chunk_id": "5bb946",
+        "wall_time_seconds": 0.5097878,
+        "exit_code": 0,
+        "original_token_count": 5,
+        "output": "All checks passed!\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "tests",
+        "cmd": "& H:/hindsight/.venv/Scripts/python.exe -B -m pytest --noconftest -o addopts= -n 0 -q --tb=short -p no:cacheprovider .trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_working_postcommit.py",
+        "chunk_id": "9712d3",
+        "wall_time_seconds": 3.1683785,
+        "exit_code": 0,
+        "original_token_count": 26,
+        "output": ".......................                                                  [100%]\r\n23 passed in 0.61s\r\n"
+      }
+    }
+  ]
+}

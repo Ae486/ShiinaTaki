@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "H:/hindsight/.venv/Scripts/ty.exe",
+    "check",
+    "hindsight_api/engine/application_state/store.py",
+    "hindsight_api/engine/application_state/snapshot.py",
+    "hindsight_api/engine/transition_baseline_reads.py",
+    "--output-format",
+    "concise"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "stdout": "All checks passed!\n",
+  "stderr": ""
+}

@@ -52,6 +52,7 @@ interface ControllerState<TStatus> {
   unsubscribe: (() => void) | null;
   read: MemoryStatusReader<TStatus>;
   sink: MemoryOperationsSink<TStatus>;
+  feedbackForError: (cause: unknown) => MemoryOperationsFeedback;
 }
 
 function isCurrent<T>(state: ControllerState<T>, candidate: MemoryOperationsClient, token: number): boolean {
@@ -106,7 +107,7 @@ async function mutateController<T>(state: ControllerState<T>, spec: MutationSpec
     state.sink.mutationSettled(feedback);
   } catch (cause) {
     if (!isCurrent(state, candidate, token)) return;
-    state.sink.mutationSettled(refusalFeedback(cause));
+    state.sink.mutationSettled(state.feedbackForError(cause));
   } finally {
     if (state.epoch === token) state.mutating = false;
   }
@@ -142,9 +143,10 @@ function retire<T>(state: ControllerState<T>): void {
   state.dirty = false;
 }
 
-export function createMemoryOperationsController<TStatus>(sink: MemoryOperationsSink<TStatus>, read: MemoryStatusReader<TStatus>): MemoryOperationsController {
+export function createMemoryOperationsController<TStatus>(sink: MemoryOperationsSink<TStatus>, read: MemoryStatusReader<TStatus>,
+  feedbackForError: (cause: unknown) => MemoryOperationsFeedback = refusalFeedback): MemoryOperationsController {
   const state: ControllerState<TStatus> = {
-    client: null, epoch: 0, mutating: false, refreshing: false, dirty: false, subscribed: null, unsubscribe: null, read, sink,
+    client: null, epoch: 0, mutating: false, refreshing: false, dirty: false, subscribed: null, unsubscribe: null, read, sink, feedbackForError,
   };
   const submit = (request: MemoryOperationRequest, key: string) => mutateController(state, {
     key,

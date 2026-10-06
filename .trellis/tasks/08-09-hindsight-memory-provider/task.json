@@ -34,7 +34,8 @@
     "09-19-active-bank-lifecycle",
     "09-25-hindsight-backup-restore",
     "09-25-hindsight-native-smoke",
-    "09-26-hindsight-capture-sync-resilience"
+    "09-26-hindsight-capture-sync-resilience",
+    "09-29-hindsight-transitions-emergency"
   ],
   "parent": null,
   "relatedFiles": [],

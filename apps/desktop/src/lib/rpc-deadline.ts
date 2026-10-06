@@ -16,6 +16,7 @@ import {
   MEMORY_AUTHORITY_METHODS,
   MEMORY_METHODS,
   MEMORY_OPERATION_METHODS,
+  MEMORY_TRANSITION_METHODS,
   MEMORY_ONBOARDING_METHODS,
   MCP_METHODS,
   PERCEPTION_METHODS,
@@ -38,6 +39,7 @@ export interface RpcMethodPolicy {
 const INTERACTIVE_READ: RpcMethodPolicy = { class: "interactive", timing: "interactiveRpcMs", timeoutOutcome: "read-only" };
 const INTERACTIVE_MUTATION: RpcMethodPolicy = { class: "interactive", timing: "interactiveRpcMs", timeoutOutcome: "unknown" };
 const LONG_MUTATION: RpcMethodPolicy = { class: "long", timing: "longRpcMs", timeoutOutcome: "unknown" };
+const LONG_READ: RpcMethodPolicy = { class: "long", timing: "longRpcMs", timeoutOutcome: "read-only" };
 
 export const RPC_METHOD_POLICIES: ReadonlyMap<string, RpcMethodPolicy> = new Map([
   [CONNECT_METHOD, { class: "open-auth", timing: "openAuthMs", timeoutOutcome: "unknown" }],
@@ -59,8 +61,12 @@ export const RPC_METHOD_POLICIES: ReadonlyMap<string, RpcMethodPolicy> = new Map
   [CONFIG_METHODS.subscribe, INTERACTIVE_MUTATION],
   [MEMORY_METHODS.tidy, LONG_MUTATION],
   [MEMORY_METHODS.status, INTERACTIVE_READ],
-  // Memory operations: admission is synchronous in Core (the durable row is the outcome), so submit/cancel stay interactive
-  // mutations; the status/list reads may be reread after a timeout without replaying anything.
+  // Transition preview/admission can verify a large corpus. A bounded deadline still does not imply cancellation.
+  [MEMORY_TRANSITION_METHODS.preview, LONG_READ],
+  [MEMORY_TRANSITION_METHODS.status, LONG_READ],
+  [MEMORY_TRANSITION_METHODS.overview, LONG_READ],
+  [MEMORY_OPERATION_METHODS.submit, INTERACTIVE_MUTATION],
+  [MEMORY_OPERATION_METHODS.cancel, INTERACTIVE_MUTATION],
   [MEMORY_AUTHORITY_METHODS.status, INTERACTIVE_READ],
   [MEMORY_ACTIVATION_METHODS.status, INTERACTIVE_READ],
   [MEMORY_OPERATION_METHODS.status, INTERACTIVE_READ],
@@ -99,7 +105,12 @@ export const RPC_METHOD_POLICIES: ReadonlyMap<string, RpcMethodPolicy> = new Map
   [SKILL_METHODS.reconcile, LONG_MUTATION],
 ]);
 
-export function rpcMethodPolicy(method: string): RpcMethodPolicy {
+export function rpcMethodPolicy(method: string, params?: JSONRPCParams): RpcMethodPolicy {
+  if (method === MEMORY_OPERATION_METHODS.submit && params && !Array.isArray(params)) {
+    const request: unknown = params.request;
+    if (request && typeof request === "object" && "kind" in request
+      && typeof request.kind === "string" && request.kind.startsWith("transition.")) return LONG_MUTATION;
+  }
   return RPC_METHOD_POLICIES.get(method) ?? INTERACTIVE_MUTATION;
 }
 
@@ -128,7 +139,7 @@ export interface RpcDeadlineRequest {
 }
 
 export async function requestWithDeadline<T>(request: RpcDeadlineRequest): Promise<T> {
-  const policy = rpcMethodPolicy(request.method);
+  const policy = rpcMethodPolicy(request.method, request.params);
   const timeoutMs = request.timing()[policy.timing];
   try {
     return await request.rpc.timeout(timeoutMs).request(request.method, request.params);

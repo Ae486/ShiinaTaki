@@ -1,0 +1,44 @@
+{
+  "runs": [
+    {
+      "root": "H:/TakiAgent/.trellis/.runtime/g1-validation/taki-hindsight-g1-9810f7a7efda",
+      "passed": 40,
+      "failed": 2,
+      "seconds": 155.0,
+      "stopped": true,
+      "dataRemoved": true,
+      "registryRemoved": true
+    },
+    {
+      "root": "H:/TakiAgent/.trellis/.runtime/g1-validation/taki-hindsight-g1-707a484074b8",
+      "passed": 252,
+      "failed": 2,
+      "skipped": 105,
+      "seconds": 248.22,
+      "stopped": true,
+      "dataRemoved": true,
+      "registryRemoved": true
+    },
+    {
+      "root": "H:/TakiAgent/.trellis/.runtime/g1-validation/taki-hindsight-g1-55db2b84d2f9",
+      "passed": 0,
+      "failed": 2,
+      "seconds": 13.6,
+      "stopped": true,
+      "dataRemoved": true,
+      "registryRemoved": true
+    },
+    {
+      "root": "H:/TakiAgent/.trellis/.runtime/g1-validation/taki-hindsight-g1-cffd09321a91",
+      "passed": 2,
+      "failed": 0,
+      "seconds": 17.23,
+      "stopped": true,
+      "dataRemoved": true,
+      "registryRemoved": true
+    }
+  ],
+  "finalCorrectness": "passed",
+  "fullCorpusMigrationExecuted": false,
+  "fullApplyPerformanceAccepted": false
+}

@@ -1,0 +1,13 @@
+test_existing_but_empty_bank_history_cannot_reset_consumed_allowance (__main__.IndependentGateTests.test_existing_but_empty_bank_history_cannot_reset_consumed_allowance) ... ok
+test_foreign_or_raw_ip_http_cannot_bypass_model_accounting (__main__.IndependentGateTests.test_foreign_or_raw_ip_http_cannot_bypass_model_accounting) ... ok
+test_history_identity_integrity_and_conservative_reservations (__main__.IndependentGateTests.test_history_identity_integrity_and_conservative_reservations) ... Executing <Task finished name='Task-12' coro=<IndependentGateTests.test_history_identity_integrity_and_conservative_reservations() done, defined at H:\TakiAgent\.trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-helper-independent-test.py:182> result=None created at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py:100> took 0.125 seconds
+ok
+test_inherited_child_context_cannot_dispatch_after_success_error_or_cancellation (__main__.IndependentGateTests.test_inherited_child_context_cannot_dispatch_after_success_error_or_cancellation) ... Executing <Task pending name='Task-17' coro=<IndependentGateTests.test_inherited_child_context_cannot_dispatch_after_success_error_or_cancellation() running at H:\TakiAgent\.trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-helper-independent-test.py:85> wait_for=<Task pending name='Task-18' coro=<IndependentGateTests.check_execution_lifetime.<locals>.original.<locals>.detached() running at H:\TakiAgent\.trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-helper-independent-test.py:134> cb=[Task.task_wakeup()] created at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\tasks.py:374> cb=[_run_until_complete_cb() at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py:180] created at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py:100> took 4.953 seconds
+ok
+test_pause_checkpoint_cannot_hide_a_different_actual_core_outcome (__main__.IndependentGateTests.test_pause_checkpoint_cannot_hide_a_different_actual_core_outcome) ... ok
+test_supervisor_rejects_hash_valid_unsupported_checkpoint_shape (__main__.IndependentGateTests.test_supervisor_rejects_hash_valid_unsupported_checkpoint_shape) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 5.682s
+
+OK

@@ -59,12 +59,15 @@ function slowClient(f: HindsightRuntimeFixture) {
 describe("foreground Hindsight Recall lifetime", () => {
   it("refuses a directly captured Run if its caller cancels after capability capture", async () => {
     const f = fixture(true); const subsystem = f.subsystem(); await subsystem.captureRun("taki");
-    const caller = new AbortController(); const capabilities = subsystem.state.provider.capabilities;
-    vi.spyOn(subsystem.state.provider, "capabilities").mockImplementationOnce(async () => {
-      const value = await capabilities(); caller.abort(); return value;
+    const caller = new AbortController(); const capture = subsystem.state.coordinator.captureRun;
+    // The coordinator owns the registered transition wrapper. Spying on the original provider after registration
+    // does not replace its copied capabilities method; interrupt the actual completed capability capture instead.
+    const captured = vi.spyOn(subsystem.state.coordinator, "captureRun").mockImplementationOnce(async () => {
+      const value = await capture(); caller.abort(); return value;
     });
     const result = await subsystem.captureRun("taki", caller.signal).then(() => ({ code: "admitted" }),
       (error: unknown) => ({ code: error instanceof Error ? error.message : "unknown" }));
+    expect(captured).toHaveBeenCalledOnce(); expect(caller.signal.aborted).toBe(true);
     expect(result).toEqual({ code: "MEMORY_OPERATION_CANCELLED" });
   });
 

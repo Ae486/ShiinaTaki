@@ -1,0 +1,13 @@
+{
+  "manifest": {
+    "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-final-source-manifest.json",
+    "sha256": "5a52c06d7432acd3cc0be861ab48c2d7b22838d7402af29fab546bcd1bcb4f04",
+    "bytes": 30012
+  },
+  "files": 45,
+  "preimages": 35,
+  "preserved": 33,
+  "replaySourceChecks": 25,
+  "copyIntegrity": "ok",
+  "workingUnchanged": true
+}

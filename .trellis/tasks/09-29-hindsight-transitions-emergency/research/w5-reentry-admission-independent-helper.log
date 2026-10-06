@@ -1,0 +1,32 @@
+✔ atomic checkpoint survives lost result ACK; malformed/hash-mismatched state fails closed (31.6721ms)
+✔ missing checkpoint never initializes from an incomplete legacy RETURN (6.1141ms)
+✔ Local policy-ack loss reconciles original receipts after real SQLite reopen (220.4995ms)
+✔ Local block-ack loss reconciles original receipts after real SQLite reopen (188.2066ms)
+✔ Local checkpoint-ack loss reconciles original receipts after real SQLite reopen (191.3433ms)
+✔ same Block revision with different content refuses instead of incrementing expected revision (170.8877ms)
+✔ wait refreshes a renewed and then replaced attempt rather than caching old lease (0.5064ms)
+✔ lost submit ACK recovers exact real admission; completed RETURN remains verified after reopen (1292.3048ms)
+✔ real Core reentry pauses A then B, explicit recovery keeps one transition and reuses completed A (2194.8557ms)
+✔ admission-before-first-claim is recovered by identity but unsupported producer recovery fails closed (382.7466ms)
+✔ one explicit replacement survives append ACK loss/restart and reuses exact admitted request (1793.7579ms)
+✔ a failure before append preserves old checkpoint and permits only the explicitly approved renewal (1249.4362ms)
+✔ renewal refuses requestId without creating a replacement (967.5167ms)
+✔ renewal refuses previewHash without creating a replacement (942.9424ms)
+✔ renewal refuses checkpoint without creating a replacement (917.3ms)
+✔ renewal refuses anchor without creating a replacement (904.19ms)
+✔ renewal refuses block without creating a replacement (973.3917ms)
+✔ renewal refuses receipt without creating a replacement (1009.4758ms)
+✔ renewal refuses orphan without creating a replacement (873.3602ms)
+✔ renewal refuses admitted without creating a replacement (961.5959ms)
+✔ renewal refuses unknown without creating a replacement (965.9248ms)
+✔ renewal refuses during-preview without creating a replacement (1099.6173ms)
+✔ fresh reentry preview/admission with repeated-plan elapsed clock=true (1351.8482ms)
+✔ fresh reentry preview/admission with repeated-plan elapsed clock=false (2173.5543ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 26820.9957

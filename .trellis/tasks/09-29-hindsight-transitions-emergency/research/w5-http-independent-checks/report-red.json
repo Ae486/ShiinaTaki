@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "H:\\hindsight\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "--noconftest",
+    "-o",
+    "addopts=",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_independent.py",
+    "-k",
+    "contradictory_http",
+    "-q",
+    "--tb=short",
+    "-n",
+    "0"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "timeoutSeconds": 60,
+  "exitCode": 1,
+  "stdout": "FFFF                                                                     [100%]\n================================== FAILURES ===================================\n_____ test_complete_report_rejects_contradictory_http_evidence[duration] ______\n.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_independent.py:282: in test_complete_report_rejects_contradictory_http_evidence\n    assert not final[\"diagnosticSucceeded\"] and not final[\"completeHttpBudgetPassed\"]\nE   assert (not True)\n______ test_complete_report_rejects_contradictory_http_evidence[lookup] _______\n.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_independent.py:282: in test_complete_report_rejects_contradictory_http_evidence\n    assert not final[\"diagnosticSucceeded\"] and not final[\"completeHttpBudgetPassed\"]\nE   assert (not True)\n__ test_complete_report_rejects_contradictory_http_evidence[duplicate-post] ___\n.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_independent.py:282: in test_complete_report_rejects_contradictory_http_evidence\n    assert not final[\"diagnosticSucceeded\"] and not final[\"completeHttpBudgetPassed\"]\nE   assert (not True)\n_ test_complete_report_rejects_contradictory_http_evidence[missing-duration] __\n.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_independent.py:282: in test_complete_report_rejects_contradictory_http_evidence\n    assert not final[\"diagnosticSucceeded\"] and not final[\"completeHttpBudgetPassed\"]\nE   assert (not True)\n=========================== short test summary info ===========================\nFAILED .trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_http_independent.py::test_complete_report_rejects_contradictory_http_evidence[duration]\nFAILED .trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_http_independent.py::test_complete_report_rejects_contradictory_http_evidence[lookup]\nFAILED .trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_http_independent.py::test_complete_report_rejects_contradictory_http_evidence[duplicate-post]\nFAILED .trellis/tasks/09-29-hindsight-transitions-emergency/research/test_w5_http_independent.py::test_complete_report_rejects_contradictory_http_evidence[missing-duration]\n4 failed, 4 deselected in 3.07s\n",
+  "stderr": "",
+  "milliseconds": 7781.999999999243
+}

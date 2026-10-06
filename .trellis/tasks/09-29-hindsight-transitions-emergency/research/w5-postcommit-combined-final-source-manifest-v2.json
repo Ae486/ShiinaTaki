@@ -1,0 +1,664 @@
+{
+  "createdAtUtc": "2026-10-04T07:40:42.231676+00:00",
+  "phase": "final",
+  "files": [
+    {
+      "path": ".trellis/spec/backend/memory-transition-healthy-drivers.md",
+      "sha256": "ee4a05d730aaa29a3985dde0f46bf78f204a7973577fa8aaabeaf0b84546eb89",
+      "bytes": 14582
+    },
+    {
+      "path": ".trellis/spec/backend/memory-transition-publication.md",
+      "sha256": "0b85c28077bf678f8b6d120bbaba6468e706d69454fdb82aace3a07a599bbec9",
+      "bytes": 12830
+    },
+    {
+      "path": ".trellis/spec/backend/memory-transitions.md",
+      "sha256": "060069047126257a9d00576b0d23f222b8f8f0e5b968f5b0a04db2cf848ff0c7",
+      "bytes": 31459
+    },
+    {
+      "path": ".trellis/spec/backend/quality-guidelines.md",
+      "sha256": "82386ec7886d93af103da5168c1d3575ab189614ba9d6a75b6406200338be862",
+      "bytes": 14454
+    },
+    {
+      "path": "CLAUDE.md",
+      "sha256": "05d346e53eb95174f982acfe52ef329a63f5a6384cb676530469f18b5ba2a8a8",
+      "bytes": 11120
+    },
+    {
+      "path": "eslint.config.js",
+      "sha256": "fc873306c3edff0ca608362150b23c47f6c3b4c16c43a7aa873a11ac174ac61d",
+      "bytes": 3159
+    },
+    {
+      "path": "packages/core/src/boot/index.md",
+      "sha256": "53677a3532be37084fa0b18b8da93b697694c12313cc6fa7ed70774a2cedd945",
+      "bytes": 1495
+    },
+    {
+      "path": "packages/core/src/boot/memory-transition-boot.test.ts",
+      "sha256": "f3cf2698d5c508bb2af09d20606e0cf9056219d9ec0a30302e13301b8e118c60",
+      "bytes": 9284
+    },
+    {
+      "path": "packages/core/src/boot/memory-transition-boot.ts",
+      "sha256": "ce85d1f435bad0c0edaa50f798c80c3509ee130eff9cf876f37a3fbe1a46e17e",
+      "bytes": 4626
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-publication.ts",
+      "sha256": "52d2435d4fc74de55947203805f6cbc1f29c6d60fbe14a97d639d9f5f3d8d0ed",
+      "bytes": 13139
+    },
+    {
+      "path": "packages/core/src/db/index.md",
+      "sha256": "be94717c302252a32961c789c8abd52a058dff5c7a352f205906333bedc4503c",
+      "bytes": 20269
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-candidate-repo.ts",
+      "sha256": "fb5bfb92ed6c530aca1c55af7f76997ab2438a01672a5f91152d4c4201929e75",
+      "bytes": 11736
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-local-staging.ts",
+      "sha256": "97b9847d12959fd4b36a819086d9f0e89ee550f998cf7bd2bf166995cc14df9f",
+      "bytes": 5518
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-observation.test.ts",
+      "sha256": "6647270114d2ee922ed9924f9557340dd9f133932b52c4fc326be366a6a10e61",
+      "bytes": 10793
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-order.test.ts",
+      "sha256": "f2c6ae8d9180fe45bb6bbfba2089f5326333afb2783dc35dad3e658e819bce2f",
+      "bytes": 2670
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-proof.ts",
+      "sha256": "e31828fd67c11fb3d2d9386505bf9be56682ce443d2eba8f00756a1301cfc5bb",
+      "bytes": 9446
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-reader.ts",
+      "sha256": "750eb400423d64436f4121b3e8de35d561fe35d86af5ca8fc2fd5799fa8583ed",
+      "bytes": 9984
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-repo.ts",
+      "sha256": "e489e5a5883d4771d83d2f99942be3f137a955da20cf00ee123d2ff45c5de807",
+      "bytes": 8703
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-representation.ts",
+      "sha256": "5cdf6abdea43c8ed4cfadf8548b5e164b998be69a13ff4bd8a24d82f4471dfcc",
+      "bytes": 5676
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-runtime-binding.test.ts",
+      "sha256": "e400c230cadf0447a793489f32ef29195f6bbaf116ca9465a9f3ef0bf776d91e",
+      "bytes": 2582
+    },
+    {
+      "path": "packages/core/src/memory/hindsight-runtime-binding.ts",
+      "sha256": "a430250812062555dd3899fafe15ba6ac13aeb12d0e5d9105c22139727ce3b48",
+      "bytes": 10686
+    },
+    {
+      "path": "packages/core/src/memory/index.md",
+      "sha256": "1d167d5ebad194cc121269e1869bc82c6d79c88511fe25d29c9ec46630884230",
+      "bytes": 14320
+    },
+    {
+      "path": "packages/core/src/memory/local-runtime-binding.test.ts",
+      "sha256": "787201af04c4b602ca8262d200236cdbc20a878191dbfe9b93ca6c2c8b1c2cd4",
+      "bytes": 4830
+    },
+    {
+      "path": "packages/core/src/memory/local-runtime-binding.ts",
+      "sha256": "a36112e7222c2e59da83cf70643d78d495ce4e67b2603af6fc6a9f15985fa16b",
+      "bytes": 6226
+    },
+    {
+      "path": "packages/core/src/memory/runtime-composition.ts",
+      "sha256": "fb75dda39f702c197274a0db2032610685ea51e731264a6ea0b981156d53b2c4",
+      "bytes": 20164
+    },
+    {
+      "path": "packages/core/src/memory/runtime-selector.ts",
+      "sha256": "a1042ff37157b507ecdba59a17c8514a6e6cf5dee036e3038dc1bb8b7744330d",
+      "bytes": 9520
+    },
+    {
+      "path": "packages/core/src/memory/transitions/index.md",
+      "sha256": "ce822cf3ce548a5734984564c4544ba58273d6ac448251eaa1fa0964b8f70ecb",
+      "bytes": 5697
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-evidence-context.test.ts",
+      "sha256": "43cfc590d16c3acbf28b32c98c288e1040cd9ac67b9e81e7dbcf2857c85eb121",
+      "bytes": 8883
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-evidence-context.ts",
+      "sha256": "2710d7ff07bce8bf633e0acb58003539aeed84609a3aa4b9c00f7c89cf2fe84f",
+      "bytes": 5944
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-final-mapping.ts",
+      "sha256": "f1dd6f0ef8f84a0db71cabe79aa9be7165f9405eb7daed68678ac13001024b8e",
+      "bytes": 13698
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-diagnostics.test.ts",
+      "sha256": "e6b5149495c90b12a6e0b7fa85b3e5da51f67ad4e933720d94872fb0d6de064d",
+      "bytes": 3690
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+      "sha256": "9c0671f4dfd20f0924213b78fd28ba4e67ffe74f330ebfbdeac520dc6467546c",
+      "bytes": 19381
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-scheduling.test.ts",
+      "sha256": "1d95a865b45f15e3a8a0ee20b36588051a4b2bc0cf274929ab7126eef2823049",
+      "bytes": 8322
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-service.ts",
+      "sha256": "ed5b46fce01aaa2a8d4dc7df6ba7e589655dfbfdd6eb191a1efd443ce7fbd689",
+      "bytes": 8161
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-terminal-boundary.test.ts",
+      "sha256": "aec9c41e9c07df7a952caa01681e7876cb40aa86cc06817c5680a64f811ae427",
+      "bytes": 2574
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-candidate.ts",
+      "sha256": "9def05f5b3b06c0bfc8c08b4e2564a01711e548f44bbaefcfe964212fe0ada03",
+      "bytes": 10632
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-projection.ts",
+      "sha256": "0273f3a5561a7b6b19607000a35bd79d32390b550c6c51695b79491de1ce939a",
+      "bytes": 22083
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-native-renewal.test.ts",
+      "sha256": "e69918ffc0361b811e90e478f98508d12174217d5762ff44220ef1847c45f8af",
+      "bytes": 6632
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-native-session.ts",
+      "sha256": "a9add5e1624151a21229167276a0fa0548c7551cccdcb02ecea1de1f2738486c",
+      "bytes": 10263
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-observation-store.test.ts",
+      "sha256": "03de2b654d1a1c68d9648ee5f9d066febe7af1e181f45282a1695a3a964575da",
+      "bytes": 4782
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-observation-store.ts",
+      "sha256": "10f015c75925901f44651c1427550447afba458cde4ee0682ae001c07836f4dc",
+      "bytes": 4786
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-pending-sources.ts",
+      "sha256": "350042f03b7559c9cb1d530a1f5b5a887727ec6f76baab14d81c2e817a98ba8b",
+      "bytes": 2669
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-runtime.ts",
+      "sha256": "7c9156978ea3580812dcc007d41d0999e7a846ce78fbe3f5c7abd4c9f3da78aa",
+      "bytes": 8459
+    },
+    {
+      "path": "packages/core/src/testing/index.md",
+      "sha256": "cff4addbf156c7b72250f5b21a62445706515352870e77676e3cabcc50107cc5",
+      "bytes": 5476
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-publication-fixtures.ts",
+      "sha256": "af9fb0e30507de64e401d94b68dbc317844d858520e79f9610b3c2fd1435be67",
+      "bytes": 7946
+    }
+  ],
+  "preserved": [
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-core-validation-source-manifest.json",
+      "sha256": "bcf06e76032d77fce66b3d26c34b60dd1be2deba821a35e6a10e60b51beaa6f4",
+      "bytes": 4538
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-readiness-source-manifest.json",
+      "sha256": "5f056f60218dbba7a1b574f7f89c63f77b788e394321fb1ab421f2bba3ca2341",
+      "bytes": 2006
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-readiness-preimage-manifest.json",
+      "sha256": "01fc13ee9582d972a659d514818174188b2e4e0073531415507f641f9c6e2ce1",
+      "bytes": 1452
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-source-manifest.json",
+      "sha256": "9cb5ecbcf8c13c4e77504da52fd1c2b5fab60f72e60890defa30d40186883a66",
+      "bytes": 9055
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-implementation.md",
+      "sha256": "c2ba81264704260060367ca5a24830c57232fd2525720841948b77f0ef739866",
+      "bytes": 9995
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-audit.py",
+      "sha256": "8ccf46c402a04df73f6a1b33a1bfa2867fbb1509f85f09c26a242827d00a0323",
+      "bytes": 4804
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-types-initial.log",
+      "sha256": "200b048828a3070d7e0970f063d8183336d03cbcf6006207a3c20ec524ac82c4",
+      "bytes": 77
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-types-final.log",
+      "sha256": "200b048828a3070d7e0970f063d8183336d03cbcf6006207a3c20ec524ac82c4",
+      "bytes": 77
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-final-tests.log",
+      "sha256": "4aca288705ac11c775135027dcb467e75257efffc01ec5aef8ebf4100045af3a",
+      "bytes": 397
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-driver-tests.log",
+      "sha256": "c268fcf419f5cc623137e222357e2f61c1f712e8063f96e04c3220c20db70058",
+      "bytes": 293
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-service-tests.log",
+      "sha256": "c11b488b2a0eb47eeb5f037413680819e743a905e62bd65a4cdd811078169f82",
+      "bytes": 262
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-lint-final.log",
+      "sha256": "79907c7ebaf5c7bd038147702f350e1dcf076279808f1398f2ffababfa9aba56",
+      "bytes": 239
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-boot.log",
+      "sha256": "407266ef5af94700c2d8dec3adf1fec1f34c77fef84aa98410e8e23c4adb28b9",
+      "bytes": 1962
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-replay.mjs",
+      "sha256": "3eda0ac746c88cd211793b006fbfce108a188c56d5ce3ea0c459b4f2640819d7",
+      "bytes": 7709
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-replay-result.json",
+      "sha256": "84e2648c09139961a0d56df045a5a5e62600c2d6f7eb2abe46087d279eeb41d8",
+      "bytes": 1221
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-driver.mjs",
+      "sha256": "d3c11b1f6a0fb1c27aef098fa763795a401c19102bda383880f39bd4939c2254",
+      "bytes": 9474
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-driver-result.json",
+      "sha256": "29d314fb8372687a878c43349b9fed8f9991f75d7b2ead788369930f52de7bc8",
+      "bytes": 2145
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-driver.log",
+      "sha256": "1ecd9eb52904ff2e74d203fb8e184f377d06042e08e7e29f35c1dbf8f204ba8f",
+      "bytes": 2292
+    },
+    {
+      "path": ".trellis/.runtime/w5-boot/ff4774fb-ec26-4629-b0bb-1a2b5a288127/result.json",
+      "sha256": "fc7ca1185e9aeffa363a9cfef8b1a31ebdb8aae907ace6c6a064183da63bcb7c",
+      "bytes": 1902
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimage-manifest.json",
+      "sha256": "0f09be95af97b6d3e4677c6a5feb30360f1e069803372b0e1b04b226ec55fac0",
+      "bytes": 3293
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-guard-preimage.json",
+      "sha256": "6d1dfc083a14e965271dc88f06df6740f0b7717da0ba15ae21412dd24d9c9da7",
+      "bytes": 176
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-source-manifest.json",
+      "sha256": "f984db6db6bbfbb0d57fe4e61c1056677f02506617c3637d9e7517460f6b2da2",
+      "bytes": 4665
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-implementation.md",
+      "sha256": "2e65b5113a62800bd6ff80a6747501a7a16c85904b54d5f0c75d1ff48062e803",
+      "bytes": 9541
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-audit.py",
+      "sha256": "ae862c73de1bbf385ee2c3b1a7f13f25f1b33b5e6434f52b2c7e4fb8e55966ae",
+      "bytes": 4784
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-proposal.md",
+      "sha256": "7fa313b1bb62bbdbc4e83bcb29c01ae4d739734f08c43086a51bd6449f8b7fe9",
+      "bytes": 7510
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-driver.mjs",
+      "sha256": "c7cfce55f4c0bc220196875f34b4d885fc209d804d9c6d6064efb12847ef3070",
+      "bytes": 11542
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-driver-result.json",
+      "sha256": "48a9e54af3c8b0bedb313a37fd80e9ca376d6014969fe9b6af68db56c778d3a5",
+      "bytes": 6844
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-driver.log",
+      "sha256": "3091aa62311343ebbe4f34fa55c75463bbb5db0fd7e0f2e808d84d32089c9ef2",
+      "bytes": 6561
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-regression-tests.log",
+      "sha256": "4493729cf1cc14316533dd4d60d2c736a23976915db3a437cebebd672a98517e",
+      "bytes": 320
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-final-tests.log",
+      "sha256": "c8301e57ff2e67eab444d04f8fa0bbb88a3047f9c4c01b52ed879e956fe2e30d",
+      "bytes": 259
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-types-final-v2.log",
+      "sha256": "200b048828a3070d7e0970f063d8183336d03cbcf6006207a3c20ec524ac82c4",
+      "bytes": 77
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-lint-final.log",
+      "sha256": "9ab17e3447896b818b21a8cd0ba9004794ba1cf7c3d4ded0041b582bb6dc3595",
+      "bytes": 251
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-preimage-manifest.json",
+      "sha256": "dce8468bf0da30688b7a32dc4519c4182895316626be65afb711257fb02c5ba2",
+      "bytes": 763
+    }
+  ],
+  "preimages": [
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-readiness-preimages/packages/core/src/memory/runtime-composition.ts",
+      "sha256": "663dcec997d078810fb5568c1246b14c34545f356b989067417078e0db703299",
+      "bytes": 19325
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-readiness-preimages/packages/core/src/boot/memory-transition-boot.ts",
+      "sha256": "4690a1404cd89d280d7386090928fa658d9db8a1081f3607b132c8c0b87acb0b",
+      "bytes": 2644
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-readiness-preimages/packages/core/src/memory/transitions/transition-healthy-execution.ts",
+      "sha256": "359501af952e908abf61758ef0054c49afa475c56c7c1da916bbf78ca1b5dd82",
+      "bytes": 17801
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-readiness-preimages/packages/core/src/memory/transitions/transition-healthy-diagnostics.test.ts",
+      "sha256": "08334d64a2917f3a465e60eb28f554fef4617cc5d9b8746035642ea3981938d2",
+      "bytes": 2448
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-readiness-preimages/packages/core/src/memory/index.md",
+      "sha256": "b27ebc342d4a1c8a964aef3b9074ec4a7c2d90a2ae2c344c0e4fc90eacbe6822",
+      "bytes": 14196
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-readiness-preimages/packages/core/src/boot/index.md",
+      "sha256": "316ad5192e18d0e547197c0b77b8088cddd1e0e1f34ba066b562125a3b95ca3d",
+      "bytes": 1459
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-readiness-preimages/packages/core/src/memory/transitions/index.md",
+      "sha256": "a93d6d54bf6da647cb37d9f30a276881605ddbf3c8e810249dee3b0d24de2393",
+      "bytes": 5129
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-readiness-preimages/.trellis/spec/backend/memory-transition-healthy-drivers.md",
+      "sha256": "08de1c80c3ab1566955ef65877a5aefb28c570da48fde7cf4aa6edc09506bfd9",
+      "bytes": 11041
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/memory/transitions/transition-evidence-context.ts",
+      "sha256": "b1b20783ec5602cb0bd3b33361fa06636f0e28fd611bfccdeb89624797e05d4c",
+      "bytes": 4255
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/memory/transitions/transition-evidence-context.test.ts",
+      "sha256": "43cfc590d16c3acbf28b32c98c288e1040cd9ac67b9e81e7dbcf2857c85eb121",
+      "bytes": 8883
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/memory/transitions/transition-local-projection.ts",
+      "sha256": "034838c98607f4768a7cb8ef4b3f6598b1598bef7868057967c5570617c28ed0",
+      "bytes": 21785
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/db/memory-transition-publication-reader.ts",
+      "sha256": "28e9d76a41393823b2f4966c88edbc9c36f4d19ccede8c54a3dd66b6d486edb5",
+      "bytes": 8150
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/memory/local-runtime-binding.ts",
+      "sha256": "065fca4ec932226139c4603497a7d4c174aef78534ba33f22dcb2c1ee75b21e9",
+      "bytes": 5186
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/memory/hindsight-runtime-binding.ts",
+      "sha256": "da52039a717c685b925ac1a26cd078b39e767472238885b8364b147a6939488a",
+      "bytes": 9626
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/memory/local-runtime-binding.test.ts",
+      "sha256": "baa29712347e9ec1d5192460ff571a7727e02c9bce88116f2ebd39637477aaaa",
+      "bytes": 4464
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/memory/hindsight-runtime-binding.test.ts",
+      "sha256": "6fbd0d496356ad3505c72f47ca2e529fc9785169a08901d779b15636c4c17306",
+      "bytes": 2295
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/memory/runtime-composition.ts",
+      "sha256": "b19288416af48989ab4bda1771712218549c4b2eb58e9599c2b87d0b11cf7d7b",
+      "bytes": 19888
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/boot/memory-transition-boot.ts",
+      "sha256": "fb2861d48a8c03a6ede00ccf2f54ef822e61016707db6fe52692a96f2b6d5a65",
+      "bytes": 2938
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/boot/memory-transition-boot.test.ts",
+      "sha256": "8db02d734bec25853f5cd93daf05a3f924cfd008e19ac72a703fce48584a9ec2",
+      "bytes": 7818
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/memory/transitions/transition-healthy-service.ts",
+      "sha256": "680a89c379f43fc91c6d3b351eef42f14f9801d0ca1aeaf85456f6d93b96a650",
+      "bytes": 7951
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/memory/index.md",
+      "sha256": "6db30bb1f234ecf9fa94773c7f0d902c945b9509fd05037237741c04ac512960",
+      "bytes": 14247
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/boot/index.md",
+      "sha256": "5db994f3c9ed41884ea3bc6b7064042679a45a3dcd6b1fec7c7ba77b64a9103c",
+      "bytes": 1569
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/memory/transitions/index.md",
+      "sha256": "d6b23e069e5a67dc7785b05b5cad5cb12c5987d381041e721be5ce888c5ff665",
+      "bytes": 5169
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/db/index.md",
+      "sha256": "380ac09e2aa8f5cd627edb9722c6a07b5f3acdbd0aecd0449b757db0b01eb54f",
+      "bytes": 20160
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/.trellis/spec/backend/memory-transition-healthy-drivers.md",
+      "sha256": "1f1036d4d347e1405ddb23009fc4f764130bcbbaa98b3199b42ab5a0bfe28f5c",
+      "bytes": 12073
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/.trellis/spec/backend/memory-transition-publication.md",
+      "sha256": "57d80712a8f9ee4cdd6c41af25918cdd1f32515d950608fdae0ef9c11ca1bdcb",
+      "bytes": 11005
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-preimages/packages/core/src/db/memory-transition-publication-proof.ts",
+      "sha256": "3a14faaf2cecceb5c7881b26622b435ea577fb3b6ed32a651b46c71d6e5699f0",
+      "bytes": 9414
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-preimages/packages/core/src/memory/transitions/transition-healthy-execution.ts",
+      "sha256": "8a0efdf705a6f1109f51b3b5ab7e6ac3b24acf5ddf359585198da49063ed1630",
+      "bytes": 17937
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-preimages/packages/core/src/memory/transitions/transition-native-session.ts",
+      "sha256": "cc9e47384019303e24364ede56b8ba103e4a79676225c452c4750e50069fefce",
+      "bytes": 7903
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-preimages/packages/core/src/memory/transitions/index.md",
+      "sha256": "b351cb000db9df366fde32697aa8225bf4bba44258ca9af3ac1c57a41b8a0ba9",
+      "bytes": 5424
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-finalization-scheduling-preimages/.trellis/spec/backend/memory-transition-healthy-drivers.md",
+      "sha256": "1cb75ced98169a7b31356800029483718a198f9fc6c35e89005c5fa60d198443",
+      "bytes": 12762
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-preimages/eslint.config.js",
+      "sha256": "9821c5c024c5ed20ce6bded27de5ba13accf36a1f151b331e9386cd1b0696e86",
+      "bytes": 2324
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-preimages/.trellis/spec/backend/quality-guidelines.md",
+      "sha256": "5cd31504903bc72d600115a89cf67fc9c49eab2a441c0951bc612b50590fa164",
+      "bytes": 12978
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-preimages/CLAUDE.md",
+      "sha256": "13623a11d25063ba894fe3c1acf4a4cc9ecb5c6c46399b61173695e45b15c114",
+      "bytes": 10931
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-preimages/packages/core/src/memory/transitions/index.md",
+      "sha256": "c0e8b202bd3be0855abb6a5b9dad4e5c9d9405126c9a7eca0071a4274f1e621c",
+      "bytes": 5470
+    }
+  ],
+  "workingDatabaseSha256": "a81a1e3ec6e85f3faa287b8b77c704742be7bbf0f05ec594e1a4bc8381c00923",
+  "retainedCopy": {
+    "path": "H:\\TakiAgent\\.trellis\\.runtime\\w5-scheduled-driver-605da83c-5ff9-44b8-87ec-e9ba7779c497\\application.sqlite",
+    "sha256": "cb8db3a947cecaeb38496fad00cb1cc8b36fe1b4d605de59b1e25afab9fddc05",
+    "integrity": "ok",
+    "terminalResolutionVerified": true
+  },
+  "replaySourceChecks": 25,
+  "productionChangesByReviewer": 0,
+  "replaySourceCurrentMatches": 24,
+  "reviewerChanges": [
+    ".trellis/spec/backend/quality-guidelines.md",
+    "CLAUDE.md",
+    "eslint.config.js",
+    "packages/core/src/memory/transitions/index.md",
+    "packages/core/src/memory/transitions/transition-healthy-terminal-boundary.test.ts"
+  ],
+  "evidence": [
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-audit.py",
+      "sha256": "fb298eb3724b1b5680679ca0c023132c44694f23b8771bea22aa1771fcab68b7",
+      "bytes": 7734
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-checkpoint.md",
+      "sha256": "6e7de0e7bbea1d3733188ef9eda4b74fb87e43f1b5b1775963a57b7bf837b868",
+      "bytes": 2066
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-delivery-checkpoint.md",
+      "sha256": "abb8306b16116d9c08d6ca739d6775546c9dc2257763bb82f35ca471ce447725",
+      "bytes": 1152
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-final-audit.log",
+      "sha256": "79c7404fc78ef66510641808b169a30bd81e34266a397f25d85afde0851a2c71",
+      "bytes": 399
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-final-source-manifest.json",
+      "sha256": "5a52c06d7432acd3cc0be861ab48c2d7b22838d7402af29fab546bcd1bcb4f04",
+      "bytes": 30012
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-independent-check.md",
+      "sha256": "a7d2e8b40b3d59491992e8825a730f544f26a93ffa3b645e32dfc052904b5954",
+      "bytes": 14901
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-length-preimage-manifest.json",
+      "sha256": "311de849472e1184f39a4470b919c1b8c0bc681f7d74b0dd8f51b5875109c3ff",
+      "bytes": 465
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-regression-tests.log",
+      "sha256": "c2028174cbcbce320385d819c1eea5d7e7f539b782b04c790dca5a6811e34cc3",
+      "bytes": 565
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-root-lint-final.log",
+      "sha256": "8fa30d82a7bf469d96bec57bcd44ac76d20a8e5b9ee39d7cc1f310c77501b676",
+      "bytes": 53
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-root-lint-initial.log",
+      "sha256": "b621648e924822cf5cd6707abf6a3a4f1dbeab4b7464a2c104c36535b85b5c02",
+      "bytes": 937
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-scoped-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-start-source-manifest.json",
+      "sha256": "8b270f5ffdd312da1e6007725104c70324e90a2774d5a9ded3c71ec538ab34f7",
+      "bytes": 24745
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-terminal-tests.log",
+      "sha256": "1986df89442eb06456742fd50a65c85f6e65efbaa51324a478a4a2a508eb411c",
+      "bytes": 232
+    },
+    {
+      "path": ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-postcommit-combined-workspace-types.log",
+      "sha256": "99df36f528acc3937695a0a2bc389935826a39448a5203e22871fae35d7f03d3",
+      "bytes": 356
+    }
+  ]
+}

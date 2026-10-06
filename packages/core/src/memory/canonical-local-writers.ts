@@ -29,12 +29,14 @@ export interface FencedCanonicalLocalWriters {
 export function fenceCanonicalLocalWriters(input: {
   engine: CanonicalLocalRuntime; ingestion: CanonicalLocalIngestion; tidy: TidyPass; fence: CanonicalLocalWriteFence;
   onIngestionFailed(characterId: string): void;
+  canQueue?: () => boolean;
 }): FencedCanonicalLocalWriters {
   const { engine, ingestion, tidy, fence } = input;
+  const foreground = { ...FOREGROUND, canQueue: input.canQueue };
   return {
     engine: {
-      reconcile: engine.reconcile, assemble: engine.assemble, tidy: engine.tidy,
-      createTools: (characterId, seq) => fenceMemoryToolWrites(engine.createTools(characterId, seq), fence, FOREGROUND),
+      reconcile: engine.reconcile, assemble: (work) => { fence.assertAlive(); return engine.assemble(work); }, tidy: engine.tidy,
+      createTools: (characterId, seq) => fenceMemoryToolWrites(engine.createTools(characterId, seq), fence, foreground),
       createBackgroundTools: (characterId, seq) => fenceMemoryToolWrites(engine.createBackgroundTools(characterId, seq), fence, BACKGROUND),
       writeEntry: (request) => fence.admitSync(() => engine.writeEntry(request)),
       retention: { listActive: engine.retention.listActive,
@@ -58,11 +60,14 @@ export function fenceCanonicalLocalWriters(input: {
     tidy: { maybeRun: (characterId) => fence.admit(() => tidy.maybeRun(characterId)),
       runNow: (characterId) => fence.admit(() => tidy.runNow(characterId)) },
     captureRun: async (characterId) => {
+      fence.assertAlive();
       // A fenced interval keeps chat usable: the Run's tools refuse writes structurally, and the custody group Chat
       // opens initializes eligibility itself, so the baseline write is skipped here rather than refused.
       if (fence.writable()) fence.admitSync(() => { engine.banks(characterId); ingestion.initializeBaseline(characterId); });
+      else if (!engine.authority.listBanks(engine.authority.authorityEpoch().epochId)
+        .some((bank) => bank.scope.kind === "character" && bank.scope.characterId === characterId)) return engine.unavailableRun(characterId);
       const run = await engine.captureRun(characterId);
-      return Object.freeze({ ...run, tools: fenceMemoryToolWrites(run.tools, fence, FOREGROUND) });
+      return Object.freeze({ ...run, tools: fenceMemoryToolWrites(run.tools, fence, foreground) });
     },
   };
 }

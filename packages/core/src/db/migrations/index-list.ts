@@ -54,6 +54,14 @@ import { hindsightMemoryWritesMigration047 } from "./047-hindsight-memory-writes
 import { memoryOperationsMigration048 } from "./048-memory-operations.ts";
 import { localOnboardingMigration049 } from "./049-local-onboarding.ts";
 import { hindsightReviewedDeploymentModeMigration050 } from "./050-hindsight-reviewed-deployment-mode.ts";
+import { hindsightReplicaRequestsMigration051 } from "./051-hindsight-replica-requests.ts";
+
+import { memoryTransitionsMigration052 } from "./052-memory-transitions.ts";
+import { memoryTransitionCandidatesMigration053 } from "./053-memory-transition-candidates.ts";
+import { memoryTransitionPublicationMigration054 } from "./054-memory-transition-publication.ts";
+import { memoryTransitionDriversMigration055 } from "./055-memory-transition-drivers.ts";
+import { memoryTransitionVerificationDispatchMigration056 } from "./056-memory-transition-verification-dispatch.ts";
+import { memoryTransitionEmergencyMigration057 } from "./057-memory-transition-emergency.ts";
 
 export const MIGRATIONS: Migration[] = [
   timelineMigration001,
@@ -106,4 +114,11 @@ export const MIGRATIONS: Migration[] = [
   memoryOperationsMigration048,
   localOnboardingMigration049,
   hindsightReviewedDeploymentModeMigration050,
+  hindsightReplicaRequestsMigration051,
+  memoryTransitionsMigration052,
+  memoryTransitionCandidatesMigration053,
+  memoryTransitionPublicationMigration054,
+  memoryTransitionDriversMigration055,
+  memoryTransitionVerificationDispatchMigration056,
+  memoryTransitionEmergencyMigration057,
 ];

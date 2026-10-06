@@ -1,0 +1,42 @@
+{
+  "scope": "Final bounded Native static checks; unchanged Native owned-PG and generated-contract results retained by source identity",
+  "initial": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "16b817",
+        "wall_time_seconds": 0.5160501,
+        "exit_code": 0,
+        "original_token_count": 5,
+        "output": "All checks passed!\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "3042c8",
+        "wall_time_seconds": 0.491033,
+        "exit_code": 0,
+        "original_token_count": 7,
+        "output": "7 files already formatted\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "664591",
+        "wall_time_seconds": 1.5801698,
+        "exit_code": 1,
+        "original_token_count": 34,
+        "output": "hindsight_api\\admin\\transition_restore.py:12:8: error[unresolved-import] Cannot resolve imported module `asyncpg`\nFound 1 diagnostic\n"
+      }
+    }
+  ],
+  "correctedTypeCheck": {
+    "command": "H:/hindsight/.venv/Scripts/ty.exe check --python H:/hindsight/.venv hindsight_api/engine/transition_snapshot.py hindsight_api/engine/application_state/snapshot.py hindsight_api/admin/transition_restore.py --output-format concise",
+    "cwd": "H:/hindsight/hindsight-api-slim",
+    "exitCode": 0,
+    "output": "All checks passed!",
+    "initialFailure": "First invocation omitted --python; asyncpg was not resolved. Exact existing Native environment passes; no source or dependency change."
+  }
+}

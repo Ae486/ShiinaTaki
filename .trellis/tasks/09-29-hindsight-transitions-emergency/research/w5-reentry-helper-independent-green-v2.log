@@ -1,0 +1,9 @@
+test_existing_but_empty_bank_history_cannot_reset_consumed_allowance (__main__.IndependentGateTests.test_existing_but_empty_bank_history_cannot_reset_consumed_allowance) ... ok
+test_inherited_child_context_cannot_dispatch_after_approved_execution_returns (__main__.IndependentGateTests.test_inherited_child_context_cannot_dispatch_after_approved_execution_returns) ... Executing <Task pending name='Task-7' coro=<IndependentGateTests.test_inherited_child_context_cannot_dispatch_after_approved_execution_returns() running at H:\TakiAgent\.trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-helper-independent-test.py:85> wait_for=<Task pending name='Task-8' coro=<IndependentGateTests.test_inherited_child_context_cannot_dispatch_after_approved_execution_returns.<locals>.original.<locals>.detached() running at H:\TakiAgent\.trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-helper-independent-test.py:76> cb=[Task.task_wakeup()] created at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\tasks.py:374> cb=[_run_until_complete_cb() at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py:180] created at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py:100> took 4.454 seconds
+ok
+test_pause_checkpoint_cannot_hide_a_different_actual_core_outcome (__main__.IndependentGateTests.test_pause_checkpoint_cannot_hide_a_different_actual_core_outcome) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 4.706s
+
+OK

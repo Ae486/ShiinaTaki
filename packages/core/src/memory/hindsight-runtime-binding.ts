@@ -9,6 +9,7 @@
 import type { MemoryRuntimeUnavailableReason } from "@taki/shared";
 import { createHindsightIngestionSourceRepo } from "../db/hindsight-ingestion-source-repo.ts";
 import type { Database } from "../db/sqlite.ts";
+import type { TransitionEvidenceContext } from "./transitions/transition-evidence-context.ts";
 import type { Logger } from "../logging/logger.ts";
 import type { PrimaryConversationCommit } from "./canonical-ingestion-source.ts";
 import type { createHindsightMemorySubsystem } from "./hindsight/hindsight-memory-subsystem.ts";
@@ -39,7 +40,13 @@ export interface HindsightRuntimeBinding {
   /** Starts the published subsystem once the composition runs; a failing start withdraws the publication as unavailable. */
   start(): void;
   current(): HindsightSubsystem | undefined;
-  snapshot(): HindsightBindingSnapshot;
+  /** Detached in-memory state only; revision changes on publication/replacement, failure and withdrawal. */
+  publicationState(): Pick<HindsightBindingSnapshot, "binding" | "lifetime"> & { revision: number };
+  snapshot(verification?: TransitionEvidenceContext): HindsightBindingSnapshot;
+  /** Withdraw this epoch and settle all its owners, while permitting a fresh subsystem on a later epoch. */
+  retire(): Promise<void>;
+  /** Explicit emergency only: withdraw all old-epoch owners without joining uncertain remote completion. */
+  quarantine(epochId: string): void;
   stop(): Promise<void>;
 }
 
@@ -50,6 +57,12 @@ export function createHindsightRuntimeBinding(input: { db: Database; construct: 
   let published: HindsightSubsystem | undefined;
   let state: HindsightBindingState = { kind: "none" };
   let started = false; let stopped = false;
+  const retirement = retirementQueue(input.logger);
+  const dispose = retirement.dispose;
+  const retireEpoch = (): Promise<void> => {
+    const previous = published; published = undefined; started = false; state = { kind: "none" };
+    return dispose(previous);
+  };
   const fail = (epochId: string, error: unknown, draft: HindsightSubsystem | undefined): never => {
     published = undefined; started = false; state = { kind: "unavailable", epochId, code: failureCode(error) };
     dispose(draft);
@@ -60,6 +73,7 @@ export function createHindsightRuntimeBinding(input: { db: Database; construct: 
     let draft: HindsightSubsystem | undefined;
     try {
       draft = input.construct(epochId);
+      retirement.identify(draft, epochId);
       install(draft);
       published = draft; state = { kind: "published", epochId }; started = false;
       return draft;
@@ -71,6 +85,7 @@ export function createHindsightRuntimeBinding(input: { db: Database; construct: 
   };
   return {
     publish: (epochId) => {
+      if (stopped) throw new Error("MEMORY_OPERATION_CANCELLED");
       if (published) throw new Error("MEMORY_INTEGRITY_ERROR: Hindsight runtime binding is already published");
       return publish(epochId, undefined);
     },
@@ -78,22 +93,61 @@ export function createHindsightRuntimeBinding(input: { db: Database; construct: 
       if (stopped) throw new Error("MEMORY_OPERATION_CANCELLED");
       const previous = published;
       const subsystem = publish(epochId, previous);
-      return { subsystem, retired: retire(previous, input.logger) };
+      return { subsystem, retired: dispose(previous) };
     },
     start: () => {
+      if (stopped) throw new Error("MEMORY_OPERATION_CANCELLED");
       if (!published || started || state.kind !== "published") return;
       try { published.start(); started = true; }
       catch (error) { fail(state.epochId, error, published); }
     },
-    current: () => published,
-    snapshot: () => snapshotOf(input.db, { binding: state, stopped, flushing: published !== undefined && !stopped }),
+    ...bindingQueries(input.db, () => ({ published, state, stopped })),
+    retire: retireEpoch,
+    quarantine: (epochId) => {
+      retirement.quarantine(epochId);
+      if (state.kind === "published" && state.epochId === epochId) void retireEpoch();
+    },
     stop: async () => {
-      if (stopped) return;
+      if (stopped) return dispose(undefined);
       stopped = true;
-      const current = published; published = undefined;
-      if (current) await current.stop();
+      await retireEpoch();
     },
   };
+}
+
+/** Detached publication observations follow the existing state object through replacement/failure/withdrawal. */
+function bindingQueries(db: Database, read: () => { published: HindsightSubsystem | undefined; state: HindsightBindingState; stopped: boolean }) {
+  let previous: HindsightBindingState | undefined; let wasStopped = false; let revision = 0;
+  return {
+    current: () => read().published,
+    publicationState: (): ReturnType<HindsightRuntimeBinding["publicationState"]> => {
+      const { state, stopped } = read();
+      if (state !== previous || stopped !== wasStopped) { revision++; previous = state; wasStopped = stopped; }
+      return { binding: { ...state }, lifetime: stopped ? "stopped" : "running", revision };
+    },
+    snapshot: (verification?: TransitionEvidenceContext) => { const { state, stopped, published } = read();
+      return snapshotOf(db, { binding: state, stopped, flushing: published !== undefined && !stopped }, verification); },
+  };
+}
+
+/** Failed drafts and replacements remain owned even when no published subsystem can be found at shutdown. */
+function retirementQueue(logger: Logger) {
+  const epochs = new WeakMap<HindsightSubsystem, string>();
+  const retiring = new Map<Promise<void>, string>();
+  const quarantined = new Set<string>();
+  const dispose = (subsystem: HindsightSubsystem | undefined): Promise<void> => {
+    if (subsystem) {
+      subsystem.writeFence?.retire(); subsystem.workFence?.retire(); subsystem.scheduler.retire?.();
+      const epochId = epochs.get(subsystem);
+      if (!epochId) throw new Error("MEMORY_INTEGRITY_ERROR");
+      const completion = retire(subsystem, logger);
+      retiring.set(completion, epochId);
+      void completion.finally(() => retiring.delete(completion));
+    }
+    return Promise.all([...retiring].filter(([, epoch]) => !quarantined.has(epoch)).map(([promise]) => promise)).then(() => undefined);
+  };
+  return { dispose, identify: (subsystem: HindsightSubsystem, epochId: string) => { epochs.set(subsystem, epochId); },
+    quarantine: (epochId: string) => { quarantined.add(epochId); } };
 }
 
 /** Under Legacy or Local authority the Hindsight binding is not the selected runtime; only a selected Hindsight epoch is judged. */
@@ -129,8 +183,8 @@ function install(draft: HindsightSubsystem): void {
   if (typeof draft.memoryFlush.prepareRetirement !== "function") throw new Error("MEMORY_INTEGRITY_ERROR: Hindsight runtime draft lacks a flush port");
 }
 
-function snapshotOf(db: Database, input: { binding: HindsightBindingState; stopped: boolean; flushing: boolean }): HindsightBindingSnapshot {
-  const selection = readMemoryAuthoritySelection(db);
+function snapshotOf(db: Database, input: { binding: HindsightBindingState; stopped: boolean; flushing: boolean }, verification?: TransitionEvidenceContext): HindsightBindingSnapshot {
+  const selection = readMemoryAuthoritySelection(db, verification);
   return { selection: selection.mode, selectedEpochId: selection.epochId, binding: input.binding,
     lifetime: input.stopped ? "stopped" : "running", flush: input.flushing ? "available" : "failing" };
 }
@@ -139,11 +193,6 @@ function snapshotOf(db: Database, input: { binding: HindsightBindingState; stopp
 async function retire(previous: HindsightSubsystem | undefined, logger: Logger): Promise<void> {
   try { await previous?.stop(); }
   catch { logger.warn({ code: "MEMORY_SHUTDOWN_FAILED" }, "replaced Hindsight runtime did not stop cleanly"); }
-}
-
-function dispose(subsystem: HindsightSubsystem | undefined): void {
-  // Disposal is best effort: the unavailable state is the durable fact, and a failing stop must not mask the cause.
-  try { void subsystem?.stop().catch(() => undefined); } catch { /* recorded through the binding state */ }
 }
 
 function failureCode(error: unknown): string {

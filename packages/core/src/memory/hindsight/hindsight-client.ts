@@ -35,6 +35,9 @@ import { createHindsightCurrentMethods, type HindsightCurrentStateClient } from 
 import { createHindsightRuntimeMethods, type HindsightRuntimeClient } from "./hindsight-runtime-client.ts";
 import { createHindsightApplicationMethods, type HindsightApplicationClient } from "./hindsight-application-client.ts";
 import { createHindsightBackupMethods, type HindsightBackupClient } from "./hindsight-backup-client.ts";
+import { createHindsightTransitionMethods, type HindsightTransitionClient } from "./hindsight-transition-client.ts";
+import { hindsightTransitionPublicationFailure } from "./hindsight-transition-errors.ts";
+import { createHindsightTransitionSourceMethods, type HindsightTransitionSourceClient } from "./hindsight-transition-source-client.ts";
 
 export interface HindsightTransportResponse {
   status: number;
@@ -47,7 +50,7 @@ export interface HindsightCallContext {
   timeoutMs: number;
   attemptId?: string;
 }
-export interface HindsightClient extends Partial<HindsightPendingClient>, Partial<HindsightNativeResultClient>, Partial<HindsightCurrentStateClient>, Partial<HindsightRuntimeClient>, Partial<HindsightApplicationClient>, Partial<HindsightBackupClient> {
+export interface HindsightClient extends Partial<HindsightPendingClient>, Partial<HindsightNativeResultClient>, Partial<HindsightCurrentStateClient>, Partial<HindsightRuntimeClient>, Partial<HindsightApplicationClient>, Partial<HindsightBackupClient>, Partial<HindsightTransitionClient>, Partial<HindsightTransitionSourceClient> {
   health(context: HindsightCallContext): Promise<{ status: "healthy"; database: "connected" }>;
   version(context: HindsightCallContext): Promise<{ apiVersion: string }>;
   compatibility(context: HindsightCallContext): Promise<HindsightCompatibilityWire>;
@@ -133,7 +136,7 @@ function createClientMethods(request: <T>(input: HindsightRequestInput<T>) => Pr
   };
   return Object.assign(methods, createBankProbeMethods(request), createSnapshotMethods(request), createJournalMethods(request),
     createHindsightPendingMethods(request), createHindsightNativeResultMethods(request), createHindsightCurrentMethods(request),
-    createHindsightRuntimeMethods(request), createHindsightApplicationMethods(request), createHindsightBackupMethods(request));
+    createHindsightRuntimeMethods(request), createHindsightApplicationMethods(request), createHindsightBackupMethods(request), createHindsightTransitionMethods(request), createHindsightTransitionSourceMethods(request));
 }
 
 function createBankProbeMethods(request: <T>(input: HindsightRequestInput<T>) => Promise<T>): Pick<HindsightClient, "bankLlmHealth" | "bankStats"> {
@@ -218,6 +221,8 @@ async function requestJson<T>(input: RequestJsonInput<T>): Promise<T> {
   try {
     const response = await awaitTransport(signal, () => input.transport(new URL(input.path, input.endpoint), { ...input.init, signal, redirect: "manual", headers: { ...(input.init?.headers ?? {}), authorization: `Bearer ${apiKey}`, "content-type": "application/json", accept: "application/json" } }, input.maxResponseBytes));
     requireActiveRequest(signal, controller.signal, firstAbort.reason);
+    const fenced = hindsightTransitionPublicationFailure(response.status, response.body);
+    if (fenced) throw fenced;
     const expectedResponse = input.responses?.[response.status];
     if (expectedResponse) {
       try { return parseResponse(response, expectedResponse, input.maxResponseBytes); }

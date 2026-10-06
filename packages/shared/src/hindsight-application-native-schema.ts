@@ -12,7 +12,7 @@ import { TakiApplicationBodyRefSchema, TakiApplicationNativeVersionSchema, TakiA
 const Text = z.string(); const NullableText = Text.nullable(); const Tags = z.array(Text);
 const Scopes = z.union([Text, z.array(z.array(Text))]).nullable();
 const Times = { created_at: Text, updated_at: Text };
-const Bank = z.strictObject({ bank_id: Text, name: Text, disposition: z.strictObject({
+export const TakiApplicationNativeBankPayloadSchema = z.strictObject({ bank_id: Text, name: Text, disposition: z.strictObject({
   skepticism: z.number(), literalism: z.number(), empathy: z.number(),
 }), mission: Text, config: JsonObject, ...Times });
 const Source = z.strictObject({ document_id: Text, bank_id: Text, content_hash: NullableText,
@@ -31,13 +31,13 @@ const MentalModel = z.strictObject({ mental_model_id: Text, bank_id: Text, subty
 const Directive = z.strictObject({ directive_id: Text, bank_id: Text, name: Text, content: Text,
   priority: z.int(), is_active: z.boolean(), tags: Tags, ...Times });
 
-export const TakiApplicationNativePayloadSchema = z.union([Bank, Source, Memory, MentalModel, Directive]);
+export const TakiApplicationNativePayloadSchema = z.union([TakiApplicationNativeBankPayloadSchema, Source, Memory, MentalModel, Directive]);
 export type TakiApplicationNativePayload = z.infer<typeof TakiApplicationNativePayloadSchema>;
 export const TakiApplicationNativeRecordSchema = z.strictObject({
   version: TakiApplicationNativeVersionSchema, payload: TakiApplicationNativePayloadSchema,
   source_evidence_ref: TakiApplicationBodyRefSchema.nullable(),
 }).superRefine((value, context) => {
-  const schemas = { bank: Bank, document: Source, memory_unit: Memory, mental_model: MentalModel, directive: Directive };
+  const schemas = { bank: TakiApplicationNativeBankPayloadSchema, document: Source, memory_unit: Memory, mental_model: MentalModel, directive: Directive };
   const keys = { bank: "bank_id", document: "document_id", memory_unit: "memory_id", mental_model: "mental_model_id", directive: "directive_id" };
   const payload = value.payload as Record<string, unknown>; const kind = value.version.object_kind;
   if (!schemas[kind].safeParse(payload).success || payload[keys[kind]] !== value.version.object_id

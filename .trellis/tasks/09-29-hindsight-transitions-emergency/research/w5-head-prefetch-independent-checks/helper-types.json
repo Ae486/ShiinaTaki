@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "H:/hindsight/.venv/Scripts/ty.exe",
+    "check",
+    "w5_head_prefetch_inventory.py",
+    "w5-head-prefetch-postpatch.py",
+    "--output-format",
+    "concise"
+  ],
+  "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+  "exitCode": 0,
+  "stdout": "All checks passed!\n",
+  "stderr": ""
+}

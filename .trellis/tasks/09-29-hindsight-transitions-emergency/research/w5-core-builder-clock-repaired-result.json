@@ -1,0 +1,46 @@
+{
+  "sourceSha256Before": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+  "copyRoot": "H:\\TakiAgent\\.trellis\\.runtime\\w5-core-builder-diagnostic-6047abe7-da52-4820-bb60-b60ec83f54c7",
+  "historicalStateOverride": "exact current recovery operation viewed as running",
+  "guards": [
+    {
+      "ordinal": 1,
+      "elapsedMs": 6,
+      "liveNow": "2026-10-03T15:30:27.198Z",
+      "liveClockPass": true
+    },
+    {
+      "ordinal": 2,
+      "elapsedMs": 14,
+      "liveNow": "2026-10-03T15:30:27.206Z",
+      "liveClockPass": true
+    },
+    {
+      "ordinal": 3,
+      "elapsedMs": 38535,
+      "liveNow": "2026-10-03T15:31:05.727Z",
+      "liveClockPass": true
+    },
+    {
+      "ordinal": 4,
+      "elapsedMs": 39489,
+      "liveNow": "2026-10-03T15:31:06.681Z",
+      "liveClockPass": true
+    }
+  ],
+  "historicalStart": "2026-10-03T15:30:27.192Z",
+  "leaseUntil": "2026-10-03T15:34:42.674Z",
+  "remainingLeaseMsAtStart": 255482,
+  "builderMs": 40213,
+  "frozenClockBuilderPassed": true,
+  "candidateCounts": {
+    "banks": 2,
+    "records": 1262,
+    "sources": 722,
+    "sourceSets": 1262
+  },
+  "copyCandidateRows": 1,
+  "copyBaselineRows": 1,
+  "sourceSha256After": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+  "sourceUnchanged": true
+}

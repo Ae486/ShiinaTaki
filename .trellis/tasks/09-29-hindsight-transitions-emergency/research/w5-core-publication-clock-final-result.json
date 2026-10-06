@@ -1,0 +1,92 @@
+{
+  "sourceSha256Before": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+  "copyRoot": "H:\\TakiAgent\\.trellis\\.runtime\\w5-core-publication-diagnostic-cebd1485-62d7-4661-9621-421e0dece2cb",
+  "historicalStateOverride": "exact current recovery operation viewed as running",
+  "implementationManifestSha256": "bcf06e76032d77fce66b3d26c34b60dd1be2deba821a35e6a10e60b51beaa6f4",
+  "timings": [
+    {
+      "stage": "builder",
+      "ms": 41018,
+      "totalMs": 41025
+    },
+    {
+      "stage": "proof",
+      "ms": 38337,
+      "totalMs": 79366
+    },
+    {
+      "stage": "publication",
+      "ms": 60324,
+      "totalMs": 139700
+    },
+    {
+      "stage": "reconstruction",
+      "ms": 38548,
+      "totalMs": 178251
+    }
+  ],
+  "guards": [
+    {
+      "stage": "builder",
+      "elapsedMs": 9,
+      "liveNow": "2026-10-03T15:30:27.201Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "builder",
+      "elapsedMs": 13,
+      "liveNow": "2026-10-03T15:30:27.205Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "builder",
+      "elapsedMs": 39287,
+      "liveNow": "2026-10-03T15:31:06.479Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "builder",
+      "elapsedMs": 40264,
+      "liveNow": "2026-10-03T15:31:07.456Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "proof",
+      "elapsedMs": 41029,
+      "liveNow": "2026-10-03T15:31:08.221Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "proof",
+      "elapsedMs": 79367,
+      "liveNow": "2026-10-03T15:31:46.559Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "publication",
+      "elapsedMs": 79377,
+      "liveNow": "2026-10-03T15:31:46.569Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "publication",
+      "elapsedMs": 139701,
+      "liveNow": "2026-10-03T15:32:46.893Z",
+      "liveClockPass": true
+    }
+  ],
+  "remainingLeaseMsAtStart": 255482,
+  "passed": true,
+  "counts": {
+    "banks": 2,
+    "records": 1262,
+    "sources": 722,
+    "sourceSets": 1262,
+    "candidates": 1,
+    "receipts": 1,
+    "publications": 1
+  },
+  "committedEpochMatches": true,
+  "sourceSha256After": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+  "sourceUnchanged": true
+}

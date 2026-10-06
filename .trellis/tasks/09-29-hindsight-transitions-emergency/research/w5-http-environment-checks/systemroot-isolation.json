@@ -1,0 +1,89 @@
+{
+  "root": "H:\\TakiAgent\\.trellis\\.runtime\\w5-candidate-native-clone-http-env-bc5a5072cae34ffdadb8d08b3ced1803",
+  "cases": [
+    {
+      "name": "retained-except-systemroot",
+      "environmentKeys": [
+        "APPDATA",
+        "COMSPEC",
+        "HF_HUB_DISABLE_IMPLICIT_TOKEN",
+        "HF_HUB_OFFLINE",
+        "HINDSIGHT_API_AUDIT_LOG_ENABLED",
+        "HINDSIGHT_API_AUDIT_LOG_RETENTION_DAYS",
+        "HINDSIGHT_API_CONSOLIDATION_RECONCILE_INTERVAL_SECONDS",
+        "HINDSIGHT_API_LLM_TRACE_ENABLED",
+        "HINDSIGHT_API_LLM_TRACE_RETENTION_DAYS",
+        "HINDSIGHT_API_MENTAL_MODEL_REFRESH_TICK_SECONDS",
+        "HINDSIGHT_API_OPERATION_RETENTION_DAYS",
+        "HINDSIGHT_API_SKIP_LLM_VERIFICATION",
+        "HINDSIGHT_API_WORKER_ENABLED",
+        "LOCALAPPDATA",
+        "NUMBER_OF_PROCESSORS",
+        "PATH",
+        "PATHEXT",
+        "PROCESSOR_ARCHITECTURE",
+        "PYTHONUTF8",
+        "PYTHON_DOTENV_DISABLED",
+        "TEMP",
+        "TMP",
+        "TOKENIZERS_PARALLELISM",
+        "TRANSFORMERS_OFFLINE",
+        "USERNAME",
+        "USERPROFILE",
+        "UV_NO_ENV_FILE",
+        "WINDIR"
+      ],
+      "versionExitCode": 0,
+      "startExitCode": 1,
+      "startExitHex": "0x00000001",
+      "ownedPostgresLive": false,
+      "commandLogBytes": 79,
+      "postgresLogExists": true,
+      "milliseconds": 686.9999999980791,
+      "cleanup": {
+        "stopped": true,
+        "portReleased": true,
+        "attempts": []
+      }
+    },
+    {
+      "name": "empty-plus-systemroot",
+      "environmentKeys": [
+        "HF_HUB_DISABLE_IMPLICIT_TOKEN",
+        "HF_HUB_OFFLINE",
+        "HINDSIGHT_API_AUDIT_LOG_ENABLED",
+        "HINDSIGHT_API_AUDIT_LOG_RETENTION_DAYS",
+        "HINDSIGHT_API_CONSOLIDATION_RECONCILE_INTERVAL_SECONDS",
+        "HINDSIGHT_API_LLM_TRACE_ENABLED",
+        "HINDSIGHT_API_LLM_TRACE_RETENTION_DAYS",
+        "HINDSIGHT_API_MENTAL_MODEL_REFRESH_TICK_SECONDS",
+        "HINDSIGHT_API_OPERATION_RETENTION_DAYS",
+        "HINDSIGHT_API_SKIP_LLM_VERIFICATION",
+        "HINDSIGHT_API_WORKER_ENABLED",
+        "PYTHONUTF8",
+        "PYTHON_DOTENV_DISABLED",
+        "SYSTEMROOT",
+        "TOKENIZERS_PARALLELISM",
+        "TRANSFORMERS_OFFLINE",
+        "UV_NO_ENV_FILE"
+      ],
+      "versionExitCode": 0,
+      "startExitCode": 3221225477,
+      "startExitHex": "0xc0000005",
+      "ownedPostgresLive": false,
+      "commandLogBytes": 0,
+      "postgresLogExists": true,
+      "milliseconds": 108.99999999674037,
+      "cleanup": {
+        "stopped": true,
+        "portReleased": true,
+        "attempts": []
+      }
+    }
+  ],
+  "cleanup": {
+    "stopped": true,
+    "portReleased": true,
+    "attempts": []
+  }
+}

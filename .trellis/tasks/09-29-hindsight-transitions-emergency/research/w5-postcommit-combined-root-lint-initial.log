@@ -1,0 +1,20 @@
+
+> takiagent@0.0.0 lint H:\TakiAgent
+> eslint .
+
+
+H:\TakiAgent\packages\core\src\memory\hindsight-runtime-binding.ts
+  53:8  error  Function 'createHindsightRuntimeBinding' has too many lines (54). Maximum allowed is 50  max-lines-per-function
+
+H:\TakiAgent\packages\core\src\memory\runtime-selector.ts
+  49:8  error  Function 'selectMemoryRuntime' has too many lines (55). Maximum allowed is 50  max-lines-per-function
+
+H:\TakiAgent\packages\core\src\memory\transitions\transition-native-session.ts
+  26:8  error  Function 'createTransitionNativeSession' has too many lines (63). Maximum allowed is 50  max-lines-per-function
+
+H:\TakiAgent\packages\core\src\memory\transitions\transition-runtime.ts
+  27:8  error  Function 'createMemoryTransitionRuntime' has too many lines (51). Maximum allowed is 50  max-lines-per-function
+
+✖ 4 problems (4 errors, 0 warnings)
+
+ ELIFECYCLE  Command failed with exit code 1.

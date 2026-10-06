@@ -1,0 +1,18 @@
+✔ atomic checkpoint survives lost result ACK; malformed/hash-mismatched state fails closed (31.7849ms)
+✔ missing checkpoint never initializes from an incomplete legacy RETURN (6.0679ms)
+✔ Local policy-ack loss reconciles original receipts after real SQLite reopen (226.7881ms)
+✔ Local block-ack loss reconciles original receipts after real SQLite reopen (196.6352ms)
+✔ Local checkpoint-ack loss reconciles original receipts after real SQLite reopen (193.3417ms)
+✔ same Block revision with different content refuses instead of incrementing expected revision (177.0155ms)
+✔ wait refreshes a renewed and then replaced attempt rather than caching old lease (0.4944ms)
+✔ lost submit ACK recovers exact real admission; completed RETURN remains verified after reopen (1272.7104ms)
+✔ real Core reentry pauses A then B, explicit recovery keeps one transition and reuses completed A (2303.8771ms)
+✔ admission-before-first-claim is recovered by identity but unsupported producer recovery fails closed (404.3131ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6883.4401

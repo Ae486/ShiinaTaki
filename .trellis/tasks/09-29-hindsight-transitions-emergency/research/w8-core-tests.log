@@ -1,0 +1,238 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ❯ src/memory/hindsight/hindsight-foreground-recall-lifetime.test.ts (9 tests | 1 failed) 2894ms
+     × refuses a directly captured Run if its caller cancels after capability capture 563ms
+ ❯ src/db/pending-memory-repo.test.ts (23 tests | 1 failed) 2155ms
+     × applies the current migration tail after a populated version-34 database and reopens without changes 193ms
+ ❯ src/db/canonical-memory-maintenance-repo.test.ts (17 tests | 1 failed) 1883ms
+     × updates the complete policy and sparse disclosure while retaining every unrelated logical value 121ms
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts (10 tests | 2 failed) 1014ms
+     × applies a fresh ordered registry, enforces one pending span, and retains the exact eligibility baseline 120ms
+     × upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration 208ms
+ ❯ src/db/migrations/053-memory-transition-candidates.test.ts (2 tests | 1 failed) 817ms
+     × upgrades a real 052 file without rewriting receipts and reopens without migration 185ms
+ ❯ src/db/migrations/054-memory-transition-publication.test.ts (7 tests | 3 failed) 938ms
+     × preserves legacy-markdown marker bytes and both old receipt histories through upgrade/reopen 192ms
+     × preserves canonical-local marker bytes and both old receipt histories through upgrade/reopen 175ms
+     × preserves hindsight marker bytes and both old receipt histories through upgrade/reopen 178ms
+ ❯ src/db/scheduled-task-repo.test.ts (3 tests | 1 failed) 360ms
+     × backfills occurrence Character ownership when migration 030 follows an applied 029 database 111ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/db/canonical-memory-maintenance-repo.test.ts > canonical Local maintenance scope and policy > updates the complete policy and sparse disclosure while retaining every unrelated logical value
+AssertionError: expected { …(12) } to deeply equal { …(12) }
+
+- Expected
++ Received
+
+@@ -5,11 +5,11 @@
+    "emotionalWeight": 0.25,
+    "importance": 9,
+    "layerId": "relationship",
+    "memoryId": "memory",
+    "origin": "observed",
+-   "policyVersion": 2,
++   "policyVersion": 3,
+    "retention": {
+      "kind": "permanent",
+    },
+    "updatedAt": "2026-02-01T00:00:00.000Z",
+    "visibility": "pinned",
+
+ ❯ src/db/canonical-memory-maintenance-repo.test.ts:54:34
+     52|     expect(result.record.unit).toEqual({ ...original.unit, revision: 2…
+     53|       tags: ["keep-tag", "taki-layer:relationship"] });
+     54|     expect(result.record.policy).toEqual({ ...original.policy, ...patc…
+       |                                  ^
+     55|     expect(result.record.provenance).toEqual(original.source.provenanc…
+     56|     expect(Object.hasOwn(result.record.unit.metadata, "__proto__")).to…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  src/db/pending-memory-repo.test.ts > Pending Memory repository > applies the current migration tail after a populated version-34 database and reopens without changes
+AssertionError: expected [ 35, 36, 37, 38, 39, 40, 41, …(16) ] to deeply equal [ Array(16) ]
+
+- Expected
++ Received
+
+@@ -13,6 +13,13 @@
+    46,
+    47,
+    48,
+    49,
+    50,
++   51,
++   52,
++   53,
++   54,
++   55,
++   56,
++   57,
+  ]
+
+ ❯ src/db/pending-memory-repo.test.ts:172:49
+    170|     const f = fixture(true, 34); const records = f.db.prepare("SELECT …
+    171|     const checkpoints = f.db.prepare("SELECT * FROM hindsight_replica_…
+    172|     const applied = f.reopen(); expect(applied).toEqual([35, 36, 37, 3…
+       |                                                 ^
+    173|     const row = f.repo.enqueue(intent()); expect(f.reopen()).toEqual([…
+    174|     expect(f.repo.get(pendingMemoryRef(row))).toEqual(row);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  src/db/scheduled-task-repo.test.ts > ScheduledTaskRepo > backfills occurrence Character ownership when migration 030 follows an applied 029 database
+AssertionError: expected [ 30, 31, 32, 33, 34, 35, 36, …(21) ] to deeply equal [ 30, 31, 32, 33, 34, 35, 36, …(14) ]
+
+- Expected
++ Received
+
+@@ -18,6 +18,13 @@
+    46,
+    47,
+    48,
+    49,
+    50,
++   51,
++   52,
++   53,
++   54,
++   55,
++   56,
++   57,
+  ]
+
+ ❯ src/db/scheduled-task-repo.test.ts:12:907
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  src/memory/hindsight/hindsight-foreground-recall-lifetime.test.ts > foreground Hindsight Recall lifetime > refuses a directly captured Run if its caller cancels after capability capture
+AssertionError: expected { code: 'admitted' } to deeply equal { code: 'MEMORY_OPERATION_CANCELLED' }
+
+- Expected
++ Received
+
+  {
+-   "code": "MEMORY_OPERATION_CANCELLED",
++   "code": "admitted",
+  }
+
+ ❯ src/memory/hindsight/hindsight-foreground-recall-lifetime.test.ts:68:20
+     66|     const result = await subsystem.captureRun("taki", caller.signal).t…
+     67|       (error: unknown) => ({ code: error instanceof Error ? error.mess…
+     68|     expect(result).toEqual({ code: "MEMORY_OPERATION_CANCELLED" });
+       |                    ^
+     69|   });
+     70|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  src/db/migrations/041-canonical-memory-maintenance.test.ts > 041 canonical maintenance history and ingestion schema > applies a fresh ordered registry, enforces one pending span, and retains the exact eligibility baseline
+AssertionError: expected 57 to be 56 // Object.is equality
+
+- Expected
++ Received
+
+- 56
++ 57
+
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts:57:40
+     55|     const applied: number[][] = []; const db = open(":memory:", MIGRAT…
+     56|     expect(applied).toEqual([MIGRATIONS.map(({ version }) => version)]…
+     57|     expect(MIGRATIONS.at(-1)?.version).toBe(56);
+       |                                        ^
+     58|     const tables = db.prepare("SELECT name FROM sqlite_schema WHERE ty…
+     59|     expect(addedTables.every((table) => tables.includes(table))).toBe(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  src/db/migrations/041-canonical-memory-maintenance.test.ts > 041 canonical maintenance history and ingestion schema > upgrades a real 040 Local/B2 history byte-for-byte, replays after deletion, and reopens without another migration
+AssertionError: expected [ [ 41, 42, 43, 44, 45, 46, …(11) ] ] to deeply equal [ [ 41, 42, 43, 44, 45, 46, …(10) ] ]
+
+- Expected
++ Received
+
+@@ -14,7 +14,8 @@
+      52,
+      53,
+      54,
+      55,
+      56,
++     57,
+    ],
+  ]
+
+ ❯ src/db/migrations/041-canonical-memory-maintenance.test.ts:94:21
+     92|     const before = { history: historyBytes(old), current: currentRows(…
+     93|     const applied: number[][] = []; const upgraded = open(file, MIGRAT…
+     94|     expect(applied).toEqual([[41, 42, 43, 44, 45, 46, 47, 48, 49, 50, …
+       |                     ^
+     95|     expect(historyBytes(upgraded)).toEqual(before.history);
+     96|     expect(currentRows(upgraded)).toEqual({ ...before.current,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  src/db/migrations/053-memory-transition-candidates.test.ts > W3 additive 053 and writer reservation > upgrades a real 052 file without rewriting receipts and reopens without migration
+AssertionError: expected [ [ 53, 54, 55, 56, 57 ] ] to deeply equal [ [ 53, 54, 55, 56 ] ]
+
+- Expected
++ Received
+
+@@ -2,7 +2,8 @@
+    [
+      53,
+      54,
+      55,
+      56,
++     57,
+    ],
+  ]
+
+ ❯ src/db/migrations/053-memory-transition-candidates.test.ts:17:21
+     15|     const applied: number[][] = [];
+     16|     db = openDatabase({ path, migrations: MIGRATIONS, onMigrated: (ver…
+     17|     expect(applied).toEqual([[53, 54, 55, 56]]);
+       |                     ^
+     18|     expect(db.prepare("SELECT * FROM migrations WHERE version<=52 ORDE…
+     19|     expect(db.prepare("PRAGMA quick_check").get()?.quick_check).toBe("…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  src/db/migrations/054-memory-transition-publication.test.ts > 054 explicit transition publication lineage > preserves legacy-markdown marker bytes and both old receipt histories through upgrade/reopen
+ FAIL  src/db/migrations/054-memory-transition-publication.test.ts > 054 explicit transition publication lineage > preserves canonical-local marker bytes and both old receipt histories through upgrade/reopen
+ FAIL  src/db/migrations/054-memory-transition-publication.test.ts > 054 explicit transition publication lineage > preserves hindsight marker bytes and both old receipt histories through upgrade/reopen
+AssertionError: expected [ [ 54, 55, 56, 57 ] ] to deeply equal [ [ 54, 55, 56 ] ]
+
+- Expected
++ Received
+
+  [
+    [
+      54,
+      55,
+      56,
++     57,
+    ],
+  ]
+
+ ❯ src/db/migrations/054-memory-transition-publication.test.ts:49:21
+     47|     const applied: number[][] = [];
+     48|     db = openDatabase({ path, migrations: MIGRATIONS, onMigrated: (ver…
+     49|     expect(applied).toEqual([[54, 55, 56]]); expect(markerBytes(db)).t…
+       |                     ^
+     50|     expect(db.prepare("SELECT transition_receipt_id FROM memory_author…
+     51|     expect(db.prepare("SELECT * FROM migrations WHERE version<=53 ORDE…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+
+ Test Files  7 failed | 483 passed (490)
+      Tests  10 failed | 3774 passed | 1 skipped (3785)
+   Start at  15:04:28
+   Duration  612.74s (transform 20.47s, setup 0ms, import 294.56s, tests 772.37s, environment 65ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run --maxWorkers=2

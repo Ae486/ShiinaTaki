@@ -10,6 +10,8 @@ import {
   type TakiMemoryPolicyProjection,
 } from "@taki/shared";
 import type { Database, SqlRow } from "./sqlite.ts";
+import { markCanonicalSourceReferencesChanged } from "./canonical-memory-source-references.ts";
+import { transitionLocalHash } from "../memory/transitions/transition-local-encoding.ts";
 
 type Identity = { epochId: string; bankId: string; memoryId: string };
 type FtsProjection = Pick<CanonicalMemoryUnit, "authorityEpochId" | "bankId" | "memoryId" | "text" | "context">;
@@ -17,6 +19,7 @@ type FtsProjection = Pick<CanonicalMemoryUnit, "authorityEpochId" | "bankId" | "
 export const CANONICAL_MEMORY_FTS_ELIGIBLE = "u.state='valid' AND p.visibility<>'hidden'";
 export type CanonicalUnitPolicy = {
   unit: CanonicalMemoryUnit; policy: TakiMemoryPolicyProjection; searchTerms: string;
+  provenance?: CanonicalMemoryRecord["provenance"];
 };
 
 export function readCanonicalRecord(db: Database, input: Identity): CanonicalMemoryRecord | undefined {
@@ -30,7 +33,20 @@ export function readCanonicalRecord(db: Database, input: Identity): CanonicalMem
       AND s.document_id=u.document_id
     WHERE u.authority_epoch_id=:epoch AND u.bank_id=:bank AND u.memory_id=:memory`)
     .get({ epoch: input.epochId, bank: input.bankId, memory: input.memoryId });
-  return row ? parseRecord(row) : undefined;
+  if (!row) return undefined;
+  // Transitioned units retain independent native/original provenance even when their supporting Source differs.
+  // Historical-schema tools remain readable before additive 053; absence does not invent a per-unit override.
+  if (db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='canonical_memory_record_provenance'").get()) {
+    const provenance = db.prepare(`SELECT provenance_json FROM canonical_memory_record_provenance
+      WHERE authority_epoch_id=:epoch AND bank_id=:bank AND memory_id=:memory`)
+      .get({ epoch: input.epochId, bank: input.bankId, memory: input.memoryId });
+    if (provenance) row.provenance_json = provenance.provenance_json ?? null;
+    const historical = db.prepare(`SELECT source_memory_id FROM canonical_memory_historical_references
+      WHERE authority_epoch_id=:epoch AND bank_id=:bank AND memory_id=:memory ORDER BY source_memory_id`)
+      .all({ epoch: input.epochId, bank: input.bankId, memory: input.memoryId });
+    row.source_memory_ids = JSON.stringify([...JSON.parse(String(row.source_memory_ids)), ...historical.map((edge) => edge.source_memory_id)].sort());
+  }
+  return parseRecord(row);
 }
 
 export function requireCanonicalRecord(db: Database, input: Identity): CanonicalMemoryRecord {
@@ -54,6 +70,7 @@ export function readCanonicalSource(db: Database, input: {
 }
 
 export function upsertCanonicalSource(db: Database, source: CanonicalMemorySource, revision: number): void {
+  const previous = readCanonicalSource(db, { epochId: source.authorityEpochId, bankId: source.bankId, documentId: source.documentId });
   const retired = db.prepare(`SELECT 1 FROM canonical_memory_retired_sources
     WHERE authority_epoch_id=:epoch AND bank_id=:bank AND document_id=:doc`)
     .get({ epoch: source.authorityEpochId, bank: source.bankId, doc: source.documentId });
@@ -66,6 +83,10 @@ export function upsertCanonicalSource(db: Database, source: CanonicalMemorySourc
       metadata_json=excluded.metadata_json,observation_scopes_json=excluded.observation_scopes_json,
       provenance_json=excluded.provenance_json,revision=excluded.revision,updated_at=excluded.updated_at`)
     .run(sourceRow(source, revision));
+  const semantics = (value: CanonicalMemorySource) => Object.fromEntries(Object.entries(value).filter(([key]) => !["revision", "updatedAt"].includes(key)));
+  if (previous && transitionLocalHash(semantics(previous)) !== transitionLocalHash(semantics(source))) {
+    markCanonicalSourceReferencesChanged(db, { ...source, revision });
+  }
 }
 
 export function insertCanonicalUnitAndPolicy(db: Database, item: CanonicalUnitPolicy): void {
@@ -74,6 +95,9 @@ export function insertCanonicalUnitAndPolicy(db: Database, item: CanonicalUnitPo
     WHERE authority_epoch_id=:epoch AND bank_id=:bank AND memory_id=:memory LIMIT 1`)
     .get({ epoch: item.unit.authorityEpochId, bank: item.unit.bankId, memory: item.unit.memoryId });
   if (historical) throw new Error("MEMORY_REQUEST_ID_CONFLICT");
+  if (db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='canonical_memory_historical_identities'").get()
+    && db.prepare(`SELECT 1 FROM canonical_memory_historical_identities WHERE authority_epoch_id=:epoch AND bank_id=:bank AND memory_id=:memory`)
+      .get({ epoch: item.unit.authorityEpochId, bank: item.unit.bankId, memory: item.unit.memoryId })) throw new Error("MEMORY_REQUEST_ID_CONFLICT");
   db.prepare(`INSERT INTO canonical_memory_units (authority_epoch_id,bank_id,memory_id,document_id,chunk_id,text,
     context,fact_type,state,revision,tags_json,metadata_json,entities_json,observation_scopes_json,event_date,
     occurred_start,occurred_end,mentioned_at,created_at,updated_at,edited_at,consolidated_at,consolidation_failed_at,
@@ -85,6 +109,10 @@ export function insertCanonicalUnitAndPolicy(db: Database, item: CanonicalUnitPo
     visibility,disclosure,origin,emotional_weight,retention_json,policy_version,updated_at)
     VALUES (:epoch,:bank,:memory,:layer,:importance,:visibility,:disclosure,:origin,:weight,:retention,:version,:updated)`)
     .run(policyRow(item.policy));
+  if (item.provenance && db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='canonical_memory_record_provenance'").get()) {
+    db.prepare("INSERT INTO canonical_memory_record_provenance VALUES(:epoch,:bank,:memory,:provenance)")
+      .run({ epoch: item.unit.authorityEpochId, bank: item.unit.bankId, memory: item.unit.memoryId, provenance: JSON.stringify(item.provenance) });
+  }
 }
 
 export function updateCanonicalRecord(db: Database, input: {

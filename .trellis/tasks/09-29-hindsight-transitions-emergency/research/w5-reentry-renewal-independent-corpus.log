@@ -1,0 +1,17 @@
+{"boundary":"runtime-started","monotonicMs":38936.4583}
+{"boundary":"renewal-start","monotonicMs":76865.47009999999}
+{"boundary":"fresh-preview-start","monotonicMs":226927.6497}
+{"boundary":"actual-ready-snapshot","milliseconds":37246.47869999998,"independentContext":false,"lifetime":"running","binding":{"kind":"published","epochId":"afb2053e-8bcd-4322-8573-0a447d560bb8"},"monotonicMs":306240.3068}
+{"boundary":"fresh-preview-returned","creationTick":306241.6418,"monotonicMs":306245.423}
+{"boundary":"replacement-append","monotonicMs":306257.6465}
+{"boundary":"renewal-returned","monotonicMs":306257.7656}
+{"boundary":"submit-start","monotonicMs":306258.0857}
+{"boundary":"plan-start","monotonicMs":306259.6529}
+{"boundary":"actual-ready-snapshot","milliseconds":3565.6445999999996,"independentContext":true,"lifetime":"running","binding":{"kind":"published","epochId":"afb2053e-8bcd-4322-8573-0a447d560bb8"},"monotonicMs":351580.5228}
+{"boundary":"plan-end","milliseconds":45322.990099999995,"monotonicMs":351582.6524}
+{"boundary":"plan-start","monotonicMs":354856.5437}
+{"boundary":"actual-ready-snapshot","milliseconds":3586.9555999999866,"independentContext":true,"lifetime":"running","binding":{"kind":"published","epochId":"afb2053e-8bcd-4322-8573-0a447d560bb8"},"monotonicMs":366394.8975}
+{"boundary":"plan-end","milliseconds":11540.42749999999,"monotonicMs":366396.9439}
+{"boundary":"actual-persistence-before-rollback","monotonicMs":366400.2517}
+{"boundary":"submit-rolled-back","previewThroughRollbackMs":60159.88760000002,"previewWallAgeAtRollbackMs":60160,"monotonicMs":366401.5733}
+{"result":"H:\\TakiAgent\\.trellis\\.runtime\\w5-renewal-independent-e8e3d19f-c33f-47bc-85ef-310381bc0d0d\\result.json","success":true,"error":null}

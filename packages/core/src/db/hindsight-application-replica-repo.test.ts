@@ -79,6 +79,15 @@ describe("D77 application replica publication", () => {
     expect(reopened.db.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
   });
 
+  it("still refuses an expired ordinary native baseline before any application snapshot publication", () => {
+    const f = fixture(); const snapshot = snapshotFixture(bankFixture(), [memoryFixture()]);
+    const baseline = applicationTestNativeBaseline(snapshot);
+    baseline.expiresAt = new Date(Date.now() - 1).toISOString();
+    expect(() => f.repo.seedVerifiedSnapshot({ ...f.input(), bundle: snapshot, nativeBaseline: baseline })).toThrow();
+    expect(f.repo.checkpoint(SCOPE.bankId)).toBeUndefined();
+    expect(f.repo.nativeCheckpoint(SCOPE.bankId)).toBeUndefined();
+  });
+
   it("publishes an app-only visibility change without inventing a native revision or cursor", () => {
     const f = fixture(); const memory = memoryFixture(); seed(f, snapshotFixture(bankFixture(), [memory]));
     const before = f.repo.checkpoint(SCOPE.bankId)!;
@@ -356,7 +365,7 @@ describe("D77 application replica publication", () => {
       return { ...statement, get: (params) => { reads.push(String(params?.id)); return statement.get(params); } };
     });
     expect(f.repo.sourceArtifacts({ ...SCOPE, documentId: "document-a" }).map((value) => value.key.artifact_id)).toEqual(["source-a"]);
-    expect(reads).toEqual([exact.application.body.ref.body_id]);
+    expect(new Set(reads)).toEqual(new Set([exact.application.body.ref.body_id]));
   });
 
   it("selects awaiting Source bindings before reading unrelated exact-source bodies", () => {

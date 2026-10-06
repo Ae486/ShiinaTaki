@@ -32,8 +32,10 @@ import { createHindsightRuntimeBankService } from "./hindsight-runtime-bank-serv
 import type { HindsightRuntimeConnection } from "./hindsight-runtime-connection.ts";
 import type { HindsightMemoryWriteAdvance } from "./hindsight-memory-write-context.ts";
 import { sameApplicationValue } from "./hindsight-application-integrity.ts";
+import { transitionQueuedProvider } from "../transitions/transition-queued-provider.ts";
+import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 
-interface Input { db: Database; runtime: HindsightRuntimeConnection; config: MemoryConfig; now?: () => string }
+interface Input { db: Database; runtime: HindsightRuntimeConnection; config: MemoryConfig; now?: () => string; workFence?: CanonicalLocalWriteFence }
 export type HindsightRuntimeState = ReturnType<typeof createHindsightRuntimeState>;
 
 export function createHindsightRuntimeState(input: Input) {
@@ -53,15 +55,15 @@ export function createHindsightRuntimeState(input: Input) {
     beforeNativeDispatch: (work) => ensureHindsightPendingSource({ writer, ...work }) });
   let advance: (work: HindsightMemoryWriteAdvance) => Promise<void> = async () => { throw new Error("MEMORY_RUNTIME_NOT_READY"); };
   const service = createHindsightRuntimeBankService({ replica, sync, recovery, bank: runtime.bank,
-    assertConnection: runtime.assertConnection, onRecovered: (work) => advance(work), now: input.now });
+    assertConnection: runtime.assertConnection, onRecovered: (work) => advance(work), now: input.now, workFence: input.workFence });
   const writes = createHindsightMemoryWrites({ db, epochId: runtime.epoch.epochId, journal: createHindsightMemoryWriteRepo({ db, assertActive, now: input.now }),
     replica, pending, pendingWriter: createPendingMemoryWriter({ authority: runtime.authority, replica: nativeReplica, pending, now: input.now }),
     writer, client: runtime.client, bank: runtime.bank, assertActive, recover: service.recover,
     requestTimeoutMs: runtime.connection.requestTimeoutMs, intentionsDefaultDays: config.intentionsDefaultDays, now: input.now });
   advance = writes.advanceBank;
   const provider = createHindsightMemoryProvider({ ...runtime, epochId: runtime.epoch.epochId, replica, admission, pending, writes,
-    synchronize: service.synchronize, now: input.now });
-  const coordinator = createMemoryCoordinator({ authority: runtime.authority, providers: new Map([["hindsight", provider]]) });
+    synchronize: service.synchronize, now: input.now, workFence: input.workFence });
+  const coordinator = createMemoryCoordinator({ authority: runtime.authority, providers: new Map([["hindsight", transitionQueuedProvider(db, provider)]]) });
   return { ...input, ...stores, sync, recovery, service, writes, provider, coordinator };
 }
 
@@ -77,6 +79,7 @@ function createStores(input: Input) {
   const tokenizer = createIntlSegmenterTokenizer({ stoplist: input.config.stoplist });
   const replica = createHindsightApplicationReplicaRepo({ db, tokenizer, bankScope, now: input.now });
   const assertActive = (guard: HindsightApplicationCommandGuard) => {
+    input.workFence?.admitSync(() => undefined);
     runtime.assertConnection(); const checkpoint = replica.checkpoint(guard.key.bankId); const scope = bankScope(guard.key.bankId);
     if (guard.key.authorityEpochId !== runtime.epoch.epochId || !checkpoint || checkpoint.bankDeleted
       || checkpoint.authorityEpochId !== runtime.epoch.epochId || !sameApplicationValue(checkpoint.namespace, guard.namespace)
@@ -84,7 +87,10 @@ function createStores(input: Input) {
   };
   const commands = createHindsightApplicationCommandRepo({ db, assertActive, now: input.now });
   const commandRunner = createHindsightApplicationCommandRunner({ repo: commands, client });
-  const writer = createHindsightApplicationWriter({ commands, runner: commandRunner, replica, now: input.now });
+  const originalWriter = createHindsightApplicationWriter({ commands, runner: commandRunner, replica, now: input.now });
+  const writer = { ...originalWriter,
+    prepare: ((work) => input.workFence ? input.workFence.admitSync(() => originalWriter.prepare(work)) : originalWriter.prepare(work)) satisfies typeof originalWriter.prepare,
+    run: ((work) => input.workFence ? input.workFence.admit(() => originalWriter.run(work)) : originalWriter.run(work)) satisfies typeof originalWriter.run };
   const nativeReplica = createHindsightApplicationRecoveryReplica({ db, replica });
   const pending = createPendingMemoryRepo(db, input.now, (bankId) => replica.bankBinding(bankId)?.bank);
   const blocks = createStructuredMemoryBlockRepo(db); const admission = createHindsightRuntimeAdmissionRepo(db);

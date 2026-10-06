@@ -1,0 +1,42 @@
+[
+  {
+    "path": "packages/core/src/memory/runtime-composition.ts",
+    "sha256": "663dcec997d078810fb5568c1246b14c34545f356b989067417078e0db703299",
+    "bytes": 19325
+  },
+  {
+    "path": "packages/core/src/boot/memory-transition-boot.ts",
+    "sha256": "4690a1404cd89d280d7386090928fa658d9db8a1081f3607b132c8c0b87acb0b",
+    "bytes": 2644
+  },
+  {
+    "path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+    "sha256": "359501af952e908abf61758ef0054c49afa475c56c7c1da916bbf78ca1b5dd82",
+    "bytes": 17801
+  },
+  {
+    "path": "packages/core/src/memory/transitions/transition-healthy-diagnostics.test.ts",
+    "sha256": "08334d64a2917f3a465e60eb28f554fef4617cc5d9b8746035642ea3981938d2",
+    "bytes": 2448
+  },
+  {
+    "path": "packages/core/src/memory/index.md",
+    "sha256": "b27ebc342d4a1c8a964aef3b9074ec4a7c2d90a2ae2c344c0e4fc90eacbe6822",
+    "bytes": 14196
+  },
+  {
+    "path": "packages/core/src/boot/index.md",
+    "sha256": "316ad5192e18d0e547197c0b77b8088cddd1e0e1f34ba066b562125a3b95ca3d",
+    "bytes": 1459
+  },
+  {
+    "path": "packages/core/src/memory/transitions/index.md",
+    "sha256": "a93d6d54bf6da647cb37d9f30a276881605ddbf3c8e810249dee3b0d24de2393",
+    "bytes": 5129
+  },
+  {
+    "path": ".trellis/spec/backend/memory-transition-healthy-drivers.md",
+    "sha256": "08de1c80c3ab1566955ef65877a5aefb28c570da48fde7cf4aa6edc09506bfd9",
+    "bytes": 11041
+  }
+]

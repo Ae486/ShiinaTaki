@@ -7,6 +7,7 @@ import { TimelineEntrySchema, type TimelineEntry } from "@taki/shared";
 import { z } from "zod";
 import { assertCanonicalLocalAuthority, canonicalMemoryAtomic } from "./canonical-memory-maintenance-storage.ts";
 import type { Database, SqlRow } from "./sqlite.ts";
+import { heldEmergencyPrimaryMember } from "./memory-transition-held-primary.ts";
 import { ingestionSourceDigest, primaryEntryDigest, sanitizeCommittedPrimarySpan,
   type PrimaryConversationCommit, type ProvenPrimaryEntry, type SanitizedCommittedSpan } from "../memory/canonical-ingestion-source.ts";
 
@@ -80,6 +81,7 @@ function recordPrimary(db: Database, input: PrimaryConversationCommit & { epochI
         .get({ character: input.characterId, seq: entry.seq });
       const digest = primaryEntryDigest(entry);
       if (!row || primaryEntryDigest(timelineEntry(row)) !== digest) throw new Error("MEMORY_INGESTION_SOURCE_UNPROVEN");
+      if (heldEmergencyPrimaryMember(db, { targetEpochId: epochId, seq: entry.seq, entryId: entry.id, digest, characterId: entry.characterId })) continue;
       const prior = db.prepare("SELECT * FROM canonical_memory_primary_commits WHERE timeline_seq=:seq").get({ seq: entry.seq });
       if (prior) { verifyRepeatedCommit(db, { prior, entry, digest, input, epochId, throughSeq }); continue; }
       db.prepare(`INSERT INTO canonical_memory_primary_commits

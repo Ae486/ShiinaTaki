@@ -1,0 +1,93 @@
+{
+  "sourceSha256Before": "a81a1e3ec6e85f3faa287b8b77c704742be7bbf0f05ec594e1a4bc8381c00923",
+  "copyRoot": "H:\\TakiAgent\\.trellis\\.runtime\\w5-observed-driver-423743f9-609e-4866-8adc-ee7ab18b9812",
+  "modelCalls": 0,
+  "networkCalls": 0,
+  "syntheticNative": true,
+  "polls": [
+    {
+      "ms": 3389,
+      "elapsedMs": 53334,
+      "phase": "committed",
+      "runtime": "ready"
+    },
+    {
+      "ms": 3543,
+      "elapsedMs": 63501,
+      "phase": "committed",
+      "runtime": "ready"
+    }
+  ],
+  "boundaries": [
+    {
+      "name": "nativeOutcome",
+      "startMs": 69981,
+      "ms": 27257
+    },
+    {
+      "name": "nativeOutcome",
+      "startMs": 97261,
+      "ms": 7957
+    },
+    {
+      "name": "bind",
+      "startMs": 105223,
+      "ms": 79592
+    },
+    {
+      "name": "full-Local-readiness",
+      "startMs": 184816,
+      "ms": 39361
+    },
+    {
+      "name": "executeIntents",
+      "startMs": 224185,
+      "ms": 120201
+    },
+    {
+      "name": "nativeRelease",
+      "startMs": 344388,
+      "ms": 34264
+    },
+    {
+      "name": "full-Local-readiness",
+      "startMs": 378659,
+      "ms": 40756
+    }
+  ],
+  "heartbeat": [
+    {
+      "outcome": "rejected",
+      "code": "HINDSIGHT_CANCELLED",
+      "startMs": 69958,
+      "ms": 349467
+    }
+  ],
+  "requestTimeoutMs": 60000,
+  "pollIntervalMs": 10000,
+  "compositionMs": 82423,
+  "operationId": "2b2dabe4-d756-4aa1-a38f-fdd2c89a6485",
+  "transitionId": "df47f32c-48a8-47bc-9792-2e24e8642084",
+  "operationState": "outcome_unknown",
+  "operationErrorCode": "MEMORY_TRANSITION_OUTCOME_UNKNOWN",
+  "driverMs": 419430,
+  "diagnostics": [
+    {
+      "code": "MEMORY_TRANSITION_LEASE_LOST",
+      "stage": "settling"
+    },
+    {
+      "code": "HINDSIGHT_CANCELLED",
+      "stage": "heartbeat"
+    }
+  ],
+  "finalPhase": "settling",
+  "failure": {
+    "code": "ERR_ASSERTION",
+    "stack": [
+      "    at file:///H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-verified-observation-driver.mjs:121:10"
+    ]
+  },
+  "sourceSha256After": "a81a1e3ec6e85f3faa287b8b77c704742be7bbf0f05ec594e1a4bc8381c00923",
+  "sourceUnchanged": true
+}

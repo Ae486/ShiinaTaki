@@ -1,0 +1,3 @@
+Would reformat: hindsight-api-slim\hindsight_api\engine\db\postgresql.py
+Would reformat: hindsight-api-slim\tests\test_taki_replication_curation.py
+2 files would be reformatted, 778 files already formatted

@@ -125,7 +125,7 @@ export const MemoryProviderCapabilitiesSchema = z.strictObject({
 });
 export type MemoryProviderCapabilities = z.infer<typeof MemoryProviderCapabilitiesSchema>;
 
-export const MemoryErrorCodeSchema = z.enum(["MEMORY_INVALID_REQUEST", "MEMORY_NOT_FOUND", "MEMORY_REQUEST_ID_CONFLICT", "MEMORY_REVISION_MISMATCH", "MEMORY_CAPABILITY_UNSUPPORTED", "MEMORY_AUTHORITY_MISMATCH", "MEMORY_OPERATION_CANCELLED", "MEMORY_OUTCOME_UNKNOWN", "MEMORY_PROVIDER_UNAVAILABLE", "MEMORY_INTEGRITY_ERROR", "MEMORY_INTERNAL_ERROR"]);
+export const MemoryErrorCodeSchema = z.enum(["MEMORY_INVALID_REQUEST", "MEMORY_NOT_FOUND", "MEMORY_REQUEST_ID_CONFLICT", "MEMORY_REVISION_MISMATCH", "MEMORY_CAPABILITY_UNSUPPORTED", "MEMORY_AUTHORITY_MISMATCH", "MEMORY_OPERATION_CANCELLED", "MEMORY_OUTCOME_UNKNOWN", "MEMORY_PROVIDER_UNAVAILABLE", "MEMORY_INTEGRITY_ERROR", "MEMORY_INTERNAL_ERROR", "MEMORY_TRANSITION_QUEUED", "MEMORY_TRANSITION_QUEUE_FULL", "MEMORY_TRANSITION_CUTOFF"]);
 export type MemoryErrorCode = z.infer<typeof MemoryErrorCodeSchema>;
 const ErrorCategorySchema = z.enum(["validation", "not-found", "conflict", "capability", "authority", "availability", "integrity", "internal"]);
 const ErrorNextActionSchema = z.enum(["fix-request", "refresh-memory", "retry", "check-provider", "none"]);
@@ -141,10 +141,15 @@ export const MEMORY_ERROR_POLICY = {
   MEMORY_PROVIDER_UNAVAILABLE: ["availability", true, "check-provider"],
   MEMORY_INTEGRITY_ERROR: ["integrity", false, "check-provider"],
   MEMORY_INTERNAL_ERROR: ["internal", false, "check-provider"],
+  MEMORY_TRANSITION_QUEUED: ["availability", false, "none"],
+  MEMORY_TRANSITION_QUEUE_FULL: ["availability", true, "retry"],
+  MEMORY_TRANSITION_CUTOFF: ["availability", false, "none"],
 } as const;
-export const MemoryErrorSchema = z.strictObject({ code: MemoryErrorCodeSchema, category: ErrorCategorySchema, message: z.string().min(1).max(512), retryable: z.boolean(), nextAction: ErrorNextActionSchema, currentRevision: z.int().min(1).optional() })
+export const MemoryErrorSchema = z.strictObject({ code: MemoryErrorCodeSchema, category: ErrorCategorySchema, message: z.string().min(1).max(512), retryable: z.boolean(), nextAction: ErrorNextActionSchema, currentRevision: z.int().min(1).optional(),
+  queue: z.strictObject({ status: z.literal("queued"), transitionId: z.uuid(), intentId: z.uuid(), sequence: z.int().positive() }).optional() })
   .superRefine((value, context) => {
     const [category, retryable, nextAction] = MEMORY_ERROR_POLICY[value.code];
+    if ((value.code === "MEMORY_TRANSITION_QUEUED") !== (value.queue !== undefined)) context.addIssue({ code: "custom", message: "queued custody requires its exact acknowledgement" });
     if (value.category !== category) context.addIssue({ code: "custom", path: ["category"], message: "error category contradicts code" });
     if (value.retryable !== retryable) context.addIssue({ code: "custom", path: ["retryable"], message: "error retryability contradicts code" });
     if (value.nextAction !== nextAction) context.addIssue({ code: "custom", path: ["nextAction"], message: "error next action contradicts code" });

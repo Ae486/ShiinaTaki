@@ -1,0 +1,40 @@
+{
+  "sourceManifestSha256": "24d34865c137cecfb2b0b7b92157903104e10827da9971c668685bc07f23ad66",
+  "files": [
+    {
+      "name": "w5-http-diagnostic.py",
+      "bytes": 16796,
+      "sha256": "47a003e35371e0bba5c8cebcfb937a5f055959dfcc10c678033979f1c2771251"
+    },
+    {
+      "name": "w5_http_composition.py",
+      "bytes": 25640,
+      "sha256": "443b09cb037e2327493ac07f00d78d3cbb4d7be8cd0c3c41f3a336956a2fb44c"
+    },
+    {
+      "name": "w5-http-client.mjs",
+      "bytes": 11536,
+      "sha256": "124fd13c36b9dbdad8d111b90c7d807568b5bbb7e27cb59d26cf1e26f91794f9"
+    },
+    {
+      "name": "w5_http_inventory.py",
+      "bytes": 3245,
+      "sha256": "8447feb0070dd7b284127b89f29b4be8f664fa7d9a6e0995f9435fd2d9ef8b13"
+    },
+    {
+      "name": "test_w5_http_diagnostic.py",
+      "bytes": 23018,
+      "sha256": "503d006b47d8b5709f415468bd36265e4878a0a89c73de3dba3e835e27c834a7"
+    },
+    {
+      "name": "test_w5_http_client.mjs",
+      "bytes": 13177,
+      "sha256": "9a2b9d50f0b713bfe952cfc75bbe016e5bb3feada646d213c0f54670883b314e"
+    },
+    {
+      "name": "w5-http-source-manifest.json",
+      "bytes": 1111986,
+      "sha256": "24d34865c137cecfb2b0b7b92157903104e10827da9971c668685bc07f23ad66"
+    }
+  ]
+}

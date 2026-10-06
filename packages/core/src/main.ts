@@ -70,6 +70,8 @@ import { readMemoryAuthorityStatus } from "./memory/operations/memory-authority-
 import { readHindsightLiveConnection } from "./memory/hindsight/hindsight-runtime-connection.ts";
 import { createHindsightLifecycleTrigger } from "./memory/hindsight-lifecycle/hindsight-lifecycle-trigger.ts";
 import { createMemoryOperationService } from "./memory/operations/memory-operation-service.ts";
+import { composeMemoryTransitions } from "./boot/memory-transition-boot.ts";
+import { registerMemoryTransitionMethods } from "./server/methods/memory-transition-methods.ts";
 import { createPerceptionLayer } from "./perception/perception-layer.ts";
 import { migrateMcpPlaintextSecrets } from "./secrets/mcp-secret-migration.ts";
 import { resolveMasterKeySource } from "./secrets/master-key.ts";
@@ -262,10 +264,13 @@ const hindsightLifecycle = composeHindsightLifecycle({ db, config: boot.config.s
 // Hindsight backup (Stage 3): capture pauses Hindsight writers and copies Core, then pairs it with the native half from the
 // opt-in native endpoint (W5) or, via backup.admit, from the operator's native CLI ZIP; verify re-checks a sealed pair.
 const hindsightBackup = composeHindsightBackup({ db, dataDir: serverConfig.dataDir, config: boot.config.source, secrets: { catalog: secretCatalog, storeId: coreHostId }, logger });
+const memoryTransitions = composeMemoryTransitions({ db, config: boot.config.source, secrets: secretCatalog,
+  runtime: memoryRuntime, ownerId: bootId, actorId: coreHostId, logger, backup: hindsightBackup, lifecycle: hindsightLifecycle });
 const memoryOperations = createMemoryOperationService({
   db, live: memoryRuntime.operations, setup: hindsightSetup, local: localOnboarding, hindsight: hindsightActivation, lifecycle: hindsightLifecycle,
-  backup: hindsightBackup, bootId, logger, onChanged: memoryOperationSubscriptions.publish,
+  backup: hindsightBackup, transition: memoryTransitions, bootId, logger, onChanged: memoryOperationSubscriptions.publish,
 });
+registerMemoryTransitionMethods(registry, memoryTransitions);
 hindsightLifecycleTrigger.bind({ lifecycle: hindsightLifecycle, operations: memoryOperations });
 registerMemoryOperationMethods(registry, { service: memoryOperations, subscriptions: memoryOperationSubscriptions, logger });
 registerMemoryOnboardingMethods(registry, { local: localOnboarding, subscriptions: memoryOnboardingSubscriptions, logger,
@@ -565,7 +570,7 @@ function shutdown(signal: string): void {
   // settles the B5 scheduler (and any manual tick a replica operation awaits), so the operation owner has nothing left in
   // flight afterwards except setup calls bounded by their own deadlines. A backup capture is aborted and awaited first too:
   // its release restarts the B5 scheduler, which must happen before the runtime stops it for good.
-  const memoryStopped = Promise.all([localOnboarding.stop(), hindsightActivation.stop(), hindsightLifecycle.stop(), hindsightBackup.stop()])
+  const memoryStopped = Promise.all([localOnboarding.stop(), hindsightActivation.stop(), hindsightLifecycle.stop(), hindsightBackup.stop(), memoryTransitions.stop()])
     .then(() => memoryRuntime.stop());
   void turnControls.turns.drain(5_000).then(() => schedulerStopped).then(() => memoryStopped).then(() => memoryOperations.stop()).then(() => server.close()).then(async () => {
     skillBoot.catalog.close();

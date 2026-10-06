@@ -19,10 +19,16 @@ const tables = {
 } as const;
 
 export function readHindsightCurrentCapture(db: Database, manifest: HindsightLocalCoverageManifest): HindsightCurrentCapture {
+  const body = { schemaVersion: 1 as const, manifest, ...readTransitionLocalPayloads(db, manifest, false) };
+  return HindsightCurrentCaptureSchema.parse({ ...body, captureId: currentCaptureHash(body) });
+}
+
+/** Hydration is separate from discovery. The transition repository must discover the entire set under its writer reservation. */
+export function readTransitionLocalPayloads(db: Database, manifest: Pick<HindsightLocalCoverageManifest, "localEpochId" | "records">, lossless = true) {
   const epochId = manifest.localEpochId; const memory = createCanonicalMemoryRepo(db);
   const banks = createCanonicalMemoryAuthorityRepo(db).listBanks(epochId).sort((a, b) => compare(a.bankId, b.bankId));
   const sources = manifest.records.filter((row) => row.kind === "source").map((row) =>
-    readHindsightLocalSource(db, { epochId, bankId: String(row.bankId), documentId: row.objectId }));
+    readHindsightLocalSource(db, { epochId, bankId: String(row.bankId), documentId: row.objectId, lossless }));
   const records = manifest.records.filter((row) => row.kind === "unit").map((row) => {
     const record = memory.record(epochId, String(row.bankId), row.objectId);
     if (!record) throw new Error("HINDSIGHT_CURRENT_CAPTURE_INCOMPLETE");
@@ -35,9 +41,8 @@ export function readHindsightCurrentCapture(db: Database, manifest: HindsightLoc
     if (!value) throw new Error("HINDSIGHT_CURRENT_CAPTURE_INCOMPLETE");
     return value;
   });
-  const body = restoreHindsightCurrentCaptureJson({ schemaVersion: 1, manifest, banks, sources, records, derived,
+  return restoreHindsightCurrentCaptureJson({ banks, sources, records, derived,
     dispositions: manifest.records.map((witness) => disposition(db, { epochId, witness })) });
-  return HindsightCurrentCaptureSchema.parse({ ...body, captureId: currentCaptureHash(body) });
 }
 
 export function currentCaptureHash(value: Omit<HindsightCurrentCapture, "captureId">): string {
@@ -76,7 +81,7 @@ function readRow(db: Database, input: { epochId: string; witness: HindsightLocal
       .get({ epoch: epochId });
   } else if (witness.kind === "block") {
     row = db.prepare(`SELECT block_id,scope_kind,character_id,content,revision,updated_at FROM taki_memory_blocks
-      WHERE block_id=:id`).get({ id: witness.objectId });
+      WHERE block_id=:id AND character_id IS :character`).get({ id: witness.objectId, character: witness.relatedId });
   } else if (witness.kind === "source-provenance") {
     row = db.prepare(`SELECT provenance_json FROM canonical_memory_sources
       WHERE authority_epoch_id=:epoch AND bank_id=:bank AND document_id=:id`)

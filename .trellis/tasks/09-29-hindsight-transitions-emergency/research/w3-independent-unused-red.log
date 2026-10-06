@@ -1,0 +1,37 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+x·
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/transitions/transition-unused-delta.test.ts > W3 genuine unused-scope consumer branch > preserves ordered and repeated Sources from a real Local copy into a new scope
+Error: MEMORY_AUTHORITY_MISMATCH
+ ❯ assertCanonicalMaintenanceScope src/db/canonical-memory-maintenance-storage.ts:48:11
+     46|     || bank.scope_kind === "global" && bank.character_id !== null
+     47|     || bank.scope_kind === "character" && bank.character_id !== input.…
+     48|     throw new Error("MEMORY_AUTHORITY_MISMATCH");
+       |           ^
+     49|   }
+     50| }
+ ❯ readCanonicalMaintenanceReceipt src/db/canonical-memory-maintenance-journal.ts:71:57
+ ❯ src/db/canonical-memory-maintenance-journal.ts:56:22
+ ❯ src/db/canonical-memory-maintenance-storage.ts:22:14
+ ❯ runTransaction src/db/sqlite.ts:92:5
+ ❯ Object.transaction src/db/sqlite.ts:70:26
+ ❯ canonicalMemoryAtomic src/db/canonical-memory-maintenance-storage.ts:21:6
+ ❯ runCanonicalMaintenance src/db/canonical-memory-maintenance-journal.ts:55:10
+ ❯ copyCanonicalMemoryToBank src/db/canonical-memory-maintenance-copy.ts:43:10
+ ❯ Object.copyToBank src/db/canonical-memory-maintenance-repo.ts:24:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  18:12:17
+   Duration  6.60s (transform 3.01s, setup 0ms, import 3.83s, tests 2.38s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/transitions/transition-unused-delta.test.ts --maxWorkers=2 --reporter=dot

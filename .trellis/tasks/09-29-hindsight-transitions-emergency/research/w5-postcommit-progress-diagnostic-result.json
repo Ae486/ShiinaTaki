@@ -1,0 +1,43 @@
+{
+  "sourceSha256Before": "a81a1e3ec6e85f3faa287b8b77c704742be7bbf0f05ec594e1a4bc8381c00923",
+  "copyRoot": "H:\\TakiAgent\\.trellis\\.runtime\\w5-postcommit-progress-a5281ec4-b314-45b3-9508-b032dad5d060",
+  "modelCalls": 0,
+  "networkCalls": 0,
+  "polls": [
+    {
+      "durationMs": 40641,
+      "elapsedMs": 40642,
+      "phase": "committed",
+      "runtime": "unavailable",
+      "nativeReleasePending": true
+    },
+    {
+      "durationMs": 40094,
+      "elapsedMs": 80741,
+      "phase": "committed",
+      "runtime": "unavailable",
+      "nativeReleasePending": true
+    }
+  ],
+  "transportSteps": [
+    {
+      "step": 1,
+      "elapsedMs": 40646
+    },
+    {
+      "step": 2,
+      "elapsedMs": 80747
+    }
+  ],
+  "bufferedControl": {
+    "ms": 16,
+    "phase": "proven",
+    "generation": 5
+  },
+  "pending": {
+    "outcome": "resolved",
+    "ms": 80750
+  },
+  "sourceSha256After": "a81a1e3ec6e85f3faa287b8b77c704742be7bbf0f05ec594e1a4bc8381c00923",
+  "sourceUnchanged": true
+}

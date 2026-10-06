@@ -1,0 +1,37 @@
+{"state":"testing","root":"H:\\TakiAgent\\.trellis\\.runtime\\stage4-native-tests\\17a70c72e9936de9","instance":{"name":"taki-drill-2bc077c41aba","port":6573,"running":true,"dataDirMatches":true}}
+{"id":"17a70c72e9936de9","root":"H:\\TakiAgent\\.trellis\\.runtime\\stage4-native-tests\\17a70c72e9936de9","tests":["tests/native_results/test_transition_initialization.py","tests/test_bank_templates.py","tests/test_delete_memory_units_validation.py"],"beforeRegistry":[{"name":"hindsight-test","mtime":"2026-08-18T16:46:38.458Z"},{"name":"taki-d78-real-06acadec47e7","mtime":"2026-09-09T11:36:19.594Z"},{"name":"taki-d78-real-654131f0175a","mtime":"2026-09-10T10:20:55.628Z"},{"name":"taki-d78-real-9e41c8d27fa0","mtime":"2026-09-11T19:18:22.803Z"},{"name":"taki-d78-real-ca744d0f8a27","mtime":"2026-09-13T13:14:06.079Z"},{"name":"taki-d78-real-cd01c5453b1e","mtime":"2026-09-09T19:18:03.157Z"},{"name":"taki-drill-071b686f8c6d","mtime":"2026-09-29T13:46:17.921Z"},{"name":"taki-drill-138691451a8f","mtime":"2026-09-30T05:56:19.597Z"},{"name":"taki-drill-1cc82ea55e55","mtime":"2026-09-30T08:44:52.205Z"},{"name":"taki-drill-2b12743c8a89","mtime":"2026-09-30T08:23:30.426Z"},{"name":"taki-drill-2fdf1135490a","mtime":"2026-09-30T06:02:15.821Z"},{"name":"taki-drill-32a8eba0e13f","mtime":"2026-09-30T12:04:06.310Z"},{"name":"taki-drill-34e7ca89e79d","mtime":"2026-09-30T04:23:24.268Z"},{"name":"taki-drill-457fbf69ce58","mtime":"2026-09-30T06:37:10.628Z"},{"name":"taki-drill-459d546d24eb","mtime":"2026-09-30T06:19:33.418Z"},{"name":"taki-drill-463ab2423434","mtime":"2026-09-30T08:12:48.857Z"},{"name":"taki-drill-57d8e8200295","mtime":"2026-09-30T13:07:25.080Z"},{"name":"taki-drill-6017a5990875","mtime":"2026-09-30T08:53:56.137Z"},{"name":"taki-drill-613ca9b5a3f7","mtime":"2026-09-30T12:28:08.263Z"},{"name":"taki-drill-6ac2f913b3b1","mtime":"2026-09-30T03:24:29.541Z"},{"name":"taki-drill-6dbbb5c215d2","mtime":"2026-09-30T11:55:23.064Z"},{"name":"taki-drill-91b2a12f5cf6","mtime":"2026-09-30T10:28:18.061Z"},{"name":"taki-drill-a148486e9416","mtime":"2026-09-30T04:06:03.523Z"},{"name":"taki-drill-a75adcd5a5ff","mtime":"2026-09-30T02:47:59.220Z"},{"name":"taki-drill-acb6f2605f85","mtime":"2026-09-30T12:56:17.205Z"},{"name":"taki-drill-af054aa644f4","mtime":"2026-09-30T11:15:34.403Z"},{"name":"taki-drill-af4fab33c700","mtime":"2026-09-30T07:17:19.033Z"},{"name":"taki-drill-bd6c9ad5fb09","mtime":"2026-09-30T12:42:54.337Z"},{"name":"taki-drill-c0dee987fed7","mtime":"2026-09-30T06:26:20.618Z"},{"name":"taki-drill-db3018ec16e5","mtime":"2026-09-30T12:18:05.062Z"},{"name":"taki-drill-f5c0d75e4e94","mtime":"2026-09-30T11:05:47.192Z"},{"name":"taki-drill-fc86b621031d","mtime":"2026-09-30T10:59:39.846Z"},{"name":"taki-drill-ffbcbbecc291","mtime":"2026-09-30T11:50:46.077Z"}],"startedAt":"2026-09-30T13:24:30.143Z","instance":{"name":"taki-drill-2bc077c41aba","port":6573,"running":true,"dataDirMatches":true},"exitCode":0,"signal":null,"stopped":true,"finishedAt":"2026-09-30T13:29:47.207Z"}
+
+tests/test_bank_templates.py::TestDefaultBankTemplateEnvVar::test_default_template_malformed_is_swallowed 
+------------------------------- live log setup --------------------------------
+2026-09-30 21:29:33 - INFO - hindsight_api.engine.memory_engine - Connecting to database at postgresql://***:***@127.0.0.1:6573/taki_smoke
+2026-09-30 21:29:33 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool created (min=1, max=15, cmd_timeout=60s, acquire_timeout=30s)
+2026-09-30 21:29:35 - INFO - hindsight_api.engine.memory_engine - Memory system initialized (pool and task backend started)
+2026-09-30 21:29:37 - INFO - hindsight_api.api - HTTP REST API enabled
+-------------------------------- live log call --------------------------------
+2026-09-30 21:29:37 - ERROR - hindsight_api.engine.memory_engine - HINDSIGHT_API_DEFAULT_BANK_TEMPLATE failed schema validation and will be ignored for bank 'template_test_1790774977.018341': version: Value error, version '999' is not supported by this server (max supported: 1). Please upgrade Hindsight.
+PASSED                                                                   [ 87%]
+------------------------------ live log teardown ------------------------------
+2026-09-30 21:29:37 - INFO - hindsight_api.engine.memory_engine - close() started
+2026-09-30 21:29:37 - INFO - hindsight_api.engine.db.postgresql - PostgreSQL pool closed
+
+tests/test_bank_templates.py::TestDefaultBankTemplateEnvVar::test_parse_default_bank_template_valid_json PASSED [ 88%]
+tests/test_bank_templates.py::TestDefaultBankTemplateEnvVar::test_parse_default_bank_template_none_or_empty PASSED [ 90%]
+tests/test_bank_templates.py::TestDefaultBankTemplateEnvVar::test_parse_default_bank_template_invalid_json_raises PASSED [ 92%]
+tests/test_bank_templates.py::TestDefaultBankTemplateEnvVar::test_parse_default_bank_template_non_object_raises PASSED [ 94%]
+tests/test_delete_memory_units_validation.py::test_empty_unit_ids_returns_zero_without_auth PASSED [ 96%]
+tests/test_delete_memory_units_validation.py::test_invalid_uuid_raises_value_error_before_auth PASSED [ 98%]
+tests/test_delete_memory_units_validation.py::test_valid_uuid_shape_accepted_and_normalized_via_uuid_ctor PASSED [100%]
+
+============================ slowest 10 durations =============================
+11.60s setup    tests/native_results/test_transition_initialization.py::test_real_b3_template_refresh_can_prove_a_new_unused_scope
+8.99s setup    tests/test_bank_templates.py::TestImportValidation::test_import_dry_run_valid
+7.15s call     tests/native_results/test_transition_initialization.py::test_initialization_history_and_original_birth_survive_physical_restore
+4.79s setup    tests/native_results/test_transition_initialization.py::test_initialization_proof_rejects_missing_extra_or_foreign_effects[model]
+4.52s setup    tests/test_bank_templates.py::TestDefaultBankTemplateEnvVar::test_default_template_overrides_env_config_defaults
+4.48s setup    tests/test_bank_templates.py::TestExport::test_export_reimport_roundtrip
+4.41s setup    tests/test_bank_templates.py::TestImportApply::test_import_creates_mental_models
+4.40s setup    tests/native_results/test_transition_initialization.py::test_initialization_proof_rejects_missing_extra_or_foreign_effects[template]
+4.38s setup    tests/native_results/test_transition_initialization.py::test_initialization_proof_rejects_missing_extra_or_foreign_effects[missing_admission]
+4.35s setup    tests/test_bank_templates.py::TestImportValidation::test_import_empty_directive_content
+======================= 54 passed in 258.14s (0:04:18) ========================
+

@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "H:\\hindsight\\.venv\\Scripts\\python.exe",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-07-hindsight-recovery-evidence\\research\\validation\\run_isolated_hindsight.py",
+    "--",
+    "--noconftest",
+    "-o",
+    "addopts=",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_independent.py::test_independent_owned_pg_with_sealed_evidence_preserved",
+    "-q",
+    "--tb=short",
+    "-n",
+    "0"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "timeoutSeconds": 240,
+  "exitCode": 0,
+  "stdout": "Owned fixture: H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-d63d7c8f3454\nPostgreSQL: 18.1 ; vector/pg_trgm ready\nPytest log: H:\\TakiAgent\\.trellis\\.runtime\\g1-validation\\taki-hindsight-g1-d63d7c8f3454\\pytest.log\n.                                                                        [100%]\n============================== warnings summary ===============================\ntest_w5_http_independent.py::test_independent_owned_pg_with_sealed_evidence_preserved\n  H:\\hindsight\\.venv\\Lib\\site-packages\\websockets\\legacy\\__init__.py:6: DeprecationWarning: websockets.legacy is deprecated; see https://websockets.readthedocs.io/en/stable/howto/upgrade.html for upgrade instructions\n    warnings.warn(  # deprecated in 14.0 - 2024-11-09\n\ntest_w5_http_independent.py::test_independent_owned_pg_with_sealed_evidence_preserved\n  H:\\hindsight\\.venv\\Lib\\site-packages\\uvicorn\\protocols\\websockets\\websockets_impl.py:17: DeprecationWarning: websockets.server.WebSocketServerProtocol is deprecated\n    from websockets.server import WebSocketServerProtocol\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n1 passed, 2 warnings in 43.71s\n{\n    \"Fixture\":  \"taki-hindsight-g1-d63d7c8f3454\",\n    \"Stopped\":  true,\n    \"DataRemoved\":  true,\n    \"RegistryRemoved\":  true,\n    \"Logs\":  \"H:\\\\TakiAgent\\\\.trellis\\\\.runtime\\\\g1-validation\\\\taki-hindsight-g1-d63d7c8f3454\"\n}\n",
+  "stderr": "",
+  "milliseconds": 63218.00000000076
+}

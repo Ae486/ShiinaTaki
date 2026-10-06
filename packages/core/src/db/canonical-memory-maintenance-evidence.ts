@@ -8,6 +8,7 @@ import { z } from "zod";
 import type { CanonicalMaintenanceTarget } from "./canonical-memory-maintenance-contract.ts";
 import { readCanonicalSource } from "./canonical-memory-maintenance-records.ts";
 import type { Database } from "./sqlite.ts";
+import { readCanonicalSourceSet } from "./canonical-memory-source-references.ts";
 
 export const CANONICAL_LOCAL_EVIDENCE_KEY = "taki:local-evidence:v1";
 const Id = z.string().min(1).max(256);
@@ -37,17 +38,19 @@ export function canonicalEvidenceTargets(source: CanonicalMemorySource): Canonic
 }
 
 export function readCanonicalEvidenceSources(db: Database, target: CanonicalMaintenanceTarget): CanonicalMemorySource[] {
+  const explicit = readCanonicalSourceSet(db, target)?.references.map((reference) => reference.source) ?? [];
   const rows = db.prepare(`SELECT document_id FROM canonical_memory_sources
     WHERE authority_epoch_id=:epoch AND bank_id=:bank
       AND json_type(metadata_json, '$."taki:local-evidence:v1"')='object' ORDER BY document_id`)
     .all({ epoch: target.epochId, bank: target.bankId });
-  return rows.flatMap((row) => {
+  const legacy = rows.flatMap((row) => {
     const source = readCanonicalSource(db, { epochId: target.epochId, bankId: target.bankId,
       documentId: String(row.document_id) });
     if (!source) throw new Error("MEMORY_INTEGRITY_ERROR: evidence source missing");
     return canonicalEvidenceTargets(source).some((ref) => ref.epochId === target.epochId
       && ref.bankId === target.bankId && ref.memoryId === target.memoryId) ? [source] : [];
   });
+  return [...explicit, ...legacy.filter((source) => !explicit.some((entry) => entry.documentId === source.documentId))];
 }
 
 export function remapCanonicalSourceEvidence(source: CanonicalMemorySource, input: {

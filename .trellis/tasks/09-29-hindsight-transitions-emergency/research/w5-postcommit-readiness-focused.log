@@ -1,0 +1,72 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+···xxxx
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/boot/memory-transition-boot.test.ts > production healthy boot readiness > avoids receipt/corpus reconstruction while the committed Local binding is absent, failed or stopped
+Error: no such column: operation_id
+ ❯ Object.prepare src/db/sqlite.ts:68:32
+     66|     prepare(sql) {
+     67|       assertActive();
+     68|       return wrapStatement(raw.prepare(sql), assertActive);
+       |                                ^
+     69|     },
+     70|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+ ❯ execute src/boot/memory-transition-boot.test.ts:26:20
+ ❯ src/boot/memory-transition-boot.test.ts:43:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/boot/memory-transition-boot.test.ts > production healthy boot readiness > withdraws both retired providers and rejects an old epoch even when a newer Local binding exists
+Error: no such column: operation_id
+ ❯ Object.prepare src/db/sqlite.ts:68:32
+     66|     prepare(sql) {
+     67|       assertActive();
+     68|       return wrapStatement(raw.prepare(sql), assertActive);
+       |                                ^
+     69|     },
+     70|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+ ❯ execute src/boot/memory-transition-boot.test.ts:26:20
+ ❯ src/boot/memory-transition-boot.test.ts:61:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/boot/memory-transition-boot.test.ts > production healthy boot readiness > still verifies complete publication evidence for a present binding and refuses corrupt stored native evidence
+Error: no such column: operation_id
+ ❯ Object.prepare src/db/sqlite.ts:68:32
+     66|     prepare(sql) {
+     67|       assertActive();
+     68|       return wrapStatement(raw.prepare(sql), assertActive);
+       |                                ^
+     69|     },
+     70|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+ ❯ execute src/boot/memory-transition-boot.test.ts:26:20
+ ❯ src/boot/memory-transition-boot.test.ts:79:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/boot/memory-transition-boot.test.ts > production healthy boot readiness > does not read a Hindsight snapshot after failed replacement or process stop
+Error: no such column: operation_id
+ ❯ Object.prepare src/db/sqlite.ts:68:32
+     66|     prepare(sql) {
+     67|       assertActive();
+     68|       return wrapStatement(raw.prepare(sql), assertActive);
+       |                                ^
+     69|     },
+     70|     transaction: (fn) => runTransaction(raw, transactionState, fn),
+ ❯ execute src/boot/memory-transition-boot.test.ts:26:20
+ ❯ src/boot/memory-transition-boot.test.ts:97:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 3 passed (7)
+   Start at  02:36:01
+   Duration  11.58s (transform 11.18s, setup 0ms, import 14.30s, tests 5.16s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/boot/memory-transition-boot.test.ts src/memory/transitions/transition-healthy-diagnostics.test.ts --maxWorkers=2 --reporter=dot

@@ -129,7 +129,7 @@ function requireOpen(db: Database, groupId: string): SqlRow {
 }
 
 /** Members re-read from the Timeline must still match their saved identity and digest; corruption blocks finalization. */
-function exactMembers(db: Database, group: SqlRow): TimelineEntry[] {
+export function exactMembers(db: Database, group: SqlRow): TimelineEntry[] {
   const rows = db.prepare(`SELECT m.entry_id AS member_id,m.entry_digest,t.* FROM primary_memory_members m
     LEFT JOIN timeline_messages t ON t.seq=m.timeline_seq WHERE m.group_id=:id ORDER BY m.timeline_seq`)
     .all({ id: String(group.group_id) });

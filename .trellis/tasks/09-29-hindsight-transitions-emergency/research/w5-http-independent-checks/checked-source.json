@@ -1,0 +1,81 @@
+{
+  "source": {
+    "sha256": "921a6dc4ac0b3d80f880bca3a2b3679314be3800b3c77ffdbafa9584ab93d415",
+    "entries": 5084,
+    "verified": true
+  },
+  "checkedManifest": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-checked-v2-source-manifest.json",
+  "originalManifestSha256": "24d34865c137cecfb2b0b7b92157903104e10827da9971c668685bc07f23ad66",
+  "previous404ManifestSha256": "ca275f841f3f5a66620be833a692b33117b9256b735f1cf10f4c17f6522647fb",
+  "dependencySha256": "15540ca2b6a078fc0e0a4de91c08643900abe7f536e47732186ba60b4863810d",
+  "pythonVerificationMilliseconds": 26561.99999999808,
+  "unchangedDeliveryEntries": 5079,
+  "changed": [
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_diagnostic.py",
+      "before": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_diagnostic.py",
+        "bytes": 23018,
+        "sha256": "503d006b47d8b5709f415468bd36265e4878a0a89c73de3dba3e835e27c834a7"
+      },
+      "after": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_http_diagnostic.py",
+        "bytes": 24279,
+        "sha256": "de1c39b849986787fe7426718a9f479a052b1a457b9a8d6900128053962cea52"
+      }
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-client.mjs",
+      "before": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-client.mjs",
+        "bytes": 11536,
+        "sha256": "124fd13c36b9dbdad8d111b90c7d807568b5bbb7e27cb59d26cf1e26f91794f9"
+      },
+      "after": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-client.mjs",
+        "bytes": 11558,
+        "sha256": "c15b4df6af856a91671f82b36c3c2dd9be8925c4e7dc5b0ed3ff03b7a6fc1552"
+      }
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-diagnostic.py",
+      "before": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-diagnostic.py",
+        "bytes": 16796,
+        "sha256": "47a003e35371e0bba5c8cebcfb937a5f055959dfcc10c678033979f1c2771251"
+      },
+      "after": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-diagnostic.py",
+        "bytes": 19544,
+        "sha256": "6317592fba4cbe5f0412691ee7256982e0e3d9168caecee588e0fc35ed64b259"
+      }
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_composition.py",
+      "before": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_composition.py",
+        "bytes": 25640,
+        "sha256": "443b09cb037e2327493ac07f00d78d3cbb4d7be8cd0c3c41f3a336956a2fb44c"
+      },
+      "after": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_composition.py",
+        "bytes": 25700,
+        "sha256": "7db6dbb66eaa47bf6fec39cfdf4ceda75f72f93107da33a37851cf968344d34f"
+      }
+    },
+    {
+      "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_inventory.py",
+      "before": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_inventory.py",
+        "bytes": 3245,
+        "sha256": "8447feb0070dd7b284127b89f29b4be8f664fa7d9a6e0995f9435fd2d9ef8b13"
+      },
+      "after": {
+        "path": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_inventory.py",
+        "bytes": 3256,
+        "sha256": "c7212acdca7b0772ef4b9d68e079aa07c36beb15a097829f795119f25a415d18"
+      }
+    }
+  ],
+  "previous404Unchanged": true
+}

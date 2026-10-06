@@ -1,0 +1,10 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ✓ src/memory/transitions/transition-healthy-source.test.ts > healthy Source upload continuation > reuses original sealed multipart bytes after reply loss and preserves old Source bodies through the roundtrip 17193ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  20:00:58
+   Duration  24.54s (transform 5.49s, setup 0ms, import 6.99s, tests 17.19s, environment 0ms)
+

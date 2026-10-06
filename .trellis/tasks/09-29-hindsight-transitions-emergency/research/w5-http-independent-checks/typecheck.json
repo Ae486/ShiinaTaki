@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "H:/hindsight/.venv/Scripts/ty.exe",
+    "check",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-http-diagnostic.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_composition.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_http_inventory.py",
+    "--python",
+    "H:/hindsight/.venv",
+    "--extra-search-path",
+    "H:/hindsight/hindsight-api-slim",
+    "--output-format",
+    "concise"
+  ],
+  "cwd": "H:\\TakiAgent",
+  "timeoutSeconds": 60,
+  "exitCode": 0,
+  "stdout": "All checks passed!\n",
+  "stderr": "",
+  "milliseconds": 1093.9999999973224
+}

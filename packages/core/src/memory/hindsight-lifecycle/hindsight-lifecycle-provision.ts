@@ -26,16 +26,20 @@ export async function provisionHindsightBank(deps: HindsightLifecycleDeps, input
   ref: MemoryBankProducerRef; call: HindsightLifecycleCall<HindsightBankPhase>;
 }): Promise<HindsightProvisionOutcome> {
   const { ref, call } = input;
+  call.signal.throwIfAborted();
   const { live, runtime, facts, target } = prepare(deps, ref);
   const client = deps.client(live.projection);
   if (facts.row === null) {
     call.checkpoint("probing");
     await assertHindsightBankUnoccupied({ client, bankId: ref.nativeBankId, context: { timeoutMs: live.projection.requestTimeoutMs, signal: call.signal } });
+    call.signal.throwIfAborted();
   }
   call.checkpoint("applying");
   const bankRepo = createHindsightBankSetupRepo(deps.db);
   if (facts.row?.status !== "verified") await dryRun({ deps, client, live, target }, call.signal);
+  call.signal.throwIfAborted();
   await applyHindsightBank({ deps: { bankRepo, client, connection: live.projection, wait: deps.wait, now: deps.now }, target, signal: call.signal });
+  call.signal.throwIfAborted();
   call.checkpoint("syncing");
   return firstSync(deps, { runtime, bankId: ref.nativeBankId, signal: call.signal });
 }
@@ -63,6 +67,7 @@ async function dryRun(input: { deps: HindsightLifecycleDeps; client: HindsightCl
   const { deps, client, live, target } = input;
   try {
     const results = await dryRunTemplates({ targets: [target], client, connection: live.projection, signal, attemptId: null });
+    signal.throwIfAborted();
     if (results.some((result) => result.dry_run !== true)) throw hindsightError("HINDSIGHT_TEMPLATE_INVALID");
   } catch (error) {
     if (signal.aborted) throw error;
@@ -76,6 +81,7 @@ async function dryRun(input: { deps: HindsightLifecycleDeps; client: HindsightCl
 async function firstSync(deps: HindsightLifecycleDeps, input: { runtime: MemoryOperationsRuntime; bankId: string; signal: AbortSignal }):
 Promise<HindsightProvisionOutcome> {
   const { runtime, bankId, signal } = input;
+  signal.throwIfAborted();
   const requestedAt = Date.parse(deps.now());
   try {
     runtime.scheduler.requestManual(bankId, "full");
@@ -83,6 +89,7 @@ Promise<HindsightProvisionOutcome> {
   } catch (error) {
     return { readiness: "syncing", errorCode: hindsightLifecycleErrorCode(error) };
   }
+  signal.throwIfAborted();
   const status = runtime.scheduler.status(bankId)[0];
   if (status?.lastSuccessAt && Date.parse(status.lastSuccessAt) >= requestedAt && hindsightReplicaBound(deps.db, { epochId: runtime.epochId, bankId })) {
     return { readiness: "ready" };

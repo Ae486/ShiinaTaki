@@ -1,0 +1,56 @@
+{
+  "completed": true,
+  "supervisor": "H:\\TakiAgent\\.trellis\\.runtime\\stage4-w6\\db280d150f6340618b340a70439b43f7\\emergency-history\\b389441a92e74f2988071642a3ef832e\\supervisor-result.json",
+  "supervisorSha256": "82c1ec833d94d59859119c98bd3f9ced8ebead47be50b8ad49c07f349d68cd69",
+  "coreSha256": "90eeaaa1482bfea5b7c5cfbb998064ee9305f463c58f0c7f8530d972c8828c15",
+  "selection": [
+    "canonical-local",
+    "c4f53993-517e-4d97-96cd-7e916620ce29",
+    "5da1b2448bcc7ccaf0a41d5cbfa50fc9ea5e6f77e3610082300c7ea9477eed31"
+  ],
+  "operationId": "bfdb9a3d-8ee7-4e51-9cba-9b26712b0c1a",
+  "operationResult": {
+    "kind": "transition",
+    "transitionId": "0faf660d-9d8c-4215-ae5f-954f9f574734",
+    "receiptId": "5da1b2448bcc7ccaf0a41d5cbfa50fc9ea5e6f77e3610082300c7ea9477eed31",
+    "authorityCommitted": true,
+    "runtime": "ready",
+    "queue": "settled",
+    "outcome": "completed",
+    "errorCode": null
+  },
+  "preservedUnknownOperations": {
+    "0505474f-3dc3-4b04-8a03-409e8634d239": "outcome_unknown",
+    "391a96ee-e370-4129-911c-2fc37a717f0b": "outcome_unknown",
+    "b661d113-93e3-4b2a-bfdd-ab61d21f1dca": "outcome_unknown"
+  },
+  "phases": [
+    {
+      "phase": "emergency",
+      "completed": true,
+      "driverStopped": true,
+      "driverForcedStop": false,
+      "driverExitCode": 0,
+      "coreBeforeSha256": "2efaa2332a7cee5c7fbed50c58d9f0e3f74d5f0c4049d5ba6b0e6d2210b54949",
+      "driverPid": 36860,
+      "driverResultSha256": "3082ac06ab46b8766cebc812790a093cbd51a225b156e683c424f563080dda21",
+      "coreAfterSha256": "90eeaaa1482bfea5b7c5cfbb998064ee9305f463c58f0c7f8530d972c8828c15",
+      "checkpointSha256": "973500c2ec8a5a9f0e5897effc77a8284a5a6b8b037bf6ad617aba7c5c90b3bb"
+    },
+    {
+      "phase": "restart",
+      "completed": true,
+      "driverStopped": true,
+      "driverForcedStop": false,
+      "driverExitCode": 0,
+      "coreBeforeSha256": "90eeaaa1482bfea5b7c5cfbb998064ee9305f463c58f0c7f8530d972c8828c15",
+      "driverPid": 38428,
+      "driverResultSha256": "34a2079c03f354cebb993d1c816af9aeca0f0db957d93f5e3242612f2610ca55",
+      "coreAfterSha256": "90eeaaa1482bfea5b7c5cfbb998064ee9305f463c58f0c7f8530d972c8828c15"
+    }
+  ],
+  "immutableReadOnly": true,
+  "sourcesPreserved": true,
+  "inputsPreserved": true,
+  "d91Completed": false
+}

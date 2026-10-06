@@ -1,0 +1,10 @@
+✔ fresh reentry preview/admission with repeated-plan elapsed clock=true (1554.4599ms)
+✔ fresh reentry preview/admission with repeated-plan elapsed clock=false (3855.2105ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7447.7584

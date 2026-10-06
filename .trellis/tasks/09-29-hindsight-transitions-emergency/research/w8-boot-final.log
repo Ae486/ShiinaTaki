@@ -1,0 +1,144 @@
+{
+  "node": "v24.18.0",
+  "loader": "native-type-stripping",
+  "modelRequests": 0,
+  "localData": "owned synthetic B2/healthy/emergency producers; deterministic Native fixture, no real corpus",
+  "results": [
+    {
+      "mode": "legacy-markdown",
+      "exitCode": 0,
+      "websocket": "opened-and-closed",
+      "gracefulSignal": "SIGINT",
+      "runtime": {
+        "providerId": "legacy-markdown",
+        "available": true,
+        "unavailableReason": null
+      },
+      "overviewProvider": null,
+      "expected": {},
+      "pid": 42876,
+      "port": 10932,
+      "listenerClosed": true,
+      "reopenedDatabase": "integrity-ok",
+      "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\w8-boot\\85bda41f-239d-4b68-a8c0-33a61a910ddc\\legacy-markdown"
+    },
+    {
+      "mode": "legacy-markdown",
+      "exitCode": 0,
+      "websocket": "opened-and-closed",
+      "gracefulSignal": "SIGINT",
+      "runtime": {
+        "providerId": "legacy-markdown",
+        "available": true,
+        "unavailableReason": null
+      },
+      "overviewProvider": null,
+      "expected": {},
+      "pid": 34328,
+      "port": 10948,
+      "listenerClosed": true,
+      "reopenedDatabase": "integrity-ok",
+      "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\w8-boot\\85bda41f-239d-4b68-a8c0-33a61a910ddc\\legacy-markdown"
+    },
+    {
+      "mode": "canonical-local",
+      "exitCode": 0,
+      "websocket": "opened-and-closed",
+      "gracefulSignal": "SIGINT",
+      "runtime": {
+        "providerId": "local",
+        "available": true,
+        "unavailableReason": null
+      },
+      "overviewProvider": "local",
+      "expected": {},
+      "pid": 41148,
+      "port": 10967,
+      "listenerClosed": true,
+      "reopenedDatabase": "integrity-ok",
+      "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\w8-boot\\85bda41f-239d-4b68-a8c0-33a61a910ddc\\canonical-local"
+    },
+    {
+      "mode": "canonical-local",
+      "exitCode": 0,
+      "websocket": "opened-and-closed",
+      "gracefulSignal": "SIGINT",
+      "runtime": {
+        "providerId": "local",
+        "available": true,
+        "unavailableReason": null
+      },
+      "overviewProvider": "local",
+      "expected": {},
+      "pid": 41332,
+      "port": 10983,
+      "listenerClosed": true,
+      "reopenedDatabase": "integrity-ok",
+      "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\w8-boot\\85bda41f-239d-4b68-a8c0-33a61a910ddc\\canonical-local"
+    },
+    {
+      "mode": "hindsight",
+      "exitCode": 0,
+      "websocket": "opened-and-closed",
+      "gracefulSignal": "SIGINT",
+      "runtime": {
+        "providerId": "hindsight",
+        "available": false,
+        "unavailableReason": "connection_disabled"
+      },
+      "overviewProvider": "hindsight",
+      "expected": {},
+      "pid": 43400,
+      "port": 11031,
+      "listenerClosed": true,
+      "reopenedDatabase": "integrity-ok",
+      "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\w8-boot\\85bda41f-239d-4b68-a8c0-33a61a910ddc\\hindsight-unavailable"
+    },
+    {
+      "mode": "canonical-local",
+      "exitCode": 0,
+      "websocket": "opened-and-closed",
+      "gracefulSignal": "SIGINT",
+      "runtime": {
+        "providerId": "local",
+        "available": true,
+        "unavailableReason": null
+      },
+      "overviewProvider": "local",
+      "expected": {
+        "transitionId": "30ead54d-cf5b-43f6-90fd-40f2487f26ee",
+        "operationId": "a77ec3d1-b704-47d3-819f-f0659163f504",
+        "receiptId": "69a7bea447ca328401e78fdcd28bd4214e21f373bc9f87c3f48f6b8f9c54fb27",
+        "recoveryOperationId": "0c1e375d-7d64-43ca-b25b-333e7ac6a27e"
+      },
+      "pid": 43620,
+      "port": 11050,
+      "listenerClosed": true,
+      "reopenedDatabase": "integrity-ok",
+      "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\w8-boot\\85bda41f-239d-4b68-a8c0-33a61a910ddc\\emergency-local"
+    },
+    {
+      "mode": "canonical-local",
+      "exitCode": 0,
+      "websocket": "opened-and-closed",
+      "gracefulSignal": "SIGINT",
+      "runtime": {
+        "providerId": "local",
+        "available": true,
+        "unavailableReason": null
+      },
+      "overviewProvider": "local",
+      "expected": {
+        "transitionId": "30ead54d-cf5b-43f6-90fd-40f2487f26ee",
+        "operationId": "a77ec3d1-b704-47d3-819f-f0659163f504",
+        "receiptId": "69a7bea447ca328401e78fdcd28bd4214e21f373bc9f87c3f48f6b8f9c54fb27",
+        "recoveryOperationId": "0c1e375d-7d64-43ca-b25b-333e7ac6a27e"
+      },
+      "pid": 34080,
+      "port": 11078,
+      "listenerClosed": true,
+      "reopenedDatabase": "integrity-ok",
+      "dataDir": "H:\\TakiAgent\\.trellis\\.runtime\\w8-boot\\85bda41f-239d-4b68-a8c0-33a61a910ddc\\emergency-local"
+    }
+  ]
+}

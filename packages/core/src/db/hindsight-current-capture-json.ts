@@ -7,9 +7,9 @@ import { HindsightCurrentJsonObjectSchema, HindsightCurrentCanonicalDerivedPaylo
   type HindsightCurrentCapture } from "@taki/shared";
 import { canonicalJson } from "../memory/legacy-migration/legacy-identities.ts";
 
-type CaptureBody = Omit<HindsightCurrentCapture, "captureId">;
+type CaptureBody = Pick<HindsightCurrentCapture, "banks" | "sources" | "records" | "derived" | "dispositions">;
 
-export function restoreHindsightCurrentCaptureJson(body: CaptureBody): CaptureBody {
+export function restoreHindsightCurrentCaptureJson<T extends CaptureBody>(body: T): T {
   const rows = new Map(body.dispositions.map((item) => [rowKey(item.witness), parseRow(item.payloadJson)]));
   const row = (input: { kind: string; bankId: string; objectId: string; relatedId?: string }) => {
     const value = rows.get(rowKey({ ...input, relatedId: input.relatedId ?? null }));

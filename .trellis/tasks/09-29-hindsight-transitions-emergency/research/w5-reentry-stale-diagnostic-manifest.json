@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "meaning": "New diagnostic artifacts only; no previous manifest replaced",
+  "inputs": {
+    "application.sqlite": {
+      "sha256": "1ac12212606d3280d85bf6364f355112a1aef4f69b7addb7b2510afba68fb632",
+      "bytes": 291049472
+    },
+    "driver-failure.log": {
+      "sha256": "a117acc8eee6ecfc5cb6c2c17620f53613dc733b3b758d2a62127a6e716a33d4",
+      "bytes": 609
+    },
+    "driver-result.json": {
+      "sha256": "0deea9876e27112445f8eac873a823e318b4067bb86b05da7c1f42812ebd615f",
+      "bytes": 16184
+    },
+    "journey-checkpoint.json": {
+      "sha256": "f13174dc640d2d7bb40b1d5d5cef7f0ef61c8d85ead9f0a62893d4073f42fb37",
+      "bytes": 13733
+    },
+    "model-submissions.json": {
+      "sha256": "a9a51b1bb5bc878414fdd375b2e0254b69956a273ed5446c19a9f00da1f6f131",
+      "bytes": 26
+    },
+    "run-plan.json": {
+      "sha256": "67033ff50c36e8c5463333f1a6433ebf1b8d656bcca86637a6595b0adee30d89",
+      "bytes": 921
+    },
+    "run-result.json": {
+      "sha256": "955b08af0cab39c2c57e678e5efe9db1647b2f94c8b6e0cb7487eea0b57f30a9",
+      "bytes": 1756
+    }
+  },
+  "artifacts": {
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-stale-replay.mjs": {
+      "sha256": "f0f0d83d212025f1b7967acd4a2101950ea2c2aca80c906272bba8bdcdc12125",
+      "bytes": 10483
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-stale-fast.test.mjs": {
+      "sha256": "622f08ad723e99890e2c11d77b6e6fa9cc37dc5a24dc40a9514e6811fabe9424",
+      "bytes": 3264
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-stale-fast.log": {
+      "sha256": "890508b2e92792cb11e3260ce8581900cc5483847d9812078820cddef32e659e",
+      "bytes": 301
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-stale-diagnosis.md": {
+      "sha256": "8d36085e3fd94e44c25454fd47fdb1f71ad24f49ffb5683b7fe4212f7b6d1264",
+      "bytes": 16804
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-stale-diagnosis-checkpoint.md": {
+      "sha256": "ef35b3481fd8499218fea70dab1d0c2f52ad4b3b2366b766cad898bc6884acfe",
+      "bytes": 5557
+    },
+    ".trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-reentry-stale-audit.py": {
+      "sha256": "e3bd934f7f8e62bd099d8de48b04823ec84b63e130e1f6c21e1d20f5f94d1d25",
+      "bytes": 3393
+    }
+  },
+  "probeResults": {
+    "w5-stale-probe-expired-57a89632-9fa5-4b0d-8e55-291db9ed70e4": {
+      "sha256": "ac8b3efe0a07ca5200e484bb0a5b8a83f730ddb4c696a7a604d299ac9fec3954",
+      "bytes": 5846
+    },
+    "w5-stale-probe-fresh-cafb7db5-6c29-49bf-8561-ac288349889f": {
+      "sha256": "91fdb58e9cb1feeb68516f707c646dcebfe37d0d26713258ce5113ad00df3ee3",
+      "bytes": 19853
+    },
+    "w5-stale-probe-elapsed-294a250e-b165-42f6-8dbc-e7796a121986": {
+      "sha256": "df394fac4af9d01d2faa242c0169c818f22c4bbcdb8514b40a6073af3892e21b",
+      "bytes": 18628
+    },
+    "w5-stale-probe-elapsed-full-fbbd19a8-76f7-4d0e-a1ac-9dc612ec3256": {
+      "sha256": "547b1e20bdc1171adb44c631851650d002290413e5cf0bc9c57cb072fb942d3c",
+      "bytes": 20194
+    }
+  },
+  "audit": {
+    "sha256": "27dbefc087956ca10e90217d37705b0f63f94bfdb080b0bcd4ec113f380f4d21",
+    "bytes": 256
+  }
+}

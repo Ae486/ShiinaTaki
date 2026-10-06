@@ -17,6 +17,18 @@ function queued(db: Database): void {
 }
 
 describe("hindsight.backup status section", () => {
+  it.each(["generation", "lineage", "epoch", "missing"] as const)("retains backup history but refuses numeric interval attribution for %s", async (mismatch) => {
+    const h = backupHarness({ dirs, dbs }); seedVerifiedBank(h.db); await h.capture();
+    const backup = h.service.lastVerified()!;
+    if (mismatch === "missing") h.db.exec("DELETE FROM hindsight_replica_sync_checkpoints;");
+    else {
+      const column = { generation: "bank_generation", lineage: "provider_lineage_id", epoch: "authority_epoch_id" }[mismatch];
+      h.db.prepare(`UPDATE hindsight_replica_sync_checkpoints SET ${column}=:value`).run({ value: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" });
+    }
+    const status = readHindsightBackupStatus(h.db, { epochId: "epoch", lastVerified: backup, now: LATER });
+    expect(status.lastVerified?.backupId).toBe(backup.backupId); expect(status.ageSeconds).toBe(90);
+    expect(status.missingInterval[0]).toMatchObject({ fromNativeCursor: null, toReplicaCursor: mismatch === "missing" ? null : 5 });
+  });
   it("reports no backup with each verified Bank's current Core checkpoint and unsettled writes", () => {
     const h = backupHarness({ dirs, dbs });
     seedVerifiedBank(h.db); queued(h.db);

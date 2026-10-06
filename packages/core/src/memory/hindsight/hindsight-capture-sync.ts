@@ -34,7 +34,9 @@ export async function synchronizeHindsightCapture(state: HindsightRuntimeState, 
   const owner = new AbortController(); const forward = () => owner.abort();
   input.signal?.addEventListener("abort", forward, { once: true });
   const run: SyncRun = { outcomes: input.banks.map(() => undefined), detached: false, context: { timeoutMs, signal: owner.signal } };
-  try { await within(syncBanks(state, input, run), input.budgetMs); }
+  // The complete Bank sequence can outlive Run admission. Give it an independent live owner before racing the
+  // caller's budget, so subsequent Banks remain admitted and shutdown still joins the detached continuation.
+  try { await within(state.service.capture(() => syncBanks(state, input, run)), input.budgetMs); }
   finally { run.detached = true; input.signal?.removeEventListener("abort", forward); }
   if (input.signal?.aborted) throw new Error("MEMORY_OPERATION_CANCELLED");
   // A connection changed or disabled mid-sync fails the sync guards as an authority mismatch; like a drift seen before

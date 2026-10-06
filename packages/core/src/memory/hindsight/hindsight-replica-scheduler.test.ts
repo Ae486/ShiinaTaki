@@ -44,6 +44,23 @@ function fixture(banks = [globalBank], now = () => new Date().toISOString()) {
 }
 
 describe("B5 asynchronous single-flight scheduler", () => {
+  it("transition pause drains the accepted run, cancels only queued manual work and refuses later admission", async () => {
+    const f = fixture(); let release!: () => void;
+    const blocked = new Promise<void>((resolve) => { release = resolve; });
+    const run = vi.fn(async (input: HindsightReplicaRunInput) => { await blocked; return f.result(input); });
+    const scheduler = f.create({ run, rebuild: run }); scheduler.start();
+    const active = scheduler.tick();
+    const queuedId = "22222222-2222-4222-8222-222222222222";
+    scheduler.requestManual("global", "incremental", queuedId);
+    let settled = false; const pause = scheduler.pause().then(() => { settled = true; });
+    await Promise.resolve(); expect(settled).toBe(false);
+    expect(() => scheduler.requestManual("global", "incremental", "late")).toThrow("MEMORY_AUTHORITY_FENCED");
+    expect(() => scheduler.start()).toThrow("MEMORY_AUTHORITY_FENCED");
+    expect(scheduler.request("late")).toBeUndefined();
+    release(); await active; await pause;
+    expect(run).toHaveBeenCalledTimes(1); expect(scheduler.started()).toBe(false);
+    expect(scheduler.request(queuedId)).toMatchObject({ state: "cancelled" });
+  });
   it("keeps start non-blocking and isolates one failed Bank from another Bank's progress", async () => {
     const f = fixture([globalBank, characterBank]);
     const run = vi.fn(async (input: HindsightReplicaRunInput) => {

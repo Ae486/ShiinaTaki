@@ -23,6 +23,7 @@ import { sameApplicationValue, type HindsightApplicationScope } from "./hindsigh
 import { HindsightPolicyRefusal } from "./hindsight-policy-context.ts";
 import { HindsightError } from "./hindsight-errors.ts";
 import type { HindsightRuntimeSynchronizeInput } from "./hindsight-runtime-bank-service.ts";
+import type { CanonicalLocalWriteFence } from "../canonical-local-write-fence.ts";
 
 export interface HindsightMemoryWritePort {
   retain(context: MemoryProviderCallContext, request: RetainRequest): Promise<RetainResult>;
@@ -40,6 +41,7 @@ export interface HindsightMemoryProviderDeps {
   writes: HindsightMemoryWritePort;
   now?: () => string;
   signal?: AbortSignal;
+  workFence?: CanonicalLocalWriteFence;
 }
 export type HindsightMemoryProviderState = ReturnType<typeof createHindsightMemoryProviderState>;
 
@@ -154,6 +156,9 @@ export function hindsightMemoryErrorCode(error: unknown): MemoryErrorCode {
   return "MEMORY_INTERNAL_ERROR";
 }
 const MESSAGES: Record<MemoryErrorCode, string> = {
+  MEMORY_TRANSITION_QUEUED: "memory write is owned by the durable transition queue",
+  MEMORY_TRANSITION_QUEUE_FULL: "memory transition queue is full; no write was admitted",
+  MEMORY_TRANSITION_CUTOFF: "memory transition admission is closed; no write was admitted",
   MEMORY_INVALID_REQUEST: "memory request is invalid or unsupported", MEMORY_NOT_FOUND: "memory record was not found",
   MEMORY_REQUEST_ID_CONFLICT: "memory request identity was reused", MEMORY_REVISION_MISMATCH: "memory revision is stale",
   MEMORY_CAPABILITY_UNSUPPORTED: "memory operation is unsupported", MEMORY_AUTHORITY_MISMATCH: "memory authority or Bank binding changed",

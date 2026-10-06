@@ -23,12 +23,15 @@ export function createHindsightMemoryProvider(deps: HindsightMemoryProviderDeps)
   const signal = deps.signal ? AbortSignal.any([deps.signal, controller.signal]) : controller.signal;
   const state = createHindsightMemoryProviderState({ ...deps, signal });
   const track = <T>(action: () => Promise<T>): Promise<T> => {
-    const task = action(); active.add(task); void task.then(() => active.delete(task), () => active.delete(task)); return task;
+    const task = deps.workFence ? deps.workFence.admit(action) : action();
+    active.add(task); void task.then(() => active.delete(task), () => active.delete(task)); return task;
   };
   const run = <T>(context: MemoryProviderCallContext, action: (call: MemoryProviderCallContext) => Promise<T>) =>
     track(() => action({ ...context, signal: context.signal ? AbortSignal.any([signal, context.signal]) : signal }));
   const settle = async () => { while (active.size > 0) await Promise.allSettled([...active]); };
-  return { providerId: "hindsight", providerLineageId: state.epoch.providerLineageId, capabilities: () => track(state.capabilities),
+  return { providerId: "hindsight", providerLineageId: state.epoch.providerLineageId,
+    capabilities: () => !deps.workFence?.writable() && state.capabilitiesSnapshot()
+      ? Promise.resolve(state.capabilitiesSnapshot()!) : track(state.capabilities),
     capabilitiesSnapshot: state.capabilitiesSnapshot,
     stop: () => { controller.abort(); return settle(); }, settle,
     retain: (context, request) => run(context, (call) => execute({ state, context: call, request, schema: RetainRequestSchema, action: (value) => {

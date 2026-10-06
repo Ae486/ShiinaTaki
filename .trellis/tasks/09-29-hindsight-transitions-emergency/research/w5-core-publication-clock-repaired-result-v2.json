@@ -1,0 +1,91 @@
+{
+  "sourceSha256Before": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+  "copyRoot": "H:\\TakiAgent\\.trellis\\.runtime\\w5-core-publication-diagnostic-45c00d63-fd54-495b-b982-cbd9e3b239ac",
+  "historicalStateOverride": "exact current recovery operation viewed as running",
+  "timings": [
+    {
+      "stage": "builder",
+      "ms": 40887,
+      "totalMs": 40893
+    },
+    {
+      "stage": "proof",
+      "ms": 40229,
+      "totalMs": 81127
+    },
+    {
+      "stage": "publication",
+      "ms": 59744,
+      "totalMs": 140883
+    },
+    {
+      "stage": "reconstruction",
+      "ms": 39477,
+      "totalMs": 180364
+    }
+  ],
+  "guards": [
+    {
+      "stage": "builder",
+      "elapsedMs": 8,
+      "liveNow": "2026-10-03T15:30:27.200Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "builder",
+      "elapsedMs": 12,
+      "liveNow": "2026-10-03T15:30:27.204Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "builder",
+      "elapsedMs": 39216,
+      "liveNow": "2026-10-03T15:31:06.408Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "builder",
+      "elapsedMs": 40195,
+      "liveNow": "2026-10-03T15:31:07.387Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "proof",
+      "elapsedMs": 40900,
+      "liveNow": "2026-10-03T15:31:08.092Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "proof",
+      "elapsedMs": 81128,
+      "liveNow": "2026-10-03T15:31:48.320Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "publication",
+      "elapsedMs": 81141,
+      "liveNow": "2026-10-03T15:31:48.333Z",
+      "liveClockPass": true
+    },
+    {
+      "stage": "publication",
+      "elapsedMs": 140885,
+      "liveNow": "2026-10-03T15:32:48.077Z",
+      "liveClockPass": true
+    }
+  ],
+  "remainingLeaseMsAtStart": 255482,
+  "passed": true,
+  "counts": {
+    "banks": 2,
+    "records": 1262,
+    "sources": 722,
+    "sourceSets": 1262,
+    "candidates": 1,
+    "receipts": 1,
+    "publications": 1
+  },
+  "committedEpochMatches": true,
+  "sourceSha256After": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+  "sourceUnchanged": true
+}

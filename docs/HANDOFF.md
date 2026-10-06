@@ -1,5 +1,11 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
+> Current Memory delivery (2026-10-06): Stage 4 W0-W8 implementation and isolated automated acceptance are complete
+> in `H:/TakiAgent`; see section 3.2 for the final report and remaining manual/environment boundaries. The bound
+> `09-29-hindsight-transitions-emergency` task remains `in_progress`. The owner subsequently authorized the local
+> Native/Taki commit batch recorded in its `research/commit-checkpoint-2026-10-06.md`; no push/archive is included.
+> Earlier checkpoints below are historical and do not supersede that delivery or select the T4 worktree.
+
 > D78 commit checkpoint and pre-B7 continuation (2026-09-10): the owner authorized committing the completed work and
 > continuing clear requirements before B7. Reuse existing decisions; apply `grill-with-docs` to unresolved product
 > choices, and complete an explicit grill before any B7 implementation. No push or production authority switch is
@@ -218,8 +224,8 @@ The native side is `H:/hindsight` TAKI-HS-013 (backup endpoint + CLI proof) and 
 serialization retry), uncommitted there like the earlier Taki patches; the compatibility build is unchanged. The W6
 restore drill (`research/restore-drill-2026-09-27.md`) proves AC11 on a throwaway native instance and found two Core
 defects fixed in `6ea0d16`/`7bbd9c3`; the 2026-09-27 formal check (`research/check-2026-09-27.md`) covers AC1-AC12.
-D86 Stage 3 trigger and D92 are closed; D88/D90/D91/D93 stay open. Next delivery is Stage 4 (transitions and emergency
-takeover; U1 is answered). From 2026-09-23 all sub-agents run on opus (fable unavailable).
+D86 Stage 3 trigger and D92 closed at that checkpoint; D88/D90/D91/D93 were then open. Stage 4 was the next
+delivery (transitions and emergency takeover; U1 answered); its final status follows below.
 The owner's latest direction makes grill conditional across the whole task: proceed when no major unresolved
 requirement needs an owner decision; reopen grill for a concrete material issue during development. No currently known
 owner question blocks continuation.
@@ -230,6 +236,41 @@ are superseded. Under the owner's
 2026-09-19 autonomy grant the Leader may run the Trellis flow, commit and archive cleanly completed stages without
 per-step consent; manual acceptance is never marked passed and nothing is pushed. Implementer dispatch follows the
 plan's wave boundaries (one agent per wave, never finer) with an explicit context-budget brief.
+
+Stage 4 final delivery (2026-10-06): `.trellis/tasks/09-29-hindsight-transitions-emergency` has completed W0-W8 and
+all six PRD product outlines in the approved isolated automated scope. Healthy return/reentry preserves current
+logical state and mappings; emergency separately seals surviving evidence and commits a new Local epoch; durable
+operations retain exact transition/receipt identities across uncertain replies, binding failure and restart.
+Home exposes Core-owned permission, confirmation, recovery/cancel and truthful progress to multiple clients.
+The [final W8 independent check](../.trellis/tasks/09-29-hindsight-transitions-emergency/research/w8-independent-check.md)
+maps T01-T18 to the PRD and records all fixed findings. Shared 555, Core 3784 plus one existing archive-fixture skip,
+Desktop 675 and Rust 5 tests passed, along with root lint/five workspace typechecks, Desktop build, seven actual
+main.ts boot/recovery processes and authenticated WS/browser checks. The existing Pet chunk warning remains.
+
+The [W5 actual healthy report](../.trellis/tasks/09-29-hindsight-transitions-emergency/research/w5-healthy-final-result-2026-10-06.md)
+and [W6 emergency/restart/D91 report](../.trellis/tasks/09-29-hindsight-transitions-emergency/research/w6-final-result-2026-10-06.md)
+preserve the isolated real-data evidence: 2 Banks, 722 Sources, 1275 records and 89 invalidated records; W6 added no
+retention change or Native/model call. All three older unknown operations remain unchanged. D91 restored the W5
+Hindsight pair on a separate owned instance, matched 56 tables/trigger modes, stopped PostgreSQL and passed the
+actual seal/credential/Core pre-writer gates. It did not restore the emergency Local database or prove original-user
+or DPAPI portability. W8 reused source-matched evidence without rerunning the corpus. Parent verified all 23 final
+source/helper identities and all 28 evidence pins in `research/w8-final-evidence.json` under the task.
+
+D93 closed in W0; D91 remains globally open for its production/original-environment boundary. Owner/manual,
+packaged WebView2/CSP, original credentials and original-data authority replacement remain unaccepted; D89,
+Stage 5/6, remote-Core D23 and other deferred work retain their separate scope. Long RPCs remain bounded at
+120 seconds; unknown-result/original-operation reattachment is proved, timely large-corpus ACK is not. Performance
+improvement is deferred under the owner's completion-first direction. Reuse the existing native/authority contract
+and migration 057; restoration requires a validated Core/Native pair and credential custody before writers.
+After COMMIT recover the selected epoch; configuration reversal or schema downgrade is not rollback.
+
+The current Stage 4 task remains session-bound and `in_progress`. The owner selected consolidated checks by
+milestone/risk with one active child at most; all implementation/check execution and owned services are stopped.
+The owner's subsequent local-commit request checkpoints this delivery and its reviewed Native dependencies; see
+the task's `research/commit-checkpoint-2026-10-06.md`. No push, finish/archive, original-data replacement or Stage 5
+start is included. Preserve failed histories and stopped W5/W6
+baselines; do not rerun conversion, extraction or old emergency/restore wrappers. These current limits supersede
+the earlier checkpoint's general closeout grant for this delivery.
 
 The Hindsight production patch lives under `H:/hindsight` and has no T4 production-file overlap. Later Memory children
 can overlap T4 integration seams. The main merge hotspots are expected to be:

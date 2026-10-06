@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/shared
+
+
+ Test Files  64 passed (64)
+      Tests  555 passed (555)
+   Start at  14:58:12
+   Duration  17.08s (transform 1.88s, setup 0ms, import 11.93s, tests 1.36s, environment 9ms)
+

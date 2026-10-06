@@ -1,0 +1,23 @@
+{
+  "deliveredManifestSha256": "0e7bfeae8c3531b1782acc81f25db9f39ef34ed1b0a8df3969575a7934cf7f33",
+  "files": [
+    {
+      "source": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_native_view_inventory.py",
+      "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-checker-preimages\\w5_native_view_inventory.py",
+      "bytes": 6053,
+      "sha256": "ba9fc92b43580174e8fc30c5ed3bf74766a2bd68a2a7b79e0f27c44e9b467cf8"
+    },
+    {
+      "source": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-postpatch.py",
+      "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-checker-preimages\\w5-native-view-postpatch.py",
+      "bytes": 6879,
+      "sha256": "53536bd3b2dfd64971d05b8f6b0f0b7b69d26908f08007dc94fb94404b5172f8"
+    },
+    {
+      "source": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_native_view_postpatch.py",
+      "preimage": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-native-view-checker-preimages\\test_w5_native_view_postpatch.py",
+      "bytes": 11503,
+      "sha256": "dfd6c02821aeeeb43f0a00835b3c95d6ba06f78f08b1284ac08d88fa39850752"
+    }
+  ]
+}

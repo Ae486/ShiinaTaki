@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { hindsightRuntimeFixture } from "../../testing/hindsight-runtime-composition-fixtures.ts";
 import { curatorTestRemotePolicy } from "./hindsight-policy-curator-fixtures.ts";
 import { HindsightApplicationRefusal } from "./hindsight-application-client.ts";
+import { publishReplicaCheckpoint } from "../../db/hindsight-replica-checkpoint-store.ts";
+import { createHindsightReplicaSchedulerRepo } from "../../db/hindsight-replica-scheduler-repo.ts";
 
 const fixtures: ReturnType<typeof hindsightRuntimeFixture>[] = [];
 afterEach(async () => { for (const value of fixtures.splice(0)) await value.close(); });
@@ -14,6 +16,40 @@ function hideMemory(f: ReturnType<typeof fixture>) {
 }
 
 describe("application-aware snapshot and replay integration", () => {
+  it("classifies a B5-only seed rollback before application snapshots and holds automatic work", async () => {
+    const f = hindsightRuntimeFixture({ seed: false }); fixtures.push(f);
+    const bank = f.banks[0]!; const subsystem = f.subsystem(); const uuid = "11111111-1111-4111-8111-111111111111";
+    publishReplicaCheckpoint(f.db, { previous: null, next: { bankId: bank.scope.bankId,
+      providerLineageId: bank.scope.namespace.provider_lineage, bankGeneration: bank.scope.namespace.bank_generation,
+      authorityEpochId: "epoch", replicaEpochId: uuid, endCursor: bank.server.cursor.native + 1,
+      snapshotId: uuid, snapshotCursor: 0, snapshotManifestDigest: "a".repeat(64), manifestDigest: "b".repeat(64), verifiedAt: new Date().toISOString() } });
+    const native = f.replica.nativeCheckpoint(bank.scope.bankId)!;
+    const repo = createHindsightReplicaSchedulerRepo(f.db);
+    const binding = { bankId: bank.scope.bankId, scope: "global" as const, characterId: null };
+    repo.ensureBank({ bank: binding }); repo.requestManual({ bankId: binding.bankId, kind: "full" });
+    const run = repo.claim({ bankId: binding.bankId, ownerId: "seed", leaseDurationMs: 30_000 })!;
+    const snapshot = vi.spyOn(f.remote.client, "createApplicationSnapshot");
+    await expect(subsystem.state.sync.run({ bank: binding, run, signal: new AbortController().signal }))
+      .rejects.toMatchObject({ code: "HINDSIGHT_PROVIDER_ROLLBACK_DETECTED" });
+    repo.fail({ run, errorCode: "HINDSIGHT_PROVIDER_ROLLBACK_DETECTED" });
+    expect(repo.get(binding.bankId)).toMatchObject({ nextAction: "explicit_retry_required", retryDueAt: null });
+    repo.requestCatchUp(binding.bankId);
+    expect(repo.claim({ bankId: binding.bankId, ownerId: "automatic", leaseDurationMs: 30_000 })).toBeUndefined();
+    expect(snapshot).not.toHaveBeenCalled(); expect(f.replica.checkpoint(binding.bankId)).toBeUndefined();
+    expect(f.replica.nativeCheckpoint(binding.bankId)).toEqual(native);
+  });
+
+  it.each(["native", "state"] as const)("classifies an ordinary page whose %s cursor alone rolled back before any event publication", async (cursor) => {
+    const f = fixture(); const subsystem = f.subsystem(); const bank = hideMemory(f);
+    await subsystem.state.service.synchronize({ bankId: bank.scope.bankId, context: { timeoutMs: 30_000 } });
+    const before = f.replica.checkpoint(bank.scope.bankId)!;
+    const snapshot = vi.spyOn(f.remote.client, "createApplicationSnapshot");
+    bank.server.cursor[cursor] = before.checkpoint[`${cursor}_cursor`] - 1;
+    await expect(subsystem.state.service.synchronize({ bankId: bank.scope.bankId, context: { timeoutMs: 30_000 } }))
+      .rejects.toMatchObject({ code: "HINDSIGHT_PROVIDER_ROLLBACK_DETECTED" });
+    expect(snapshot).not.toHaveBeenCalled(); expect(f.replica.checkpoint(bank.scope.bankId)).toEqual(before);
+    expect(f.replica.nativeCheckpoint(bank.scope.bankId)).toEqual(before.native);
+  });
   it("rebuilds after an authenticated replay floor reset while retaining the real native baseline identity", async () => {
     const f = fixture(); const subsystem = f.subsystem(); const bank = hideMemory(f);
     const before = f.replica.checkpoint(bank.scope.bankId)!;

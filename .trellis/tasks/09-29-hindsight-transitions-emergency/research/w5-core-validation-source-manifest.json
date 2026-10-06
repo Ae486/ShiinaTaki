@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "createdAtUtc": "2026-10-03T17:21:02.1402178Z",
+  "originalDatabaseSha256": "6d9c381b11045722f1b6086d04e886d6c6bfcde8ab8cddf84091f519e1e7891c",
+  "originalPreimageManifestSha256": "7e8a25a47be1253c4e5205862e958d8fa1967f697b1e3e885c3172916cb4f4fe",
+  "files": [
+    {
+      "path": ".trellis/spec/backend/memory-transition-healthy-drivers.md",
+      "sha256": "08de1c80c3ab1566955ef65877a5aefb28c570da48fde7cf4aa6edc09506bfd9"
+    },
+    {
+      "path": ".trellis/spec/backend/memory-transition-publication.md",
+      "sha256": "57d80712a8f9ee4cdd6c41af25918cdd1f32515d950608fdae0ef9c11ca1bdcb"
+    },
+    {
+      "path": ".trellis/spec/backend/memory-transitions.md",
+      "sha256": "060069047126257a9d00576b0d23f222b8f8f0e5b968f5b0a04db2cf848ff0c7"
+    },
+    {
+      "path": "packages/core/src/db/hindsight-application-replica-publication.ts",
+      "sha256": "52d2435d4fc74de55947203805f6cbc1f29c6d60fbe14a97d639d9f5f3d8d0ed"
+    },
+    {
+      "path": "packages/core/src/db/index.md",
+      "sha256": "380ac09e2aa8f5cd627edb9722c6a07b5f3acdbd0aecd0449b757db0b01eb54f"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-candidate-repo.ts",
+      "sha256": "fb5bfb92ed6c530aca1c55af7f76997ab2438a01672a5f91152d4c4201929e75"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-local-staging.ts",
+      "sha256": "97b9847d12959fd4b36a819086d9f0e89ee550f998cf7bd2bf166995cc14df9f"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-order.test.ts",
+      "sha256": "f2c6ae8d9180fe45bb6bbfba2089f5326333afb2783dc35dad3e658e819bce2f"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-proof.ts",
+      "sha256": "3a14faaf2cecceb5c7881b26622b435ea577fb3b6ed32a651b46c71d6e5699f0"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-reader.ts",
+      "sha256": "28e9d76a41393823b2f4966c88edbc9c36f4d19ccede8c54a3dd66b6d486edb5"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-publication-repo.ts",
+      "sha256": "e489e5a5883d4771d83d2f99942be3f137a955da20cf00ee123d2ff45c5de807"
+    },
+    {
+      "path": "packages/core/src/db/memory-transition-representation.ts",
+      "sha256": "5cdf6abdea43c8ed4cfadf8548b5e164b998be69a13ff4bd8a24d82f4471dfcc"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/index.md",
+      "sha256": "a93d6d54bf6da647cb37d9f30a276881605ddbf3c8e810249dee3b0d24de2393"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-evidence-context.test.ts",
+      "sha256": "43cfc590d16c3acbf28b32c98c288e1040cd9ac67b9e81e7dbcf2857c85eb121"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-evidence-context.ts",
+      "sha256": "b1b20783ec5602cb0bd3b33361fa06636f0e28fd611bfccdeb89624797e05d4c"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-final-mapping.ts",
+      "sha256": "f1dd6f0ef8f84a0db71cabe79aa9be7165f9405eb7daed68678ac13001024b8e"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-diagnostics.test.ts",
+      "sha256": "08334d64a2917f3a465e60eb28f554fef4617cc5d9b8746035642ea3981938d2"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-execution.ts",
+      "sha256": "359501af952e908abf61758ef0054c49afa475c56c7c1da916bbf78ca1b5dd82"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-healthy-service.ts",
+      "sha256": "680a89c379f43fc91c6d3b351eef42f14f9801d0ca1aeaf85456f6d93b96a650"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-candidate.ts",
+      "sha256": "9def05f5b3b06c0bfc8c08b4e2564a01711e548f44bbaefcfe964212fe0ada03"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-local-projection.ts",
+      "sha256": "034838c98607f4768a7cb8ef4b3f6598b1598bef7868057967c5570617c28ed0"
+    },
+    {
+      "path": "packages/core/src/memory/transitions/transition-pending-sources.ts",
+      "sha256": "350042f03b7559c9cb1d530a1f5b5a887727ec6f76baab14d81c2e817a98ba8b"
+    },
+    {
+      "path": "packages/core/src/testing/index.md",
+      "sha256": "cff4addbf156c7b72250f5b21a62445706515352870e77676e3cabcc50107cc5"
+    },
+    {
+      "path": "packages/core/src/testing/memory-transition-publication-fixtures.ts",
+      "sha256": "af9fb0e30507de64e401d94b68dbc317844d858520e79f9610b3c2fd1435be67"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "v2-tests": {
+    "exitCode": 0,
+    "command": [
+      "H:\\hindsight\\.venv\\Scripts\\python.exe",
+      "-B",
+      "-s",
+      "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_actual_embedding_v2.py"
+    ]
+  },
+  "ruff": {
+    "exitCode": 0,
+    "command": [
+      "H:\\hindsight\\.venv\\Scripts\\ruff.exe",
+      "check",
+      "--config",
+      "H:\\hindsight\\hindsight-api-slim\\pyproject.toml",
+      "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-candidate-actual-embedding-v2.py",
+      "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_actual_embedding_v2.py"
+    ]
+  },
+  "format": {
+    "exitCode": 0,
+    "command": [
+      "H:\\hindsight\\.venv\\Scripts\\ruff.exe",
+      "format",
+      "--check",
+      "--config",
+      "H:\\hindsight\\hindsight-api-slim\\pyproject.toml",
+      "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-candidate-actual-embedding-v2.py",
+      "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_actual_embedding_v2.py"
+    ]
+  },
+  "ty": {
+    "exitCode": 0,
+    "command": [
+      "H:\\hindsight\\.venv\\Scripts\\ty.exe",
+      "check",
+      "--project",
+      "H:\\hindsight\\hindsight-api-slim",
+      "--python",
+      "H:\\hindsight\\.venv",
+      "--extra-search-path",
+      "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+      "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-candidate-actual-embedding-v2.py",
+      "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\test_w5_actual_embedding_v2.py"
+    ]
+  },
+  "no-argument-entry": {
+    "exitCode": 0,
+    "command": [
+      "H:\\hindsight\\.venv\\Scripts\\python.exe",
+      "-B",
+      "-s",
+      "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-candidate-actual-embedding-v2.py"
+    ]
+  },
+  "v1Preservation": {
+    "files": 269,
+    "allUnchanged": true
+  },
+  "v1FakeSemantics": {
+    "passed": 19,
+    "result": "../w5-actual-embedding-v2-checks/result.json",
+    "repeatedAfterTypeOnlyFix": false
+  }
+}

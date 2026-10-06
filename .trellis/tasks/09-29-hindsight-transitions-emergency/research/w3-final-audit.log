@@ -1,0 +1,61 @@
+{
+  "task": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency",
+  "nativeRoot": "H:\\hindsight",
+  "takiRoot": "H:\\TakiAgent",
+  "heads": {
+    "H:\\TakiAgent": "fccfc4fb78958c90efebdb4a5a98b355bcb73a40",
+    "H:\\hindsight": "6a749ba3e7d8719e336d9d1d8735a8e09da4366b"
+  },
+  "preservedNativeBaselineCount": 289,
+  "nativeMissing": [],
+  "unexpectedNative": [],
+  "encodingFailures": [],
+  "indexFailures": [],
+  "whitespaceFailures": [],
+  "diffChecks": [
+    {
+      "root": "H:\\TakiAgent",
+      "args": [
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "root": "H:\\TakiAgent",
+      "args": [
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "root": "H:\\hindsight",
+      "args": [
+        "diff",
+        "--check"
+      ],
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "root": "H:\\hindsight",
+      "args": [
+        "diff",
+        "--cached",
+        "--check"
+      ],
+      "exitCode": 0,
+      "output": ""
+    }
+  ],
+  "generatedPython": {
+    "canonicalRun": "97f9a4800627",
+    "compared": 372,
+    "mismatches": []
+  }
+}
+W3 native paths: 59; Taki source/spec paths: 97

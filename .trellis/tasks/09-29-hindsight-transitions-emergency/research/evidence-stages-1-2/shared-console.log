@@ -1,0 +1,18 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/shared
+
+ ✓ src/memory-operation-schema.test.ts (5 tests) 24ms
+ ✓ src/memory-authority-status-schema.test.ts (4 tests) 19ms
+ ✓ src/memory-hindsight-operation-schema.test.ts (4 tests) 15ms
+ ✓ src/hindsight-setup-schema.test.ts (4 tests) 15ms
+ ✓ src/memory-hindsight-lifecycle-schema.test.ts (6 tests) 14ms
+ ✓ src/hindsight-connection-schema.test.ts (3 tests) 11ms
+ ✓ src/memory-activation-schema.test.ts (2 tests) 16ms
+ ✓ src/memory-local-onboarding-schema.test.ts (4 tests) 16ms
+
+ Test Files  8 passed (8)
+      Tests  32 passed (32)
+   Start at  10:39:07
+   Duration  3.18s (transform 1.11s, setup 0ms, import 2.76s, tests 131ms, environment 1ms)
+
+JSON report written to H:/TakiAgent/.trellis/tasks/09-29-hindsight-transitions-emergency/research/evidence-stages-1-2/shared-results.json

@@ -21,6 +21,7 @@ import type { HindsightBackupFile, HindsightBackupStore } from "./hindsight-back
 
 export interface HindsightBackupVerifyInput {
   backupId: string;
+  signal?: AbortSignal;
   checkpoint(phase: MemoryBackupProducerRef["phase"]): void;
 }
 interface VerifyDeps {
@@ -38,8 +39,10 @@ export async function verifyHindsightBackup(deps: VerifyDeps, input: HindsightBa
     err: error instanceof Error ? error.name : "unknown" }, "backup verify failed");
   try {
     const manifest = await stepAsync(() => deps.store.read(input.backupId), (error) => codeOf(error, "HINDSIGHT_BACKUP_STORAGE_FAILED"));
+    input.signal?.throwIfAborted();
     if (!manifest) return failedOutcome("HINDSIGHT_BACKUP_ARTIFACT_INVALID");
-    const judged = await judge(deps, manifest).then(() => null, (error: unknown) => outcomeOf(error, unexpected));
+    const judged = await judge(deps, manifest, input.signal).then(() => null, (error: unknown) => outcomeOf(error, unexpected));
+    input.signal?.throwIfAborted();
     if (judged && !judged.ok && ARTIFACT_CODES.includes(judged.code)) {
       await record(deps.store, { manifest, verifiedAt: null });
       return judged;
@@ -57,19 +60,21 @@ export async function verifyHindsightBackup(deps: VerifyDeps, input: HindsightBa
   }
 }
 
-async function judge(deps: VerifyDeps, manifest: HindsightBackupManifest): Promise<void> {
+async function judge(deps: VerifyDeps, manifest: HindsightBackupManifest, signal?: AbortSignal): Promise<void> {
   assertDigest(await digest(deps.store, { manifest, file: "core.sqlite" }), manifest.core);
-  const proof = await nativeProof(deps, manifest);
+  signal?.throwIfAborted();
+  const proof = await nativeProof(deps, manifest, signal);
+  signal?.throwIfAborted();
   const pair = verifyHindsightBackupPair(manifest, proof);
   if (!pair.ok) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_PAIR_MISMATCH", { reason: pair.reason, bankId: pair.bankId });
 }
 
 /** The proof the pair check judges: re-read from a Core-held route-b ZIP, else the recorded one after its ZIP digest matches. */
-async function nativeProof(deps: VerifyDeps, manifest: HindsightBackupManifest): Promise<HindsightBackupNativeProof> {
+async function nativeProof(deps: VerifyDeps, manifest: HindsightBackupManifest, signal?: AbortSignal): Promise<HindsightBackupNativeProof> {
   const { store } = deps;
   const recorded = manifest.native.proof;
   if (manifest.native.location === "native-host") {
-    assertDigest(await nativeHostDigest(deps.route, manifest.native.file), { sha256: recorded.zipSha256, bytes: recorded.zipBytes });
+    assertDigest(await nativeHostDigest(deps.route, manifest.native.file, signal), { sha256: recorded.zipSha256, bytes: recorded.zipBytes });
     return recorded;
   }
   if (manifest.route === "native-endpoint") {
@@ -84,9 +89,15 @@ async function nativeProof(deps: VerifyDeps, manifest: HindsightBackupManifest):
   return archive.proof;
 }
 
-async function nativeHostDigest(route: HindsightNativeBackupRoute, file: string): Promise<HindsightBackupFileDigest> {
+async function nativeHostDigest(route: HindsightNativeBackupRoute, file: string, retired?: AbortSignal): Promise<HindsightBackupFileDigest> {
   if (!route.available()) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_ROUTE_UNAVAILABLE");
-  const digest = await stepAsync(() => route.readBack({ file, signal: AbortSignal.timeout(READ_BACK_TIMEOUT_MS) }),
+  const signal = AbortSignal.any([AbortSignal.timeout(READ_BACK_TIMEOUT_MS), ...(retired ? [retired] : [])]);
+  let onAbort: () => void = () => undefined;
+  const aborted = new Promise<never>((_resolve, reject) => {
+    onAbort = () => reject(new HindsightBackupFailure("HINDSIGHT_BACKUP_NATIVE_FAILED"));
+    if (signal.aborted) onAbort(); else signal.addEventListener("abort", onAbort, { once: true });
+  });
+  const digest = await stepAsync(() => Promise.race([route.readBack({ file, signal }), aborted]).finally(() => signal.removeEventListener("abort", onAbort)),
     (error) => codeOf(error, "HINDSIGHT_BACKUP_NATIVE_FAILED"));
   if (!digest) throw new HindsightBackupFailure("HINDSIGHT_BACKUP_ARTIFACT_INVALID");
   return digest;

@@ -22,6 +22,7 @@ import { canonicalControlledLayerTags, readCanonicalRecord, replaceCanonicalFts,
 import { canonicalMemoryAtomic, readCanonicalSnapshot, saveCanonicalSnapshot } from "./canonical-memory-maintenance-storage.ts";
 import { createCanonicalMemoryRepo } from "./canonical-memory-repo.ts";
 import type { Database } from "./sqlite.ts";
+import { advanceCanonicalPolicyVersion } from "./canonical-memory-policy-revision.ts";
 
 type ReinforceInput = Parameters<CanonicalMemoryMaintenanceRepo["reinforce"]>[0];
 type PolicyInput = Parameters<CanonicalMemoryMaintenanceRepo["policyEdit"]>[0];
@@ -50,7 +51,11 @@ function policyEdit(writer: CanonicalMaintenanceWriter, input: PolicyInput): Can
     decode: (value) => decodeCanonicalMaintenanceMutation(writer.db, input, value),
     apply() {
       const current = requireExpectedCanonicalRecord(writer.db, input);
-      const policy = { ...current.policy, ...patch.data, updatedAt: input.now };
+      const policy = advanceCanonicalPolicyVersion(current.policy, { ...current.policy, ...patch.data, updatedAt: input.now });
+      if (policy.policyVersion === current.policy.policyVersion) {
+        ensureCanonicalMaintenanceSnapshot(writer.db, current, input.now);
+        return { outcome: "unchanged", record: current };
+      }
       const unit = { ...current.unit, revision: current.unit.revision + 1, updatedAt: input.now,
         tags: patch.data.layerId === undefined ? current.unit.tags : canonicalControlledLayerTags(current.unit.tags, policy.layerId) };
       return commitCanonicalMaintenanceRecord(writer, input, HindsightCurrentCanonicalRecordSchema.parse({ ...current, unit, policy }));
@@ -78,7 +83,8 @@ export function applyCanonicalReinforcement(writer: CanonicalMaintenanceWriter, 
   const importance = input.mode === "tidy" ? current.policy.importance : Math.max(current.policy.importance, input.importance);
   const record = HindsightCurrentCanonicalRecordSchema.parse({ ...current,
     unit: { ...current.unit, revision: current.unit.revision + 1, proofCount: current.unit.proofCount + 1, updatedAt: input.now },
-    policy: { ...current.policy, importance, updatedAt: importance === current.policy.importance ? current.policy.updatedAt : input.now } });
+    policy: advanceCanonicalPolicyVersion(current.policy, { ...current.policy, importance,
+      updatedAt: importance === current.policy.importance ? current.policy.updatedAt : input.now }) });
   return commitCanonicalMaintenanceRecord(writer, input, record);
 }
 

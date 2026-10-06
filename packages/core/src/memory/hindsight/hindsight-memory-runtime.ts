@@ -1,13 +1,8 @@
 /**
  * INPUT:  the real Hindsight provider/recovery state and Core-owned persona/Block projection
- * OUTPUT: canonical tools, immutable Run memory capture and actual native policy-bearing recall; a memory-unavailable Run
- *         (unavailableRun) when the Character has no ready Bank, the connection drifted during an incomplete admission sync or
- *         a degraded admission sync left no admission evidence;
- *         onSynced after a capture that admitted and synced every routed Bank (the G13 reconnect signal); onSync per Bank
- *         whose admission sync (bounded by admissionBudgetMs(), read per capture) was refused, degraded, deferred or later
- *         failed in the background
- * POS:    core/memory/hindsight — foreground engine adapter; legacy generic background/file mutation surfaces refuse explicitly;
- *         integrity/authority failures keep refusing the capture
+ * OUTPUT: immutable canonical Runs, bounded admission sync, policy-bearing reads and truthful unavailable captures
+ * POS:    core/memory/hindsight — whole-capture transition ownership, permanently retired references and typed write custody;
+ *         Core receives per-Bank sync failures and a reconnect signal only after complete capture synchronization
  */
 import type { MemoryEngine } from "../memory-engine.ts";
 import { CANONICAL_MEMORY_SYSTEM_PROMPT } from "../../agents/chat-agent.ts";
@@ -29,7 +24,7 @@ export function createHindsightMemoryRuntime(input: {
   onSync?: (event: HindsightCaptureSyncEvent) => void; admissionBudgetMs: () => number;
 }) {
   const { state } = input;
-  const consumers = createHindsightRuntimeConsumers();
+  const consumers = createHindsightRuntimeConsumers(state.workFence);
   const persona = input.promptDir ? createPersonaProvider({ promptDir: input.promptDir }) : createFallbackPersonaProvider();
   const capabilities = () => {
     const value = state.provider.capabilitiesSnapshot();

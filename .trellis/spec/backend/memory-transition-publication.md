@@ -1,0 +1,178 @@
+# Memory Transition Publication and Runtime Ownership
+
+## Synchronous native evidence validation
+
+Large retained W2 evidence can take tens of seconds to validate. Repeating full parsing, canonical hashes and body
+verification for scope resolution, projection, Blocks, Pending Sources and candidate persistence can block the Core
+event loop beyond the executor lease; a timer cannot renew while synchronous work runs.
+
+`withTransitionEvidenceContext(db, callback)` owns one synchronous candidate/proof/publication/reconstruction
+boundary. The first read performs the complete existing stored-document and native-evidence checks. Internal calls
+may reuse only its verified object identity and the same database. Every reuse compares the actual stored row's
+identity and complete body bytes; changed/deleted rows fail closed. JSON is deeply frozen, and returned body Maps
+and byte arrays are isolated. The context expires on return or throw and rejects asynchronous callbacks.
+
+Never cache across independent entrypoints or in process-global state. The context certifies immutable evidence
+only: it cannot certify current configuration, lease, executor, candidate mapping or source ownership. Keep every
+existing current-state guard, W1 CAS and SQLite transaction. Candidate construction, independent proof creation,
+COMMIT and later boot/recovery each validate storage afresh. No lease/TTL extension or await inside SQLite is a
+substitute for removing repeated validation.
+
+Regressions must cover complete publication under a finite simulated processing budget, genuine lease exhaustion
+with rollback, actual row corruption/deletion, foreign database/object identities, immutable body isolation,
+context expiry and fresh validation after proof or COMMIT. A corpus-copy timing report remains separate from
+fixture passes and must record unchanged source hashes and exact logical counts.
+
+## Boundary-local validation cost
+
+Proof creation, atomic publication and later receipt reconstruction are independent validation boundaries. Within
+one synchronous boundary, thread the owned `TransitionEvidenceContext` through candidate reconstruction, native
+Bank joins, installation, representation and final read-back. Validate each retained native document in full once,
+then recheck actual stored identity/body bytes on reuse. Do not reuse a context from candidate construction or an
+earlier invocation. Configuration/source/lease guards and all final joins remain current and uncached.
+
+The transition-only D77 snapshot publisher can consume that same verified object and independently reconstructed
+bundle; its normal snapshot/event paths retain their existing validation and TTL behavior. Timed corpus-copy
+verification must include proof and complete COMMIT/read-back, not only the faster candidate builder. A candidate
+performance result does not prove publication fits the lease or establish real-model/manual acceptance.
+
+Before comparing installed Local arrays with the candidate, apply the candidate's `sortState` ordering to the freshly
+discovered state. SQLite inventory order can differ, especially for derived objects whose IDs and revisions sort
+differently. Preserve exact counts, duplicates, nested order and payload hashes; sorting is not permission to compare
+only IDs or sets. Tests must include genuine mixed models/directives and a changed-payload rollback refusal.
+
+## Scope and signatures
+
+### Verified observation scope
+
+`createTransitionPublicationObserver(db)` belongs to one healthy service and one selected receipt. It reexecutes
+the original complete publication/candidate reader and every mutable ancestry/history/preparation/delta/custody/
+queue/Pending/source/checkpoint/marker join inside a coherent SQLite read transaction. It retains no SQL result,
+candidate verdict, publication verdict, selected authority or readiness answer.
+
+Only native verification whose current row identity and complete bytes still match, and the frozen pure
+`projectTransitionLocalBank` output, may be reused. The projection key covers every semantic input, including future
+fields, exact ordered ancestry/previous mappings and verified baseline evidence. Returned native body bytes are
+detached. Each successful read prunes untouched dependency entries and keeps one current projection variant per Bank.
+Changed receipt/binding revision, any validation error, service close or a new Database owner invalidates reuse.
+The first eligible read performs full validation; no TTL, persistent/global cache or asynchronous guess is allowed.
+
+Independent COMMIT, bind, boot/reconstruction and data-admission readers retain fresh full contexts. Public full
+publication readers reject an observation context through `assertIndependent`; the internal candidate flow accepts
+an observation context only while the observer's synchronous read is active. Tests must prove unchanged corruption
+checks, legal current Local edits and custody evolution, actual boot status timing and independent full revalidation
+after warming. Existing cold ID-based native loading does not enforce a slot's semantic meaning; warm observation
+additionally rejects any saved row-slot change. Neither behavior permits trusting a changed native body or identity.
+
+An independent synchronous context also retains one frozen pure projection variant per Bank until its callback
+ends. The shared pure key covers all semantic inputs, including ordered ancestry/mappings, baseline evidence and
+future fields; every hit first checks context/evidence ownership and rereads exact stored identity/body bytes.
+Changed inputs recompute; changed/deleted evidence refuses; caller-created envelopes and mutable body aliases are
+not admitted. Close on return/throw clears all entries. This permits one admission transaction's repeated full
+readers to share immutable computation, without importing the service-owned observer store or any mutable verdict.
+
+W4 is the production Core handoff seam. W5 owns healthy-operation orchestration and W6 owns emergency admission;
+neither a test fixture nor a prepared candidate enables an operator transition action.
+
+- `buildTransitionPublicationProof(db, {lease, now, candidateId, assertConfiguration})` re-reads the complete final
+  source boundary under a SQLite writer reservation. Record the returned proof with the existing W1 repository.
+- `publishMemoryTransition(db, sameInput)` is one synchronous COMMIT of closed source/new selected epoch, Local
+  rows/Blocks or paired Hindsight replica, exact primary custody, queued obligations, receipt and publication marker.
+- `readVerifiedTransitionPublication(db, receiptId)` is the boot/lost-reply join; it reconstructs the complete W3
+  candidate, baseline, native proof, checkpoints, source ancestry and saved custody. An invalid marker cannot fall back.
+- `composeMemoryRuntime(...).transitions` exposes `quiesce`, `proof`, `publish`, `nativeOutcome`, `nativeRelease`,
+  `abort`, `bind`, `resumeSource`, `executeIntents`, `queue` and `stop`. They retain the W1 lease and exact request IDs.
+- Migration054 recognizes the complete old marker schema, adds `transition_receipt_id`, and preserves all original
+  marker bytes and B2/B4 history. Transition markers have no initial snapshot/activation ID. Publication, target
+  effect, bounded Local refusal and native-outcome rows have immutable SQL guards.
+
+## Final configuration and custody contract
+
+`configRevision` and `inventoryRevision` both refer to `hindsight_connection_state.revision`; there is no independent
+Bank counter. `configFingerprint` is the configured row's reviewed fingerprint. `inventoryHash` is exactly
+`canonicalPayloadHash(db.prepare("SELECT * FROM hindsight_bank_setup ORDER BY external_bank_id").all())`, using all
+raw columns including operation JSON and timestamps. Every candidate scope has one verified setup row with exact
+external Bank and canonical identity. W5 captures this after setup and before admission; changes invalidate the proof.
+
+Separately, cover every Character discovered from Timeline, assigned primary groups, current-epoch canonical Banks
+and Character Blocks. A Character arriving during drain without an admitted candidate scope is stale, even when the
+setup revision/hash did not change. Scope creation itself consults the selected Local writer fence.
+
+Custody transfers exact append/group membership and witness identity in both directions. Boot accepts genuine late
+append/finalization and user-only retraction without losing the saved subset. A consumed Timeline row may have been
+compacted, cascading away its witness: only a completed producer ingestion span with matching Character, epoch
+ancestry, source_json/source_hash and exact seq/ID/digest proves consumption. Lost/foreign/unclaimed members or
+witnesses are integrity failures, never an empty inventory. A finalized group's last member must match its original
+`finalized_through_seq`. Completed spans require their producer-derived identity, provider/lineage, epoch ancestry
+and exact source membership even while Timeline rows still exist; a `complete` label alone never proves consumption.
+Source publication refuses unfinished ingestion spans;
+normal target ingestion can be in progress during later boot/read-back.
+
+Awaiting Source disposition joins the actual original source-command bytes, namespace, document, Pending request
+and parent journal's Pending `intent.operationId` (not remote UUID). Positive terminal non-dispatch or a tracked
+native cancellation proving zero committed parts/completed inputs and no result may release it. Both source and
+target classifiers read Pending through its ordinary storage validator, joining row keys, immutable intent hash,
+phase/version and native dispatch binding; parsing state JSON alone is insufficient. Partial or ambiguous
+native work remains unknown and owns its original epoch; native final snapshots do not settle application parents.
+
+## Provider lifetime and native outcome gates
+
+Quiescence includes raw writes, observed writes, ingestion/flush/tidy/retention, manual/background sync, foreground
+capture/hydration and source/application/policy producers. Nested admitted children own independent completion
+counts; a detached continuation cannot borrow a completed parent's identity. A multi-Bank capture holds one complete
+work owner until every Bank ends. The Bank service owns that complete sequence independently before racing the Run's
+admission budget: budget expiry may return a partial Run while both later-Bank admission and shutdown settlement stay
+under the original live work owner. Transition drain timeout/cancellation keeps the source fenced without a release gap.
+First B4 privileged ingestion drain retains its established behavior while the source is quiesced but not retired.
+
+Unresolved source transitions refuse fresh Local/Hindsight construction. Positive pre-COMMIT native abort outcomes
+for every scope plus the W1 source-aborted resolution permit fresh same-epoch reconstruction; old references remain
+retired forever. New unused scopes require their exact quarantined/unused-baseline-held proof; existing scopes need
+source-resumed or retired-baseline-restored as appropriate. No failed binding revives the other provider.
+
+Core Hindsight COMMIT precedes native activation. Store and validate each actual `activate` outcome against the exact
+Core receipt, acquisition and final proof before constructing target writers or dispatching its queue. Return-Local
+can construct while native retirement remains pending/fenced; final operation release still requires every native
+outcome. Every stored native response must match the exact transition/Bank row key before activation or release;
+a valid response from a different admitted Bank cannot satisfy that obligation. Ordinary native snapshot reads enforce TTL. Retained transition installation skips TTL only after separately
+reconstructing and verifying the complete immutable W2 certificate and closure, never from a caller's matching manifest.
+
+Bindings withdraw before replacement and own asynchronous disposal of current, replaced and failed drafts. Process
+shutdown seals and aborts transition execution, joins all producer/drain lifetimes and only then permits DB close.
+
+## Queued caller and target evidence
+
+Real canonical retain/mutation calls commit normalized commands and original caller/Run/Attempt/Effect provenance
+before returning `MEMORY_TRANSITION_QUEUED`. Its queue identity is an acknowledgement of custody, not a completed write.
+Capacity returns retryable `MEMORY_TRANSITION_QUEUE_FULL`; cutoff returns nonretryable `MEMORY_TRANSITION_CUTOFF`.
+Named existing documents and target-unsupported Local strategy/updateMode refuse before insertion. No old closure,
+Run context or parent Effect is rewritten for target execution.
+
+After COMMIT/readiness, map each original logical scope/ID/revision into the final candidate and verify the actual
+current target CAS revision. Reserve a stable target request before dispatch; process in sequence. Read actual Local
+or Hindsight parent receipts first, including after a lost reply. An unavailable target does not reserve an execution.
+An unknown target invokes only the target's original Pending/parent recovery and receipt lookup, never a new raw call
+or request ID. Unknown blocks subsequent sequence entries; another observer sees the same durable state.
+
+Actual Hindsight parent completion requires its full native/application effect. `superseded` becomes revision failure,
+not applied success. A terminal native parent error also needs its original Pending no-effect proof; partial cancelled
+work stays unknown. Local positive preflight/CAS refusals carry exact provider/epoch/request identity, absence of a
+canonical receipt and an immutable domain-separated execution/command hash plus closed code. Only audited Local
+synchronous validation/rollback errors qualify. Generic ok:false, thrown transport/internal/integrity errors or a
+cancellation after possible remote dispatch never certify refusal. Original provider receipts always take precedence.
+
+## Validation matrix
+
+| Boundary | Required evidence |
+| --- | --- |
+| SQLite INSERT/marker/receipt/COMMIT failure | Entire authority, rows, Blocks, custody and obligations roll back |
+| Lost COMMIT reply or failed target constructor/start | Same receipt/epoch remains selected; repair only the target binding |
+| Two complete provider cycles | Four genuine W4 receipts with real started constructors/bindings and retired old references |
+| Missing native activation or one missing unused Bank outcome | Selected Hindsight stays unavailable; no target execution |
+| Source reboot before positive release | No source writers; positive abort permits a fresh same-epoch binding |
+| Timeline compaction, late append/finalize, missing member | Exact producer span or membership proof; corruption refuses |
+| Queue capacity/cutoff/revision conflict | No unintended insertion/effect; stable truthful original caller observation |
+| Effect-before-ACK, partial cancellation and restart | Original receipt/no-effect proof or durable unknown; no duplicate dispatch |
+
+Use isolated SQLite and actual Core producers. Synthetic native envelopes prove Core joins only; real maintenance,
+historical-corpus roundtrip and owner/manual acceptance remain separately recorded W5/product gates.

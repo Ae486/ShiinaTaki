@@ -1,0 +1,27 @@
+F841 Local variable `instance` is assigned to but never used
+  --> hindsight-clients\python\hindsight_client_api\models\source_artifacts_inner.py:60:9
+   |
+58 |     @field_validator('actual_instance')
+59 |     def actual_instance_must_validate_oneof(cls, v):
+60 |         instance = SourceArtifactsInner.model_construct()
+   |         ^^^^^^^^
+61 |         error_messages = []
+62 |         match = 0
+   |
+help: Remove assignment to unused variable `instance`
+
+F841 Local variable `instance` is assigned to but never used
+  --> hindsight-clients\python\hindsight_client_api\models\transition_artifact_input.py:72:9
+   |
+70 |     @field_validator('actual_instance')
+71 |     def actual_instance_must_validate_oneof(cls, v):
+72 |         instance = TransitionArtifactInput.model_construct()
+   |         ^^^^^^^^
+73 |         error_messages = []
+74 |         match = 0
+   |
+help: Remove assignment to unused variable `instance`
+
+Found 2000 errors (1998 fixed, 2 remaining).
+No fixes available (2 hidden fixes can be enabled with the `--unsafe-fixes` option).
+17 files reformatted, 23 files left unchanged

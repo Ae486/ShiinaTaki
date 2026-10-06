@@ -1,0 +1,51 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+x·
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/memory/transitions/transition-unused-delta.test.ts > W3 genuine unused-scope consumer branch > preserves ordered and repeated Sources from a real Local copy into a new scope
+AssertionError: expected [ { artifact_kind: 'source', …(1) } ] to deeply equal [ …(4) ]
+
+- Expected
++ Received
+
+  [
+    {
+      "artifact_id": "local-copy-1db561f975ede6b3c30cc1f5ecbab4cfca12d44e0a6b40674ee2104ad27d93a1",
+      "artifact_kind": "source",
+    },
+-   {
+-     "artifact_id": "local-copy-bb04ffb44b24c64b52f49e7c0be9aeb55a8bd0d133570d42a0bb6798e15c162b",
+-     "artifact_kind": "source",
+-   },
+-   {
+-     "artifact_id": "local-copy-06f28257ad8af7d638c6811ffb7dbc0959d369cc012d87c4e33f713d95cc60e7",
+-     "artifact_kind": "source",
+-   },
+-   {
+-     "artifact_id": "local-copy-bb04ffb44b24c64b52f49e7c0be9aeb55a8bd0d133570d42a0bb6798e15c162b",
+-     "artifact_kind": "source",
+-   },
+  ]
+
+ ❯ src/memory/transitions/transition-unused-delta.test.ts:50:44
+     48|       expect(memory?.artifact_kind).toBe("memory");
+     49|       if (memory?.artifact_kind !== "memory") throw new Error("missing…
+     50|       expect(memory.body.source_artifacts).toEqual(references.map((ref…
+       |                                            ^
+     51|       const foreign = structuredClone(capture);
+     52|       const set = foreign.state.sourceSets.find((row) => row.bankId ==…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  18:13:08
+   Duration  6.32s (transform 2.80s, setup 0ms, import 3.55s, tests 2.41s, environment 0ms)
+
+undefined
+H:\TakiAgent\packages\core:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/memory/transitions/transition-unused-delta.test.ts --maxWorkers=2 --reporter=dot

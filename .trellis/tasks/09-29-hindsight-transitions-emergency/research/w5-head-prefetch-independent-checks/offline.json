@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "H:/hindsight/.venv/Scripts/python.exe",
+    "-B",
+    "-s",
+    "-m",
+    "pytest",
+    "--noconftest",
+    "-o",
+    "addopts=",
+    "tests/native_results/test_transition_head_prefetch.py",
+    "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-head-prefetch-independent-checks\\test_registration.py",
+    "tests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_inventory_and_head_refusals[wrong_sql_key]",
+    "tests/native_results/test_transition_native_view.py::test_duplicate_keys_fall_back_instead_of_overriding",
+    "-q",
+    "--tb=short"
+  ],
+  "cwd": "H:/hindsight/hindsight-api-slim",
+  "exitCode": 0,
+  "stdout": "\ntests/native_results/test_transition_head_prefetch.py::test_locked_bundler_keeps_head_first_batches_and_full_bodies PASSED [ 10%]\n::test_malformed_later_row_preserves_prior_queue_without_partial_registration[{-False] PASSED [ 20%]\n::test_malformed_later_row_preserves_prior_queue_without_partial_registration[{-True] PASSED [ 30%]\n::test_malformed_later_row_preserves_prior_queue_without_partial_registration[{}-False] PASSED [ 40%]\n::test_malformed_later_row_preserves_prior_queue_without_partial_registration[{}-True] PASSED [ 50%]\n::test_tombstones_duplicate_refs_and_original_order_use_one_enumeration[False] PASSED [ 60%]\n::test_tombstones_duplicate_refs_and_original_order_use_one_enumeration[True] PASSED [ 70%]\ntests/native_results/test_transition_native_view.py::test_borrowed_source_preserves_inventory_and_head_refusals[wrong_sql_key] PASSED [ 80%]\ntests/native_results/test_transition_native_view.py::test_duplicate_keys_fall_back_instead_of_overriding[native] PASSED [ 90%]\ntests/native_results/test_transition_native_view.py::test_duplicate_keys_fall_back_instead_of_overriding[head] PASSED [100%]\n\n============================= 10 passed in 8.63s ==============================\n",
+  "stderr": ""
+}

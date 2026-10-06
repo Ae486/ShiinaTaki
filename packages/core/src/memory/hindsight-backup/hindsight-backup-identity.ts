@@ -30,15 +30,16 @@ export function readHindsightBackupIdentity(db: Database, runtime: HindsightBack
 
 function readIdentity(db: Database, runtime: HindsightBackupRuntimeIdentity): HindsightBackupIdentity {
   const selection = readMemoryAuthoritySelection(db);
-  const { epochId, transactionId, providerLineageId, replicaCheckpointDigest } = selection;
-  if (selection.mode !== "hindsight" || epochId !== runtime.epochId || !transactionId || !providerLineageId || !replicaCheckpointDigest) {
+  const { epochId, transactionId, transitionReceiptId, providerLineageId, replicaCheckpointDigest } = selection;
+  if (selection.mode !== "hindsight" || epochId !== runtime.epochId || (!transactionId && !transitionReceiptId) || !providerLineageId || !replicaCheckpointDigest) {
     throw new Error("MEMORY_AUTHORITY_MISMATCH");
   }
   const banks = runtime.banks().map((bank) => readBank(db, bank));
   const generations = new Map(banks.flatMap((bank) => bank.bankGeneration === null ? [] : [[bank.nativeBankId, bank.bankGeneration] as const]));
   const operationIds = readHindsightTerminalOperations(db, { epochId, providerLineageId, generations });
   const authority: HindsightBackupManifest["authority"] = { epochId, activationTransactionId: transactionId, providerLineageId,
-    replicaCheckpointDigest, configFingerprint: runtime.configFingerprint, deploymentMode: runtime.deploymentMode };
+    replicaCheckpointDigest, configFingerprint: runtime.configFingerprint, deploymentMode: runtime.deploymentMode,
+    ...(transitionReceiptId ? { transitionReceiptId } : {}) };
   return { core: { authority, banks, terminalOperations: { count: new Set(operationIds).size, digest: hindsightBackupOperationDigest(operationIds) } },
     operationIds: [...new Set(operationIds)], migrationHead: migrationHead(db) };
 }

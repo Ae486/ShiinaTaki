@@ -1,0 +1,22 @@
+{
+  "meaning": "Static AST/source audit only; no diagnostic execution or data access",
+  "diagnosticExecuted": false,
+  "allowedDifferences": [
+    "tgenabled::text",
+    "write_result",
+    "result.json-only writer wrapper",
+    "reportEncodingFailed final gate"
+  ],
+  "otherAstUnchanged": true,
+  "frozenManifests": {
+    "w5-candidate-trigger-readonly-diagnostic-v2-manifest.json": {
+      "sha256": "a93cfd8fd194763345d763b2b9270997fe992128a3cfd3e1f86ff897fbc60b76",
+      "unchangedEntries": 13
+    },
+    "w5-candidate-reader-queue-source-manifest.json": {
+      "sha256": "b38a102c5e6b9737afc62c6f4063f7dc9b7ecda6e39039e7026aab6555bda47f",
+      "unchangedEntries": 17
+    }
+  },
+  "scriptSha256": "09a9ca9b3fc6044be9052a1bb98765e7eab3d80a77cef0687f9de6f1cdc83b73"
+}

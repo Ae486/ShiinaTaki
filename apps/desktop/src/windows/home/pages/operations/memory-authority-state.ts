@@ -47,13 +47,14 @@ export const MEMORY_RUNTIME_UNAVAILABLE_LABEL: Record<NonNullable<MemoryAuthorit
   connection_disabled: "Hindsight 连接已关闭", config_changed: "连接配置已变更，需要重新校验",
 };
 export const MEMORY_OPERATION_STATE_LABEL: Record<MemoryOperation["state"], string> = {
-  admitted: "已受理（未认领）", running: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消", outcome_unknown: "结果未知（Core 重启）",
+  admitted: "已受理（未认领）", running: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消", outcome_unknown: "结果未知",
 };
 export const MEMORY_OPERATION_KIND_LABEL: Record<MemoryOperation["kind"], string> = {
   "setup.validate": "校验连接", "setup.apply": "应用配置", "replica.sync": "同步副本",
   "local.onboard.prepare": "准备本地记忆", "local.onboard.activate": "启用 / 恢复本地记忆", "hindsight.activate": "启用 Hindsight",
   "bank.provision": "创建 Bank", "connection.revalidate": "重新校验连接",
   "backup.capture": "创建备份", "backup.admit": "导入备份", "backup.verify": "校验备份",
+  "transition.return-local": "返回 Local", "transition.reenter-hindsight": "重新进入 Hindsight", "transition.emergency-local": "紧急接管至 Local",
 };
 const UNKNOWN = "未知";
 

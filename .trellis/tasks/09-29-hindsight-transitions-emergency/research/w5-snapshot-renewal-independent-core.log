@@ -1,0 +1,31 @@
+
+ RUN  v4.1.10 H:/TakiAgent/packages/core
+
+ ✓ src/memory/transitions/transition-healthy-reconstruction.test.ts > healthy recovery after complete Core reconstruction > recovers a lost native takeover reply before proof without repeating the successful claim 3633ms
+ ✓ src/memory/transitions/transition-healthy-reconstruction.test.ts > healthy recovery after complete Core reconstruction > reopens SQLite and replaces all Core owners after verifyReply 3035ms
+ ✓ src/memory/transitions/transition-healthy-reconstruction.test.ts > healthy recovery after complete Core reconstruction > reopens SQLite and replaces all Core owners after resolveReply 3364ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > dispatches with the renewed Native executor after expiry claims a new fence during inventory loading 11254ms
+ ✓ src/memory/transitions/transition-healthy-maintenance.test.ts > healthy driver partial finite maintenance recovery > retains nine completed steps, refuses early abort and resumes only after an explicit recovery 900ms
+ ✓ src/memory/transitions/transition-healthy-maintenance.test.ts > healthy driver partial finite maintenance recovery > keeps a lost continuation proof recoverable without repeating completed steps 1190ms
+ ✓ src/memory/transitions/transition-healthy-maintenance.test.ts > healthy driver partial finite maintenance recovery > upgrades actual055 history and journals only the new partial-plan continuation 1103ms
+ ✓ src/memory/transitions/transition-healthy-maintenance.test.ts > healthy driver partial finite maintenance recovery > reopens an interrupted055 return without an abort intent and completes the same transition after056 3088ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > reopens after losing a renewed reply, reuses that durable request and never repeats an earlier delta 10931ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > renews an expired page with at most one successor per invocation (1 consecutive expiries) 9476ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > renews an expired page with at most one successor per invocation (2 consecutive expiries) 10364ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > does not renew on snapshot_not_found 2564ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > does not renew on request_id_conflict 2246ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > does not renew on namespace_mismatch 1980ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > does not renew on untyped_expiry 1626ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses a saved snapshot command for another namespace before dispatch 1267ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses renewal after active-writer invalidates ownership 2522ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses renewal after lost-claim invalidates ownership 2148ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses renewal after core-configuration invalidates ownership 2017ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > refuses changed sealed proof after reopening instead of reusing incompatible historical evidence 2384ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > reuses sealed evidence after a proven Bank executor expires and is claimed by the reopened Core 5099ms
+ ✓ src/memory/transitions/transition-healthy-snapshot-recovery.test.ts > unused inventory snapshot recovery through the complete healthy driver > renews a positively expired snapshot after earlier delta preparation and physical Core reconstruction 5148ms
+
+ Test Files  3 passed (3)
+      Tests  22 passed (22)
+   Start at  19:59:01
+   Duration  82.46s (transform 17.62s, setup 0ms, import 23.74s, tests 87.35s, environment 0ms)
+

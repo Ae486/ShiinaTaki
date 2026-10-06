@@ -1,0 +1,17 @@
+[
+  {
+    "path": "eslint.config.js",
+    "sha256": "9821c5c024c5ed20ce6bded27de5ba13accf36a1f151b331e9386cd1b0696e86",
+    "bytes": 2324
+  },
+  {
+    "path": ".trellis/spec/backend/quality-guidelines.md",
+    "sha256": "5cd31504903bc72d600115a89cf67fc9c49eab2a441c0951bc612b50590fa164",
+    "bytes": 12978
+  },
+  {
+    "path": "CLAUDE.md",
+    "sha256": "13623a11d25063ba894fe3c1acf4a4cc9ecb5c6c46399b61173695e45b15c114",
+    "bytes": 10931
+  }
+]

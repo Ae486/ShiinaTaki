@@ -1,0 +1,250 @@
+{
+  "baselineCount": 205,
+  "unchanged": 179,
+  "missing": [],
+  "changed": [
+    {
+      "path": "TAKI_PATCHES.md",
+      "before": "e3aa3f79fff3bbd2e5fa6c3c34b311711c971e12499546bfa41ab6a7a6f1ddfa",
+      "after": "ebc5b525c1d17bb26dca972c1db299fed18bf52e9a2ef03bd7b465b33be139dd"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/admin/cli.py",
+      "before": "9e5ae607f5f905215edf9dd85a0d08146c57c6153a28de737e73331bd9079a6d",
+      "after": "d2495869dcfffecab3c23bdfdd8ac0113173966c8f2aeae3713800a08b1e067b"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/api/http.py",
+      "before": "9abd009f37be64ebe0a647ba98e9c23ebd125d430e8aa76d20a13e76291cde2e",
+      "after": "f9e61ae7e213b20ad5873cf949b6f5683f4e66c9ab7fd02ec108767eddb97dda"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/api/taki_application_schema.py",
+      "before": "ab5e7eebb1ca3992c7f7ba1b61e0cbda4397389a21e39eb7885f62735d770e42",
+      "after": "c21268b0208f1c28c3a0cfefe06b2d4c065d1fdf2487e19d15a3c61379148c3e"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/api/taki_application_state.py",
+      "before": "0fb0886eb32a78ee79e7e8881153a86564038a8254be522293c415bf38f2447a",
+      "after": "ddb1ba96999d5fb21a7441657617f9ffe71b0e50402addf506f24f99dc12e38a"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/application_state/service.py",
+      "before": "1c18c191742a9d1590891e469b636a61984fd42a56bacd1bc61c04246c058a2d",
+      "after": "11681261e1bb6fb4bc7649fe0853a35f645d7def320da56261e8a28bac34b1c7"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/application_state/snapshot.py",
+      "before": "bd82d785cd3db9e22c1136b9990de1636095b12060419c1582aa8be3a9d58e96",
+      "after": "553f5680e1c22d5b134d9198c00ca05caf864491d8e7d21bd42d4d9d45f3e2fa"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/memory_engine.py",
+      "before": "aee07935b3b63bda7c234224e527d71a15b9036b8a59f797cd599839452f2607",
+      "after": "70655df153c0512300b1793bcc7731b9f400b25cba81f2c3070b8bec53b0099e"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/taki_compatibility.py",
+      "before": "818340d18be3a6e5c6025b95b281ad47d914d4e246228cc21a80b63cfe3c961b",
+      "after": "1e438d827b002304dc4693252dce61fc3f87783fb715eb763ba63563f4e6180e"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/extensions/builtin/taki_memory.py",
+      "before": "a505870cbd989c304330a0ba303fca0383b64412d97e05e7ebca1900990e6e81",
+      "after": "1d67643e39e8b7321e3d3c39add536cf4b85734b8f33c1c99179a0742030644c"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_cutover_compatibility.py",
+      "before": "cc8926423d1aab3596a11d04ae17858541590af004f1e71d73f02336faf73e3c",
+      "after": "d5c045aee10bc2e9f4038d92bba30806fe2cd2f3c1f98406d3b91aa8a0cac660"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_cutover_maintenance_migration.py",
+      "before": "b51f77be110aec5e37659eee752c08143a8bc81ac60e914a195e4d9dc253dd64",
+      "after": "593aa907f0da55ad08a2ec430e14d76643b6f1283361a6339debe2d5286da191"
+    },
+    {
+      "path": "hindsight-api-slim/tests/test_taki_admin_backup.py",
+      "before": "428b1d6823b12bc834c4d2065f7d33d1892844aaab6176a162c4535fa16dbdbe",
+      "after": "69f56d2e73c300238bed2023d0aa1ebb7c209f6bb6d2e2ed969499ca8d940875"
+    },
+    {
+      "path": "hindsight-api-slim/tests/test_taki_extension_contract.py",
+      "before": "e230172dedf9aef44696a56c5ef6707295056d0aa717bae071577883354ea89d",
+      "after": "5538aa309ce3440c30a32d36597c9e19ce92c9e71425cc990a182e5b2657349d"
+    },
+    {
+      "path": "hindsight-clients/go/api/openapi.yaml",
+      "before": "ba42ed2b2f24614053d66e8ab88b29740eaff8ea2c43f36880dc335267e2ee62",
+      "after": "e64435c7a9ed2c650a5ca97e09d2747811d8f08ac06928b525bff71aa5ba0bd5"
+    },
+    {
+      "path": "hindsight-clients/go/api_taki_memory_compatibility.go",
+      "before": "c49d24f66e5f8481ba40bdb6b01175c0560f4cd4d95adf211f77ee50b1bee2d0",
+      "after": "ad8c41a1a808ffdc0928e71b6a76910da360285b76221f58c45693328394fa9c"
+    },
+    {
+      "path": "hindsight-clients/go/model_taki_compatibility_contracts.go",
+      "before": "c131155af0d0852e01788d89510f60645bb226c9f603c927306112a69588d015",
+      "after": "5e9d383321431d8ab29e62c90875818d4acf29c259cb986a4f385a692ca607da"
+    },
+    {
+      "path": "hindsight-clients/python/.openapi-generator/FILES",
+      "before": "6c1fd3abaf89a8374abbd78ff5d8627b15ea87457f7091bd993bcd2146c1e15a",
+      "after": "21d4388dda3edffb964078854e2451801e18d6e0e91e5344860669662da64de7"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/__init__.py",
+      "before": "d4413b4e9317d3647ded4bab4e132c1792052dd7249d27aa4ceb25654470a468",
+      "after": "35a16063eb8f681cea3aaba5942522cfa75407075179e3911603d56c12cac9d6"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/api/taki_memory_compatibility_api.py",
+      "before": "b6177b9a386f12d4d9c8025106de61f07b530d7852ac771ff0d20f75a0dc737c",
+      "after": "6eb2426202cc19ee243a2a65b7e58b7877c1379a40d9f19fdf0dcc2469daf983"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/__init__.py",
+      "before": "cf53cf32004a6ede2d2bea0084ba72fb06b04ee633ed8bcfa0966929f582df42",
+      "after": "24b7cb7640b36846892e57438943c7a60b7ead1492946aba089618f8a73ca74e"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_compatibility_contracts.py",
+      "before": "f156f9187405f16dcd005b7df64d07fabb79a10b0d20ff4732d7374a7a87402e",
+      "after": "0ec3e6db547e4a91be7744031622999dee54d38ccc0230ea28f629065d036724"
+    },
+    {
+      "path": "hindsight-clients/python/hindsight_client_api/models/taki_compatibility_support.py",
+      "before": "868d838743b91b1e5cf7c63184534a0d1bcdf335a2f1095a822b6e2ed9a64116",
+      "after": "823b228e0593c807cfc17e695195795be30400a38c4705b0a45d834137722944"
+    },
+    {
+      "path": "hindsight-clients/typescript/generated/sdk.gen.ts",
+      "before": "dbdb557a1f68238e916a8d1f2d6ae77914a0375b2939e3d8da1ea443bc10e652",
+      "after": "2efe8dec0d0936ff48852e4c9a5a423ad657b130974fef7211340261f559cd56"
+    },
+    {
+      "path": "hindsight-clients/typescript/generated/types.gen.ts",
+      "before": "36a23c2887475ebd4ad5fff0f0b9d1474437aaeb443aca8ac7d1942119c324cc",
+      "after": "0e1ef4b6d48f0dbfdd6bc61c990e90a82737d9fbcb96227a8be7f3492169d673"
+    },
+    {
+      "path": "hindsight-docs/static/openapi.json",
+      "before": "582b83b3d8f85b783420546011bfb4431395f2c6e79e25d47b7cce7603dbb4f2",
+      "after": "fe0f1f29ef5ff03e0cd9e0c81204ac5a3224cfa623deeb70abcfe3cb356de185"
+    }
+  ],
+  "checkerDelta": [
+    {
+      "path": "TAKI_PATCHES.md",
+      "before": "ba6ad803c3a9e2c4d18d7dbf8d7691137a70f8e8a606d024ec6e8f56383618d9",
+      "after": "ebc5b525c1d17bb26dca972c1db299fed18bf52e9a2ef03bd7b465b33be139dd"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/admin/cli.py",
+      "before": "08e5c9a09692fbbe2995f257e9162aa35ebc62117a3fc74ab239cc0963e8aebc",
+      "after": "d2495869dcfffecab3c23bdfdd8ac0113173966c8f2aeae3713800a08b1e067b"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/alembic/versions/e30a9d7f6c21_add_transition_publication_fences.py",
+      "before": "23804b62ff07d703697321eb385c581ce4819e5b80c80d1ffe1712edd76af00d",
+      "after": "3a310b19a4e6de34a0a9eb7935992105f90df21a0717e96fd6aad9834f9e6433"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/api/http.py",
+      "before": "9abd009f37be64ebe0a647ba98e9c23ebd125d430e8aa76d20a13e76291cde2e",
+      "after": "f9e61ae7e213b20ad5873cf949b6f5683f4e66c9ab7fd02ec108767eddb97dda"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/db/postgresql.py",
+      "before": "627258c473fb879ad97826e26411528f2746f4d26ac64176406d5d704cc042a9",
+      "after": "cf4f961420abe141d5a722d23d2f292d22eec4be1ae9d4231cc03ab17596ff2d"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/memory_engine.py",
+      "before": "2743d63ca5eedaccfcfb984a69e6898df7d30aa0065e77dc4742978111c5dd98",
+      "after": "70655df153c0512300b1793bcc7731b9f400b25cba81f2c3070b8bec53b0099e"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_context.py",
+      "before": "c9b77c0abe7b399f4b159164c2485b9f9830c39fb7834146f4dcf058a06d83d4",
+      "after": "df61e073d864d049c5a3fbeebd98cdd071cad355eb75ffd327d08a0c30e41316"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_initialization.py",
+      "before": null,
+      "after": "83610d6833e97dae8a80dc7cd2903439c623d784ffff9a217026d9d79afb876e"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_maintenance.py",
+      "before": "5c13166236291e92b01d9d13ad1b364d172e4f2b72f252c40ad928528ee1799c",
+      "after": "03d0df5d88eeef2ab87899b91bc2694395b2b4ff994fc9c885fb5a2bfc7f467e"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_service.py",
+      "before": "2cd0e061fb9c9f10fd9bf6ccd1014e84c8177f885c9c9f258d3a8cba81dd1733",
+      "after": "5eaee15df9d58e8aa913ecdad8828d068ebc2da74b28298ac2573586a96e1510"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_snapshot.py",
+      "before": "7fc1d38a5014e4285c0366fac2cd536223b03b607fdceb6280f58e9da9041055",
+      "after": "3e695dffedd3927468c290693a83827a080ba4e561da64c6d298df9b60123291"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_storage.py",
+      "before": "88b1a0a617f86983ddc005a1b82b6ef87065238779d2ae89d753f37fd9c4af27",
+      "after": "5b3664406ee7a28c753e1882e6dd562089048a98f77f3861707e1d17e8ad85fa"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_unused_scope.py",
+      "before": "1d9db69cacc5d5aeb5d0f42ce6d73db6a5803167df94463c9f87cc8bf90727a2",
+      "after": "3efa14f9170ec13a233e8a51a635a311ffdaf8fa9bf957edc606c0c03fa10ab9"
+    },
+    {
+      "path": "hindsight-api-slim/hindsight_api/engine/transition_writers.py",
+      "before": "a7969c21046c0d4dedc6fa5a7c81369fc355d6949e422eb7a76ba3af590f7ebd",
+      "after": "3e98e2db02e50b6512c342a476bd830ca5b2756a87c5516a06d73aeec72bfaa3"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/taki_character_template.json",
+      "before": null,
+      "after": "684c0e7a30331850f72a004bc43a8274183a30bed6f7689a99729f388f905f43"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_core_projection.py",
+      "before": "6e5d82528eaae7b5dadbcee4ac52e081657cfc7974210b30e7a6c391b4b213da",
+      "after": "44433e33ebfce0f980235c60ae84de179e02202c0ee0e72a094db60435a4eab1"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_fence.py",
+      "before": "307a5e0198a24bed003296d7d8a9a5eeb57603cf5779e2bbfce160711e7e80d2",
+      "after": "ac86946fad150c4cfcc273a97f5d8c06b287e97e034e2e1caab6b16347b8f833"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_initialization.py",
+      "before": null,
+      "after": "6bb0ca07a6a39f21b5fe360eaeaa717a10cf1ba088c9a8b7042e78c201852857"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_integrity.py",
+      "before": "af83a16e32d40059a9ea2fc710245f444a05b9760d3f32e3691776972f65b5a9",
+      "after": "770713b69bf1ff2913f18d920372386eec899ea23a2bdb63fe2f4c7ed2bf8470"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_recovery.py",
+      "before": "97ebf79f90c398d94413f7d7310a02fb9864abe725d681859bf67da121d65040",
+      "after": "7185a4cc4eb8b6e3956b01f9ce4629b936fc86609149843780d23b2be9ca313d"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_unused_scope.py",
+      "before": "b14f745103f1fc65b0b3a7eef2c29a4cab87af23ecce0d6e7ba2a22a3d025478",
+      "after": "cfaff6c2710cdefa607042641348852f417587b1df1a3e84070c0e4cc4efa2b2"
+    },
+    {
+      "path": "hindsight-api-slim/tests/native_results/test_transition_writers.py",
+      "before": null,
+      "after": "36c638c7eeb4fe3dfbf7b44994354f6b73ab1161dba0b81e4e2baae0b47091d8"
+    }
+  ],
+  "protectedCliHash": "ce3ccd97b3759b2a0848221a9487de67178ce640d1ddc324a3043f7507655ef2"
+}

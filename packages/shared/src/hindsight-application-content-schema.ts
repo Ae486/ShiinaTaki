@@ -5,7 +5,7 @@
  */
 import { z } from "zod";
 import { TakiApplicationBankBodySchema, TakiApplicationSourceBodySchema, TakiApplicationBlockBodySchema,
-  TakiApplicationCommandsSchema, TakiApplicationAffectedVersionsSchema } from "./hindsight-application-artifact-schema.ts";
+  TakiApplicationCommandsSchema, TakiApplicationAffectedVersionsSchema, TakiApplicationSourceEvidenceBodySchema } from "./hindsight-application-artifact-schema.ts";
 import { TakiApplicationMemoryBodySchema } from "./memory-policy-assessment-schema.ts";
 import { TakiApplicationNativeRecordSchema, TakiApplicationNativeSourceEvidenceSchema } from "./hindsight-application-native-schema.ts";
 import { TakiApplicationReadContextSchema, TakiApplicationRecordPageSchema } from "./hindsight-application-read-schema.ts";
@@ -14,6 +14,7 @@ import type { TakiApplicationBodySchema } from "./hindsight-application-primitiv
 export const TakiApplicationBodyContentSchema = z.discriminatedUnion("body_schema", [
   z.strictObject({ body_schema: z.literal("application-bank.v1"), value: TakiApplicationBankBodySchema }),
   z.strictObject({ body_schema: z.literal("application-source.v1"), value: TakiApplicationSourceBodySchema }),
+  z.strictObject({ body_schema: z.literal("application-source-evidence.v1"), value: TakiApplicationSourceEvidenceBodySchema }),
   z.strictObject({ body_schema: z.literal("application-memory.v1"), value: TakiApplicationMemoryBodySchema }),
   z.strictObject({ body_schema: z.literal("application-block.v1"), value: TakiApplicationBlockBodySchema }),
   z.strictObject({ body_schema: z.literal("application-commands.v1"), value: TakiApplicationCommandsSchema }),

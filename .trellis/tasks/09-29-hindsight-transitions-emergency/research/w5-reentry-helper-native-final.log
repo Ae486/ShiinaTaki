@@ -1,0 +1,12 @@
+test_actual_prepare_then_denial_incomplete_same_transition_resume_and_completed_bank_reuse (__main__.GateTests.test_actual_prepare_then_denial_incomplete_same_transition_resume_and_completed_bank_reuse) ... Executing <Task pending name='Task-2' coro=<GateTests.test_actual_prepare_then_denial_incomplete_same_transition_resume_and_completed_bank_reuse() running at H:\TakiAgent\.trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-gate-test.py:328> wait_for=<Task pending name='Task-3' coro=<TransitionMaintenanceService._renew() running at H:\hindsight/hindsight-api-slim\hindsight_api\engine\transition_maintenance.py:200> cb=[Task.task_wakeup()] created at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\tasks.py:374> cb=[_run_until_complete_cb() at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py:180] created at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py:100> took 4.546 seconds
+ok
+test_exact_transition_selection_never_reads_old_complete_return_or_bank_ordinal (__main__.GateTests.test_exact_transition_selection_never_reads_old_complete_return_or_bank_ordinal) ... ok
+test_malformed_checkpoint_and_wrong_candidate_approval_fail_closed (__main__.GateTests.test_malformed_checkpoint_and_wrong_candidate_approval_fail_closed) ... ok
+test_per_bank_cap_counter_and_first_402_latch_survive_restart (__main__.GateTests.test_per_bank_cap_counter_and_first_402_latch_survive_restart) ... ok
+test_supervisor_installs_gate_before_initialize_and_default_preview_disables_model_network (__main__.GateTests.test_supervisor_installs_gate_before_initialize_and_default_preview_disables_model_network) ... Executing <Task finished name='Task-25' coro=<GateTests.test_supervisor_installs_gate_before_initialize_and_default_preview_disables_model_network() done, defined at H:\TakiAgent\.trellis\tasks\09-29-hindsight-transitions-emergency\research\w5-reentry-gate-test.py:179> result=None created at C:\Users\55473\AppData\Local\Programs\Python\Python311\Lib\asyncio\runners.py:100> took 6.765 seconds
+ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 11.738s
+
+OK

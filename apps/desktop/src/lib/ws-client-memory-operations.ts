@@ -10,6 +10,9 @@ import {
   MEMORY_ACTIVATION_METHODS,
   MEMORY_AUTHORITY_METHODS,
   MEMORY_OPERATION_METHODS,
+  MEMORY_TRANSITION_METHODS,
+  MemoryTransitionPreviewSchema, MemoryTransitionReadSchema, MemoryTransitionOverviewSchema,
+  type MemoryTransitionPreview, type MemoryTransitionRead, type MemoryTransitionOverview,
   MemoryActivationStatusSchema,
   MemoryAuthorityStatusSchema,
   MemoryOperationCancelResultSchema,
@@ -25,6 +28,9 @@ import {
 } from "@taki/shared";
 
 export interface MemoryOperationMethods {
+  memoryTransitionPreview(params: { kind: MemoryTransitionPreview["kind"]; recoveryTransitionId?: string }): Promise<MemoryTransitionPreview>;
+  memoryTransitionStatus(transitionId: string): Promise<MemoryTransitionRead>;
+  memoryTransitionOverview(): Promise<MemoryTransitionOverview>;
   /** Reads the composite memory-authority status (authority, runtime, setup, per-Bank replica/Pending, operations). */
   memoryAuthorityStatus(): Promise<MemoryAuthorityStatus>;
   /** Reads the Hindsight activation status (setup, Bank prerequisites, run, custody, Core-derived actions); invalidated by memory.operations.changed. */
@@ -42,6 +48,9 @@ export interface MemoryOperationMethods {
 export function memoryOperationMethods(request: <T>(method: string, params: JSONRPCParams) => Promise<T>): MemoryOperationMethods {
   let subscription: Promise<void> | null = null;
   return {
+    memoryTransitionPreview: async (params) => MemoryTransitionPreviewSchema.parse(await request(MEMORY_TRANSITION_METHODS.preview, params)),
+    memoryTransitionStatus: async (transitionId) => MemoryTransitionReadSchema.parse(await request(MEMORY_TRANSITION_METHODS.status, { transitionId })),
+    memoryTransitionOverview: async () => MemoryTransitionOverviewSchema.parse(await request(MEMORY_TRANSITION_METHODS.overview, {})),
     memoryAuthorityStatus: async () => MemoryAuthorityStatusSchema.parse(await request(MEMORY_AUTHORITY_METHODS.status, {})),
     memoryActivationStatus: async () => MemoryActivationStatusSchema.parse(await request(MEMORY_ACTIVATION_METHODS.status, {})),
     memoryOperationSubmit: async (submitted) =>

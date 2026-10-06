@@ -1,0 +1,88 @@
+{
+  "sourceInventory": {
+    "sha256": "ca275f841f3f5a66620be833a692b33117b9256b735f1cf10f4c17f6522647fb",
+    "entries": 404,
+    "inherited_manifests": 8,
+    "verified": true
+  },
+  "checks": [
+    {
+      "name": "offline",
+      "exitCode": 0
+    },
+    {
+      "name": "helper",
+      "exitCode": 0
+    },
+    {
+      "name": "native-lint",
+      "exitCode": 0
+    },
+    {
+      "name": "native-format",
+      "exitCode": 0
+    },
+    {
+      "name": "native-types",
+      "exitCode": 0
+    },
+    {
+      "name": "helper-lint",
+      "exitCode": 0
+    },
+    {
+      "name": "helper-format",
+      "exitCode": 0
+    },
+    {
+      "name": "helper-types",
+      "exitCode": 0
+    },
+    {
+      "name": "owned-pg",
+      "exitCode": 0
+    }
+  ],
+  "evidence": [
+    {
+      "file": "helper-format.json",
+      "sha256": "ba87de779291ec3f8959964a7551848cf1f709f042d0862e6b9a6236f24e4f1c"
+    },
+    {
+      "file": "helper-lint.json",
+      "sha256": "de64c47b381fcde88dd9c0ba8f058e01a51b882a7705200a79361ffdd4690c7f"
+    },
+    {
+      "file": "helper-types.json",
+      "sha256": "2c50b716db74cd3589b2ad6ba96c9cdef190f43eea3be4f4c22924c4f371b946"
+    },
+    {
+      "file": "helper.json",
+      "sha256": "f7ee016c3f738c5f33930c310c103e30485c158aba48801ffe333d3d09370bf3"
+    },
+    {
+      "file": "native-format.json",
+      "sha256": "70a46fc6fc70dde71f71415d502e0b7cfec27e54608a3a5c804a7f7633a72b6a"
+    },
+    {
+      "file": "native-lint.json",
+      "sha256": "d2c9b177d87bc81e113779c0e15d047acf534921db1a1773f8f28ea2f990348b"
+    },
+    {
+      "file": "native-types.json",
+      "sha256": "0b21b0b49782428daba875182ac5c5f9867fd3013186e222a3f21cdec6890dc1"
+    },
+    {
+      "file": "offline.json",
+      "sha256": "d329ae1443e405aa4293d1c198f84f497d4e880eb0b52d1ea6bc18faa0a4dc87"
+    },
+    {
+      "file": "owned-pg.json",
+      "sha256": "0db285f8802fd09f7ac8ce364b254a3c73adcb665cc421a4f09699d3dd6f2f91"
+    },
+    {
+      "file": "test_registration.py",
+      "sha256": "72ecdb66c4dda602c2ddc1e6cc3bfa88a7dd5bc3c321c390ba1eb78fad178cff"
+    }
+  ]
+}

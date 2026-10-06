@@ -5,6 +5,8 @@
  */
 import type { Database } from "../../db/sqlite.ts";
 import type { Lease } from "./legacy-migration-ledger-repo.ts";
+import { readVerifiedTransitionPublication } from "../../db/memory-transition-publication-reader.ts";
+import type { TransitionEvidenceContext } from "../transitions/transition-evidence-context.ts";
 
 export interface MemoryAuthoritySelection {
   mode: "legacy-markdown" | "canonical-local" | "hindsight";
@@ -13,17 +15,24 @@ export interface MemoryAuthoritySelection {
   transactionId: string | null;
   providerLineageId: string | null;
   replicaCheckpointDigest: string | null;
+  transitionReceiptId?: string;
 }
-export function readMemoryAuthoritySelection(db: Database): MemoryAuthoritySelection {
+export function readMemoryAuthoritySelection(db: Database, verification?: TransitionEvidenceContext): MemoryAuthoritySelection {
+  verification?.assertOwner(db); verification?.assertIndependent();
   const row = db.prepare("SELECT * FROM memory_authority_selection WHERE singleton=1").get();
   if (!row || !["legacy-markdown", "canonical-local", "hindsight"].includes(String(row.mode))) throw new Error("MEMORY_INTEGRITY_ERROR");
-  if (row.mode === "canonical-local" && (!row.active_epoch_id || !row.verified_snapshot_id || !row.activation_transaction_id)) throw new Error("MEMORY_INTEGRITY_ERROR");
-  if (row.mode === "hindsight" && (!row.active_epoch_id || row.verified_snapshot_id !== null || !row.activation_transaction_id || !row.provider_lineage_id || !row.replica_checkpoint_digest)) throw new Error("MEMORY_INTEGRITY_ERROR");
-  if (row.mode === "hindsight") verifyHindsightSelection(db, row);
+  const transitionReceiptId = row.transition_receipt_id == null ? undefined : String(row.transition_receipt_id);
+  if (transitionReceiptId) readVerifiedTransitionPublication(db, transitionReceiptId, verification);
+  else {
+    if (row.mode === "canonical-local" && (!row.active_epoch_id || !row.verified_snapshot_id || !row.activation_transaction_id)) throw new Error("MEMORY_INTEGRITY_ERROR");
+    if (row.mode === "hindsight" && (!row.active_epoch_id || row.verified_snapshot_id !== null || !row.activation_transaction_id || !row.provider_lineage_id || !row.replica_checkpoint_digest)) throw new Error("MEMORY_INTEGRITY_ERROR");
+    if (row.mode === "hindsight") verifyHindsightSelection(db, row);
+  }
   return { mode: row.mode as MemoryAuthoritySelection["mode"], epochId: row.active_epoch_id === null ? null : String(row.active_epoch_id),
     snapshotId: row.verified_snapshot_id === null ? null : String(row.verified_snapshot_id), transactionId: row.activation_transaction_id === null ? null : String(row.activation_transaction_id),
     providerLineageId: row.provider_lineage_id === null || row.provider_lineage_id === undefined ? null : String(row.provider_lineage_id),
-    replicaCheckpointDigest: row.replica_checkpoint_digest === null || row.replica_checkpoint_digest === undefined ? null : String(row.replica_checkpoint_digest) };
+    replicaCheckpointDigest: row.replica_checkpoint_digest === null || row.replica_checkpoint_digest === undefined ? null : String(row.replica_checkpoint_digest),
+    ...(transitionReceiptId ? { transitionReceiptId } : {}) };
 }
 
 function verifyHindsightSelection(db: Database, row: Record<string, unknown>): void {
@@ -46,6 +55,7 @@ function verifyHindsightSelection(db: Database, row: Record<string, unknown>): v
 /** Same-epoch recovery proof: the marker must join one receipt on run, snapshot, epoch and transaction; mode alone is not proof. */
 export function verifyCanonicalLocalReceipt(db: Database, selection: MemoryAuthoritySelection): void {
   if (selection.mode !== "canonical-local") throw new Error("MEMORY_AUTHORITY_MISMATCH");
+  if (selection.transitionReceiptId) { readVerifiedTransitionPublication(db, selection.transitionReceiptId); return; }
   const receipt = db.prepare(`SELECT 1 AS proven FROM memory_migration_activation_receipts receipt
     JOIN memory_migration_runs run ON run.run_id=receipt.run_id
     JOIN canonical_memory_authority_state state ON state.singleton=1 AND state.active_epoch_id=receipt.epoch_id

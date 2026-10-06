@@ -125,7 +125,7 @@ function intervalRows(section: NonNullable<MemoryAuthorityStatus["hindsight"]>):
   const scopes = new Map(section.banks.map((bank) => [bank.nativeBankId, bankScopeLabel(bank.scope, bank.characterId)]));
   return (section.backup?.missingInterval ?? []).map((bank) => ({
     label: `${scopes.get(bank.bankId) ?? `Bank ${bank.bankId}`} 未备份区间`,
-    value: `游标 ${bank.fromNativeCursor ?? UNKNOWN} → ${bank.toReplicaCursor ?? UNKNOWN} · 未落定写入 ${bank.pendingCount ?? UNKNOWN}`,
+    value: `游标 ${bank.fromNativeCursor ?? UNKNOWN} → ${bank.toReplicaCursor ?? UNKNOWN} · 未落定写入 ${bank.pendingCount ?? UNKNOWN} · 远端未同步写入未知`,
   }));
 }
 

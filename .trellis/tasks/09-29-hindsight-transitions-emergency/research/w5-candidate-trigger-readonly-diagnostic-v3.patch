@@ -1,0 +1,97 @@
+--- w5-candidate-trigger-readonly-diagnostic-v2.py
++++ w5-candidate-trigger-readonly-diagnostic-v3.py
+@@ -51,6 +51,60 @@
+     return hashlib.sha256(path.read_bytes()).hexdigest()
+ 
+ 
++def write_result(path: Path, report: dict[str, Any]) -> None:
++    """Keep cleanup facts durable when diagnostic payload encoding fails."""
++    try:
++        encoded = json.dumps(report, indent=2, allow_nan=False)
++    except (TypeError, ValueError) as error:
++        # Do not stringify arbitrary payloads or exception messages. Retain the
++        # first diagnostic failure; an encoding-only failure must also make the
++        # inherited main's success gate fail after its cleanup has completed.
++        report["reportEncodingFailed"] = True
++        report["reportEncodingErrorClass"] = "TypeError" if isinstance(error, TypeError) else "ValueError"
++        report.setdefault("errorClass", "ReportSerializationError")
++        known_errors = {
++            "AssertionError",
++            "TypeError",
++            "ValueError",
++            "TimeoutError",
++            "RuntimeError",
++            "CancelledError",
++            "OSError",
++            "KeyboardInterrupt",
++            "ReportSerializationError",
++        }
++        original_error = report["errorClass"]
++        fallback = {
++            "meaning": "Diagnostic report encoding failed; only closed failure and preservation facts retained.",
++            "root": str(path.parent),
++            "reportEncodingFailed": True,
++            "reportEncodingErrorClass": report["reportEncodingErrorClass"],
++            "errorClass": original_error
++            if isinstance(original_error, str) and original_error in known_errors
++            else "OtherError",
++        }
++        # The outer finally calls this again after source/port verification.
++        # Preserve its latest booleans without inventing success for absent or
++        # malformed facts. The failed payload is deliberately never persisted.
++        for key in (
++            "started",
++            "stopped",
++            "sourcePreserved",
++            "inputPreserved",
++            "corePreserved",
++            "originalPreserved",
++            "readerSourcesPreserved",
++            "portReleased",
++            "diagnosticCompleted",
++        ):
++            value = report.get(key)
++            fallback[key] = value if isinstance(value, bool) else None
++        encoded = json.dumps(fallback, indent=2, allow_nan=False)
++    # Encode completely before opening the file; a payload failure must not
++    # truncate the preceding report. Filesystem failures remain explicit.
++    path.write_text(encoded + "\n", encoding="utf-8")
++
++
+ def verify_sources() -> None:
+     assert digest(READER_MANIFEST) == READER_HASH, "READER_MANIFEST_CHANGED"
+     for row in json.loads(READER_MANIFEST.read_text(encoding="utf-8"))["files"]:
+@@ -138,7 +192,8 @@
+     )
+     report["storedEndpointLookupMatchesReviewedTextPredicate"] = True
+     triggers = await query.fetch(
+-        "SELECT c.relname,t.tgname,t.tgenabled,p.proname,pg_get_triggerdef(t.oid,true) AS definition "
++        "SELECT c.relname,t.tgname,t.tgenabled::text AS tgenabled,p.proname,"
++        "pg_get_triggerdef(t.oid,true) AS definition "
+         "FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid JOIN pg_namespace n ON n.oid=c.relnamespace "
+         "JOIN pg_proc p ON p.oid=t.tgfoid WHERE n.nspname=$1 AND c.relname=ANY($2::text[]) "
+         "AND NOT t.tgisinternal ORDER BY c.relname,t.tgname",
+@@ -446,6 +501,15 @@
+             "Clone-only loopback HBA trust; no source credentials read and no ALTER ROLE/password mutation."
+         ),
+     }
++    original_write_json = clone.write_json
++
++    def diagnostic_write_json(path: Path, value: Any) -> None:
++        if path.name == "result.json":
++            write_result(path, value)
++        else:
++            original_write_json(path, value)
++
++    clone.write_json = diagnostic_write_json
+     original_pg_command = clone.pg_command
+ 
+     def readonly_pg_command(arguments: list[str], label: str, timeout: int = 45) -> int:
+@@ -481,6 +545,7 @@
+         finally:
+             if clone.CLONE is not None:
+                 clone.write_json(clone.CLONE / "result.json", clone.REPORT)
++    assert not clone.REPORT.get("reportEncodingFailed", False), "DIAGNOSTIC_REPORT_ENCODING_FAILED"
+     assert clone.REPORT["diagnosticCompleted"] and clone.REPORT["allBankSetsEquivalent"]
+     assert clone.REPORT["stopped"] and clone.REPORT["originalPreserved"] and clone.REPORT["portReleased"]
+ 

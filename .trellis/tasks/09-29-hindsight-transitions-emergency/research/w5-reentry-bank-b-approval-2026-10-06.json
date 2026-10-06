@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "returnReceiptId": "e173dffd3612e5932f50a1df5ae7c1c1b4f7ee3d269dce9a11828debd77a8469",
+  "transitionId": "6d27eb9b-6bbd-4b56-8ef4-0fda9c5eec53",
+  "cumulativeCap": 589,
+  "banks": [
+    {
+      "bankId": "taki-hs-v1-g-d8a3a7cfaad9404dc514fb925b212633",
+      "transitionId": "6d27eb9b-6bbd-4b56-8ef4-0fda9c5eec53",
+      "providerLineage": "df0f294a-1933-403d-8190-8f144b4c38e1",
+      "bankGeneration": "f1f8f904-c765-41e5-8624-224121b4e0f6",
+      "candidateHash": "24ed06f356c3c9cd9ddd8d11ad3c10fc759cfe8ee2d1551fe1afcb7edb5404c1",
+      "requiredSetHash": "e0346ecd4f77b9bf7dc147f21c8b3b74915385da684d8030205dd21309a0e2df",
+      "policyHash": "03a9f5ebf4675c17513ef18953aca33a2a7464e9acf872ba0f2b53566a4abf39",
+      "requestHash": "acda360bc188efd56f7654a9f746a84fdabe51d46bc2f2e2ab9904f43c448d19",
+      "deltaResultHash": "511873726a3903c6045f23f35b476f736d2a5862ea3087047590cb63ee9b0da2",
+      "maxSubmissions": 63
+    }
+  ],
+  "review": {
+    "planFile": "H:\\TakiAgent\\.trellis\\.runtime\\stage4-conversion-native\\8ce88920d37641aa9689145bd1811a90\\w5-healthy-a7ffc67a1666400b8cc7e890d837cb97\\reentry-plan-875cf4e23668468fb6599dca70cde4f6-40ebb63bee2f4f94a5c1bae7197093d4.json",
+    "planSha256": "078afc9c4bc7947dde625dca64c537f167dda04a53e4f432708c583de1a97cab",
+    "initialSubmissions": 526,
+    "baseCallEstimate": 21,
+    "estimateIsUpperBound": false,
+    "allowanceRationale": "Three times the actual 20 source batches plus one model task as a finite retry allowance. Only Bank B is permitted; Bank A complete proof/evidence and all prior reservations are retained. No allowance reset or maintenance replay.",
+    "authorization": "Existing owner authorization for necessary scoped real-model reuse tests; leader-reviewed exact Bank B plan after A completion and normal staged pause."
+  }
+}

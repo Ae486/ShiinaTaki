@@ -1,13 +1,15 @@
 /**
  * INPUT:  operator operation requests (plus Core's automatic lifecycle submissions), the kind registry, the live Hindsight
  *         runtime accessor, the B3 setup service and the optional Local onboarding / Hindsight activation / lifecycle / backup
- *         services
+ *         services and optional transition driver
  * OUTPUT: createMemoryOperationService() — durable admit/execute/observe/settle/cancel with transition fan-out
  * POS:    core/memory/operations — the single operation owner (D-S1-1); every state change is a repo CAS, then onChanged
  */
 import { randomUUID } from "node:crypto";
 import type { MemoryOperation, MemoryOperationListParams, MemoryOperationProducerRef, MemoryOperationRequest } from "@taki/shared";
+import { MemoryTransitionErrorCodeSchema } from "@taki/shared";
 import { createMemoryOperationRepo, type MemoryOperationRepo } from "../../db/memory-operation-repo.ts";
+import { readReplicaRequest } from "../../db/hindsight-replica-request-repo.ts";
 import type { Database } from "../../db/sqlite.ts";
 import type { Logger } from "../../logging/logger.ts";
 import { readMemoryAuthoritySelection } from "../legacy-migration/legacy-activation-repo.ts";
@@ -21,6 +23,9 @@ import {
   type MemoryOperationsRuntime,
 } from "./memory-operation-contract.ts";
 import { MEMORY_OPERATION_KINDS, memoryOperationHandler, type MemoryOperationKindRegistry } from "./memory-operation-kinds.ts";
+import { createTransitionOperationStorage, type MemoryTransitionDriver } from "./memory-operation-transition-storage.ts";
+import { withTransitionAdmissionContext } from "../transitions/transition-evidence-context.ts";
+import { quarantineEmergencyProducers, operationIsQuarantined } from "../../db/memory-transition-emergency-quarantine.ts";
 
 export interface MemoryOperationService {
   /** The origin defaults to the operator; only Core's automatic lifecycle trigger passes "automatic". */
@@ -44,6 +49,7 @@ export interface MemoryOperationServiceInput {
   hindsight?: HindsightActivationService;
   lifecycle?: HindsightLifecycleService;
   backup?: HindsightBackupService;
+  transition?: MemoryTransitionDriver;
   bootId: string;
   onChanged(operation: MemoryOperation): void;
   logger: Logger;
@@ -54,7 +60,7 @@ export interface MemoryOperationServiceInput {
 
 interface Owner {
   repo: MemoryOperationRepo; kinds: MemoryOperationKindRegistry; ctx: MemoryOperationContext; input: MemoryOperationServiceInput;
-  inflight: Set<Promise<void>>;
+  inflight: Map<Promise<void>, string>;
 }
 
 export function createMemoryOperationService(input: MemoryOperationServiceInput): MemoryOperationService {
@@ -63,8 +69,10 @@ export function createMemoryOperationService(input: MemoryOperationServiceInput)
   const owner: Owner = {
     repo, kinds: input.kinds ?? MEMORY_OPERATION_KINDS,
     ctx: { live: input.live, setup: input.setup, local: input.local, hindsight: input.hindsight, lifecycle: input.lifecycle, backup: input.backup,
+      transition: input.transition, transitionStorage: createTransitionOperationStorage(input.db),
       lookup: (operationId) => repo.get(operationId),
-      activeInFamily: (family) => repo.activeInFamily(family), latestInFamily: (family) => repo.latestInFamily(family), now }, input, inflight: new Set(),
+      replicaRequest: (requestId) => readReplicaRequest(input.db, requestId),
+      activeInFamily: (family) => repo.activeInFamily(family), latestInFamily: (family) => repo.latestInFamily(family), now }, input, inflight: new Map(),
   };
   observeBoot(owner);
   // A previous process cannot report what happened to its open rows; unknown stays unknown (D-S1-3).
@@ -76,7 +84,10 @@ export function createMemoryOperationService(input: MemoryOperationServiceInput)
     recent: (limit) => owner.repo.listRecent(limit),
     latest: (family) => { const row = owner.repo.latestInFamily(family); return row ? refresh(owner, row) : undefined; },
     cancel: (operationId) => cancel(owner, operationId),
-    stop: async () => { while (owner.inflight.size > 0) await Promise.allSettled([...owner.inflight]); },
+    stop: async () => {
+      const required = () => [...owner.inflight].filter(([, id]) => !operationIsQuarantined(input.db, id)).map(([promise]) => promise);
+      while (required().length > 0) await Promise.allSettled(required());
+    },
   };
 }
 
@@ -95,20 +106,45 @@ function observeBoot(owner: Owner): void {
 
 function submit(owner: Owner, request: MemoryOperationRequest, admission: MemoryOperationAdmission): MemoryOperation {
   const handler = memoryOperationHandler(owner.kinds, request.kind);
-  const producer = handler.admit(request, owner.ctx, admission);
   const family = handler.family(request);
   const operationId = randomUUID();
-  let admitted: MemoryOperation;
+  let admitted: MemoryOperation | undefined;
+  let existing: MemoryOperation | undefined;
+  let quarantined: MemoryOperation[] = [];
   try {
-    admitted = owner.repo.insertAdmitted({ operationId, kind: request.kind, family, request, producer, bootId: owner.input.bootId,
-      authorityEpochId: readMemoryAuthoritySelection(owner.input.db).epochId });
+    owner.input.db.transaction(() => {
+      existing = handler.existing?.(request, owner.ctx);
+      if (existing) return;
+      const persist = (ctx: MemoryOperationContext) => {
+        const producer = handler.admit(request, ctx, admission);
+        if (request.kind === "transition.emergency-local" && !request.recovery) quarantined = quarantineEmergencyProducers(owner.input.db,
+          { repo: owner.repo, emergencyOperationId: operationId, epochId: request.expected.predecessorEpochId,
+            bankIds: request.expected.banks.map((bank) => bank.sourceBankId), now: ctx.now() });
+        admitted = owner.repo.insertAdmitted({ operationId, kind: request.kind, family, request, producer, bootId: owner.input.bootId,
+          authorityEpochId: readMemoryAuthoritySelection(owner.input.db, ctx.admissionVerification).epochId });
+        handler.persistAdmission?.(admitted, ctx);
+      };
+      // This lifetime is inside the transaction and ends before notification or async execution.
+      // Never attach it to owner.ctx: later work and nested/new submissions need independent proof.
+      if (family === "memory-transition") withTransitionAdmissionContext({ db: owner.input.db, startedAt: owner.ctx.now() },
+        (verification) => persist({ ...owner.ctx, admissionVerification: verification }));
+      else persist(owner.ctx);
+    });
   } catch (error) {
+    // A handler already identified the conflicting family owner; preserve that actionable identity.
+    if (error instanceof MemoryOperationRefusal) throw error;
+    const transitionError = MemoryTransitionErrorCodeSchema.safeParse(error instanceof Error ? error.message : null);
+    if (transitionError.success) throw new MemoryOperationRefusal(transitionError.data);
     if (!(error instanceof Error) || error.message !== "MEMORY_OPERATION_BUSY") throw error;
     throw new MemoryOperationRefusal("MEMORY_OPERATION_BUSY", owner.repo.activeInFamily(family)?.operationId ?? null);
   }
+  if (existing) return existing;
+  if (!admitted?.producer) throw new Error("MEMORY_OPERATION_NOT_FOUND");
+  if (request.kind === "transition.emergency-local") owner.ctx.transition?.emergencyAdmitted?.(request.expected.predecessorEpochId);
+  for (const operation of quarantined) owner.input.onChanged(operation);
   owner.input.onChanged(admitted);
-  const execution = execute(owner, handler, { operationId, request, producer });
-  owner.inflight.add(execution);
+  const execution = execute(owner, handler, { operationId, request, producer: admitted.producer });
+  owner.inflight.set(execution, operationId);
   void execution.finally(() => owner.inflight.delete(execution));
   return requireOperation(owner, operationId);
 }

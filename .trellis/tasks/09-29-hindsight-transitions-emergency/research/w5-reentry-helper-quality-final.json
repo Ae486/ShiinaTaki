@@ -1,0 +1,116 @@
+[
+  {
+    "check": "python-ast",
+    "files": 4,
+    "exitCode": 0
+  },
+  {
+    "command": [
+      "node",
+      "--check",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reused-driver.mjs"
+    ],
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "command": [
+      "node",
+      "--check",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reentry-journey.mjs"
+    ],
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "command": [
+      "node",
+      "--check",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-journey-checkpoint.mjs"
+    ],
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "command": [
+      "node",
+      "--check",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reentry-journey.test.mjs"
+    ],
+    "exitCode": 0,
+    "output": ""
+  },
+  {
+    "command": [
+      "H:/hindsight/.venv/Scripts/python.exe",
+      "-m",
+      "ruff",
+      "check",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_reentry_gate.py",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reentry-plan.py",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reentry-gate-test.py"
+    ],
+    "exitCode": 0,
+    "output": "All checks passed!\n"
+  },
+  {
+    "command": [
+      "H:/hindsight/.venv/Scripts/python.exe",
+      "-m",
+      "ruff",
+      "format",
+      "--check",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5_reentry_gate.py",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reentry-plan.py",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reentry-gate-test.py"
+    ],
+    "exitCode": 0,
+    "output": "3 files already formatted\n"
+  },
+  {
+    "command": [
+      "H:/hindsight/.venv/Scripts/python.exe",
+      "-m",
+      "ruff",
+      "check",
+      "--select",
+      "F,E9",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reused-native.py"
+    ],
+    "exitCode": 0,
+    "output": "All checks passed!\n"
+  },
+  {
+    "command": [
+      "python",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reused-native.py",
+      "--help"
+    ],
+    "exitCode": 0,
+    "output": "usage: w5-reused-native.py [-h] [--stage {all,return,reentry}]\n                           --submission-cap SUBMISSION_CAP\n                           [--maintenance-approval MAINTENANCE_APPROVAL]\n                           {prepare,inspect,connect,run}\n\npositional arguments:\n  {prepare,inspect,connect,run}\n\noptions:\n  -h, --help            show this help message and exit\n  --stage {all,return,reentry}\n  --submission-cap SUBMISSION_CAP\n  --maintenance-approval MAINTENANCE_APPROVAL\n                        Exact reviewed per-Bank reentry allowances; omission\n                        deliberately denies all maintenance\n"
+  },
+  {
+    "command": [
+      "python",
+      ".trellis\\tasks\\09-29-hindsight-transitions-emergency\\research\\w5-reentry-plan.py",
+      "--help"
+    ],
+    "exitCode": 0,
+    "output": "usage: w5-reentry-plan.py [-h] --transition-id TRANSITION_ID --submission-cap\n                          SUBMISSION_CAP --forecast FORECAST\n\noptions:\n  -h, --help            show this help message and exit\n  --transition-id TRANSITION_ID\n  --submission-cap SUBMISSION_CAP\n  --forecast FORECAST\n"
+  },
+  {
+    "check": "utf8-no-bom-and-whitespace",
+    "files": 8,
+    "exitCode": 0
+  },
+  {
+    "check": "combined-gate-production-source-unchanged",
+    "files": 39,
+    "exitCode": 0
+  },
+  {
+    "check": "immutable-preimages",
+    "files": 3,
+    "exitCode": 0
+  }
+]

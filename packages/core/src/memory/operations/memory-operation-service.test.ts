@@ -44,7 +44,7 @@ describe("memory operation service — replica.sync", () => {
     const f = fixture(); const release = f.runtime!.scheduler.hold();
     const admitted = f.service.submit(sync());
     expect(admitted).toMatchObject({ state: "admitted", kind: "replica.sync", authorityEpochId: "epoch", producer: { kind: "replica", bankId: "global", admittedAt: AT }, result: null });
-    expect(f.runtime!.scheduler.requestManual).toHaveBeenCalledWith("global", "incremental");
+    expect(f.runtime!.scheduler.requestManual).toHaveBeenCalledWith("global", "incremental", expect.any(String));
     expect(f.runtime!.scheduler.status("global")[0]?.pendingManualKind).toBe("incremental");
     expect(f.service.status(admitted.operationId).state).toBe("admitted");
     expect(f.service.list({ includeTerminal: false, limit: 20 }).map((operation) => operation.operationId)).toEqual([admitted.operationId]);

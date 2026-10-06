@@ -1,0 +1,249 @@
+{
+  "job": "H:\\TakiAgent\\.trellis\\.runtime\\w5-actual-embedding-c7cf4137c82a421fb9458351d9f2cbf9",
+  "fileHashes": {
+    "result.json": "65987e822cb34c339684d3cd8b9271d2132e4b34c01141d03d786cdce0dd2916",
+    "telemetry-result.json": "9aa8c22556d4a9f408e8c44dadf92f7ec1bab9a91b63ba4a6913fb161100d5c4",
+    "postpatch-result.json": "fbdb5833bcb432947052722b82b37b21f48ad76ce1eb15acc415d7f349694dd8"
+  },
+  "childReportMatchesPersisted": true,
+  "childReportSha256": "bbff330997dbd62da35a10caaa8abab26e5dbde85abb67230a9bab7a11bb1f4c",
+  "worker": {
+    "parentPid": 19820,
+    "heldPid": 33216,
+    "scriptPid": 33216,
+    "identity": {
+      "pid": 33216,
+      "executable": "G:\\AppDataMove\\PythonPrograms\\Python311\\python.exe",
+      "creationTicks": 134356780837379815
+    },
+    "executable": "H:\\hindsight\\.venv\\Scripts\\python.exe",
+    "baseExecutable": "G:\\AppDataMove\\PythonPrograms\\Python311\\python.exe",
+    "prefix": "H:\\hindsight\\.venv",
+    "basePrefix": "G:\\AppDataMove\\PythonPrograms\\Python311",
+    "packageOrigins": {
+      "sentence_transformers": "H:\\hindsight\\.venv\\Lib\\site-packages\\sentence_transformers\\__init__.py",
+      "asyncpg": "H:\\hindsight\\.venv\\Lib\\site-packages\\asyncpg\\__init__.py",
+      "torch": "H:\\hindsight\\.venv\\Lib\\site-packages\\torch\\__init__.py"
+    },
+    "packagesImported": [],
+    "verified": true
+  },
+  "inventory": {
+    "sha256": "ca275f841f3f5a66620be833a692b33117b9256b735f1cf10f4c17f6522647fb",
+    "entries": 404,
+    "inherited_manifests": 8,
+    "verified": true
+  },
+  "fullApplyMilliseconds": 49318.017900000996,
+  "marginMilliseconds": 10681.982099999004,
+  "exactLookupMilliseconds": 685.8855999998923,
+  "stages": [
+    {
+      "name": "normal-clone-claim",
+      "path": [
+        "normal-clone-claim"
+      ],
+      "completed": true,
+      "milliseconds": 20.320499999797903
+    },
+    {
+      "name": "full-apply",
+      "path": [
+        "full-apply"
+      ],
+      "completed": true,
+      "milliseconds": 49318.017900000996
+    },
+    {
+      "name": "admit",
+      "path": [
+        "full-apply",
+        "admit"
+      ],
+      "completed": true,
+      "milliseconds": 12737.997899999755
+    },
+    {
+      "name": "baseline",
+      "path": [
+        "full-apply",
+        "admit",
+        "baseline"
+      ],
+      "completed": true,
+      "milliseconds": 12686.388900001475
+    },
+    {
+      "name": "preflight_transition_delta",
+      "path": [
+        "full-apply",
+        "preflight_transition_delta"
+      ],
+      "completed": true,
+      "milliseconds": 1171.926999999414
+    },
+    {
+      "name": "application-predecessors",
+      "path": [
+        "full-apply",
+        "application-predecessors"
+      ],
+      "completed": true,
+      "milliseconds": 3004.9505999995745
+    },
+    {
+      "name": "prepare_current_state_rows",
+      "path": [
+        "full-apply",
+        "prepare_current_state_rows"
+      ],
+      "completed": true,
+      "milliseconds": 2440.334200000507
+    },
+    {
+      "name": "admit",
+      "path": [
+        "full-apply",
+        "admit"
+      ],
+      "completed": true,
+      "milliseconds": 12611.075300002994
+    },
+    {
+      "name": "baseline",
+      "path": [
+        "full-apply",
+        "admit",
+        "baseline"
+      ],
+      "completed": true,
+      "milliseconds": 12536.240999997972
+    },
+    {
+      "name": "native-renewal",
+      "path": [
+        "full-apply",
+        "native-renewal"
+      ],
+      "completed": true,
+      "milliseconds": 15.261799999279901
+    },
+    {
+      "name": "preflight_transition_delta",
+      "path": [
+        "full-apply",
+        "preflight_transition_delta"
+      ],
+      "completed": true,
+      "milliseconds": 1402.2798000005423
+    },
+    {
+      "name": "write_transition_native_delta",
+      "path": [
+        "full-apply",
+        "write_transition_native_delta"
+      ],
+      "completed": true,
+      "milliseconds": 6557.967699998699
+    },
+    {
+      "name": "write_transition_application_delta",
+      "path": [
+        "full-apply",
+        "write_transition_application_delta"
+      ],
+      "completed": true,
+      "milliseconds": 8404.888799999753
+    },
+    {
+      "name": "application-predecessors",
+      "path": [
+        "full-apply",
+        "write_transition_application_delta",
+        "application-predecessors"
+      ],
+      "completed": true,
+      "milliseconds": 2796.2661999990814
+    },
+    {
+      "name": "exact-lookup",
+      "path": [
+        "exact-lookup"
+      ],
+      "completed": true,
+      "milliseconds": 685.8855999998923
+    }
+  ],
+  "embeddings": {
+    "options": {
+      "model_name": "BAAI/bge-small-en-v1.5",
+      "force_cpu": false,
+      "trust_remote_code": false,
+      "allow_mps": false
+    },
+    "initializationCompleted": true,
+    "documentBatches": [
+      {
+        "inputs": 68,
+        "completed": true,
+        "milliseconds": 2429.749200000515
+      }
+    ],
+    "syntheticEncoderCalls": 0,
+    "queryEncoderCalls": 0,
+    "dimension": 384,
+    "device": "cpu",
+    "modelName": "BAAI/bge-small-en-v1.5",
+    "cacheRevision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+    "initializationMilliseconds": 14876.613000000361,
+    "storedVectorDimension": 384
+  },
+  "bodySql": {
+    "fetch:SELECT * FROM (SELECT provider_lineage,bank_id,bank_generation,body_id,descriptor,state,expires_at, SUM(octet_length(descriptor)) OVER () AS batch_bytes, COUNT(*) OVER () AS batch_count FROM \"memory_application_bodies\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=ANY($4::uuid[])) batch WHERE batch_bytes<=$5 AND batch_count<=$6": {
+      "calls": 96,
+      "milliseconds": 251.50589999975637,
+      "maxMs": 6.136500000138767
+    },
+    "fetch:SELECT body_id,SUM(octet_length(data)) AS actual_bytes,COUNT(*) AS part_count FROM \"memory_application_body_parts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=ANY($4::uuid[]) GROUP BY body_id ORDER BY body_id": {
+      "calls": 96,
+      "milliseconds": 218.07760000228882,
+      "maxMs": 5.146199997398071
+    },
+    "fetch:SELECT * FROM (SELECT provider_lineage,bank_id,bank_generation,body_id,part_number,part_sha256,data, SUM(octet_length(data)) OVER () AS batch_bytes,COUNT(*) OVER () AS batch_count FROM \"memory_application_body_parts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=ANY($4::uuid[])) batch WHERE batch_bytes<=$5 AND batch_count<=$6 ORDER BY body_id,part_number": {
+      "calls": 96,
+      "milliseconds": 334.854799999448,
+      "maxMs": 4.806299999472685
+    },
+    "fetchrow:SELECT descriptor,state,expires_at FROM \"memory_application_bodies\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=$4": {
+      "calls": 1393,
+      "milliseconds": 1036.3076999492478,
+      "maxMs": 1.4885999989928678
+    },
+    "fetch:SELECT part_number,part_sha256,data FROM \"memory_application_body_parts\" WHERE provider_lineage=$1 AND bank_id=$2 AND bank_generation=$3 AND body_id=$4 ORDER BY part_number": {
+      "calls": 1393,
+      "milliseconds": 929.1437999600021,
+      "maxMs": 1.4138000005914364
+    }
+  },
+  "resultCounts": {
+    "mappings": 1559,
+    "artifacts": 1558
+  },
+  "deltaRows": 1,
+  "preservation": {
+    "sourcePreserved": true,
+    "inputPreserved": true,
+    "corePreserved": true,
+    "originalPreserved": true,
+    "sourcesPreserved": true
+  },
+  "cleanup": {
+    "stopped": true,
+    "portReleased": true,
+    "attempts": []
+  },
+  "diagnosticSucceeded": true,
+  "nativeApplyBudgetPassed": true,
+  "httpOrAuthorityRecoveryProven": false,
+  "limitations": "Independent audit of persisted reports/identities; no new live model/database execution or source-data scan."
+}

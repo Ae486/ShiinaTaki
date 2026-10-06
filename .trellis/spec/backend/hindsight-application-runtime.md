@@ -42,7 +42,9 @@ B5 native projection hashes and JSON1 limits must not be silently reinterpreted.
 
 ### Independent native application state
 
-- Require build `taki-memory-hindsight-0.9.0-d77-v1`, `application_state` version `1.0.0`, and the actual client methods.
+- Require build `taki-memory-hindsight-0.9.0-d77-v1` or `taki-memory-hindsight-0.9.0-transitions-v1`,
+  `application_state` version `1.0.0`, and the actual client methods. The latter build does not imply transition
+  readiness: its independently versioned contract, actual schema and client inventory must pass their own gate.
   `application_reflect` is a separate capability. A configured endpoint or native reflect method does not prove it.
 - Namespace is application `taki` plus provider lineage and Bank generation. Every body, command, receipt, page,
   snapshot and event hash is scoped to the exact namespace and Bank.
@@ -249,3 +251,16 @@ Deploy compatible native D77 code/migration and generated contracts before selec
 secret and verified Bank bindings remain authoritative. These code changes do not themselves authorize activation.
 Core applies 042-047 on its normal migration path. Preserve backups and original receipt bytes; a nonempty native D77
 downgrade refuses rather than dropping evidence. No destructive rollback, Authority switch or B7 operation is implied.
+
+### Source evidence extension
+
+Repeated transitions may add `application-source-evidence.v1`: immutable nested original Source bytes plus exact prior
+artifact/body and native association. Full snapshot/event/hydration, SQLite evidence closure and ordinary Source readers
+must validate all dependencies; association-only rebind changes only associated_native. The body is independently
+negotiated by transition_source_evidence1.0.0; old capability support does not imply new upload/delta support.
+Memory source_artifacts remain exact ordered version lists, allowing repeated keys and historical versions after latest
+head retirement. A Source append fragment never replaces physical document text/metadata in runtime projection.
+
+Current awaiting_native Sources remain unconfirmed intent evidence. Complete W2 proof may retain them even if no async
+native work remains. W3 candidate.pendingSources classifies the current head with exact operation/bytes; W4 joins factual
+Pending/custody disposition, and W5 cannot use a raw pending list as publication readiness. See memory-transitions.md.

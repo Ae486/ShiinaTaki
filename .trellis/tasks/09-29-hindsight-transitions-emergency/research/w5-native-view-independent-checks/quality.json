@@ -1,0 +1,123 @@
+[
+  {
+    "name": "native-ruff",
+    "cwd": "H:\\hindsight\\hindsight-api-slim",
+    "argv": [
+      "H:\\hindsight\\.venv\\Scripts\\ruff.exe",
+      "check",
+      "hindsight_api/engine/transition_snapshot.py",
+      "hindsight_api/engine/application_state/snapshot.py",
+      "tests/native_results/test_transition_native_view.py",
+      "tests/native_results/test_transition_native_view_pg.py",
+      "tests/native_results/test_transition_baseline_reads.py"
+    ],
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "name": "native-format",
+    "cwd": "H:\\hindsight\\hindsight-api-slim",
+    "argv": [
+      "H:\\hindsight\\.venv\\Scripts\\ruff.exe",
+      "format",
+      "--check",
+      "hindsight_api/engine/transition_snapshot.py",
+      "hindsight_api/engine/application_state/snapshot.py",
+      "tests/native_results/test_transition_native_view.py",
+      "tests/native_results/test_transition_native_view_pg.py",
+      "tests/native_results/test_transition_baseline_reads.py"
+    ],
+    "exitCode": 0,
+    "stdout": "5 files already formatted\n",
+    "stderr": ""
+  },
+  {
+    "name": "native-ty",
+    "cwd": "H:\\hindsight\\hindsight-api-slim",
+    "argv": [
+      "H:\\hindsight\\.venv\\Scripts\\ty.exe",
+      "check",
+      "hindsight_api/engine/transition_snapshot.py",
+      "hindsight_api/engine/application_state/snapshot.py",
+      "--output-format",
+      "concise"
+    ],
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "name": "helper-ruff",
+    "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+    "argv": [
+      "H:\\hindsight\\.venv\\Scripts\\ruff.exe",
+      "check",
+      "w5_native_view_inventory.py",
+      "w5-native-view-postpatch.py",
+      "test_w5_native_view_postpatch.py"
+    ],
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "name": "helper-format",
+    "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+    "argv": [
+      "H:\\hindsight\\.venv\\Scripts\\ruff.exe",
+      "format",
+      "--check",
+      "w5_native_view_inventory.py",
+      "w5-native-view-postpatch.py",
+      "test_w5_native_view_postpatch.py"
+    ],
+    "exitCode": 0,
+    "stdout": "3 files already formatted\n",
+    "stderr": ""
+  },
+  {
+    "name": "helper-ty",
+    "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+    "argv": [
+      "H:\\hindsight\\.venv\\Scripts\\ty.exe",
+      "check",
+      "w5_native_view_inventory.py",
+      "w5-native-view-postpatch.py",
+      "--output-format",
+      "concise"
+    ],
+    "exitCode": 0,
+    "stdout": "All checks passed!\n",
+    "stderr": ""
+  },
+  {
+    "name": "helper-unit",
+    "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+    "argv": [
+      "H:\\hindsight\\.venv\\Scripts\\python.exe",
+      "-B",
+      "-s",
+      "-m",
+      "unittest",
+      "test_w5_native_view_postpatch",
+      "-v"
+    ],
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_default_has_no_verification_or_execution (test_w5_native_view_postpatch.CompositionTests.test_default_has_no_verification_or_execution) ... ok\ntest_parent_requires_actual_worker_inventory_and_keeps_timing_failure_separate (test_w5_native_view_postpatch.CompositionTests.test_parent_requires_actual_worker_inventory_and_keeps_timing_failure_separate) ... ok\ntest_real_modules_route_new_entry_and_nested_verifiers_and_restore_on_error (test_w5_native_view_postpatch.CompositionTests.test_real_modules_route_new_entry_and_nested_verifiers_and_restore_on_error) ... ok\ntest_worker_admission_failures_keep_sanitized_original_failure_record (test_w5_native_view_postpatch.CompositionTests.test_worker_admission_failures_keep_sanitized_original_failure_record) ... ok\ntest_worker_checks_parent_sha_and_reports_complete_inventory_before_and_after (test_w5_native_view_postpatch.CompositionTests.test_worker_checks_parent_sha_and_reports_complete_inventory_before_and_after) ... ok\ntest_worker_final_inventory_failure_is_recorded_without_losing_prior_failure (test_w5_native_view_postpatch.CompositionTests.test_worker_final_inventory_failure_is_recorded_without_losing_prior_failure) ... ok\ntest_current_drift_and_parent_manifest_drift_refuse (test_w5_native_view_postpatch.InventoryTests.test_current_drift_and_parent_manifest_drift_refuse) ... ok\ntest_delivered_manifest_is_pinned_and_only_three_helper_replacements_allowed (test_w5_native_view_postpatch.InventoryTests.test_delivered_manifest_is_pinned_and_only_three_helper_replacements_allowed) ... ok\ntest_inherited_manifest_rewrite_and_missing_reference_refuse (test_w5_native_view_postpatch.InventoryTests.test_inherited_manifest_rewrite_and_missing_reference_refuse) ... ok\ntest_missing_duplicate_extra_and_missing_addition_refuse (test_w5_native_view_postpatch.InventoryTests.test_missing_duplicate_extra_and_missing_addition_refuse) ... ok\ntest_only_explicit_changed_path_may_replace_inherited_pin (test_w5_native_view_postpatch.InventoryTests.test_only_explicit_changed_path_may_replace_inherited_pin) ... ok\ntest_original_verifier_still_refuses_authorized_patch (test_w5_native_view_postpatch.InventoryTests.test_original_verifier_still_refuses_authorized_patch) ... ok\n\n----------------------------------------------------------------------\nRan 12 tests in 0.655s\n\nOK\n"
+  },
+  {
+    "name": "default-noop",
+    "cwd": "H:\\TakiAgent\\.trellis\\tasks\\09-29-hindsight-transitions-emergency\\research",
+    "argv": [
+      "H:\\hindsight\\.venv\\Scripts\\python.exe",
+      "-B",
+      "-s",
+      "w5-native-view-postpatch.py"
+    ],
+    "exitCode": 0,
+    "stdout": "Parent-only; executed=false; postpatch complete inventory; original V2 deadlines and model unchanged.\n",
+    "stderr": ""
+  }
+]

@@ -2,7 +2,7 @@
  * INPUT:  authenticated D77 state, captured authority/Bank leases and complete native/application checkpoints
  * OUTPUT: atomic joint snapshot/event publication through the existing B5 scheduler interface; a binding CAS conflict
  *         re-pulls and retries a bounded number of consecutive times before failing the run; a native head behind Core's
- *         own checkpoint in the same lineage and generation, reported by a reset refusal or by a full run's initialize,
+ *         own B5/application checkpoint in the same lineage and generation, reported by reset, page or full/seed initialize,
  *         surfaces as a rollback before any snapshot, never a rebuild or a stale publication
  * POS:    core/memory/hindsight — application-aware pull; policy binding runs between complete pulls, never in SQL transactions
  */
@@ -175,6 +175,10 @@ async function full(context: Context, reset: boolean): Promise<HindsightApplicat
   context.request();
   const sameGeneration = previous !== null && sameApplicationValue(previous.namespace, scope.namespace);
   if (sameGeneration) refuseRollback(head.checkpoint, previous);
+  if (native && native.providerLineageId === scope.namespace.provider_lineage
+    && native.bankGeneration === scope.namespace.bank_generation && head.checkpoint.native_cursor < native.endCursor) {
+    throw new HindsightRollbackError({ providerLineageId: native.providerLineageId, bankGeneration: native.bankGeneration });
+  }
   // One complete snapshot can span many individually bounded HTTP requests.
   // Passing only request() would turn its per-request cap into a second, shorter
   // deadline for the entire body closure and discard every partial cold read.
@@ -209,6 +213,7 @@ async function incremental(context: Context, initial: HindsightApplicationReplic
     const page = await context.client.applicationChanges({ ...scope, afterStateCursor: checkpoint.checkpoint.state_cursor,
       limit: 128, context: context.request() });
     context.request(); requireApplicationScope(page, scope);
+    refuseRollback(page.to_checkpoint, checkpoint);
     if (!sameApplicationValue(page.from_checkpoint, checkpoint.checkpoint)
       || page.minimum_state_cursor > checkpoint.checkpoint.state_cursor) invalidPage();
     for (const manifest of page.changes) {

@@ -1,0 +1,10 @@
+test_actual_launch_is_base_executable_not_venv_redirector (__main__.DirectWorkerTests.test_actual_launch_is_base_executable_not_venv_redirector) ... ok
+test_actual_worker_identity_venv_resolution_and_hard_termination (__main__.DirectWorkerTests.test_actual_worker_identity_venv_resolution_and_hard_termination) ... ok
+test_only_launch_variable_is_added_and_offline_environment_is_preserved (__main__.DirectWorkerTests.test_only_launch_variable_is_added_and_offline_environment_is_preserved) ... ok
+test_parent_mismatch_refuses_before_model_or_data (__main__.DirectWorkerTests.test_parent_mismatch_refuses_before_model_or_data) ... ok
+test_v1_parent_launch_is_adapted_without_global_subprocess_patch (__main__.DirectWorkerTests.test_v1_parent_launch_is_adapted_without_global_subprocess_patch) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.567s
+
+OK

@@ -15,7 +15,9 @@ only below `<dataDir>/backups/`.
 - hindsight-backup-archive.ts — the route-b ZIP reader: native manifest v2 + `taki` proof, every `<table>.bin` re-hashed against its pinned digest and size, no extraction
 - hindsight-backup-admit.ts — the backup.admit producer: claim the inbox ZIP into the staged dir, check the echoed backup id and the pair against the staged Core copy, seal verified or hand the ZIP back
 - hindsight-backup-verify.ts — the backup.verify producer: re-hash (a native-host ZIP through the route's digest read-back), re-read the route-b proof, re-pair, credential read-back; atomic verifiedAt or a recorded null
-- hindsight-backup-status.ts — the synchronous `hindsight.backup` status section: last verified pair, age, per-Bank missing interval and unsettled Core writes, the newest sealed backup whatever its verification and the current epoch's staged captures
-- hindsight-backup-emergency.ts — sealEmergencyEvidence(): an incident-local Core copy + manifest that never contacts native (Stage 4 hook, no caller yet)
+- hindsight-backup-status.ts — the synchronous `hindsight.backup` status section: last verified pair, age, exact-history-compatible per-Bank backup-to-local interval (remote loss remains unknown) and unsettled Core writes, the newest sealed backup whatever its verification and the current epoch's staged captures
+- hindsight-backup-emergency.ts — sealEmergencyEvidence(): transition-owned original-ID incident with snapshot-derived facts, atomic immutable seal/read-back and no Native dependency
 - hindsight-backup-harness.ts — test support (not in the production path): the service harness, the route-b operator ZIP builder (the W5 CLI contract) and inbox helpers
 - hindsight-backup-route-fixtures.ts — test support (not in the production path): programmable in-memory native route double with an inter-capture hook, failure injection and the produced native-host ZIP digests
+- hindsight-emergency-snapshot.ts — immutable copied Core facts, per-Bank closure and original Pending/parent/application/ingestion uncertainty.
+- hindsight-backup-restore.ts — D91 pre-writer validation of sealed Core/native pair, actual authority/checkpoints/body closure and credential custody.
