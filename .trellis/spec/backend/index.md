@@ -16,6 +16,14 @@ Before writing backend code:
 
 W6 offline authority contracts: [Emergency transitions and paired recovery](./memory-transition-emergency.md).
 
+Stage 5A: [Optional API-runtime configuration observation](./hindsight-configuration-observation.md).
+
+Stage 5B foundation: [Template composition and atomic Native application](./hindsight-template-lifecycle.md).
+
+Stage 5C/C1: [Installed Host custody, private bootstrap and original-resource observation](./hindsight-host-custody.md).
+
+Stage 5C/C2a: [Admitted fake deployment, durable resource ownership and original-resource recovery](./hindsight-managed-deployment.md).
+
 | Guide | Description |
 |-------|-------------|
 | [Directory Structure](./directory-structure.md) | Where files go in `packages/core` and `src-tauri` |

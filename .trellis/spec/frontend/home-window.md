@@ -86,6 +86,61 @@ generation, and gates while hidden is codified in [`reactive-read-models.md`](./
 - Full storage/runtime/governance and verification requirements live in
   [`skill-lifecycle.md`](../backend/skill-lifecycle.md).
 
+### Optional Hindsight API configuration observation (Operations page)
+
+- `HindsightConfigurationSection` uses the shared Home operator connection and actual Character roster. Global and
+  Character scopes go to Core; Home never chooses a Native endpoint, grant, namespace or evidence identity.
+- `hindsightConfigurationStatus` and `hindsightConfigurationObserve` are Shared-validated ordinary bounded reads.
+  Mount, reconnect, focus and visible-page restoration read Core status. Only the explicit observation button
+  initiates a Native observation. No model health, setup or mutation is attached to either method.
+- The controller hides previous evidence during refresh and after failure, rejects retired connection/scope results,
+  and cancels expiry work when hidden/disposed. It subtracts request transit time from Core `validForMs` and performs
+  at most one status read for each expired observation identity; the same expired observation cannot rearm a timer.
+  There is no polling, push without a producer, localStorage or browser-owned evidence authority.
+- Desired settings, observed provider/configured-model aliases, Core comparisons and unknown coverage are separate.
+  API replicas, standalone Workers, embedding and reranker remain unknown. Unsupported/routed/custom profiles never
+  become a first-member model. An unpinned Bank is explicit; a match never becomes activation or health readiness.
+- Denied, unsupported, unavailable, expired, identity mismatch and transport failures use closed safe wording.
+  No raw error, nonce, build hash or runtime session identifier is rendered. Existing-instance operations remain
+  available independently of this optional disclosure capability.
+- Test actual WsClient/controller/Core-service behavior and authenticated browser scope, observer, reconnect,
+  remount, expiry and refusal paths; static presentation cases supplement these tests rather than replacing them.
+
+### Hindsight templates and explicit user choices (Operations page)
+
+- `HindsightTemplateSection` uses the shared authenticated Home client and Core-listed Bank identities/catalog
+  revisions. Defaults affect the reviewed existing Banks and later new Banks; per-Bank user choices stay local.
+  Native values never reconstruct user intent or legacy ownership. An untracked Bank stays visibly untracked.
+- Text, labels, models and directives preserve distinct `value`, `inherit` and `suppress` choices. Explicit values
+  equal to a template remain explicit. Complete user resources retain advanced fields. An unfinished resource
+  editor prevents preview/confirmation; duplicate additions cannot silently replace an existing choice.
+- Preview calls `memory.templates.preview`, then `memory.templates.preview.bank` for every Bank in that exact
+  ready preview. All details must agree before confirmation. Display complete old/new definitions, each deletion's
+  content/history/dependency consequences and requested provider work. Existing-resource enrollment, deletion and
+  provider work have separate acknowledgements. Same-name directive adoption requires an explicit actual UUID;
+  multiple candidates never become an automatic choice.
+- Scope, draft, connection or selected-plan/revision changes retire old preview/detail replies. Local unsubmitted
+  drafts survive connection replacement; an externally changed identity marks them stale until explicit reload.
+  The same socket can observe connection config/drift, setup revision, Bank roster or incarnation changes; these
+  retire consent too, without using ordinary cursor/job/timestamp progress as an identity change.
+  One-shot expiry retires consent and performs no read or write. Cancellation receives focus; Escape dismisses
+  from any focused preview detail or confirmation control and restores the opener. Changing a template version
+  clears separately selected generation requests.
+- `template.apply` submits only the consumed request/preview/hash identity through `memory.operations.submit`.
+  A second click, timeout, reconnect or remount cannot replay it. `template.recover` uses only the original
+  `recoverPlanId` supplied by Core. Subscription failures use the same injected safe formatter as mutation failures.
+- Native receipts, Core selection publication, current runtime availability and the original operation's historical
+  outcome are separate facts. Binding-only recovery does not rewrite the original failed operation as successful.
+  Rollout child rows always identify their historical observation time and never imply current progress.
+- `memory.templates.derived` explicitly rereads one genuine plan/Bank/child. Stale, unavailable, wrong-identity or
+  failed observations clear previous current evidence. Reconnect rereads only the selected child after status;
+  it does not refresh models or enumerate children. Preview/derived use bounded long-read deadlines because they
+  contact Native; status/detail are bounded local reads. Durable submit retains its ordinary unknown-outcome ACK.
+- Verify strict adapters, explicit full-resource round trips, stale generations, all-Bank detail gating and failure
+  cleanup. Use actual Core/operator WS tests and one integrated real-browser sequence for two observers, lost ACK,
+  partial original-plan recovery, scope selection, explicit equal-value retention on removal and derived failure.
+  Synthetic Native/runtime delegates do not prove Native SQL/auth, installed WebView2/CSP or owner acceptance.
+
 ### Memory authority and operations card (Operations page)
 
 - The card is a disposable projection of `memory.authority.status` plus the `memory.operations.changed` push. It owns

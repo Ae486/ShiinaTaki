@@ -54,6 +54,8 @@ new synthetic fixtures. Native transport in those fixtures is explicit determini
 acceptance. Count requests and compare original operation IDs across lost ACK/close/second observer/reconnect.
 Browser tests use installed Playwright/Chromium, real timers and isolated contexts. Their pinned synthetic
 wall-clock matches fixture identities. Browser/Vite evidence is separate from packaged WebView2/CSP and owner AC.
+Synthetic browser-control HTTP requests use `Connection: close` to avoid reusing an idle socket across real Core
+work; they never retry fixture mutations. This control transport choice does not change application WebSockets.
 Keep a running producer behind an explicit fixture release until the second observer has read it and the initiator
 has closed. A fixed sleep alone cannot prove this ordering on a loaded machine. Always release during teardown.
 

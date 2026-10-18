@@ -1,5 +1,11 @@
 # Host-Local Encrypted Secret Catalog
 
+Internal `revision()` is a process-local successful-publication generation for short-lived configuration observation.
+Successful set, nonempty clear, restore and key rotation advance it only after durable publication; failed writes
+and idempotent absent clear do not. Timestamp/key-version metadata may repeat, so observation uses this revision
+without changing persisted connection fingerprints or public secret projections. Health is fixed at construction;
+future live lock/reload APIs must also invalidate it. A new Core process starts with no retained observations.
+
 The Core-owned credential store for Host secrets (MCP credentials first). Secret values live ONLY inside the
 versioned encrypted envelope on the owning Host's disk; Core SQLite, config files, logs, WS responses, errors,
 and caches carry opaque `secret-ref:` markers and sanitized metadata only. Implemented by the

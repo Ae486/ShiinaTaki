@@ -78,6 +78,13 @@ neither a test fixture nor a prepared candidate enables an operator transition a
   source boundary under a SQLite writer reservation. Record the returned proof with the existing W1 repository.
 - `publishMemoryTransition(db, sameInput)` is one synchronous COMMIT of closed source/new selected epoch, Local
   rows/Blocks or paired Hindsight replica, exact primary custody, queued obligations, receipt and publication marker.
+  Its input additionally requires `currentTime(): string`, supplied by the production driver's live clock. After
+  complete publication read-back and before transaction return, recheck the original executor/operation/attempt/
+  generation/owner at that time with exactly the single revision increment from `recordTransitionReceipt`.
+  Never adopt the current row's executor or use captured `now` as a live-clock fallback. Expiry at `leaseUntil`
+  rolls back every publication write, including nonempty primary custody and queued obligations. Captured `now`
+  retains its immutable evidence meaning. Already committed receipt recovery remains a complete read-only join
+  and does not require the obsolete executor to regain a lease or permit another publication.
 - `readVerifiedTransitionPublication(db, receiptId)` is the boot/lost-reply join; it reconstructs the complete W3
   candidate, baseline, native proof, checkpoints, source ancestry and saved custody. An invalid marker cannot fall back.
 - `composeMemoryRuntime(...).transitions` exposes `quiesce`, `proof`, `publish`, `nativeOutcome`, `nativeRelease`,
@@ -87,6 +94,14 @@ neither a test fixture nor a prepared candidate enables an operator transition a
   effect, bounded Local refusal and native-outcome rows have immutable SQL guards.
 
 ## Final configuration and custody contract
+
+For template-aware healthy transitions, the final synchronous publication read-back also reconstructs every saved
+W2 template association and rereads the complete current selection/default/history/hold commitment. This check
+runs after `readVerifiedTransitionPublication` and before the existing final `requireTransitionLease` call with the
+live executor clock. Native observations stay outside the transaction. The template read-back may itself exhaust
+the lease; authority, custody, readiness, queue obligations and publication must then roll back together. Do not
+move the live lease check earlier, adopt a newer executor, or let an earlier successful template observation authorize
+the final COMMIT. Existing-receipt historical recovery remains a separate read-only path.
 
 `configRevision` and `inventoryRevision` both refer to `hindsight_connection_state.revision`; there is no independent
 Bank counter. `configFingerprint` is the configured row's reviewed fingerprint. `inventoryHash` is exactly

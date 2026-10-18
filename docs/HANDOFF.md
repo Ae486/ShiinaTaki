@@ -1,5 +1,168 @@
 # TakiAgent T4 Leader Handoff — Skills/MCP First
 
+> Stage 5C/C2 continuation (2026-10-15): the owner approved the new
+> `10-14-hindsight-managed-deployment` child, design/independent review, then direct C2a source/fake-data work.
+> It remains the current `in_progress` task. **C2a SOURCE PASS**: all six source criteria are accepted;
+> independent tests passed 182 cases, with four old C1 fixtures ignored; affected types/lint/Clippy pass.
+> Source/check/report ownership is released. Root verified 109 files, preserved exact task-only patches and
+> raw evidence, then removed all three owned G: staging trees; no protected C: fixture/tested child remains.
+> Read `research/leader-now.md`, `research/c2a-source-acceptance.md` and `research/c2a-root-final-readback.json`.
+> The owner also approved the bounded project-owned Docker experiment and cleanup, conditional on preserving
+> unrelated processes/environments. **The first real-Docker fake-consumer case passed**: actual admitted startup,
+> same-key/original observation, no-TTY private delivery, Linux sockets/child and zero-hit scans. R1 failed from
+> one missing debug Shell fixture setting; R2 corrected it without production-source changes. Both results remain
+> retained. R2 completed before the later interruption and was not rerun. Root recovered Desktop under existing
+> authorization and verified exact test-container/volume/image/C: cleanup, then archived and removed G: staging.
+> Seven original container IDs remain; redis/arboris-app auto-started after recovery. No active mutation targeted
+> unrelated containers; daemon-restart acceptance is not claimed. Read `research/c2a-docker-first-case-acceptance.md`.
+> [Final independent runtime-evidence review](../.trellis/tasks/10-14-hindsight-managed-deployment/research/c2a-docker-runtime-review.md)
+> passed with no new blocker; all 85 retained archive entries match. Report ownership is released and the
+> current handoff is reconciled. Source checks and the successful Docker case were not repeated.
+> Subsequent recovery R2 passed outer Host completion loss, original Core/Host reopen, same-container
+> restart and fresh authority; both recovery attempts are preserved and cleaned. See the child task's
+> `research/c2a-recovery-runtime-review.md`. A real PostgreSQL 18.1 offline first-start/SQL/checked-stop
+> prerequisite also passed with exact cleanup; admitted logged-data persistence is next. C2b planning
+> must supply the actual API producer and definition-only managed setup before trusting references.
+> The original C1 task remains `in_progress`. Its approved Ubuntu read-only preflight found systemd 249 and
+> no `/usr/bin/systemd-creds`; no install/service/credential effects ran. AC2/6 await a compatible environment
+> and do not block C2. The broader Docker fault/restart matrix, database, C2b, real data/keys/models and Git lifecycle remain open.
+
+> Stage 5C Linux acceptance (2026-10-14): **8 PASS, 0 FAIL, 0 SKIP** in actual Ubuntu/WSL, using the explicitly
+> approved temporary G: Python 3.11.17 and locked python-dotenv 1.2.2 environment. The first two failed runs and
+> measured fixture timing corrections are retained in the [check report](../.trellis/tasks/10-07-hindsight-managed-host-custody/research/c1b-linux-check-2026-10-14.md).
+> Production code/limits are unchanged. Root matched all 34 released inputs; only the Linux test and README
+> differ from the prior source manifest. AC7 is now accepted; automatic criteria 1/3/4/5/7/8/9/10 pass,
+> while Ubuntu service/platform criteria 2/6 and installer/Docker/model/manual gates remain open.
+> The high-effort checker released SOURCE/CHECK SLOT. The temporary runtime and all 26 suite/probe directories
+> are removed, no owned process remains, and Ubuntu/docker-desktop were observed naturally stopped.
+> H: has about 13.33 GiB free. The original C1 task/session remains `in_progress`; no Git lifecycle action ran.
+> Read the C1 task's `research/leader-now.md`; earlier Linux-pending and environment-authority notes are historical.
+
+> Current Stage 5C/C1 continuation (2026-10-13): the owner authorized proceeding after accepted Stage 5B.
+> Existing task `10-07-hindsight-managed-host-custody` is now `in_progress`, bound to
+> `codex_01a1309f-e374-7241-ab38-4e50f040d985`; read its `research/leader-now.md` and `implement.md`.
+> The four original design hashes matched independent confirmation; the post-5B source refresh found no new blocker.
+> Independent C1a and C1b SOURCE reviews are PASS. Both `xhigh` owners released source/check work. C1b's review
+> fixed admission expiry hiding a running process's original status; final Native 24 and fake-observer 20 pass,
+> with scoped static checks passing and eight Linux cases unexecuted. Root matched all 34 final C1b inputs;
+> C1a retains 124 unchanged inputs and four authorized README/index/spec documentation changes, with no code drift.
+> Read `research/c1b-independent-review-2026-10-13.md` and `research/c1b-root-final-readback.json` in the C1 task.
+> Seven automatic ACs are checked; combined Ubuntu service/Linux process criteria 2, 6 and 7 remain open.
+> The authorized Ubuntu-only preflight found Python 3.10.12 and no python-dotenv. No dependency was installed;
+> both Ubuntu and docker-desktop are now Stopped, without an explicit termination command.
+> Requested build-output cleanup reclaimed 14.998 GiB before development resumed; Root's latest H: readback is
+> about 13.40 GiB free. Four Git states and retained evidence were unchanged by cleanup; heavy checks stay serial.
+> Original data/credentials/services, real models, runtime/service installation, Docker startup and Git lifecycle
+> remain excluded. Earlier stop-before-5C notes below are historical; the 5B automatic acceptance remains valid
+> for its recorded source and scope. Linux process/Ubuntu service/final-installer/Docker acceptance remains pending.
+
+> Current Stage 5B automatic acceptance (2026-10-13): **PASS**. All eleven automatic PRD criteria are accepted.
+> Read [the Stage 5B acceptance report](../.trellis/tasks/10-07-hindsight-template-lifecycle/research/b3-whole-acceptance.md)
+> and the task's `research/leader-now.md`. Core coverage is 522 files, 4108 passed / one Windows-inapplicable skip,
+> using the original full run's 516 unchanged passing files plus complete reruns of the six corrected files.
+> This is not a second full 522-file green execution; the original failures remain retained.
+> Five package types, final Core types, root lint, Shared 611, CLI 47, Desktop 723 with three actual browsers,
+> Desktop build, applicable Rust checks (175 passed; three actual desktop tests excluded), and isolated real
+> Core main/WS boot pass. Joint physical restore and Native canonical/four-SDK evidence reconcile with current source.
+> `b3-whole-source-readback-01.json` records the final source/check/cleanup reconciliation; the later
+> `b3-whole-handoff-readback-01.json` records only acceptance-document changes. Both reviewers and all checks
+> have ended; owned fixtures and the actual boot process/port/data are cleaned. Evidence remains retained.
+> Existing task: `10-07-hindsight-template-lifecycle`, `in_progress`; session: `codex_01a1309f-e374-7241-ab38-4e50f040d985`.
+> Stop before 5C, uncommitted and unarchived. Installed/manual and original-environment/model acceptance remain separate.
+> All earlier continuation, pending-gate and pause notes below are historical and superseded by this result.
+
+> Latest Stage 5B pause (2026-10-10): all three existing assignments and necessary checks are complete and the
+> agents have stopped. Home scoped independent PASS, Core Healthy/W2/W9 fixes/self-checks, and Native canonical/
+> four-SDK/77-case affected closure are recorded in the template-lifecycle task's `research/b3-current-batch-handoff.md`.
+> Two clean generations and the post-test pin preserve 958 identical artifacts and 12 maintained inputs.
+> Root verified Home 78, Core 1644 and Native 2074 source/input/evidence paths in separate overlapping sets,
+> with no mismatches; Native's 55 TEMP directories and owned PG data/registry/old PID are absent. All source
+> and check ownership is released. Current task remains `in_progress`, uncommitted and unarchived.
+> Actual paired restore/preflight, remaining Core matrices, independent B3/whole-5B and current-workspace gates
+> remain pending. No new checker, joint-03, extra consumer agent, 5C or Git lifecycle action was started in this
+> stop batch. Wait for the owner; prior continuation and slot notes below are historical.
+
+> Current Stage 5B execution (2026-10-09): B2 combined independent review PASSED. The detached-Apply shutdown
+> defect is fixed; Core independent regressions 93, scoped lint and Core types pass. Accepted Native/label
+> N1/N2 evidence remains valid. Root verified 2994 current paths with no mismatch in the active template task's
+> `research/b2-joint-source-readback-2026-10-09.json`. Read `research/b2-independent-review.md`.
+> B3 is released to the original Core/Shared, Native and Home implementers under `research/b3-dispatch-plan.md`;
+> Shared wire/hash fixtures lead, all heavy checks remain serial, and whole-5B independent review follows.
+> Stop after 5B, before 5C. Existing task remains in_progress; no original-environment or Git lifecycle work.
+
+> Latest Stage 5B continuation (2026-10-09): the owner approved resuming beyond the previous pause. The existing
+> session/task and both repository HEADs are unchanged; all 2972 unique released source/input/generated paths
+> match. Resume independent B2 Core review using `10-07-hindsight-template-lifecycle/research/b2-core-review-dispatch-2026-10-09.md`.
+> Native/seven-label review remains PASS. Core review and final reconciliation gate B3, followed by the whole-5B
+> gate; stop before 5C. No original service/data/model, new dependency or Git lifecycle work is included.
+
+> Latest Stage 5B pause checkpoint (2026-10-08): the owner requested completion of the two existing agents,
+> then a pause and report. Both agents have completed and released their work; no child/check is running.
+> Core B2 implementation and planned self-checks pass, including corrected legacy Bank/W6 paths, all 185 original
+> runtime cases across two non-overlapping batches, 85 affected managed/read/operator cases, 41 migration cases,
+> 15 Shared and 18 Desktop cases, scoped lint/types and actual isolated main/WS boot. Core independent review
+> has not started. Native/seven-file-label independent review PASSES after N1/N2 fixes: parser 141, Native 46
+> and consumer 69 pass (the first two overlap). Root verified 1953 unique Core/input paths plus 242 Native,
+> seven label, the lifecycle spec and 912 generated artifacts against the released manifests, with no mismatch.
+> Core PID/port/owned data and all isolated PostgreSQL fixtures are cleaned; evidence remains in research.
+> Read `10-07-hindsight-template-lifecycle/research/b2-batch-handoff.md` and `research/leader-now.md`.
+> The original session remains bound to that in-progress task; both repository HEADs are unchanged.
+> Wait for owner instructions. Next: Core independent review -> combined B2 gate -> approved B3 Home/paired
+> backup/restore -> whole-5B gate. No B3/5C or Git lifecycle work was dispatched in this stop batch.
+>
+> Latest Memory implementation (2026-10-08): B1 combined independent review PASSED. Root verified the new
+> `10-07-hindsight-template-lifecycle/research/b1-reviewed-source.json` baseline: 109 Taki / 215 Native source
+> files and all 906 generated files match. Native 166 tests, Core 80 plus 26 compatibility tests and Shared 44
+> pass, with current scoped types/lint and byte-identical fresh OpenAPI. Both checkers released their work.
+> B2 now has three disjoint implementers under that task's `research/b2-dispatch-plan.md`: Core lifecycle/runtime,
+> Native structured provenance, and the Core label consumer/real HTTP-to-SQLite integration fixture. Core 059 and
+> Native e62a3d0b9c54 after e51 are reserved. B2 runtime/recovery/policy independent review precedes B3. The B3
+> read-only proposal is complete; root accepted its real service observation/CLI adapter and bounded v2 request
+> design in `research/b3-dispatch-plan.md`. B3 remains gated; no proposed producer is counted as implemented.
+> No original service/data/model, C implementation or Git lifecycle is included; whole Stage 5B remains pending.
+>
+> Previous Memory continuation (2026-10-08): the owner approved resumed implementation and delegated review cadence.
+> The existing `10-07-hindsight-template-lifecycle` task remains in_progress. The earlier B1 stop below is superseded.
+> Root rechecked unchanged B1 source/generated identities. Independent Native/Shared and Core B1 reviews precede
+> B2 runtime/policy implementation and review, then B3 Home/paired backup and whole-5B review. Heavy checks remain
+> serial with at most two Vitest workers. Read `research/leader-now.md` and `research/resume-review-plan-2026-10-08.md`
+> in that task. No original-data/service/model use, C implementation, commit, push, finish or archive is included.
+> Review progress: Core B1 scoped PASS (80 Core / 44 Shared tests, Core types and root lint). Root rechecked the
+> released 30 Core files, three Shared inputs and immutable v1 with no mismatch. Native is repairing/rechecking
+> wire validation, actual provider-attempt guards and backup table completeness; its final verdict is pending.
+> The original B1 release manifest is historical after these review fixes. B2 source is still gated by combined B1.
+>
+> Previous Memory stop state (2026-10-08): both Stage 5B/B1 implementation owners completed self-checks and released
+> all source/test ownership. Root verified 101 Taki/201 Native manifest files and 906 generated artifacts; all match.
+> Shared 565 / Core affected 66, five workspace typechecks, root lint and four SDK contracts passed. Two valid
+> same-input canonical generations are byte-identical. Native retains 35 passed/2 test-side failures followed by
+> targeted 3/3 passes; no full green rerun is claimed. Scoped Linux ty passed; Windows full-package ty retains
+> 27 existing platform/optional-dependency diagnostics. All four owned Native fixtures are cleaned; no child runs.
+> The owner requested **finish B1, summarize and stop**. This run has stopped before independent B1 review.
+> B2/B3 are not started and whole 5B is not accepted. No new checker, C1 implementation or research was dispatched.
+> Active task stays `.trellis/tasks/10-07-hindsight-template-lifecycle`, in_progress and unarchived. Read its
+> `research/b1-batch-handoff.md`, `research/b1-root-handoff-verification.json` and `research/leader-now.md`.
+> On a later resume, independent B1 transaction/auth/composition/refresh review comes before B2. Delivered source
+> registers Core 058 / Native e51 after e40 and template-lifecycle-v1; original deployment was not changed.
+> C1 design review passed but implementation is pending. No commit, push, finish or archive occurred.
+
+> Previous Memory checkpoint (2026-10-07, before B1): 5A configuration observation independently PASSED; R1 secret ABA and
+> R2 lazy compatibility initialization are fixed and independently rechecked. All source/test ownership is released.
+> Final 59 Taki/66 Native file identities and 809 generated artifacts match. Core acceptance combines the 3817-pass
+> pre-R1 full baseline, 78 affected passes, independent 17-test rerun, final types/lint and actual boot; no final full
+> Core rerun is claimed. See `10-07-hindsight-configuration-observation/research/independent-check.md` under tasks.
+> The reviewed `.trellis/tasks/10-07-hindsight-template-lifecycle` plan ordered B1 -> B2 -> B3 implementation/check
+> gates in `H:/TakiAgent` (main) and `H:/hindsight`. Core 057/Native e40 were the rechecked activation baseline.
+> Owner delegated scheduling. Existing W9/5A/unrelated edits and all evidence remain preserved. Original instances,
+> installed/manual acceptance, paid model calls, deployment and commit/push/finish/archive remain outside this work.
+
+> Current Memory continuation (2026-10-07): Stage 4 W9 final healthy-publication lease correction is implemented
+> and independently accepted. Independent regression 20/20 and adjacent 67/67 pass; full Core had 3,791 passes,
+> four test-only deadline failures and one existing skip, followed by 7/7 passing scoped timeout correction.
+> No second clean full run is claimed. Read the task's `research/w9-independent-check.md` and `leader-now.md`.
+> Keep `H:/TakiAgent`; B7/Stage 5 is planning its first configuration-evidence/permission contract. Production
+> lease remains five minutes; no performance work, original-data/model rerun, commit, push or archive occurred.
+
 > Current Memory delivery (2026-10-06): Stage 4 W0-W8 implementation and isolated automated acceptance are complete
 > in `H:/TakiAgent`; see section 3.2 for the final report and remaining manual/environment boundaries. The bound
 > `09-29-hindsight-transitions-emergency` task remains `in_progress`. The owner subsequently authorized the local

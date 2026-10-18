@@ -51,6 +51,19 @@ The diagnostic code set also accepts exact `HindsightErrorCodeSchema` values (in
 response) from the sanitized error message. Prefix matches, arbitrary messages, names, stacks and provider bodies
 remain excluded; throwing metadata getters and sinks must not alter execution or settlement.
 
+The B3 template-history driver fixture must retain independent template receipt/result auxiliary rows when its
+synthetic delta rebuilds the final W2 snapshot; reseal only before Native proof observation, never after Core
+persists an association. An ordinary native/application fixture does not imply complete template auxiliary state.
+`transition-template-healthy.test.ts` keeps all exact history, scope, publication and rollback assertions. Its
+scoped test budgets follow the work performed: selected RETURN uses 60 seconds and selected two-direction cases
+use 180 seconds; removed RETURN uses 240 seconds and removed two-direction cases use 360 seconds. Preserved
+whole-run measurements reached 164.274 seconds for removed RETURN and 279.016 seconds for a removed roundtrip.
+A test timeout can leave its asynchronous body running into fake-Date teardown, so diagnose an overrun in an
+isolated case before treating its later lease error as a separate producer defect. These are test-only budgets;
+Core/Native leases, runtime deadlines, preview TTLs and global test defaults remain unchanged. The drift matrix
+requires a non-null failed result and complete `source-aborted` resolution when RETURN proves factual abort;
+prepared REENTRY and final lease-expiry cases retain `outcome_unknown` after full publication rollback.
+
 ## Native delta validation reads and derived-link cleanup
 
 `TransitionDeltaService._admit`, after its existing Bank lock, executor and exact retired-proof guards, enables
@@ -200,6 +213,34 @@ rehashed but divergent final proof. Original commands, preparations,
 evidence and terminal operation outcomes must remain byte-identical, and earlier delta applies must not repeat.
 
 ## Verification and partial maintenance
+
+### Optional template-aware W2 associations
+
+A template-capable healthy identity commits the complete Core selection/default/history and durable-hold state.
+Each Bank's separately versioned association joins that state to the original immutable W2 evidence ID and proof
+hash. Independently validate every scoped Apply receipt in the W2 auxiliary inventory and its database-only
+definition projection; a matching selected receipt alone is insufficient.
+
+Construct the observation request with only that exact Bank incarnation's verified receipt IDs and the terminal
+semantic refresh-result IDs Core has durably observed. Derive refresh ownership from the already verified receipt
+children. Pending, unknown and ordinary worker failures without a persisted semantic result are not terminal
+membership. The authenticated observation must acknowledge the exact list with zero missing IDs. Independently
+validate each requested W2 `memory_template_refresh_results` SQL row against its original receipt target, request,
+child, model and definition, allowed terminal state and coherent result revision/hash. An intact Apply inventory
+does not prove a missing or corrupt child marker. Do not substitute requested membership for the complete inventory.
+
+Before reusing either a saved W2 document or a saved final candidate in a live healthy recovery, obtain a fresh
+authenticated template observation outside SQLite transactions. Reuse the exact original request, require a new
+nonce and the same schema and per-Bank authenticated source context, then compare the complete inventory, selected
+anchor, database facet, inherited configuration and full definition projection against the original association.
+Recheck current Core template/default/hold state after the asynchronous observation. A compatible service/transport
+restart may change incidental process identity or observation ID; it must not invalidate the stable authenticated
+context. Different Banks need not have identical context hashes.
+
+The original W2 proof, evidence ID, association bytes and candidate remain immutable; a fresh observation is only a
+current-target comparison, never a replacement historical document. A previously finalized candidate uses current
+fence/status reads without repeating Native maintenance. Historical evidence verification and W6 emergency remain
+offline, and historical W2 documents without this optional extension retain their original serialized meaning.
 
 Migration056 is additive after recorded055; never edit055 to retrofit a real database. Its immutable
 `memory_transition_native_verifications` records the exact native executor before a **new** verify dispatch.

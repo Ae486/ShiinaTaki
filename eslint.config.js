@@ -79,11 +79,11 @@ export default tseslint.config(
   },
   {
     // The sole Shared public entry names cross-package contracts without owning
-    // implementation. D77, transition candidates and Source custody add independent contracts; the
-    // reviewed entry allowance still depends on this strict AST boundary.
+    // implementation. B3 adds separate strict versioned backup/observation/attestation
+    // exports; this exact entry allowance still depends on the same strict AST boundary.
     files: ["packages/shared/src/index.ts"],
     rules: {
-      "max-lines": ["error", { max: 540, skipBlankLines: true, skipComments: true }],
+      "max-lines": ["error", { max: 625, skipBlankLines: true, skipComments: true }],
       "no-restricted-syntax": [
         "error",
         {

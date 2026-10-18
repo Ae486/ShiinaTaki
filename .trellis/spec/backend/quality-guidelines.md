@@ -11,8 +11,8 @@
 
 Exemptions: generated code, migrations, test files.
 
-`packages/shared/src/index.ts` has a reviewed 540-line limit as the single public named-re-export entry, including the
-independently versioned D77 application-state, native transition and Source custody contracts. This allowance
+`packages/shared/src/index.ts` has a 625-line limit as the single public named-re-export entry, including the
+independently versioned D77 application-state, native transition, Source custody, configuration observation and bounded template lifecycle contracts. B3 adds separate strict versioned backup, observation and copied-Core attestation exports; no implementation logic is admitted. This allowance
 applies only to that exact file: ESLint permits only source-bearing `ExportNamedDeclaration` statements and rejects
 `export *`, imports, local declarations and side effects. All implementation modules retain the 360-line limit.
 
@@ -107,6 +107,10 @@ cargo test  --manifest-path apps/desktop/src-tauri/Cargo.toml
 ### 2. Signatures
 
 - Canonical generator entry: `scripts/generate-clients.sh` in the pinned Hindsight checkout.
+- The same entry supports explicit `HINDSIGHT_OPENAPI_GENERATOR_JAR` when an installed local Java generator is needed;
+  it must report exactly 7.10.0 before generation. Docker remains the default. `HINDSIGHT_GENERATOR_PYTHON` selects an
+  existing Python interpreter; Git Bash paths are converted before Native Java/Python consume them. Both backends use
+  the same flags, canonical OpenAPI, preserved wrappers/module pins and postprocessors; no fake Docker shim or hand edits.
 - Python and Go generator image: `openapitools/openapi-generator-cli:v7.10.0`.
 - Go maintained module contract: checked-in `hindsight-clients/go/go.mod` and `go.sum` remain authoritative across generation.
 - Taki-only schema names must be source-qualified, for example `TakiDispositionTraits`; do not rely on post-generation aliases to disambiguate native schemas.
@@ -123,7 +127,7 @@ cargo test  --manifest-path apps/desktop/src-tauri/Cargo.toml
 
 | Condition | Required result |
 | --- | --- |
-| Docker/generator unavailable | Keep the compatibility patch rejected; do not accept stale clients. |
+| Neither Docker nor the explicitly selected, version-verified local generator is available | Keep the compatibility patch rejected; do not accept stale clients. |
 | Duplicate schema name changes a public client type | Rename/isolate the Taki schema at the source and regenerate. |
 | Generation changes `go.mod`/`go.sum` | Restore the checked-in manifests, fail the gate, and fix the generator script before acceptance. |
 | Generated source differs after a clean rerun | Treat as untracked drift unless it is an explicit scripted generator repair. |

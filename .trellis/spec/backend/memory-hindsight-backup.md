@@ -264,6 +264,16 @@ point). Owner-only modes where the OS has them. Nothing is deleted automatically
 
 ## 4. Validation & Error Matrix
 
+### Template-capable capture connection guard
+
+A backup-v2 capture requires the actually admitted connection to be `configured`, with the exact runtime
+fingerprint, reviewed deployment mode when known, and complete verified raw Bank setup inventory. Commit its
+connection revision and every setup column before `backupTo`; compare the completed immutable copy and reread the
+live commitment after copying, immediately before Native dispatch and before sealing/staging. A compatibility-only
+fixture or template publication cannot promote the connection phase implicitly. Connection-only or raw setup drift
+refuses without a listed artifact and still releases the capture pause. Keep historical v1 behavior and the existing
+whole-template/default/history/hold read-back separate; do not weaken either guard to make a fixture pass.
+
 | Condition | Required result |
 | --- | --- |
 | no backup producer, marker not `hindsight`, other epoch, or (capture) an unpublished/drifting runtime | `MEMORY_OPERATION_UNSUPPORTED`; no row |
